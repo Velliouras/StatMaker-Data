@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
+# STATMAKER_FIXED_SCRAPER_V2 - visible links only, capped scraping
 """
 StatMaker World Cup JSON updater.
 
-Reads the public Flashscore World Cup results pages with a headless browser,
-extracts finished matches and match statistics, and writes the stable
+Reads the public Flashscore World Cup results page with a headless browser,
+extracts recent finished matches and match statistics, and writes the stable
 StatMaker JSON schema consumed by the Android app.
 
 Important:
 - This script does not run inside the Android app.
 - It does not use tokens or private credentials.
-- If Flashscore changes markup or blocks headless browsing, the script should
-  fail cleanly rather than inventing data.
+- It never invents missing stats; missing values remain null.
+- It deliberately does NOT expand the full Flashscore archive, because that can
+  produce hundreds of historical/qualifier links and make the GitHub Action hang.
 """
 
 from __future__ import annotations
@@ -35,8 +37,15 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
+SCRIPT_VERSION = "visible-links-only-v2"
 
-# Flashscore labels vary slightly by locale/site revision. Keep this explicit.
+# Only inspect the recent visible/current result links. This prevents the Action
+# from crawling the whole Flashscore archive.
+MAX_CANDIDATE_LINKS = int(os.getenv("MAX_CANDIDATE_LINKS", "12"))
+MATCH_DELAY_SECONDS = float(os.getenv("MATCH_DELAY_SECONDS", "0.4"))
+TOURNAMENT_START = os.getenv("TOURNAMENT_START", "2026-06-11")
+TOURNAMENT_END = os.getenv("TOURNAMENT_END", "2026-07-20")
+
 STAT_LABEL_ALIASES = {
     "homePossession": ["ball possession", "possession"],
     "homeShots": ["goal attempts", "total shots", "shots"],
@@ -106,81 +115,92 @@ def first_text(page: Page, selectors: Iterable[str]) -> str:
     return ""
 
 
-def first_attr(page: Page, selectors: Iterable[str], attr: str) -> str:
-    for selector in selectors:
-        try:
-            locator = page.locator(selector).first
-            if locator.count() > 0:
-                value = locator.get_attribute(attr, timeout=2500)
-                if value:
-                    return value
-        except Exception:
-            continue
-    return ""
-
-
 def accept_cookies_if_present(page: Page) -> None:
-    labels = [
-        "Accept all",
-        "I Accept",
-        "Accept",
-        "Agree",
-        "Consent",
-    ]
+    labels = ["Accept all", "I Accept", "Accept", "Agree", "Consent"]
     for label in labels:
         try:
             button = page.get_by_role("button", name=re.compile(label, re.I)).first
             if button.count() > 0:
                 button.click(timeout=1500)
-                page.wait_for_timeout(1000)
+                page.wait_for_timeout(800)
                 return
         except Exception:
             continue
 
 
-def load_all_result_rows(page: Page) -> None:
-    """Click Show more matches until the results page is fully expanded."""
-    for _ in range(20):
-        try:
-            show_more = page.get_by_text(re.compile(r"show more", re.I)).first
-            if show_more.count() == 0:
-                break
-            show_more.click(timeout=2500)
-            page.wait_for_timeout(1500)
-        except Exception:
-            break
-
-
-def collect_match_links(page: Page) -> list[str]:
-    links = page.evaluate(
-        """
-        () => Array.from(document.querySelectorAll('a[href*="/match/"]'))
-          .map(a => a.href)
-          .filter(Boolean)
-        """
-    )
-    normalized: list[str] = []
-    seen: set[str] = set()
-    for href in links:
-        href = str(href).split("#")[0]
-        # Keep only football match pages and strip tabs to the summary base.
-        if "/match/football/" not in href:
-            continue
-        href = re.sub(r"/summary.*$", "/summary/", href)
-        href = re.sub(r"/match-summary.*$", "/summary/", href)
-        if href not in seen:
-            seen.add(href)
-            normalized.append(href)
-    return normalized
-
-
 def goto(page: Page, url: str) -> None:
     page.goto(url, wait_until="domcontentloaded", timeout=45000)
+    page.wait_for_timeout(2000)
+
+
+def normalize_match_url(href: str) -> str | None:
+    href = str(href).split("#")[0]
+    if "/match/football/" not in href:
+        return None
+    # Always use the summary tab as canonical base.
+    href = re.sub(r"/(summary|match-summary|stats|standings|h2h).*$", "/summary/", href.rstrip("/"))
+    if not href.endswith("/summary/"):
+        href = href.rstrip("/") + "/summary/"
+    return href
+
+
+def collect_visible_finished_match_links(page: Page) -> list[str]:
+    """
+    Collect match links from the currently visible results page only.
+
+    We do not click 'Show more'. The previous version expanded the full archive
+    and found 154 links, which made the workflow crawl for too long.
+    """
     page.wait_for_timeout(2500)
+    data = page.evaluate(
+        """
+        () => {
+          const rows = Array.from(document.querySelectorAll('.event__match, [id^="g_1_"]'));
+          const out = [];
+          for (const row of rows) {
+            const text = (row.innerText || '').trim();
+            const homeScore = row.querySelector('.event__score--home')?.textContent?.trim() || '';
+            const awayScore = row.querySelector('.event__score--away')?.textContent?.trim() || '';
+            const link = row.querySelector('a[href*="/match/"]')?.href || '';
+            out.push({ text, homeScore, awayScore, link });
+          }
+          if (out.length === 0) {
+            return Array.from(document.querySelectorAll('a[href*="/match/"]')).map(a => ({
+              text: a.innerText || '',
+              homeScore: '',
+              awayScore: '',
+              link: a.href || ''
+            }));
+          }
+          return out;
+        }
+        """
+    )
+
+    links: list[str] = []
+    seen: set[str] = set()
+    for item in data:
+        href = normalize_match_url(str(item.get("link") or ""))
+        if not href or href in seen:
+            continue
+
+        # On Flashscore result rows, numeric home/away scores mean the row is a played match.
+        home_score = clean_text(str(item.get("homeScore") or ""))
+        away_score = clean_text(str(item.get("awayScore") or ""))
+        row_text = clean_text(str(item.get("text") or ""))
+        has_score_pair = bool(re.search(r"\d", home_score) and re.search(r"\d", away_score))
+        if not has_score_pair and not re.search(r"\b\d+\s*-\s*\d+\b", row_text):
+            continue
+
+        seen.add(href)
+        links.append(href)
+        if len(links) >= MAX_CANDIDATE_LINKS:
+            break
+
+    return links
 
 
 def parse_score(score_text: str) -> tuple[int | None, int | None]:
-    # Handles "2 - 0", "2-0", and multiline detail score wrappers.
     nums = re.findall(r"\d+", score_text)
     if len(nums) >= 2:
         return int(nums[0]), int(nums[1])
@@ -188,12 +208,18 @@ def parse_score(score_text: str) -> tuple[int | None, int | None]:
 
 
 def parse_date_time(header_text: str) -> tuple[str | None, str | None]:
-    # Flashscore commonly uses DD.MM.YYYY HH:MM. Convert to YYYY-MM-DD.
     match = re.search(r"(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}:\d{2})", header_text)
     if not match:
         return None, None
     day, month, year, hhmm = match.groups()
     return f"{year}-{int(month):02d}-{int(day):02d}", hhmm
+
+
+def in_tournament_window(date_value: str | None) -> bool:
+    if not date_value:
+        # Do not drop a match only because Flashscore date markup changed.
+        return True
+    return TOURNAMENT_START <= date_value <= TOURNAMENT_END
 
 
 def parse_match_header(page: Page, url: str) -> MatchHeader | None:
@@ -236,7 +262,6 @@ def parse_match_header(page: Page, url: str) -> MatchHeader | None:
         ],
     )
 
-    # Fallback: parse title, e.g. "Mexico v South Africa | ..."
     if not home_team or not away_team:
         title = first_text(page, ["title"])
         match = re.search(r"(.+?)\s+v\s+(.+?)(?:\s+\||,|$)", title, re.I)
@@ -249,6 +274,10 @@ def parse_match_header(page: Page, url: str) -> MatchHeader | None:
 
     if not home_team or not away_team or home_goals is None or away_goals is None:
         print(f"Skipping match; could not parse finished header: {url}", file=sys.stderr)
+        return None
+
+    if not in_tournament_window(date_value):
+        print(f"Skipping outside tournament window: {date_value} {home_team} - {away_team}")
         return None
 
     match_id = "wc2026_" + slugify(f"{home_team}_{away_team}")
@@ -288,7 +317,7 @@ def parse_stat_row_text(text: str) -> tuple[str, int | None, int | None] | None:
     if len(lines) < 3:
         return None
 
-    # Most Flashscore rows are: home value / label / away value.
+    # Flashscore rows are usually home value / label / away value.
     candidates = [
         (lines[1], lines[0], lines[2]),
         (lines[0], lines[1], lines[2]),
@@ -315,6 +344,7 @@ def parse_stats_from_rows(page: Page) -> dict[str, int | None]:
         "awayPossession": None,
     }
 
+    row_texts: list[str] = []
     selectors = [
         "[class*='stat__row']",
         "[class*='wcl-row']",
@@ -322,11 +352,10 @@ def parse_stats_from_rows(page: Page) -> dict[str, int | None]:
         "[data-testid*='stat']",
     ]
 
-    row_texts: list[str] = []
     for selector in selectors:
         try:
             loc = page.locator(selector)
-            count = min(loc.count(), 80)
+            count = min(loc.count(), 100)
             for index in range(count):
                 text = loc.nth(index).inner_text(timeout=2000)
                 if text and text not in row_texts:
@@ -366,7 +395,7 @@ def parse_match_stats(page: Page, summary_url: str) -> dict[str, int | None]:
 
 
 def build_match_json(header: MatchHeader, stats: dict[str, int | None]) -> dict[str, Any]:
-    match: dict[str, Any] = {
+    return {
         "matchId": header.match_id,
         "date": header.date,
         "time": header.time,
@@ -390,7 +419,6 @@ def build_match_json(header: MatchHeader, stats: dict[str, int | None]) -> dict[
         "awayPossession": stats.get("awayPossession"),
         "venue": header.venue,
     }
-    return match
 
 
 def load_existing() -> dict[str, Any]:
@@ -407,7 +435,6 @@ def load_existing() -> dict[str, Any]:
 
 
 def merge_matches(existing: dict[str, Any], scraped_matches: list[dict[str, Any]]) -> dict[str, Any]:
-    # Keep non-finished future fixtures from the previous JSON, replace finished matches by matchId.
     by_id: dict[str, dict[str, Any]] = {}
     for item in existing.get("matches", []):
         if isinstance(item, dict) and item.get("matchId"):
@@ -450,12 +477,12 @@ def main() -> int:
         print(f"Opening results page: {RESULTS_URL}")
         goto(page, RESULTS_URL)
         accept_cookies_if_present(page)
-        load_all_result_rows(page)
-        links = collect_match_links(page)
-        print(f"Found {len(links)} candidate match links")
+
+        links = collect_visible_finished_match_links(page)
+        print(f"Found {len(links)} recent finished candidate match links")
 
         if not links:
-            print("No match links found. Failing without changing JSON.", file=sys.stderr)
+            print("No recent finished match links found. Failing without changing JSON.", file=sys.stderr)
             browser.close()
             return 2
 
@@ -466,10 +493,8 @@ def main() -> int:
                 if header is None:
                     continue
                 stats = parse_match_stats(page, link)
-                match_json = build_match_json(header, stats)
-                scraped_matches.append(match_json)
-                # polite delay; don't hammer pages
-                time.sleep(1)
+                scraped_matches.append(build_match_json(header, stats))
+                time.sleep(MATCH_DELAY_SECONDS)
             except Exception as exc:
                 print(f"Failed to parse match {link}: {exc}", file=sys.stderr)
                 continue
