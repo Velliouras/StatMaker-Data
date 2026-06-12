@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V9 - robust existing JSON fallback + scheduled fixtures feed
+# STATMAKER_FIXED_SCRAPER_V10 - Europe/Athens fixture times
 """
 StatMaker World Cup JSON updater.
 
@@ -41,7 +41,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "stats-plus-fixtures-v8"
+SCRIPT_VERSION = "stats-plus-fixtures-v10-athens-time"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -747,8 +747,9 @@ def main() -> int:
                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
                 "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
             ),
-            locale="en-US",
-            timezone_id="UTC",
+            # Force Flashscore to render match kickoff times in Greek local time.
+            locale="en-GB",
+            timezone_id="Europe/Athens",
         )
         page = context.new_page()
 
