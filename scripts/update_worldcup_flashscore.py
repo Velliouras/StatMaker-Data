@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V5 - preserve statistic rows and click stats tab
+# STATMAKER_FIXED_SCRAPER_V6 - prevent false red-card parsing
 """
 StatMaker World Cup JSON updater.
 
@@ -37,7 +37,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "robust-stats-parsing-v5"
+SCRIPT_VERSION = "robust-stats-parsing-v6"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -371,8 +371,27 @@ def normalize_label(label: str) -> str:
 
 def match_stat_key(label: str) -> str | None:
     normalized = normalize_label(label)
-    for key, aliases in STAT_LABEL_ALIASES.items():
-        for alias in aliases:
+
+    # Avoid false positives from combined Flashscore text blocks such as:
+    #   "1 Yellow Cards 2 Red Cards"
+    # These are not a single reliable stat row. Red cards must come from an
+    # explicit "Red Cards" row with its own numeric values; otherwise they stay null.
+    has_yellow = "yellow card" in normalized or "yellow cards" in normalized
+    has_red = "red card" in normalized or "red cards" in normalized
+    if has_yellow and has_red:
+        return None
+
+    # Match more specific labels first. "shots on target" must win before "shots".
+    priority = [
+        "homePossession",
+        "homeShotsOnTarget",
+        "homeShots",
+        "homeCorners",
+        "homeYellowCards",
+        "homeRedCards",
+    ]
+    for key in priority:
+        for alias in STAT_LABEL_ALIASES[key]:
             if alias in normalized:
                 return key
     return None
@@ -498,7 +517,13 @@ def parse_stats_from_body_text(page: Page) -> dict[str, int | None]:
     lines = [clean_text(x) for x in body.splitlines() if clean_text(x)]
     for i in range(1, len(lines) - 1):
         label = lines[i]
-        if not match_stat_key(label):
+        key = match_stat_key(label)
+        if not key:
+            continue
+        # Red cards often appear as navigation/filter text near yellow-card numbers.
+        # Do not infer them from the whole body text; accept them only from actual
+        # visible stat rows parsed by parse_stats_from_visible_rows().
+        if key == "homeRedCards":
             continue
         home_value = parse_int(lines[i - 1])
         away_value = parse_int(lines[i + 1])
@@ -507,6 +532,8 @@ def parse_stats_from_body_text(page: Page) -> dict[str, int | None]:
     # Form 2: after whitespace collapse, "57% Ball Possession 43%".
     flat = clean_text(body)
     for home_key, aliases in STAT_LABEL_ALIASES.items():
+        if home_key == "homeRedCards":
+            continue
         for alias in aliases:
             pattern = re.compile(
                 rf"(\d+%?)\s+{re.escape(alias)}\s+(\d+%?)",
