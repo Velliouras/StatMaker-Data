@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V6 - prevent false red-card parsing
+# STATMAKER_FIXED_SCRAPER_V9 - robust existing JSON fallback + scheduled fixtures feed
 """
 StatMaker World Cup JSON updater.
 
 Reads the public Flashscore World Cup results page with a headless browser,
-extracts recent finished matches and match statistics, and writes the stable
-StatMaker JSON schema consumed by the Android app.
+extracts recent finished matches, match statistics, and upcoming fixtures,
+and writes the stable StatMaker JSON schema consumed by the Android app.
 
 Important:
 - This script does not run inside the Android app.
@@ -33,15 +33,20 @@ RESULTS_URL = os.getenv(
     "FLASHSCORE_RESULTS_URL",
     "https://www.flashscore.com/football/world/world-championship/results/",
 )
+FIXTURES_URL = os.getenv(
+    "FLASHSCORE_FIXTURES_URL",
+    "https://www.flashscore.com/football/world/world-championship/fixtures/",
+)
 OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"))
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "robust-stats-parsing-v6"
+SCRIPT_VERSION = "stats-plus-fixtures-v8"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
 MAX_CANDIDATE_LINKS = int(os.getenv("MAX_CANDIDATE_LINKS", "8"))
+MAX_FIXTURE_LINKS = int(os.getenv("MAX_FIXTURE_LINKS", "32"))
 MATCH_DELAY_SECONDS = float(os.getenv("MATCH_DELAY_SECONDS", "0.4"))
 TOURNAMENT_START = os.getenv("TOURNAMENT_START", "2026-06-11")
 TOURNAMENT_END = os.getenv("TOURNAMENT_END", "2026-07-20")
@@ -194,12 +199,12 @@ def normalize_match_url(href: str) -> str | None:
     return href
 
 
-def collect_visible_finished_match_links(page: Page) -> list[str]:
-    """
-    Collect match links from the currently visible results page only.
+def collect_visible_match_links(page: Page, require_score: bool, limit: int) -> list[str]:
+    """Collect match links from the currently visible Flashscore page only.
 
-    We do not click 'Show more'. The previous version expanded the full archive
-    and found 154 links, which made the workflow crawl for too long.
+    require_score=True is used for the results page. It keeps only played rows.
+    require_score=False is used for the fixtures page. It keeps scheduled rows too.
+    We deliberately do not click 'Show more', to avoid crawling old qualifiers/archive pages.
     """
     page.wait_for_timeout(2500)
     data = page.evaluate(
@@ -234,20 +239,28 @@ def collect_visible_finished_match_links(page: Page) -> list[str]:
         if not href or href in seen:
             continue
 
-        # On Flashscore result rows, numeric home/away scores mean the row is a played match.
         home_score = clean_text(str(item.get("homeScore") or ""))
         away_score = clean_text(str(item.get("awayScore") or ""))
         row_text = clean_text(str(item.get("text") or ""))
         has_score_pair = bool(re.search(r"\d", home_score) and re.search(r"\d", away_score))
-        if not has_score_pair and not re.search(r"\b\d+\s*-\s*\d+\b", row_text):
+        has_inline_score = bool(re.search(r"\b\d+\s*-\s*\d+\b", row_text))
+        if require_score and not has_score_pair and not has_inline_score:
             continue
 
         seen.add(href)
         links.append(href)
-        if len(links) >= MAX_CANDIDATE_LINKS:
+        if len(links) >= limit:
             break
 
     return links
+
+
+def collect_visible_finished_match_links(page: Page) -> list[str]:
+    return collect_visible_match_links(page, require_score=True, limit=MAX_CANDIDATE_LINKS)
+
+
+def collect_visible_fixture_match_links(page: Page) -> list[str]:
+    return collect_visible_match_links(page, require_score=False, limit=MAX_FIXTURE_LINKS)
 
 
 def parse_score(score_text: str) -> tuple[int | None, int | None]:
@@ -272,7 +285,7 @@ def in_tournament_window(date_value: str | None) -> bool:
     return TOURNAMENT_START <= date_value <= TOURNAMENT_END
 
 
-def parse_match_header(page: Page, url: str) -> MatchHeader | None:
+def parse_match_header(page: Page, url: str, require_score: bool = True) -> MatchHeader | None:
     goto(page, url)
 
     title_text = ""
@@ -338,8 +351,12 @@ def parse_match_header(page: Page, url: str) -> MatchHeader | None:
     home_goals, away_goals = parse_score(score_text)
     date_value, time_value = parse_date_time(start_time_text or body_text)
 
-    if not home_team or not away_team or home_goals is None or away_goals is None:
-        print(f"Skipping match; could not parse finished header: {url}", file=sys.stderr)
+    if not home_team or not away_team:
+        print(f"Skipping match; could not parse teams: {url}", file=sys.stderr)
+        return None
+
+    if require_score and (home_goals is None or away_goals is None):
+        print(f"Skipping match; could not parse finished score: {url}", file=sys.stderr)
         return None
 
     if not in_tournament_window(date_value):
@@ -358,7 +375,7 @@ def parse_match_header(page: Page, url: str) -> MatchHeader | None:
         away_team=away_team,
         home_goals=home_goals,
         away_goals=away_goals,
-        status="finished",
+        status="finished" if home_goals is not None and away_goals is not None else "scheduled",
         venue=None,
     )
 
@@ -663,17 +680,35 @@ def build_match_json(header: MatchHeader, stats: dict[str, int | None]) -> dict[
     }
 
 
+def empty_document() -> dict[str, Any]:
+    return {
+        "competition": COMPETITION,
+        "season": SEASON,
+        "updatedAt": None,
+        "source": SOURCE,
+        "matches": [],
+    }
+
+
 def load_existing() -> dict[str, Any]:
     if not OUTPUT_PATH.exists():
-        return {
-            "competition": COMPETITION,
-            "season": SEASON,
-            "updatedAt": None,
-            "source": SOURCE,
-            "matches": [],
-        }
-    with OUTPUT_PATH.open("r", encoding="utf-8") as fp:
-        return json.load(fp)
+        return empty_document()
+
+    try:
+        if OUTPUT_PATH.stat().st_size == 0:
+            print(f"Existing {OUTPUT_PATH} is empty. Rebuilding it from scraped data.", file=sys.stderr)
+            return empty_document()
+        with OUTPUT_PATH.open("r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        if not isinstance(data, dict):
+            print(f"Existing {OUTPUT_PATH} is not a JSON object. Rebuilding it from scraped data.", file=sys.stderr)
+            return empty_document()
+        if not isinstance(data.get("matches"), list):
+            data["matches"] = []
+        return data
+    except json.JSONDecodeError as exc:
+        print(f"Existing {OUTPUT_PATH} is invalid JSON: {exc}. Rebuilding it from scraped data.", file=sys.stderr)
+        return empty_document()
 
 
 def merge_matches(existing: dict[str, Any], scraped_matches: list[dict[str, Any]]) -> dict[str, Any]:
@@ -702,6 +737,7 @@ def merge_matches(existing: dict[str, Any], scraped_matches: list[dict[str, Any]
 
 def main() -> int:
     scraped_matches: list[dict[str, Any]] = []
+    scraped_fixture_count = 0
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -729,9 +765,9 @@ def main() -> int:
             return 2
 
         for index, link in enumerate(links, start=1):
-            print(f"[{index}/{len(links)}] {link}")
+            print(f"[{index}/{len(links)} finished] {link}")
             try:
-                header = parse_match_header(page, link)
+                header = parse_match_header(page, link, require_score=True)
                 if header is None:
                     continue
                 stats = parse_match_stats(page, link)
@@ -747,7 +783,31 @@ def main() -> int:
                 scraped_matches.append(build_match_json(header, stats))
                 time.sleep(MATCH_DELAY_SECONDS)
             except Exception as exc:
-                print(f"Failed to parse match {link}: {exc}", file=sys.stderr)
+                print(f"Failed to parse finished match {link}: {exc}", file=sys.stderr)
+                continue
+
+        print(f"Opening fixtures page: {FIXTURES_URL}")
+        goto(page, FIXTURES_URL)
+        accept_cookies_if_present(page)
+        fixture_links = collect_visible_fixture_match_links(page)
+        print(f"Found {len(fixture_links)} visible fixture candidate links")
+
+        existing_ids = {str(item.get("matchId")) for item in scraped_matches if item.get("matchId")}
+        for index, link in enumerate(fixture_links, start=1):
+            print(f"[{index}/{len(fixture_links)} fixture] {link}")
+            try:
+                header = parse_match_header(page, link, require_score=False)
+                if header is None:
+                    continue
+                item = build_match_json(header, default_stats())
+                if str(item.get("matchId")) in existing_ids:
+                    continue
+                scraped_matches.append(item)
+                existing_ids.add(str(item.get("matchId")))
+                scraped_fixture_count += 1
+                time.sleep(MATCH_DELAY_SECONDS)
+            except Exception as exc:
+                print(f"Failed to parse fixture {link}: {exc}", file=sys.stderr)
                 continue
 
         browser.close()
@@ -764,7 +824,9 @@ def main() -> int:
         fp.write("\n")
 
     print(f"Wrote {OUTPUT_PATH} with {len(updated['matches'])} total matches")
-    print(f"Finished matches parsed this run: {len(scraped_matches)}")
+    finished_count = sum(1 for item in scraped_matches if item.get("status") == "finished")
+    print(f"Finished matches parsed this run: {finished_count}")
+    print(f"Fixtures parsed this run: {scraped_fixture_count}")
     return 0
 
 
