@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V4 - robust Flashscore statistics parsing
+# STATMAKER_FIXED_SCRAPER_V5 - preserve statistic rows and click stats tab
 """
 StatMaker World Cup JSON updater.
 
@@ -37,7 +37,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "robust-stats-parsing-v4"
+SCRIPT_VERSION = "robust-stats-parsing-v5"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -99,6 +99,24 @@ def clean_text(value: str | None) -> str:
     if not value:
         return ""
     return re.sub(r"\s+", " ", value).strip()
+
+
+def normalize_multiline(value: str | None) -> str:
+    """
+    Normalize whitespace but preserve row line boundaries.
+
+    This matters because Flashscore statistic rows often render as:
+      3
+      Corner Kicks
+      1
+
+    V4 collapsed that into one line, so row parsing lost home/label/away order.
+    """
+    if not value:
+        return ""
+    value = str(value).replace("\t", "\n")
+    lines = [clean_text(line) for line in value.splitlines() if clean_text(line)]
+    return "\n".join(lines)
 
 
 def parse_int(value: str | None) -> int | None:
@@ -419,8 +437,7 @@ def parse_stats_from_visible_rows(page: Page) -> dict[str, int | None]:
             loc = page.locator(selector)
             count = min(loc.count(), 250)
             for index in range(count):
-                text = loc.nth(index).inner_text(timeout=1500)
-                text = clean_text(text.replace("\t", "\n"))
+                text = normalize_multiline(loc.nth(index).inner_text(timeout=1500))
                 if text and text not in row_texts:
                     row_texts.append(text)
         except Exception:
@@ -450,11 +467,14 @@ def parse_stats_from_visible_rows(page: Page) -> dict[str, int | None]:
             """
         )
         for text in extra_rows:
-            cleaned = clean_text(str(text).replace("\t", "\n"))
+            cleaned = normalize_multiline(str(text))
             if cleaned and cleaned not in row_texts:
                 row_texts.append(cleaned)
     except Exception:
         pass
+
+    if row_texts:
+        print(f"Collected {len(row_texts)} candidate stat row texts")
 
     for text in row_texts:
         parsed = parse_stat_row_text(text)
@@ -515,6 +535,28 @@ def stats_found_count(stats: dict[str, int | None]) -> int:
     return sum(1 for value in stats.values() if value is not None)
 
 
+def click_statistics_tab(page: Page) -> None:
+    """Try to force Flashscore onto the detailed statistics panel."""
+    candidates = [
+        "a[href*='match-statistics']",
+        "button:has-text('Stats')",
+        "a:has-text('Stats')",
+        "[role='tab']:has-text('Stats')",
+        "text=/^Stats$/",
+        "text=/^Statistics$/",
+        "text=/^Match statistics$/i",
+    ]
+    for selector in candidates:
+        try:
+            loc = page.locator(selector).first
+            if loc.count() > 0 and loc.is_visible(timeout=1000):
+                loc.click(timeout=2500)
+                page.wait_for_timeout(2500)
+                return
+        except Exception:
+            continue
+
+
 def stats_urls_for(match_url: str) -> list[str]:
     """
     Flashscore stat tabs are hash-routed. Try a few stable variants.
@@ -529,10 +571,12 @@ def stats_urls_for(match_url: str) -> list[str]:
         with_query = path
 
     candidates = [
-        path + "/#/match-summary/match-statistics/0",
         with_query + "#/match-summary/match-statistics/0",
-        path + "/#/match-summary",
+        with_query + "#/match-summary/match-statistics",
+        path + "/#/match-summary/match-statistics/0",
+        path + "/#/match-summary/match-statistics",
         with_query + "#/match-summary",
+        path + "/#/match-summary",
     ]
 
     out: list[str] = []
@@ -548,7 +592,8 @@ def parse_match_stats(page: Page, match_url: str) -> dict[str, int | None]:
     for url in stats_urls_for(match_url):
         try:
             goto(page, url)
-            page.wait_for_timeout(2500)
+            page.wait_for_timeout(1500)
+            click_statistics_tab(page)
             row_stats = parse_stats_from_visible_rows(page)
             body_stats = parse_stats_from_body_text(page)
             stats = combine_stats(row_stats, body_stats)
