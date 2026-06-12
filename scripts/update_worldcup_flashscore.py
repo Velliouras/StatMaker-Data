@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V3 - fixed Flashscore URL normalization
+# STATMAKER_FIXED_SCRAPER_V4 - robust Flashscore statistics parsing
 """
 StatMaker World Cup JSON updater.
 
@@ -37,7 +37,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "fixed-url-normalization-v3"
+SCRIPT_VERSION = "robust-stats-parsing-v4"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -50,9 +50,24 @@ STAT_LABEL_ALIASES = {
     "homePossession": ["ball possession", "possession"],
     "homeShots": ["goal attempts", "total shots", "shots"],
     "homeShotsOnTarget": ["shots on goal", "shots on target"],
-    "homeCorners": ["corner kicks", "corners"],
+    "homeCorners": ["corner kicks", "corners", "corner"],
     "homeYellowCards": ["yellow cards", "yellow card"],
     "homeRedCards": ["red cards", "red card"],
+}
+
+EMPTY_STATS = {
+    "homeCorners": None,
+    "awayCorners": None,
+    "homeShots": None,
+    "awayShots": None,
+    "homeShotsOnTarget": None,
+    "awayShotsOnTarget": None,
+    "homeYellowCards": None,
+    "awayYellowCards": None,
+    "homeRedCards": None,
+    "awayRedCards": None,
+    "homePossession": None,
+    "awayPossession": None,
 }
 
 AWAY_KEYS = {
@@ -345,15 +360,23 @@ def match_stat_key(label: str) -> str | None:
     return None
 
 
+def default_stats() -> dict[str, int | None]:
+    return dict(EMPTY_STATS)
+
+
 def parse_stat_row_text(text: str) -> tuple[str, int | None, int | None] | None:
     lines = [clean_text(line) for line in text.splitlines() if clean_text(line)]
     if len(lines) < 3:
         return None
 
-    # Flashscore rows are usually home value / label / away value.
+    # Flashscore rows usually render as one of these forms:
+    #   home value / label / away value
+    #   label / home value / away value
+    # The CSS classes change often, so this parser is intentionally text-based.
     candidates = [
         (lines[1], lines[0], lines[2]),
         (lines[0], lines[1], lines[2]),
+        (lines[-2], lines[0], lines[-1]),
     ]
     for label, home, away in candidates:
         if match_stat_key(label):
@@ -361,54 +384,135 @@ def parse_stat_row_text(text: str) -> tuple[str, int | None, int | None] | None:
     return None
 
 
-def parse_stats_from_rows(page: Page) -> dict[str, int | None]:
-    result: dict[str, int | None] = {
-        "homeCorners": None,
-        "awayCorners": None,
-        "homeShots": None,
-        "awayShots": None,
-        "homeShotsOnTarget": None,
-        "awayShotsOnTarget": None,
-        "homeYellowCards": None,
-        "awayYellowCards": None,
-        "homeRedCards": None,
-        "awayRedCards": None,
-        "homePossession": None,
-        "awayPossession": None,
-    }
+def merge_stat_value(
+    stats: dict[str, int | None],
+    label: str,
+    home_value: int | None,
+    away_value: int | None,
+) -> None:
+    home_key = match_stat_key(label)
+    if not home_key:
+        return
+    away_key = AWAY_KEYS[home_key]
+    if home_value is not None:
+        stats[home_key] = home_value
+    if away_value is not None:
+        stats[away_key] = away_value
+
+
+def parse_stats_from_visible_rows(page: Page) -> dict[str, int | None]:
+    stats = default_stats()
 
     row_texts: list[str] = []
     selectors = [
         "[class*='stat__row']",
         "[class*='wcl-row']",
+        "[class*='wcl-category']",
+        "[class*='matchStats'] [class*='row']",
         "[class*='matchStatsRow']",
         "[data-testid*='stat']",
+        "[class*='statistics'] [class*='row']",
     ]
 
     for selector in selectors:
         try:
             loc = page.locator(selector)
-            count = min(loc.count(), 100)
+            count = min(loc.count(), 250)
             for index in range(count):
-                text = loc.nth(index).inner_text(timeout=2000)
+                text = loc.nth(index).inner_text(timeout=1500)
+                text = clean_text(text.replace("\t", "\n"))
                 if text and text not in row_texts:
                     row_texts.append(text)
         except Exception:
             continue
+
+    # Last-resort DOM scan: take elements whose text contains a known stat label
+    # and parse them as home/label/away mini-blocks.
+    try:
+        extra_rows = page.evaluate(
+            """
+            () => {
+              const aliases = [
+                'Ball Possession', 'Possession', 'Goal Attempts', 'Total Shots',
+                'Shots', 'Shots on Goal', 'Shots on Target', 'Corner Kicks',
+                'Corners', 'Yellow Cards', 'Red Cards'
+              ];
+              const out = [];
+              const els = Array.from(document.querySelectorAll('div, span'));
+              for (const el of els) {
+                const txt = (el.innerText || '').trim();
+                if (!txt || txt.length > 180) continue;
+                const lower = txt.toLowerCase();
+                if (aliases.some(a => lower.includes(a.toLowerCase()))) out.push(txt);
+              }
+              return out;
+            }
+            """
+        )
+        for text in extra_rows:
+            cleaned = clean_text(str(text).replace("\t", "\n"))
+            if cleaned and cleaned not in row_texts:
+                row_texts.append(cleaned)
+    except Exception:
+        pass
 
     for text in row_texts:
         parsed = parse_stat_row_text(text)
         if not parsed:
             continue
         label, home_value, away_value = parsed
-        home_key = match_stat_key(label)
-        if not home_key:
-            continue
-        away_key = AWAY_KEYS[home_key]
-        result[home_key] = home_value
-        result[away_key] = away_value
+        merge_stat_value(stats, label, home_value, away_value)
 
-    return result
+    return stats
+
+
+def parse_stats_from_body_text(page: Page) -> dict[str, int | None]:
+    stats = default_stats()
+
+    try:
+        body = page.locator("body").inner_text(timeout=8000)
+    except Exception:
+        return stats
+
+    # Form 1: home value / label / away value across lines.
+    lines = [clean_text(x) for x in body.splitlines() if clean_text(x)]
+    for i in range(1, len(lines) - 1):
+        label = lines[i]
+        if not match_stat_key(label):
+            continue
+        home_value = parse_int(lines[i - 1])
+        away_value = parse_int(lines[i + 1])
+        merge_stat_value(stats, label, home_value, away_value)
+
+    # Form 2: after whitespace collapse, "57% Ball Possession 43%".
+    flat = clean_text(body)
+    for home_key, aliases in STAT_LABEL_ALIASES.items():
+        for alias in aliases:
+            pattern = re.compile(
+                rf"(\d+%?)\s+{re.escape(alias)}\s+(\d+%?)",
+                re.IGNORECASE,
+            )
+            match = pattern.search(flat)
+            if match:
+                away_key = AWAY_KEYS[home_key]
+                stats[home_key] = parse_int(match.group(1))
+                stats[away_key] = parse_int(match.group(2))
+                break
+
+    return stats
+
+
+def combine_stats(*parts: dict[str, int | None]) -> dict[str, int | None]:
+    combined = default_stats()
+    for part in parts:
+        for key, value in part.items():
+            if value is not None:
+                combined[key] = value
+    return combined
+
+
+def stats_found_count(stats: dict[str, int | None]) -> int:
+    return sum(1 for value in stats.values() if value is not None)
 
 
 def stats_urls_for(match_url: str) -> list[str]:
@@ -439,31 +543,25 @@ def stats_urls_for(match_url: str) -> list[str]:
 
 
 def parse_match_stats(page: Page, match_url: str) -> dict[str, int | None]:
+    best = default_stats()
+
     for url in stats_urls_for(match_url):
         try:
             goto(page, url)
-            stats = parse_stats_from_rows(page)
-            if any(value is not None for value in stats.values()):
-                return stats
+            page.wait_for_timeout(2500)
+            row_stats = parse_stats_from_visible_rows(page)
+            body_stats = parse_stats_from_body_text(page)
+            stats = combine_stats(row_stats, body_stats)
+            if stats_found_count(stats) > stats_found_count(best):
+                best = stats
+            if stats_found_count(best) >= 8:
+                return best
         except PlaywrightTimeoutError:
             print(f"Stats page timeout: {url}", file=sys.stderr)
         except Exception as exc:
             print(f"Stats page parse failed: {url}: {exc}", file=sys.stderr)
 
-    return {
-        "homeCorners": None,
-        "awayCorners": None,
-        "homeShots": None,
-        "awayShots": None,
-        "homeShotsOnTarget": None,
-        "awayShotsOnTarget": None,
-        "homeYellowCards": None,
-        "awayYellowCards": None,
-        "homeRedCards": None,
-        "awayRedCards": None,
-        "homePossession": None,
-        "awayPossession": None,
-    }
+    return best
 
 
 def build_match_json(header: MatchHeader, stats: dict[str, int | None]) -> dict[str, Any]:
@@ -565,6 +663,15 @@ def main() -> int:
                 if header is None:
                     continue
                 stats = parse_match_stats(page, link)
+                print(
+                    f"Parsed stats for {header.home_team} - {header.away_team}: "
+                    f"corners={stats.get('homeCorners')}-{stats.get('awayCorners')}, "
+                    f"shots={stats.get('homeShots')}-{stats.get('awayShots')}, "
+                    f"sot={stats.get('homeShotsOnTarget')}-{stats.get('awayShotsOnTarget')}, "
+                    f"yc={stats.get('homeYellowCards')}-{stats.get('awayYellowCards')}, "
+                    f"rc={stats.get('homeRedCards')}-{stats.get('awayRedCards')}, "
+                    f"pos={stats.get('homePossession')}-{stats.get('awayPossession')}"
+                )
                 scraped_matches.append(build_match_json(header, stats))
                 time.sleep(MATCH_DELAY_SECONDS)
             except Exception as exc:
