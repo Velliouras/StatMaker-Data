@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V2 - visible links only, capped scraping
+# STATMAKER_FIXED_SCRAPER_V3 - fixed Flashscore URL normalization
 """
 StatMaker World Cup JSON updater.
 
@@ -37,11 +37,11 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "visible-links-only-v2"
+SCRIPT_VERSION = "fixed-url-normalization-v3"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
-MAX_CANDIDATE_LINKS = int(os.getenv("MAX_CANDIDATE_LINKS", "12"))
+MAX_CANDIDATE_LINKS = int(os.getenv("MAX_CANDIDATE_LINKS", "8"))
 MATCH_DELAY_SECONDS = float(os.getenv("MATCH_DELAY_SECONDS", "0.4"))
 TOURNAMENT_START = os.getenv("TOURNAMENT_START", "2026-06-11")
 TOURNAMENT_END = os.getenv("TOURNAMENT_END", "2026-07-20")
@@ -134,13 +134,30 @@ def goto(page: Page, url: str) -> None:
 
 
 def normalize_match_url(href: str) -> str | None:
-    href = str(href).split("#")[0]
+    """
+    Return the match URL as Flashscore gives it, cleaned but NOT rewritten to
+    /summary/.
+
+    The previous V2 script produced broken URLs such as:
+      .../?mid=CGdvIm6K/summary/
+    because it appended /summary/ after the query string. That made parsing fail.
+    """
+    href = clean_text(str(href or ""))
+    if not href:
+        return None
+    href = href.split("#")[0]
     if "/match/football/" not in href:
         return None
-    # Always use the summary tab as canonical base.
-    href = re.sub(r"/(summary|match-summary|stats|standings|h2h).*$", "/summary/", href.rstrip("/"))
-    if not href.endswith("/summary/"):
-        href = href.rstrip("/") + "/summary/"
+
+    # Remove accidental tab suffixes if they have already been appended.
+    href = re.sub(r"/(summary|match-summary|stats|standings|h2h)/?$", "", href.rstrip("/"))
+
+    # If a bad previous query value has something like ?mid=ID/summary/, clean it.
+    if "?" in href:
+        path, query = href.split("?", 1)
+        query = re.sub(r"/(summary|match-summary|stats|standings|h2h).*$", "", query)
+        href = path.rstrip("/") + "?" + query
+
     return href
 
 
@@ -225,8 +242,14 @@ def in_tournament_window(date_value: str | None) -> bool:
 def parse_match_header(page: Page, url: str) -> MatchHeader | None:
     goto(page, url)
 
+    title_text = ""
+    try:
+        title_text = clean_text(page.title())
+    except Exception:
+        title_text = ""
+
     body_text = clean_text(page.locator("body").inner_text(timeout=10000))
-    if not body_text:
+    if not body_text and not title_text:
         return None
 
     home_team = first_text(
@@ -263,11 +286,21 @@ def parse_match_header(page: Page, url: str) -> MatchHeader | None:
     )
 
     if not home_team or not away_team:
-        title = first_text(page, ["title"])
-        match = re.search(r"(.+?)\s+v\s+(.+?)(?:\s+\||,|$)", title, re.I)
+        match = re.search(r"(.+?)\s+v\s+(.+?)(?:\s+\||,|$)", title_text, re.I)
         if match:
             home_team = home_team or clean_text(match.group(1))
             away_team = away_team or clean_text(match.group(2))
+
+    if not home_team or not away_team:
+        # Last-resort fallback from Flashscore URL slug. It is not perfect, but
+        # prevents a full failure if CSS class names change.
+        m = re.search(r"/match/football/([^/?#]+)/([^/?#]+)", url)
+        if m:
+            def team_from_slug(slug: str) -> str:
+                slug = re.sub(r"-[A-Za-z0-9]{6,}$", "", slug)
+                return " ".join(part.capitalize() for part in slug.split("-") if part)
+            home_team = home_team or team_from_slug(m.group(1))
+            away_team = away_team or team_from_slug(m.group(2))
 
     home_goals, away_goals = parse_score(score_text)
     date_value, time_value = parse_date_time(start_time_text or body_text)
@@ -378,20 +411,59 @@ def parse_stats_from_rows(page: Page) -> dict[str, int | None]:
     return result
 
 
-def stats_url_for(summary_url: str) -> str:
-    base = re.sub(r"/summary/?$", "", summary_url.rstrip("/"))
-    return base + "/summary/stats/"
+def stats_urls_for(match_url: str) -> list[str]:
+    """
+    Flashscore stat tabs are hash-routed. Try a few stable variants.
+    """
+    clean_url = match_url.split("#")[0].rstrip("/")
+    if "?" in clean_url:
+        path, query = clean_url.split("?", 1)
+        path = path.rstrip("/")
+        with_query = path + "?" + query
+    else:
+        path = clean_url.rstrip("/")
+        with_query = path
+
+    candidates = [
+        path + "/#/match-summary/match-statistics/0",
+        with_query + "#/match-summary/match-statistics/0",
+        path + "/#/match-summary",
+        with_query + "#/match-summary",
+    ]
+
+    out: list[str] = []
+    for item in candidates:
+        if item not in out:
+            out.append(item)
+    return out
 
 
-def parse_match_stats(page: Page, summary_url: str) -> dict[str, int | None]:
-    url = stats_url_for(summary_url)
-    try:
-        goto(page, url)
-    except PlaywrightTimeoutError:
-        print(f"Stats page timeout: {url}", file=sys.stderr)
-        return {}
+def parse_match_stats(page: Page, match_url: str) -> dict[str, int | None]:
+    for url in stats_urls_for(match_url):
+        try:
+            goto(page, url)
+            stats = parse_stats_from_rows(page)
+            if any(value is not None for value in stats.values()):
+                return stats
+        except PlaywrightTimeoutError:
+            print(f"Stats page timeout: {url}", file=sys.stderr)
+        except Exception as exc:
+            print(f"Stats page parse failed: {url}: {exc}", file=sys.stderr)
 
-    return parse_stats_from_rows(page)
+    return {
+        "homeCorners": None,
+        "awayCorners": None,
+        "homeShots": None,
+        "awayShots": None,
+        "homeShotsOnTarget": None,
+        "awayShotsOnTarget": None,
+        "homeYellowCards": None,
+        "awayYellowCards": None,
+        "homeRedCards": None,
+        "awayRedCards": None,
+        "homePossession": None,
+        "awayPossession": None,
+    }
 
 
 def build_match_json(header: MatchHeader, stats: dict[str, int | None]) -> dict[str, Any]:
