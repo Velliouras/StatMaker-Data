@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V10 - Europe/Athens fixture times
+# STATMAKER_FIXED_SCRAPER_V11 - smart scrape gate
 """
 StatMaker World Cup JSON updater.
 
@@ -23,7 +23,8 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -41,7 +42,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "stats-plus-fixtures-v10-athens-time"
+SCRIPT_VERSION = "stats-plus-fixtures-v11-smart-gate"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -50,6 +51,13 @@ MAX_FIXTURE_LINKS = int(os.getenv("MAX_FIXTURE_LINKS", "32"))
 MATCH_DELAY_SECONDS = float(os.getenv("MATCH_DELAY_SECONDS", "0.4"))
 TOURNAMENT_START = os.getenv("TOURNAMENT_START", "2026-06-11")
 TOURNAMENT_END = os.getenv("TOURNAMENT_END", "2026-07-20")
+
+LOCAL_TZ_NAME = os.getenv("STATMAKER_LOCAL_TZ", "Europe/Athens")
+LOCAL_TZ = ZoneInfo(LOCAL_TZ_NAME)
+SMART_GATE_ENABLED = os.getenv("STATMAKER_SMART_GATE", "true").lower() not in {"0", "false", "no"}
+PRE_KICKOFF_MINUTES = int(os.getenv("STATMAKER_PRE_KICKOFF_MINUTES", "60"))
+POST_KICKOFF_MINUTES = int(os.getenv("STATMAKER_POST_KICKOFF_MINUTES", "240"))
+DAILY_FULL_REFRESH_HOUR = int(os.getenv("STATMAKER_DAILY_FULL_REFRESH_HOUR", "6"))
 
 STAT_LABEL_ALIASES = {
     "homePossession": ["ball possession", "possession"],
@@ -731,11 +739,79 @@ def merge_matches(existing: dict[str, Any], scraped_matches: list[dict[str, Any]
         "season": SEASON,
         "updatedAt": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "source": SOURCE,
+        "scriptVersion": SCRIPT_VERSION,
+        "localTimezone": LOCAL_TZ_NAME,
         "matches": sorted(by_id.values(), key=sort_key),
     }
 
 
+def parse_local_kickoff(item: dict[str, Any]) -> datetime | None:
+    date_value = clean_text(str(item.get("date") or ""))
+    time_value = clean_text(str(item.get("time") or ""))
+    if not date_value or not time_value:
+        return None
+    try:
+        return datetime.strptime(f"{date_value} {time_value}", "%Y-%m-%d %H:%M").replace(tzinfo=LOCAL_TZ)
+    except ValueError:
+        return None
+
+
+def is_manual_run() -> bool:
+    event_name = os.getenv("GITHUB_EVENT_NAME", "")
+    return event_name == "workflow_dispatch"
+
+
+def should_scrape_now(existing: dict[str, Any]) -> tuple[bool, str]:
+    if os.getenv("STATMAKER_FORCE_SCRAPE", "").lower() in {"1", "true", "yes"}:
+        return True, "forced by STATMAKER_FORCE_SCRAPE"
+
+    if is_manual_run():
+        return True, "manual workflow_dispatch run"
+
+    if not SMART_GATE_ENABLED:
+        return True, "smart gate disabled"
+
+    matches = existing.get("matches")
+    if not isinstance(matches, list) or not matches:
+        return True, "local JSON has no matches yet"
+
+    now_local = datetime.now(LOCAL_TZ)
+
+    # One daily full refresh keeps fixture/schedule changes fresh, even on quiet days.
+    if now_local.hour == DAILY_FULL_REFRESH_HOUR:
+        return True, f"daily full refresh hour {DAILY_FULL_REFRESH_HOUR:02d}:00 {LOCAL_TZ_NAME}"
+
+    for item in matches:
+        if not isinstance(item, dict):
+            continue
+        status = clean_text(str(item.get("status") or "")).lower()
+        if status == "finished":
+            continue
+        kickoff = parse_local_kickoff(item)
+        if kickoff is None:
+            continue
+        window_start = kickoff - timedelta(minutes=PRE_KICKOFF_MINUTES)
+        window_end = kickoff + timedelta(minutes=POST_KICKOFF_MINUTES)
+        if window_start <= now_local <= window_end:
+            label = f"{item.get('homeTeam', '?')} - {item.get('awayTeam', '?')}"
+            return True, (
+                f"active match window for {label}: "
+                f"{window_start:%Y-%m-%d %H:%M} to {window_end:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}"
+            )
+
+    return False, (
+        f"no active/recent match window at {now_local:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}; "
+        f"checked {len(matches)} matches"
+    )
+
+
 def main() -> int:
+    existing_for_gate = load_existing()
+    allowed, reason = should_scrape_now(existing_for_gate)
+    print(f"Smart gate decision: {'SCRAPE' if allowed else 'SKIP'} - {reason}")
+    if not allowed:
+        return 0
+
     scraped_matches: list[dict[str, Any]] = []
     scraped_fixture_count = 0
 
@@ -761,9 +837,7 @@ def main() -> int:
         print(f"Found {len(links)} recent finished candidate match links")
 
         if not links:
-            print("No recent finished match links found. Failing without changing JSON.", file=sys.stderr)
-            browser.close()
-            return 2
+            print("No recent finished match links found. Continuing with fixtures.", file=sys.stderr)
 
         for index, link in enumerate(links, start=1):
             print(f"[{index}/{len(links)} finished] {link}")
@@ -817,7 +891,7 @@ def main() -> int:
         print("No finished matches parsed. Failing without changing JSON.", file=sys.stderr)
         return 3
 
-    existing = load_existing()
+    existing = existing_for_gate
     updated = merge_matches(existing, scraped_matches)
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with OUTPUT_PATH.open("w", encoding="utf-8") as fp:
