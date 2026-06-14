@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every 30 minutes during active tournament days.
-    - cron: "0 * * * *"
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
