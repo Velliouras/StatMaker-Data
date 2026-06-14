@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# STATMAKER_FIXED_SCRAPER_V11 - smart scrape gate
+# STATMAKER_FIXED_SCRAPER_V12 - post-match smart gate
 """
 StatMaker World Cup JSON updater.
 
@@ -42,7 +42,7 @@ OUTPUT_PATH = Path(os.getenv("STATMAKER_OUTPUT", "world-cup/world_cup_2026.json"
 COMPETITION = "world_cup"
 SEASON = "2026"
 SOURCE = "flashscore"
-SCRIPT_VERSION = "stats-plus-fixtures-v11-smart-gate"
+SCRIPT_VERSION = "stats-plus-fixtures-v12-post-match-gate"
 
 # Only inspect the recent visible/current result links. This prevents the Action
 # from crawling the whole Flashscore archive.
@@ -55,9 +55,10 @@ TOURNAMENT_END = os.getenv("TOURNAMENT_END", "2026-07-20")
 LOCAL_TZ_NAME = os.getenv("STATMAKER_LOCAL_TZ", "Europe/Athens")
 LOCAL_TZ = ZoneInfo(LOCAL_TZ_NAME)
 SMART_GATE_ENABLED = os.getenv("STATMAKER_SMART_GATE", "true").lower() not in {"0", "false", "no"}
-PRE_KICKOFF_MINUTES = int(os.getenv("STATMAKER_PRE_KICKOFF_MINUTES", "60"))
-POST_KICKOFF_MINUTES = int(os.getenv("STATMAKER_POST_KICKOFF_MINUTES", "240"))
-DAILY_FULL_REFRESH_HOUR = int(os.getenv("STATMAKER_DAILY_FULL_REFRESH_HOUR", "6"))
+ESTIMATED_MATCH_DURATION_MINUTES = int(os.getenv("STATMAKER_ESTIMATED_MATCH_DURATION_MINUTES", "120"))
+POST_MATCH_SCRAPE_MINUTES = int(os.getenv("STATMAKER_POST_MATCH_SCRAPE_MINUTES", "60"))
+DAILY_FULL_REFRESH_HOUR = int(os.getenv("STATMAKER_DAILY_FULL_REFRESH_HOUR", "8"))
+DAILY_FULL_REFRESH_MINUTE_WINDOW = int(os.getenv("STATMAKER_DAILY_FULL_REFRESH_MINUTE_WINDOW", "15"))
 
 STAT_LABEL_ALIASES = {
     "homePossession": ["ball possession", "possession"],
@@ -778,8 +779,13 @@ def should_scrape_now(existing: dict[str, Any]) -> tuple[bool, str]:
     now_local = datetime.now(LOCAL_TZ)
 
     # One daily full refresh keeps fixture/schedule changes fresh, even on quiet days.
-    if now_local.hour == DAILY_FULL_REFRESH_HOUR:
-        return True, f"daily full refresh hour {DAILY_FULL_REFRESH_HOUR:02d}:00 {LOCAL_TZ_NAME}"
+    # With a */15 cron we only allow the first run inside the hour window, so
+    # 08:00/08:05 runs refresh, but 08:15/08:30/08:45 skip unless a match window is active.
+    if now_local.hour == DAILY_FULL_REFRESH_HOUR and now_local.minute < DAILY_FULL_REFRESH_MINUTE_WINDOW:
+        return True, (
+            f"daily full refresh window {DAILY_FULL_REFRESH_HOUR:02d}:00-"
+            f"{DAILY_FULL_REFRESH_HOUR:02d}:{DAILY_FULL_REFRESH_MINUTE_WINDOW:02d} {LOCAL_TZ_NAME}"
+        )
 
     for item in matches:
         if not isinstance(item, dict):
@@ -790,18 +796,29 @@ def should_scrape_now(existing: dict[str, Any]) -> tuple[bool, str]:
         kickoff = parse_local_kickoff(item)
         if kickoff is None:
             continue
-        window_start = kickoff - timedelta(minutes=PRE_KICKOFF_MINUTES)
-        window_end = kickoff + timedelta(minutes=POST_KICKOFF_MINUTES)
+
+        # Post-match scraping model:
+        #   kickoff + 120 minutes = estimated final whistle
+        #   estimated final whistle to +60 minutes = scrape window
+        # GitHub Actions may wake every 15 minutes, but Flashscore is touched only
+        # inside this post-match window or during manual/daily full refresh.
+        estimated_end = kickoff + timedelta(minutes=ESTIMATED_MATCH_DURATION_MINUTES)
+        window_start = estimated_end
+        window_end = estimated_end + timedelta(minutes=POST_MATCH_SCRAPE_MINUTES)
         if window_start <= now_local <= window_end:
             label = f"{item.get('homeTeam', '?')} - {item.get('awayTeam', '?')}"
             return True, (
-                f"active match window for {label}: "
-                f"{window_start:%Y-%m-%d %H:%M} to {window_end:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}"
+                f"post-match scrape window for {label}: "
+                f"kickoff={kickoff:%Y-%m-%d %H:%M}, "
+                f"estimated_end={estimated_end:%Y-%m-%d %H:%M}, "
+                f"window={window_start:%Y-%m-%d %H:%M} to {window_end:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}"
             )
 
     return False, (
-        f"no active/recent match window at {now_local:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}; "
-        f"checked {len(matches)} matches"
+        f"no post-match scrape window at {now_local:%Y-%m-%d %H:%M} {LOCAL_TZ_NAME}; "
+        f"checked {len(matches)} matches; "
+        f"estimated duration={ESTIMATED_MATCH_DURATION_MINUTES}m, "
+        f"post-match window={POST_MATCH_SCRAPE_MINUTES}m"
     )
 
 
