@@ -3,7 +3,7 @@ name: Update World Cup JSON
 on:
   workflow_dispatch:
   schedule:
-    # Every 30 minutes during active tournament days.
+   # Every 15 minutes; Python script decides whether to scrape or skip.
     - cron: "*/15 * * * *"
 
 permissions:
