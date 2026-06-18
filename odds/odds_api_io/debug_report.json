@@ -1,7 +1,7 @@
 {
   "source": "odds_api_io",
-  "generatedAt": "2026-06-18T12:10:25Z",
-  "scriptVersion": "odds-api-io-wc-v2-full-statmaker-market-discovery",
+  "generatedAt": "2026-06-18T12:22:52Z",
+  "scriptVersion": "odds-api-io-wc-v3-full-statmaker-market-mapping",
   "fixturesPath": "world-cup/world_cup_2026.json",
   "outputPath": "odds/odds_api_io/world_cup_odds.json",
   "debugPath": "odds/odds_api_io/debug_report.json",
@@ -12,7 +12,19 @@
       "1X2",
       "MATCH_GOALS",
       "BTTS",
-      "TEAM_TOTAL_GOALS"
+      "TEAM_TOTAL_GOALS",
+      "MATCH_CORNERS",
+      "TEAM_CORNERS_HOME",
+      "TEAM_CORNERS_AWAY",
+      "MATCH_CARDS",
+      "TEAM_CARDS_HOME",
+      "TEAM_CARDS_AWAY",
+      "MATCH_SHOTS",
+      "TEAM_SHOTS_HOME",
+      "TEAM_SHOTS_AWAY",
+      "MATCH_SHOTS_ON_TARGET",
+      "TEAM_SHOTS_ON_TARGET_HOME",
+      "TEAM_SHOTS_ON_TARGET_AWAY"
     ],
     "discoveryTargets": [
       "1X2",
@@ -29,7 +41,7 @@
       2.5,
       3.5
     ],
-    "note": "Discovery is diagnostic-only for corners/cards/shots/SOT; only emittedMarkets are written as normalized odds until mapping is approved."
+    "note": "Corners/cards/shots/SOT are emitted only from clean full-time over/under rows with hdp + over + under odds. HT/2H/player/spread/handicap/N/A odds are excluded."
   },
   "bookmakersRequested": [
     "Bet365",
@@ -46,9 +58,9 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 865,
+      "durationMs": 380,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "79",
+      "rateLimitRemaining": "69",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 122786,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 0}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 5}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eventsCount\": 0}, {\"name\": \"Argentina - Liga Profesional\", \"slug\": \"argentina-liga-profesional\", \"eventsCount\": 0}, {\"name\": \"Argentina - Primera B\", \"slug\": \"argentina-primera-b\", \"eventsCount\": 166}, {\"name\": \"Argentina - Primera B Nacional\", \"slug\": \"argentina-primera-b-nacional\", \"eventsCount\": 235}, {\"name\": \"Argentina - Primera C\", \"slug\": \"argentina-primera-c\", \"eventsCount\": 168}, {\"name\": \"Ar..."
@@ -65,9 +77,9 @@
         "league": "international-fifa-world-cup"
       },
       "status": 200,
-      "durationMs": 460,
+      "durationMs": 208,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "78",
+      "rateLimitRemaining": "68",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 13454,
       "sample": "[{\"id\": 66456910, \"home\": \"Czechia\", \"away\": \"South Africa\", \"homeId\": 4714, \"awayId\": 4736, \"date\": \"2026-06-18T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456922, \"home\": \"Switzerland\", \"away\": \"Bosnia and Herzegovina\", \"homeId\": 4699, \"awayId\": 4479, \"date\": \"2026-06-18T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456920, \"home\": \"Canada\", \"away\": \"Qatar\", \"homeId\": 4752, \"awayId\": 4792, \"date\": \"2026-06-18T22:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456908, \"home\": \"Mexico\", \"away\": \"Korea Republic\", \"homeId\": 4781, \"awayId\": 4735, \"date\": \"2026-06-19T01:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456944, \"home\": \"USA\", \"away\": \"Australia\", \"homeId\": 4724, \"awayId\": 4741, \"date\": \"2026-06-19T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456934, \"home\": \"Scotland\", \"away\": \"Morocco\", \"homeId\": 4695, \"awayId\": 4778, \"date\": \"2026-06-19T22:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"le..."
@@ -84,9 +96,9 @@
         "league": "international-fifa-world-cup-qualification-caf"
       },
       "status": 200,
-      "durationMs": 464,
+      "durationMs": 225,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "77",
+      "rateLimitRemaining": "67",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 2,
       "sample": []
@@ -103,9 +115,9 @@
         "league": "international-fifa-world-cup-women-qualification-ofc"
       },
       "status": 200,
-      "durationMs": 452,
+      "durationMs": 216,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "76",
+      "rateLimitRemaining": "66",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 2,
       "sample": []
@@ -122,9 +134,9 @@
         "league": "international-fifa-world-cup-women-qualification-uefa-gr-a1"
       },
       "status": 200,
-      "durationMs": 448,
+      "durationMs": 235,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "75",
+      "rateLimitRemaining": "65",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 2,
       "sample": []
@@ -141,9 +153,9 @@
         "league": "international-fifa-world-cup-women-qualification-uefa-gr-a2"
       },
       "status": 200,
-      "durationMs": 439,
+      "durationMs": 212,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "74",
+      "rateLimitRemaining": "64",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 2,
       "sample": []
@@ -156,12 +168,12 @@
         "eventIds": "66456910,66456922,66456920,66456908,66456944,66456934,66456932,66456946,66456972,66457074"
       },
       "status": 200,
-      "durationMs": 1050,
+      "durationMs": 402,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "73",
+      "rateLimitRemaining": "63",
       "rateLimitReset": "2026-06-18T12:51:08Z",
-      "bodyLength": 1312639,
-      "sample": "[{\"id\": 66456910, \"home\": \"Czechia\", \"away\": \"South Africa\", \"homeId\": 4714, \"awayId\": 4736, \"date\": \"2026-06-18T16:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E192256753/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1027164910\"}, \"bookmakerIds\": {\"Bet365\": \"192256753\", \"Bet365_4\": \"192256753-bot365\", \"Unibet\": \"1027164910\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T10:07:47.826Z\", \"odds\": [{\"home\": \"1.800\", \"draw\": \"3.600\", \"away\": \"4.500\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T12:06:09.502Z\", \"odds\": [{\"home\": \"1.300\", \"away\": \"3.400\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T07:13:40.912Z\", \"odds\": [{\"label\": \"Czechia or South Africa\", \"under\": \"1.285\"}, {\"label\": \"Draw or South Africa\", \"under\": \"1.909\"}, {\"label\": \"Czechia or Draw\", \"under\": \"1.222\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T11:22:25.737Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"1.800\", \"away\": \"2.050\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T10:51:37.553Z\", \"odds\": [{\"hdp\": 2.25, \"over\": \"1.925\", \"under\": \"1.925\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T06:25:10.308Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"2.100\", \"under\": \"1.727\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T06:25:10.308Z\", \"odds\": [{\"yes\": \"1.950\", \"no\": \"1.800\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T10:12:47.578Z\", \"odds\": [{\"hdp\": -0.25, \"home\": \"2.000\", \"away\": \"1.850\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-17T20:56:23.242Z\", \"odds\": [{\"hdp\": 1, \"over\": \"2.100\", \"under\": \"1.775\"}]}, {\"name\": \"European Handicap\", \"updatedAt..."
+      "bodyLength": 1313187,
+      "sample": "[{\"id\": 66456922, \"home\": \"Switzerland\", \"away\": \"Bosnia and Herzegovina\", \"homeId\": 4699, \"awayId\": 4479, \"date\": \"2026-06-18T19:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E192256763/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1027164905\"}, \"bookmakerIds\": {\"Bet365\": \"192256763\", \"Bet365_4\": \"192256763-bot365\", \"Unibet\": \"1027164905\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T12:21:24.16Z\", \"odds\": [{\"home\": \"1.533\", \"draw\": \"4.200\", \"away\": \"6.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T09:59:20.308Z\", \"odds\": [{\"home\": \"1.200\", \"away\": \"4.333\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T11:40:10.824Z\", \"odds\": [{\"label\": \"Switzerland or Bosnia-Herzegovina\", \"under\": \"1.222\"}, {\"label\": \"Switzerland or Draw\", \"under\": \"1.125\"}, {\"label\": \"Draw or Bosnia-Herzegovina\", \"under\": \"2.375\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T10:58:07.752Z\", \"odds\": [{\"hdp\": -1, \"home\": \"1.950\", \"away\": \"1.900\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T11:53:52.44Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.950\", \"under\": \"1.900\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T12:12:54.165Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.909\", \"under\": \"1.909\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T12:12:54.165Z\", \"odds\": [{\"yes\": \"2.000\", \"no\": \"1.750\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T08:02:41.811Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"2.125\", \"away\": \"1.750\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-18T02:17:22.555Z\", \"odds\": [{\"hdp\": 1, \"over\": \"1.925\", \"under\": \"1.925\"}]}, {\"name\": \"Eu..."
     },
     {
       "path": "/odds/multi",
@@ -171,12 +183,12 @@
         "eventIds": "66457076,66456974,66456998,66456986,66457000,66456988,66457022,66457010,66457012,66457024"
       },
       "status": 200,
-      "durationMs": 1142,
+      "durationMs": 362,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "72",
+      "rateLimitRemaining": "62",
       "rateLimitReset": "2026-06-18T12:51:08Z",
-      "bodyLength": 1167873,
-      "sample": "[{\"id\": 66456986, \"home\": \"Belgium\", \"away\": \"Iran\", \"homeId\": 4717, \"awayId\": 4766, \"date\": \"2026-06-21T19:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699808/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862147\"}, \"bookmakerIds\": {\"Bet365\": \"194699808\", \"Bet365_4\": \"194699808-bot365\", \"Unibet\": \"1025862147\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T09:53:34.222Z\", \"odds\": [{\"home\": \"1.444\", \"draw\": \"4.500\", \"away\": \"7.500\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-16T06:23:02.808Z\", \"odds\": [{\"home\": \"1.125\", \"away\": \"6.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T11:59:37.876Z\", \"odds\": [{\"label\": \"Belgium or Iran\", \"under\": \"1.181\"}, {\"label\": \"Draw or Iran\", \"under\": \"2.625\"}, {\"label\": \"Belgium or Draw\", \"under\": \"1.100\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T10:21:05.27Z\", \"odds\": [{\"hdp\": -1.25, \"home\": \"2.000\", \"away\": \"1.850\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T10:27:42.237Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-05-15T16:11:46.531Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.909\", \"under\": \"1.909\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T11:04:38.035Z\", \"odds\": [{\"yes\": \"2.100\", \"no\": \"1.666\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-16T16:36:20.715Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"1.950\", \"away\": \"1.900\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-05-17T02:57:15.367Z\", \"odds\": [{\"hdp\": 1, \"over\": \"1.800\", \"under\": \"2.050\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T12:09:38.47..."
+      "bodyLength": 1168388,
+      "sample": "[{\"id\": 66456974, \"home\": \"Tunisia\", \"away\": \"Japan\", \"homeId\": 4729, \"awayId\": 4770, \"date\": \"2026-06-21T04:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699803/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862145\"}, \"bookmakerIds\": {\"Bet365\": \"194699803\", \"Bet365_4\": \"194699803-bot365\", \"Unibet\": \"1025862145\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-16T14:51:48.052Z\", \"odds\": [{\"home\": \"6.500\", \"draw\": \"4.000\", \"away\": \"1.533\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-15T07:21:22.554Z\", \"odds\": [{\"home\": \"5.500\", \"away\": \"1.142\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-16T18:20:44.503Z\", \"odds\": [{\"label\": \"Tunisia or Draw\", \"under\": \"2.500\"}, {\"label\": \"Tunisia or Japan\", \"under\": \"1.222\"}, {\"label\": \"Draw or Japan\", \"under\": \"1.100\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T07:38:54.463Z\", \"odds\": [{\"hdp\": 1, \"home\": \"1.900\", \"away\": \"1.950\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-15T13:37:41.033Z\", \"odds\": [{\"hdp\": 2.25, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-15T09:22:51.451Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"2.100\", \"under\": \"1.727\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-15T06:57:22.802Z\", \"odds\": [{\"yes\": \"2.200\", \"no\": \"1.615\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-15T06:06:51.639Z\", \"odds\": [{\"hdp\": 0.5, \"home\": \"1.750\", \"away\": \"2.125\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-15T07:02:07.858Z\", \"odds\": [{\"hdp\": 1, \"over\": \"2.050\", \"under\": \"1.800\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T12:22:37.52..."
     },
     {
       "path": "/odds/multi",
@@ -186,12 +198,12 @@
         "eventIds": "66457034,66457046,66457048,66457036,66456926,66456924,66456938,66456936,66456912,66456914"
       },
       "status": 200,
-      "durationMs": 990,
+      "durationMs": 325,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "71",
+      "rateLimitRemaining": "61",
       "rateLimitReset": "2026-06-18T12:51:08Z",
-      "bodyLength": 524197,
-      "sample": "[{\"id\": 66457046, \"home\": \"England\", \"away\": \"Ghana\", \"homeId\": 4713, \"awayId\": 4764, \"date\": \"2026-06-23T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699828/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862275\"}, \"bookmakerIds\": {\"Bet365\": \"194699828\", \"Bet365_4\": \"194699828-bot365\", \"Unibet\": \"1025862275\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T04:25:36.454Z\", \"odds\": [{\"home\": \"1.222\", \"draw\": \"6.250\", \"away\": \"13.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T10:03:48.842Z\", \"odds\": [{\"home\": \"1.050\", \"away\": \"11.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T07:53:09.13Z\", \"odds\": [{\"label\": \"Draw or Ghana\", \"under\": \"4.000\"}, {\"label\": \"England or Draw\", \"under\": \"1.040\"}, {\"label\": \"England or Ghana\", \"under\": \"1.125\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T05:32:55.053Z\", \"odds\": [{\"hdp\": -1.75, \"home\": \"1.900\", \"away\": \"1.950\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T01:59:22.021Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T02:30:53.678Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.666\", \"under\": \"2.200\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T06:40:09.981Z\", \"odds\": [{\"yes\": \"2.375\", \"no\": \"1.533\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T07:15:40.147Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"1.900\", \"away\": \"1.950\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-18T04:26:23.292Z\", \"odds\": [{\"hdp\": 1.25, \"over\": \"2.100\", \"under\": \"1.775\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T1..."
+      "bodyLength": 524285,
+      "sample": "[{\"id\": 66457034, \"home\": \"Portugal\", \"away\": \"Uzbekistan\", \"homeId\": 4704, \"awayId\": 4723, \"date\": \"2026-06-23T17:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699823/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862264\"}, \"bookmakerIds\": {\"Bet365\": \"194699823\", \"Bet365_4\": \"194699823-bot365\", \"Unibet\": \"1025862264\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T06:13:54.34Z\", \"odds\": [{\"home\": \"1.222\", \"draw\": \"6.500\", \"away\": \"12.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T07:08:40.178Z\", \"odds\": [{\"home\": \"1.050\", \"away\": \"11.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T08:18:39.643Z\", \"odds\": [{\"label\": \"Portugal or Draw\", \"under\": \"1.050\"}, {\"label\": \"Draw or Uzbekistan\", \"under\": \"4.000\"}, {\"label\": \"Portugal or Uzbekistan\", \"under\": \"1.111\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T10:49:52.944Z\", \"odds\": [{\"hdp\": -1.75, \"home\": \"1.800\", \"away\": \"2.050\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T06:14:54.141Z\", \"odds\": [{\"hdp\": 3, \"over\": \"2.000\", \"under\": \"1.850\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T08:43:13.714Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.615\", \"under\": \"2.300\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T02:59:25.362Z\", \"odds\": [{\"yes\": \"2.250\", \"no\": \"1.571\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T07:45:12.497Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"1.850\", \"away\": \"2.000\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-17T15:14:31.717Z\", \"odds\": [{\"hdp\": 1.25, \"over\": \"1.975\", \"under\": \"1.875\"}]}, {\"name\": \"European Handicap\", \"updatedAt\"..."
     },
     {
       "path": "/odds/multi",
@@ -201,9 +213,9 @@
         "eventIds": "66457080,66457078"
       },
       "status": 200,
-      "durationMs": 657,
+      "durationMs": 245,
       "rateLimitLimit": "100",
-      "rateLimitRemaining": "70",
+      "rateLimitRemaining": "60",
       "rateLimitReset": "2026-06-18T12:51:08Z",
       "bodyLength": 80934,
       "sample": "[{\"id\": 66457080, \"home\": \"Curacao\", \"away\": \"Ivory Coast\", \"homeId\": 55827, \"awayId\": 4768, \"date\": \"2026-06-25T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699862/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862134\"}, \"bookmakerIds\": {\"Bet365\": \"194699862\", \"Bet365_4\": \"194699862-bot365\", \"Unibet\": \"1025862134\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-15T15:48:02.32Z\", \"odds\": [{\"home\": \"17.000\", \"draw\": \"8.500\", \"away\": \"1.125\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-15T16:08:22.194Z\", \"odds\": [{\"home\": \"15.000\", \"away\": \"1.030\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-15T15:08:38.747Z\", \"odds\": [{\"label\": \"Curacao or Draw\", \"under\": \"6.000\"}, {\"label\": \"Draw or Ivory Coast\", \"under\": \"1.025\"}, {\"label\": \"Curacao or Ivory Coast\", \"under\": \"1.083\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-17T15:56:46.752Z\", \"odds\": [{\"hdp\": 2.25, \"home\": \"1.925\", \"away\": \"1.925\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-15T14:43:39.921Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.850\", \"under\": \"2.000\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-15T14:41:24.699Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.533\", \"under\": \"2.500\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-15T17:13:50.377Z\", \"odds\": [{\"yes\": \"2.750\", \"no\": \"1.400\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-17T16:17:13.994Z\", \"odds\": [{\"hdp\": 1, \"home\": \"1.875\", \"away\": \"1.975\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-15T15:39:18.49Z\", \"odds\": [{\"hdp\": 1.25, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"20..."
@@ -803,7 +815,7 @@
   },
   "statMakerMarketDiscovery": {
     "1X2": {
-      "rawMarketCount": 138,
+      "rawMarketCount": 128,
       "examples": [
         {
           "matchId": "wc2026_czech_republic_south_africa",
@@ -841,8 +853,8 @@
           "normalizedName": "ml ht",
           "oddsShape": [
             {
-              "home": "2.38",
-              "draw": "2.16",
+              "home": "2.40",
+              "draw": "2.15",
               "away": "4.90"
             }
           ]
@@ -869,7 +881,7 @@
           "normalizedName": "ml",
           "oddsShape": [
             {
-              "home": "1.550",
+              "home": "1.533",
               "draw": "4.200",
               "away": "6.000"
             }
@@ -979,7 +991,7 @@
       "topMarketNames": [
         {
           "name": "ML",
-          "count": 74
+          "count": 64
         },
         {
           "name": "ML HT",
@@ -992,45 +1004,45 @@
       ]
     },
     "OTHER": {
-      "rawMarketCount": 1202,
+      "rawMarketCount": 1186,
       "marketNames": {
         "Draw No Bet": 59,
         "Double Chance": 64,
-        "Spread": 80,
+        "Spread": 64,
         "Spread HT": 64,
         "European Handicap": 64,
         "Anytime Goalscorer": 64,
-        "Correct Score": 64,
-        "Team Tackles Home": 13,
-        "Player Fouls Committed": 20,
-        "Player of the Match": 3,
-        "Goal Method": 32,
-        "Multi Scorers": 32,
-        "Number of Goals In Match": 32,
         "Half Time Result": 32,
-        "Goalkeeper Saves": 52,
         "Player Passes": 18,
-        "Match Offsides": 15,
-        "Player Tackles": 19,
-        "Alternative Goal Line": 32,
-        "Match Tackles": 16,
-        "Alternative Asian Handicap": 32,
         "Team Tackles Away": 13,
-        "Team Offsides Away": 13,
-        "Specials": 32,
-        "Team Offsides Home": 13,
-        "Player to be Booked": 21,
+        "Goal Method": 32,
+        "Team Tackles Home": 13,
         "First 10 Minutes (00:00 - 09:59)": 32,
-        "Player To Be Fouled": 16,
-        "Player To Score or Assist": 33,
+        "Match Tackles": 16,
+        "Team Offsides Away": 13,
+        "Player to be Booked": 21,
         "1st Half Handicap": 32,
+        "Alternative Asian Handicap": 32,
+        "Player Fouls Committed": 20,
+        "Multi Scorers": 32,
+        "Match Offsides": 15,
+        "Alternative Goal Line": 32,
+        "Player Tackles": 19,
+        "Number of Goals In Match": 32,
+        "Player To Score or Assist": 33,
+        "Team Offsides Home": 13,
+        "Player of the Match": 3,
+        "Specials": 32,
+        "Goalkeeper Saves": 52,
+        "Correct Score": 64,
+        "Player To Be Fouled": 16,
         "Half Time / Full Time": 32,
         "Player To Assist": 4,
-        "Goalkeeper Saves Away": 32,
+        "Player Fouls": 24,
         "Goalkeeper Saves Home": 32,
         "To Score 2+ Goals": 32,
-        "Player Fouls": 24,
         "To Score 3+ Goals": 32,
+        "Goalkeeper Saves Away": 32,
         "1st Half Goal Line": 2
       },
       "examples": [
@@ -1042,8 +1054,8 @@
           "normalizedName": "draw no bet",
           "oddsShape": [
             {
-              "home": "1.300",
-              "away": "3.400"
+              "home": "1.333",
+              "away": "3.250"
             }
           ]
         },
@@ -1059,8 +1071,8 @@
               "under": "1.285"
             },
             {
-              "label": "Draw or South Africa",
-              "under": "1.909"
+              "label": "Czechia or Draw",
+              "under": "1.200"
             }
           ]
         },
@@ -1087,8 +1099,8 @@
           "oddsShape": [
             {
               "hdp": -0.25,
-              "home": "2.000",
-              "away": "1.850"
+              "home": "1.975",
+              "away": "1.875"
             }
           ]
         },
@@ -1100,14 +1112,14 @@
           "normalizedName": "european handicap",
           "oddsShape": [
             {
-              "hdp": -3,
-              "home": "17.000"
+              "hdp": 1,
+              "home": "1.200"
             },
             {
-              "hdp": -2,
-              "home": "7.000",
-              "draw": "15.000",
-              "away": "29.000"
+              "hdp": 2,
+              "home": "1.040",
+              "draw": "5.000",
+              "away": "1.333"
             }
           ]
         },
@@ -1124,9 +1136,9 @@
               "over": "4.333"
             },
             {
-              "label": "Teboho Mokoena",
+              "label": "Denis Visinsky",
               "hdp": 0.5,
-              "over": "5.000"
+              "over": "4.750"
             }
           ]
         },
@@ -1134,16 +1146,17 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Correct Score",
-          "normalizedName": "correct score",
+          "marketName": "Half Time Result",
+          "normalizedName": "half time result",
           "oddsShape": [
             {
-              "label": "3-2",
-              "odds": "34.000"
+              "label": "Draw",
+              "under": "2.100"
             },
             {
-              "label": "4-0",
-              "odds": "34.000"
+              "label": "1",
+              "hdp": 1,
+              "under": "2.400"
             }
           ]
         },
@@ -1151,49 +1164,32 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Tackles Home",
-          "normalizedName": "team tackles home",
+          "marketName": "Player Passes",
+          "normalizedName": "player passes",
           "oddsShape": [
             {
-              "hdp": 14.5,
+              "label": "Ladislav Krejci (1)",
+              "hdp": 56,
+              "over": "1.166"
+            },
+            {
+              "label": "Patrik Schick (1)",
+              "hdp": 12,
+              "over": "1.222"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Team Tackles Away",
+          "normalizedName": "team tackles away",
+          "oddsShape": [
+            {
+              "hdp": 13.5,
               "over": "1.909",
               "under": "1.800"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Player Fouls Committed",
-          "normalizedName": "player fouls committed",
-          "oddsShape": [
-            {
-              "label": "Jaroslav Zeleny (1)",
-              "hdp": 0.5,
-              "over": "1.444"
-            },
-            {
-              "label": "Jaroslav Zeleny (1)",
-              "hdp": 1.5,
-              "over": "3.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Player of the Match",
-          "normalizedName": "player of the match",
-          "oddsShape": [
-            {
-              "label": "Patrik Schick",
-              "over": "3.000"
-            },
-            {
-              "label": "Lyle Foster",
-              "over": "8.000"
             }
           ]
         },
@@ -1218,23 +1214,35 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Multi Scorers",
-          "normalizedName": "multi scorers",
+          "marketName": "Team Tackles Home",
+          "normalizedName": "team tackles home",
           "oddsShape": [
             {
-              "label": "Iqraam Rayners (2 or More) (2)",
-              "under": "29.000"
-            },
+              "hdp": 14.5,
+              "over": "1.909",
+              "under": "1.800"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "First 10 Minutes (00:00 - 09:59)",
+          "normalizedName": "first 10 minutes 00 00 09 59",
+          "oddsShape": [
             {
-              "label": "David Jurasek (2 or More) (1)",
-              "under": "126.000"
+              "label": "Goals (Over) (0.5)",
+              "hdp": 0.5,
+              "over": "5.000",
+              "under": "1.166"
             }
           ]
         }
       ]
     },
     "MATCH_GOALS": {
-      "rawMarketCount": 360,
+      "rawMarketCount": 350,
       "examples": [
         {
           "matchId": "wc2026_czech_republic_south_africa",
@@ -1259,8 +1267,8 @@
           "oddsShape": [
             {
               "hdp": 2.5,
-              "over": "2.100",
-              "under": "1.727"
+              "over": "2.200",
+              "under": "1.666"
             }
           ]
         },
@@ -1275,6 +1283,23 @@
               "hdp": 1,
               "over": "2.100",
               "under": "1.775"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Exact Total Goals",
+          "normalizedName": "exact total goals",
+          "oddsShape": [
+            {
+              "label": "0 Goals",
+              "under": "8.500"
+            },
+            {
+              "label": "2 Goals",
+              "under": "3.400"
             }
           ]
         },
@@ -1300,36 +1325,19 @@
         {
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Exact Total Goals",
-          "normalizedName": "exact total goals",
-          "oddsShape": [
-            {
-              "label": "0 Goals",
-              "under": "8.500"
-            },
-            {
-              "label": "2 Goals",
-              "under": "3.400"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
           "marketName": "Totals",
           "normalizedName": "totals",
           "oddsShape": [
             {
               "hdp": 2.25,
-              "over": "1.84",
-              "under": "1.96"
+              "over": "1.83",
+              "under": "1.98"
             },
             {
               "hdp": 2.5,
-              "over": "2.10",
-              "under": "1.73"
+              "over": "2.08",
+              "under": "1.74"
             }
           ]
         },
@@ -1347,8 +1355,8 @@
             },
             {
               "hdp": 0.5,
-              "over": "1.44",
-              "under": "2.63"
+              "over": "1.43",
+              "under": "2.65"
             }
           ]
         },
@@ -1366,8 +1374,8 @@
             },
             {
               "hdp": 1.5,
-              "over": "2.20",
-              "under": "1.61"
+              "over": "2.18",
+              "under": "1.62"
             }
           ]
         },
@@ -1379,13 +1387,13 @@
           "normalizedName": "total fouls home",
           "oddsShape": [
             {
-              "hdp": 14.5,
-              "over": "2.02",
+              "hdp": 13.5,
+              "over": "1.75",
               "under": "N/A"
             },
             {
-              "hdp": 13.5,
-              "over": "1.73",
+              "hdp": 14.5,
+              "over": "2.05",
               "under": "N/A"
             }
           ]
@@ -1398,32 +1406,13 @@
           "normalizedName": "total fouls",
           "oddsShape": [
             {
-              "hdp": 29.5,
-              "over": "2.15",
+              "hdp": 27.5,
+              "over": "1.68",
               "under": "N/A"
             },
             {
-              "hdp": 26.5,
-              "over": "1.54",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Away",
-          "normalizedName": "total fouls away",
-          "oddsShape": [
-            {
-              "hdp": 15.5,
-              "over": "2.38",
-              "under": "N/A"
-            },
-            {
-              "hdp": 14.5,
-              "over": "1.98",
+              "hdp": 30.5,
+              "over": "2.43",
               "under": "N/A"
             }
           ]
@@ -1437,7 +1426,31 @@
           "oddsShape": [
             {
               "hdp": 3.5,
-              "over": "1.91",
+              "over": "1.92",
+              "under": "N/A"
+            },
+            {
+              "hdp": 4.5,
+              "over": "2.88",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Away",
+          "normalizedName": "total fouls away",
+          "oddsShape": [
+            {
+              "hdp": 15.5,
+              "over": "2.35",
+              "under": "N/A"
+            },
+            {
+              "hdp": 14.5,
+              "over": "1.97",
               "under": "N/A"
             }
           ]
@@ -1448,7 +1461,7 @@
       "topMarketNames": [
         {
           "name": "Totals",
-          "count": 74
+          "count": 64
         },
         {
           "name": "Totals HT",
@@ -1459,11 +1472,11 @@
           "count": 32
         },
         {
-          "name": "Alternative Total Goals",
+          "name": "Exact Total Goals",
           "count": 32
         },
         {
-          "name": "Exact Total Goals",
+          "name": "Alternative Total Goals",
           "count": 32
         },
         {
@@ -1479,11 +1492,11 @@
           "count": 24
         },
         {
-          "name": "Total Fouls Away",
+          "name": "Total Offsides",
           "count": 24
         },
         {
-          "name": "Total Offsides",
+          "name": "Total Fouls Away",
           "count": 24
         }
       ]
@@ -1499,8 +1512,8 @@
           "normalizedName": "both teams to score",
           "oddsShape": [
             {
-              "yes": "1.950",
-              "no": "1.800"
+              "yes": "2.000",
+              "no": "1.750"
             }
           ]
         },
@@ -1551,8 +1564,8 @@
           "normalizedName": "both teams to score",
           "oddsShape": [
             {
-              "yes": "2.050",
-              "no": "1.700"
+              "yes": "2.000",
+              "no": "1.750"
             }
           ]
         },
@@ -1714,13 +1727,16 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Corners Home",
-          "normalizedName": "team corners home",
+          "marketName": "Total Corners",
+          "normalizedName": "total corners",
           "oddsShape": [
             {
-              "hdp": 5.5,
-              "over": "2.100",
-              "under": "1.666"
+              "label": "Under 6",
+              "under": "7.000"
+            },
+            {
+              "label": "6 - 8",
+              "under": "2.750"
             }
           ]
         },
@@ -1761,6 +1777,39 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
+          "marketName": "Team Corners Away",
+          "normalizedName": "team corners away",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "2.000",
+              "under": "1.727"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Corners Race",
+          "normalizedName": "corners race",
+          "oddsShape": [
+            {
+              "hdp": 3,
+              "home": "1.444",
+              "away": "2.625"
+            },
+            {
+              "hdp": 5,
+              "home": "1.800",
+              "away": "3.750"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
           "marketName": "Corners 2-Way",
           "normalizedName": "corners 2 way",
           "oddsShape": [
@@ -1794,49 +1843,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Corners Race",
-          "normalizedName": "corners race",
+          "marketName": "Team Corners Home",
+          "normalizedName": "team corners home",
           "oddsShape": [
             {
-              "hdp": 3,
-              "home": "1.444",
-              "away": "2.625"
-            },
-            {
-              "hdp": 5,
-              "home": "1.800",
-              "away": "3.750"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Corners Away",
-          "normalizedName": "team corners away",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "2.000",
-              "under": "1.727"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Total Corners",
-          "normalizedName": "total corners",
-          "oddsShape": [
-            {
-              "label": "Under 6",
-              "under": "7.000"
-            },
-            {
-              "label": "6 - 8",
-              "under": "2.750"
+              "hdp": 5.5,
+              "over": "2.100",
+              "under": "1.666"
             }
           ]
         },
@@ -1849,7 +1862,7 @@
           "oddsShape": [
             {
               "hdp": -0.5,
-              "home": "1.55",
+              "home": "1.56",
               "away": "N/A"
             },
             {
@@ -1884,7 +1897,7 @@
           "count": 24
         },
         {
-          "name": "Team Corners Home",
+          "name": "Total Corners",
           "count": 24
         },
         {
@@ -1896,6 +1909,14 @@
           "count": 24
         },
         {
+          "name": "Team Corners Away",
+          "count": 24
+        },
+        {
+          "name": "Corners Race",
+          "count": 24
+        },
+        {
           "name": "Corners 2-Way",
           "count": 24
         },
@@ -1904,21 +1925,13 @@
           "count": 24
         },
         {
-          "name": "Corners Race",
-          "count": 24
-        },
-        {
-          "name": "Team Corners Away",
-          "count": 24
-        },
-        {
-          "name": "Total Corners",
+          "name": "Team Corners Home",
           "count": 24
         }
       ]
     },
     "CARDS": {
-      "rawMarketCount": 113,
+      "rawMarketCount": 112,
       "examples": [
         {
           "matchId": "wc2026_czech_republic_south_africa",
@@ -1952,13 +1965,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Cards Away",
-          "normalizedName": "team cards away",
+          "marketName": "Team Cards Home",
+          "normalizedName": "team cards home",
           "oddsShape": [
             {
               "hdp": 1.5,
-              "over": "1.500",
-              "under": "2.500"
+              "over": "1.909",
+              "under": "1.800"
             }
           ]
         },
@@ -1976,34 +1989,6 @@
             {
               "label": "Oswin Appollis (Booked)",
               "over": "6.500"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Number of Cards In Match",
-          "normalizedName": "number of cards in match",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "1.833",
-              "under": "1.833"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Cards Home",
-          "normalizedName": "team cards home",
-          "oddsShape": [
-            {
-              "hdp": 1.5,
-              "over": "1.909",
-              "under": "1.800"
             }
           ]
         },
@@ -2029,19 +2014,47 @@
         {
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Team Cards Away",
+          "normalizedName": "team cards away",
+          "oddsShape": [
+            {
+              "hdp": 1.5,
+              "over": "1.500",
+              "under": "2.500"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Number of Cards In Match",
+          "normalizedName": "number of cards in match",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "1.833",
+              "under": "1.833"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
           "marketName": "Bookings Spread",
           "normalizedName": "bookings spread",
           "oddsShape": [
             {
               "hdp": -0.5,
-              "home": "3.65",
+              "home": "3.70",
               "away": "N/A"
             },
             {
               "hdp": 0.5,
               "home": "N/A",
-              "away": "1.58"
+              "away": "1.57"
             }
           ]
         },
@@ -2096,18 +2109,13 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Card Handicap",
-          "normalizedName": "card handicap",
+          "marketName": "Number of Cards In Match",
+          "normalizedName": "number of cards in match",
           "oddsShape": [
             {
-              "label": "1 (1)",
-              "hdp": 1,
-              "home": "2.100"
-            },
-            {
-              "label": "Tie (-1)",
-              "hdp": -1,
-              "away": "2.750"
+              "hdp": 3.5,
+              "over": "1.909",
+              "under": "1.800"
             }
           ]
         }
@@ -2116,11 +2124,11 @@
       "uniqueMarketNames": 7,
       "topMarketNames": [
         {
-          "name": "Bookings Totals",
-          "count": 33
+          "name": "Bookings Spread",
+          "count": 32
         },
         {
-          "name": "Bookings Spread",
+          "name": "Bookings Totals",
           "count": 32
         },
         {
@@ -2132,11 +2140,11 @@
           "count": 8
         },
         {
-          "name": "Team Cards Away",
+          "name": "Team Cards Home",
           "count": 7
         },
         {
-          "name": "Team Cards Home",
+          "name": "Team Cards Away",
           "count": 7
         },
         {
@@ -2148,6 +2156,23 @@
     "TEAM_TOTAL_GOALS": {
       "rawMarketCount": 160,
       "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Team Goalscorer",
+          "normalizedName": "team goalscorer",
+          "oddsShape": [
+            {
+              "label": "Patrik Schick (First)",
+              "over": "3.500"
+            },
+            {
+              "label": "Stepan Chaloupek (First)",
+              "over": "17.000"
+            }
+          ]
+        },
         {
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
@@ -2189,23 +2214,6 @@
         {
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Goalscorer",
-          "normalizedName": "team goalscorer",
-          "oddsShape": [
-            {
-              "label": "Patrik Schick (First)",
-              "over": "3.500"
-            },
-            {
-              "label": "Stepan Chaloupek (First)",
-              "over": "17.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
           "marketName": "Team Total Home",
           "normalizedName": "team total home",
@@ -2213,12 +2221,12 @@
             {
               "hdp": 0.5,
               "over": "1.18",
-              "under": "4.35"
+              "under": "4.30"
             },
             {
-              "hdp": 1.5,
-              "over": "1.94",
-              "under": "1.79"
+              "hdp": 2.5,
+              "over": "4.00",
+              "under": "1.21"
             }
           ]
         },
@@ -2232,12 +2240,31 @@
             {
               "hdp": 0.5,
               "over": "1.58",
-              "under": "2.23"
+              "under": "2.25"
             },
             {
               "hdp": 1.5,
-              "over": "3.90",
+              "over": "3.85",
               "under": "1.22"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Team Total Goals Home",
+          "normalizedName": "team total goals home",
+          "oddsShape": [
+            {
+              "hdp": 1.5,
+              "over": "1.666",
+              "under": "2.100"
+            },
+            {
+              "hdp": 2.5,
+              "over": "3.250",
+              "under": "1.333"
             }
           ]
         },
@@ -2262,32 +2289,13 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Team Total Goals Home",
-          "normalizedName": "team total goals home",
-          "oddsShape": [
-            {
-              "hdp": 1.5,
-              "over": "1.727",
-              "under": "2.000"
-            },
-            {
-              "hdp": 2.5,
-              "over": "3.400",
-              "under": "1.300"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
           "marketName": "Team Total Goals Away",
           "normalizedName": "team total goals away",
           "oddsShape": [
             {
               "hdp": 1.5,
-              "over": "5.000",
-              "under": "1.166"
+              "over": "4.500",
+              "under": "1.181"
             },
             {
               "hdp": 0.5,
@@ -2338,6 +2346,23 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
+          "marketName": "Team Goalscorer",
+          "normalizedName": "team goalscorer",
+          "oddsShape": [
+            {
+              "label": "Jayden Nelson (First)",
+              "over": "5.500"
+            },
+            {
+              "label": "Jayden Nelson (Last)",
+              "over": "5.500"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
           "marketName": "Team Total Goals Home",
           "normalizedName": "team total goals home",
           "oddsShape": [
@@ -2352,38 +2377,21 @@
               "under": "1.200"
             }
           ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Team Goalscorer",
-          "normalizedName": "team goalscorer",
-          "oddsShape": [
-            {
-              "label": "Jayden Nelson (First)",
-              "over": "5.500"
-            },
-            {
-              "label": "Jayden Nelson (Last)",
-              "over": "5.500"
-            }
-          ]
         }
       ],
       "status": "found",
       "uniqueMarketNames": 5,
       "topMarketNames": [
         {
+          "name": "Team Goalscorer",
+          "count": 32
+        },
+        {
           "name": "Team Total Goals Home",
           "count": 32
         },
         {
           "name": "Team Total Goals Away",
-          "count": 32
-        },
-        {
-          "name": "Team Goalscorer",
           "count": 32
         },
         {
@@ -2403,13 +2411,46 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Shots on Target Away",
-          "normalizedName": "team shots on target away",
+          "marketName": "Player Shots on Target",
+          "normalizedName": "player shots on target",
           "oddsShape": [
             {
+              "label": "Tomas Soucek (1)",
+              "hdp": 1.5,
+              "over": "7.000"
+            },
+            {
+              "label": "Tomas Soucek (1)",
               "hdp": 2.5,
-              "over": "1.615",
-              "under": "2.200"
+              "over": "21.000"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Match Shots on Target",
+          "normalizedName": "match shots on target",
+          "oddsShape": [
+            {
+              "hdp": 8.5,
+              "over": "2.100",
+              "under": "1.666"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Team Shots on Target Home",
+          "normalizedName": "team shots on target home",
+          "oddsShape": [
+            {
+              "hdp": 4.5,
+              "over": "1.833",
+              "under": "1.833"
             }
           ]
         },
@@ -2436,32 +2477,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Player Shots on Target",
-          "normalizedName": "player shots on target",
+          "marketName": "Team Shots on Target Away",
+          "normalizedName": "team shots on target away",
           "oddsShape": [
             {
-              "label": "Tomas Soucek (1)",
-              "hdp": 1.5,
-              "over": "7.000"
-            },
-            {
-              "label": "Tomas Soucek (1)",
               "hdp": 2.5,
-              "over": "21.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Shots on Target Home",
-          "normalizedName": "team shots on target home",
-          "oddsShape": [
-            {
-              "hdp": 4.5,
-              "over": "1.833",
-              "under": "1.833"
+              "over": "1.615",
+              "under": "2.200"
             }
           ]
         },
@@ -2481,39 +2503,6 @@
               "label": "Relebohile Mofokeng (2)",
               "hdp": 1.5,
               "over": "41.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Match Shots on Target",
-          "normalizedName": "match shots on target",
-          "oddsShape": [
-            {
-              "hdp": 8.5,
-              "over": "2.100",
-              "under": "1.666"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Most Shots on Target",
-          "normalizedName": "most shots on target",
-          "oddsShape": [
-            {
-              "hdp": -0.5,
-              "home": "1.37",
-              "away": "N/A"
-            },
-            {
-              "hdp": 0.5,
-              "home": "N/A",
-              "away": "3.65"
             }
           ]
         },
@@ -2542,18 +2531,37 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target Away",
-          "normalizedName": "total shots on target away",
+          "marketName": "Total Shots on Target Home",
+          "normalizedName": "total shots on target home",
           "oddsShape": [
             {
-              "hdp": 2.5,
-              "over": "1.58",
-              "under": "2.18"
+              "hdp": 3.5,
+              "over": "1.28",
+              "under": "3.00"
             },
             {
-              "hdp": 3.5,
-              "over": "2.38",
-              "under": "1.50"
+              "hdp": 5.5,
+              "over": "2.32",
+              "under": "1.47"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Most Shots on Target",
+          "normalizedName": "most shots on target",
+          "oddsShape": [
+            {
+              "hdp": 0.5,
+              "home": "N/A",
+              "away": "3.60"
+            },
+            {
+              "hdp": -0.5,
+              "home": "1.37",
+              "away": "N/A"
             }
           ]
         },
@@ -2565,35 +2573,16 @@
           "normalizedName": "player shots on target",
           "oddsShape": [
             {
-              "label": "Thapelo Maseko",
-              "hdp": 0.5,
-              "over": "1.98",
-              "under": "N/A"
-            },
-            {
               "label": "Olwethu Makhanya",
               "hdp": 0.5,
               "over": "7.00",
               "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target Home",
-          "normalizedName": "total shots on target home",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "1.28",
-              "under": "3.05"
             },
             {
-              "hdp": 4.5,
-              "over": "1.66",
-              "under": "1.97"
+              "label": "Relebohile Mofokeng",
+              "hdp": 0.5,
+              "over": "2.65",
+              "under": "N/A"
             }
           ]
         },
@@ -2605,14 +2594,33 @@
           "normalizedName": "total shots on target",
           "oddsShape": [
             {
-              "hdp": 10.5,
-              "over": "4.00",
-              "under": "1.16"
+              "hdp": 5.5,
+              "over": "1.14",
+              "under": "4.10"
             },
             {
-              "hdp": 7.5,
-              "over": "1.64",
-              "under": "2.00"
+              "hdp": 10.5,
+              "over": "3.90",
+              "under": "1.16"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target Away",
+          "normalizedName": "total shots on target away",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "1.58",
+              "under": "2.20"
+            },
+            {
+              "hdp": 3.5,
+              "over": "2.35",
+              "under": "1.52"
             }
           ]
         }
@@ -2625,15 +2633,15 @@
           "count": 52
         },
         {
-          "name": "Total Shots on Target Away",
-          "count": 32
-        },
-        {
           "name": "Total Shots on Target Home",
           "count": 32
         },
         {
           "name": "Total Shots on Target",
+          "count": 32
+        },
+        {
+          "name": "Total Shots on Target Away",
           "count": 32
         },
         {
@@ -2645,19 +2653,19 @@
           "count": 20
         },
         {
-          "name": "Team Shots on Target Away",
-          "count": 16
-        },
-        {
           "name": "Team Shots on Target Home",
           "count": 16
         },
         {
-          "name": "Player Headed Shots on Target",
-          "count": 15
+          "name": "Team Shots on Target Away",
+          "count": 16
         },
         {
           "name": "Match Shots on Target",
+          "count": 15
+        },
+        {
+          "name": "Player Headed Shots on Target",
           "count": 15
         }
       ]
@@ -2683,20 +2691,6 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Match Shots",
-          "normalizedName": "match shots",
-          "oddsShape": [
-            {
-              "hdp": 22.5,
-              "over": "1.909",
-              "under": "1.800"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
           "marketName": "Team Shots Away",
           "normalizedName": "team shots away",
           "oddsShape": [
@@ -2704,6 +2698,20 @@
               "hdp": 8.5,
               "over": "1.833",
               "under": "1.833"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Match Shots",
+          "normalizedName": "match shots",
+          "oddsShape": [
+            {
+              "hdp": 22.5,
+              "over": "1.909",
+              "under": "1.800"
             }
           ]
         },
@@ -2730,56 +2738,18 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
-          "marketName": "Total Shots Away",
-          "normalizedName": "total shots away",
-          "oddsShape": [
-            {
-              "hdp": 9.5,
-              "over": "1.94",
-              "under": "1.68"
-            },
-            {
-              "hdp": 8.5,
-              "over": "1.62",
-              "under": "2.02"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
           "marketName": "Total Shots",
           "normalizedName": "total shots",
           "oddsShape": [
             {
-              "hdp": 25.5,
-              "over": "2.75",
-              "under": "1.38"
-            },
-            {
-              "hdp": 20.5,
-              "over": "1.42",
-              "under": "2.60"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Home",
-          "normalizedName": "total shots home",
-          "oddsShape": [
-            {
-              "hdp": 14.5,
-              "over": "2.25",
-              "under": "1.50"
-            },
-            {
-              "hdp": 13.5,
-              "over": "1.90",
+              "hdp": 23.5,
+              "over": "2.00",
               "under": "1.70"
+            },
+            {
+              "hdp": 25.5,
+              "over": "2.70",
+              "under": "1.38"
             }
           ]
         },
@@ -2791,42 +2761,52 @@
           "normalizedName": "player shots",
           "oddsShape": [
             {
-              "label": "Oswin Appollis",
+              "label": "Iqraam Rayners",
               "hdp": 0.5,
               "over": "N/A"
             },
             {
-              "label": "Relebohile Mofokeng",
+              "label": "Pavel Sulc",
               "hdp": 0.5,
-              "over": "1.27"
+              "over": "N/A"
             }
           ]
         },
         {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Team Shots Away",
-          "normalizedName": "team shots away",
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Away",
+          "normalizedName": "total shots away",
           "oddsShape": [
+            {
+              "hdp": 9.5,
+              "over": "1.92",
+              "under": "1.70"
+            },
             {
               "hdp": 8.5,
-              "over": "1.909",
-              "under": "1.800"
+              "over": "1.60",
+              "under": "2.05"
             }
           ]
         },
         {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Match Shots",
-          "normalizedName": "match shots",
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Home",
+          "normalizedName": "total shots home",
           "oddsShape": [
             {
-              "hdp": 22.5,
-              "over": "1.800",
-              "under": "1.909"
+              "hdp": 13.5,
+              "over": "1.90",
+              "under": "1.71"
+            },
+            {
+              "hdp": 14.5,
+              "over": "2.25",
+              "under": "1.50"
             }
           ]
         },
@@ -2862,6 +2842,34 @@
               "over": "3.500"
             }
           ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Match Shots",
+          "normalizedName": "match shots",
+          "oddsShape": [
+            {
+              "hdp": 22.5,
+              "over": "1.800",
+              "under": "1.909"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Team Shots Away",
+          "normalizedName": "team shots away",
+          "oddsShape": [
+            {
+              "hdp": 8.5,
+              "over": "1.909",
+              "under": "1.800"
+            }
+          ]
         }
       ],
       "status": "found",
@@ -2872,11 +2880,11 @@
           "count": 44
         },
         {
-          "name": "Total Shots Away",
+          "name": "Total Shots",
           "count": 24
         },
         {
-          "name": "Total Shots",
+          "name": "Total Shots Away",
           "count": 24
         },
         {
@@ -2888,11 +2896,11 @@
           "count": 14
         },
         {
-          "name": "Match Shots",
+          "name": "Team Shots Away",
           "count": 14
         },
         {
-          "name": "Team Shots Away",
+          "name": "Match Shots",
           "count": 14
         }
       ]
@@ -2901,80 +2909,33 @@
   "summary": {
     "matchesNormalized": 32,
     "matchesWithMarkets": 32,
-    "marketsFound": 2630,
+    "marketsFound": 5602,
     "marketCounts": {
-      "1X2": 414,
-      "MATCH_GOALS": 1238,
-      "BTTS": 256,
-      "TEAM_TOTAL_GOALS": 722
+      "1X2": 192,
+      "MATCH_GOALS": 480,
+      "BTTS": 128,
+      "MATCH_CORNERS": 1260,
+      "MATCH_CARDS": 172,
+      "TEAM_CARDS_HOME": 14,
+      "MATCH_SHOTS_ON_TARGET": 404,
+      "TEAM_SHOTS_HOME": 170,
+      "TEAM_CORNERS_AWAY": 456,
+      "TEAM_SHOTS_ON_TARGET_HOME": 306,
+      "TEAM_TOTAL_GOALS": 722,
+      "TEAM_SHOTS_AWAY": 146,
+      "TEAM_CARDS_AWAY": 14,
+      "MATCH_SHOTS": 346,
+      "TEAM_CORNERS_HOME": 520,
+      "TEAM_SHOTS_ON_TARGET_AWAY": 272
     }
   },
   "rawMarketInventoryTop": [
     {
-      "name": "Spread",
-      "count": 80,
-      "bookmakers": {
-        "Bet365": 32,
-        "Bet365 (no latency)": 16,
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Spread",
-          "normalizedName": "spread",
-          "oddsShape": [
-            {
-              "hdp": -0.5,
-              "home": "1.800",
-              "away": "2.050"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365 (no latency)",
-          "marketName": "Spread",
-          "normalizedName": "spread",
-          "oddsShape": [
-            {
-              "hdp": -0.5,
-              "home": "1.800",
-              "away": "2.050"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Spread",
-          "normalizedName": "spread",
-          "oddsShape": [
-            {
-              "hdp": -2.5,
-              "home": "7.00",
-              "away": "1.10"
-            },
-            {
-              "hdp": -2.25,
-              "home": "6.50",
-              "away": "1.11"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "ML",
-      "count": 74,
+      "count": 64,
       "bookmakers": {
         "Bet365": 32,
-        "Unibet": 32,
-        "Bet365 (no latency)": 10
+        "Unibet": 32
       },
       "examples": [
         {
@@ -3013,67 +2974,9 @@
           "normalizedName": "ml",
           "oddsShape": [
             {
-              "home": "1.550",
+              "home": "1.533",
               "draw": "4.200",
               "away": "6.000"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Totals",
-      "count": 74,
-      "bookmakers": {
-        "Bet365": 32,
-        "Unibet": 32,
-        "Bet365 (no latency)": 10
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Totals",
-          "normalizedName": "totals",
-          "oddsShape": [
-            {
-              "hdp": 2.25,
-              "over": "1.925",
-              "under": "1.925"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Totals",
-          "normalizedName": "totals",
-          "oddsShape": [
-            {
-              "hdp": 2.25,
-              "over": "1.84",
-              "under": "1.96"
-            },
-            {
-              "hdp": 2.5,
-              "over": "2.10",
-              "under": "1.73"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Totals",
-          "normalizedName": "totals",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "1.950",
-              "under": "1.900"
             }
           ]
         }
@@ -3099,8 +3002,8 @@
               "under": "1.285"
             },
             {
-              "label": "Draw or South Africa",
-              "under": "1.909"
+              "label": "Czechia or Draw",
+              "under": "1.200"
             }
           ]
         },
@@ -3138,6 +3041,120 @@
       ]
     },
     {
+      "name": "Spread",
+      "count": 64,
+      "bookmakers": {
+        "Bet365": 32,
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Spread",
+          "normalizedName": "spread",
+          "oddsShape": [
+            {
+              "hdp": -0.5,
+              "home": "1.800",
+              "away": "2.050"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Spread",
+          "normalizedName": "spread",
+          "oddsShape": [
+            {
+              "hdp": -2.5,
+              "home": "7.00",
+              "away": "1.10"
+            },
+            {
+              "hdp": -2.25,
+              "home": "6.50",
+              "away": "1.11"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Spread",
+          "normalizedName": "spread",
+          "oddsShape": [
+            {
+              "hdp": -1,
+              "home": "1.950",
+              "away": "1.900"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Totals",
+      "count": 64,
+      "bookmakers": {
+        "Bet365": 32,
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Totals",
+          "normalizedName": "totals",
+          "oddsShape": [
+            {
+              "hdp": 2.25,
+              "over": "1.925",
+              "under": "1.925"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Totals",
+          "normalizedName": "totals",
+          "oddsShape": [
+            {
+              "hdp": 2.25,
+              "over": "1.83",
+              "under": "1.98"
+            },
+            {
+              "hdp": 2.5,
+              "over": "2.08",
+              "under": "1.74"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Totals",
+          "normalizedName": "totals",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "1.950",
+              "under": "1.900"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Both Teams To Score",
       "count": 64,
       "bookmakers": {
@@ -3153,8 +3170,8 @@
           "normalizedName": "both teams to score",
           "oddsShape": [
             {
-              "yes": "1.950",
-              "no": "1.800"
+              "yes": "2.000",
+              "no": "1.750"
             }
           ]
         },
@@ -3179,8 +3196,8 @@
           "normalizedName": "both teams to score",
           "oddsShape": [
             {
-              "yes": "2.050",
-              "no": "1.700"
+              "yes": "2.000",
+              "no": "1.750"
             }
           ]
         }
@@ -3203,8 +3220,8 @@
           "oddsShape": [
             {
               "hdp": -0.25,
-              "home": "2.000",
-              "away": "1.850"
+              "home": "1.975",
+              "away": "1.875"
             }
           ]
         },
@@ -3217,13 +3234,13 @@
           "oddsShape": [
             {
               "hdp": -1.5,
-              "home": "6.50",
-              "away": "1.08"
+              "home": "6.40",
+              "away": "1.09"
             },
             {
               "hdp": -1.25,
               "home": "5.80",
-              "away": "1.10"
+              "away": "1.11"
             }
           ]
         },
@@ -3259,14 +3276,14 @@
           "normalizedName": "european handicap",
           "oddsShape": [
             {
-              "hdp": -3,
-              "home": "17.000"
+              "hdp": 1,
+              "home": "1.200"
             },
             {
-              "hdp": -2,
-              "home": "7.000",
-              "draw": "15.000",
-              "away": "29.000"
+              "hdp": 2,
+              "home": "1.040",
+              "draw": "5.000",
+              "away": "1.333"
             }
           ]
         },
@@ -3281,13 +3298,13 @@
               "hdp": -3,
               "home": "14.00",
               "draw": "9.00",
-              "away": "1.07"
+              "away": "1.08"
             },
             {
-              "hdp": -2,
-              "home": "6.75",
-              "draw": "4.90",
-              "away": "1.30"
+              "hdp": -1,
+              "home": "3.10",
+              "draw": "3.35",
+              "away": "1.98"
             }
           ]
         },
@@ -3332,9 +3349,9 @@
               "over": "4.333"
             },
             {
-              "label": "Teboho Mokoena",
+              "label": "Denis Visinsky",
               "hdp": 0.5,
-              "over": "5.000"
+              "over": "4.750"
             }
           ]
         },
@@ -3415,8 +3432,8 @@
               "odds": "61.00"
             },
             {
-              "label": "5-2",
-              "odds": "151.00"
+              "label": "2-0",
+              "odds": "7.50"
             }
           ]
         },
@@ -3475,8 +3492,8 @@
             },
             {
               "hdp": 0.5,
-              "over": "1.44",
-              "under": "2.63"
+              "over": "1.43",
+              "under": "2.65"
             }
           ]
         },
@@ -3512,8 +3529,8 @@
           "normalizedName": "draw no bet",
           "oddsShape": [
             {
-              "home": "1.300",
-              "away": "3.400"
+              "home": "1.333",
+              "away": "3.250"
             }
           ]
         },
@@ -3576,7 +3593,7 @@
           "oddsShape": [
             {
               "hdp": -0.5,
-              "home": "1.55",
+              "home": "1.56",
               "away": "N/A"
             },
             {
@@ -3637,9 +3654,9 @@
               "under": "3.40"
             },
             {
-              "hdp": 7.5,
-              "over": "1.50",
-              "under": "2.43"
+              "hdp": 10.5,
+              "over": "3.15",
+              "under": "1.32"
             }
           ]
         },
@@ -3699,15 +3716,15 @@
           "normalizedName": "player shots on target",
           "oddsShape": [
             {
-              "label": "Thapelo Maseko",
-              "hdp": 0.5,
-              "over": "1.98",
-              "under": "N/A"
-            },
-            {
               "label": "Olwethu Makhanya",
               "hdp": 0.5,
               "over": "7.00",
+              "under": "N/A"
+            },
+            {
+              "label": "Relebohile Mofokeng",
+              "hdp": 0.5,
+              "over": "2.65",
               "under": "N/A"
             }
           ]
@@ -3770,7 +3787,7 @@
           "oddsShape": [
             {
               "hdp": 6.5,
-              "over": "2.50",
+              "over": "2.48",
               "under": "N/A"
             },
             {
@@ -3836,14 +3853,14 @@
           "normalizedName": "player shots",
           "oddsShape": [
             {
-              "label": "Oswin Appollis",
+              "label": "Iqraam Rayners",
               "hdp": 0.5,
               "over": "N/A"
             },
             {
-              "label": "Relebohile Mofokeng",
+              "label": "Pavel Sulc",
               "hdp": 0.5,
-              "over": "1.27"
+              "over": "N/A"
             }
           ]
         },
@@ -3863,64 +3880,6 @@
               "label": "Jovo Lukic (2)",
               "hdp": 2.5,
               "over": "3.500"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Bookings Totals",
-      "count": 33,
-      "bookmakers": {
-        "Bet365": 8,
-        "Unibet": 24,
-        "Bet365 (no latency)": 1
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Bookings Totals",
-          "normalizedName": "bookings totals",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "1.925",
-              "under": "1.875"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Bookings Totals",
-          "normalizedName": "bookings totals",
-          "oddsShape": [
-            {
-              "hdp": 4.5,
-              "over": "2.90",
-              "under": "1.34"
-            },
-            {
-              "hdp": 3.5,
-              "over": "1.96",
-              "under": "1.73"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Bookings Totals",
-          "normalizedName": "bookings totals",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "2.000",
-              "under": "1.800"
             }
           ]
         }
@@ -3999,8 +3958,8 @@
           "oddsShape": [
             {
               "hdp": 2.5,
-              "over": "2.100",
-              "under": "1.727"
+              "over": "2.200",
+              "under": "1.666"
             }
           ]
         },
@@ -4013,8 +3972,8 @@
           "oddsShape": [
             {
               "hdp": 2.5,
-              "over": "2.000",
-              "under": "1.800"
+              "over": "1.909",
+              "under": "1.909"
             }
           ]
         },
@@ -4065,13 +4024,13 @@
           "oddsShape": [
             {
               "hdp": -0.5,
-              "home": "3.65",
+              "home": "3.70",
               "away": "N/A"
             },
             {
               "hdp": 0.5,
               "home": "N/A",
-              "away": "1.58"
+              "away": "1.57"
             }
           ]
         },
@@ -4092,7 +4051,64 @@
       ]
     },
     {
-      "name": "Team Total Goals Home",
+      "name": "Bookings Totals",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 8,
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Bookings Totals",
+          "normalizedName": "bookings totals",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "1.925",
+              "under": "1.875"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Bookings Totals",
+          "normalizedName": "bookings totals",
+          "oddsShape": [
+            {
+              "hdp": 4.5,
+              "over": "2.90",
+              "under": "1.34"
+            },
+            {
+              "hdp": 3.5,
+              "over": "1.96",
+              "under": "1.73"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Bookings Totals",
+          "normalizedName": "bookings totals",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "2.000",
+              "under": "1.800"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Team Goalscorer",
       "count": 32,
       "bookmakers": {
         "Bet365": 32
@@ -4102,18 +4118,16 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Total Goals Home",
-          "normalizedName": "team total goals home",
+          "marketName": "Team Goalscorer",
+          "normalizedName": "team goalscorer",
           "oddsShape": [
             {
-              "hdp": 0.5,
-              "over": "1.200",
-              "under": "4.333"
+              "label": "Patrik Schick (First)",
+              "over": "3.500"
             },
             {
-              "hdp": 1.5,
-              "over": "2.000",
-              "under": "1.727"
+              "label": "Stepan Chaloupek (First)",
+              "over": "17.000"
             }
           ]
         },
@@ -4121,18 +4135,16 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Team Total Goals Home",
-          "normalizedName": "team total goals home",
+          "marketName": "Team Goalscorer",
+          "normalizedName": "team goalscorer",
           "oddsShape": [
             {
-              "hdp": 1.5,
-              "over": "1.727",
-              "under": "2.000"
+              "label": "Breel Embolo (First)",
+              "over": "3.400"
             },
             {
-              "hdp": 2.5,
-              "over": "3.400",
-              "under": "1.300"
+              "label": "Zeki Amdouni (First)",
+              "over": "3.750"
             }
           ]
         },
@@ -4140,18 +4152,141 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Team Total Goals Home",
-          "normalizedName": "team total goals home",
+          "marketName": "Team Goalscorer",
+          "normalizedName": "team goalscorer",
           "oddsShape": [
             {
-              "hdp": 2.5,
-              "over": "2.250",
-              "under": "1.571"
+              "label": "Jayden Nelson (First)",
+              "over": "5.500"
             },
             {
-              "hdp": 3.5,
-              "over": "4.333",
-              "under": "1.200"
+              "label": "Jayden Nelson (Last)",
+              "over": "5.500"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Half Time Result",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Half Time Result",
+          "normalizedName": "half time result",
+          "oddsShape": [
+            {
+              "label": "Draw",
+              "under": "2.100"
+            },
+            {
+              "label": "1",
+              "hdp": 1,
+              "under": "2.400"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Half Time Result",
+          "normalizedName": "half time result",
+          "oddsShape": [
+            {
+              "label": "1",
+              "hdp": 1,
+              "under": "2.050"
+            },
+            {
+              "label": "2",
+              "hdp": 2,
+              "under": "6.500"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Half Time Result",
+          "normalizedName": "half time result",
+          "oddsShape": [
+            {
+              "label": "2",
+              "hdp": 2,
+              "under": "9.500"
+            },
+            {
+              "label": "1",
+              "hdp": 1,
+              "under": "1.666"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Exact Total Goals",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Exact Total Goals",
+          "normalizedName": "exact total goals",
+          "oddsShape": [
+            {
+              "label": "0 Goals",
+              "under": "8.500"
+            },
+            {
+              "label": "2 Goals",
+              "under": "3.400"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Exact Total Goals",
+          "normalizedName": "exact total goals",
+          "oddsShape": [
+            {
+              "label": "3 Goals",
+              "under": "4.000"
+            },
+            {
+              "label": "4 Goals",
+              "under": "6.000"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Exact Total Goals",
+          "normalizedName": "exact total goals",
+          "oddsShape": [
+            {
+              "label": "0 Goals",
+              "under": "13.000"
+            },
+            {
+              "label": "1 Goal",
+              "under": "5.500"
             }
           ]
         }
@@ -4218,7 +4353,7 @@
       ]
     },
     {
-      "name": "Multi Scorers",
+      "name": "First 10 Minutes (00:00 - 09:59)",
       "count": 32,
       "bookmakers": {
         "Bet365": 32
@@ -4228,16 +4363,14 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Multi Scorers",
-          "normalizedName": "multi scorers",
+          "marketName": "First 10 Minutes (00:00 - 09:59)",
+          "normalizedName": "first 10 minutes 00 00 09 59",
           "oddsShape": [
             {
-              "label": "Iqraam Rayners (2 or More) (2)",
-              "under": "29.000"
-            },
-            {
-              "label": "David Jurasek (2 or More) (1)",
-              "under": "126.000"
+              "label": "Goals (Over) (0.5)",
+              "hdp": 0.5,
+              "over": "5.000",
+              "under": "1.166"
             }
           ]
         },
@@ -4245,16 +4378,14 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Multi Scorers",
-          "normalizedName": "multi scorers",
+          "marketName": "First 10 Minutes (00:00 - 09:59)",
+          "normalizedName": "first 10 minutes 00 00 09 59",
           "oddsShape": [
             {
-              "label": "Edin Dzeko (2 or More) (2)",
-              "under": "29.000"
-            },
-            {
-              "label": "Jovo Lukic (2 or More) (2)",
-              "under": "34.000"
+              "label": "Goals (Over) (0.5)",
+              "hdp": 0.5,
+              "over": "4.500",
+              "under": "1.181"
             }
           ]
         },
@@ -4262,23 +4393,21 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Multi Scorers",
-          "normalizedName": "multi scorers",
+          "marketName": "First 10 Minutes (00:00 - 09:59)",
+          "normalizedName": "first 10 minutes 00 00 09 59",
           "oddsShape": [
             {
-              "label": "Stephen Eustaquio (3 or More) (1)",
-              "under": "151.000"
-            },
-            {
-              "label": "Ahmed Alaaeldin (3 or More) (2)",
-              "under": "301.000"
+              "label": "Goals (Over) (0.5)",
+              "hdp": 0.5,
+              "over": "4.333",
+              "under": "1.200"
             }
           ]
         }
       ]
     },
     {
-      "name": "Number of Goals In Match",
+      "name": "Team Total Goals Home",
       "count": 32,
       "bookmakers": {
         "Bet365": 32
@@ -4288,96 +4417,37 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Number of Goals In Match",
-          "normalizedName": "number of goals in match",
+          "marketName": "Team Total Goals Home",
+          "normalizedName": "team total goals home",
           "oddsShape": [
             {
-              "label": "Over 3 goals",
-              "over": "4.000"
-            },
-            {
-              "label": "2 or 3 goals",
-              "under": "1.952"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Number of Goals In Match",
-          "normalizedName": "number of goals in match",
-          "oddsShape": [
-            {
-              "label": "2 or 3 goals",
-              "under": "2.000"
-            },
-            {
-              "label": "Under 2 goals",
-              "under": "3.400"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Number of Goals In Match",
-          "normalizedName": "number of goals in match",
-          "oddsShape": [
-            {
-              "label": "Under 2 goals",
+              "hdp": 0.5,
+              "over": "1.200",
               "under": "4.333"
             },
             {
-              "label": "Over 3 goals",
-              "over": "2.750"
+              "hdp": 1.5,
+              "over": "2.000",
+              "under": "1.727"
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "Half Time Result",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
+        },
         {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Half Time Result",
-          "normalizedName": "half time result",
+          "marketName": "Team Total Goals Home",
+          "normalizedName": "team total goals home",
           "oddsShape": [
             {
-              "label": "Draw",
+              "hdp": 1.5,
+              "over": "1.666",
               "under": "2.100"
             },
             {
-              "label": "1",
-              "hdp": 1,
-              "under": "2.400"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Half Time Result",
-          "normalizedName": "half time result",
-          "oddsShape": [
-            {
-              "label": "1",
-              "hdp": 1,
-              "under": "2.050"
-            },
-            {
-              "label": "2",
-              "hdp": 2,
-              "under": "6.500"
+              "hdp": 2.5,
+              "over": "3.250",
+              "under": "1.333"
             }
           ]
         },
@@ -4385,111 +4455,46 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Half Time Result",
-          "normalizedName": "half time result",
+          "marketName": "Team Total Goals Home",
+          "normalizedName": "team total goals home",
           "oddsShape": [
             {
-              "label": "2",
-              "hdp": 2,
-              "under": "9.500"
+              "hdp": 2.5,
+              "over": "2.250",
+              "under": "1.571"
             },
-            {
-              "label": "Draw",
-              "under": "2.600"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Alternative Goal Line",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Alternative Goal Line",
-          "normalizedName": "alternative goal line",
-          "oddsShape": [
-            {
-              "hdp": 1.25,
-              "over": "1.225",
-              "under": "4.100"
-            },
-            {
-              "hdp": 1.5,
-              "over": "1.350",
-              "under": "3.100"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Alternative Goal Line",
-          "normalizedName": "alternative goal line",
-          "oddsShape": [
-            {
-              "hdp": 1.75,
-              "over": "1.375",
-              "under": "3.000"
-            },
-            {
-              "hdp": 1.25,
-              "over": "1.180",
-              "under": "4.650"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Alternative Goal Line",
-          "normalizedName": "alternative goal line",
-          "oddsShape": [
-            {
-              "hdp": 1.25,
-              "over": "1.130",
-              "under": "5.900"
-            },
-            {
-              "hdp": 1.75,
-              "over": "1.260",
-              "under": "3.700"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Alternative Total Goals",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Alternative Total Goals",
-          "normalizedName": "alternative total goals",
-          "oddsShape": [
             {
               "hdp": 3.5,
-              "over": "4.000",
-              "under": "1.250"
+              "over": "4.333",
+              "under": "1.200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1st Half Handicap",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "1st Half Handicap",
+          "normalizedName": "1st half handicap",
+          "oddsShape": [
+            {
+              "label": "1 (-1)",
+              "hdp": -1,
+              "home": "7.000"
             },
             {
-              "hdp": 4.5,
-              "over": "8.000",
-              "under": "1.083"
+              "label": "Tie (1)",
+              "hdp": 1,
+              "away": "1.533"
             }
           ]
         },
@@ -4497,18 +4502,18 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Alternative Total Goals",
-          "normalizedName": "alternative total goals",
+          "marketName": "1st Half Handicap",
+          "normalizedName": "1st half handicap",
           "oddsShape": [
             {
-              "hdp": 0.5,
-              "over": "1.062",
-              "under": "10.000"
+              "label": "Tie (1)",
+              "hdp": 1,
+              "away": "1.727"
             },
             {
-              "hdp": 1.5,
-              "over": "1.333",
-              "under": "3.400"
+              "label": "1 (-1)",
+              "hdp": -1,
+              "home": "5.500"
             }
           ]
         },
@@ -4516,18 +4521,18 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Alternative Total Goals",
-          "normalizedName": "alternative total goals",
+          "marketName": "1st Half Handicap",
+          "normalizedName": "1st half handicap",
           "oddsShape": [
             {
-              "hdp": 0.5,
-              "over": "1.040",
-              "under": "13.000"
+              "label": "Tie (1)",
+              "hdp": 1,
+              "away": "2.100"
             },
             {
-              "hdp": 1.5,
-              "over": "1.222",
-              "under": "4.333"
+              "label": "1 (-1)",
+              "hdp": -1,
+              "home": "3.750"
             }
           ]
         }
@@ -4600,6 +4605,132 @@
       ]
     },
     {
+      "name": "Multi Scorers",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Multi Scorers",
+          "normalizedName": "multi scorers",
+          "oddsShape": [
+            {
+              "label": "Iqraam Rayners (2 or More) (2)",
+              "under": "29.000"
+            },
+            {
+              "label": "David Jurasek (2 or More) (1)",
+              "under": "126.000"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Multi Scorers",
+          "normalizedName": "multi scorers",
+          "oddsShape": [
+            {
+              "label": "Edin Dzeko (2 or More) (2)",
+              "under": "29.000"
+            },
+            {
+              "label": "Jovo Lukic (2 or More) (2)",
+              "under": "34.000"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Multi Scorers",
+          "normalizedName": "multi scorers",
+          "oddsShape": [
+            {
+              "label": "Stephen Eustaquio (3 or More) (1)",
+              "under": "151.000"
+            },
+            {
+              "label": "Ahmed Alaaeldin (3 or More) (2)",
+              "under": "301.000"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alternative Goal Line",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Goal Line",
+          "normalizedName": "alternative goal line",
+          "oddsShape": [
+            {
+              "hdp": 1.25,
+              "over": "1.225",
+              "under": "4.100"
+            },
+            {
+              "hdp": 1.5,
+              "over": "1.350",
+              "under": "3.100"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Goal Line",
+          "normalizedName": "alternative goal line",
+          "oddsShape": [
+            {
+              "hdp": 1.75,
+              "over": "1.375",
+              "under": "3.000"
+            },
+            {
+              "hdp": 1.25,
+              "over": "1.180",
+              "under": "4.650"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Goal Line",
+          "normalizedName": "alternative goal line",
+          "oddsShape": [
+            {
+              "hdp": 1.25,
+              "over": "1.130",
+              "under": "5.900"
+            },
+            {
+              "hdp": 1.75,
+              "over": "1.260",
+              "under": "3.700"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Both Teams To Score 2H",
       "count": 32,
       "bookmakers": {
@@ -4648,6 +4779,180 @@
       ]
     },
     {
+      "name": "Both Teams To Score HT",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Both Teams To Score HT",
+          "normalizedName": "both teams to score ht",
+          "oddsShape": [
+            {
+              "yes": "5.500",
+              "no": "1.142"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Both Teams To Score HT",
+          "normalizedName": "both teams to score ht",
+          "oddsShape": [
+            {
+              "yes": "5.500",
+              "no": "1.142"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Both Teams To Score HT",
+          "normalizedName": "both teams to score ht",
+          "oddsShape": [
+            {
+              "yes": "6.000",
+              "no": "1.125"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alternative Total Goals",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Total Goals",
+          "normalizedName": "alternative total goals",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "4.000",
+              "under": "1.250"
+            },
+            {
+              "hdp": 4.5,
+              "over": "8.000",
+              "under": "1.083"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Total Goals",
+          "normalizedName": "alternative total goals",
+          "oddsShape": [
+            {
+              "hdp": 0.5,
+              "over": "1.050",
+              "under": "11.000"
+            },
+            {
+              "hdp": 1.5,
+              "over": "1.300",
+              "under": "3.500"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Alternative Total Goals",
+          "normalizedName": "alternative total goals",
+          "oddsShape": [
+            {
+              "hdp": 0.5,
+              "over": "1.040",
+              "under": "13.000"
+            },
+            {
+              "hdp": 1.5,
+              "over": "1.222",
+              "under": "4.333"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Number of Goals In Match",
+      "count": 32,
+      "bookmakers": {
+        "Bet365": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Number of Goals In Match",
+          "normalizedName": "number of goals in match",
+          "oddsShape": [
+            {
+              "label": "Over 3 goals",
+              "over": "4.000"
+            },
+            {
+              "label": "2 or 3 goals",
+              "under": "1.952"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Number of Goals In Match",
+          "normalizedName": "number of goals in match",
+          "oddsShape": [
+            {
+              "label": "2 or 3 goals",
+              "under": "2.000"
+            },
+            {
+              "label": "Under 2 goals",
+              "under": "3.400"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Number of Goals In Match",
+          "normalizedName": "number of goals in match",
+          "oddsShape": [
+            {
+              "label": "Under 2 goals",
+              "under": "4.333"
+            },
+            {
+              "label": "Over 3 goals",
+              "over": "2.750"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Team Total Goals Away",
       "count": 32,
       "bookmakers": {
@@ -4682,8 +4987,8 @@
           "oddsShape": [
             {
               "hdp": 1.5,
-              "over": "5.000",
-              "under": "1.166"
+              "over": "4.500",
+              "under": "1.181"
             },
             {
               "hdp": 0.5,
@@ -4749,12 +5054,12 @@
             {
               "label": "To Win From Behind (1)",
               "hdp": 1,
-              "home": "2.500"
+              "home": "2.625"
             },
             {
               "label": "To Win From Behind (2)",
               "hdp": 2,
-              "away": "8.000"
+              "away": "9.000"
             }
           ]
         },
@@ -4780,294 +5085,6 @@
       ]
     },
     {
-      "name": "Team Goalscorer",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Goalscorer",
-          "normalizedName": "team goalscorer",
-          "oddsShape": [
-            {
-              "label": "Patrik Schick (First)",
-              "over": "3.500"
-            },
-            {
-              "label": "Stepan Chaloupek (First)",
-              "over": "17.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Team Goalscorer",
-          "normalizedName": "team goalscorer",
-          "oddsShape": [
-            {
-              "label": "Breel Embolo (First)",
-              "over": "3.400"
-            },
-            {
-              "label": "Zeki Amdouni (First)",
-              "over": "3.750"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Team Goalscorer",
-          "normalizedName": "team goalscorer",
-          "oddsShape": [
-            {
-              "label": "Jayden Nelson (First)",
-              "over": "5.500"
-            },
-            {
-              "label": "Jayden Nelson (Last)",
-              "over": "5.500"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Both Teams To Score HT",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Both Teams To Score HT",
-          "normalizedName": "both teams to score ht",
-          "oddsShape": [
-            {
-              "yes": "5.500",
-              "no": "1.142"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Both Teams To Score HT",
-          "normalizedName": "both teams to score ht",
-          "oddsShape": [
-            {
-              "yes": "5.500",
-              "no": "1.142"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Both Teams To Score HT",
-          "normalizedName": "both teams to score ht",
-          "oddsShape": [
-            {
-              "yes": "6.000",
-              "no": "1.125"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "First 10 Minutes (00:00 - 09:59)",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "First 10 Minutes (00:00 - 09:59)",
-          "normalizedName": "first 10 minutes 00 00 09 59",
-          "oddsShape": [
-            {
-              "label": "Goals (Over) (0.5)",
-              "hdp": 0.5,
-              "over": "5.000",
-              "under": "1.166"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "First 10 Minutes (00:00 - 09:59)",
-          "normalizedName": "first 10 minutes 00 00 09 59",
-          "oddsShape": [
-            {
-              "label": "Goals (Over) (0.5)",
-              "hdp": 0.5,
-              "over": "4.500",
-              "under": "1.181"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "First 10 Minutes (00:00 - 09:59)",
-          "normalizedName": "first 10 minutes 00 00 09 59",
-          "oddsShape": [
-            {
-              "label": "Goals (Over) (0.5)",
-              "hdp": 0.5,
-              "over": "4.333",
-              "under": "1.200"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "1st Half Handicap",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "1st Half Handicap",
-          "normalizedName": "1st half handicap",
-          "oddsShape": [
-            {
-              "label": "1 (-1)",
-              "hdp": -1,
-              "home": "7.000"
-            },
-            {
-              "label": "Tie (1)",
-              "hdp": 1,
-              "away": "1.533"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "1st Half Handicap",
-          "normalizedName": "1st half handicap",
-          "oddsShape": [
-            {
-              "label": "Tie (1)",
-              "hdp": 1,
-              "away": "1.727"
-            },
-            {
-              "label": "1 (-1)",
-              "hdp": -1,
-              "home": "5.500"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "1st Half Handicap",
-          "normalizedName": "1st half handicap",
-          "oddsShape": [
-            {
-              "label": "1 (-1)",
-              "hdp": -1,
-              "home": "3.750"
-            },
-            {
-              "label": "Tie (1)",
-              "hdp": 1,
-              "away": "2.100"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Exact Total Goals",
-      "count": 32,
-      "bookmakers": {
-        "Bet365": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Exact Total Goals",
-          "normalizedName": "exact total goals",
-          "oddsShape": [
-            {
-              "label": "0 Goals",
-              "under": "8.500"
-            },
-            {
-              "label": "2 Goals",
-              "under": "3.400"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Exact Total Goals",
-          "normalizedName": "exact total goals",
-          "oddsShape": [
-            {
-              "label": "3 Goals",
-              "under": "4.000"
-            },
-            {
-              "label": "4 Goals",
-              "under": "6.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Exact Total Goals",
-          "normalizedName": "exact total goals",
-          "oddsShape": [
-            {
-              "label": "0 Goals",
-              "under": "13.000"
-            },
-            {
-              "label": "1 Goal",
-              "under": "5.500"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "ML HT",
       "count": 32,
       "bookmakers": {
@@ -5082,8 +5099,8 @@
           "normalizedName": "ml ht",
           "oddsShape": [
             {
-              "home": "2.38",
-              "draw": "2.16",
+              "home": "2.40",
+              "draw": "2.15",
               "away": "4.90"
             }
           ]
@@ -5135,12 +5152,12 @@
             {
               "hdp": 0.5,
               "over": "1.18",
-              "under": "4.35"
+              "under": "4.30"
             },
             {
-              "hdp": 1.5,
-              "over": "1.94",
-              "under": "1.79"
+              "hdp": 2.5,
+              "over": "4.00",
+              "under": "1.21"
             }
           ]
         },
@@ -5201,11 +5218,11 @@
             {
               "hdp": 0.5,
               "over": "1.58",
-              "under": "2.23"
+              "under": "2.25"
             },
             {
               "hdp": 1.5,
-              "over": "3.90",
+              "over": "3.85",
               "under": "1.22"
             }
           ]
@@ -5311,6 +5328,128 @@
       ]
     },
     {
+      "name": "Goalkeeper Saves Home",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Goalkeeper Saves Home",
+          "normalizedName": "goalkeeper saves home",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "2.28",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Goalkeeper Saves Home",
+          "normalizedName": "goalkeeper saves home",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "2.28",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Goalkeeper Saves Home",
+          "normalizedName": "goalkeeper saves home",
+          "oddsShape": [
+            {
+              "hdp": 1.5,
+              "over": "1.52",
+              "under": "N/A"
+            },
+            {
+              "hdp": 2.5,
+              "over": "2.45",
+              "under": "N/A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "To Score 2+ Goals",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 2+ Goals",
+          "normalizedName": "to score 2 goals",
+          "oddsShape": [
+            {
+              "label": "Robin Hranác",
+              "hdp": 1.5,
+              "over": "181.00"
+            },
+            {
+              "label": "Thapelo Maseko",
+              "hdp": 1.5,
+              "over": "46.00"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 2+ Goals",
+          "normalizedName": "to score 2 goals",
+          "oddsShape": [
+            {
+              "label": "Manuel Akanji",
+              "hdp": 1.5,
+              "over": "181.00"
+            },
+            {
+              "label": "Dan Ndoye",
+              "hdp": 1.5,
+              "over": "12.00"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 2+ Goals",
+          "normalizedName": "to score 2 goals",
+          "oddsShape": [
+            {
+              "label": "Tani Oluwaseyi",
+              "hdp": 1.5,
+              "over": "10.50"
+            },
+            {
+              "label": "Liam Millar",
+              "hdp": 1.5,
+              "over": "25.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Totals 2H",
       "count": 32,
       "bookmakers": {
@@ -5331,8 +5470,8 @@
             },
             {
               "hdp": 1.5,
-              "over": "2.20",
-              "under": "1.61"
+              "over": "2.18",
+              "under": "1.62"
             }
           ]
         },
@@ -5377,6 +5516,321 @@
       ]
     },
     {
+      "name": "Total Shots on Target Home",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target Home",
+          "normalizedName": "total shots on target home",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "1.28",
+              "under": "3.00"
+            },
+            {
+              "hdp": 5.5,
+              "over": "2.32",
+              "under": "1.47"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target Home",
+          "normalizedName": "total shots on target home",
+          "oddsShape": [
+            {
+              "hdp": 7.5,
+              "over": "4.60",
+              "under": "1.11"
+            },
+            {
+              "hdp": 6.5,
+              "over": "3.05",
+              "under": "1.27"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target Home",
+          "normalizedName": "total shots on target home",
+          "oddsShape": [
+            {
+              "hdp": 5.5,
+              "over": "1.65",
+              "under": "1.98"
+            },
+            {
+              "hdp": 6.5,
+              "over": "2.23",
+              "under": "1.50"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "To Score 3+ Goals",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 3+ Goals",
+          "normalizedName": "to score 3 goals",
+          "oddsShape": [
+            {
+              "label": "Adam Hlozek",
+              "hdp": 2.5,
+              "over": "81.00"
+            },
+            {
+              "label": "Patrik Schick",
+              "hdp": 2.5,
+              "over": "51.00"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 3+ Goals",
+          "normalizedName": "to score 3 goals",
+          "oddsShape": [
+            {
+              "label": "Zeki Amdouni",
+              "hdp": 2.5,
+              "over": "76.00"
+            },
+            {
+              "label": "Rubén Vargas",
+              "hdp": 2.5,
+              "over": "71.00"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "To Score 3+ Goals",
+          "normalizedName": "to score 3 goals",
+          "oddsShape": [
+            {
+              "label": "Jonathan David",
+              "hdp": 2.5,
+              "over": "21.00"
+            },
+            {
+              "label": "Tani Oluwaseyi",
+              "hdp": 2.5,
+              "over": "61.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ML 2H",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "ML 2H",
+          "normalizedName": "ml 2h",
+          "oddsShape": [
+            {
+              "home": "2.16",
+              "draw": "2.50",
+              "away": "4.50"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "ML 2H",
+          "normalizedName": "ml 2h",
+          "oddsShape": [
+            {
+              "home": "1.85",
+              "draw": "2.70",
+              "away": "5.60"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "ML 2H",
+          "normalizedName": "ml 2h",
+          "oddsShape": [
+            {
+              "home": "1.57",
+              "draw": "3.15",
+              "away": "7.50"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Shots on Target",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target",
+          "normalizedName": "total shots on target",
+          "oddsShape": [
+            {
+              "hdp": 5.5,
+              "over": "1.14",
+              "under": "4.10"
+            },
+            {
+              "hdp": 10.5,
+              "over": "3.90",
+              "under": "1.16"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target",
+          "normalizedName": "total shots on target",
+          "oddsShape": [
+            {
+              "hdp": 8.5,
+              "over": "2.00",
+              "under": "1.64"
+            },
+            {
+              "hdp": 10.5,
+              "over": "3.70",
+              "under": "1.18"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots on Target",
+          "normalizedName": "total shots on target",
+          "oddsShape": [
+            {
+              "hdp": 6.5,
+              "over": "1.21",
+              "under": "3.50"
+            },
+            {
+              "hdp": 11.5,
+              "over": "4.30",
+              "under": "1.13"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Corners Totals Home",
+      "count": 32,
+      "bookmakers": {
+        "Unibet": 32
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Corners Totals Home",
+          "normalizedName": "corners totals home",
+          "oddsShape": [
+            {
+              "hdp": 8.5,
+              "over": "6.10",
+              "under": "1.07"
+            },
+            {
+              "hdp": 5.5,
+              "over": "2.28",
+              "under": "1.55"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Corners Totals Home",
+          "normalizedName": "corners totals home",
+          "oddsShape": [
+            {
+              "hdp": 9.5,
+              "over": "5.20",
+              "under": "1.11"
+            },
+            {
+              "hdp": 6.5,
+              "over": "2.15",
+              "under": "1.61"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Corners Totals Home",
+          "normalizedName": "corners totals home",
+          "oddsShape": [
+            {
+              "hdp": 5.5,
+              "over": "1.41",
+              "under": "2.65"
+            },
+            {
+              "hdp": 9.5,
+              "over": "3.65",
+              "under": "1.23"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Total Shots on Target Away",
       "count": 32,
       "bookmakers": {
@@ -5393,12 +5847,12 @@
             {
               "hdp": 2.5,
               "over": "1.58",
-              "under": "2.18"
+              "under": "2.20"
             },
             {
               "hdp": 3.5,
-              "over": "2.38",
-              "under": "1.50"
+              "over": "2.35",
+              "under": "1.52"
             }
           ]
         },
@@ -5443,7 +5897,7 @@
       ]
     },
     {
-      "name": "Total Shots on Target Home",
+      "name": "Corners Totals Away",
       "count": 32,
       "bookmakers": {
         "Unibet": 32
@@ -5453,18 +5907,18 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target Home",
-          "normalizedName": "total shots on target home",
+          "marketName": "Corners Totals Away",
+          "normalizedName": "corners totals away",
           "oddsShape": [
             {
-              "hdp": 3.5,
-              "over": "1.28",
-              "under": "3.05"
+              "hdp": 5.5,
+              "over": "4.35",
+              "under": "1.16"
             },
             {
               "hdp": 4.5,
-              "over": "1.66",
-              "under": "1.97"
+              "over": "2.85",
+              "under": "1.35"
             }
           ]
         },
@@ -5472,18 +5926,18 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target Home",
-          "normalizedName": "total shots on target home",
+          "marketName": "Corners Totals Away",
+          "normalizedName": "corners totals away",
           "oddsShape": [
             {
-              "hdp": 7.5,
-              "over": "4.60",
-              "under": "1.11"
+              "hdp": 2.5,
+              "over": "1.58",
+              "under": "2.18"
             },
             {
-              "hdp": 6.5,
-              "over": "3.05",
-              "under": "1.27"
+              "hdp": 4.5,
+              "over": "3.50",
+              "under": "1.24"
             }
           ]
         },
@@ -5491,18 +5945,18 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target Home",
-          "normalizedName": "total shots on target home",
+          "marketName": "Corners Totals Away",
+          "normalizedName": "corners totals away",
           "oddsShape": [
             {
               "hdp": 5.5,
-              "over": "1.65",
-              "under": "1.98"
+              "over": "8.00",
+              "under": "1.03"
             },
             {
-              "hdp": 6.5,
-              "over": "2.23",
-              "under": "1.50"
+              "hdp": 1.5,
+              "over": "1.34",
+              "under": "2.90"
             }
           ]
         }
@@ -5565,443 +6019,6 @@
       ]
     },
     {
-      "name": "Goalkeeper Saves Home",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Goalkeeper Saves Home",
-          "normalizedName": "goalkeeper saves home",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "2.28",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Goalkeeper Saves Home",
-          "normalizedName": "goalkeeper saves home",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "2.28",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Goalkeeper Saves Home",
-          "normalizedName": "goalkeeper saves home",
-          "oddsShape": [
-            {
-              "hdp": 1.5,
-              "over": "1.52",
-              "under": "N/A"
-            },
-            {
-              "hdp": 2.5,
-              "over": "2.45",
-              "under": "N/A"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Shots on Target",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target",
-          "normalizedName": "total shots on target",
-          "oddsShape": [
-            {
-              "hdp": 10.5,
-              "over": "4.00",
-              "under": "1.16"
-            },
-            {
-              "hdp": 7.5,
-              "over": "1.64",
-              "under": "2.00"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target",
-          "normalizedName": "total shots on target",
-          "oddsShape": [
-            {
-              "hdp": 8.5,
-              "over": "2.00",
-              "under": "1.64"
-            },
-            {
-              "hdp": 10.5,
-              "over": "3.70",
-              "under": "1.18"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots on Target",
-          "normalizedName": "total shots on target",
-          "oddsShape": [
-            {
-              "hdp": 6.5,
-              "over": "1.21",
-              "under": "3.50"
-            },
-            {
-              "hdp": 11.5,
-              "over": "4.30",
-              "under": "1.13"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "ML 2H",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "ML 2H",
-          "normalizedName": "ml 2h",
-          "oddsShape": [
-            {
-              "home": "2.16",
-              "draw": "2.50",
-              "away": "4.50"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "ML 2H",
-          "normalizedName": "ml 2h",
-          "oddsShape": [
-            {
-              "home": "1.85",
-              "draw": "2.70",
-              "away": "5.60"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "ML 2H",
-          "normalizedName": "ml 2h",
-          "oddsShape": [
-            {
-              "home": "1.57",
-              "draw": "3.15",
-              "away": "7.50"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "To Score 2+ Goals",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 2+ Goals",
-          "normalizedName": "to score 2 goals",
-          "oddsShape": [
-            {
-              "label": "Relebohile Mofokeng",
-              "hdp": 1.5,
-              "over": "81.00"
-            },
-            {
-              "label": "Iqraam Rayners",
-              "hdp": 1.5,
-              "over": "25.00"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 2+ Goals",
-          "normalizedName": "to score 2 goals",
-          "oddsShape": [
-            {
-              "label": "Manuel Akanji",
-              "hdp": 1.5,
-              "over": "181.00"
-            },
-            {
-              "label": "Dan Ndoye",
-              "hdp": 1.5,
-              "over": "12.00"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 2+ Goals",
-          "normalizedName": "to score 2 goals",
-          "oddsShape": [
-            {
-              "label": "Tani Oluwaseyi",
-              "hdp": 1.5,
-              "over": "10.50"
-            },
-            {
-              "label": "Liam Millar",
-              "hdp": 1.5,
-              "over": "25.00"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Corners Totals Home",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Home",
-          "normalizedName": "corners totals home",
-          "oddsShape": [
-            {
-              "hdp": 8.5,
-              "over": "6.25",
-              "under": "1.07"
-            },
-            {
-              "hdp": 5.5,
-              "over": "2.28",
-              "under": "1.54"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Home",
-          "normalizedName": "corners totals home",
-          "oddsShape": [
-            {
-              "hdp": 9.5,
-              "over": "5.20",
-              "under": "1.11"
-            },
-            {
-              "hdp": 6.5,
-              "over": "2.15",
-              "under": "1.61"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Home",
-          "normalizedName": "corners totals home",
-          "oddsShape": [
-            {
-              "hdp": 5.5,
-              "over": "1.41",
-              "under": "2.65"
-            },
-            {
-              "hdp": 9.5,
-              "over": "3.65",
-              "under": "1.23"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "To Score 3+ Goals",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 3+ Goals",
-          "normalizedName": "to score 3 goals",
-          "oddsShape": [
-            {
-              "label": "Adam Hlozek",
-              "hdp": 2.5,
-              "over": "101.00"
-            },
-            {
-              "label": "Patrik Schick",
-              "hdp": 2.5,
-              "over": "56.00"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 3+ Goals",
-          "normalizedName": "to score 3 goals",
-          "oddsShape": [
-            {
-              "label": "Zeki Amdouni",
-              "hdp": 2.5,
-              "over": "76.00"
-            },
-            {
-              "label": "Rubén Vargas",
-              "hdp": 2.5,
-              "over": "71.00"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "To Score 3+ Goals",
-          "normalizedName": "to score 3 goals",
-          "oddsShape": [
-            {
-              "label": "Jonathan David",
-              "hdp": 2.5,
-              "over": "21.00"
-            },
-            {
-              "label": "Tani Oluwaseyi",
-              "hdp": 2.5,
-              "over": "61.00"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Corners Totals Away",
-      "count": 32,
-      "bookmakers": {
-        "Unibet": 32
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Away",
-          "normalizedName": "corners totals away",
-          "oddsShape": [
-            {
-              "hdp": 4.5,
-              "over": "2.85",
-              "under": "1.36"
-            },
-            {
-              "hdp": 6.5,
-              "over": "6.50",
-              "under": "1.06"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Away",
-          "normalizedName": "corners totals away",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "1.58",
-              "under": "2.18"
-            },
-            {
-              "hdp": 4.5,
-              "over": "3.50",
-              "under": "1.24"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Corners Totals Away",
-          "normalizedName": "corners totals away",
-          "oddsShape": [
-            {
-              "hdp": 5.5,
-              "over": "8.00",
-              "under": "1.03"
-            },
-            {
-              "hdp": 1.5,
-              "over": "1.34",
-              "under": "2.90"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "Corners Totals HT",
       "count": 24,
       "bookmakers": {
@@ -6045,15 +6062,15 @@
           "oddsShape": [
             {
               "hdp": 4.5,
-              "over": "1.800",
-              "under": "2.000"
+              "over": "1.825",
+              "under": "1.975"
             }
           ]
         }
       ]
     },
     {
-      "name": "Team Corners Home",
+      "name": "Total Corners",
       "count": 24,
       "bookmakers": {
         "Bet365": 24
@@ -6063,13 +6080,16 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Corners Home",
-          "normalizedName": "team corners home",
+          "marketName": "Total Corners",
+          "normalizedName": "total corners",
           "oddsShape": [
             {
-              "hdp": 5.5,
-              "over": "2.100",
-              "under": "1.666"
+              "label": "Under 6",
+              "under": "7.000"
+            },
+            {
+              "label": "6 - 8",
+              "under": "2.750"
             }
           ]
         },
@@ -6077,13 +6097,16 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Team Corners Home",
-          "normalizedName": "team corners home",
+          "marketName": "Total Corners",
+          "normalizedName": "total corners",
           "oddsShape": [
             {
-              "hdp": 5.5,
-              "over": "1.666",
-              "under": "2.100"
+              "label": "9 - 11",
+              "under": "2.625"
+            },
+            {
+              "label": "Under 6",
+              "under": "8.000"
             }
           ]
         },
@@ -6091,13 +6114,16 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Team Corners Home",
-          "normalizedName": "team corners home",
+          "marketName": "Total Corners",
+          "normalizedName": "total corners",
           "oddsShape": [
             {
-              "hdp": 6.5,
-              "over": "1.727",
-              "under": "2.000"
+              "label": "Under 6",
+              "under": "10.000"
+            },
+            {
+              "label": "6 - 8",
+              "under": "3.250"
             }
           ]
         }
@@ -6221,6 +6247,123 @@
       ]
     },
     {
+      "name": "Team Corners Away",
+      "count": 24,
+      "bookmakers": {
+        "Bet365": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Team Corners Away",
+          "normalizedName": "team corners away",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "2.000",
+              "under": "1.727"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Team Corners Away",
+          "normalizedName": "team corners away",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "1.615",
+              "under": "2.200"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Team Corners Away",
+          "normalizedName": "team corners away",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "1.833",
+              "under": "1.833"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Corners Race",
+      "count": 24,
+      "bookmakers": {
+        "Bet365": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Bet365",
+          "marketName": "Corners Race",
+          "normalizedName": "corners race",
+          "oddsShape": [
+            {
+              "hdp": 3,
+              "home": "1.444",
+              "away": "2.625"
+            },
+            {
+              "hdp": 5,
+              "home": "1.800",
+              "away": "3.750"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Corners Race",
+          "normalizedName": "corners race",
+          "oddsShape": [
+            {
+              "hdp": 3,
+              "home": "1.285",
+              "away": "3.500"
+            },
+            {
+              "hdp": 5,
+              "home": "1.444",
+              "away": "5.000"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Bet365",
+          "marketName": "Corners Race",
+          "normalizedName": "corners race",
+          "oddsShape": [
+            {
+              "hdp": 5,
+              "home": "1.250",
+              "away": "7.000"
+            },
+            {
+              "hdp": 7,
+              "home": "1.727",
+              "away": "17.000"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Corners 2-Way",
       "count": 24,
       "bookmakers": {
@@ -6338,7 +6481,7 @@
       ]
     },
     {
-      "name": "Corners Race",
+      "name": "Team Corners Home",
       "count": 24,
       "bookmakers": {
         "Bet365": 24
@@ -6348,18 +6491,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Corners Race",
-          "normalizedName": "corners race",
+          "marketName": "Team Corners Home",
+          "normalizedName": "team corners home",
           "oddsShape": [
             {
-              "hdp": 3,
-              "home": "1.444",
-              "away": "2.625"
-            },
-            {
-              "hdp": 5,
-              "home": "1.800",
-              "away": "3.750"
+              "hdp": 5.5,
+              "over": "2.100",
+              "under": "1.666"
             }
           ]
         },
@@ -6367,18 +6505,13 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Corners Race",
-          "normalizedName": "corners race",
+          "marketName": "Team Corners Home",
+          "normalizedName": "team corners home",
           "oddsShape": [
             {
-              "hdp": 3,
-              "home": "1.285",
-              "away": "3.500"
-            },
-            {
-              "hdp": 5,
-              "home": "1.444",
-              "away": "5.000"
+              "hdp": 5.5,
+              "over": "1.666",
+              "under": "2.100"
             }
           ]
         },
@@ -6386,652 +6519,13 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Corners Race",
-          "normalizedName": "corners race",
+          "marketName": "Team Corners Home",
+          "normalizedName": "team corners home",
           "oddsShape": [
-            {
-              "hdp": 5,
-              "home": "1.250",
-              "away": "7.000"
-            },
-            {
-              "hdp": 7,
-              "home": "1.727",
-              "away": "17.000"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Team Corners Away",
-      "count": 24,
-      "bookmakers": {
-        "Bet365": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Team Corners Away",
-          "normalizedName": "team corners away",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "2.000",
-              "under": "1.727"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Team Corners Away",
-          "normalizedName": "team corners away",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "1.615",
-              "under": "2.200"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Team Corners Away",
-          "normalizedName": "team corners away",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "1.833",
-              "under": "1.833"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Corners",
-      "count": 24,
-      "bookmakers": {
-        "Bet365": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Bet365",
-          "marketName": "Total Corners",
-          "normalizedName": "total corners",
-          "oddsShape": [
-            {
-              "label": "Under 6",
-              "under": "7.000"
-            },
-            {
-              "label": "6 - 8",
-              "under": "2.750"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Total Corners",
-          "normalizedName": "total corners",
-          "oddsShape": [
-            {
-              "label": "9 - 11",
-              "under": "2.625"
-            },
-            {
-              "label": "Under 6",
-              "under": "8.000"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Bet365",
-          "marketName": "Total Corners",
-          "normalizedName": "total corners",
-          "oddsShape": [
-            {
-              "label": "Under 6",
-              "under": "10.000"
-            },
-            {
-              "label": "6 - 8",
-              "under": "3.250"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Shots Away",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Away",
-          "normalizedName": "total shots away",
-          "oddsShape": [
-            {
-              "hdp": 9.5,
-              "over": "1.94",
-              "under": "1.68"
-            },
-            {
-              "hdp": 8.5,
-              "over": "1.62",
-              "under": "2.02"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Away",
-          "normalizedName": "total shots away",
-          "oddsShape": [
-            {
-              "hdp": 8.5,
-              "over": "1.87",
-              "under": "1.73"
-            },
-            {
-              "hdp": 7.5,
-              "over": "1.56",
-              "under": "2.12"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Away",
-          "normalizedName": "total shots away",
-          "oddsShape": [
-            {
-              "hdp": 7.5,
-              "over": "2.00",
-              "under": "1.63"
-            },
             {
               "hdp": 6.5,
-              "over": "1.63",
-              "under": "2.02"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Shots",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots",
-          "normalizedName": "total shots",
-          "oddsShape": [
-            {
-              "hdp": 25.5,
-              "over": "2.75",
-              "under": "1.38"
-            },
-            {
-              "hdp": 20.5,
-              "over": "1.42",
-              "under": "2.60"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots",
-          "normalizedName": "total shots",
-          "oddsShape": [
-            {
-              "hdp": 25.5,
-              "over": "2.50",
-              "under": "1.45"
-            },
-            {
-              "hdp": 24.5,
-              "over": "2.16",
-              "under": "1.60"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots",
-          "normalizedName": "total shots",
-          "oddsShape": [
-            {
-              "hdp": 24.5,
-              "over": "1.90",
-              "under": "1.78"
-            },
-            {
-              "hdp": 26.5,
-              "over": "2.50",
-              "under": "1.45"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Shots Home",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Home",
-          "normalizedName": "total shots home",
-          "oddsShape": [
-            {
-              "hdp": 14.5,
-              "over": "2.25",
-              "under": "1.50"
-            },
-            {
-              "hdp": 13.5,
-              "over": "1.90",
-              "under": "1.70"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Home",
-          "normalizedName": "total shots home",
-          "oddsShape": [
-            {
-              "hdp": 14.5,
-              "over": "1.80",
-              "under": "1.80"
-            },
-            {
-              "hdp": 15.5,
-              "over": "2.10",
-              "under": "1.58"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Shots Home",
-          "normalizedName": "total shots home",
-          "oddsShape": [
-            {
-              "hdp": 15.5,
-              "over": "1.54",
-              "under": "2.17"
-            },
-            {
-              "hdp": 17.5,
-              "over": "2.00",
-              "under": "1.64"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Fouls Home",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Home",
-          "normalizedName": "total fouls home",
-          "oddsShape": [
-            {
-              "hdp": 14.5,
-              "over": "2.02",
-              "under": "N/A"
-            },
-            {
-              "hdp": 13.5,
-              "over": "1.73",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Home",
-          "normalizedName": "total fouls home",
-          "oddsShape": [
-            {
-              "hdp": 12.5,
-              "over": "1.95",
-              "under": "N/A"
-            },
-            {
-              "hdp": 11.5,
-              "over": "1.65",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Home",
-          "normalizedName": "total fouls home",
-          "oddsShape": [
-            {
-              "hdp": 11.5,
-              "over": "1.68",
-              "under": "N/A"
-            },
-            {
-              "hdp": 12.5,
-              "over": "2.02",
-              "under": "N/A"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Most Shots on Target",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Most Shots on Target",
-          "normalizedName": "most shots on target",
-          "oddsShape": [
-            {
-              "hdp": -0.5,
-              "home": "1.37",
-              "away": "N/A"
-            },
-            {
-              "hdp": 0.5,
-              "home": "N/A",
-              "away": "3.65"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Most Shots on Target",
-          "normalizedName": "most shots on target",
-          "oddsShape": [
-            {
-              "hdp": 0.5,
-              "home": "N/A",
-              "away": "4.10"
-            },
-            {
-              "hdp": -0.5,
-              "home": "1.30",
-              "away": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Most Shots on Target",
-          "normalizedName": "most shots on target",
-          "oddsShape": [
-            {
-              "hdp": -0.5,
-              "home": "1.15",
-              "away": "N/A"
-            },
-            {
-              "hdp": 0.5,
-              "home": "N/A",
-              "away": "6.00"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Fouls",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls",
-          "normalizedName": "total fouls",
-          "oddsShape": [
-            {
-              "hdp": 29.5,
-              "over": "2.15",
-              "under": "N/A"
-            },
-            {
-              "hdp": 26.5,
-              "over": "1.54",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls",
-          "normalizedName": "total fouls",
-          "oddsShape": [
-            {
-              "hdp": 30.5,
-              "over": "2.23",
-              "under": "N/A"
-            },
-            {
-              "hdp": 27.5,
-              "over": "1.61",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls",
-          "normalizedName": "total fouls",
-          "oddsShape": [
-            {
-              "hdp": 27.5,
-              "over": "2.28",
-              "under": "N/A"
-            },
-            {
-              "hdp": 26.5,
-              "over": "2.00",
-              "under": "N/A"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Fouls Away",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Away",
-          "normalizedName": "total fouls away",
-          "oddsShape": [
-            {
-              "hdp": 15.5,
-              "over": "2.38",
-              "under": "N/A"
-            },
-            {
-              "hdp": 14.5,
-              "over": "1.98",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Away",
-          "normalizedName": "total fouls away",
-          "oddsShape": [
-            {
-              "hdp": 16.5,
-              "over": "1.89",
-              "under": "N/A"
-            },
-            {
-              "hdp": 15.5,
-              "over": "1.64",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Fouls Away",
-          "normalizedName": "total fouls away",
-          "oddsShape": [
-            {
-              "hdp": 13.5,
-              "over": "1.83",
-              "under": "N/A"
-            },
-            {
-              "hdp": 12.5,
-              "over": "1.57",
-              "under": "N/A"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Total Offsides",
-      "count": 24,
-      "bookmakers": {
-        "Unibet": 24
-      },
-      "examples": [
-        {
-          "matchId": "wc2026_czech_republic_south_africa",
-          "fixture": "Czech Republic - South Africa",
-          "bookmaker": "Unibet",
-          "marketName": "Total Offsides",
-          "normalizedName": "total offsides",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "1.91",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Unibet",
-          "marketName": "Total Offsides",
-          "normalizedName": "total offsides",
-          "oddsShape": [
-            {
-              "hdp": 3.5,
-              "over": "1.91",
-              "under": "N/A"
-            },
-            {
-              "hdp": 4.5,
-              "over": "2.80",
-              "under": "N/A"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_canada_qatar",
-          "fixture": "Canada - Qatar",
-          "bookmaker": "Unibet",
-          "marketName": "Total Offsides",
-          "normalizedName": "total offsides",
-          "oddsShape": [
-            {
-              "hdp": 4.5,
-              "over": "2.85",
-              "under": "N/A"
-            },
-            {
-              "hdp": 3.5,
-              "over": "1.91",
-              "under": "N/A"
+              "over": "1.727",
+              "under": "2.000"
             }
           ]
         }
@@ -7110,6 +6604,534 @@
       ]
     },
     {
+      "name": "Total Shots",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots",
+          "normalizedName": "total shots",
+          "oddsShape": [
+            {
+              "hdp": 23.5,
+              "over": "2.00",
+              "under": "1.70"
+            },
+            {
+              "hdp": 25.5,
+              "over": "2.70",
+              "under": "1.38"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots",
+          "normalizedName": "total shots",
+          "oddsShape": [
+            {
+              "hdp": 25.5,
+              "over": "2.50",
+              "under": "1.45"
+            },
+            {
+              "hdp": 24.5,
+              "over": "2.16",
+              "under": "1.60"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots",
+          "normalizedName": "total shots",
+          "oddsShape": [
+            {
+              "hdp": 24.5,
+              "over": "1.90",
+              "under": "1.78"
+            },
+            {
+              "hdp": 26.5,
+              "over": "2.50",
+              "under": "1.45"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Shots Away",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Away",
+          "normalizedName": "total shots away",
+          "oddsShape": [
+            {
+              "hdp": 9.5,
+              "over": "1.92",
+              "under": "1.70"
+            },
+            {
+              "hdp": 8.5,
+              "over": "1.60",
+              "under": "2.05"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Away",
+          "normalizedName": "total shots away",
+          "oddsShape": [
+            {
+              "hdp": 8.5,
+              "over": "1.87",
+              "under": "1.73"
+            },
+            {
+              "hdp": 7.5,
+              "over": "1.56",
+              "under": "2.12"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Away",
+          "normalizedName": "total shots away",
+          "oddsShape": [
+            {
+              "hdp": 7.5,
+              "over": "2.00",
+              "under": "1.63"
+            },
+            {
+              "hdp": 6.5,
+              "over": "1.63",
+              "under": "2.02"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Most Shots on Target",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Most Shots on Target",
+          "normalizedName": "most shots on target",
+          "oddsShape": [
+            {
+              "hdp": 0.5,
+              "home": "N/A",
+              "away": "3.60"
+            },
+            {
+              "hdp": -0.5,
+              "home": "1.37",
+              "away": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Most Shots on Target",
+          "normalizedName": "most shots on target",
+          "oddsShape": [
+            {
+              "hdp": 0.5,
+              "home": "N/A",
+              "away": "4.10"
+            },
+            {
+              "hdp": -0.5,
+              "home": "1.30",
+              "away": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Most Shots on Target",
+          "normalizedName": "most shots on target",
+          "oddsShape": [
+            {
+              "hdp": -0.5,
+              "home": "1.15",
+              "away": "N/A"
+            },
+            {
+              "hdp": 0.5,
+              "home": "N/A",
+              "away": "6.00"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Fouls Home",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Home",
+          "normalizedName": "total fouls home",
+          "oddsShape": [
+            {
+              "hdp": 13.5,
+              "over": "1.75",
+              "under": "N/A"
+            },
+            {
+              "hdp": 14.5,
+              "over": "2.05",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Home",
+          "normalizedName": "total fouls home",
+          "oddsShape": [
+            {
+              "hdp": 12.5,
+              "over": "1.95",
+              "under": "N/A"
+            },
+            {
+              "hdp": 11.5,
+              "over": "1.65",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Home",
+          "normalizedName": "total fouls home",
+          "oddsShape": [
+            {
+              "hdp": 11.5,
+              "over": "1.68",
+              "under": "N/A"
+            },
+            {
+              "hdp": 12.5,
+              "over": "2.02",
+              "under": "N/A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Fouls",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls",
+          "normalizedName": "total fouls",
+          "oddsShape": [
+            {
+              "hdp": 27.5,
+              "over": "1.68",
+              "under": "N/A"
+            },
+            {
+              "hdp": 30.5,
+              "over": "2.43",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls",
+          "normalizedName": "total fouls",
+          "oddsShape": [
+            {
+              "hdp": 30.5,
+              "over": "2.23",
+              "under": "N/A"
+            },
+            {
+              "hdp": 27.5,
+              "over": "1.61",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls",
+          "normalizedName": "total fouls",
+          "oddsShape": [
+            {
+              "hdp": 27.5,
+              "over": "2.28",
+              "under": "N/A"
+            },
+            {
+              "hdp": 26.5,
+              "over": "2.00",
+              "under": "N/A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Offsides",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Offsides",
+          "normalizedName": "total offsides",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "1.92",
+              "under": "N/A"
+            },
+            {
+              "hdp": 4.5,
+              "over": "2.88",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Offsides",
+          "normalizedName": "total offsides",
+          "oddsShape": [
+            {
+              "hdp": 3.5,
+              "over": "1.91",
+              "under": "N/A"
+            },
+            {
+              "hdp": 4.5,
+              "over": "2.80",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Offsides",
+          "normalizedName": "total offsides",
+          "oddsShape": [
+            {
+              "hdp": 4.5,
+              "over": "2.85",
+              "under": "N/A"
+            },
+            {
+              "hdp": 3.5,
+              "over": "1.91",
+              "under": "N/A"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Shots Home",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Home",
+          "normalizedName": "total shots home",
+          "oddsShape": [
+            {
+              "hdp": 13.5,
+              "over": "1.90",
+              "under": "1.71"
+            },
+            {
+              "hdp": 14.5,
+              "over": "2.25",
+              "under": "1.50"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Home",
+          "normalizedName": "total shots home",
+          "oddsShape": [
+            {
+              "hdp": 14.5,
+              "over": "1.80",
+              "under": "1.80"
+            },
+            {
+              "hdp": 15.5,
+              "over": "2.10",
+              "under": "1.58"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Shots Home",
+          "normalizedName": "total shots home",
+          "oddsShape": [
+            {
+              "hdp": 15.5,
+              "over": "1.54",
+              "under": "2.17"
+            },
+            {
+              "hdp": 17.5,
+              "over": "2.00",
+              "under": "1.64"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Total Fouls Away",
+      "count": 24,
+      "bookmakers": {
+        "Unibet": 24
+      },
+      "examples": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "fixture": "Czech Republic - South Africa",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Away",
+          "normalizedName": "total fouls away",
+          "oddsShape": [
+            {
+              "hdp": 15.5,
+              "over": "2.35",
+              "under": "N/A"
+            },
+            {
+              "hdp": 14.5,
+              "over": "1.97",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Away",
+          "normalizedName": "total fouls away",
+          "oddsShape": [
+            {
+              "hdp": 16.5,
+              "over": "1.89",
+              "under": "N/A"
+            },
+            {
+              "hdp": 15.5,
+              "over": "1.64",
+              "under": "N/A"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "fixture": "Canada - Qatar",
+          "bookmaker": "Unibet",
+          "marketName": "Total Fouls Away",
+          "normalizedName": "total fouls away",
+          "oddsShape": [
+            {
+              "hdp": 13.5,
+              "over": "1.83",
+              "under": "N/A"
+            },
+            {
+              "hdp": 12.5,
+              "over": "1.57",
+              "under": "N/A"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Player Cards",
       "count": 21,
       "bookmakers": {
@@ -7141,12 +7163,12 @@
           "normalizedName": "player cards",
           "oddsShape": [
             {
-              "label": "Ermin Mahmic (1st Card)",
-              "over": "15.000"
+              "label": "Amar Dedic (Booked)",
+              "over": "4.000"
             },
             {
-              "label": "Jovo Lukic (1st Card)",
-              "over": "15.000"
+              "label": "Dzenis Burnic (Booked)",
+              "over": "4.000"
             }
           ]
         },
@@ -7203,14 +7225,14 @@
           "normalizedName": "player to be booked",
           "oddsShape": [
             {
-              "label": "Gregor Kobel (Booked)",
+              "label": "Ermedin Demirovic (Booked)",
               "hdp": 0.5,
-              "over": "21.000"
+              "over": "4.000"
             },
             {
-              "label": "Landry Mvogo (Booked)",
+              "label": "Sead Kolasinac (Booked)",
               "hdp": 0.5,
-              "over": "21.000"
+              "over": "4.000"
             }
           ]
         },
@@ -7506,7 +7528,7 @@
       ]
     },
     {
-      "name": "Team Shots on Target Away",
+      "name": "Match Tackles",
       "count": 16,
       "bookmakers": {
         "Bet365": 16
@@ -7516,27 +7538,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Team Shots on Target Away",
-          "normalizedName": "team shots on target away",
+          "marketName": "Match Tackles",
+          "normalizedName": "match tackles",
           "oddsShape": [
             {
-              "hdp": 2.5,
-              "over": "1.615",
-              "under": "2.200"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_switzerland_bosnia_herzegovina",
-          "fixture": "Switzerland - Bosnia & Herzegovina",
-          "bookmaker": "Bet365",
-          "marketName": "Team Shots on Target Away",
-          "normalizedName": "team shots on target away",
-          "oddsShape": [
-            {
-              "hdp": 2.5,
-              "over": "1.615",
-              "under": "2.200"
+              "hdp": 27.5,
+              "over": "1.800",
+              "under": "1.909"
             }
           ]
         },
@@ -7544,13 +7552,27 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Team Shots on Target Away",
-          "normalizedName": "team shots on target away",
+          "marketName": "Match Tackles",
+          "normalizedName": "match tackles",
           "oddsShape": [
             {
-              "hdp": 2.5,
+              "hdp": 33.5,
               "over": "2.000",
               "under": "1.727"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "fixture": "Mexico - South Korea",
+          "bookmaker": "Bet365",
+          "marketName": "Match Tackles",
+          "normalizedName": "match tackles",
+          "oddsShape": [
+            {
+              "hdp": 26.5,
+              "over": "1.909",
+              "under": "1.800"
             }
           ]
         }
@@ -7608,7 +7630,7 @@
       ]
     },
     {
-      "name": "Match Tackles",
+      "name": "Team Shots on Target Away",
       "count": 16,
       "bookmakers": {
         "Bet365": 16
@@ -7618,13 +7640,27 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Match Tackles",
-          "normalizedName": "match tackles",
+          "marketName": "Team Shots on Target Away",
+          "normalizedName": "team shots on target away",
           "oddsShape": [
             {
-              "hdp": 27.5,
-              "over": "1.800",
-              "under": "1.909"
+              "hdp": 2.5,
+              "over": "1.615",
+              "under": "2.200"
+            }
+          ]
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "fixture": "Switzerland - Bosnia & Herzegovina",
+          "bookmaker": "Bet365",
+          "marketName": "Team Shots on Target Away",
+          "normalizedName": "team shots on target away",
+          "oddsShape": [
+            {
+              "hdp": 2.5,
+              "over": "1.615",
+              "under": "2.200"
             }
           ]
         },
@@ -7632,27 +7668,13 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Match Tackles",
-          "normalizedName": "match tackles",
+          "marketName": "Team Shots on Target Away",
+          "normalizedName": "team shots on target away",
           "oddsShape": [
             {
-              "hdp": 33.5,
+              "hdp": 2.5,
               "over": "2.000",
               "under": "1.727"
-            }
-          ]
-        },
-        {
-          "matchId": "wc2026_mexico_south_korea",
-          "fixture": "Mexico - South Korea",
-          "bookmaker": "Bet365",
-          "marketName": "Match Tackles",
-          "normalizedName": "match tackles",
-          "oddsShape": [
-            {
-              "hdp": 26.5,
-              "over": "1.909",
-              "under": "1.800"
             }
           ]
         }
@@ -7725,7 +7747,7 @@
       ]
     },
     {
-      "name": "Player Headed Shots on Target",
+      "name": "Match Shots on Target",
       "count": 15,
       "bookmakers": {
         "Bet365": 15
@@ -7735,18 +7757,13 @@
           "matchId": "wc2026_czech_republic_south_africa",
           "fixture": "Czech Republic - South Africa",
           "bookmaker": "Bet365",
-          "marketName": "Player Headed Shots on Target",
-          "normalizedName": "player headed shots on target",
+          "marketName": "Match Shots on Target",
+          "normalizedName": "match shots on target",
           "oddsShape": [
             {
-              "label": "Tomas Chory (1)",
-              "hdp": 0.5,
-              "over": "3.400"
-            },
-            {
-              "label": "David Doudera (1)",
-              "hdp": 0.5,
-              "over": "6.500"
+              "hdp": 8.5,
+              "over": "2.100",
+              "under": "1.666"
             }
           ]
         },
@@ -7754,18 +7771,13 @@
           "matchId": "wc2026_switzerland_bosnia_herzegovina",
           "fixture": "Switzerland - Bosnia & Herzegovina",
           "bookmaker": "Bet365",
-          "marketName": "Player Headed Shots on Target",
-          "normalizedName": "player headed shots on target",
+          "marketName": "Match Shots on Target",
+          "normalizedName": "match shots on target",
           "oddsShape": [
             {
-              "label": "Jovo Lukic (2)",
-              "hdp": 0.5,
-              "over": "3.750"
-            },
-            {
-              "label": "Nikola Katic (2)",
-              "hdp": 0.5,
-              "over": "5.000"
+              "hdp": 8.5,
+              "over": "1.833",
+              "under": "1.833"
             }
           ]
         },
@@ -7773,18 +7785,13 @@
           "matchId": "wc2026_canada_qatar",
           "fixture": "Canada - Qatar",
           "bookmaker": "Bet365",
-          "marketName": "Player Headed Shots on Target",
-          "normalizedName": "player headed shots on target",
+          "marketName": "Match Shots on Target",
+          "normalizedName": "match shots on target",
           "oddsShape": [
             {
-              "label": "Almoez Ali (2)",
-              "hdp": 0.5,
-              "over": "5.500"
-            },
-            {
-              "label": "Almoez Ali (2)",
-              "hdp": 1.5,
-              "over": "34.000"
+              "hdp": 8.5,
+              "over": "1.800",
+              "under": "1.909"
             }
           ]
         }
