@@ -27,7 +27,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "odds-api-io-wc-v2-full-statmaker-market-discovery"
+SCRIPT_VERSION = "odds-api-io-wc-v3-full-statmaker-market-mapping"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -43,6 +43,25 @@ DISCOVERY_TARGETS = [
     "CARDS",
     "SHOTS",
     "SHOTS_ON_TARGET",
+]
+
+EMITTED_MARKETS = [
+    "1X2",
+    "MATCH_GOALS",
+    "BTTS",
+    "TEAM_TOTAL_GOALS",
+    "MATCH_CORNERS",
+    "TEAM_CORNERS_HOME",
+    "TEAM_CORNERS_AWAY",
+    "MATCH_CARDS",
+    "TEAM_CARDS_HOME",
+    "TEAM_CARDS_AWAY",
+    "MATCH_SHOTS",
+    "TEAM_SHOTS_HOME",
+    "TEAM_SHOTS_AWAY",
+    "MATCH_SHOTS_ON_TARGET",
+    "TEAM_SHOTS_ON_TARGET_HOME",
+    "TEAM_SHOTS_ON_TARGET_AWAY",
 ]
 
 
@@ -385,6 +404,76 @@ def raw_market_display_name(market: Dict[str, Any]) -> str:
     return str(market.get("name") or market.get("market") or market.get("type") or market.get("key") or "UNKNOWN")
 
 
+def is_allowed_bookmaker(bookmaker: str, requested: Iterable[str]) -> bool:
+    wanted = {normalize_text(x) for x in requested if str(x).strip()}
+    return normalize_text(bookmaker) in wanted
+
+
+def is_full_time_market_name(raw_name: str) -> bool:
+    name = normalize_text(raw_name)
+    if re.search(r"\b(ht|2h|1h)\b", name):
+        return False
+    blocked = [
+        "half",
+        "1st",
+        "2nd",
+        "first 10 minutes",
+        "first half",
+        "second half",
+    ]
+    return not any(token in name for token in blocked)
+
+
+def is_clean_over_under_row(row: Dict[str, Any]) -> Tuple[Optional[float], Optional[float], Optional[float]]:
+    line = line_float(row.get("max") or row.get("points") or row.get("line") or row.get("handicap") or row.get("hdp"))
+    over_odd = to_float(row.get("over"))
+    under_odd = to_float(row.get("under"))
+    if line is None or over_odd is None or under_odd is None:
+        return None, None, None
+    return line, over_odd, under_odd
+
+
+def event_side_from_market_name(raw_name: str) -> Optional[str]:
+    name = normalize_text(raw_name)
+    if re.search(r"\bhome\b", name):
+        return "home"
+    if re.search(r"\baway\b", name):
+        return "away"
+    return None
+
+
+def fixture_side_for_event_side(event_side: str, orientation: str) -> str:
+    if event_side == "home":
+        return "HOME" if orientation == "same" else "AWAY"
+    return "AWAY" if orientation == "same" else "HOME"
+
+
+def fixture_team_for_side(fixture: Dict[str, Any], fixture_side: str) -> Any:
+    return fixture.get("homeTeam") if fixture_side == "HOME" else fixture.get("awayTeam")
+
+
+def side_marker_for_output(fixture_side: str) -> str:
+    return "Home" if fixture_side == "HOME" else "Away"
+
+
+def add_ou_pair(
+    out: List[Dict[str, Any]],
+    base: Dict[str, Any],
+    market_code: str,
+    selection_prefix: str,
+    line: float,
+    over_odd: float,
+    under_odd: float,
+    *,
+    team: Any = None,
+) -> None:
+    team_part = {"team": team} if team is not None else {}
+    out.extend([
+        {**base, **team_part, "market": market_code, "selection": f"{selection_prefix} Over {line:g}", "line": line, "side": "over", "odds": over_odd},
+        {**base, **team_part, "market": market_code, "selection": f"{selection_prefix} Under {line:g}", "line": line, "side": "under", "odds": under_odd},
+    ])
+
+
 def discovery_categories(raw_name: str) -> List[str]:
     name = normalize_text(raw_name)
     categories: List[str] = []
@@ -483,7 +572,10 @@ def finalize_market_discovery(debug: Dict[str, Any]) -> None:
 
 
 def extract_1x2(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
     name = market_name(market)
+    if not is_full_time_market_name(raw_name):
+        return []
     if not any(token in name for token in ["ml", "moneyline", "match result", "match winner", "1x2"]):
         return []
     odds_rows = market.get("odds")
@@ -513,35 +605,37 @@ def extract_1x2(market: Dict[str, Any], fixture: Dict[str, Any], orientation: st
 
 
 def extract_match_goals(market: Dict[str, Any], bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
     name = market_name(market)
-    if "team total" in name or "teamtotal" in name:
+    if not is_full_time_market_name(raw_name):
         return []
-    if not any(token in name for token in ["over under", "total", "totals", "goals"]):
+    blocked = ["team", "corner", "booking", "bookings", "card", "cards", "foul", "fouls", "offside", "offsides", "tackle", "tackles", "shot", "shots", "save", "saves", "player"]
+    if any(token in name for token in blocked):
+        return []
+    allowed_names = {"totals", "goals over under", "alternative total goals", "alternative goal line"}
+    if name not in allowed_names and not ("goal" in name and any(token in name for token in ["over under", "total", "line"])):
         return []
     odds_rows = market.get("odds")
     if not isinstance(odds_rows, list):
         return []
-    out = []
+    out: List[Dict[str, Any]] = []
     for row in odds_rows:
         if not isinstance(row, dict):
             continue
-        line = line_float(row.get("max") or row.get("points") or row.get("line") or row.get("handicap") or row.get("hdp"))
-        if line not in MAIN_TOTAL_LINES:
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line not in MAIN_TOTAL_LINES or over_odd is None or under_odd is None:
             continue
-        over_odd = to_float(row.get("over"))
-        under_odd = to_float(row.get("under"))
-        if over_odd and under_odd:
-            base = base_market_meta(market, bookmaker, "odds_api_io_exact_match_goals")
-            out.extend([
-                {**base, "market": "MATCH_GOALS", "selection": f"Over {line:g} Goals", "line": line, "side": "over", "odds": over_odd},
-                {**base, "market": "MATCH_GOALS", "selection": f"Under {line:g} Goals", "line": line, "side": "under", "odds": under_odd},
-            ])
-            debug_bucket["MATCH_GOALS"] = debug_bucket.get("MATCH_GOALS", 0) + 2
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_match_goals")
+        add_ou_pair(out, base, "MATCH_GOALS", "Goals", line, over_odd, under_odd)
+        debug_bucket["MATCH_GOALS"] = debug_bucket.get("MATCH_GOALS", 0) + 2
     return out
 
 
 def extract_btts(market: Dict[str, Any], bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
     name = market_name(market)
+    if not is_full_time_market_name(raw_name):
+        return []
     if not any(token in name for token in ["both teams", "btts", "both teams to score"]):
         return []
     odds_rows = market.get("odds")
@@ -565,35 +659,193 @@ def extract_btts(market: Dict[str, Any], bookmaker: str, debug_bucket: Dict[str,
 
 
 def extract_team_totals(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
     name = market_name(market)
-    if not any(token in name for token in ["team total", "team goals", "teamtotal"]):
+    if not is_full_time_market_name(raw_name):
         return []
+    if not any(token in name for token in ["team total", "team total goals", "teamtotal"]):
+        return []
+    if any(token in name for token in ["goalscorer", "scorer", "assist", "player"]):
+        return []
+    event_side = event_side_from_market_name(raw_name)
     odds_rows = market.get("odds")
     if not isinstance(odds_rows, list):
         return []
-    out = []
+    out: List[Dict[str, Any]] = []
     for row in odds_rows:
         if not isinstance(row, dict):
             continue
-        line = line_float(row.get("max") or row.get("points") or row.get("line") or row.get("handicap") or row.get("hdp"))
-        if line is None or line not in {0.5, 1.5, 2.5}:
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line not in {0.5, 1.5, 2.5} or over_odd is None or under_odd is None:
             continue
-        side = normalize_text(row.get("team") or row.get("side") or row.get("designation") or market.get("side") or market.get("team"))
-        if side in {"home", normalize_text(fixture.get("homeTeam"))}:
-            team = fixture.get("homeTeam") if orientation == "same" else fixture.get("awayTeam")
-        elif side in {"away", normalize_text(fixture.get("awayTeam"))}:
-            team = fixture.get("awayTeam") if orientation == "same" else fixture.get("homeTeam")
-        else:
-            team = row.get("team") or market.get("team")
-        over_odd = to_float(row.get("over"))
-        under_odd = to_float(row.get("under"))
-        if over_odd and under_odd:
-            base = base_market_meta(market, bookmaker, "odds_api_io_exact_team_totals")
-            out.extend([
-                {**base, "market": "TEAM_TOTAL_GOALS", "selection": f"{team} Over {line:g} Goals", "team": team, "line": line, "side": "over", "odds": over_odd},
-                {**base, "market": "TEAM_TOTAL_GOALS", "selection": f"{team} Under {line:g} Goals", "team": team, "line": line, "side": "under", "odds": under_odd},
-            ])
-            debug_bucket["TEAM_TOTAL_GOALS"] = debug_bucket.get("TEAM_TOTAL_GOALS", 0) + 2
+        row_side = event_side
+        if row_side is None:
+            side = normalize_text(row.get("team") or row.get("side") or row.get("designation") or market.get("side") or market.get("team"))
+            if side in {"home", normalize_text(fixture.get("homeTeam"))}:
+                row_side = "home"
+            elif side in {"away", normalize_text(fixture.get("awayTeam"))}:
+                row_side = "away"
+        if row_side not in {"home", "away"}:
+            continue
+        fixture_side = fixture_side_for_event_side(row_side, orientation)
+        team = fixture_team_for_side(fixture, fixture_side)
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_team_total_goals")
+        prefix = f"{team} Goals"
+        add_ou_pair(out, base, "TEAM_TOTAL_GOALS", prefix, line, over_odd, under_odd, team=team)
+        debug_bucket["TEAM_TOTAL_GOALS"] = debug_bucket.get("TEAM_TOTAL_GOALS", 0) + 2
+    return out
+
+
+def extract_corners(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
+    name = market_name(market)
+    if not is_full_time_market_name(raw_name) or "corner" not in name:
+        return []
+    if any(token in name for token in ["spread", "handicap", "race", "player"]):
+        return []
+    event_side = event_side_from_market_name(raw_name)
+    if event_side is None:
+        allowed_match_names = {"corners totals", "corners", "corners 2 way", "alternative corners"}
+        if name not in allowed_match_names:
+            return []
+        market_code = "MATCH_CORNERS"
+        prefix = "Corners"
+        team = None
+    else:
+        fixture_side = fixture_side_for_event_side(event_side, orientation)
+        market_code = f"TEAM_CORNERS_{fixture_side}"
+        team = fixture_team_for_side(fixture, fixture_side)
+        prefix = f"{team} Corners"
+    odds_rows = market.get("odds")
+    if not isinstance(odds_rows, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for row in odds_rows:
+        if not isinstance(row, dict):
+            continue
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line is None or over_odd is None or under_odd is None:
+            continue
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_corners")
+        add_ou_pair(out, base, market_code, prefix, line, over_odd, under_odd, team=team)
+        debug_bucket[market_code] = debug_bucket.get(market_code, 0) + 2
+    return out
+
+
+def extract_cards(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
+    name = market_name(market)
+    if not is_full_time_market_name(raw_name):
+        return []
+    if not any(token in name for token in ["booking", "bookings", "card", "cards"]):
+        return []
+    if any(token in name for token in ["spread", "handicap", "player", "to be booked"]):
+        return []
+    event_side = event_side_from_market_name(raw_name)
+    if event_side is None:
+        allowed_match_names = {"bookings totals", "number of cards in match"}
+        if name not in allowed_match_names:
+            return []
+        market_code = "MATCH_CARDS"
+        prefix = "Cards"
+        team = None
+    else:
+        # Only team cards, not generic spread/handicap markets with home/away.
+        if "team" not in name:
+            return []
+        fixture_side = fixture_side_for_event_side(event_side, orientation)
+        market_code = f"TEAM_CARDS_{fixture_side}"
+        team = fixture_team_for_side(fixture, fixture_side)
+        prefix = f"{team} Cards"
+    odds_rows = market.get("odds")
+    if not isinstance(odds_rows, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for row in odds_rows:
+        if not isinstance(row, dict):
+            continue
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line is None or over_odd is None or under_odd is None:
+            continue
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_cards")
+        add_ou_pair(out, base, market_code, prefix, line, over_odd, under_odd, team=team)
+        debug_bucket[market_code] = debug_bucket.get(market_code, 0) + 2
+    return out
+
+
+def extract_shots(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
+    name = market_name(market)
+    if not is_full_time_market_name(raw_name):
+        return []
+    if "shot" not in name or "target" in name:
+        return []
+    if any(token in name for token in ["player", "most"]):
+        return []
+    event_side = event_side_from_market_name(raw_name)
+    if event_side is None:
+        allowed_match_names = {"match shots", "total shots"}
+        if name not in allowed_match_names:
+            return []
+        market_code = "MATCH_SHOTS"
+        prefix = "Shots"
+        team = None
+    else:
+        fixture_side = fixture_side_for_event_side(event_side, orientation)
+        market_code = f"TEAM_SHOTS_{fixture_side}"
+        team = fixture_team_for_side(fixture, fixture_side)
+        prefix = f"{team} Shots"
+    odds_rows = market.get("odds")
+    if not isinstance(odds_rows, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for row in odds_rows:
+        if not isinstance(row, dict):
+            continue
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line is None or over_odd is None or under_odd is None:
+            continue
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_shots")
+        add_ou_pair(out, base, market_code, prefix, line, over_odd, under_odd, team=team)
+        debug_bucket[market_code] = debug_bucket.get(market_code, 0) + 2
+    return out
+
+
+def extract_shots_on_target(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
+    raw_name = raw_market_display_name(market)
+    name = market_name(market)
+    if not is_full_time_market_name(raw_name):
+        return []
+    if "shot" not in name or "target" not in name:
+        return []
+    if any(token in name for token in ["player", "most", "headed", "outside box"]):
+        return []
+    event_side = event_side_from_market_name(raw_name)
+    if event_side is None:
+        allowed_match_names = {"match shots on target", "total shots on target"}
+        if name not in allowed_match_names:
+            return []
+        market_code = "MATCH_SHOTS_ON_TARGET"
+        prefix = "Shots on Target"
+        team = None
+    else:
+        fixture_side = fixture_side_for_event_side(event_side, orientation)
+        market_code = f"TEAM_SHOTS_ON_TARGET_{fixture_side}"
+        team = fixture_team_for_side(fixture, fixture_side)
+        prefix = f"{team} Shots on Target"
+    odds_rows = market.get("odds")
+    if not isinstance(odds_rows, list):
+        return []
+    out: List[Dict[str, Any]] = []
+    for row in odds_rows:
+        if not isinstance(row, dict):
+            continue
+        line, over_odd, under_odd = is_clean_over_under_row(row)
+        if line is None or over_odd is None or under_odd is None:
+            continue
+        base = base_market_meta(market, bookmaker, "odds_api_io_exact_shots_on_target")
+        add_ou_pair(out, base, market_code, prefix, line, over_odd, under_odd, team=team)
+        debug_bucket[market_code] = debug_bucket.get(market_code, 0) + 2
     return out
 
 
@@ -614,8 +866,11 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
     accepted_counts: Dict[str, int] = {}
 
     if isinstance(bookmakers, dict):
+        requested_bookmakers = debug.get("bookmakersRequested", [])
         for bookmaker, markets in bookmakers.items():
             if not isinstance(markets, list):
+                continue
+            if not is_allowed_bookmaker(str(bookmaker), requested_bookmakers):
                 continue
             for market in markets:
                 if not isinstance(market, dict):
@@ -627,6 +882,10 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
                 markets_out.extend(extract_match_goals(market, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_btts(market, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_team_totals(market, fixture, orientation, str(bookmaker), accepted_counts))
+                markets_out.extend(extract_corners(market, fixture, orientation, str(bookmaker), accepted_counts))
+                markets_out.extend(extract_cards(market, fixture, orientation, str(bookmaker), accepted_counts))
+                markets_out.extend(extract_shots(market, fixture, orientation, str(bookmaker), accepted_counts))
+                markets_out.extend(extract_shots_on_target(market, fixture, orientation, str(bookmaker), accepted_counts))
 
     return {
         "matchId": fixture.get("matchId"),
@@ -664,10 +923,10 @@ def main() -> int:
         "policy": {
             "singleOdds": "exact_api_mapped_odds_only",
             "noApproximateSingles": True,
-            "emittedMarkets": ["1X2", "MATCH_GOALS", "BTTS", "TEAM_TOTAL_GOALS"],
+            "emittedMarkets": EMITTED_MARKETS,
             "discoveryTargets": DISCOVERY_TARGETS,
             "matchGoalsLines": sorted(MAIN_TOTAL_LINES),
-            "note": "Discovery is diagnostic-only for corners/cards/shots/SOT; only emittedMarkets are written as normalized odds until mapping is approved.",
+            "note": "Corners/cards/shots/SOT are emitted only from clean full-time over/under rows with hdp + over + under odds. HT/2H/player/spread/handicap/N/A odds are excluded.",
         },
     }
 
@@ -711,7 +970,7 @@ def main() -> int:
             "scriptVersion": SCRIPT_VERSION,
             "oddsPolicy": debug["policy"],
             "bookmakersRequested": debug["bookmakersRequested"],
-            "marketsRequested": ["1X2", "MATCH_GOALS", "BTTS", "TEAM_TOTAL_GOALS"],
+            "marketsRequested": EMITTED_MARKETS,
             "matches": normalized_matches,
         }
         debug["summary"] = {
