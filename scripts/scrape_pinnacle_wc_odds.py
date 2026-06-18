@@ -46,7 +46,7 @@ BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v5-arcadia-api-parser"
+SCRIPT_VERSION = "pinnacle-wc-odds-v6-arcadia-ou-btts-parser"
 
 NETWORK_API_KEYWORDS = [
     "api",
@@ -528,6 +528,223 @@ def is_1x2_market_candidate(market: dict[str, Any]) -> bool:
     return len(outcomes) >= 3
 
 
+def extract_numeric_line_from_obj(value: Any) -> float | None:
+    """Return an explicit betting line from a market/outcome object.
+
+    This is not an odds guess. It only reads line/points/handicap/total values
+    already present in the API payload, or explicit text such as "Over 2.5".
+    """
+    if isinstance(value, dict):
+        for key in [
+            "line", "points", "point", "handicap", "spread", "total", "totalPoints",
+            "value", "threshold", "limit", "number",
+        ]:
+            raw = value.get(key)
+            if isinstance(raw, bool) or raw is None:
+                continue
+            if isinstance(raw, (int, float)):
+                number = float(raw)
+                if 0 <= number <= 20:
+                    return round(number, 2)
+            if isinstance(raw, str):
+                token = clean_text(raw)
+                m = re.fullmatch(r"\d{1,2}(?:[\.,][05])?", token)
+                if m:
+                    return round(float(token.replace(",", ".")), 2)
+        for key in ["name", "label", "description", "title", "displayName", "marketName"]:
+            text = clean_text(value.get(key))
+            m = re.search(r"\b(?:over|under|o|u)\s*(\d{1,2}(?:[\.,][05])?)\b", text, re.IGNORECASE)
+            if m:
+                return round(float(m.group(1).replace(",", ".")), 2)
+            m = re.search(r"\b(\d{1,2}(?:[\.,][05])?)\s*(?:goals?|total)\b", text, re.IGNORECASE)
+            if m:
+                return round(float(m.group(1).replace(",", ".")), 2)
+    return None
+
+
+def outcome_label_text(outcome: dict[str, Any]) -> str:
+    return normalize_text(" ".join(
+        clean_text(outcome.get(key))
+        for key in ["name", "label", "description", "designation", "side", "type", "title", "displayName"]
+        if key in outcome
+    ))
+
+
+def outcome_total_side(outcome: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Return over/under only from explicit API labels/designations."""
+    label = outcome_label_text(outcome)
+    raw = normalize_text(json_dumps_safe(outcome, limit=2500))
+    if re.search(r"\b(over|o)\b", label):
+        return "Over", "explicit_outcome_label"
+    if re.search(r"\b(under|u)\b", label):
+        return "Under", "explicit_outcome_label"
+    # If the payload uses terse codes, accept common explicit fields only.
+    for key in ["designation", "type", "side", "name", "label"]:
+        value = normalize_text(clean_text(outcome.get(key)))
+        if value in {"over", "o"}:
+            return "Over", f"explicit_{key}"
+        if value in {"under", "u"}:
+            return "Under", f"explicit_{key}"
+    # Do not infer from arbitrary raw JSON unless the words are explicit and isolated.
+    if re.search(r"\b(over|under)\b", raw):
+        if re.search(r"\bover\b", raw) and not re.search(r"\bunder\b", raw):
+            return "Over", "explicit_raw_over"
+        if re.search(r"\bunder\b", raw) and not re.search(r"\bover\b", raw):
+            return "Under", "explicit_raw_under"
+    return None, None
+
+
+def is_total_market_candidate(market: dict[str, Any]) -> bool:
+    text = market_text(market)
+    if any(token in text for token in ["corner", "card", "player", "team total", "team goals", "spread", "handicap"]):
+        return False
+    if any(token in text for token in ["total", "totals", "over under", "over/under", "match goals", "game total"]):
+        return True
+    outcomes = collect_outcomes(market)
+    sides = {outcome_total_side(outcome)[0] for outcome in outcomes}
+    return "Over" in sides and "Under" in sides and extract_numeric_line_from_obj(market) is not None
+
+
+def build_total_goals_from_api_market(market: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    debug: dict[str, Any] = {
+        "marketKeys": list(market.keys())[:24],
+        "marketText": market_text(market),
+        "outcomesChecked": 0,
+        "accepted": False,
+        "notes": [],
+    }
+    if not is_total_market_candidate(market):
+        debug["notes"].append("market rejected: not an explicit match total goals candidate")
+        return [], debug
+
+    market_line = extract_numeric_line_from_obj(market)
+    mapped: dict[str, dict[str, Any]] = {}
+    outcomes_debug: list[dict[str, Any]] = []
+    for outcome in collect_outcomes(market):
+        debug["outcomesChecked"] += 1
+        side, side_source = outcome_total_side(outcome)
+        odd, price_source = extract_price_from_outcome(outcome)
+        line = extract_numeric_line_from_obj(outcome) or market_line
+        outcomes_debug.append({
+            "keys": list(outcome.keys())[:18],
+            "side": side,
+            "sideSource": side_source,
+            "line": line,
+            "odd": odd,
+            "priceSource": price_source,
+            "sample": json_dumps_safe(outcome, limit=700),
+        })
+        if side in {"Over", "Under"} and odd is not None and line is not None:
+            key = f"{side}:{line:g}"
+            if key not in mapped:
+                mapped[key] = {"side": side, "line": float(line), "odd": odd, "sideSource": side_source, "priceSource": price_source}
+
+    debug["outcomesSample"] = outcomes_debug[:10]
+    debug["mapped"] = mapped
+    markets: list[dict[str, Any]] = []
+    lines = sorted({item["line"] for item in mapped.values()})
+    for line in lines:
+        over = mapped.get(f"Over:{line:g}")
+        under = mapped.get(f"Under:{line:g}")
+        if not over or not under:
+            continue
+        if not (MIN_ODD <= float(over["odd"]) <= MAX_ODD and MIN_ODD <= float(under["odd"]) <= MAX_ODD):
+            continue
+        for item in [over, under]:
+            unique_market(markets, {
+                "market": "MATCH_GOALS",
+                "selection": f"{item['side']} {line:g} Goals",
+                "team": None,
+                "line": line,
+                "odd": round(float(item["odd"]), 2),
+                "confidence": "high",
+                "extraction": "pinnacle_arcadia_api_exact_match_goals",
+            })
+
+    if not markets:
+        debug["notes"].append("market rejected: explicit Over/Under pair with same line and exact prices not found")
+        return [], debug
+    debug["accepted"] = True
+    debug["notes"].append("accepted exact API mapped match goals Over/Under market")
+    return markets, debug
+
+
+def outcome_yes_no(outcome: dict[str, Any]) -> tuple[str | None, str | None]:
+    label = outcome_label_text(outcome)
+    for key in ["name", "label", "description", "designation", "side", "type", "title"]:
+        value = normalize_text(clean_text(outcome.get(key)))
+        if value in {"yes", "y"}:
+            return "Yes", f"explicit_{key}"
+        if value in {"no", "n"}:
+            return "No", f"explicit_{key}"
+    if re.search(r"\byes\b", label):
+        return "Yes", "explicit_outcome_label"
+    if re.search(r"\bno\b", label):
+        return "No", "explicit_outcome_label"
+    return None, None
+
+
+def is_btts_market_candidate(market: dict[str, Any]) -> bool:
+    text = market_text(market)
+    if any(token in text for token in ["both teams", "btts", "both teams to score", "team to score"]):
+        return True
+    # Do not accept generic yes/no markets unless the market text identifies BTTS.
+    return False
+
+
+def build_btts_from_api_market(market: dict[str, Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    debug: dict[str, Any] = {
+        "marketKeys": list(market.keys())[:24],
+        "marketText": market_text(market),
+        "outcomesChecked": 0,
+        "accepted": False,
+        "notes": [],
+    }
+    if not is_btts_market_candidate(market):
+        debug["notes"].append("market rejected: not an explicit BTTS candidate")
+        return [], debug
+    mapped: dict[str, dict[str, Any]] = {}
+    outcomes_debug: list[dict[str, Any]] = []
+    for outcome in collect_outcomes(market):
+        debug["outcomesChecked"] += 1
+        yn, yn_source = outcome_yes_no(outcome)
+        odd, price_source = extract_price_from_outcome(outcome)
+        outcomes_debug.append({
+            "keys": list(outcome.keys())[:18],
+            "yesNo": yn,
+            "yesNoSource": yn_source,
+            "odd": odd,
+            "priceSource": price_source,
+            "sample": json_dumps_safe(outcome, limit=700),
+        })
+        if yn in {"Yes", "No"} and odd is not None and yn not in mapped:
+            mapped[yn] = {"odd": odd, "yesNoSource": yn_source, "priceSource": price_source}
+    debug["outcomesSample"] = outcomes_debug[:10]
+    debug["mapped"] = mapped
+    if not all(side in mapped for side in ["Yes", "No"]):
+        debug["notes"].append("market rejected: exact Yes/No BTTS mapping not complete")
+        return [], debug
+
+    markets: list[dict[str, Any]] = []
+    for label in ["Yes", "No"]:
+        odd = float(mapped[label]["odd"])
+        if not (MIN_ODD <= odd <= MAX_ODD):
+            debug["notes"].append(f"market rejected: {label} odd outside accepted bounds")
+            return [], debug
+        unique_market(markets, {
+            "market": "BTTS",
+            "selection": label,
+            "team": None,
+            "line": None,
+            "odd": round(odd, 2),
+            "confidence": "high",
+            "extraction": "pinnacle_arcadia_api_exact_btts",
+        })
+    debug["accepted"] = True
+    debug["notes"].append("accepted exact API mapped BTTS market")
+    return markets, debug
+
+
 def build_1x2_from_api_market(market: dict[str, Any], fixture: Fixture, participant_map: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     debug: dict[str, Any] = {
         "marketKeys": list(market.keys())[:24],
@@ -645,22 +862,31 @@ def build_markets_from_api_payloads(fixture: Fixture, api_payloads: list[dict[st
             debug["participantMappedObjects"] += 1
             for market in collect_market_objects(obj):
                 debug["marketCandidatesChecked"] += 1
-                candidate_markets, market_debug = build_1x2_from_api_market(market, fixture, participant_map)
+                one_x_two_markets, one_x_two_debug = build_1x2_from_api_market(market, fixture, participant_map)
+                total_markets, total_debug = build_total_goals_from_api_market(market)
+                btts_markets, btts_debug = build_btts_from_api_market(market)
                 if len(debug["samples"]) < 10:
                     debug["samples"].append({
                         "url": url,
                         "participantDebug": participant_debug,
-                        "marketDebug": market_debug,
+                        "marketDebug": {
+                            "1X2": one_x_two_debug,
+                            "MATCH_GOALS": total_debug,
+                            "BTTS": btts_debug,
+                        },
                     })
-                for candidate in candidate_markets:
+                for candidate in one_x_two_markets + total_markets + btts_markets:
                     unique_market(markets, candidate)
             if markets:
                 debug["accepted"] = True
-                debug["notes"].append(f"accepted exact API mapped 1X2 from {url}")
+                debug["notes"].append(f"accepted exact API mapped markets from {url}; counts={count_market_types(markets)}")
+                # Continue scanning payloads after finding 1X2, because totals/BTTS can live in
+                # separate market containers or nearby objects. Stop only after this fixture has
+                # gathered all high-confidence markets visible in this candidate object.
                 return markets, debug
 
     if not markets:
-        debug["notes"].append("No exact API-mapped 1X2 market found; singles remain empty.")
+        debug["notes"].append("No exact API-mapped 1X2/MATCH_GOALS/BTTS market found; singles remain empty.")
     return markets, debug
 
 
@@ -1346,7 +1572,7 @@ def main() -> None:
             "This scraper rejects low-confidence 1X2 extraction, including identical generic/nearby tokens.",
             "Only high-confidence labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
             "If too few markets are emitted, inspect bestPage.networkApiCandidatesTop for Pinnacle JSON/API endpoints rather than accepting nearby visible-text odds.",
-            "This version parses Pinnacle Arcadia API JSON first, but still emits no single odds unless exact high-confidence mapping is available.",
+            "This version parses Pinnacle Arcadia API JSON first, including exact 1X2, match goals Over/Under, and BTTS when explicitly mapped.",
         ],
     }
 
