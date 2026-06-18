@@ -1,6 +1,811 @@
 {
   "source": "odds_api_io",
-  "provider": "Odds-API.io",
+  "generatedAt": "2026-06-18T11:51:07Z",
   "scriptVersion": "odds-api-io-wc-v1-normalized-markets",
-  "status": "placeholder_before_first_workflow_run"
+  "fixturesPath": "world-cup/world_cup_2026.json",
+  "outputPath": "odds/odds_api_io/world_cup_odds.json",
+  "debugPath": "odds/odds_api_io/debug_report.json",
+  "policy": {
+    "singleOdds": "exact_api_mapped_odds_only",
+    "noApproximateSingles": true,
+    "emittedMarkets": [
+      "1X2",
+      "MATCH_GOALS",
+      "BTTS",
+      "TEAM_TOTAL_GOALS"
+    ],
+    "matchGoalsLines": [
+      1.5,
+      2.5,
+      3.5
+    ]
+  },
+  "bookmakersRequested": [
+    "Bet365",
+    "Unibet"
+  ],
+  "fixturesLoaded": 56,
+  "unplayedFixtures": 32,
+  "apiCalls": [
+    {
+      "path": "/leagues",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "all": "true"
+      },
+      "status": 200,
+      "durationMs": 351,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "99",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 122786,
+      "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 0}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 5}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eventsCount\": 0}, {\"name\": \"Argentina - Liga Profesional\", \"slug\": \"argentina-liga-profesional\", \"eventsCount\": 0}, {\"name\": \"Argentina - Primera B\", \"slug\": \"argentina-primera-b\", \"eventsCount\": 166}, {\"name\": \"Argentina - Primera B Nacional\", \"slug\": \"argentina-primera-b-nacional\", \"eventsCount\": 235}, {\"name\": \"Argentina - Primera C\", \"slug\": \"argentina-primera-c\", \"eventsCount\": 168}, {\"name\": \"Ar..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "status": "pending,live",
+        "from": "2026-06-16T00:00:00Z",
+        "to": "2026-06-27T23:59:59Z",
+        "limit": 5000,
+        "league": "international-fifa-world-cup"
+      },
+      "status": 200,
+      "durationMs": 261,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "98",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 13454,
+      "sample": "[{\"id\": 66456910, \"home\": \"Czechia\", \"away\": \"South Africa\", \"homeId\": 4714, \"awayId\": 4736, \"date\": \"2026-06-18T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456922, \"home\": \"Switzerland\", \"away\": \"Bosnia and Herzegovina\", \"homeId\": 4699, \"awayId\": 4479, \"date\": \"2026-06-18T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456920, \"home\": \"Canada\", \"away\": \"Qatar\", \"homeId\": 4752, \"awayId\": 4792, \"date\": \"2026-06-18T22:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456908, \"home\": \"Mexico\", \"away\": \"Korea Republic\", \"homeId\": 4781, \"awayId\": 4735, \"date\": \"2026-06-19T01:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456944, \"home\": \"USA\", \"away\": \"Australia\", \"homeId\": 4724, \"awayId\": 4741, \"date\": \"2026-06-19T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66456934, \"home\": \"Scotland\", \"away\": \"Morocco\", \"homeId\": 4695, \"awayId\": 4778, \"date\": \"2026-06-19T22:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"le..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "status": "pending,live",
+        "from": "2026-06-16T00:00:00Z",
+        "to": "2026-06-27T23:59:59Z",
+        "limit": 5000,
+        "league": "international-fifa-world-cup-qualification-caf"
+      },
+      "status": 200,
+      "durationMs": 210,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "97",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 2,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "status": "pending,live",
+        "from": "2026-06-16T00:00:00Z",
+        "to": "2026-06-27T23:59:59Z",
+        "limit": 5000,
+        "league": "international-fifa-world-cup-women-qualification-ofc"
+      },
+      "status": 200,
+      "durationMs": 203,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "96",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 2,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "status": "pending,live",
+        "from": "2026-06-16T00:00:00Z",
+        "to": "2026-06-27T23:59:59Z",
+        "limit": 5000,
+        "league": "international-fifa-world-cup-women-qualification-uefa-gr-a1"
+      },
+      "status": 200,
+      "durationMs": 214,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "95",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 2,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "status": "pending,live",
+        "from": "2026-06-16T00:00:00Z",
+        "to": "2026-06-27T23:59:59Z",
+        "limit": 5000,
+        "league": "international-fifa-world-cup-women-qualification-uefa-gr-a2"
+      },
+      "status": 200,
+      "durationMs": 217,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "94",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 2,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "bookmakers": "Bet365,Unibet",
+        "eventIds": "66456910,66456922,66456920,66456908,66456944,66456934,66456932,66456972,66457074,66457076"
+      },
+      "status": 200,
+      "durationMs": 386,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "93",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 1314542,
+      "sample": "[{\"id\": 66456910, \"home\": \"Czechia\", \"away\": \"South Africa\", \"homeId\": 4714, \"awayId\": 4736, \"date\": \"2026-06-18T16:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E192256753/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1027164910\"}, \"bookmakerIds\": {\"Bet365\": \"192256753\", \"Bet365_4\": \"192256753-bot365\", \"Unibet\": \"1027164910\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T10:07:47.826Z\", \"odds\": [{\"home\": \"1.800\", \"draw\": \"3.600\", \"away\": \"4.500\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T11:01:22.78Z\", \"odds\": [{\"home\": \"1.333\", \"away\": \"3.250\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T07:13:40.912Z\", \"odds\": [{\"label\": \"Czechia or South Africa\", \"under\": \"1.285\"}, {\"label\": \"Draw or South Africa\", \"under\": \"1.909\"}, {\"label\": \"Czechia or Draw\", \"under\": \"1.222\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T11:22:25.737Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"1.800\", \"away\": \"2.050\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T10:51:37.553Z\", \"odds\": [{\"hdp\": 2.25, \"over\": \"1.925\", \"under\": \"1.925\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T06:25:10.308Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"2.100\", \"under\": \"1.727\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T06:25:10.308Z\", \"odds\": [{\"yes\": \"1.950\", \"no\": \"1.800\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T10:12:47.578Z\", \"odds\": [{\"hdp\": -0.25, \"home\": \"2.000\", \"away\": \"1.850\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-17T20:56:23.242Z\", \"odds\": [{\"hdp\": 1, \"over\": \"2.100\", \"under\": \"1.775\"}]}, {\"name\": \"European Handicap\", \"updatedAt\"..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "bookmakers": "Bet365,Unibet",
+        "eventIds": "66456974,66456998,66456986,66457000,66456988,66457022,66457010,66457012,66457024,66457034"
+      },
+      "status": 200,
+      "durationMs": 370,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "92",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 1102499,
+      "sample": "[{\"id\": 66456986, \"home\": \"Belgium\", \"away\": \"Iran\", \"homeId\": 4717, \"awayId\": 4766, \"date\": \"2026-06-21T19:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699808/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862147\"}, \"bookmakerIds\": {\"Bet365\": \"194699808\", \"Bet365_4\": \"194699808-bot365\", \"Unibet\": \"1025862147\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T09:53:34.222Z\", \"odds\": [{\"home\": \"1.444\", \"draw\": \"4.500\", \"away\": \"7.500\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-16T06:23:02.808Z\", \"odds\": [{\"home\": \"1.125\", \"away\": \"6.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-16T05:49:06.031Z\", \"odds\": [{\"label\": \"Belgium or Iran\", \"under\": \"1.181\"}, {\"label\": \"Belgium or Draw\", \"under\": \"1.100\"}, {\"label\": \"Draw or Iran\", \"under\": \"2.750\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T10:21:05.27Z\", \"odds\": [{\"hdp\": -1.25, \"home\": \"2.000\", \"away\": \"1.850\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T10:27:42.237Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-05-15T16:11:46.531Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.909\", \"under\": \"1.909\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T11:04:38.035Z\", \"odds\": [{\"yes\": \"2.100\", \"no\": \"1.666\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-16T16:36:20.715Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"1.950\", \"away\": \"1.900\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-05-17T02:57:15.367Z\", \"odds\": [{\"hdp\": 1, \"over\": \"1.800\", \"under\": \"2.050\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T11:50:08.01..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "bookmakers": "Bet365,Unibet",
+        "eventIds": "66457046,66457048,66457036,66456926,66456924,66456938,66456936,66456912,66456914,66457080"
+      },
+      "status": 200,
+      "durationMs": 326,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "91",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 495728,
+      "sample": "[{\"id\": 66457046, \"home\": \"England\", \"away\": \"Ghana\", \"homeId\": 4713, \"awayId\": 4764, \"date\": \"2026-06-23T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699828/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862275\"}, \"bookmakerIds\": {\"Bet365\": \"194699828\", \"Bet365_4\": \"194699828-bot365\", \"Unibet\": \"1025862275\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T04:25:36.454Z\", \"odds\": [{\"home\": \"1.222\", \"draw\": \"6.250\", \"away\": \"13.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-18T10:03:48.842Z\", \"odds\": [{\"home\": \"1.050\", \"away\": \"11.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-18T07:53:09.13Z\", \"odds\": [{\"label\": \"Draw or Ghana\", \"under\": \"4.000\"}, {\"label\": \"England or Draw\", \"under\": \"1.040\"}, {\"label\": \"England or Ghana\", \"under\": \"1.125\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T05:32:55.053Z\", \"odds\": [{\"hdp\": -1.75, \"home\": \"1.900\", \"away\": \"1.950\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-18T01:59:22.021Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-18T02:30:53.678Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.666\", \"under\": \"2.200\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-18T06:40:09.981Z\", \"odds\": [{\"yes\": \"2.375\", \"no\": \"1.533\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-18T07:15:40.147Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"1.900\", \"away\": \"1.950\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-06-18T04:26:23.292Z\", \"odds\": [{\"hdp\": 1.25, \"over\": \"2.100\", \"under\": \"1.775\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T1..."
+    },
+    {
+      "path": "/odds",
+      "params": {
+        "apiKey": "***",
+        "bookmakers": "Bet365,Unibet",
+        "eventId": "66457078"
+      },
+      "status": 200,
+      "durationMs": 256,
+      "rateLimitLimit": "100",
+      "rateLimitRemaining": "90",
+      "rateLimitReset": "2026-06-18T12:51:08Z",
+      "bodyLength": 39932,
+      "sample": "{\"id\": 66457078, \"home\": \"Ecuador\", \"away\": \"Germany\", \"homeId\": 4757, \"awayId\": 4711, \"date\": \"2026-06-25T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International - FIFA World Cup\", \"slug\": \"international-fifa-world-cup\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E194699864/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025862129\"}, \"bookmakerIds\": {\"Bet365\": \"194699864\", \"Bet365_4\": \"194699864-bot365\", \"Unibet\": \"1025862129\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-18T10:41:57.549Z\", \"odds\": [{\"home\": \"5.250\", \"draw\": \"3.600\", \"away\": \"1.666\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-16T10:50:14.686Z\", \"odds\": [{\"home\": \"3.750\", \"away\": \"1.250\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-16T12:54:31.833Z\", \"odds\": [{\"label\": \"Ecuador or Germany\", \"under\": \"1.285\"}, {\"label\": \"Ecuador or Draw\", \"under\": \"2.100\"}, {\"label\": \"Draw or Germany\", \"under\": \"1.166\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-18T10:41:57.549Z\", \"odds\": [{\"hdp\": 0.75, \"home\": \"1.975\", \"away\": \"1.875\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-15T01:16:15.335Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.925\", \"under\": \"1.925\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-05-25T18:07:16.651Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.909\", \"under\": \"1.909\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-09T15:11:57.923Z\", \"odds\": [{\"yes\": \"1.800\", \"no\": \"1.950\"}]}, {\"name\": \"Spread HT\", \"updatedAt\": \"2026-06-16T14:10:16.275Z\", \"odds\": [{\"hdp\": 0.25, \"home\": \"2.025\", \"away\": \"1.825\"}]}, {\"name\": \"Totals HT\", \"updatedAt\": \"2026-05-27T01:31:26.362Z\", \"odds\": [{\"hdp\": 1, \"over\": \"1.825\", \"under\": \"2.025\"}]}, {\"name\": \"European Handicap\", \"updatedAt\": \"2026-06-18T11:..."
+    }
+  ],
+  "leagueDiscovery": {
+    "mode": "api",
+    "leaguesSeen": 1250,
+    "selected": [
+      "international-fifa-world-cup",
+      "international-fifa-world-cup-qualification-caf",
+      "international-fifa-world-cup-women-qualification-ofc",
+      "international-fifa-world-cup-women-qualification-uefa-gr-a1",
+      "international-fifa-world-cup-women-qualification-uefa-gr-a2",
+      "international-fifa-world-cup-women-qualification-uefa-gr-a3",
+      "international-fifa-world-cup-women-qualification-uefa-gr-a4",
+      "international-fifa-world-cup-women-qualification-uefa-gr-b1",
+      "international-fifa-world-cup-women-qualification-uefa-gr-b2",
+      "international-fifa-world-cup-women-qualification-uefa-gr-b3"
+    ],
+    "samples": [
+      {
+        "name": "International - FIFA World Cup",
+        "slug": "international-fifa-world-cup",
+        "eventsCount": 80
+      },
+      {
+        "name": "International - FIFA World Cup, Qualification CAF",
+        "slug": "international-fifa-world-cup-qualification-caf",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, OFC",
+        "slug": "international-fifa-world-cup-women-qualification-ofc",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. A1",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-a1",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. A2",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-a2",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. A3",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-a3",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. A4",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-a4",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. B1",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-b1",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. B2",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-b2",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. B3",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-b3",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. B4",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-b4",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C1",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c1",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C2",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c2",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C3",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c3",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C4",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c4",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C5",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c5",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - FIFA World Cup, Women, Qualification, UEFA, Gr. C6",
+        "slug": "international-fifa-world-cup-women-qualification-uefa-gr-c6",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - World Cup",
+        "slug": "international-world-cup",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - World Cup Qualification, AFC",
+        "slug": "international-world-cup-qualification-afc",
+        "eventsCount": 0
+      },
+      {
+        "name": "International - World Cup Qualification CONCACAF",
+        "slug": "international-world-cup-qualification-concacaf",
+        "eventsCount": 0
+      }
+    ],
+    "fallback": null
+  },
+  "eventsFetch": {
+    "from": "2026-06-16T00:00:00Z",
+    "to": "2026-06-27T23:59:59Z",
+    "eventsFetched": 46,
+    "sample": [
+      {
+        "id": 66456910,
+        "home": "Czechia",
+        "away": "South Africa",
+        "date": "2026-06-18T16:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456922,
+        "home": "Switzerland",
+        "away": "Bosnia and Herzegovina",
+        "date": "2026-06-18T19:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456920,
+        "home": "Canada",
+        "away": "Qatar",
+        "date": "2026-06-18T22:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456908,
+        "home": "Mexico",
+        "away": "Korea Republic",
+        "date": "2026-06-19T01:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456944,
+        "home": "USA",
+        "away": "Australia",
+        "date": "2026-06-19T19:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456934,
+        "home": "Scotland",
+        "away": "Morocco",
+        "date": "2026-06-19T22:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456932,
+        "home": "Brazil",
+        "away": "Haiti",
+        "date": "2026-06-20T00:30:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456946,
+        "home": "Turkiye",
+        "away": "Paraguay",
+        "date": "2026-06-20T03:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456972,
+        "home": "Netherlands",
+        "away": "Sweden",
+        "date": "2026-06-20T17:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457074,
+        "home": "Germany",
+        "away": "Ivory Coast",
+        "date": "2026-06-20T20:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457076,
+        "home": "Ecuador",
+        "away": "Curacao",
+        "date": "2026-06-21T00:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456974,
+        "home": "Tunisia",
+        "away": "Japan",
+        "date": "2026-06-21T04:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456998,
+        "home": "Spain",
+        "away": "Saudi Arabia",
+        "date": "2026-06-21T16:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456986,
+        "home": "Belgium",
+        "away": "Iran",
+        "date": "2026-06-21T19:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457000,
+        "home": "Uruguay",
+        "away": "Cape Verde",
+        "date": "2026-06-21T22:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66456988,
+        "home": "New Zealand",
+        "away": "Egypt",
+        "date": "2026-06-22T01:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457022,
+        "home": "Argentina",
+        "away": "Austria",
+        "date": "2026-06-22T17:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457010,
+        "home": "France",
+        "away": "Iraq",
+        "date": "2026-06-22T21:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457012,
+        "home": "Norway",
+        "away": "Senegal",
+        "date": "2026-06-23T00:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      },
+      {
+        "id": 66457024,
+        "home": "Jordan",
+        "away": "Algeria",
+        "date": "2026-06-23T03:00:00Z",
+        "status": "pending",
+        "league": {
+          "name": "International - FIFA World Cup",
+          "slug": "international-fifa-world-cup"
+        },
+        "bookmakerCount": null
+      }
+    ]
+  },
+  "eventMatching": {
+    "unplayedFixtures": 32,
+    "matched": 31,
+    "unmatched": 1,
+    "unmatchedSample": [
+      {
+        "matchId": "wc2026_turkey_paraguay",
+        "homeTeam": "Turkey",
+        "awayTeam": "Paraguay",
+        "date": "2026-06-20"
+      }
+    ],
+    "matchedSample": [
+      {
+        "matchId": "wc2026_czech_republic_south_africa",
+        "fixture": "Czech Republic - South Africa",
+        "eventId": 66456910,
+        "event": "Czechia - South Africa",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_switzerland_bosnia_herzegovina",
+        "fixture": "Switzerland - Bosnia & Herzegovina",
+        "eventId": 66456922,
+        "event": "Switzerland - Bosnia and Herzegovina",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_canada_qatar",
+        "fixture": "Canada - Qatar",
+        "eventId": 66456920,
+        "event": "Canada - Qatar",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_mexico_south_korea",
+        "fixture": "Mexico - South Korea",
+        "eventId": 66456908,
+        "event": "Mexico - Korea Republic",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_usa_australia",
+        "fixture": "USA - Australia",
+        "eventId": 66456944,
+        "event": "USA - Australia",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_scotland_morocco",
+        "fixture": "Scotland - Morocco",
+        "eventId": 66456934,
+        "event": "Scotland - Morocco",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_brazil_haiti",
+        "fixture": "Brazil - Haiti",
+        "eventId": 66456932,
+        "event": "Brazil - Haiti",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_netherlands_sweden",
+        "fixture": "Netherlands - Sweden",
+        "eventId": 66456972,
+        "event": "Netherlands - Sweden",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_germany_ivory_coast",
+        "fixture": "Germany - Ivory Coast",
+        "eventId": 66457074,
+        "event": "Germany - Ivory Coast",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_ecuador_curacao",
+        "fixture": "Ecuador - Curacao",
+        "eventId": 66457076,
+        "event": "Ecuador - Curacao",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_tunisia_japan",
+        "fixture": "Tunisia - Japan",
+        "eventId": 66456974,
+        "event": "Tunisia - Japan",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_spain_saudi_arabia",
+        "fixture": "Spain - Saudi Arabia",
+        "eventId": 66456998,
+        "event": "Spain - Saudi Arabia",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_belgium_iran",
+        "fixture": "Belgium - Iran",
+        "eventId": 66456986,
+        "event": "Belgium - Iran",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_uruguay_cape_verde",
+        "fixture": "Uruguay - Cape Verde",
+        "eventId": 66457000,
+        "event": "Uruguay - Cape Verde",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_new_zealand_egypt",
+        "fixture": "New Zealand - Egypt",
+        "eventId": 66456988,
+        "event": "New Zealand - Egypt",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_argentina_austria",
+        "fixture": "Argentina - Austria",
+        "eventId": 66457022,
+        "event": "Argentina - Austria",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_france_iraq",
+        "fixture": "France - Iraq",
+        "eventId": 66457010,
+        "event": "France - Iraq",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_norway_senegal",
+        "fixture": "Norway - Senegal",
+        "eventId": 66457012,
+        "event": "Norway - Senegal",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_jordan_algeria",
+        "fixture": "Jordan - Algeria",
+        "eventId": 66457024,
+        "event": "Jordan - Algeria",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_portugal_uzbekistan",
+        "fixture": "Portugal - Uzbekistan",
+        "eventId": 66457034,
+        "event": "Portugal - Uzbekistan",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_england_ghana",
+        "fixture": "England - Ghana",
+        "eventId": 66457046,
+        "event": "England - Ghana",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_panama_croatia",
+        "fixture": "Panama - Croatia",
+        "eventId": 66457048,
+        "event": "Panama - Croatia",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_colombia_d_r_congo",
+        "fixture": "Colombia - D.R. Congo",
+        "eventId": 66457036,
+        "event": "Colombia - Congo DR",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_bosnia_herzegovina_qatar",
+        "fixture": "Bosnia & Herzegovina - Qatar",
+        "eventId": 66456926,
+        "event": "Bosnia and Herzegovina - Qatar",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_switzerland_canada",
+        "fixture": "Switzerland - Canada",
+        "eventId": 66456924,
+        "event": "Switzerland - Canada",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_morocco_haiti",
+        "fixture": "Morocco - Haiti",
+        "eventId": 66456938,
+        "event": "Morocco - Haiti",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_scotland_brazil",
+        "fixture": "Scotland - Brazil",
+        "eventId": 66456936,
+        "event": "Scotland - Brazil",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_czech_republic_mexico",
+        "fixture": "Czech Republic - Mexico",
+        "eventId": 66456912,
+        "event": "Czechia - Mexico",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_south_africa_south_korea",
+        "fixture": "South Africa - South Korea",
+        "eventId": 66456914,
+        "event": "South Africa - Korea Republic",
+        "orientation": "same"
+      },
+      {
+        "matchId": "wc2026_curacao_ivory_coast",
+        "fixture": "Curacao - Ivory Coast",
+        "eventId": 66457080,
+        "event": "Curacao - Ivory Coast",
+        "orientation": "same"
+      }
+    ]
+  },
+  "oddsFetch": {
+    "requestedEventIds": 31,
+    "eventsWithOddsResponse": 31,
+    "bookmakersRequested": [
+      "Bet365",
+      "Unibet"
+    ]
+  },
+  "summary": {
+    "matchesNormalized": 31,
+    "matchesWithMarkets": 31,
+    "marketsFound": 2548,
+    "marketCounts": {
+      "1X2": 402,
+      "MATCH_GOALS": 1200,
+      "BTTS": 248,
+      "TEAM_TOTAL_GOALS": 698
+    }
+  }
 }
