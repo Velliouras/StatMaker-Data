@@ -43,12 +43,14 @@ MAX_NETWORK_API_CANDIDATES = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_API_C
 MAX_NETWORK_BODY_CHARS = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_BODY_CHARS", "6000"))
 MAX_DETAIL_PROBE_FIXTURES = int(os.getenv("STATMAKER_PINNACLE_DETAIL_PROBE_FIXTURES", "18"))
 MAX_DETAIL_ENDPOINTS_PER_MATCHUP = int(os.getenv("STATMAKER_PINNACLE_DETAIL_ENDPOINTS_PER_MATCHUP", "6"))
+MAX_BTTS_DISCOVERY_MARKETS = int(os.getenv("STATMAKER_PINNACLE_BTTS_DISCOVERY_MARKETS", "5000"))
+MAX_BTTS_DISCOVERY_SAMPLES = int(os.getenv("STATMAKER_PINNACLE_BTTS_DISCOVERY_SAMPLES", "80"))
 
 BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v7-matchup-detail-probe"
+SCRIPT_VERSION = "pinnacle-wc-odds-v8-btts-market-discovery"
 
 NETWORK_API_KEYWORDS = [
     "api",
@@ -1450,6 +1452,112 @@ def count_market_types(markets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
+
+def compact_outcome_sample(outcome: dict[str, Any]) -> dict[str, Any]:
+    """Small, JSON-safe outcome preview for market discovery diagnostics."""
+    preview: dict[str, Any] = {"keys": list(outcome.keys())[:18]}
+    for key in ["name", "label", "description", "designation", "side", "type", "title", "key", "participantId", "participantID", "participant_id", "teamId", "competitorId", "runnerId", "price", "decimalPrice", "odds"]:
+        if key in outcome and outcome.get(key) is not None:
+            preview[key] = clean_text(outcome.get(key)) if not isinstance(outcome.get(key), (dict, list)) else summarize_json_root(outcome.get(key))
+    odd, price_source = extract_price_from_outcome(outcome)
+    if odd is not None:
+        preview["parsedOdd"] = odd
+        preview["priceSource"] = price_source
+    return preview
+
+
+def discover_btts_market_candidates(api_payloads: list[dict[str, Any]]) -> dict[str, Any]:
+    """Diagnostic-only BTTS market discovery.
+
+    This function never emits odds. It only catalogues Pinnacle market objects that
+    might be related to BTTS, so the parser can later be tightened around a real
+    explicit market key/type. Single odds remain exact-only and are not inferred
+    from this discovery report.
+    """
+    report: dict[str, Any] = {
+        "strategy": "diagnostic_only_btts_market_discovery",
+        "policy": "no odds emitted from discovery; exact single odds only",
+        "payloadsChecked": len(api_payloads),
+        "marketObjectsScanned": 0,
+        "marketTextsTop": {},
+        "candidateCounts": {
+            "explicitBttsText": 0,
+            "bothTeamsText": 0,
+            "scoreText": 0,
+            "yesNoOutcomes": 0,
+            "yesNoWithScoreText": 0,
+        },
+        "samples": [],
+        "notes": [],
+    }
+
+    text_counts: dict[str, int] = {}
+    seen_samples: set[str] = set()
+
+    for payload in api_payloads:
+        url = str(payload.get("url") or "")
+        root = payload.get("jsonRoot")
+        for market in collect_market_objects(root):
+            if report["marketObjectsScanned"] >= MAX_BTTS_DISCOVERY_MARKETS:
+                report["notes"].append(f"stopped after STATMAKER_PINNACLE_BTTS_DISCOVERY_MARKETS={MAX_BTTS_DISCOVERY_MARKETS}")
+                report["marketTextsTop"] = dict(sorted(text_counts.items(), key=lambda item: item[1], reverse=True)[:80])
+                return report
+
+            report["marketObjectsScanned"] += 1
+            m_text = market_text(market)
+            if m_text:
+                text_counts[m_text] = text_counts.get(m_text, 0) + 1
+            raw_norm = normalize_text(json_dumps_safe(market, limit=10000))
+            outcomes = collect_outcomes(market)
+            outcome_labels = [outcome_label_text(item) for item in outcomes]
+            yes_count = sum(1 for label in outcome_labels if re.search(r"\byes\b", label))
+            no_count = sum(1 for label in outcome_labels if re.search(r"\bno\b", label))
+            has_yes_no = yes_count > 0 and no_count > 0
+
+            flags = {
+                "explicitBttsText": any(token in raw_norm for token in ["btts", "both teams to score"]),
+                "bothTeamsText": "both teams" in raw_norm,
+                "scoreText": "score" in raw_norm or "scoring" in raw_norm,
+                "yesNoOutcomes": has_yes_no,
+                "yesNoWithScoreText": has_yes_no and ("score" in raw_norm or "both teams" in raw_norm or "btts" in raw_norm),
+            }
+            for key, hit in flags.items():
+                if hit:
+                    report["candidateCounts"][key] += 1
+
+            if not any(flags.values()):
+                continue
+
+            sample_key = f"{url}|{m_text}|{json_dumps_safe(market.get('key'), 200)}|{json_dumps_safe(market.get('type'), 200)}"
+            if sample_key in seen_samples:
+                continue
+            seen_samples.add(sample_key)
+            if len(report["samples"]) >= MAX_BTTS_DISCOVERY_SAMPLES:
+                continue
+            report["samples"].append({
+                "url": url,
+                "flags": flags,
+                "marketText": m_text,
+                "marketKeys": list(market.keys())[:28],
+                "marketIdentifiers": {
+                    key: clean_text(market.get(key)) if key in market and not isinstance(market.get(key), (dict, list)) else summarize_json_root(market.get(key))
+                    for key in ["key", "type", "name", "label", "description", "period", "status", "matchupId"]
+                    if key in market
+                },
+                "outcomeCount": len(outcomes),
+                "outcomeLabelsSample": outcome_labels[:12],
+                "outcomesSample": [compact_outcome_sample(item) for item in outcomes[:8]],
+                "rawSample": json_dumps_safe(market, limit=1800),
+            })
+
+    report["marketTextsTop"] = dict(sorted(text_counts.items(), key=lambda item: item[1], reverse=True)[:80])
+    if not report["samples"]:
+        report["notes"].append("No BTTS-like market objects were found in loaded Pinnacle payloads. This may mean BTTS is absent, hidden behind another endpoint, or named differently.")
+    else:
+        report["notes"].append("Inspect samples for an explicit BTTS market key/type before enabling BTTS odds output.")
+    return report
+
+
 def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str, list[dict[str, Any]], dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
     best: dict[str, Any] | None = None
@@ -1683,6 +1791,7 @@ def main() -> None:
 
     errors: list[str] = []
     best_page, visible_text, html, api_payloads, detail_probe_report = select_best_page(fixtures)
+    btts_discovery_report = discover_btts_market_candidates(api_payloads)
 
     output = make_empty_feed(generated_at)
     matched_debug: list[dict[str, Any]] = []
@@ -1764,6 +1873,7 @@ def main() -> None:
         "bestPage": best_page,
         "apiPayloadsLoaded": len(api_payloads),
         "matchupDetailProbe": detail_probe_report,
+        "bttsDiscovery": btts_discovery_report,
         "apiPayloads": [
             {
                 "url": str(payload.get("url") or ""),
@@ -1787,6 +1897,7 @@ def main() -> None:
             "If too few markets are emitted, inspect bestPage.networkApiCandidatesTop for Pinnacle JSON/API endpoints rather than accepting nearby visible-text odds.",
             "This version parses Pinnacle Arcadia API JSON first, including exact 1X2, match goals Over/Under, and BTTS when explicitly mapped.",
             "It also probes per-matchup detail endpoints such as related/straight for expanded markets, but still emits singles only when exact/high-confidence mapping succeeds.",
+            "BTTS discovery is diagnostic-only: it catalogues candidate market keys/text but never emits approximate BTTS odds.",
         ],
     }
 
