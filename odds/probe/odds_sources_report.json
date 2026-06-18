@@ -1,15 +1,2071 @@
 {
   "source": "international_odds_probe",
-  "generatedAt": "",
+  "generatedAt": "2026-06-18T08:46:43Z",
   "scriptVersion": "odds-source-probe-v1",
   "fixturesPath": "world-cup/world_cup_2026.json",
-  "fixturesLoaded": 0,
-  "sourcesTested": 0,
-  "usableCandidates": [],
-  "results": [],
+  "fixturesLoaded": 32,
+  "sourcesTested": 8,
+  "usableCandidates": [
+    {
+      "sourceId": "pinnacle",
+      "sourceName": "Pinnacle",
+      "classification": "visible",
+      "score": 181,
+      "bestUrl": "https://www.pinnacle.com/en/soccer/matchups",
+      "bestFinalUrl": "https://www.pinnacle.com/en/soccer/matchups/highlights/",
+      "fixturesBothTeamsInVisibleText": 11,
+      "fixturesBothTeamsInHtml": 11,
+      "scriptApiCandidatesCount": 37,
+      "notes": [
+        "At least one sampled fixture has both teams visible; source may be usable.",
+        "Script/API-like URLs found; inspect source snapshot for candidate endpoints."
+      ]
+    }
+  ],
+  "results": [
+    {
+      "sourceId": "pinnacle",
+      "sourceName": "Pinnacle",
+      "kind": "bookmaker",
+      "bestUrl": "https://www.pinnacle.com/en/soccer/matchups",
+      "bestFinalUrl": "https://www.pinnacle.com/en/soccer/matchups/highlights/",
+      "httpStatus": 200,
+      "title": "Soccer Odds | Soccer Betting",
+      "classification": "visible",
+      "score": 181,
+      "visibleTextLength": 5557,
+      "htmlLength": 181626,
+      "oddsLikeNumbersInVisibleText": 21,
+      "oddsLikeNumbersInHtml": 42,
+      "fixturesBothTeamsInVisibleText": 11,
+      "fixturesBothTeamsInHtml": 11,
+      "scriptApiCandidatesCount": 37,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.pinnacle.com/en/soccer/matchups",
+          "finalUrl": "https://www.pinnacle.com/en/soccer/matchups/highlights/",
+          "httpStatus": 200,
+          "title": "Soccer Odds | Soccer Betting",
+          "classification": "visible",
+          "visibleTextLength": 5557,
+          "htmlLength": 181626,
+          "oddsLikeNumbersInVisibleText": 21,
+          "oddsLikeNumbersInHtml": 42,
+          "scriptApiCandidatesCount": 37,
+          "fixturesBothTeamsInVisibleText": 11,
+          "fixturesBothTeamsInHtml": 11,
+          "error": null,
+          "score": 181
+        },
+        {
+          "requestedUrl": "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups",
+          "finalUrl": "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/#all",
+          "httpStatus": 200,
+          "title": "Soccer Odds | Soccer Betting",
+          "classification": "visible",
+          "visibleTextLength": 4308,
+          "htmlLength": 160843,
+          "oddsLikeNumbersInVisibleText": 13,
+          "oddsLikeNumbersInHtml": 26,
+          "scriptApiCandidatesCount": 39,
+          "fixturesBothTeamsInVisibleText": 9,
+          "fixturesBothTeamsInHtml": 9,
+          "error": null,
+          "score": 173
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": true,
+          "html": true
+        },
+        "soccer": {
+          "visibleText": true,
+          "html": true
+        },
+        "world cup": {
+          "visibleText": true,
+          "html": true
+        },
+        "fifa": {
+          "visibleText": true,
+          "html": true
+        },
+        "odds": {
+          "visibleText": true,
+          "html": true
+        },
+        "market": {
+          "visibleText": false,
+          "html": true
+        },
+        "event": {
+          "visibleText": false,
+          "html": true
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": true,
+          "html": true
+        },
+        "match": {
+          "visibleText": true,
+          "html": true
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": true,
+          "homeInHtml": false,
+          "awayInHtml": true,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": true,
+          "awayInVisibleText": true,
+          "homeInHtml": true,
+          "awayInHtml": true,
+          "bothInVisibleText": true,
+          "bothInHtml": true
+        }
+      ],
+      "scriptApiCandidates": [
+        "https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna0;rcb=17;ord=3266723075335;npa=0;auiddc=2141755953.1781772406;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66g1v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115616985~115938465~115938469~119392696~119392704~119456239~119456247;epver=2;dc_random=1781772405_OkzndVreTuU03tMqFDYPUOIoGeeH_2_PSg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F",
+        "https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna0;rcb=17;ord=3266723075335;npa=0;auiddc=2141755953.1781772406;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66g1v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115616985~115938465~115938469~119392696~119392704~119456239~119456247;epver=2;dc_random=1781772405_OkzndVreTuU03tMqFDYPUOIoGeeH_2_PSg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F?",
+        "https://15181258.fls.doubleclick.net/activityi;src=15181258;type=sites0;cat=tmrw-0;rcb=17;ord=2469465125031;npa=0;auiddc=2141755953.1781772406;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66g1v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115616985~115938465~115938469~119392696~119392704~119456239~119456247;epver=2;dc_random=1781772405_ob4L9zwYRSTjVh7brNp2G4hX0qxIe59_Bg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F",
+        "https://15181258.fls.doubleclick.net/activityi;src=15181258;type=sites0;cat=tmrw-0;rcb=17;ord=2469465125031;npa=0;auiddc=2141755953.1781772406;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66g1v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115616985~115938465~115938469~119392696~119392704~119456239~119456247;epver=2;dc_random=1781772405_ob4L9zwYRSTjVh7brNp2G4hX0qxIe59_Bg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F?",
+        "https://adscool.net/resources/content/pinnacleww.js",
+        "https://adsdigitalplatform.com/tag/js?rtid=ECA-1723736153653135",
+        "https://casino.pinnacle.com/en/virtual-sports/",
+        "https://f49e0e95-cc2a-4abf-89de-609208c51cca.snippet.anjouangaming.org/anj-seal.js",
+        "https://fonts.googleapis.com",
+        "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap",
+        "https://fonts.gstatic.com",
+        "https://googleads.g.doubleclick.net/pagead/viewthroughconversion/16528237569/?random=1781772406108&amp;cv=11&amp;fst=1781772406108&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;en=gtag.config&amp;gtm=45be66g1v9184628268z879423099za20gzb79423099zd79423099xec&amp;gcd=13l3l3l3l1l1&amp;dma=0&amp;tag_exp=115938465~115938469~119392696~119392704~119456239~119456247~119534187&amp;u_w=1365&amp;u_h=900&amp;url=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F&amp;rcb=19&amp;frm=0&amp;tiba=Online%20Sports%20Betting%20%7C%20The%20Best%20Odds%20%7C%20Pinnacle&amp;ga_uid=G-DXNRHBHDY9.Guest&amp;hn=www.googleadservices.com&amp;npa=0&amp;pscdl=noapi&amp;auid=2141755953.1781772406&amp;uaa=x64&amp;uab=64&amp;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0&amp;uamb=0&amp;uam=&amp;uap=Windows&amp;uapv=10.0&amp;uaw=0&amp;data=event%3Dgtag.config&amp;ept=9&amp;rfmt=3&amp;fmt=4",
+        "https://scripts.clarity.ms/0.8.65/clarity.js",
+        "https://scripts.mediamathrdrt.com/scripts/ww_pinnacle.js",
+        "https://seal.godaddy.com/verifySeal?sealID=5YHunbnKFbrMSJSIW4AB9JX8zvmJoEG5zt3HMQSXyqefuAYn33nHxZmTPMQi",
+        "https://static.zdassets.com/ekr/snippet.js?key=de531b1e-e056-499d-878e-453e1d545afc",
+        "https://www.facebook.com/pinnaclesports",
+        "https://www.googletagmanager.com/gtag/js?id=AW-16528237569&amp;cx=c&amp;gtm=4e66g1",
+        "https://www.googletagmanager.com/gtag/js?id=DC-15181258&amp;cx=c&amp;gtm=4e66g1",
+        "https://www.googletagmanager.com/gtag/js?id=G-DXNRHBHDY9&amp;cx=c&amp;gtm=4e66g1",
+        "https://www.googletagmanager.com/gtm.js?id=GTM-KXLFXC7&amp;gtm_auth=RSYvLtUxCh8o0eYkz0CGig",
+        "https://www.gstatic.com/recaptcha/releases/ne1iDVwClkE7nKD3uA9Vqsvl/recaptcha__en.js",
+        "https://www.linkedin.com/company/pinnacle-sports",
+        "https://www.pinnacle.com/en/betting-articles/betting-strategy/betting-on-soccer-asian-handicap-markets/x9h2kx3zfzndmtef",
+        "https://www.pinnacle.com/en/esports/matchups/highlights/",
+        "https://www.pinnacle.com/en/future/bets-sports-offered",
+        "https://www.pinnacle.com/en/landing/pinnacle-sports-direct",
+        "https://www.pinnacle.com/esports/matchups/highlights/",
+        "https://www.pinnacle.com/img/footers/sports-direct-logo-blue.svg",
+        "https://www.pinnacle.com/main.5010a3d968048002765c.js",
+        "https://www.pinnacle.com/manifest.json",
+        "https://www.pinnacle.com/runtime.724483a7517017323e75.js",
+        "https://www.pinnacle.com/vendors.adc6697c5292d4ffd999.js",
+        "https://www.recaptcha.net/recaptcha/api.js?onload=onLoadCaptchaV3Callback&amp;render=6LcssPcbAAAAABu-IURUmN4cgxGRtk3-2kDX8fHu",
+        "https://www.recaptcha.net/recaptcha/api2/anchor?ar=1&amp;k=6LcssPcbAAAAABu-IURUmN4cgxGRtk3-2kDX8fHu&amp;co=aHR0cHM6Ly93d3cucGlubmFjbGUuY29tOjQ0Mw..&amp;hl=en&amp;v=ne1iDVwClkE7nKD3uA9Vqsvl&amp;size=invisible&amp;anchor-ms=20000&amp;execute-ms=30000&amp;cb=ope9mxbk7eeq",
+        "https://www.reddit.com/r/PinnacleSportsbook/",
+        "https://www.youtube.com/@pinnaclesports"
+      ],
+      "notes": [
+        "At least one sampled fixture has both teams visible; source may be usable.",
+        "Script/API-like URLs found; inspect source snapshot for candidate endpoints."
+      ]
+    },
+    {
+      "sourceId": "betfair",
+      "sourceName": "Betfair",
+      "kind": "exchange/bookmaker",
+      "bestUrl": "https://sports.betfair.com/sport/football",
+      "bestFinalUrl": "https://sports.betfair.com/sport/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.betfair.com/sport/football",
+          "finalUrl": "https://www.betfair.com/sport/football",
+          "httpStatus": 403,
+          "title": "Betfair",
+          "classification": "blocked",
+          "visibleTextLength": 359,
+          "htmlLength": 4008,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 2,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": null,
+          "score": -78
+        },
+        {
+          "requestedUrl": "https://sports.betfair.com/sport/football",
+          "finalUrl": "https://sports.betfair.com/sport/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://sports.betfair.com/sport/football\nCall log:\n  - navigating to \"https://sports.betfair.com/sport/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "william_hill",
+      "sourceName": "William Hill",
+      "kind": "bookmaker",
+      "bestUrl": "https://sports.williamhill.com/betting/en-gb/football",
+      "bestFinalUrl": "https://sports.williamhill.com/betting/en-gb/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://sports.williamhill.com/betting/en-gb/football",
+          "finalUrl": "https://sports.williamhill.com/betting/en-gb/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://sports.williamhill.com/betting/en-gb/football\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n  - navigating to \"https://sports.williamhill.com/betting/en-gb/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        },
+        {
+          "requestedUrl": "https://www.williamhill.com/betting/en-gb/football",
+          "finalUrl": "https://www.williamhill.com/betting/en-gb/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: net::ERR_TOO_MANY_REDIRECTS at https://www.williamhill.com/betting/en-gb/football\nCall log:\n  - navigating to \"https://www.williamhill.com/betting/en-gb/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "bwin",
+      "sourceName": "Bwin",
+      "kind": "bookmaker",
+      "bestUrl": "https://sports.bwin.com/en/sports/football-4/betting",
+      "bestFinalUrl": "https://sports.bwin.com/en/sports/football-4/betting",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://sports.bwin.com/en/sports/football-4/betting",
+          "finalUrl": "https://sports.bwin.com/en/sports/football-4/betting",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://sports.bwin.com/en/sports/football-4/betting\" is interrupted by another navigation to \"chrome-error://chromewebdata/\"\nCall log:\n  - navigating to \"https://sports.bwin.com/en/sports/football-4/betting\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        },
+        {
+          "requestedUrl": "https://sports.bwin.com/en/sports/football-4",
+          "finalUrl": "https://sports.bwin.com/en/sports/football-4",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://sports.bwin.com/en/sports/football-4\" is interrupted by another navigation to \"https://www.bwin.com/en/sports/football-4/betting\"\nCall log:\n  - navigating to \"https://sports.bwin.com/en/sports/football-4\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "unibet",
+      "sourceName": "Unibet",
+      "kind": "bookmaker",
+      "bestUrl": "https://www.unibet.com/betting/sports/filter/football",
+      "bestFinalUrl": "https://www.unibet.com/betting/sports/filter/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.unibet.com/betting/sports/filter/football",
+          "finalUrl": "https://www.unibet.com/betting/sports/filter/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://www.unibet.com/betting/sports/filter/football\" is interrupted by another navigation to \"https://www.bwin.com/en/sports/football-4\"\nCall log:\n  - navigating to \"https://www.unibet.com/betting/sports/filter/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        },
+        {
+          "requestedUrl": "https://www.unibet.com/betting/sports/home",
+          "finalUrl": "https://www.unibet.com/betting/sports/home",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://www.unibet.com/betting/sports/home\" is interrupted by another navigation to \"https://www.unibet.com/betting/sports/filter/football\"\nCall log:\n  - navigating to \"https://www.unibet.com/betting/sports/home\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "betvictor",
+      "sourceName": "BetVictor",
+      "kind": "bookmaker",
+      "bestUrl": "https://www.betvictor.com/en-gb/sports/football",
+      "bestFinalUrl": "https://www.betvictor.com/en-gb/sports/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.betvictor.com/en-gb/sports/football",
+          "finalUrl": "https://www.betvictor.com/en-gb/sports/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://www.betvictor.com/en-gb/sports/football\" is interrupted by another navigation to \"https://www.unibet.com/betting/sports/home\"\nCall log:\n  - navigating to \"https://www.betvictor.com/en-gb/sports/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "paddypower",
+      "sourceName": "Paddy Power",
+      "kind": "bookmaker",
+      "bestUrl": "https://www.paddypower.com/football",
+      "bestFinalUrl": "https://www.paddypower.com/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.paddypower.com/football",
+          "finalUrl": "https://www.paddypower.com/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://www.paddypower.com/football\" is interrupted by another navigation to \"https://www.betvictor.com/en-gb/sports/football\"\nCall log:\n  - navigating to \"https://www.paddypower.com/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    },
+    {
+      "sourceId": "oddschecker",
+      "sourceName": "Oddschecker",
+      "kind": "odds-comparison",
+      "bestUrl": "https://www.oddschecker.com/football",
+      "bestFinalUrl": "https://www.oddschecker.com/football",
+      "httpStatus": null,
+      "title": "",
+      "classification": "empty_or_js_only",
+      "score": 10,
+      "visibleTextLength": 0,
+      "htmlLength": 0,
+      "oddsLikeNumbersInVisibleText": 0,
+      "oddsLikeNumbersInHtml": 0,
+      "fixturesBothTeamsInVisibleText": 0,
+      "fixturesBothTeamsInHtml": 0,
+      "scriptApiCandidatesCount": 0,
+      "attempts": [
+        {
+          "requestedUrl": "https://www.oddschecker.com/football",
+          "finalUrl": "https://www.oddschecker.com/football",
+          "httpStatus": null,
+          "title": "",
+          "classification": "empty_or_js_only",
+          "visibleTextLength": 0,
+          "htmlLength": 0,
+          "oddsLikeNumbersInVisibleText": 0,
+          "oddsLikeNumbersInHtml": 0,
+          "scriptApiCandidatesCount": 0,
+          "fixturesBothTeamsInVisibleText": 0,
+          "fixturesBothTeamsInHtml": 0,
+          "error": "Error: Page.goto: Navigation to \"https://www.oddschecker.com/football\" is interrupted by another navigation to \"https://www.paddypower.com/football\"\nCall log:\n  - navigating to \"https://www.oddschecker.com/football\", waiting until \"domcontentloaded\"\n",
+          "score": 10
+        }
+      ],
+      "keywordPresence": {
+        "football": {
+          "visibleText": false,
+          "html": false
+        },
+        "soccer": {
+          "visibleText": false,
+          "html": false
+        },
+        "world cup": {
+          "visibleText": false,
+          "html": false
+        },
+        "fifa": {
+          "visibleText": false,
+          "html": false
+        },
+        "odds": {
+          "visibleText": false,
+          "html": false
+        },
+        "market": {
+          "visibleText": false,
+          "html": false
+        },
+        "event": {
+          "visibleText": false,
+          "html": false
+        },
+        "coupon": {
+          "visibleText": false,
+          "html": false
+        },
+        "sportsbook": {
+          "visibleText": false,
+          "html": false
+        },
+        "match": {
+          "visibleText": false,
+          "html": false
+        }
+      },
+      "fixturePresenceSample": [
+        {
+          "matchId": "wc2026_czech_republic_south_africa",
+          "date": "2026-06-18",
+          "time": "19:00",
+          "homeTeam": "Czech Republic",
+          "awayTeam": "South Africa",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_switzerland_bosnia_herzegovina",
+          "date": "2026-06-18",
+          "time": "22:00",
+          "homeTeam": "Switzerland",
+          "awayTeam": "Bosnia & Herzegovina",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_canada_qatar",
+          "date": "2026-06-19",
+          "time": "01:00",
+          "homeTeam": "Canada",
+          "awayTeam": "Qatar",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_mexico_south_korea",
+          "date": "2026-06-19",
+          "time": "04:00",
+          "homeTeam": "Mexico",
+          "awayTeam": "South Korea",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_usa_australia",
+          "date": "2026-06-19",
+          "time": "22:00",
+          "homeTeam": "USA",
+          "awayTeam": "Australia",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_scotland_morocco",
+          "date": "2026-06-20",
+          "time": "01:00",
+          "homeTeam": "Scotland",
+          "awayTeam": "Morocco",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_brazil_haiti",
+          "date": "2026-06-20",
+          "time": "03:30",
+          "homeTeam": "Brazil",
+          "awayTeam": "Haiti",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_turkey_paraguay",
+          "date": "2026-06-20",
+          "time": "06:00",
+          "homeTeam": "Turkey",
+          "awayTeam": "Paraguay",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_netherlands_sweden",
+          "date": "2026-06-20",
+          "time": "20:00",
+          "homeTeam": "Netherlands",
+          "awayTeam": "Sweden",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_germany_ivory_coast",
+          "date": "2026-06-20",
+          "time": "23:00",
+          "homeTeam": "Germany",
+          "awayTeam": "Ivory Coast",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_ecuador_curacao",
+          "date": "2026-06-21",
+          "time": "03:00",
+          "homeTeam": "Ecuador",
+          "awayTeam": "Curacao",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        },
+        {
+          "matchId": "wc2026_tunisia_japan",
+          "date": "2026-06-21",
+          "time": "07:00",
+          "homeTeam": "Tunisia",
+          "awayTeam": "Japan",
+          "homeInVisibleText": false,
+          "awayInVisibleText": false,
+          "homeInHtml": false,
+          "awayInHtml": false,
+          "bothInVisibleText": false,
+          "bothInHtml": false
+        }
+      ],
+      "scriptApiCandidates": [],
+      "notes": [
+        "No StatMaker WC fixture teams found in visible text or HTML for sampled fixtures."
+      ]
+    }
+  ],
   "errors": [],
   "notes": [
-    "Placeholder. Run the GitHub Action \"Probe International Odds Sources\" to populate diagnostics.",
-    "Diagnostic only. Do not consume this file from the Android app."
+    "Diagnostic only. Do not consume this file from the Android app.",
+    "A source is not selected for production until its odds can be reliably mapped to StatMaker fixtures and markets."
   ]
 }
