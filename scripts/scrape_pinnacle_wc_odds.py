@@ -44,7 +44,7 @@ BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v2-confidence"
+SCRIPT_VERSION = "pinnacle-wc-odds-v3-exact-singles"
 
 KEYWORDS = [
     "football",
@@ -270,24 +270,32 @@ def find_odd_near_label(lines: list[str], label_index: int, max_ahead: int = 4) 
 
 
 def validate_1x2_triplet(home_odd: float, draw_odd: float, away_odd: float) -> tuple[bool, list[str], str]:
+    """Validate a 1X2 triplet without estimating or inferring prices.
+
+    Important StatMaker rule: single bet odds must be exact bookmaker odds.
+    Therefore this function is only called after explicit Home/Draw/Away mapping has
+    already been found. It performs sanity checks; it does not infer missing prices.
+    """
     notes: list[str] = []
     values = [home_odd, draw_odd, away_odd]
     spread = max(values) - min(values)
     implied_sum = sum(1.0 / value for value in values if value > 0)
 
-    if len({round(value, 2) for value in values}) < 3:
-        notes.append("rejected: duplicate 1X2 odds; likely generic/nearby tokens, not real 1X2")
-    if spread < 0.15:
-        notes.append(f"rejected: odds spread too small ({spread:.2f})")
+    if not all(MIN_ODD <= value <= MAX_ODD for value in values):
+        notes.append("rejected: at least one 1X2 odd is outside accepted decimal-odds bounds")
+    if all(round(value, 2) == round(values[0], 2) for value in values):
+        notes.append("rejected: all three 1X2 odds are identical; likely generic/nearby tokens, not exact 1X2")
     if not (0.95 <= implied_sum <= 1.55):
         notes.append(f"rejected: implied probability sum out of expected range ({implied_sum:.3f})")
 
     if notes:
         return False, notes, "rejected"
 
-    confidence = "high" if spread >= 0.35 else "medium"
-    notes.append(f"accepted: labelled Home/Draw/Away lines, spread={spread:.2f}, impliedSum={implied_sum:.3f}")
-    return True, notes, confidence
+    notes.append(
+        f"accepted: explicit labelled Home/Draw/Away odds; exact single odds only; "
+        f"spread={spread:.2f}, impliedSum={implied_sum:.3f}"
+    )
+    return True, notes, "high"
 
 
 def extract_1x2_markets(window: str, fixture: Fixture) -> tuple[list[dict[str, Any]], dict[str, Any]]:
@@ -426,6 +434,8 @@ def extract_total_markets(window: str) -> list[dict[str, Any]]:
                 "team": None,
                 "line": line,
                 "odd": odd,
+                "confidence": "high",
+                "extraction": "explicit_over_under_line",
             })
     return markets
 
@@ -451,6 +461,8 @@ def extract_btts_markets(window: str) -> list[dict[str, Any]]:
             "team": None,
             "line": None,
             "odd": odd,
+            "confidence": "high",
+            "extraction": "explicit_btts_yes_no_line",
         })
     return markets
 
@@ -573,6 +585,12 @@ def make_empty_feed(generated_at: str) -> dict[str, Any]:
         "country": "International",
         "competition": COMPETITION,
         "season": SEASON,
+        "oddsPolicy": {
+            "singleOdds": "exact_bookmaker_odds_only",
+            "noApproximateSingles": True,
+            "emitMarketOnlyWhenConfidence": "high",
+            "betBuilderTotalsMayBeEstimatedInAndroid": True,
+        },
         "matches": [],
     }
 
@@ -709,8 +727,10 @@ def main() -> None:
         "unmatchedFixtures": unmatched,
         "errors": errors,
         "notes": [
-            "This scraper now rejects low-confidence 1X2 extraction, including identical/near-identical Home/Draw/Away odds.",
-            "Only labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
+            "Single bet odds policy: exact bookmaker odds only; no approximate or inferred singles are emitted.",
+            "Bet Builder total odds may be estimated only in the Android app when actual builder prices are unavailable; single selection odds remain exact-only.",
+            "This scraper rejects low-confidence 1X2 extraction, including identical generic/nearby tokens.",
+            "Only high-confidence labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
             "If too few markets are emitted, switch to Pinnacle API candidate extraction rather than accepting nearby visible-text odds.",
         ],
     }
