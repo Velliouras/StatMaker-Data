@@ -37,12 +37,13 @@ BETSSON_WC_URL = os.getenv(
 FIXTURES_PATH = Path(os.getenv("STATMAKER_WC_FIXTURES", "world-cup/world_cup_2026.json"))
 OUTPUT_PATH = Path(os.getenv("STATMAKER_WC_ODDS_OUTPUT", "odds/betsson/world_cup_odds.json"))
 DEBUG_PATH = Path(os.getenv("STATMAKER_WC_ODDS_DEBUG", "odds/betsson/debug_report.json"))
+SNAPSHOT_PATH = Path(os.getenv("STATMAKER_BETSSON_PROBE_SNAPSHOT", "odds/betsson/betsson_probe_snapshot.txt"))
 LOCAL_TZ = os.getenv("STATMAKER_LOCAL_TZ", "Europe/Athens")
 BOOKMAKER = "Betsson"
 SOURCE = "betsson_probe"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "betsson-wc-odds-probe-v1"
+SCRIPT_VERSION = "betsson-wc-odds-probe-v2-diagnostics"
 MAX_FIXTURES = int(os.getenv("STATMAKER_WC_ODDS_MAX_FIXTURES", "64"))
 MIN_ODD = float(os.getenv("STATMAKER_MIN_VALID_ODD", "1.01"))
 MAX_ODD = float(os.getenv("STATMAKER_MAX_VALID_ODD", "1000"))
@@ -204,11 +205,18 @@ def accept_cookies_if_present(page: Page) -> None:
             continue
 
 
-def goto(page: Page, url: str) -> None:
-    page.goto(url, wait_until="domcontentloaded", timeout=60000)
+def goto(page: Page, url: str) -> int | None:
+    response = page.goto(url, wait_until="domcontentloaded", timeout=60000)
     page.wait_for_timeout(3500)
     accept_cookies_if_present(page)
     page.wait_for_timeout(2500)
+    try:
+        page.wait_for_load_state("networkidle", timeout=15000)
+    except Exception:
+        # Many sportsbook pages keep long-polling/websocket requests open.
+        # Network idle is useful if it happens, but not required for the probe.
+        pass
+    return response.status if response else None
 
 
 def visible_text(page: Page) -> str:
@@ -216,6 +224,132 @@ def visible_text(page: Page) -> str:
         return clean_text(page.locator("body").inner_text(timeout=10000))
     except Exception:
         return ""
+
+def safe_page_content(page: Page) -> str:
+    try:
+        return page.content()
+    except Exception:
+        return ""
+
+
+def safe_page_title(page: Page) -> str:
+    try:
+        return clean_text(page.title())
+    except Exception:
+        return ""
+
+
+def collect_probe_links(page: Page, html: str) -> dict[str, list[str]]:
+    """Collect likely script/API clues without assuming Betsson's schema."""
+    script_srcs: list[str] = []
+    link_hrefs: list[str] = []
+    try:
+        script_srcs = [clean_text(x) for x in page.locator("script[src]").evaluate_all("nodes => nodes.map(n => n.src || '')")]
+    except Exception:
+        script_srcs = []
+    try:
+        link_hrefs = [clean_text(x) for x in page.locator("link[href]").evaluate_all("nodes => nodes.map(n => n.href || '')")]
+    except Exception:
+        link_hrefs = []
+
+    # Pull URL-like strings from HTML/JS. This often reveals internal API endpoints.
+    raw_urls = re.findall(r"https?://[^\"'<>\\\s)]+", html or "")
+    relative_api = re.findall(r"[\"']([^\"']*(?:api|sportsbook|event|market|coupon|odds)[^\"']*)[\"']", html or "", flags=re.I)
+
+    def unique(values: Iterable[str], limit: int = 120) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for value in values:
+            value = clean_text(value)
+            if not value or value in seen:
+                continue
+            seen.add(value)
+            out.append(value)
+            if len(out) >= limit:
+                break
+        return out
+
+    keywords = ("api", "sportsbook", "event", "market", "coupon", "odds", "kambi", "betsson")
+    interesting_urls = [u for u in raw_urls if any(k in u.lower() for k in keywords)]
+    interesting_scripts = [u for u in script_srcs if any(k in u.lower() for k in keywords)] or script_srcs[:60]
+
+    return {
+        "scriptSrcs": unique(interesting_scripts),
+        "linkHrefs": unique(link_hrefs, limit=60),
+        "interestingAbsoluteUrls": unique(interesting_urls),
+        "interestingRelativeStrings": unique(relative_api),
+    }
+
+
+def write_probe_snapshot(
+    path: Path,
+    *,
+    generated_at: str,
+    requested_url: str,
+    final_url: str,
+    http_status: int | None,
+    title: str,
+    page_text: str,
+    html: str,
+    fixtures: list[Fixture],
+    json_roots_count: int,
+    links: dict[str, list[str]],
+    errors: list[str] | None = None,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    sample_fixtures = fixtures[:12]
+    keyword_values = [
+        "football", "world cup", "sportsbook", "odds", "market", "coupon", "event",
+        "mexico", "germany", "brazil", "england", "czech", "south africa", "ivory coast",
+    ]
+    lower_text = (page_text or "").lower()
+    lower_html = (html or "").lower()
+    keyword_report = {
+        key: {"visibleText": key in lower_text, "html": key in lower_html}
+        for key in keyword_values
+    }
+    fixture_presence = []
+    for f in sample_fixtures:
+        fixture_presence.append({
+            "matchId": f.match_id,
+            "homeTeam": f.home,
+            "awayTeam": f.away,
+            "homeInVisibleText": normalize_name(f.home) in normalize_name(page_text),
+            "awayInVisibleText": normalize_name(f.away) in normalize_name(page_text),
+            "homeInHtml": normalize_name(f.home) in normalize_name(html),
+            "awayInHtml": normalize_name(f.away) in normalize_name(html),
+        })
+
+    def section(title_text: str) -> str:
+        return f"\n\n===== {title_text} =====\n"
+
+    content: list[str] = []
+    content.append("StatMaker Betsson probe snapshot\n")
+    content.append(json.dumps({
+        "generatedAt": generated_at,
+        "scriptVersion": SCRIPT_VERSION,
+        "requestedUrl": requested_url,
+        "finalUrl": final_url,
+        "httpStatus": http_status,
+        "pageTitle": title,
+        "visibleTextLength": len(page_text or ""),
+        "htmlLength": len(html or ""),
+        "jsonRootsFound": json_roots_count,
+        "fixturesLoaded": len(fixtures),
+        "snapshotNote": "Diagnostic only. Do not consume this file from the Android app.",
+        "errors": errors or [],
+    }, ensure_ascii=False, indent=2))
+    content.append(section("Keyword presence"))
+    content.append(json.dumps(keyword_report, ensure_ascii=False, indent=2))
+    content.append(section("Fixture presence sample"))
+    content.append(json.dumps(fixture_presence, ensure_ascii=False, indent=2))
+    content.append(section("Script/API/link clues"))
+    content.append(json.dumps(links, ensure_ascii=False, indent=2))
+    content.append(section("Visible text sample first 12000 chars"))
+    content.append((page_text or "")[:12000])
+    content.append(section("HTML sample first 12000 chars"))
+    content.append((html or "")[:12000])
+    path.write_text("".join(content) + "\n", encoding="utf-8")
 
 
 def extract_jsonish_objects(page: Page) -> list[Any]:
@@ -424,6 +558,7 @@ def main() -> int:
         "fixturesPath": str(FIXTURES_PATH),
         "outputPath": str(OUTPUT_PATH),
         "debugPath": str(DEBUG_PATH),
+        "snapshotPath": str(SNAPSHOT_PATH),
         "fixturesLoaded": len(fixtures),
         "matchesMatched": 0,
         "matchesWithMarkets": 0,
@@ -443,6 +578,20 @@ def main() -> int:
         debug["errors"].append("No upcoming fixtures found in StatMaker World Cup JSON")
         write_json(OUTPUT_PATH, feed)
         write_json(DEBUG_PATH, debug)
+        write_probe_snapshot(
+            SNAPSHOT_PATH,
+            generated_at=generated_at,
+            requested_url=BETSSON_WC_URL,
+            final_url="",
+            http_status=None,
+            title="",
+            page_text="",
+            html="",
+            fixtures=fixtures,
+            json_roots_count=0,
+            links={},
+            errors=debug["errors"],
+        )
         return 0
 
     feed = empty_feed(generated_at)
@@ -460,11 +609,34 @@ def main() -> int:
                 timezone_id=LOCAL_TZ,
             )
             page = context.new_page()
-            goto(page, BETSSON_WC_URL)
+            http_status = goto(page, BETSSON_WC_URL)
             page_text = visible_text(page)
+            html = safe_page_content(page)
+            title = safe_page_title(page)
             json_roots = extract_jsonish_objects(page)
+            links = collect_probe_links(page, html)
+            debug["httpStatus"] = http_status
+            debug["finalUrl"] = page.url
+            debug["pageTitle"] = title
             debug["visibleTextLength"] = len(page_text)
+            debug["htmlLength"] = len(html)
             debug["jsonRootsFound"] = len(json_roots)
+            debug["scriptSrcsFound"] = len(links.get("scriptSrcs", []))
+            debug["interestingUrlsFound"] = len(links.get("interestingAbsoluteUrls", []))
+            write_probe_snapshot(
+                SNAPSHOT_PATH,
+                generated_at=generated_at,
+                requested_url=BETSSON_WC_URL,
+                final_url=page.url,
+                http_status=http_status,
+                title=title,
+                page_text=page_text,
+                html=html,
+                fixtures=fixtures,
+                json_roots_count=len(json_roots),
+                links=links,
+                errors=debug["errors"],
+            )
 
             for fixture in fixtures:
                 json_markets, json_notes = try_extract_from_json_roots(fixture, json_roots)
@@ -519,6 +691,21 @@ def main() -> int:
 
     write_json(OUTPUT_PATH, feed)
     write_json(DEBUG_PATH, debug)
+    if not SNAPSHOT_PATH.exists():
+        write_probe_snapshot(
+            SNAPSHOT_PATH,
+            generated_at=generated_at,
+            requested_url=BETSSON_WC_URL,
+            final_url=str(debug.get("finalUrl") or ""),
+            http_status=debug.get("httpStatus"),
+            title=str(debug.get("pageTitle") or ""),
+            page_text="",
+            html="",
+            fixtures=fixtures,
+            json_roots_count=int(debug.get("jsonRootsFound") or 0),
+            links={},
+            errors=debug["errors"],
+        )
 
     # Do not fail the workflow on zero markets during probe phase. The debug
     # report is the artifact we need to decide whether Betsson is scrapeable.
