@@ -1,3 +1,998 @@
 StatMaker Pinnacle probe snapshot
+{
+  "generatedAt": "2026-06-18T09:04:49Z",
+  "scriptVersion": "pinnacle-wc-odds-v1",
+  "source": "pinnacle",
+  "bookmaker": "Pinnacle",
+  "bestPage": {
+    "requestedUrl": "https://www.pinnacle.com/en/soccer/matchups",
+    "finalUrl": "https://www.pinnacle.com/en/soccer/matchups/highlights/",
+    "httpStatus": 200,
+    "title": "Soccer Odds | Soccer Betting",
+    "visibleTextLength": 5557,
+    "htmlLength": 182313,
+    "oddsLikeNumbersInVisibleText": 21,
+    "oddsLikeNumbersInHtml": 42,
+    "scriptApiCandidatesCount": 75,
+    "error": null,
+    "score": 126,
+    "attempts": [
+      {
+        "requestedUrl": "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups",
+        "finalUrl": "https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/#all",
+        "httpStatus": 200,
+        "title": "Soccer Odds | Soccer Betting",
+        "visibleTextLength": 4308,
+        "htmlLength": 160924,
+        "oddsLikeNumbersInVisibleText": 13,
+        "oddsLikeNumbersInHtml": 32,
+        "scriptApiCandidatesCount": 74,
+        "error": null,
+        "score": 118
+      },
+      {
+        "requestedUrl": "https://www.pinnacle.com/en/soccer/matchups",
+        "finalUrl": "https://www.pinnacle.com/en/soccer/matchups/highlights/",
+        "httpStatus": 200,
+        "title": "Soccer Odds | Soccer Betting",
+        "visibleTextLength": 5557,
+        "htmlLength": 182313,
+        "oddsLikeNumbersInVisibleText": 21,
+        "oddsLikeNumbersInHtml": 42,
+        "scriptApiCandidatesCount": 75,
+        "error": null,
+        "score": 126
+      }
+    ]
+  },
+  "fixturesLoaded": 32,
+  "snapshotNote": "Diagnostic only. Do not consume this file from the Android app."
+}
 
-Placeholder. Run the Update Pinnacle World Cup Odds workflow to populate this file.
+===== Keyword presence =====
+{
+  "football": {
+    "visibleText": true,
+    "html": true
+  },
+  "soccer": {
+    "visibleText": true,
+    "html": true
+  },
+  "world cup": {
+    "visibleText": true,
+    "html": true
+  },
+  "fifa": {
+    "visibleText": true,
+    "html": true
+  },
+  "odds": {
+    "visibleText": true,
+    "html": true
+  },
+  "matchups": {
+    "visibleText": false,
+    "html": true
+  },
+  "spread": {
+    "visibleText": false,
+    "html": true
+  },
+  "money line": {
+    "visibleText": true,
+    "html": true
+  },
+  "total": {
+    "visibleText": false,
+    "html": true
+  },
+  "over": {
+    "visibleText": true,
+    "html": true
+  },
+  "under": {
+    "visibleText": true,
+    "html": true
+  },
+  "both teams": {
+    "visibleText": false,
+    "html": true
+  }
+}
+
+===== Fixture presence sample =====
+[
+  {
+    "matchId": "wc2026_czech_republic_south_africa",
+    "date": "2026-06-18",
+    "time": "19:00",
+    "homeTeam": "Czech Republic",
+    "awayTeam": "South Africa",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_switzerland_bosnia_herzegovina",
+    "date": "2026-06-18",
+    "time": "22:00",
+    "homeTeam": "Switzerland",
+    "awayTeam": "Bosnia & Herzegovina",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_canada_qatar",
+    "date": "2026-06-19",
+    "time": "01:00",
+    "homeTeam": "Canada",
+    "awayTeam": "Qatar",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_mexico_south_korea",
+    "date": "2026-06-19",
+    "time": "04:00",
+    "homeTeam": "Mexico",
+    "awayTeam": "South Korea",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_usa_australia",
+    "date": "2026-06-19",
+    "time": "22:00",
+    "homeTeam": "USA",
+    "awayTeam": "Australia",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_scotland_morocco",
+    "date": "2026-06-20",
+    "time": "01:00",
+    "homeTeam": "Scotland",
+    "awayTeam": "Morocco",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_brazil_haiti",
+    "date": "2026-06-20",
+    "time": "03:30",
+    "homeTeam": "Brazil",
+    "awayTeam": "Haiti",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_turkey_paraguay",
+    "date": "2026-06-20",
+    "time": "06:00",
+    "homeTeam": "Turkey",
+    "awayTeam": "Paraguay",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_netherlands_sweden",
+    "date": "2026-06-20",
+    "time": "20:00",
+    "homeTeam": "Netherlands",
+    "awayTeam": "Sweden",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_germany_ivory_coast",
+    "date": "2026-06-20",
+    "time": "23:00",
+    "homeTeam": "Germany",
+    "awayTeam": "Ivory Coast",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_ecuador_curacao",
+    "date": "2026-06-21",
+    "time": "03:00",
+    "homeTeam": "Ecuador",
+    "awayTeam": "Curacao",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_tunisia_japan",
+    "date": "2026-06-21",
+    "time": "07:00",
+    "homeTeam": "Tunisia",
+    "awayTeam": "Japan",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_spain_saudi_arabia",
+    "date": "2026-06-21",
+    "time": "19:00",
+    "homeTeam": "Spain",
+    "awayTeam": "Saudi Arabia",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_belgium_iran",
+    "date": "2026-06-21",
+    "time": "22:00",
+    "homeTeam": "Belgium",
+    "awayTeam": "Iran",
+    "homeInVisibleText": true,
+    "awayInVisibleText": true,
+    "homeInHtml": true,
+    "awayInHtml": true
+  },
+  {
+    "matchId": "wc2026_uruguay_cape_verde",
+    "date": "2026-06-22",
+    "time": "01:00",
+    "homeTeam": "Uruguay",
+    "awayTeam": "Cape Verde",
+    "homeInVisibleText": false,
+    "awayInVisibleText": false,
+    "homeInHtml": false,
+    "awayInHtml": false
+  },
+  {
+    "matchId": "wc2026_new_zealand_egypt",
+    "date": "2026-06-22",
+    "time": "04:00",
+    "homeTeam": "New Zealand",
+    "awayTeam": "Egypt",
+    "homeInVisibleText": false,
+    "awayInVisibleText": false,
+    "homeInHtml": false,
+    "awayInHtml": false
+  }
+]
+
+===== Matched fixture extraction sample =====
+[
+  {
+    "matchId": "wc2026_czech_republic_south_africa",
+    "date": "2026-06-18",
+    "time": "19:00",
+    "homeTeam": "Czech Republic",
+    "awayTeam": "South Africa",
+    "windowReason": "visible lines 20-64, team distance=0",
+    "oddsTokensInWindow": [],
+    "marketsExtracted": 0,
+    "marketCounts": {},
+    "windowSample": "Help\nSoccer\nSoccer Odds\nHIGHLIGHTSLIVELEAGUESFUTURES\nSOCCER - FIFA - WORLD CUP\nFIFA - World Cup 2026 Winner\nThursday, June 18, 2026 at 17:00\nFrance\n5.000\nEngland\n7.000\nSpain\n7.000\nSOCCER - FIFA - WORLD CUP\nCzechia - South Africa\nThursday, June 18, 2026 at 17:00\nMoney Line – Match\nCzechia\n1.854\nDraw\n3.670\nSouth Africa\n4.740\nSOCCER - FIFA - WORLD CUP\nFirst Time Winner\nThursday, June 18, 2026 at 17:00\nFutures\nYes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match"
+  },
+  {
+    "matchId": "wc2026_switzerland_bosnia_herzegovina",
+    "date": "2026-06-18",
+    "time": "22:00",
+    "homeTeam": "Switzerland",
+    "awayTeam": "Bosnia & Herzegovina",
+    "windowReason": "visible lines 47-91, team distance=0",
+    "oddsTokensInWindow": [],
+    "marketsExtracted": 0,
+    "marketCounts": {},
+    "windowSample": "Yes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00"
+  },
+  {
+    "matchId": "wc2026_canada_qatar",
+    "date": "2026-06-19",
+    "time": "01:00",
+    "homeTeam": "Canada",
+    "awayTeam": "Qatar",
+    "windowReason": "visible lines 57-101, team distance=0",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 0,
+    "marketCounts": {},
+    "windowSample": "4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
+  },
+  {
+    "matchId": "wc2026_mexico_south_korea",
+    "date": "2026-06-19",
+    "time": "04:00",
+    "homeTeam": "Mexico",
+    "awayTeam": "South Korea",
+    "windowReason": "visible lines 119-164, team distance=1",
+    "oddsTokensInWindow": [
+      2.75,
+      2.75,
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Qatar (Match)\nToday 23:00\n1.298\n5.850\n12.500\n-1.5\n1.884\n+1.5\n2.040\n2.75\n1.943\n2.75\n1.961\n+77\nMexico (Match)\nSouth Korea (Match)\n6/19/2026 02:00\n2.090\n3.330\n4.020\n-0.5\n2.100\n+0.5\n1.840\n2.25\n2.040\n2.25\n1.877\n+77\nUSA (Match)\nAustralia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)"
+  },
+  {
+    "matchId": "wc2026_usa_australia",
+    "date": "2026-06-19",
+    "time": "22:00",
+    "homeTeam": "USA",
+    "awayTeam": "Australia",
+    "windowReason": "visible lines 135-179, team distance=0",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25,
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "6/19/2026 02:00\n2.090\n3.330\n4.020\n-0.5\n2.100\n+0.5\n1.840\n2.25\n2.040\n2.25\n1.877\n+77\nUSA (Match)\nAustralia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)"
+  },
+  {
+    "matchId": "wc2026_scotland_morocco",
+    "date": "2026-06-20",
+    "time": "01:00",
+    "homeTeam": "Scotland",
+    "awayTeam": "Morocco",
+    "windowReason": "visible lines 149-194, team distance=1",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 0,
+    "marketCounts": {},
+    "windowSample": "Australia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)"
+  },
+  {
+    "matchId": "wc2026_brazil_haiti",
+    "date": "2026-06-20",
+    "time": "03:30",
+    "homeTeam": "Brazil",
+    "awayTeam": "Haiti",
+    "windowReason": "visible lines 164-209, team distance=1",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25,
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Morocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)"
+  },
+  {
+    "matchId": "wc2026_turkey_paraguay",
+    "date": "2026-06-20",
+    "time": "06:00",
+    "homeTeam": "Turkey",
+    "awayTeam": "Paraguay",
+    "windowReason": "visible lines 179-224, team distance=1",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 0,
+    "marketCounts": {},
+    "windowSample": "Haiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)\nSweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)"
+  },
+  {
+    "matchId": "wc2026_netherlands_sweden",
+    "date": "2026-06-20",
+    "time": "20:00",
+    "homeTeam": "Netherlands",
+    "awayTeam": "Sweden",
+    "windowReason": "visible lines 194-239, team distance=1",
+    "oddsTokensInWindow": [
+      2.25,
+      2.25,
+      2.75,
+      2.75
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Paraguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)\nSweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)"
+  },
+  {
+    "matchId": "wc2026_germany_ivory_coast",
+    "date": "2026-06-20",
+    "time": "23:00",
+    "homeTeam": "Germany",
+    "awayTeam": "Ivory Coast",
+    "windowReason": "visible lines 209-254, team distance=1",
+    "oddsTokensInWindow": [
+      2.75,
+      2.75,
+      3.25,
+      3.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Sweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)"
+  },
+  {
+    "matchId": "wc2026_ecuador_curacao",
+    "date": "2026-06-21",
+    "time": "03:00",
+    "homeTeam": "Ecuador",
+    "awayTeam": "Curacao",
+    "windowReason": "visible lines 224-269, team distance=1",
+    "oddsTokensInWindow": [
+      2.75,
+      2.75,
+      3.25,
+      3.25,
+      2.25,
+      2.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Ivory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)"
+  },
+  {
+    "matchId": "wc2026_tunisia_japan",
+    "date": "2026-06-21",
+    "time": "07:00",
+    "homeTeam": "Tunisia",
+    "awayTeam": "Japan",
+    "windowReason": "visible lines 239-284, team distance=1",
+    "oddsTokensInWindow": [
+      3.25,
+      3.25,
+      2.25,
+      2.25,
+      3.25,
+      3.25
+    ],
+    "marketsExtracted": 3,
+    "marketCounts": {
+      "1X2": 3
+    },
+    "windowSample": "Curacao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)\nSaudi Arabia (Match)\n6/21/2026 17:00\n1.095\n10.230\n24.050\n-2.5\n2.040\n+2.5\n1.826\n3.25\n1.980\n3.25\n1.854\n+61\nBelgium (Match)"
+  }
+]
+
+===== Script/API candidates =====
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna00;rcb=1;ord=143121322970;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773487_vHloQsN3nMXtFOXBW_4NecqtSwxVGPdIRQ;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna00;rcb=1;ord=143121322970;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773487_vHloQsN3nMXtFOXBW_4NecqtSwxVGPdIRQ;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F?
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna0;rcb=1;ord=7454671662029;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773485_jgrq5v59FL3C6g2a8XroIY1uwYlnVujpwA;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=pages;cat=pinna0;rcb=1;ord=7454671662029;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773485_jgrq5v59FL3C6g2a8XroIY1uwYlnVujpwA;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F?
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=sites0;cat=tmrw-0;rcb=1;ord=8971685737936;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773485__XBe7MQOr8b8RaP-BWe_Y4OxJXngILrwUg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F
+https://15181258.fls.doubleclick.net/activityi;src=15181258;type=sites0;cat=tmrw-0;rcb=1;ord=8971685737936;npa=0;auiddc=1840019409.1781773481;uaa=x64;uab=64;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0;uamb=0;uam=;uap=Windows;uapv=10.0;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe66h0h2v9203607104z879423099za20gzb79423099zd79423099xea;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938466~115938468~119392696~119392704~119456239~119456247;epver=2;dc_random=1781773485__XBe7MQOr8b8RaP-BWe_Y4OxJXngILrwUg;_dc_test=1;~oref=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F?
+https://adscool.net/pageview/pinnacleww?usr=v1.3%3A15011924469%3A1781773481652%3A1781773485719&amp;scr=1365x900%7C1365x900&amp;scv=1365x900%7C0&amp;pgh=www.pinnacle.com&amp;pgl=%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F&amp;pgs=&amp;pgr=
+https://adscool.net/resources/content/pinnacleww.js
+https://adsdigitalplatform.com/tag/js?rtid=ECA-1723736153653135
+https://adsdigitalplatform.com/wmetrics?rtid=ECA-1723736153653135&amp;fr=0&amp;dr=&amp;dl=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F
+https://casino.pinnacle.com/en/virtual-sports/
+https://f49e0e95-cc2a-4abf-89de-609208c51cca.snippet.anjouangaming.org/anj-seal.js
+https://fonts.googleapis.com
+https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap
+https://googleads.g.doubleclick.net/pagead/viewthroughconversion/16528237569/?random=1781773485696&amp;cv=11&amp;fst=1781773485696&amp;bg=ffffff&amp;guid=ON&amp;async=1&amp;en=gtag.config&amp;gtm=45be66h0h2v9184628268z879423099za20gzb79423099zd79423099xec&amp;gcd=13l3l3l3l1l1&amp;dma=0&amp;tag_exp=115616985~115938466~115938469~119392696~119392704~119456239~119456247~119534189&amp;u_w=1365&amp;u_h=900&amp;url=https%3A%2F%2Fwww.pinnacle.com%2Fen%2Fsoccer%2Fmatchups%2Fhighlights%2F&amp;rcb=0&amp;frm=0&amp;tiba=Online%20Sports%20Betting%20%7C%20The%20Best%20Odds%20%7C%20Pinnacle&amp;hn=www.googleadservices.com&amp;npa=0&amp;pscdl=noapi&amp;auid=1840019409.1781773481&amp;uaa=x64&amp;uab=64&amp;uafvl=HeadlessChrome%3B131.0.6778.33%7CChromium%3B131.0.6778.33%7CNot_A%2520Brand%3B24.0.0.0&amp;uamb=0&amp;uam=&amp;uap=Windows&amp;uapv=10.0&amp;uaw=0&amp;data=event%3Dgtag.config&amp;ept=9&amp;rfmt=3&amp;fmt=4
+https://scripts.clarity.ms/0.8.65/clarity.js
+https://scripts.mediamathrdrt.com/scripts/ww_pinnacle.js
+https://seal.godaddy.com/verifySeal?sealID=5YHunbnKFbrMSJSIW4AB9JX8zvmJoEG5zt3HMQSXyqefuAYn33nHxZmTPMQi
+https://static.zdassets.com/ekr/snippet.js?key=de531b1e-e056-499d-878e-453e1d545afc
+https://www.facebook.com/pinnaclesports
+https://www.googletagmanager.com/gtag/js?id=AW-16528237569&amp;cx=c&amp;gtm=4e66h0h2
+https://www.googletagmanager.com/gtag/js?id=DC-15181258&amp;cx=c&amp;gtm=4e66h0h2
+https://www.googletagmanager.com/gtag/js?id=G-DXNRHBHDY9&amp;cx=c&amp;gtm=4e66h0h2
+https://www.googletagmanager.com/gtm.js?id=GTM-KXLFXC7&amp;gtm_auth=RSYvLtUxCh8o0eYkz0CGig
+https://www.gstatic.com/recaptcha/releases/MerVUtRoajKEbP7pLiGXkL28/recaptcha__en.js
+https://www.linkedin.com/company/pinnacle-sports
+https://www.pinnacle.com/en/account/signup/step1/?pathTo=/soccer/matchups/highlights/
+https://www.pinnacle.com/en/aussie-rules/matchups/
+https://www.pinnacle.com/en/baseball/matchups/
+https://www.pinnacle.com/en/basketball/matchups/
+https://www.pinnacle.com/en/betting-articles/betting-strategy/betting-on-soccer-asian-handicap-markets/x9h2kx3zfzndmtef
+https://www.pinnacle.com/en/boxing/matchups/
+https://www.pinnacle.com/en/chess/matchups/
+https://www.pinnacle.com/en/cricket/matchups/
+https://www.pinnacle.com/en/cycling/matchups/
+https://www.pinnacle.com/en/esports/matchups/highlights/
+https://www.pinnacle.com/en/football/matchups/
+https://www.pinnacle.com/en/formula-1/matchups/
+https://www.pinnacle.com/en/future/bets-sports-offered
+https://www.pinnacle.com/en/golf/matchups/
+https://www.pinnacle.com/en/handball/matchups/
+https://www.pinnacle.com/en/hockey/matchups/
+https://www.pinnacle.com/en/landing/pinnacle-sports-direct
+https://www.pinnacle.com/en/mixed-martial-arts/matchups/
+https://www.pinnacle.com/en/motorsport/matchups/
+https://www.pinnacle.com/en/rugby-league/matchups/
+https://www.pinnacle.com/en/rugby-union/matchups/
+https://www.pinnacle.com/en/snooker/matchups/
+https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/
+https://www.pinnacle.com/en/soccer/fifa-world-cup/matchups/#futures
+https://www.pinnacle.com/en/soccer/matchups/highlights/
+https://www.pinnacle.com/en/soccer/matchups/live/
+https://www.pinnacle.com/en/tennis/matchups/
+https://www.pinnacle.com/en/volleyball/matchups/
+https://www.pinnacle.com/es/soccer/matchups/highlights/
+https://www.pinnacle.com/esports/matchups/highlights/
+https://www.pinnacle.com/fi/soccer/matchups/highlights/
+https://www.pinnacle.com/fr/soccer/matchups/highlights/
+https://www.pinnacle.com/img/footers/sports-direct-logo-blue.svg
+https://www.pinnacle.com/it/soccer/matchups/highlights/
+https://www.pinnacle.com/ja/soccer/matchups/highlights/
+https://www.pinnacle.com/ko/soccer/matchups/highlights/
+https://www.pinnacle.com/main.5010a3d968048002765c.js
+https://www.pinnacle.com/manifest.json
+https://www.pinnacle.com/pt/soccer/matchups/highlights/
+https://www.pinnacle.com/ru/soccer/matchups/highlights/
+https://www.pinnacle.com/runtime.724483a7517017323e75.js
+https://www.pinnacle.com/sv/soccer/matchups/highlights/
+https://www.pinnacle.com/vendors.adc6697c5292d4ffd999.js
+https://www.pinnacle.com/zh-CN/soccer/matchups/highlights/
+https://www.pinnacle.com/zh-TW/soccer/matchups/highlights/
+https://www.recaptcha.net/recaptcha/api.js?onload=onLoadCaptchaV3Callback&amp;render=6LcssPcbAAAAABu-IURUmN4cgxGRtk3-2kDX8fHu
+https://www.recaptcha.net/recaptcha/api2/anchor?ar=1&amp;k=6LcssPcbAAAAABu-IURUmN4cgxGRtk3-2kDX8fHu&amp;co=aHR0cHM6Ly93d3cucGlubmFjbGUuY29tOjQ0Mw..&amp;hl=en&amp;v=MerVUtRoajKEbP7pLiGXkL28&amp;size=invisible&amp;anchor-ms=20000&amp;execute-ms=30000&amp;cb=dq53sbskdmng
+https://www.reddit.com/r/PinnacleSportsbook/
+https://www.youtube.com/@pinnaclesports
+
+===== Visible text sample =====
+Welcome to Pinnacle. We use cookies to provide you with the most relevant experience. To change your cookie settings or for more information on cookies, see our
+cookie policy
+.
+ACCEPT
+Forgot email or password?
+LOG IN
+JOIN
+SPORTS BETTING
+Log In or Join to access the Live Centre.
+LIVE CENTRE
+CASINO
+LIVE CASINO
+VIRTUAL SPORTS
+BETTING RESOURCES
+Quick Bet
+I
+O
+Decimal Odds
+EN
+10:04:48 (GMT +01:00)
+Help
+Soccer
+Soccer Odds
+HIGHLIGHTSLIVELEAGUESFUTURES
+SOCCER - FIFA - WORLD CUP
+FIFA - World Cup 2026 Winner
+Thursday, June 18, 2026 at 17:00
+France
+5.000
+England
+7.000
+Spain
+7.000
+SOCCER - FIFA - WORLD CUP
+Czechia - South Africa
+Thursday, June 18, 2026 at 17:00
+Money Line – Match
+Czechia
+1.854
+Draw
+3.670
+South Africa
+4.740
+SOCCER - FIFA - WORLD CUP
+First Time Winner
+Thursday, June 18, 2026 at 17:00
+Futures
+Yes
+3.250
+No
+1.370
+SOCCER - FIFA - WORLD CUP
+Winning Continent
+Thursday, June 18, 2026 at 17:00
+Europe
+1.333
+South America
+4.500
+Rest of the World
+12.000
+SOCCER - FIFA - WORLD CUP
+Switzerland - Bosnia and Herzegovina
+Thursday, June 18, 2026 at 20:00
+Money Line – Match
+Switzerland
+1.581
+Draw
+4.190
+Bosnia and Herzegovina
+6.470
+SOCCER - FIFA - WORLD CUP
+Canada - Qatar
+Thursday, June 18, 2026 at 23:00
+Money Line – Match
+Canada
+1.298
+Draw
+5.850
+Qatar
+12.500
+HIGHLIGHTS
+FIFA - WORLD CUP
+1
+X
+2
+HANDICAP
+OVER
+UNDER
+Czechia (Match)
+South Africa (Match)
+Today 17:00
+1.854
+3.670
+4.740
+-0.5
+1.854
++0.5
+2.080
+2.25
+1.900
+2.25
+2.010
++77
+Switzerland (Match)
+Bosnia and Herzegovina (Match)
+Today 20:00
+1.581
+4.190
+6.470
+-1.0
+2.010
++1.0
+1.917
+2.5
+2.060
+2.5
+1.854
++78
+Canada (Match)
+Qatar (Match)
+Today 23:00
+1.298
+5.850
+12.500
+-1.5
+1.884
++1.5
+2.040
+2.75
+1.943
+2.75
+1.961
++77
+Mexico (Match)
+South Korea (Match)
+6/19/2026 02:00
+2.090
+3.330
+4.020
+-0.5
+2.100
++0.5
+1.840
+2.25
+2.040
+2.25
+1.877
++77
+USA (Match)
+Australia (Match)
+6/19/2026 20:00
+1.598
+4.500
+5.270
+-1.0
+2.100
++1.0
+1.826
+2.5
+1.990
+2.5
+1.900
++76
+Scotland (Match)
+Morocco (Match)
+6/19/2026 23:00
+5.410
+3.700
+1.719
++0.75
+1.934
+-0.75
+1.970
+2.25
+2.030
+2.25
+1.862
++75
+Brazil (Match)
+Haiti (Match)
+6/20/2026 02:00
+1.097
+11.770
+21.880
+-2.5
+1.943
++2.5
+1.909
+3.5
+1.884
+3.5
+1.934
++29
+Turkiye (Match)
+Paraguay (Match)
+6/20/2026 04:00
+2.030
+3.440
+3.980
+-0.5
+2.040
++0.5
+1.869
+2.25
+1.877
+2.25
+2.010
++75
+Netherlands (Match)
+Sweden (Match)
+6/20/2026 18:00
+1.751
+3.910
+4.780
+-0.75
+1.980
++0.75
+1.925
+2.5
+1.909
+2.5
+1.980
++64
+Germany (Match)
+Ivory Coast (Match)
+6/20/2026 21:00
+1.549
+4.670
+5.630
+-1.0
+1.925
++1.0
+1.980
+2.75
+1.840
+2.75
+2.060
++65
+Ecuador (Match)
+Curacao (Match)
+6/21/2026 01:00
+1.090
+10.560
+25.240
+-2.5
+1.990
++2.5
+1.862
+3.25
+1.980
+3.25
+1.877
++18
+Tunisia (Match)
+Japan (Match)
+6/21/2026 05:00
+6.910
+4.210
+1.526
++1.0
+1.925
+-1.0
+1.980
+2.25
+1.862
+2.25
+2.030
++64
+Spain (Match)
+Saudi Arabia (Match)
+6/21/2026 17:00
+1.095
+10.230
+24.050
+-2.5
+2.040
++2.5
+1.826
+3.25
+1.980
+3.25
+1.854
++61
+Belgium (Match)
+Iran (Match)
+6/21/2026 20:00
+1.431
+4.730
+7.830
+-1.25
+2.020
++1.25
+1.884
+2.5
+1.900
+2.5
+1.990
++65
+Soccer betting and soccer odds
+
+Soccer is one of the most popular sports in the world, with millions of spectators from across the globe watching domestic and international soccer all year round. One of the largest soccer tournaments is the World Cup, which sees countries from around the world compete every four years for the right to be crowned champions. Pinnacle offers a comprehensive list of soccer odds and betting lines, covering some of the most important soccer matches and tournaments for soccer bettors.
+
+See more
+
+FAVOURITES
+Log in or Join to change your favourites.
+TOP SPORTS
+Soccer
+585
+Esports
+87
+Hockey
+6
+Basketball
+74
+Tennis
+250
+Baseball
+21
+MMA
+33
+Golf
+136
+Football
+77
+Volleyball
+7
+Handball
+1
+A-Z SPORTS
+Aussie Rules
+8
+Baseball
+21
+Basketball
+74
+Boxing
+14
+Chess
+1
+Cricket
+9
+Cycling
+123
+Esports
+87
+Football
+77
+Formula 1
+3
+Golf
+136
+Handball
+1
+Hockey
+6
+MMA
+33
+Motorsport
+1
+Rugby League
+10
+Rugby Union
+7
+Snooker
+16
+Soccer
+585
+Tennis
+250
+Volleyball
+7
+BET SLIP
+MY BETS
+SINGLES
+There are no bets on your ticket.
+Click the odds to add a bet.
+MULTIPLES
+To place a Multiple bet you need a minimum of two bets on your Bet Slip. Alternatively, you can place a Single bet.
+TEASERS
+Sports Betting
+Soccer betting
+Basketball betting
+Baseball betting
+Football betting
+Tennis betting
+Hockey betting
+Esports betting
+About Pinnacle
+Corporate
+Press
+Affiliates
+Why Pinnacle?
+Policies
+Responsible Gaming
+Terms & Conditions
+Privacy Policy
+Cookie Policy
+Help & Support
+Contact us
+Betting Rules
+Bets Offered
+Help
+Sitemap
+Payment Options
+Social
+X
+YouTube
+Facebook
+LinkedIn
+Reddit
+Spotify
+Apple Podcasts
+
+Gambling can be addictive. Please know your limits and gamble responsibly.
+
+Impyrial Holdings Ltd, 8A Pitmans Alley, Main Street, Gibraltar GX11 1AA, acting for processing purposes on behalf of Ragnarok Corporation N.V.
+
+Pinnacle.com operates with the license of Ragnarok Corporation N.V., Pletterijweg 43, Willemstad, Curaçao, company number 79358, and is supervised and licensed by the Curaçao Gaming Authority under the License OGL/2023/105/0084, issued for the provision of games of chance. Licensed from June 25, 2024, with its status as being active. Pinnacle is a registered trademark.
+
+Online sports betting from Pinnacle bookmakers - your premier international sportsbook © 2004 - 2026 Pinnacle.
+Pinnacle, Pinnacle Sports, Pinbet, Pinny and all other derivative marks are registered trademarks of Pinnacle. Any and all content on the website (desktop and mobile), including sports odds, are proprietary and may not be copied or disseminated without the express written consent of Pinnacle. All Rights Reserved.
+
+v.8.3.67-rel
+
+===== HTML sample =====
+<!DOCTYPE html><html lang="en" class="" data-react-helmet="lang" style="--global-animation-easing: cubic-bezier(0, 1, 0.85, 1); --global-border-color: rgba(102, 102, 102, 0.2); --global-border-radius: 3px; --global-border-radiusSml: 2px; --global-colors-primary: var(--orange); --global-colors-secondary: var(--green); --global-colors-tertiary: var(--azure); --global-colors-background: var(--darkBlue); --global-font-color: var(--tiber); --global-font-family: 'Roboto', sans-serif; --global-messages-accepted-background: #D0FAD5; --global-messages-accepted-color: var(--tiber); --global-messages-attention-background: #FFCCD0; --global-messages-attention-color: var(--tiber); --global-messages-neutral-background: var(--zumthor); --global-messages-neutral-color: var(--tiber); --global-messages-warning-background: var(--khaki); --global-messages-warning-color: var(--tiber); --global-scrollbar-background: rgba(0, 0, 0, .10); --global-scrollbar-thumb-background: rgba(11, 20, 34, 0.25); --global-scrollbar-hover-thumb-background: rgba(11, 20, 34, 0.5); --global-spacing-margin: 15px; --global-spacing-padding: 15px; --layout-background: var(--solitude); --layout-breakpoints-desktop: 1280px; --layout-breakpoints-tablet: 1024px; --layout-breakpoints-mobile: 768px; --layout-footer-color: #343B48; --layout-footer-background: transparent; --layout-footer-disclaimer-color: #343B48; --layout-footer-disclaimer-background: var(--solitude); --layout-footer-disclaimer_ontario-color: #343B48; --layout-footer-disclaimer_ontario-background: var(--solitude2); --layout-footer-heading-color: #343B48; --layout-footer-p88CookiesAndLicenses-color: #334e6a; --layout-footer-p88CookiesAndLicenses-background: 334e6a; --layout-footer-p88CookiesAndLicenses-opacity: 0.1; --layout-sidebar-color: var(--darkBlue); --layout-sidebar-divider-color: var(--athensGray); --layout-sidebar-item-hover-background: var(--white); --layout-sidebar-icon-color: var(--medGray); --layout-sidebar-icon-hover-color: var(--orange); --layout-sidebar-veil-background: rgba(255, 255, 255, .7); --layout-sidebar-closeSidebar-background: #042D56; --components-account-background: var(--solitude); --components-account-betCard-details-background: var(--ghostWhite); --components-account-betCard-details-border-color: var(--zumthor); --components-account-betResultsTable-betCard-background: var(--ghostWhite); --components-account-betResultsTable-betCard-border-color: var(--zumthor); --components-account-betResultsTable-container-border-color: var(--zumthor); --components-account-betResultsTable-wagerCount-background: var(--zumthor); --components-account-betStatus-color: var(--global-font-color); --components-account-breadcrumb-background: var(--white); --components-account-pspCard-background: var(--white); --components-account-pspCard-color: var(--global-font-color); --components-account-dataPoints-color: var(--darkSlateBlue); --components-account-emptySearchResults-container-background: var(--solitude); --components-account-emptySearchResults-container-header-color: rgba(0,0,0,.7); --components-account-emptySearchResults-icon-background: url(/img/icons/empty-tickets.default.svg); --components-account-events-matchName-color: var(--cloudBurst); --components-account-eventDate-startTime-color: var(--cloudBurst); --components-account-finalScore-value-color: var(--cloudBurst); --components-account-faqLinks-container-background: var(--white); --components-account-faqLinks-container-links-background: var(--solitude2); --components-account-faqLinks-container-links-linkItem-border-color: var(--zumthor); --components-account-forcedpasswordupdate-header-color: var(--black); --components-account-forcedpasswordupdate-alertparagraph-background: var(--white); --components-account-forcedpasswordupdate-form-background: var(--white); --components-account-filters-background: var(--white); --components-account-filters-border-color: var(--global-colors-tertiary); --components-account-firstDepositStatus-content-background: var(--solitude); --components-account-firstDepositStatus-resultContainer-background: var(--zumthor); --components-account-helpLink-background: var(--darkBlue); --components-account-geoLocationPopup-reasonBody-backgroundColor: var(--white); --components-account-knowYourCustomer-textBoxing-color: var(--darkWhiteSmoke); --components-account-knowYourCustomer-requestMessage-borderBottom: 1px solid var(--athensGray); --components-account-knowYourCustomer-mobileDocContainer-background: white; --components-account-knowYourCustomer-docStatusState-color: black; --components-account-knowYourCustomer-docStateLabel-required-background: var(--alertPink); --components-account-knowYourCustomer-docStateLabel-pending-background: var(--khaki); --components-account-knowYourCustomer-docStateLabel-verified-background: var(--mintGainsboro); --components-account-kycStatusTracker-bottomBtn-border-color: var(--athensGray); --components-account-kycStatusTracker-bottomBtn-hover-background: var(--softYellow); --components-account-kycStatusTracker-bottomBtn-hover-color: var(--global-colors-primary); --components-account-menu-mobile-background: var(--white); --components-account-messageCenter-fullMessageView-background: var(--solitude2); --components-account-messageCenter-messageRow-row-active-background: rgba(255,255,255, .8); --components-account-messageCenter-messageRow-row-background: var(--solitude2); --components-account-messageCenter-messageRow-row-border-color: var(--athensGray); --components-account-messageCenter-messageRow-row-color: var(--grayBlue); --components-account-messageCenter-messageRow-row-hover-background: var(--white); --components-account-messageCenter-messageRow-row-hover-color: var(--global-font-color); --components-account-messageCenter-messageRow-row-unread-color: var(--tiber); --components-account-minDefaultStakeWarning-validator-color: rgba(0,0,0,.5); --components-account-paymentOptions-disclaimer-background: var(--white); --components-account-paymentOptions-depositLimitsHeader-details-color: var(--black); --components-account-responsibleGaming-disclaimer-background: var(--white); --components-account-responsibleGaming-termsAndConditionsContainer-background: var(--solitude2); --components-account-responsibleGaming-noLimitsSetContainer-body-background: var(--solitude2); --components-account-responsibleGaming-noLimitsSetContainer-header-background: var(--khaki); --components-account-responsibleGaming-noLimitsSetContainer-header-color: var(--tiber); --components-account-responsibleGaming-deactivation-reasonSelector-container-background: var(--solitude2); --components-account-responsibleGaming-durationMenu-background: var(--solitude2); --components-account-responsibleGaming-lossLimit-notifications-success-background: var(--snowFlurry); --components-account-responsibleGaming-lossLimit-notifications-error-background: var(--pink); --components-account-responsibleGaming-lossLimit-notifications-notice-background: var(--moccasin2); --components-account-responsibleGaming-lossLimit-buttons-background: var(--white); --components-account-transactionsHistory-headers-color: var(--black); --components-account-transactionsHistory-card-background: var(--ghostWhite); --components-account-transactionsHistory-card-border-color: var(--global-border-color); --components-account-transactionsHistory-card-hover-background: rgba(218,219,220,0.3); --components-account-transactionsHistory-card-dateTime-color: var(--black); --components-account-wagerCard-background: var(--white); --components-account-casinoHistory-winLoss-backgroundColor: var(--mintGainsboro); --components-account-selfExclusion-sectionBorderColor: var(--linkWater); --components-account-selfExclusion-sectionBorderColorMobile: var(--athensGray); --components-scoreboard-borderBottom: 1px solid #1f3a5a; --components-accountMenu-selected-background: var(--white); --components-accountMenu-item-active-background: rgba(255,255,255, .8); --components-accountMenu-item-hover-background: var(--white); --components-accountNotifications-background: var(--solitude2); --components-accountNotifications-color: var(--global-font-color); --components-b2bMenuLinks-badge-background: var(--global-colors-primary); --components-b2bMenuLinks-color: var(--white); --components-betslip-background: var(--zumthor); --components-betslip-empty-background: url(/img/icons/betslip-empty.default.svg); --components-betslip-card-background: var(--white); --components-betslip-card-color: var(--tiber); --components-betslip-card-price-color: var(--white); --components-betslip-card-price-background: var(--orange); --components-betslip-card-closeIcon-color: #999; --components-betslip-card-live-color: var(--green); --components-betslip-card-sportIcon-color: var(--raven); --components-betslip-card-teaserPoints-color: var(--dimGray); --components-betslip-card-title-color: var(--cloudBurst); --components-betslip-card-wagerSummary-color: var(--blumine); --components-betslip-cardMessage-accepted-background: var(--global-messages-accepted-background); --components-betslip-cardMessage-accepted-color: var(--global-messages-accepted-color); --components-betslip-cardMessage-attention-background: var(--global-messages-attention-background); --components-betslip-cardMessage-attention-color: var(--global-messages-attention-color); --components-betslip-cardMessage-warning-background: #ffd26e; --components-betslip-cardMessage-warning-color: var(--global-messages-warning-color); --components-betslip-removeAll-color: var(--medGray); --components-betslip-roundRobinOptions-background: var(--ghostWhite); --components-betslip-stakeAndOptions-background: var(--white); --components-betslip-stakeWin-background: var(--white); --components-betslip-stakeWinInput-color: var(--tiber); --components-betslip-stakeWinInput-background: var(--ghostWhite); --components-betslip-stakeWinInput-border-color: var(--linkWater); --components-betslip-stakeWinInput-focus-background: var(--white); --components-betslip-stakeWinInput-focus-border-color: var(--dodgerBlue); --components-betslip-stakeWinInput-placeholder-color: var(--athensGray); --components-betslip-stakeWinInput-label-color: #666B72; --components-betslip-teaserInfoContainer-background: var(--ghostWhite); --components-betslip-teaserLink-background: var(--white); --components-betslip-teaserLink-hover-background: var(--lightGray); --components-betslip-header-badge-background: var(--orange); --components-betslip-footer-button-disabled-color: rgba(255,255,255,0.3); --components-betslip-footer-button-disabled-background: var(--medGray); --components-betslip-footer-button-disabled-border-color: var(--medGray); --components-betslip-footer-button-oddsChangeGrey: #9CA3AF; --components-betslip-oddsMessage-priceChange: var(--green); --components-betslip-tabs-selected-boxShadow: 0 -3px 0 0 var(--global-colors-primary) inset; --components-betslip-unified-background: var(--zumthor); --components-betslip-unified-betslip-background: var(--white); --components-betslip-unified-totals-background: #f1f3f7; --components-betslip-unified-openBets-card-header-background: var(--mintGainsboro); --components-betslip-unified-openBets-card-header-color: black; --components-betslip-unified-openBets-summary-color: black; --components-betslip-unified-openBets-emptyResults-background: white; --components-breadCrumb-navbar-background-desktop: #081A30; --components-breadCrumb-navbar-background-mobile: white; --components-breadCrumb-navbar-arrow-desktop: var(--orange); --components-breadCrumb-navbar-arrow-mobile: var(--nero); --components-breadCrumb-navbar-color-desktop: white; --components-breadCrumb-navbar-color-mobile: var(--nero); --components-breadCrumb-background: #081A30; --components-breadCrumb-arrow: var(--nero); --components-breadCrumb-color: var(--regalBlue); --components-breadCrumb-dropdown-color-mobile: #122740; --components-breadCrumb-dropdown-color-desktop: #122740; --components-breadCrumb-dropdown-overlay: #09203980; --components-breadCrumb-dropdown-countColor: #ccd3da; --components-breadCrumb-dropdown-dropshadow: 4px 17px 30px 0px rgb(3 10 17 / 63%); --components-breadCrumb-dropdown-subCategory: #788da8; --components-breadCrumb-dropdown-background-mobile: white; --components-breadCrumb-dropdown-background-desktop: #8ba3c0; --components-breadCrumb-dropdown-sports-border: solid 1px rgb(131 150 174); --components-breadCrumb-dropdown-title: var(--regalBlue); --components-breadCrumb-dropdown-border: solid #aab2bb6e 1px; --components-breadCrumb-dropdown-isLive-color: #26FF07; --components-breadCrumb-dropdown-activeSport: #69819F; --components-breadCrumb-dropdown-activeSportMobile: #CCD3DA; --components-button-disabled-color: rgba(255,255,255,0.6); --components-button-disabled-background: var(--silver); --components-button-disabled-border-color: var(--silver); --components-button-disabled-hover-background: var(--silver); --components-button-disabled-hover-border-color: var(--silver); --components-button-primary-background: var(--global-colors-primary); --components-button-primary-hover-background: hsl(20, 100%, 42.5%); --components-button-secondary-background: var(--global-colors-secondary); --components-button-secondary-hover-background: hsl(120.39999999999998, 83.6%, 30.5%); --components-button-tertiary-background: var(--global-colors-tertiary); --components-button-tertiary-hover-background: hsl(212.20000000000005, 92%, 41.5%); --components-casinoTitleContainer-title-color: var(--tiber); --components-casinoTitleContainer-totalAmount-color: rgba(11, 20, 34, .6); --components-collapse-primary-title-background: var(--blumine); --components-collapse-primary-title-color: var(--white); --components-collapse-primary-title-border: none; --components-collapse-primary-title-hover-background: hsl(210.5, 35%, 35.4%); --components-collapse-primary-subtitle-color: var(--gainsboro); --components-collapse-primary-content-background: var(--white); --components-collapse-primary-subtitledesc-background: var(--blumine); --components-collapse-primary
