@@ -420,10 +420,15 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
         context.close()
         browser.close()
 
+    # Do not attach the attempts list to the original `best` dict object when it
+    # is also one of the entries inside `attempts`; that creates a circular
+    # reference and json.dumps(debug) fails on GitHub Actions.
     if best is None:
-        best = {"attempts": attempts, "error": "No Pinnacle candidate page could be inspected."}
-    best["attempts"] = attempts
-    return best, best_visible, best_html
+        best_summary: dict[str, Any] = {"error": "No Pinnacle candidate page could be inspected."}
+    else:
+        best_summary = dict(best)
+    best_summary["attempts"] = [dict(item) for item in attempts]
+    return best_summary, best_visible, best_html
 
 
 def make_empty_feed(generated_at: str) -> dict[str, Any]:
