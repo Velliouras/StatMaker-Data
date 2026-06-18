@@ -44,7 +44,7 @@ BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v1"
+SCRIPT_VERSION = "pinnacle-wc-odds-v2-confidence"
 
 KEYWORDS = [
     "football",
@@ -247,21 +247,140 @@ def find_fixture_window(visible_text: str, html: str, fixture: Fixture) -> tuple
     return "", None
 
 
-def extract_1x2_markets(window: str, fixture: Fixture) -> list[dict[str, Any]]:
-    markets: list[dict[str, Any]] = []
-    tokens = odds_tokens(window)
-    if len(tokens) < 3:
-        return markets
+def is_draw_label(line: str) -> bool:
+    norm = normalize_text(line)
+    return norm in {"draw", "x", "tie"} or norm.startswith("draw ")
 
-    # Conservative assumption: in a matched fixture block, the first three decimal odds are 1-X-2.
-    # Pinnacle pages often expose Matchups with the main prices near team names. Debug report keeps the window for verification.
-    home_odd, draw_odd, away_odd = tokens[0], tokens[1], tokens[2]
+
+def first_odd_in_text(text: str) -> float | None:
+    tokens = odds_tokens(text)
+    return tokens[0] if tokens else None
+
+
+def find_odd_near_label(lines: list[str], label_index: int, max_ahead: int = 4) -> tuple[float | None, str | None]:
+    """Find the first decimal odd on the label line or shortly after it."""
+    for offset in range(0, max_ahead + 1):
+        idx = label_index + offset
+        if idx >= len(lines):
+            break
+        odd = first_odd_in_text(lines[idx])
+        if odd is not None:
+            return odd, f"line {idx} (+{offset})"
+    return None, None
+
+
+def validate_1x2_triplet(home_odd: float, draw_odd: float, away_odd: float) -> tuple[bool, list[str], str]:
+    notes: list[str] = []
+    values = [home_odd, draw_odd, away_odd]
+    spread = max(values) - min(values)
+    implied_sum = sum(1.0 / value for value in values if value > 0)
+
+    if len({round(value, 2) for value in values}) < 3:
+        notes.append("rejected: duplicate 1X2 odds; likely generic/nearby tokens, not real 1X2")
+    if spread < 0.15:
+        notes.append(f"rejected: odds spread too small ({spread:.2f})")
+    if not (0.95 <= implied_sum <= 1.55):
+        notes.append(f"rejected: implied probability sum out of expected range ({implied_sum:.3f})")
+
+    if notes:
+        return False, notes, "rejected"
+
+    confidence = "high" if spread >= 0.35 else "medium"
+    notes.append(f"accepted: labelled Home/Draw/Away lines, spread={spread:.2f}, impliedSum={implied_sum:.3f}")
+    return True, notes, confidence
+
+
+def extract_1x2_markets(window: str, fixture: Fixture) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Extract labelled 1X2 odds only when Home/Draw/Away are clearly mapped.
+
+    The first scraper version took the first three decimal tokens in a fixture window.
+    That produced false prices when nearby generic tokens repeated, e.g. 2.25/2.25/2.25.
+    This version requires labelled team lines plus an explicit Draw line. If confidence
+    is not sufficient, it emits no 1X2 market and explains why in debug_report.json.
+    """
+    markets: list[dict[str, Any]] = []
+    lines = split_lines(window)
+    tokens = odds_tokens(window)
+    diagnostic: dict[str, Any] = {
+        "strategy": "labelled_home_draw_away",
+        "oddsTokensInWindow": tokens[:24],
+        "candidateCount": 0,
+        "accepted": False,
+        "notes": [],
+    }
+
+    home_indices = [idx for idx, line in enumerate(lines) if line_has_team(line, fixture.home_team)]
+    away_indices = [idx for idx, line in enumerate(lines) if line_has_team(line, fixture.away_team)]
+    draw_indices = [idx for idx, line in enumerate(lines) if is_draw_label(line)]
+    diagnostic["homeLineIndices"] = home_indices[:8]
+    diagnostic["drawLineIndices"] = draw_indices[:8]
+    diagnostic["awayLineIndices"] = away_indices[:8]
+
+    candidates: list[dict[str, Any]] = []
+    for home_idx in home_indices:
+        for draw_idx in draw_indices:
+            for away_idx in away_indices:
+                # Most sportsbook 1X2 blocks are Home / Draw / Away. Keep this conservative.
+                if not (home_idx <= draw_idx <= away_idx):
+                    continue
+                if away_idx - home_idx > 18:
+                    continue
+                home_odd, home_odd_source = find_odd_near_label(lines, home_idx)
+                draw_odd, draw_odd_source = find_odd_near_label(lines, draw_idx)
+                away_odd, away_odd_source = find_odd_near_label(lines, away_idx)
+                if home_odd is None or draw_odd is None or away_odd is None:
+                    continue
+                accepted, notes, confidence = validate_1x2_triplet(home_odd, draw_odd, away_odd)
+                candidate = {
+                    "homeLine": home_idx,
+                    "drawLine": draw_idx,
+                    "awayLine": away_idx,
+                    "lineSpan": away_idx - home_idx,
+                    "homeOdd": home_odd,
+                    "drawOdd": draw_odd,
+                    "awayOdd": away_odd,
+                    "homeOddSource": home_odd_source,
+                    "drawOddSource": draw_odd_source,
+                    "awayOddSource": away_odd_source,
+                    "accepted": accepted,
+                    "confidence": confidence,
+                    "notes": notes,
+                }
+                candidates.append(candidate)
+
+    diagnostic["candidateCount"] = len(candidates)
+    diagnostic["candidates"] = candidates[:8]
+
+    accepted_candidates = [candidate for candidate in candidates if candidate.get("accepted")]
+    if not accepted_candidates:
+        if not draw_indices:
+            diagnostic["notes"].append("No explicit Draw line found near fixture; 1X2 skipped.")
+        elif not candidates:
+            diagnostic["notes"].append("No Home/Draw/Away labelled odds candidate found; 1X2 skipped.")
+        else:
+            diagnostic["notes"].append("All labelled 1X2 candidates rejected by confidence checks.")
+        return markets, diagnostic
+
+    best = sorted(
+        accepted_candidates,
+        key=lambda item: (0 if item.get("confidence") == "high" else 1, int(item.get("lineSpan") or 999)),
+    )[0]
+    diagnostic["accepted"] = True
+    diagnostic["selectedCandidate"] = best
+
+    home_odd = float(best["homeOdd"])
+    draw_odd = float(best["drawOdd"])
+    away_odd = float(best["awayOdd"])
+    confidence = str(best.get("confidence") or "medium")
+
     unique_market(markets, {
         "market": "1X2",
         "selection": f"{fixture.home_team} Win",
         "team": fixture.home_team,
         "line": None,
         "odd": home_odd,
+        "confidence": confidence,
+        "extraction": "labelled_home_draw_away",
     })
     unique_market(markets, {
         "market": "1X2",
@@ -269,6 +388,8 @@ def extract_1x2_markets(window: str, fixture: Fixture) -> list[dict[str, Any]]:
         "team": None,
         "line": None,
         "odd": draw_odd,
+        "confidence": confidence,
+        "extraction": "labelled_home_draw_away",
     })
     unique_market(markets, {
         "market": "1X2",
@@ -276,8 +397,10 @@ def extract_1x2_markets(window: str, fixture: Fixture) -> list[dict[str, Any]]:
         "team": fixture.away_team,
         "line": None,
         "odd": away_odd,
+        "confidence": confidence,
+        "extraction": "labelled_home_draw_away",
     })
-    return markets
+    return markets, diagnostic
 
 
 def extract_total_markets(window: str) -> list[dict[str, Any]]:
@@ -332,15 +455,26 @@ def extract_btts_markets(window: str) -> list[dict[str, Any]]:
     return markets
 
 
-def build_markets_from_window(window: str, fixture: Fixture) -> list[dict[str, Any]]:
+def build_markets_from_window(window: str, fixture: Fixture) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     markets: list[dict[str, Any]] = []
-    for candidate in extract_1x2_markets(window, fixture):
+    extraction_debug: dict[str, Any] = {}
+
+    one_x_two_markets, one_x_two_debug = extract_1x2_markets(window, fixture)
+    extraction_debug["1X2"] = one_x_two_debug
+    for candidate in one_x_two_markets:
         unique_market(markets, candidate)
-    for candidate in extract_total_markets(window):
+
+    total_markets = extract_total_markets(window)
+    extraction_debug["MATCH_GOALS"] = {"marketsExtracted": len(total_markets)}
+    for candidate in total_markets:
         unique_market(markets, candidate)
-    for candidate in extract_btts_markets(window):
+
+    btts_markets = extract_btts_markets(window)
+    extraction_debug["BTTS"] = {"marketsExtracted": len(btts_markets)}
+    for candidate in btts_markets:
         unique_market(markets, candidate)
-    return markets
+
+    return markets, extraction_debug
 
 
 def count_market_types(markets: list[dict[str, Any]]) -> dict[str, int]:
@@ -519,7 +653,7 @@ def main() -> None:
             })
             continue
 
-        markets = build_markets_from_window(window, fixture)
+        markets, extraction_debug = build_markets_from_window(window, fixture)
         debug_item = {
             "matchId": fixture.match_id,
             "date": fixture.date,
@@ -530,7 +664,8 @@ def main() -> None:
             "oddsTokensInWindow": odds_tokens(window)[:24],
             "marketsExtracted": len(markets),
             "marketCounts": count_market_types(markets),
-            "windowSample": window[:1400],
+            "extractionDebug": extraction_debug,
+            "windowSample": window[:1800],
         }
         matched_debug.append(debug_item)
 
@@ -544,6 +679,7 @@ def main() -> None:
                 "reason": "fixture found, but no conservative odds market could be extracted",
                 "windowReason": window_reason,
                 "oddsTokensInWindow": odds_tokens(window)[:12],
+                "extractionDebug": extraction_debug,
             })
             continue
 
@@ -573,9 +709,9 @@ def main() -> None:
         "unmatchedFixtures": unmatched,
         "errors": errors,
         "notes": [
-            "This is a first Pinnacle scraper, not final production logic.",
-            "Only conservative markets are emitted. Inspect matchedFixtureDebug/windowSample after each run.",
-            "If 1X2 ordering is wrong for Pinnacle visible text, switch to API candidate extraction before consuming in Android.",
+            "This scraper now rejects low-confidence 1X2 extraction, including identical/near-identical Home/Draw/Away odds.",
+            "Only labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
+            "If too few markets are emitted, switch to Pinnacle API candidate extraction rather than accepting nearby visible-text odds.",
         ],
     }
 
