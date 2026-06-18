@@ -27,12 +27,24 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "odds-api-io-wc-v1-normalized-markets"
+SCRIPT_VERSION = "odds-api-io-wc-v2-full-statmaker-market-discovery"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
 MAIN_TOTAL_LINES = {1.5, 2.5, 3.5}
 MAX_EVENTS_PER_MULTI_CALL = 10
+
+DISCOVERY_TARGETS = [
+    "1X2",
+    "MATCH_GOALS",
+    "BTTS",
+    "TEAM_TOTAL_GOALS",
+    "CORNERS",
+    "CARDS",
+    "SHOTS",
+    "SHOTS_ON_TARGET",
+]
+
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_PATH = ROOT / "world-cup" / "world_cup_2026.json"
@@ -57,6 +69,8 @@ TEAM_ALIASES = {
     "curaçao": "curacao",
     "south korea": "korea republic",
     "korea republic": "korea republic",
+    "turkey": "turkiye",
+    "turkiye": "turkiye",
     "saudi arabia": "saudi arabia",
     "cape verde": "cape verde",
     "new zealand": "new zealand",
@@ -367,6 +381,107 @@ def market_name(market: Dict[str, Any]) -> str:
     return normalize_text(" ".join(str(p or "") for p in parts))
 
 
+def raw_market_display_name(market: Dict[str, Any]) -> str:
+    return str(market.get("name") or market.get("market") or market.get("type") or market.get("key") or "UNKNOWN")
+
+
+def discovery_categories(raw_name: str) -> List[str]:
+    name = normalize_text(raw_name)
+    categories: List[str] = []
+
+    if any(token in name for token in ["ml", "moneyline", "match result", "match winner", "1x2"]):
+        categories.append("1X2")
+
+    if any(token in name for token in ["both teams", "btts", "both teams to score"]):
+        categories.append("BTTS")
+
+    if "corner" in name or "corners" in name:
+        categories.append("CORNERS")
+
+    if any(token in name for token in ["booking", "bookings", "card", "cards", "yellow", "red card"]):
+        categories.append("CARDS")
+
+    if any(token in name for token in ["shot on target", "shots on target", "on target"]):
+        categories.append("SHOTS_ON_TARGET")
+    elif "shot" in name or "shots" in name:
+        categories.append("SHOTS")
+
+    if any(token in name for token in ["team total", "team goals", "teamtotal"]):
+        categories.append("TEAM_TOTAL_GOALS")
+    elif any(token in name for token in ["goals over under", "over under", "total", "totals"]):
+        # Corners/cards can also have totals. Keep MATCH_GOALS only when the name is not a non-goal stat market.
+        if not any(cat in categories for cat in ["CORNERS", "CARDS", "SHOTS", "SHOTS_ON_TARGET"]):
+            categories.append("MATCH_GOALS")
+
+    return categories or ["OTHER"]
+
+
+def odds_shape_sample(market: Dict[str, Any], limit: int = 500) -> Any:
+    rows = market.get("odds")
+    if not isinstance(rows, list):
+        return compact(rows, limit)
+    return compact(rows[:2], limit)
+
+
+def observe_raw_market(debug: Dict[str, Any], fixture: Dict[str, Any], bookmaker: str, market: Dict[str, Any]) -> None:
+    raw_name = raw_market_display_name(market)
+    normalized = market_name(market)
+
+    inventory = debug.setdefault("rawMarketInventory", {})
+    inv = inventory.setdefault(raw_name, {"count": 0, "bookmakers": {}, "examples": []})
+    inv["count"] += 1
+    inv["bookmakers"][bookmaker] = inv["bookmakers"].get(bookmaker, 0) + 1
+    if len(inv["examples"]) < 3:
+        inv["examples"].append({
+            "matchId": fixture.get("matchId"),
+            "fixture": f"{fixture.get('homeTeam')} - {fixture.get('awayTeam')}",
+            "bookmaker": bookmaker,
+            "marketName": raw_name,
+            "normalizedName": normalized,
+            "oddsShape": odds_shape_sample(market),
+        })
+
+    discovery = debug.setdefault("statMakerMarketDiscovery", {})
+    for category in discovery_categories(raw_name):
+        bucket = discovery.setdefault(category, {"rawMarketCount": 0, "marketNames": {}, "examples": []})
+        bucket["rawMarketCount"] += 1
+        bucket["marketNames"][raw_name] = bucket["marketNames"].get(raw_name, 0) + 1
+        if len(bucket["examples"]) < 12:
+            bucket["examples"].append({
+                "matchId": fixture.get("matchId"),
+                "fixture": f"{fixture.get('homeTeam')} - {fixture.get('awayTeam')}",
+                "bookmaker": bookmaker,
+                "marketName": raw_name,
+                "normalizedName": normalized,
+                "oddsShape": odds_shape_sample(market),
+            })
+
+
+def finalize_market_discovery(debug: Dict[str, Any]) -> None:
+    discovery = debug.setdefault("statMakerMarketDiscovery", {})
+    for category in DISCOVERY_TARGETS:
+        bucket = discovery.setdefault(category, {"rawMarketCount": 0, "marketNames": {}, "examples": []})
+        names = bucket.get("marketNames", {}) if isinstance(bucket.get("marketNames"), dict) else {}
+        top_names = sorted(names.items(), key=lambda item: item[1], reverse=True)[:30]
+        bucket["status"] = "found" if bucket.get("rawMarketCount", 0) else "not_found"
+        bucket["uniqueMarketNames"] = len(names)
+        bucket["topMarketNames"] = [{"name": name, "count": count} for name, count in top_names]
+        bucket.pop("marketNames", None)
+
+    raw_inventory = debug.get("rawMarketInventory", {})
+    if isinstance(raw_inventory, dict):
+        top_inventory = []
+        for name, entry in sorted(raw_inventory.items(), key=lambda item: item[1].get("count", 0), reverse=True)[:80]:
+            top_inventory.append({
+                "name": name,
+                "count": entry.get("count", 0),
+                "bookmakers": entry.get("bookmakers", {}),
+                "examples": entry.get("examples", []),
+            })
+        debug["rawMarketInventoryTop"] = top_inventory
+        debug.pop("rawMarketInventory", None)
+
+
 def extract_1x2(market: Dict[str, Any], fixture: Dict[str, Any], orientation: str, bookmaker: str, debug_bucket: Dict[str, int]) -> List[Dict[str, Any]]:
     name = market_name(market)
     if not any(token in name for token in ["ml", "moneyline", "match result", "match winner", "1x2"]):
@@ -505,7 +620,8 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
             for market in markets:
                 if not isinstance(market, dict):
                     continue
-                raw_name = str(market.get("name") or market.get("market") or market.get("type") or market.get("key") or "UNKNOWN")
+                raw_name = raw_market_display_name(market)
+                observe_raw_market(debug, fixture, str(bookmaker), market)
                 raw_market_names[raw_name] = raw_market_names.get(raw_name, 0) + 1
                 markets_out.extend(extract_1x2(market, fixture, orientation, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_match_goals(market, str(bookmaker), accepted_counts))
@@ -549,7 +665,9 @@ def main() -> int:
             "singleOdds": "exact_api_mapped_odds_only",
             "noApproximateSingles": True,
             "emittedMarkets": ["1X2", "MATCH_GOALS", "BTTS", "TEAM_TOTAL_GOALS"],
+            "discoveryTargets": DISCOVERY_TARGETS,
             "matchGoalsLines": sorted(MAIN_TOTAL_LINES),
+            "note": "Discovery is diagnostic-only for corners/cards/shots/SOT; only emittedMarkets are written as normalized odds until mapping is approved.",
         },
     }
 
@@ -601,6 +719,17 @@ def main() -> int:
             "matchesWithMarkets": matches_with_markets,
             "marketsFound": sum(global_counts.values()),
             "marketCounts": global_counts,
+        }
+        finalize_market_discovery(debug)
+        output["marketDiscoverySummary"] = {
+            key: {
+                "status": value.get("status"),
+                "rawMarketCount": value.get("rawMarketCount"),
+                "uniqueMarketNames": value.get("uniqueMarketNames"),
+                "topMarketNames": value.get("topMarketNames", [])[:10],
+            }
+            for key, value in debug.get("statMakerMarketDiscovery", {}).items()
+            if key in DISCOVERY_TARGETS
         }
         write_json(OUTPUT_PATH, output)
         write_json(DEBUG_PATH, debug)
