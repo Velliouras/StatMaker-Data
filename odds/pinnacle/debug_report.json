@@ -1,8 +1,8 @@
 {
   "source": "pinnacle",
   "bookmaker": "Pinnacle",
-  "generatedAt": "2026-06-18T09:04:39Z",
-  "scriptVersion": "pinnacle-wc-odds-v1",
+  "generatedAt": "2026-06-18T09:16:30Z",
+  "scriptVersion": "pinnacle-wc-odds-v2-confidence",
   "fixturesPath": "world-cup/world_cup_2026.json",
   "outputPath": "odds/pinnacle/world_cup_odds.json",
   "debugPath": "odds/pinnacle/debug_report.json",
@@ -13,7 +13,7 @@
     "httpStatus": 200,
     "title": "Soccer Odds | Soccer Betting",
     "visibleTextLength": 5557,
-    "htmlLength": 182313,
+    "htmlLength": 182380,
     "oddsLikeNumbersInVisibleText": 21,
     "oddsLikeNumbersInHtml": 42,
     "scriptApiCandidatesCount": 75,
@@ -26,7 +26,7 @@
         "httpStatus": 200,
         "title": "Soccer Odds | Soccer Betting",
         "visibleTextLength": 4308,
-        "htmlLength": 160924,
+        "htmlLength": 160880,
         "oddsLikeNumbersInVisibleText": 13,
         "oddsLikeNumbersInHtml": 32,
         "scriptApiCandidatesCount": 74,
@@ -39,7 +39,7 @@
         "httpStatus": 200,
         "title": "Soccer Odds | Soccer Betting",
         "visibleTextLength": 5557,
-        "htmlLength": 182313,
+        "htmlLength": 182380,
         "oddsLikeNumbersInVisibleText": 21,
         "oddsLikeNumbersInHtml": 42,
         "scriptApiCandidatesCount": 75,
@@ -49,12 +49,10 @@
     ]
   },
   "fixturesLoaded": 32,
-  "matchesMatched": 15,
-  "matchesWithMarkets": 15,
-  "marketsFound": 45,
-  "marketCounts": {
-    "1X2": 45
-  },
+  "matchesMatched": 0,
+  "matchesWithMarkets": 0,
+  "marketsFound": 0,
+  "marketCounts": {},
   "matchedFixtureDebug": [
     {
       "matchId": "wc2026_czech_republic_south_africa",
@@ -66,7 +64,36 @@
       "oddsTokensInWindow": [],
       "marketsExtracted": 0,
       "marketCounts": {},
-      "windowSample": "Help\nSoccer\nSoccer Odds\nHIGHLIGHTSLIVELEAGUESFUTURES\nSOCCER - FIFA - WORLD CUP\nFIFA - World Cup 2026 Winner\nThursday, June 18, 2026 at 17:00\nFrance\n5.000\nEngland\n7.000\nSpain\n7.000\nSOCCER - FIFA - WORLD CUP\nCzechia - South Africa\nThursday, June 18, 2026 at 17:00\nMoney Line – Match\nCzechia\n1.854\nDraw\n3.670\nSouth Africa\n4.740\nSOCCER - FIFA - WORLD CUP\nFirst Time Winner\nThursday, June 18, 2026 at 17:00\nFutures\nYes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match"
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            19
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
+      "windowSample": "Help\nSoccer\nSoccer Odds\nHIGHLIGHTSLIVELEAGUESFUTURES\nSOCCER - FIFA - WORLD CUP\nFIFA - World Cup 2026 Winner\nThursday, June 18, 2026 at 17:00\nFrance\n5.000\nEngland\n7.000\nSpain\n7.000\nSOCCER - FIFA - WORLD CUP\nCzechia - South Africa\nThursday, June 18, 2026 at 17:00\nMoney Line – Match\nCzechia\n1.854\nDraw\n3.660\nSouth Africa\n4.720\nSOCCER - FIFA - WORLD CUP\nFirst Time Winner\nThursday, June 18, 2026 at 17:00\nFutures\nYes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match"
     },
     {
       "matchId": "wc2026_switzerland_bosnia_herzegovina",
@@ -78,7 +105,38 @@
       "oddsTokensInWindow": [],
       "marketsExtracted": 0,
       "marketCounts": {},
-      "windowSample": "Yes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00"
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            19,
+            29,
+            36
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
+      "windowSample": "Yes\n3.250\nNo\n1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.578\nDraw\n4.250\nBosnia and Herzegovina\n6.420\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00"
     },
     {
       "matchId": "wc2026_canada_qatar",
@@ -93,7 +151,41 @@
       ],
       "marketsExtracted": 0,
       "marketCounts": {},
-      "windowSample": "4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            9,
+            19,
+            26
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
+      "windowSample": "4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.578\nDraw\n4.250\nBosnia and Herzegovina\n6.420\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
     },
     {
       "matchId": "wc2026_mexico_south_korea",
@@ -108,9 +200,37 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Qatar (Match)\nToday 23:00\n1.298\n5.850\n12.500\n-1.5\n1.884\n+1.5\n2.040\n2.75\n1.943\n2.75\n1.961\n+77\nMexico (Match)\nSouth Korea (Match)\n6/19/2026 02:00\n2.090\n3.330\n4.020\n-0.5\n2.100\n+0.5\n1.840\n2.25\n2.040\n2.25\n1.877\n+77\nUSA (Match)\nAustralia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)"
     },
@@ -127,9 +247,38 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            13,
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "6/19/2026 02:00\n2.090\n3.330\n4.020\n-0.5\n2.100\n+0.5\n1.840\n2.25\n2.040\n2.25\n1.877\n+77\nUSA (Match)\nAustralia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)"
     },
@@ -146,6 +295,34 @@
       ],
       "marketsExtracted": 0,
       "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
       "windowSample": "Australia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)"
     },
     {
@@ -161,9 +338,37 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Morocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)"
     },
@@ -180,6 +385,34 @@
       ],
       "marketsExtracted": 0,
       "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
       "windowSample": "Haiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)\nSweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)"
     },
     {
@@ -195,9 +428,37 @@
         2.75,
         2.75
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Paraguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)\nSweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)"
     },
@@ -214,9 +475,37 @@
         3.25,
         3.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Sweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)"
     },
@@ -235,9 +524,39 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Ivory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)"
     },
@@ -256,9 +575,39 @@
         3.25,
         3.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Curacao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)\nSaudi Arabia (Match)\n6/21/2026 17:00\n1.095\n10.230\n24.050\n-2.5\n2.040\n+2.5\n1.826\n3.25\n1.980\n3.25\n1.854\n+61\nBelgium (Match)"
     },
@@ -277,9 +626,39 @@
         1.25,
         1.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Japan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)\nSaudi Arabia (Match)\n6/21/2026 17:00\n1.095\n10.230\n24.050\n-2.5\n2.040\n+2.5\n1.826\n3.25\n1.980\n3.25\n1.854\n+61\nBelgium (Match)\nIran (Match)\n6/21/2026 20:00\n1.431\n4.730\n7.830\n-1.25\n2.020\n+1.25\n1.884\n2.5\n1.900\n2.5\n1.990\n+65\nSoccer betting and soccer odds"
     },
@@ -296,11 +675,39 @@
         1.25,
         1.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
-      "windowSample": "Saudi Arabia (Match)\n6/21/2026 17:00\n1.095\n10.230\n24.050\n-2.5\n2.040\n+2.5\n1.826\n3.25\n1.980\n3.25\n1.854\n+61\nBelgium (Match)\nIran (Match)\n6/21/2026 20:00\n1.431\n4.730\n7.830\n-1.25\n2.020\n+1.25\n1.884\n2.5\n1.900\n2.5\n1.990\n+65\nSoccer betting and soccer odds\nSoccer is one of the most popular sports in the world, with millions of spectators from across the globe watching domestic and international soccer all year round. One of the largest soccer tournaments is the World Cup, which sees countries from around the world compete every four years for the right to be crowned champions. Pinnacle offers a comprehensive list of soccer odds and betting lines, covering some of the most important soccer matches and tournaments for soccer bettors.\nSee more\nFAVOURITES\nLog in or Join to change your favourites.\nTOP SPORTS\nSoccer\n585\nEsports\n87\nHockey\n6\nBasketball\n74\nTennis\n250"
+      "windowSample": "Saudi Arabia (Match)\n6/21/2026 17:00\n1.095\n10.230\n24.050\n-2.5\n2.040\n+2.5\n1.826\n3.25\n1.980\n3.25\n1.854\n+61\nBelgium (Match)\nIran (Match)\n6/21/2026 20:00\n1.431\n4.730\n7.830\n-1.25\n2.020\n+1.25\n1.884\n2.5\n1.900\n2.5\n1.990\n+65\nSoccer betting and soccer odds\nSoccer is one of the most popular sports in the world, with millions of spectators from across the globe watching domestic and international soccer all year round. One of the largest soccer tournaments is the World Cup, which sees countries from around the world compete every four years for the right to be crowned champions. Pinnacle offers a comprehensive list of soccer odds and betting lines, covering some of the most important soccer matches and tournaments for soccer bettors.\nSee more\nFAVOURITES\nLog in or Join to change your favourites.\nTOP SPORTS\nSoccer\n587\nEsports\n87\nHockey\n6\nBasketball\n85\nTennis\n250"
     },
     {
       "matchId": "wc2026_bosnia_herzegovina_qatar",
@@ -315,7 +722,41 @@
       ],
       "marketsExtracted": 0,
       "marketCounts": {},
-      "windowSample": "Europe\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            7,
+            14
+          ],
+          "drawLineIndices": [
+            12,
+            22,
+            29
+          ],
+          "awayLineIndices": [
+            17,
+            24
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
+      "windowSample": "Europe\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.578\nDraw\n4.250\nBosnia and Herzegovina\n6.420\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
     },
     {
       "matchId": "wc2026_switzerland_canada",
@@ -330,7 +771,41 @@
       ],
       "marketsExtracted": 0,
       "marketCounts": {},
-      "windowSample": "1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.581\nDraw\n4.190\nBosnia and Herzegovina\n6.470\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            11,
+            14
+          ],
+          "drawLineIndices": [
+            16,
+            26,
+            33
+          ],
+          "awayLineIndices": [
+            21,
+            24
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      },
+      "windowSample": "1.370\nSOCCER - FIFA - WORLD CUP\nWinning Continent\nThursday, June 18, 2026 at 17:00\nEurope\n1.333\nSouth America\n4.500\nRest of the World\n12.000\nSOCCER - FIFA - WORLD CUP\nSwitzerland - Bosnia and Herzegovina\nThursday, June 18, 2026 at 20:00\nMoney Line – Match\nSwitzerland\n1.578\nDraw\n4.250\nBosnia and Herzegovina\n6.420\nSOCCER - FIFA - WORLD CUP\nCanada - Qatar\nThursday, June 18, 2026 at 23:00\nMoney Line – Match\nCanada\n1.298\nDraw\n5.850\nQatar\n12.500\nHIGHLIGHTS\nFIFA - WORLD CUP\n1\nX\n2\nHANDICAP\nOVER\nUNDER\nCzechia (Match)\nSouth Africa (Match)\nToday 17:00\n1.854\n3.670\n4.740\n-0.5\n1.854\n+0.5\n2.080\n2.25\n1.900\n2.25"
     },
     {
       "matchId": "wc2026_morocco_haiti",
@@ -345,9 +820,37 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            29
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75\nNetherlands (Match)"
     },
@@ -364,9 +867,37 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            29
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Australia (Match)\n6/19/2026 20:00\n1.598\n4.500\n5.270\n-1.0\n2.100\n+1.0\n1.826\n2.5\n1.990\n2.5\n1.900\n+76\nScotland (Match)\nMorocco (Match)\n6/19/2026 23:00\n5.410\n3.700\n1.719\n+0.75\n1.934\n-0.75\n1.970\n2.25\n2.030\n2.25\n1.862\n+75\nBrazil (Match)\nHaiti (Match)\n6/20/2026 02:00\n1.097\n11.770\n21.880\n-2.5\n1.943\n+2.5\n1.909\n3.5\n1.884\n3.5\n1.934\n+29\nTurkiye (Match)\nParaguay (Match)\n6/20/2026 04:00\n2.030\n3.440\n3.980\n-0.5\n2.040\n+0.5\n1.869\n2.25\n1.877\n2.25\n2.010\n+75"
     },
@@ -399,11 +930,55 @@
         1.25,
         1.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            0
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            0
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
-      "windowSample": "Welcome to Pinnacle. We use cookies to provide you with the most relevant experience. To change your cookie settings or for more information on cookies, see our cookie policy . ACCEPT Forgot email or password? LOG IN JOIN SPORTS BETTING Log In or Join to access the Live Centre. LIVE CENTRE CASINO LIVE CASINO VIRTUAL SPORTS BETTING RESOURCES Quick Bet I O Decimal Odds EN 10:04:48 (GMT +01:00) Help Soccer Soccer Odds HIGHLIGHTSLIVELEAGUESFUTURES SOCCER - FIFA - WORLD CUP FIFA - World Cup 2026 Winner Thursday, June 18, 2026 at 17:00 France 5.000 England 7.000 Spain 7.000 SOCCER - FIFA - WORLD CUP Czechia - South Africa Thursday, June 18, 2026 at 17:00 Money Line – Match Czechia 1.854 Draw 3.670 South Africa 4.740 SOCCER - FIFA - WORLD CUP First Time Winner Thursday, June 18, 2026 at 17:00 Futures Yes 3.250 No 1.370 SOCCER - FIFA - WORLD CUP Winning Continent Thursday, June 18, 2026 at 17:00 Europe 1.333 South America 4.500 Rest of the World 12.000 SOCCER - FIFA - WORLD CUP Switzerland - Bosnia and Herzegovina Thursday, June 18, 2026 at 20:00 Money Line – Match Switzerland 1.581 Draw 4.190 Bosnia and Herzegovina 6.470 SOCCER - FIFA - WORLD CUP Canada - Qatar Thursday, June 18, 2026 at 23:00 Money Line – Match Canada 1.298 Draw 5.850 Qatar 12.500 HIGHLIGHTS FIFA - WORLD CUP 1 X 2 HANDICAP OVER UNDER Czechia (Match) South Africa (Match) Today 17:00 1.854 3.670 4.740 -0.5 1.854 +0.5 2"
+      "windowSample": "Welcome to Pinnacle. We use cookies to provide you with the most relevant experience. To change your cookie settings or for more information on cookies, see our cookie policy . ACCEPT Forgot email or password? LOG IN JOIN SPORTS BETTING Log In or Join to access the Live Centre. LIVE CENTRE CASINO LIVE CASINO VIRTUAL SPORTS BETTING RESOURCES Quick Bet I O Decimal Odds EN 10:16:37 (GMT +01:00) Help Soccer Soccer Odds HIGHLIGHTSLIVELEAGUESFUTURES SOCCER - FIFA - WORLD CUP FIFA - World Cup 2026 Winner Thursday, June 18, 2026 at 17:00 France 5.000 England 7.000 Spain 7.000 SOCCER - FIFA - WORLD CUP Czechia - South Africa Thursday, June 18, 2026 at 17:00 Money Line – Match Czechia 1.854 Draw 3.660 South Africa 4.720 SOCCER - FIFA - WORLD CUP First Time Winner Thursday, June 18, 2026 at 17:00 Futures Yes 3.250 No 1.370 SOCCER - FIFA - WORLD CUP Winning Continent Thursday, June 18, 2026 at 17:00 Europe 1.333 South America 4.500 Rest of the World 12.000 SOCCER - FIFA - WORLD CUP Switzerland - Bosnia and Herzegovina Thursday, June 18, 2026 at 20:00 Money Line – Match Switzerland 1.578 Draw 4.250 Bosnia and Herzegovina 6.420 SOCCER - FIFA - WORLD CUP Canada - Qatar Thursday, June 18, 2026 at 23:00 Money Line – Match Canada 1.298 Draw 5.850 Qatar 12.500 HIGHLIGHTS FIFA - WORLD CUP 1 X 2 HANDICAP OVER UNDER Czechia (Match) South Africa (Match) Today 17:00 1.854 3.670 4.740 -0.5 1.854 +0.5 2.080 2.25 1.900 2.25 2.010 +79 Switzerland (Match) Bosnia and Herzegovina (Match) Today 20:00 1.581 4.190 6.470 -1.0 2.010 +1.0 1.917 2.5 2.060 2.5 1.854 +78 Canada (Match) Qatar (Match) Today 23:00 1.298 5.850 12.500 -1.5 1.884 +1.5 2.040 2.75 1.943 2.75 1.961 +77 Mexico (Match) South Korea (Match) 6/19/2026 02:00 2.090 3.330 4.020 -0.5 2.100 +0.5 1.840 2.25 2.040 2.25 1.877 +77 USA (Match) Austr"
     },
     {
       "matchId": "wc2026_south_africa_south_korea",
@@ -434,11 +1009,55 @@
         1.25,
         1.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            0
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            0
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
-      "windowSample": "Welcome to Pinnacle. We use cookies to provide you with the most relevant experience. To change your cookie settings or for more information on cookies, see our cookie policy . ACCEPT Forgot email or password? LOG IN JOIN SPORTS BETTING Log In or Join to access the Live Centre. LIVE CENTRE CASINO LIVE CASINO VIRTUAL SPORTS BETTING RESOURCES Quick Bet I O Decimal Odds EN 10:04:48 (GMT +01:00) Help Soccer Soccer Odds HIGHLIGHTSLIVELEAGUESFUTURES SOCCER - FIFA - WORLD CUP FIFA - World Cup 2026 Winner Thursday, June 18, 2026 at 17:00 France 5.000 England 7.000 Spain 7.000 SOCCER - FIFA - WORLD CUP Czechia - South Africa Thursday, June 18, 2026 at 17:00 Money Line – Match Czechia 1.854 Draw 3.670 South Africa 4.740 SOCCER - FIFA - WORLD CUP First Time Winner Thursday, June 18, 2026 at 17:00 Futures Yes 3.250 No 1.370 SOCCER - FIFA - WORLD CUP Winning Continent Thursday, June 18, 2026 at 17:00 Europe 1.333 South America 4.500 Rest of the World 12.000 SOCCER - FIFA - WORLD CUP Switzerland - Bosnia and Herzegovina Thursday, June 18, 2026 at 20:00 Money Line – Match Switzerland 1.581 Draw 4.190 Bosnia and Herzegovina 6.470 SOCCER - FIFA - WORLD CUP Canada - Qatar Thursday, June 18, 2026 at 23:00 Money Line – Match Canada 1.298 Draw 5.850 Qatar 12.500 HIGHLIGHTS FIFA - WORLD CUP 1 X 2 HANDICAP OVER UNDER Czechia (Match) South Africa (Match) Today 17:00 1.854 3.670 4.740 -0.5 1.854 +0.5 2"
+      "windowSample": "Welcome to Pinnacle. We use cookies to provide you with the most relevant experience. To change your cookie settings or for more information on cookies, see our cookie policy . ACCEPT Forgot email or password? LOG IN JOIN SPORTS BETTING Log In or Join to access the Live Centre. LIVE CENTRE CASINO LIVE CASINO VIRTUAL SPORTS BETTING RESOURCES Quick Bet I O Decimal Odds EN 10:16:37 (GMT +01:00) Help Soccer Soccer Odds HIGHLIGHTSLIVELEAGUESFUTURES SOCCER - FIFA - WORLD CUP FIFA - World Cup 2026 Winner Thursday, June 18, 2026 at 17:00 France 5.000 England 7.000 Spain 7.000 SOCCER - FIFA - WORLD CUP Czechia - South Africa Thursday, June 18, 2026 at 17:00 Money Line – Match Czechia 1.854 Draw 3.660 South Africa 4.720 SOCCER - FIFA - WORLD CUP First Time Winner Thursday, June 18, 2026 at 17:00 Futures Yes 3.250 No 1.370 SOCCER - FIFA - WORLD CUP Winning Continent Thursday, June 18, 2026 at 17:00 Europe 1.333 South America 4.500 Rest of the World 12.000 SOCCER - FIFA - WORLD CUP Switzerland - Bosnia and Herzegovina Thursday, June 18, 2026 at 20:00 Money Line – Match Switzerland 1.578 Draw 4.250 Bosnia and Herzegovina 6.420 SOCCER - FIFA - WORLD CUP Canada - Qatar Thursday, June 18, 2026 at 23:00 Money Line – Match Canada 1.298 Draw 5.850 Qatar 12.500 HIGHLIGHTS FIFA - WORLD CUP 1 X 2 HANDICAP OVER UNDER Czechia (Match) South Africa (Match) Today 17:00 1.854 3.670 4.740 -0.5 1.854 +0.5 2.080 2.25 1.900 2.25 2.010 +79 Switzerland (Match) Bosnia and Herzegovina (Match) Today 20:00 1.581 4.190 6.470 -1.0 2.010 +1.0 1.917 2.5 2.060 2.5 1.854 +78 Canada (Match) Qatar (Match) Today 23:00 1.298 5.850 12.500 -1.5 1.884 +1.5 2.040 2.75 1.943 2.75 1.961 +77 Mexico (Match) South Korea (Match) 6/19/2026 02:00 2.090 3.330 4.020 -0.5 2.100 +0.5 1.840 2.25 2.040 2.25 1.877 +77 USA (Match) Austr"
     },
     {
       "matchId": "wc2026_curacao_ivory_coast",
@@ -455,9 +1074,39 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            29
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64\nSpain (Match)"
     },
@@ -476,9 +1125,39 @@
         2.25,
         2.25
       ],
-      "marketsExtracted": 3,
-      "marketCounts": {
-        "1X2": 3
+      "marketsExtracted": 0,
+      "marketCounts": {},
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            29
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
       },
       "windowSample": "Sweden (Match)\n6/20/2026 18:00\n1.751\n3.910\n4.780\n-0.75\n1.980\n+0.75\n1.925\n2.5\n1.909\n2.5\n1.980\n+64\nGermany (Match)\nIvory Coast (Match)\n6/20/2026 21:00\n1.549\n4.670\n5.630\n-1.0\n1.925\n+1.0\n1.980\n2.75\n1.840\n2.75\n2.060\n+65\nEcuador (Match)\nCuracao (Match)\n6/21/2026 01:00\n1.090\n10.560\n25.240\n-2.5\n1.990\n+2.5\n1.862\n3.25\n1.980\n3.25\n1.877\n+18\nTunisia (Match)\nJapan (Match)\n6/21/2026 05:00\n6.910\n4.210\n1.526\n+1.0\n1.925\n-1.0\n1.980\n2.25\n1.862\n2.25\n2.030\n+64"
     }
@@ -492,7 +1171,36 @@
       "awayTeam": "South Africa",
       "reason": "fixture found, but no conservative odds market could be extracted",
       "windowReason": "visible lines 20-64, team distance=0",
-      "oddsTokensInWindow": []
+      "oddsTokensInWindow": [],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            19
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_switzerland_bosnia_herzegovina",
@@ -502,7 +1210,38 @@
       "awayTeam": "Bosnia & Herzegovina",
       "reason": "fixture found, but no conservative odds market could be extracted",
       "windowReason": "visible lines 47-91, team distance=0",
-      "oddsTokensInWindow": []
+      "oddsTokensInWindow": [],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            19,
+            29,
+            36
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_canada_qatar",
@@ -515,7 +1254,132 @@
       "oddsTokensInWindow": [
         2.25,
         2.25
-      ]
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14,
+            17
+          ],
+          "drawLineIndices": [
+            9,
+            19,
+            26
+          ],
+          "awayLineIndices": [
+            14,
+            21
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_mexico_south_korea",
+      "date": "2026-06-19",
+      "time": "04:00",
+      "homeTeam": "Mexico",
+      "awayTeam": "South Korea",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 119-164, team distance=1",
+      "oddsTokensInWindow": [
+        2.75,
+        2.75,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_usa_australia",
+      "date": "2026-06-19",
+      "time": "22:00",
+      "homeTeam": "USA",
+      "awayTeam": "Australia",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 135-179, team distance=0",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            13,
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_scotland_morocco",
@@ -528,7 +1392,80 @@
       "oddsTokensInWindow": [
         2.25,
         2.25
-      ]
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_brazil_haiti",
+      "date": "2026-06-20",
+      "time": "03:30",
+      "homeTeam": "Brazil",
+      "awayTeam": "Haiti",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 164-209, team distance=1",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_turkey_paraguay",
@@ -541,7 +1478,317 @@
       "oddsTokensInWindow": [
         2.25,
         2.25
-      ]
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_netherlands_sweden",
+      "date": "2026-06-20",
+      "time": "20:00",
+      "homeTeam": "Netherlands",
+      "awayTeam": "Sweden",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 194-239, team distance=1",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.75,
+        2.75
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_germany_ivory_coast",
+      "date": "2026-06-20",
+      "time": "23:00",
+      "homeTeam": "Germany",
+      "awayTeam": "Ivory Coast",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 209-254, team distance=1",
+      "oddsTokensInWindow": [
+        2.75,
+        2.75,
+        3.25,
+        3.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_ecuador_curacao",
+      "date": "2026-06-21",
+      "time": "03:00",
+      "homeTeam": "Ecuador",
+      "awayTeam": "Curacao",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 224-269, team distance=1",
+      "oddsTokensInWindow": [
+        2.75,
+        2.75,
+        3.25,
+        3.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_tunisia_japan",
+      "date": "2026-06-21",
+      "time": "07:00",
+      "homeTeam": "Tunisia",
+      "awayTeam": "Japan",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 239-284, team distance=1",
+      "oddsTokensInWindow": [
+        3.25,
+        3.25,
+        2.25,
+        2.25,
+        3.25,
+        3.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_spain_saudi_arabia",
+      "date": "2026-06-21",
+      "time": "19:00",
+      "homeTeam": "Spain",
+      "awayTeam": "Saudi Arabia",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 254-299, team distance=1",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        3.25,
+        3.25,
+        1.25,
+        1.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_belgium_iran",
+      "date": "2026-06-21",
+      "time": "22:00",
+      "homeTeam": "Belgium",
+      "awayTeam": "Iran",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 269-314, team distance=1",
+      "oddsTokensInWindow": [
+        3.25,
+        3.25,
+        1.25,
+        1.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            15
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_uruguay_cape_verde",
@@ -634,7 +1881,41 @@
       "oddsTokensInWindow": [
         2.25,
         2.25
-      ]
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            7,
+            14
+          ],
+          "drawLineIndices": [
+            12,
+            22,
+            29
+          ],
+          "awayLineIndices": [
+            17,
+            24
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     },
     {
       "matchId": "wc2026_switzerland_canada",
@@ -647,13 +1928,373 @@
       "oddsTokensInWindow": [
         2.25,
         2.25
-      ]
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No Home/Draw/Away labelled odds candidate found; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            11,
+            14
+          ],
+          "drawLineIndices": [
+            16,
+            26,
+            33
+          ],
+          "awayLineIndices": [
+            21,
+            24
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_morocco_haiti",
+      "date": "2026-06-25",
+      "time": "01:00",
+      "homeTeam": "Morocco",
+      "awayTeam": "Haiti",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 150-209, team distance=15",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            29
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_scotland_brazil",
+      "date": "2026-06-25",
+      "time": "01:00",
+      "homeTeam": "Scotland",
+      "awayTeam": "Brazil",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 149-208, team distance=15",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            14
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            29
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_czech_republic_mexico",
+      "date": "2026-06-25",
+      "time": "04:00",
+      "homeTeam": "Czech Republic",
+      "awayTeam": "Mexico",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "combined text/html window, distance=1004",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.75,
+        2.75,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.75,
+        2.75
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            0
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            0
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_south_africa_south_korea",
+      "date": "2026-06-25",
+      "time": "04:00",
+      "homeTeam": "South Africa",
+      "awayTeam": "South Korea",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "combined text/html window, distance=1009",
+      "oddsTokensInWindow": [
+        2.25,
+        2.25,
+        2.75,
+        2.75,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.25,
+        2.75,
+        2.75
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.25,
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25,
+            3.25,
+            3.25,
+            1.25,
+            1.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            0
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            0
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_curacao_ivory_coast",
+      "date": "2026-06-25",
+      "time": "23:00",
+      "homeTeam": "Curacao",
+      "awayTeam": "Ivory Coast",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 210-269, team distance=15",
+      "oddsTokensInWindow": [
+        2.75,
+        2.75,
+        3.25,
+        3.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            29
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
+    },
+    {
+      "matchId": "wc2026_ecuador_germany",
+      "date": "2026-06-25",
+      "time": "23:00",
+      "homeTeam": "Ecuador",
+      "awayTeam": "Germany",
+      "reason": "fixture found, but no conservative odds market could be extracted",
+      "windowReason": "visible lines 209-268, team distance=15",
+      "oddsTokensInWindow": [
+        2.75,
+        2.75,
+        3.25,
+        3.25,
+        2.25,
+        2.25
+      ],
+      "extractionDebug": {
+        "1X2": {
+          "strategy": "labelled_home_draw_away",
+          "oddsTokensInWindow": [
+            2.75,
+            2.75,
+            3.25,
+            3.25,
+            2.25,
+            2.25
+          ],
+          "candidateCount": 0,
+          "accepted": false,
+          "notes": [
+            "No explicit Draw line found near fixture; 1X2 skipped."
+          ],
+          "homeLineIndices": [
+            29
+          ],
+          "drawLineIndices": [],
+          "awayLineIndices": [
+            14
+          ],
+          "candidates": []
+        },
+        "MATCH_GOALS": {
+          "marketsExtracted": 0
+        },
+        "BTTS": {
+          "marketsExtracted": 0
+        }
+      }
     }
   ],
   "errors": [],
   "notes": [
-    "This is a first Pinnacle scraper, not final production logic.",
-    "Only conservative markets are emitted. Inspect matchedFixtureDebug/windowSample after each run.",
-    "If 1X2 ordering is wrong for Pinnacle visible text, switch to API candidate extraction before consuming in Android."
+    "This scraper now rejects low-confidence 1X2 extraction, including identical/near-identical Home/Draw/Away odds.",
+    "Only labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
+    "If too few markets are emitted, switch to Pinnacle API candidate extraction rather than accepting nearby visible-text odds."
   ]
 }
