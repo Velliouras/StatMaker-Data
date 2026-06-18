@@ -46,7 +46,7 @@ BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v4-api-candidate-probe"
+SCRIPT_VERSION = "pinnacle-wc-odds-v5-arcadia-api-parser"
 
 NETWORK_API_KEYWORDS = [
     "api",
@@ -243,6 +243,425 @@ def summarize_json_root(value: Any, depth: int = 0) -> Any:
             preview["first"] = summarize_json_root(value[0], depth + 1)
         return preview
     return type(value).__name__
+
+
+
+
+def json_dumps_safe(value: Any, limit: int = 200000) -> str:
+    """Serialize for diagnostics only, bounded so debug files do not explode."""
+    try:
+        text = json.dumps(value, ensure_ascii=False, default=str)
+    except Exception:
+        text = str(value)
+    return text[:limit]
+
+
+def iter_dicts(value: Any, max_depth: int = 8, depth: int = 0) -> Any:
+    if depth > max_depth:
+        return
+    if isinstance(value, dict):
+        yield value
+        for child in value.values():
+            yield from iter_dicts(child, max_depth, depth + 1)
+    elif isinstance(value, list):
+        for child in value:
+            yield from iter_dicts(child, max_depth, depth + 1)
+
+
+def get_nested_text(value: Any, keys: list[str]) -> str:
+    if not isinstance(value, dict):
+        return ""
+    for key in keys:
+        if key in value and value.get(key) is not None:
+            return clean_text(value.get(key))
+    return ""
+
+
+def as_decimal_from_price(value: Any) -> float | None:
+    """Convert an exact API price representation to decimal odds.
+
+    This never estimates bookmaker odds. It only converts explicit numeric/string
+    prices that the API already provides. American prices are converted to their
+    decimal equivalent because the source value is still exact bookmaker data.
+    """
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        number = float(value)
+        # Decimal odds directly supplied.
+        if MIN_ODD <= number <= MAX_ODD and not float(number).is_integer() or (1.01 <= number <= 99.99):
+            if 1.01 <= number <= 99.99:
+                return round(number, 2)
+        # American odds conversion, e.g. -110 or +250.
+        if abs(number) >= 100 and abs(number) <= 100000:
+            if number > 0:
+                return round(1.0 + number / 100.0, 2)
+            return round(1.0 + 100.0 / abs(number), 2)
+        return None
+    if isinstance(value, str):
+        token = clean_text(value)
+        dec = parse_decimal_odd(token)
+        if dec is not None:
+            return dec
+        if re.fullmatch(r"[+-]?\d{3,5}", token):
+            return as_decimal_from_price(int(token))
+    return None
+
+
+def extract_price_from_outcome(outcome: dict[str, Any]) -> tuple[float | None, str | None]:
+    """Find explicit price inside an API outcome/price object."""
+    price_keys = [
+        "price", "decimalPrice", "decimalOdds", "odds", "value", "currentPrice",
+        "americanPrice", "americanOdds", "displayPrice", "formattedPrice",
+    ]
+    for key in price_keys:
+        if key in outcome:
+            odd = as_decimal_from_price(outcome.get(key))
+            if odd is not None:
+                return odd, key
+    # Some APIs nest prices under price/value objects.
+    for key in ["prices", "priceData", "oddsData", "display"]:
+        nested = outcome.get(key)
+        if isinstance(nested, dict):
+            odd, source = extract_price_from_outcome(nested)
+            if odd is not None:
+                return odd, f"{key}.{source}"
+    return None, None
+
+
+def extract_id(value: Any) -> str:
+    if value is None:
+        return ""
+    return clean_text(value)
+
+
+def collect_participants(obj: Any, max_depth: int = 5) -> list[dict[str, Any]]:
+    """Collect participant-like objects with id/name/alignment from a matchup payload."""
+    participants: list[dict[str, Any]] = []
+    participant_list_keys = ["participants", "competitors", "teams", "runners"]
+
+    def walk(value: Any, depth: int) -> None:
+        if depth > max_depth:
+            return
+        if isinstance(value, dict):
+            for key in participant_list_keys:
+                items = value.get(key)
+                if isinstance(items, list):
+                    for item in items:
+                        if isinstance(item, dict):
+                            name = get_nested_text(item, ["name", "displayName", "fullName", "teamName", "title", "label", "description"])
+                            if not name and isinstance(item.get("participant"), dict):
+                                name = get_nested_text(item["participant"], ["name", "displayName", "fullName", "teamName", "title", "label"])
+                            if name:
+                                nested_participant = item.get("participant") if isinstance(item.get("participant"), dict) else {}
+                                participant_id = (
+                                    item.get("id")
+                                    or item.get("participantId")
+                                    or item.get("participantID")
+                                    or item.get("teamId")
+                                    or item.get("competitorId")
+                                    or nested_participant.get("id")
+                                )
+                                participants.append({
+                                    "id": extract_id(participant_id),
+                                    "name": name,
+                                    "alignment": clean_text(item.get("alignment") or item.get("side") or item.get("designation") or item.get("type") or item.get("homeAway")),
+                                    "rawKeys": list(item.keys())[:16],
+                                })
+            # Direct home/away objects.
+            for side_key in ["home", "away", "team1", "team2"]:
+                item = value.get(side_key)
+                if isinstance(item, dict):
+                    name = get_nested_text(item, ["name", "displayName", "fullName", "teamName", "title", "label"])
+                    if name:
+                        participants.append({
+                            "id": extract_id(item.get("id") or item.get("participantId") or item.get("teamId")),
+                            "name": name,
+                            "alignment": side_key,
+                            "rawKeys": list(item.keys())[:16],
+                        })
+            for child in value.values():
+                walk(child, depth + 1)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child, depth + 1)
+
+    walk(obj, 0)
+    # De-duplicate by id/name/alignment.
+    seen: set[tuple[str, str, str]] = set()
+    unique: list[dict[str, Any]] = []
+    for item in participants:
+        key = (str(item.get("id") or ""), normalize_text(str(item.get("name") or "")), normalize_text(str(item.get("alignment") or "")))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(item)
+    return unique
+
+
+def map_fixture_participants(obj: Any, fixture: Fixture) -> tuple[dict[str, Any], dict[str, Any]]:
+    participants = collect_participants(obj)
+    home_candidates = [item for item in participants if contains_team(str(item.get("name") or ""), fixture.home_team)]
+    away_candidates = [item for item in participants if contains_team(str(item.get("name") or ""), fixture.away_team)]
+
+    def preferred(items: list[dict[str, Any]], side: str) -> dict[str, Any] | None:
+        if not items:
+            return None
+        side_norm = normalize_text(side)
+        aligned = [item for item in items if side_norm in normalize_text(str(item.get("alignment") or ""))]
+        if aligned:
+            return aligned[0]
+        return items[0]
+
+    home = preferred(home_candidates, "home")
+    away = preferred(away_candidates, "away")
+    debug = {
+        "participantsFound": len(participants),
+        "participantsSample": participants[:8],
+        "homeCandidates": home_candidates[:4],
+        "awayCandidates": away_candidates[:4],
+        "homeMapped": home,
+        "awayMapped": away,
+    }
+    if not home or not away:
+        return {}, debug
+    return {"home": home, "away": away}, debug
+
+
+def collect_market_objects(obj: Any, max_depth: int = 7) -> list[dict[str, Any]]:
+    markets: list[dict[str, Any]] = []
+    for item in iter_dicts(obj, max_depth=max_depth):
+        # Market-like object with outcome/price lists.
+        if any(isinstance(item.get(key), list) for key in ["prices", "outcomes", "selections", "runners"]):
+            markets.append(item)
+        # Direct market objects are often inside a list named markets.
+        maybe_markets = item.get("markets")
+        if isinstance(maybe_markets, list):
+            for market in maybe_markets:
+                if isinstance(market, dict):
+                    markets.append(market)
+    # De-duplicate by object id.
+    seen: set[int] = set()
+    unique: list[dict[str, Any]] = []
+    for item in markets:
+        oid = id(item)
+        if oid in seen:
+            continue
+        seen.add(oid)
+        unique.append(item)
+    return unique
+
+
+def collect_outcomes(market: dict[str, Any]) -> list[dict[str, Any]]:
+    outcomes: list[dict[str, Any]] = []
+    for key in ["prices", "outcomes", "selections", "runners"]:
+        items = market.get(key)
+        if isinstance(items, list):
+            for item in items:
+                if isinstance(item, dict):
+                    outcomes.append(item)
+    return outcomes
+
+
+def outcome_kind(outcome: dict[str, Any], participant_map: dict[str, dict[str, Any]], fixture: Fixture) -> tuple[str | None, str | None]:
+    """Return home/draw/away only from explicit participant id/name/designation."""
+    text = normalize_text(json_dumps_safe(outcome, limit=5000))
+    label_text = normalize_text(" ".join(clean_text(outcome.get(key)) for key in ["name", "label", "description", "designation", "side", "type", "title"] if key in outcome))
+
+    if any(token in label_text.split() for token in ["draw", "tie"]):
+        return "draw", "explicit_label"
+    if label_text in {"x"} or " draw " in f" {label_text} ":
+        return "draw", "explicit_label"
+
+    # Participant id mapping is the strongest exact signal.
+    possible_id_keys = ["participantId", "participantID", "participant_id", "teamId", "competitorId", "runnerId", "id"]
+    ids = {extract_id(outcome.get(key)) for key in possible_id_keys if key in outcome and outcome.get(key) is not None}
+    for nested_key in ["participant", "team", "competitor", "runner"]:
+        nested = outcome.get(nested_key)
+        if isinstance(nested, dict):
+            ids.update(extract_id(nested.get(key)) for key in ["id", "participantId", "teamId", "competitorId"] if nested.get(key) is not None)
+            nested_name = get_nested_text(nested, ["name", "displayName", "fullName", "teamName", "title", "label"])
+            if nested_name:
+                if contains_team(nested_name, fixture.home_team):
+                    return "home", f"{nested_key}.name"
+                if contains_team(nested_name, fixture.away_team):
+                    return "away", f"{nested_key}.name"
+
+    home_id = extract_id((participant_map.get("home") or {}).get("id"))
+    away_id = extract_id((participant_map.get("away") or {}).get("id"))
+    if home_id and home_id in ids:
+        return "home", "participant_id"
+    if away_id and away_id in ids:
+        return "away", "participant_id"
+
+    # Explicit team names in the outcome itself are acceptable.
+    if contains_team(text, fixture.home_team):
+        return "home", "explicit_team_text"
+    if contains_team(text, fixture.away_team):
+        return "away", "explicit_team_text"
+
+    # Side/designation can be acceptable only when participant map is already exact for this fixture.
+    side = normalize_text(clean_text(outcome.get("side") or outcome.get("designation") or outcome.get("alignment") or outcome.get("type")))
+    if side in {"home", "team1"}:
+        return "home", "explicit_side"
+    if side in {"away", "team2"}:
+        return "away", "explicit_side"
+    return None, None
+
+
+def market_text(market: dict[str, Any]) -> str:
+    return normalize_text(" ".join(clean_text(market.get(key)) for key in ["name", "label", "description", "type", "key", "marketType", "period", "betType"] if key in market))
+
+
+def is_1x2_market_candidate(market: dict[str, Any]) -> bool:
+    text = market_text(market)
+    # Keep broad because Arcadia keys can be terse, but still reject obvious non-1X2 markets.
+    reject = ["total", "spread", "handicap", "corner", "card", "player", "team total", "both teams"]
+    if any(token in text for token in reject):
+        return False
+    accept = ["moneyline", "money line", "match odds", "1x2", "3 way", "three way", "winner", "full time result"]
+    if any(token in text for token in accept):
+        return True
+    outcomes = collect_outcomes(market)
+    return len(outcomes) >= 3
+
+
+def build_1x2_from_api_market(market: dict[str, Any], fixture: Fixture, participant_map: dict[str, dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    debug: dict[str, Any] = {
+        "marketKeys": list(market.keys())[:24],
+        "marketText": market_text(market),
+        "outcomesChecked": 0,
+        "mappedKinds": {},
+        "accepted": False,
+        "notes": [],
+    }
+    if not is_1x2_market_candidate(market):
+        debug["notes"].append("market rejected: not a 1X2/moneyline candidate")
+        return [], debug
+
+    mapped: dict[str, dict[str, Any]] = {}
+    outcomes_debug: list[dict[str, Any]] = []
+    for outcome in collect_outcomes(market):
+        debug["outcomesChecked"] += 1
+        odd, price_source = extract_price_from_outcome(outcome)
+        kind, kind_source = outcome_kind(outcome, participant_map, fixture)
+        outcomes_debug.append({
+            "keys": list(outcome.keys())[:18],
+            "kind": kind,
+            "kindSource": kind_source,
+            "odd": odd,
+            "priceSource": price_source,
+            "sample": json_dumps_safe(outcome, limit=700),
+        })
+        if kind in {"home", "draw", "away"} and odd is not None and kind not in mapped:
+            mapped[kind] = {"odd": odd, "kindSource": kind_source, "priceSource": price_source}
+
+    debug["outcomesSample"] = outcomes_debug[:10]
+    debug["mappedKinds"] = mapped
+    if not all(kind in mapped for kind in ["home", "draw", "away"]):
+        debug["notes"].append("market rejected: exact home/draw/away outcome mapping not complete")
+        return [], debug
+
+    home_odd = float(mapped["home"]["odd"])
+    draw_odd = float(mapped["draw"]["odd"])
+    away_odd = float(mapped["away"]["odd"])
+    accepted, notes, confidence = validate_1x2_triplet(home_odd, draw_odd, away_odd)
+    debug["notes"].extend(notes)
+    if not accepted or confidence != "high":
+        return [], debug
+
+    debug["accepted"] = True
+    return [
+        {
+            "market": "1X2",
+            "selection": f"{fixture.home_team} Win",
+            "team": fixture.home_team,
+            "line": None,
+            "odd": home_odd,
+            "confidence": "high",
+            "extraction": "pinnacle_arcadia_api_exact_1x2",
+        },
+        {
+            "market": "1X2",
+            "selection": "Draw",
+            "team": None,
+            "line": None,
+            "odd": draw_odd,
+            "confidence": "high",
+            "extraction": "pinnacle_arcadia_api_exact_1x2",
+        },
+        {
+            "market": "1X2",
+            "selection": f"{fixture.away_team} Win",
+            "team": fixture.away_team,
+            "line": None,
+            "odd": away_odd,
+            "confidence": "high",
+            "extraction": "pinnacle_arcadia_api_exact_1x2",
+        },
+    ], debug
+
+
+def build_markets_from_api_payloads(fixture: Fixture, api_payloads: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Extract exact odds from Pinnacle Arcadia JSON payloads.
+
+    This does not infer odds from nearby numbers. It only accepts a market when the
+    JSON maps home/draw/away outcomes to explicit participant ids/names/designations.
+    """
+    debug: dict[str, Any] = {
+        "strategy": "pinnacle_arcadia_api_exact_mapping",
+        "payloadsChecked": len(api_payloads),
+        "candidateObjectsChecked": 0,
+        "participantMappedObjects": 0,
+        "marketCandidatesChecked": 0,
+        "accepted": False,
+        "notes": [],
+        "samples": [],
+    }
+    markets: list[dict[str, Any]] = []
+
+    for payload in api_payloads:
+        root = payload.get("jsonRoot")
+        url = str(payload.get("url") or "")
+        for obj in iter_dicts(root, max_depth=8):
+            obj_text = json_dumps_safe(obj, limit=30000)
+            if not (contains_team(obj_text, fixture.home_team) and contains_team(obj_text, fixture.away_team)):
+                continue
+            if "market" not in normalize_text(obj_text) and "price" not in normalize_text(obj_text):
+                continue
+            debug["candidateObjectsChecked"] += 1
+            participant_map, participant_debug = map_fixture_participants(obj, fixture)
+            if not participant_map:
+                if len(debug["samples"]) < 8:
+                    debug["samples"].append({
+                        "url": url,
+                        "reason": "fixture teams present but participants could not be mapped exactly",
+                        "participantDebug": participant_debug,
+                        "objectKeys": list(obj.keys())[:24],
+                    })
+                continue
+            debug["participantMappedObjects"] += 1
+            for market in collect_market_objects(obj):
+                debug["marketCandidatesChecked"] += 1
+                candidate_markets, market_debug = build_1x2_from_api_market(market, fixture, participant_map)
+                if len(debug["samples"]) < 10:
+                    debug["samples"].append({
+                        "url": url,
+                        "participantDebug": participant_debug,
+                        "marketDebug": market_debug,
+                    })
+                for candidate in candidate_markets:
+                    unique_market(markets, candidate)
+            if markets:
+                debug["accepted"] = True
+                debug["notes"].append(f"accepted exact API mapped 1X2 from {url}")
+                return markets, debug
+
+    if not markets:
+        debug["notes"].append("No exact API-mapped 1X2 market found; singles remain empty.")
+    return markets, debug
 
 
 def count_fixture_pairs_in_text(text: str, fixtures: list[Fixture], limit: int = 12) -> tuple[int, list[dict[str, Any]]]:
@@ -608,11 +1027,12 @@ def count_market_types(markets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str]:
+def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     best: dict[str, Any] | None = None
     best_visible = ""
     best_html = ""
+    api_payloads: list[dict[str, Any]] = []
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -669,6 +1089,15 @@ def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str]
                 candidate = analyse_response_body(response_url, status, content_type, body, fixtures)
                 if body_error:
                     candidate["bodyReadError"] = body_error
+                # Keep parsed Arcadia JSON in memory for exact odds extraction. Do not dump
+                # full payloads to debug_report.json; they are summarized separately.
+                if status == 200 and body and "json" in (content_type or "").lower():
+                    try:
+                        parsed_root = json.loads(body)
+                        if "guest.api.arcadia.pinnacle.com" in response_url.lower() and "matchup" in response_url.lower():
+                            api_payloads.append({"url": response_url, "jsonRoot": parsed_root})
+                    except Exception:
+                        pass
                 network_candidates.append(candidate)
 
             page.on("response", capture_response)
@@ -734,7 +1163,7 @@ def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str]
     else:
         best_summary = dict(best)
     best_summary["attempts"] = [dict(item) for item in attempts]
-    return best_summary, best_visible, best_html
+    return best_summary, best_visible, best_html, api_payloads
 
 
 def make_empty_feed(generated_at: str) -> dict[str, Any]:
@@ -815,7 +1244,7 @@ def main() -> None:
     DEBUG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     errors: list[str] = []
-    best_page, visible_text, html = select_best_page(fixtures)
+    best_page, visible_text, html, api_payloads = select_best_page(fixtures)
 
     output = make_empty_feed(generated_at)
     matched_debug: list[dict[str, Any]] = []
@@ -834,7 +1263,21 @@ def main() -> None:
             })
             continue
 
-        markets, extraction_debug = build_markets_from_window(window, fixture)
+        api_markets, api_extraction_debug = build_markets_from_api_payloads(fixture, api_payloads)
+        if api_markets:
+            markets = api_markets
+            visible_markets: list[dict[str, Any]] = []
+            visible_extraction_debug: dict[str, Any] = {"skipped": "API exact mapping accepted; visible-text parsing not needed."}
+        else:
+            visible_markets, visible_extraction_debug = build_markets_from_window(window, fixture)
+            # Visible-text extraction is still exact/high-confidence only. It is kept as a
+            # fallback, but current Pinnacle layout usually has no labelled Home/Draw/Away.
+            markets = visible_markets
+
+        extraction_debug = {
+            "API": api_extraction_debug,
+            "VISIBLE_TEXT": visible_extraction_debug,
+        }
         debug_item = {
             "matchId": fixture.match_id,
             "date": fixture.date,
@@ -881,6 +1324,14 @@ def main() -> None:
         "debugPath": str(DEBUG_PATH),
         "snapshotPath": str(SNAPSHOT_PATH),
         "bestPage": best_page,
+        "apiPayloadsLoaded": len(api_payloads),
+        "apiPayloads": [
+            {
+                "url": str(payload.get("url") or ""),
+                "jsonShape": summarize_json_root(payload.get("jsonRoot")),
+            }
+            for payload in api_payloads[:12]
+        ],
         "fixturesLoaded": len(fixtures),
         "matchesMatched": len(output["matches"]),
         "matchesWithMarkets": len(output["matches"]),
@@ -895,7 +1346,7 @@ def main() -> None:
             "This scraper rejects low-confidence 1X2 extraction, including identical generic/nearby tokens.",
             "Only high-confidence labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
             "If too few markets are emitted, inspect bestPage.networkApiCandidatesTop for Pinnacle JSON/API endpoints rather than accepting nearby visible-text odds.",
-            "This version probes API/network response candidates but still emits no single odds unless exact high-confidence mapping is available.",
+            "This version parses Pinnacle Arcadia API JSON first, but still emits no single odds unless exact high-confidence mapping is available.",
         ],
     }
 
