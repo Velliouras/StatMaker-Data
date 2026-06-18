@@ -1,0 +1,40 @@
+name: Update Odds-API.io World Cup Odds
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "10 6 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-odds-api-io-wc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch Odds-API.io World Cup odds
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          ODDS_API_IO_LEAGUES: ${{ vars.ODDS_API_IO_LEAGUES }}
+        run: python scripts/update_worldcup_odds_api_io.py
+
+      - name: Commit updated odds JSON
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add odds/odds_api_io/world_cup_odds.json odds/odds_api_io/debug_report.json
+          if git diff --cached --quiet; then
+            echo "No odds changes to commit."
+          else
+            git commit -m "Update Odds-API.io World Cup odds"
+            git push
+          fi
