@@ -39,12 +39,34 @@ TIMEOUT_MS = int(os.getenv("STATMAKER_PINNACLE_TIMEOUT_MS", "22000"))
 MAX_FIXTURES = int(os.getenv("STATMAKER_WC_ODDS_MAX_FIXTURES", "64"))
 MIN_ODD = float(os.getenv("STATMAKER_MIN_VALID_ODD", "1.01"))
 MAX_ODD = float(os.getenv("STATMAKER_MAX_VALID_ODD", "1000"))
+MAX_NETWORK_API_CANDIDATES = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_API_CANDIDATES", "80"))
+MAX_NETWORK_BODY_CHARS = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_BODY_CHARS", "6000"))
 
 BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v3-exact-singles"
+SCRIPT_VERSION = "pinnacle-wc-odds-v4-api-candidate-probe"
+
+NETWORK_API_KEYWORDS = [
+    "api",
+    "event",
+    "events",
+    "market",
+    "markets",
+    "price",
+    "prices",
+    "odds",
+    "sports",
+    "matchup",
+    "matchups",
+    "prematch",
+    "straight",
+    "line",
+    "coupon",
+    "graphql",
+    "json",
+]
 
 KEYWORDS = [
     "football",
@@ -192,6 +214,95 @@ def extract_candidate_urls(html: str, base_url: str) -> list[str]:
         if any(token in lower for token in ["api", "event", "market", "coupon", "odds", "sports", "prematch", "matchup", "graphql", "json"]):
             candidates.add(raw)
     return sorted(candidates)[:100]
+
+
+def is_api_candidate_url(url: str) -> bool:
+    lower = (url or "").lower()
+    return any(token in lower for token in NETWORK_API_KEYWORDS)
+
+
+def summarize_json_root(value: Any, depth: int = 0) -> Any:
+    """Small JSON shape preview for diagnostics. Never returns raw huge payloads."""
+    if depth >= 3:
+        if isinstance(value, dict):
+            return {"type": "object", "keys": list(value.keys())[:12]}
+        if isinstance(value, list):
+            return {"type": "array", "length": len(value)}
+        return type(value).__name__
+    if isinstance(value, dict):
+        preview: dict[str, Any] = {"type": "object", "keys": list(value.keys())[:20]}
+        children: dict[str, Any] = {}
+        for key, item in list(value.items())[:8]:
+            children[str(key)] = summarize_json_root(item, depth + 1)
+        if children:
+            preview["children"] = children
+        return preview
+    if isinstance(value, list):
+        preview = {"type": "array", "length": len(value)}
+        if value:
+            preview["first"] = summarize_json_root(value[0], depth + 1)
+        return preview
+    return type(value).__name__
+
+
+def count_fixture_pairs_in_text(text: str, fixtures: list[Fixture], limit: int = 12) -> tuple[int, list[dict[str, Any]]]:
+    samples: list[dict[str, Any]] = []
+    matched_count = 0
+    for fixture in fixtures:
+        home_found = contains_team(text, fixture.home_team)
+        away_found = contains_team(text, fixture.away_team)
+        if home_found and away_found:
+            matched_count += 1
+            if len(samples) < limit:
+                samples.append({
+                    "matchId": fixture.match_id,
+                    "homeTeam": fixture.home_team,
+                    "awayTeam": fixture.away_team,
+                })
+    return matched_count, samples
+
+
+def analyse_response_body(url: str, status: int | None, content_type: str, body: str, fixtures: list[Fixture]) -> dict[str, Any]:
+    text = body or ""
+    json_root: Any | None = None
+    json_error: str | None = None
+    stripped = text.lstrip()
+    if stripped.startswith("{") or stripped.startswith("[") or "json" in (content_type or "").lower():
+        try:
+            json_root = json.loads(text)
+        except Exception as exc:  # noqa: BLE001 - diagnostics only.
+            json_error = f"{type(exc).__name__}: {exc}"
+
+    fixture_pairs_count, fixture_pairs_sample = count_fixture_pairs_in_text(text, fixtures)
+    keyword_hits = {
+        keyword: keyword in normalize_text(text)
+        for keyword in ["soccer", "football", "world cup", "fifa", "odds", "market", "markets", "price", "prices", "event", "events"]
+    }
+    odds_count = len(odds_tokens(text))
+    score = 0
+    if status == 200:
+        score += 20
+    if json_root is not None:
+        score += 40
+    score += min(fixture_pairs_count * 12, 60)
+    score += min(odds_count, 30)
+    score += sum(3 for hit in keyword_hits.values() if hit)
+
+    return {
+        "url": url,
+        "status": status,
+        "contentType": content_type,
+        "bodyLength": len(text),
+        "oddsLikeNumbers": odds_count,
+        "fixturePairsInBody": fixture_pairs_count,
+        "fixturePairsSample": fixture_pairs_sample,
+        "keywordHits": keyword_hits,
+        "jsonParsed": json_root is not None,
+        "jsonError": json_error,
+        "jsonShape": summarize_json_root(json_root) if json_root is not None else None,
+        "score": score,
+        "bodySample": text[:MAX_NETWORK_BODY_CHARS],
+    }
 
 
 def keyword_presence(visible_text: str, html: str) -> dict[str, dict[str, bool]]:
@@ -497,7 +608,7 @@ def count_market_types(markets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def select_best_page() -> tuple[dict[str, Any], str, str]:
+def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str]:
     attempts: list[dict[str, Any]] = []
     best: dict[str, Any] | None = None
     best_visible = ""
@@ -515,7 +626,6 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
             locale="en-GB",
             timezone_id="Europe/London",
         )
-        page = context.new_page()
 
         for url in PINNACLE_URLS:
             response_status: int | None = None
@@ -524,10 +634,48 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
             visible_text = ""
             html = ""
             error: str | None = None
+            network_candidates: list[dict[str, Any]] = []
+            seen_candidate_urls: set[str] = set()
+            page = context.new_page()
+
+            def capture_response(response: Any) -> None:
+                if len(network_candidates) >= MAX_NETWORK_API_CANDIDATES:
+                    return
+                response_url = str(getattr(response, "url", "") or "")
+                if not is_api_candidate_url(response_url):
+                    return
+                if response_url in seen_candidate_urls:
+                    return
+                seen_candidate_urls.add(response_url)
+                status = None
+                content_type = ""
+                body = ""
+                body_error = None
+                try:
+                    status = int(response.status)
+                    headers = response.headers or {}
+                    content_type = clean_text(headers.get("content-type") or headers.get("Content-Type") or "")
+                    # Pull bodies only for likely useful API/JSON responses. JS chunks are already
+                    # listed from HTML candidates and are usually too noisy for exact odds extraction.
+                    lower_url = response_url.lower()
+                    if status == 200 and (
+                        "json" in content_type.lower()
+                        or any(token in lower_url for token in ["api", "event", "market", "odds", "matchup", "sportsbook"])
+                    ):
+                        body = response.text()
+                except Exception as exc:  # noqa: BLE001 - diagnostics must not crash scraping.
+                    body_error = f"{type(exc).__name__}: {exc}"
+
+                candidate = analyse_response_body(response_url, status, content_type, body, fixtures)
+                if body_error:
+                    candidate["bodyReadError"] = body_error
+                network_candidates.append(candidate)
+
+            page.on("response", capture_response)
             try:
                 response = page.goto(url, wait_until="domcontentloaded", timeout=TIMEOUT_MS)
                 response_status = response.status if response else None
-                page.wait_for_timeout(3500)
+                page.wait_for_timeout(4500)
                 title = page.title() or ""
                 final_url = page.url or url
                 visible_text = page.locator("body").inner_text(timeout=7000) if page.locator("body").count() else ""
@@ -536,7 +684,14 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
                 error = f"timeout: {exc}"
             except Exception as exc:  # noqa: BLE001 - diagnostics should capture site-specific failures.
                 error = f"{type(exc).__name__}: {exc}"
+            finally:
+                try:
+                    page.close()
+                except Exception:
+                    pass
 
+            html_api_candidates = extract_candidate_urls(html, final_url)
+            network_candidates_sorted = sorted(network_candidates, key=lambda item: int(item.get("score") or 0), reverse=True)
             result = {
                 "requestedUrl": url,
                 "finalUrl": final_url,
@@ -546,7 +701,10 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
                 "htmlLength": len(html or ""),
                 "oddsLikeNumbersInVisibleText": len(odds_tokens(visible_text)),
                 "oddsLikeNumbersInHtml": len(odds_tokens(html)),
-                "scriptApiCandidatesCount": len(extract_candidate_urls(html, final_url)),
+                "scriptApiCandidatesCount": len(html_api_candidates),
+                "htmlApiCandidatesSample": html_api_candidates[:25],
+                "networkApiCandidatesCount": len(network_candidates_sorted),
+                "networkApiCandidatesTop": network_candidates_sorted[:12],
                 "error": error,
             }
             score = 0
@@ -555,6 +713,8 @@ def select_best_page() -> tuple[dict[str, Any], str, str]:
             score += min(result["visibleTextLength"] // 100, 40)
             score += min(result["oddsLikeNumbersInVisibleText"], 80)
             score += min(result["scriptApiCandidatesCount"], 25)
+            if network_candidates_sorted:
+                score += min(int(network_candidates_sorted[0].get("score") or 0), 80)
             result["score"] = score
             attempts.append(result)
 
@@ -632,8 +792,11 @@ def write_snapshot(best_page: dict[str, Any], visible_text: str, html: str, fixt
         "===== Matched fixture extraction sample =====",
         json.dumps(matched_debug[:12], ensure_ascii=False, indent=2),
         "",
-        "===== Script/API candidates =====",
+        "===== HTML script/API candidates =====",
         "\n".join(extract_candidate_urls(html, best_page.get("finalUrl") or "")) or "None found.",
+        "",
+        "===== Network/API response candidates =====",
+        json.dumps(best_page.get("networkApiCandidatesTop", []), ensure_ascii=False, indent=2),
         "",
         "===== Visible text sample =====",
         (visible_text or "")[:14000] or "<empty>",
@@ -652,7 +815,7 @@ def main() -> None:
     DEBUG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     errors: list[str] = []
-    best_page, visible_text, html = select_best_page()
+    best_page, visible_text, html = select_best_page(fixtures)
 
     output = make_empty_feed(generated_at)
     matched_debug: list[dict[str, Any]] = []
@@ -731,7 +894,8 @@ def main() -> None:
             "Bet Builder total odds may be estimated only in the Android app when actual builder prices are unavailable; single selection odds remain exact-only.",
             "This scraper rejects low-confidence 1X2 extraction, including identical generic/nearby tokens.",
             "Only high-confidence labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
-            "If too few markets are emitted, switch to Pinnacle API candidate extraction rather than accepting nearby visible-text odds.",
+            "If too few markets are emitted, inspect bestPage.networkApiCandidatesTop for Pinnacle JSON/API endpoints rather than accepting nearby visible-text odds.",
+            "This version probes API/network response candidates but still emits no single odds unless exact high-confidence mapping is available.",
         ],
     }
 
