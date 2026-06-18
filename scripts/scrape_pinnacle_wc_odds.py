@@ -41,12 +41,14 @@ MIN_ODD = float(os.getenv("STATMAKER_MIN_VALID_ODD", "1.01"))
 MAX_ODD = float(os.getenv("STATMAKER_MAX_VALID_ODD", "1000"))
 MAX_NETWORK_API_CANDIDATES = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_API_CANDIDATES", "80"))
 MAX_NETWORK_BODY_CHARS = int(os.getenv("STATMAKER_PINNACLE_MAX_NETWORK_BODY_CHARS", "6000"))
+MAX_DETAIL_PROBE_FIXTURES = int(os.getenv("STATMAKER_PINNACLE_DETAIL_PROBE_FIXTURES", "18"))
+MAX_DETAIL_ENDPOINTS_PER_MATCHUP = int(os.getenv("STATMAKER_PINNACLE_DETAIL_ENDPOINTS_PER_MATCHUP", "6"))
 
 BOOKMAKER = "Pinnacle"
 SOURCE = "pinnacle"
 COMPETITION = "World Cup"
 SEASON = "2026"
-SCRIPT_VERSION = "pinnacle-wc-odds-v6-arcadia-ou-btts-parser"
+SCRIPT_VERSION = "pinnacle-wc-odds-v7-matchup-detail-probe"
 
 NETWORK_API_KEYWORDS = [
     "api",
@@ -429,6 +431,201 @@ def map_fixture_participants(obj: Any, fixture: Fixture) -> tuple[dict[str, Any]
         return {}, debug
     return {"home": home, "away": away}, debug
 
+
+
+
+def candidate_matchup_id(obj: dict[str, Any]) -> str:
+    """Return an object-level matchup id only, never a participant/outcome id."""
+    for key in ["matchupId", "matchupID", "eventId", "eventID", "id"]:
+        value = obj.get(key)
+        if value is not None and not isinstance(value, (dict, list)):
+            token = extract_id(value)
+            if token:
+                return token
+    return ""
+
+
+def find_fixture_matchup_candidates(api_payloads: list[dict[str, Any]], fixture: Fixture, limit: int = 4) -> list[dict[str, Any]]:
+    """Find Arcadia matchup objects that clearly contain both fixture teams.
+
+    These objects are used only to derive exact matchup ids and participant mapping
+    for per-matchup market-detail endpoint probes. No odds are inferred here.
+    """
+    candidates: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for payload in api_payloads:
+        root = payload.get("jsonRoot")
+        url = str(payload.get("url") or "")
+        for obj in iter_dicts(root, max_depth=8):
+            obj_text = json_dumps_safe(obj, limit=30000)
+            if not (contains_team(obj_text, fixture.home_team) and contains_team(obj_text, fixture.away_team)):
+                continue
+            participant_map, participant_debug = map_fixture_participants(obj, fixture)
+            if not participant_map:
+                continue
+            matchup_id = candidate_matchup_id(obj)
+            if not matchup_id or matchup_id in seen:
+                continue
+            seen.add(matchup_id)
+            candidates.append({
+                "matchupId": matchup_id,
+                "sourceUrl": url,
+                "participantMap": participant_map,
+                "participantDebug": participant_debug,
+                "objectKeys": list(obj.keys())[:24],
+            })
+            if len(candidates) >= limit:
+                return candidates
+    return candidates
+
+
+def build_fixture_wrapped_detail_payload(fixture: Fixture, matchup_candidate: dict[str, Any], detail_root: Any) -> dict[str, Any]:
+    """Wrap a detail-market payload with fixture/participant context.
+
+    Some Pinnacle per-matchup market endpoints return only market objects. The
+    wrapper gives the exact fixture context to the existing high-confidence market
+    mapper without inventing or approximating any odds.
+    """
+    participant_map = matchup_candidate.get("participantMap") if isinstance(matchup_candidate.get("participantMap"), dict) else {}
+    participants = []
+    home = participant_map.get("home") if isinstance(participant_map, dict) else None
+    away = participant_map.get("away") if isinstance(participant_map, dict) else None
+    if isinstance(home, dict):
+        participants.append({
+            "id": home.get("id"),
+            "name": fixture.home_team,
+            "alignment": "home",
+        })
+    else:
+        participants.append({"id": None, "name": fixture.home_team, "alignment": "home"})
+    if isinstance(away, dict):
+        participants.append({
+            "id": away.get("id"),
+            "name": fixture.away_team,
+            "alignment": "away",
+        })
+    else:
+        participants.append({"id": None, "name": fixture.away_team, "alignment": "away"})
+
+    return {
+        "_statmakerFixtureMatchId": fixture.match_id,
+        "id": matchup_candidate.get("matchupId"),
+        "matchupId": matchup_candidate.get("matchupId"),
+        "participants": participants,
+        "markets": detail_root if isinstance(detail_root, list) else None,
+        "detail": detail_root,
+    }
+
+
+def detail_endpoint_candidates(matchup_id: str) -> list[str]:
+    base = "https://guest.api.arcadia.pinnacle.com/0.1"
+    # The related/straight path is the important one for per-matchup expanded
+    # markets. The other paths are diagnostics/fallbacks only.
+    return [
+        f"{base}/matchups/{matchup_id}/markets/related/straight",
+        f"{base}/matchups/{matchup_id}/markets/straight",
+        f"{base}/matchups/{matchup_id}/markets/related",
+        f"{base}/matchups/{matchup_id}/markets",
+        f"{base}/matchups/{matchup_id}",
+        f"{base}/matchups/{matchup_id}/related",
+    ][:MAX_DETAIL_ENDPOINTS_PER_MATCHUP]
+
+
+def probe_matchup_detail_endpoints(context: Any, fixtures: list[Fixture], api_payloads: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Probe per-matchup Pinnacle Arcadia endpoints for expanded markets.
+
+    This adds extra JSON payloads only when the response is JSON. It does not emit
+    any odds directly; later extraction still requires exact/high-confidence
+    mapping from the returned API objects.
+    """
+    detail_payloads: list[dict[str, Any]] = []
+    report: dict[str, Any] = {
+        "strategy": "pinnacle_arcadia_matchup_detail_probe",
+        "fixturesChecked": 0,
+        "matchupCandidatesFound": 0,
+        "detailUrlsTried": 0,
+        "detailJsonPayloadsLoaded": 0,
+        "detailPayloadsWithMarketText": 0,
+        "samples": [],
+        "notes": [
+            "Per-matchup detail endpoint probing only. Singles are still emitted only after exact/high-confidence market mapping.",
+        ],
+    }
+    seen_urls: set[str] = set()
+
+    for fixture in fixtures[:MAX_DETAIL_PROBE_FIXTURES]:
+        report["fixturesChecked"] += 1
+        candidates = find_fixture_matchup_candidates(api_payloads, fixture, limit=3)
+        report["matchupCandidatesFound"] += len(candidates)
+        if not candidates and len(report["samples"]) < 12:
+            report["samples"].append({
+                "matchId": fixture.match_id,
+                "homeTeam": fixture.home_team,
+                "awayTeam": fixture.away_team,
+                "reason": "no base API matchup candidate with exact participant map",
+            })
+            continue
+        for candidate in candidates:
+            matchup_id = str(candidate.get("matchupId") or "")
+            for url in detail_endpoint_candidates(matchup_id):
+                if url in seen_urls:
+                    continue
+                seen_urls.add(url)
+                report["detailUrlsTried"] += 1
+                status = None
+                content_type = ""
+                body = ""
+                error = None
+                parsed: Any | None = None
+                try:
+                    response = context.request.get(url, timeout=TIMEOUT_MS)
+                    status = int(response.status)
+                    headers = response.headers or {}
+                    content_type = clean_text(headers.get("content-type") or headers.get("Content-Type") or "")
+                    if status == 200:
+                        body = response.text()
+                        if body and ("json" in content_type.lower() or body.lstrip().startswith(("{", "["))):
+                            parsed = json.loads(body)
+                except Exception as exc:  # noqa: BLE001 - diagnostics only.
+                    error = f"{type(exc).__name__}: {exc}"
+
+                body_text = body[:MAX_NETWORK_BODY_CHARS] if body else ""
+                keyword_hits = keyword_presence(body_text, body_text)
+                detail_sample = {
+                    "matchId": fixture.match_id,
+                    "homeTeam": fixture.home_team,
+                    "awayTeam": fixture.away_team,
+                    "matchupId": matchup_id,
+                    "url": url,
+                    "status": status,
+                    "contentType": content_type,
+                    "bodyLength": len(body or ""),
+                    "oddsLikeNumbers": len(odds_tokens(body_text)),
+                    "keywordHits": keyword_hits.get("odds", {}),
+                    "jsonParsed": parsed is not None,
+                    "jsonShape": summarize_json_root(parsed) if parsed is not None else None,
+                    "error": error,
+                }
+                if len(report["samples"]) < 24:
+                    report["samples"].append(detail_sample)
+
+                if parsed is None:
+                    continue
+                report["detailJsonPayloadsLoaded"] += 1
+                parsed_text = json_dumps_safe(parsed, limit=60000)
+                if any(token in normalize_text(parsed_text) for token in ["total", "over", "under", "both teams", "btts", "moneyline", "price", "prices", "market"]):
+                    report["detailPayloadsWithMarketText"] += 1
+                wrapped = build_fixture_wrapped_detail_payload(fixture, candidate, parsed)
+                detail_payloads.append({
+                    "url": url,
+                    "jsonRoot": wrapped,
+                    "fixtureMatchId": fixture.match_id,
+                    "matchupId": matchup_id,
+                    "payloadKind": "matchup_detail_probe",
+                })
+
+    report["detailPayloadsReturned"] = len(detail_payloads)
+    return detail_payloads, report
 
 def collect_market_objects(obj: Any, max_depth: int = 7) -> list[dict[str, Any]]:
     markets: list[dict[str, Any]] = []
@@ -880,10 +1077,10 @@ def build_markets_from_api_payloads(fixture: Fixture, api_payloads: list[dict[st
             if markets:
                 debug["accepted"] = True
                 debug["notes"].append(f"accepted exact API mapped markets from {url}; counts={count_market_types(markets)}")
-                # Continue scanning payloads after finding 1X2, because totals/BTTS can live in
-                # separate market containers or nearby objects. Stop only after this fixture has
-                # gathered all high-confidence markets visible in this candidate object.
-                return markets, debug
+                # Continue scanning all payloads. Pinnacle often serves 1X2 in the
+                # base matchup feed and totals/BTTS in per-matchup detail payloads.
+                # unique_market() prevents duplicates while allowing separate exact
+                # markets to be added.
 
     if not markets:
         debug["notes"].append("No exact API-mapped 1X2/MATCH_GOALS/BTTS market found; singles remain empty.")
@@ -1253,12 +1450,13 @@ def count_market_types(markets: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str, list[dict[str, Any]]]:
+def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str, list[dict[str, Any]], dict[str, Any]]:
     attempts: list[dict[str, Any]] = []
     best: dict[str, Any] | None = None
     best_visible = ""
     best_html = ""
     api_payloads: list[dict[str, Any]] = []
+    detail_probe_report: dict[str, Any] = {}
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -1378,6 +1576,19 @@ def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str,
                 best_visible = visible_text
                 best_html = html
 
+        # After the main pages have loaded and exposed Arcadia matchup payloads,
+        # probe per-matchup detail endpoints for expanded markets such as totals
+        # and BTTS. These payloads are still parsed conservatively later.
+        try:
+            detail_payloads, detail_probe_report = probe_matchup_detail_endpoints(context, fixtures, api_payloads)
+            api_payloads.extend(detail_payloads)
+        except Exception as exc:  # noqa: BLE001 - diagnostics must not crash the main scrape.
+            detail_probe_report = {
+                "strategy": "pinnacle_arcadia_matchup_detail_probe",
+                "error": f"{type(exc).__name__}: {exc}",
+                "detailPayloadsReturned": 0,
+            }
+
         context.close()
         browser.close()
 
@@ -1389,7 +1600,8 @@ def select_best_page(fixtures: list[Fixture]) -> tuple[dict[str, Any], str, str,
     else:
         best_summary = dict(best)
     best_summary["attempts"] = [dict(item) for item in attempts]
-    return best_summary, best_visible, best_html, api_payloads
+    best_summary["matchupDetailProbe"] = detail_probe_report
+    return best_summary, best_visible, best_html, api_payloads, detail_probe_report
 
 
 def make_empty_feed(generated_at: str) -> dict[str, Any]:
@@ -1470,7 +1682,7 @@ def main() -> None:
     DEBUG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     errors: list[str] = []
-    best_page, visible_text, html, api_payloads = select_best_page(fixtures)
+    best_page, visible_text, html, api_payloads, detail_probe_report = select_best_page(fixtures)
 
     output = make_empty_feed(generated_at)
     matched_debug: list[dict[str, Any]] = []
@@ -1551,6 +1763,7 @@ def main() -> None:
         "snapshotPath": str(SNAPSHOT_PATH),
         "bestPage": best_page,
         "apiPayloadsLoaded": len(api_payloads),
+        "matchupDetailProbe": detail_probe_report,
         "apiPayloads": [
             {
                 "url": str(payload.get("url") or ""),
@@ -1573,6 +1786,7 @@ def main() -> None:
             "Only high-confidence labelled Home/Draw/Away 1X2 markets are emitted. Inspect matchedFixtureDebug/extractionDebug after each run.",
             "If too few markets are emitted, inspect bestPage.networkApiCandidatesTop for Pinnacle JSON/API endpoints rather than accepting nearby visible-text odds.",
             "This version parses Pinnacle Arcadia API JSON first, including exact 1X2, match goals Over/Under, and BTTS when explicitly mapped.",
+            "It also probes per-matchup detail endpoints such as related/straight for expanded markets, but still emits singles only when exact/high-confidence mapping succeeds.",
         ],
     }
 
