@@ -3,8 +3,10 @@ name: Update World Cup JSON
 on:
   workflow_dispatch:
   schedule:
-   # Every 15 minutes offset from crowded GitHub cron slots; Python decides scrape or skip.
-    - cron: "7,22,37,52 * * * *"
+    # Hourly scrape gate. Python still decides SCRAPE or SKIP.
+    # With STATMAKER_POST_MATCH_SCRAPE_MINUTES=360, each finished match gets
+    # one safe catch-up attempt per hour for about 6 hours after estimated full-time.
+    - cron: "7 * * * *"
 
 permissions:
   contents: write
@@ -13,6 +15,8 @@ jobs:
   update-worldcup:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      STATMAKER_POST_MATCH_SCRAPE_MINUTES: "360"
 
     steps:
       - name: Checkout data repo
