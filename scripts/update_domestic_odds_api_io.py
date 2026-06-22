@@ -28,7 +28,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "domestic-odds-api-io-v1"
+SCRIPT_VERSION = "domestic-odds-api-io-v2-emission-fix"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -99,6 +99,12 @@ def line_float(value: Any) -> Optional[float]:
         return None
 
 
+def is_half_line(value: Optional[float]) -> bool:
+    if value is None:
+        return False
+    return abs((value * 10) % 10 - 5) < 0.0001
+
+
 def read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
@@ -128,7 +134,10 @@ def empty_output(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
             "leaguesRequested": debug.get("leaguesRequested", []),
             "leaguesMatched": debug.get("leaguesMatched", []),
             "leaguesMissing": debug.get("leaguesMissing", []),
-            "unmatchedTeams": debug.get("unmatchedTeams", []),
+            "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
+            "leagueReports": debug.get("leagueReports", []),
+            "skippedMarketSummary": skipped_market_summary(debug),
+            "skippedMarketExamples": debug.get("skippedMarketExamples", []),
             "rateLimitRemaining": debug.get("rateLimitRemaining"),
             "warnings": debug.get("warnings", []),
         },
@@ -211,14 +220,23 @@ def load_aliases() -> Dict[str, Dict[str, str]]:
     return mapping
 
 
-def canonical_team(name: str, league_code: str, aliases: Dict[str, Dict[str, str]], debug: Dict[str, Any]) -> str:
+def record_unmatched_team(debug: Dict[str, Any], league_code: str, provider_team: str, normalized: str) -> None:
+    debug.setdefault("unmatchedTeams", []).append({
+        "leagueCode": league_code,
+        "providerTeam": provider_team,
+        "normalized": normalized,
+    })
+
+
+def canonical_team_info(name: str, league_code: str, aliases: Dict[str, Dict[str, str]], debug: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     normalized = normalize_text(name, drop_suffixes=True)
     league_aliases = aliases.get(league_code, {})
     if normalized in league_aliases:
-        return league_aliases[normalized]
-    # Safe fallback: keep provider spelling but report it so explicit mappings can be added later.
-    debug.setdefault("unmatchedTeams", []).append({"leagueCode": league_code, "providerTeam": name, "normalized": normalized})
-    return str(name or "").strip()
+        canonical = league_aliases[normalized]
+        return canonical, canonical
+    record_unmatched_team(debug, league_code, str(name or "").strip(), normalized)
+    provider_name = str(name or "").strip()
+    return provider_name, None
 
 
 def choose_leagues(config: Dict[str, Any], mode: str, target: str) -> List[Dict[str, Any]]:
@@ -389,11 +407,30 @@ def row_name(row: Dict[str, Any]) -> str:
 
 
 def row_line(row: Dict[str, Any]) -> Optional[float]:
-    return line_float(row.get("line") or row.get("point") or row.get("points") or row.get("handicap") or row.get("max"))
+    return line_float(row.get("line") or row.get("point") or row.get("points") or row.get("handicap") or row.get("hdp") or row.get("max"))
+
+
+def row_side_price(row: Dict[str, Any], side: str) -> Optional[float]:
+    return to_float(row.get(side))
+
+
+def record_skipped_market(debug: Dict[str, Any], market: str, reason: str, row: str = "") -> None:
+    key = f"{market}|{reason}"
+    summary = debug.setdefault("skippedMarketSummary", {})
+    bucket = summary.setdefault(key, {"market": market, "reason": reason, "count": 0})
+    bucket["count"] += 1
+    examples = debug.setdefault("skippedMarketExamples", [])
+    if len(examples) < 50:
+        item = {"market": market, "reason": reason}
+        if row:
+            item["row"] = row
+        examples.append(item)
 
 
 def market_family_from_name(name: str) -> str:
     n = normalize_text(name)
+    if n in {"ml", "money line", "moneyline"}:
+        return "1X2"
     if any(token in n for token in ["both teams", "btts"]):
         return "BTTS"
     if "corner" in n:
@@ -456,24 +493,38 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
     rows = outcome_rows(market)
     out: List[Dict[str, Any]] = []
     if not rows:
-        debug.setdefault("skippedMarkets", []).append({"market": raw_name, "reason": "no outcome rows"})
+        record_skipped_market(debug, raw_name, "no outcome rows")
         return out
 
     if family == "1X2":
         for row in rows:
+            home_price = row_side_price(row, "home")
+            draw_price = row_side_price(row, "draw")
+            away_price = row_side_price(row, "away")
+            if home_price is not None or draw_price is not None or away_price is not None:
+                add_market(out, "1X2", "Home", home_price, bookmaker, team=home)
+                add_market(out, "1X2", "Draw", draw_price, bookmaker)
+                add_market(out, "1X2", "Away", away_price, bookmaker, team=away)
+                continue
             name = row_name(row)
             n = normalize_text(name, drop_suffixes=True)
             price = row_price(row)
             if n in {"draw", "x", "tie"}:
                 add_market(out, "1X2", "Draw", price, bookmaker)
             elif n == normalize_text(home, drop_suffixes=True) or "home" in n:
-                add_market(out, "1X2", home, price, bookmaker, team=home)
+                add_market(out, "1X2", "Home", price, bookmaker, team=home)
             elif n == normalize_text(away, drop_suffixes=True) or "away" in n:
-                add_market(out, "1X2", away, price, bookmaker, team=away)
+                add_market(out, "1X2", "Away", price, bookmaker, team=away)
         return out
 
     if family == "BTTS":
         for row in rows:
+            yes_price = row_side_price(row, "yes")
+            no_price = row_side_price(row, "no")
+            if yes_price is not None or no_price is not None:
+                add_market(out, "BTTS", "Yes", yes_price, bookmaker)
+                add_market(out, "BTTS", "No", no_price, bookmaker)
+                continue
             name = row_name(row)
             n = normalize_text(name)
             price = row_price(row)
@@ -493,20 +544,28 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
     }.get(family)
 
     if not base_market:
-        debug.setdefault("skippedMarkets", []).append({"market": raw_name, "reason": "unsupported market family"})
+        record_skipped_market(debug, raw_name, "unsupported market family")
         return out
 
     for row in rows:
         name = row_name(row)
         n = normalize_text(name)
         line = row_line(row) or row_line(market)
-        price = row_price(row)
         team = team_from_market_or_row(raw_name, row, home, away) if base_market.startswith("TEAM_") else None
+        if base_market == "TEAM_TOTAL_GOALS" and not team:
+            market_norm = normalize_text(raw_name)
+            if "home" in market_norm:
+                team = home
+            elif "away" in market_norm:
+                team = away
         if base_market.startswith("TEAM_") and not team:
-            debug.setdefault("skippedMarkets", []).append({"market": raw_name, "row": name, "reason": "team market without clear team"})
+            record_skipped_market(debug, raw_name, "team market without clear team", name)
             continue
         if line is None:
-            debug.setdefault("skippedMarkets", []).append({"market": raw_name, "row": name, "reason": "line missing"})
+            record_skipped_market(debug, raw_name, "line missing", name)
+            continue
+        if not is_half_line(line):
+            record_skipped_market(debug, raw_name, "non half-line skipped", name)
             continue
         label_prefix = team if team else {
             "MATCH_GOALS": "Goals",
@@ -515,17 +574,22 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
             "MATCH_SHOTS": "Shots",
             "MATCH_SHOTS_ON_TARGET": "Shots on Target",
         }.get(base_market, family.title())
-        if "under" in n:
-            add_market(out, base_market, f"{label_prefix} Under {line:g}", price, bookmaker, line=line, team=team)
+        over_price = row_side_price(row, "over")
+        under_price = row_side_price(row, "under")
+        if over_price is not None or under_price is not None:
+            add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", over_price, bookmaker, line=line, team=team)
+            add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", under_price, bookmaker, line=line, team=team)
+        elif "under" in n:
+            add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
         elif "over" in n:
-            add_market(out, base_market, f"{label_prefix} Over {line:g}", price, bookmaker, line=line, team=team)
+            add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
         else:
             # Some APIs provide rows named only by side keys over/under.
             side = normalize_text(row.get("side"))
             if side == "under":
-                add_market(out, base_market, f"{label_prefix} Under {line:g}", price, bookmaker, line=line, team=team)
+                add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
             elif side == "over":
-                add_market(out, base_market, f"{label_prefix} Over {line:g}", price, bookmaker, line=line, team=team)
+                add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
     return out
 
 
@@ -550,8 +614,14 @@ def normalize_event_match(config_league: Dict[str, Any], event: Dict[str, Any], 
     if not home_raw or not away_raw:
         debug.setdefault("warnings", []).append(f"Skipped event without teams: {event_id(event)}")
         return None
-    home = canonical_team(home_raw, league_code, aliases, debug)
-    away = canonical_team(away_raw, league_code, aliases, debug)
+    home, canonical_home = canonical_team_info(home_raw, league_code, aliases, debug)
+    away, canonical_away = canonical_team_info(away_raw, league_code, aliases, debug)
+    if canonical_home and canonical_away:
+        mapping_status = "matched"
+    elif canonical_home or canonical_away:
+        mapping_status = "partial"
+    else:
+        mapping_status = "unmatched"
     kickoff = event_kickoff(event)
     date = kickoff[:10] if kickoff else ""
     markets: List[Dict[str, Any]] = []
@@ -564,8 +634,14 @@ def normalize_event_match(config_league: Dict[str, Any], event: Dict[str, Any], 
         "id": event_id(event),
         "date": date,
         "kickoff": kickoff,
+        "providerHomeTeam": home_raw,
+        "providerAwayTeam": away_raw,
         "homeTeam": home,
         "awayTeam": away,
+        "canonicalHomeTeam": canonical_home,
+        "canonicalAwayTeam": canonical_away,
+        "teamMappingStatus": mapping_status,
+        "usableForStats": mapping_status == "matched",
         "markets": markets,
     }
 
@@ -608,9 +684,12 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
             odds_by_event = fetch_odds(api_key, event_ids, bookmakers, debug) if event_ids else {}
             matches = []
             for event in events:
-                match = normalize_event_match(league, event, odds_by_event.get(event_id(event)), aliases, debug)
+                match = normalize_event_match(league, event, odds_by_event.get(event_id(event)) or event, aliases, debug)
                 if match and match["markets"]:
                     matches.append(match)
+            matched_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "matched")
+            partial_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "partial")
+            unmatched_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "unmatched")
             output["leagues"].append({
                 "leagueCode": league_code,
                 "country": league.get("country"),
@@ -626,6 +705,9 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
                 "eventsWithOddsResponse": len(odds_by_event),
                 "matchesEmitted": len(matches),
                 "marketsEmitted": sum(len(m.get("markets", [])) for m in matches),
+                "matchedTeamPairs": matched_pairs,
+                "partialTeamPairs": partial_pairs,
+                "unmatchedTeamPairs": unmatched_pairs,
             })
         except Exception as exc:  # keep partial output safe
             debug.setdefault("warnings", []).append(f"{league_code}: {exc}")
@@ -644,10 +726,33 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
         "leaguesRequested": debug.get("leaguesRequested", []),
         "leaguesMatched": debug.get("leaguesMatched", []),
         "leaguesMissing": debug.get("leaguesMissing", []),
-        "unmatchedTeams": unique_debug_list(debug.get("unmatchedTeams", [])),
+        "leagueReports": debug.get("leagueReports", []),
+        "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
+        "skippedMarketSummary": skipped_market_summary(debug),
+        "skippedMarketExamples": debug.get("skippedMarketExamples", []),
         "rateLimitRemaining": debug.get("rateLimitRemaining"),
         "warnings": debug.get("warnings", []),
     }
+
+
+def skipped_market_summary(debug: Dict[str, Any]) -> List[Dict[str, Any]]:
+    summary = list(debug.get("skippedMarketSummary", {}).values())
+    return sorted(summary, key=lambda item: (-int(item.get("count") or 0), str(item.get("market") or ""), str(item.get("reason") or "")))
+
+
+def unique_unmatched_teams(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    seen = set()
+    out = []
+    for item in items:
+        key = (
+            str(item.get("leagueCode") or ""),
+            normalize_text(item.get("providerTeam") or ""),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(item)
+    return out
 
 
 def unique_debug_list(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -690,6 +795,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     report["leaguesEmitted"] = [x.get("leagueCode") for x in output.get("leagues", [])]
     report["matchesEmitted"] = sum(len(x.get("matches", [])) for x in output.get("leagues", []))
     report["marketsEmitted"] = sum(len(m.get("markets", [])) for x in output.get("leagues", []) for m in x.get("matches", []))
+    report["unmatchedTeams"] = unique_unmatched_teams(debug.get("unmatchedTeams", []))
+    report["skippedMarketSummary"] = skipped_market_summary(debug)
+    report["skippedMarketExamples"] = debug.get("skippedMarketExamples", [])
     write_json(OUT_PATH, output)
     write_json(REPORT_PATH, report)
     print(json.dumps({
