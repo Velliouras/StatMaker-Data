@@ -56,6 +56,21 @@ SUPPORTED_MARKETS = {
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
 }
+EMITTED_MARKET_COUNT_KEYS = [
+    "1X2",
+    "BTTS",
+    "MATCH_GOALS",
+    "TEAM_TOTAL_GOALS",
+    "FIRST_HALF_GOALS",
+    "MATCH_CORNERS",
+    "TEAM_CORNERS",
+    "MATCH_CARDS",
+    "TEAM_CARDS",
+    "MATCH_SHOTS",
+    "TEAM_SHOTS",
+    "MATCH_SHOTS_ON_TARGET",
+    "TEAM_SHOTS_ON_TARGET",
+]
 
 COMMON_SUFFIXES = {"fc", "fk", "cf", "sc", "ac", "afc", "bk", "if"}
 
@@ -137,6 +152,7 @@ def empty_output(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
             "leaguesMissing": debug.get("leaguesMissing", []),
             "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
             "leagueReports": debug.get("leagueReports", []),
+            "emittedMarketCounts": emitted_market_counts(debug.get("lastOutput", {})),
             "skippedMarketSummary": skipped_market_summary(debug),
             "skippedMarketExamples": debug.get("skippedMarketExamples", []),
             "rateLimitRemaining": debug.get("rateLimitRemaining"),
@@ -428,6 +444,13 @@ def record_skipped_market(debug: Dict[str, Any], market: str, reason: str, row: 
         examples.append(item)
 
 
+def record_raw_market(debug: Dict[str, Any], raw_name: str, family: str) -> None:
+    raw_counts = debug.setdefault("rawMarketCounts", {})
+    raw_counts[raw_name] = int(raw_counts.get(raw_name, 0)) + 1
+    family_counts = debug.setdefault("classifiedMarketCounts", {})
+    family_counts[family] = int(family_counts.get(family, 0)) + 1
+
+
 def market_family_from_name(name: str) -> str:
     n = normalize_text(name)
     if n in {"ml", "money line", "moneyline"}:
@@ -496,6 +519,7 @@ def add_market(out: List[Dict[str, Any]], market: str, selection: str, odds: Opt
 def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: str, debug: Dict[str, Any]) -> List[Dict[str, Any]]:
     raw_name = raw_market_name(market)
     family = market_family_from_name(raw_name)
+    record_raw_market(debug, raw_name, family)
     rows = outcome_rows(market)
     out: List[Dict[str, Any]] = []
     if not rows:
@@ -736,8 +760,11 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
         "leaguesMissing": debug.get("leaguesMissing", []),
         "leagueReports": debug.get("leagueReports", []),
         "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
+        "rawMarketCounts": debug.get("rawMarketCounts", {}),
+        "classifiedMarketCounts": debug.get("classifiedMarketCounts", {}),
         "skippedMarketSummary": skipped_market_summary(debug),
         "skippedMarketExamples": debug.get("skippedMarketExamples", []),
+        "emittedMarketCounts": debug.get("emittedMarketCounts", {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}),
         "rateLimitRemaining": debug.get("rateLimitRemaining"),
         "warnings": debug.get("warnings", []),
     }
@@ -775,6 +802,17 @@ def unique_debug_list(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
+def emitted_market_counts(output: Dict[str, Any]) -> Dict[str, int]:
+    counts = {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}
+    for league in output.get("leagues", []) or []:
+        for match in league.get("matches", []) or []:
+            for market in match.get("markets", []) or []:
+                key = str(market.get("market") or "")
+                if key in counts:
+                    counts[key] += 1
+    return counts
+
+
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Update domestic Odds-API.io schedule + odds JSON.")
     parser.add_argument("--mode", choices=["all", "group", "league"], default=os.getenv("STATMAKER_DOMESTIC_MODE", "group"))
@@ -796,6 +834,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         debug.setdefault("warnings", []).append("ODDS_API_IO_KEY is missing; wrote structural output without API calls.")
         args.dry_run = True
     output = build_output(config, selected, api_key, args.dry_run, args.bookmakers, debug)
+    debug["emittedMarketCounts"] = emitted_market_counts(output)
+    output.setdefault("debug", {})["emittedMarketCounts"] = debug["emittedMarketCounts"]
+    output.setdefault("debug", {})["rawMarketCounts"] = debug.get("rawMarketCounts", {})
+    output.setdefault("debug", {})["classifiedMarketCounts"] = debug.get("classifiedMarketCounts", {})
     report = dict(debug)
     report["outputPath"] = str(OUT_PATH.relative_to(ROOT))
     report["reportPath"] = str(REPORT_PATH.relative_to(ROOT))
@@ -803,6 +845,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     report["leaguesEmitted"] = [x.get("leagueCode") for x in output.get("leagues", [])]
     report["matchesEmitted"] = sum(len(x.get("matches", [])) for x in output.get("leagues", []))
     report["marketsEmitted"] = sum(len(m.get("markets", [])) for x in output.get("leagues", []) for m in x.get("matches", []))
+    report["emittedMarketCounts"] = debug["emittedMarketCounts"]
     report["unmatchedTeams"] = unique_unmatched_teams(debug.get("unmatchedTeams", []))
     report["skippedMarketSummary"] = skipped_market_summary(debug)
     report["skippedMarketExamples"] = debug.get("skippedMarketExamples", [])
