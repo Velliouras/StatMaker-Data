@@ -44,6 +44,7 @@ REPORT_PATH = ROOT / "reports" / "domestic_odds_debug.json"
 SUPPORTED_MARKETS = {
     "1X2",
     "MATCH_GOALS",
+    "FIRST_HALF_GOALS",
     "BTTS",
     "TEAM_TOTAL_GOALS",
     "MATCH_CORNERS",
@@ -445,6 +446,11 @@ def market_family_from_name(name: str) -> str:
         return "1X2"
     if any(token in n for token in ["team total", "team goals"]):
         return "TEAM_TOTAL_GOALS"
+    if (
+        any(token in n for token in ["1st half", "first half", "half time", "halftime", "ht"])
+        and any(token in n for token in ["goal", "goals", "total", "totals", "over under", "goal line"])
+    ):
+        return "FIRST_HALF_GOALS"
     if any(token in n for token in ["total", "over under", "goals"]):
         return "MATCH_GOALS"
     return "OTHER"
@@ -536,6 +542,7 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
 
     base_market = {
         "MATCH_GOALS": "MATCH_GOALS",
+        "FIRST_HALF_GOALS": "FIRST_HALF_GOALS",
         "TEAM_TOTAL_GOALS": "TEAM_TOTAL_GOALS",
         "CORNERS": "TEAM_CORNERS" if is_team_market(raw_name) else "MATCH_CORNERS",
         "CARDS": "TEAM_CARDS" if is_team_market(raw_name) else "MATCH_CARDS",
@@ -569,6 +576,7 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
             continue
         label_prefix = team if team else {
             "MATCH_GOALS": "Goals",
+            "FIRST_HALF_GOALS": "1H Goals",
             "MATCH_CORNERS": "Corners",
             "MATCH_CARDS": "Cards",
             "MATCH_SHOTS": "Shots",
@@ -577,19 +585,19 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
         over_price = row_side_price(row, "over")
         under_price = row_side_price(row, "under")
         if over_price is not None or under_price is not None:
-            add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", over_price, bookmaker, line=line, team=team)
-            add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", under_price, bookmaker, line=line, team=team)
+            add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", over_price, bookmaker, line=line, team=team)
+            add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", under_price, bookmaker, line=line, team=team)
         elif "under" in n:
-            add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
+            add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
         elif "over" in n:
-            add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
+            add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
         else:
             # Some APIs provide rows named only by side keys over/under.
             side = normalize_text(row.get("side"))
             if side == "under":
-                add_market(out, base_market, "Under" if base_market == "MATCH_GOALS" else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
+                add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
             elif side == "over":
-                add_market(out, base_market, "Over" if base_market == "MATCH_GOALS" else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
+                add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
     return out
 
 
