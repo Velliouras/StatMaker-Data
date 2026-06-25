@@ -424,7 +424,16 @@ def row_name(row: Dict[str, Any]) -> str:
 
 
 def row_line(row: Dict[str, Any]) -> Optional[float]:
-    return line_float(row.get("line") or row.get("point") or row.get("points") or row.get("handicap") or row.get("hdp") or row.get("max"))
+    explicit = line_float(row.get("line") or row.get("point") or row.get("points") or row.get("handicap") or row.get("hdp") or row.get("max"))
+    if explicit is not None:
+        return explicit
+    return line_from_text(row_name(row))
+
+
+def line_from_text(value: str) -> Optional[float]:
+    text = str(value or "")
+    match = re.search(r"(?<!\d)(\d+(?:[.,]\d+)?)(?!\d)", text)
+    return line_float(match.group(1)) if match else None
 
 
 def row_side_price(row: Dict[str, Any], side: str) -> Optional[float]:
@@ -581,7 +590,7 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
     for row in rows:
         name = row_name(row)
         n = normalize_text(name)
-        line = row_line(row) or row_line(market)
+        line = row_line(row) or row_line(market) or line_from_text(raw_name)
         team = team_from_market_or_row(raw_name, row, home, away) if base_market.startswith("TEAM_") else None
         if base_market == "TEAM_TOTAL_GOALS" and not team:
             market_norm = normalize_text(raw_name)
