@@ -153,6 +153,7 @@ def empty_output(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
             "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
             "leagueReports": debug.get("leagueReports", []),
             "emittedMarketCounts": emitted_market_counts(debug.get("lastOutput", {})),
+            "skippedMarketReasons": skipped_market_reasons(debug),
             "skippedMarketSummary": skipped_market_summary(debug),
             "skippedMarketExamples": debug.get("skippedMarketExamples", []),
             "rateLimitRemaining": debug.get("rateLimitRemaining"),
@@ -445,6 +446,11 @@ def record_skipped_market(debug: Dict[str, Any], market: str, reason: str, row: 
     summary = debug.setdefault("skippedMarketSummary", {})
     bucket = summary.setdefault(key, {"market": market, "reason": reason, "count": 0})
     bucket["count"] += 1
+    family = market_family_from_name(market)
+    reason_key = f"{family}|{reason}"
+    reasons = debug.setdefault("skippedMarketReasons", {})
+    reason_bucket = reasons.setdefault(reason_key, {"family": family, "reason": reason, "count": 0})
+    reason_bucket["count"] += 1
     examples = debug.setdefault("skippedMarketExamples", [])
     if len(examples) < 50:
         item = {"market": market, "reason": reason}
@@ -771,6 +777,7 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
         "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
         "rawMarketCounts": debug.get("rawMarketCounts", {}),
         "classifiedMarketCounts": debug.get("classifiedMarketCounts", {}),
+        "skippedMarketReasons": skipped_market_reasons(debug),
         "skippedMarketSummary": skipped_market_summary(debug),
         "skippedMarketExamples": debug.get("skippedMarketExamples", []),
         "emittedMarketCounts": debug.get("emittedMarketCounts", {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}),
@@ -782,6 +789,11 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
 def skipped_market_summary(debug: Dict[str, Any]) -> List[Dict[str, Any]]:
     summary = list(debug.get("skippedMarketSummary", {}).values())
     return sorted(summary, key=lambda item: (-int(item.get("count") or 0), str(item.get("market") or ""), str(item.get("reason") or "")))
+
+
+def skipped_market_reasons(debug: Dict[str, Any]) -> List[Dict[str, Any]]:
+    reasons = list(debug.get("skippedMarketReasons", {}).values())
+    return sorted(reasons, key=lambda item: (-int(item.get("count") or 0), str(item.get("family") or ""), str(item.get("reason") or "")))
 
 
 def unique_unmatched_teams(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -847,6 +859,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     output.setdefault("debug", {})["emittedMarketCounts"] = debug["emittedMarketCounts"]
     output.setdefault("debug", {})["rawMarketCounts"] = debug.get("rawMarketCounts", {})
     output.setdefault("debug", {})["classifiedMarketCounts"] = debug.get("classifiedMarketCounts", {})
+    output.setdefault("debug", {})["skippedMarketReasons"] = skipped_market_reasons(debug)
     report = dict(debug)
     report["outputPath"] = str(OUT_PATH.relative_to(ROOT))
     report["reportPath"] = str(REPORT_PATH.relative_to(ROOT))
@@ -856,6 +869,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     report["marketsEmitted"] = sum(len(m.get("markets", [])) for x in output.get("leagues", []) for m in x.get("matches", []))
     report["emittedMarketCounts"] = debug["emittedMarketCounts"]
     report["unmatchedTeams"] = unique_unmatched_teams(debug.get("unmatchedTeams", []))
+    report["skippedMarketReasons"] = skipped_market_reasons(debug)
     report["skippedMarketSummary"] = skipped_market_summary(debug)
     report["skippedMarketExamples"] = debug.get("skippedMarketExamples", [])
     write_json(OUT_PATH, output)

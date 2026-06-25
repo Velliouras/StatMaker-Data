@@ -1,919 +1,960 @@
-﻿{
-    "warnings":  [
-
-                 ],
-    "apiCalls":  [
-                     {
-                         "path":  "/leagues",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "sport":  "football",
-                                        "all":  "true"
-                                    },
-                         "status":  200,
-                         "durationMs":  371,
-                         "bodyLength":  125218,
-                         "rateLimitRemaining":  89,
-                         "sample":  "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 0}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 5}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"even..."
-                     },
-                     {
-                         "path":  "/events",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "sport":  "football",
-                                        "league":  "norway-eliteserien",
-                                        "status":  "pending,live",
-                                        "from":  "2026-06-22T19:12:22Z",
-                                        "to":  "2026-07-13T19:12:22Z",
-                                        "limit":  500
-                                    },
-                         "status":  200,
-                         "durationMs":  213,
-                         "bodyLength":  2178,
-                         "rateLimitRemaining":  88,
-                         "sample":  "[{\"id\": 67015244, \"home\": \"Fredrikstad\", \"away\": \"Lillestroem\", \"homeId\": 687, \"awayId\": 664, \"date\": \"2026-07-11T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015256, \"home\": \"Aalesund\", \"away\": \"Molde\", \"homeId\": 677, \"awayId\": 661, \"date\": \"2026-07-11T14:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015254, \"home\": \"Tromsoe\", \"away\": \"Valerenga\", \"homeId\": 660, \"awayId\": 1165, \"date\": \"2026-07-11T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015246, \"home\": \"KFUM Oslo\", \"away\": \"Bodoe/Glimt\", \"homeId\": 786, \"awayId\": 656, \"date\": \"2026-07-12T12:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015242, \"home\": \"Brann\", \"away\": \"Start\", \"homeId\": 1159, \"awayId\": 667, \"date\": \"2026-07-12T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway..."
-                     },
-                     {
-                         "path":  "/odds/multi",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "eventIds":  "67015244,67015256,67015254,67015246,67015242,67015248,67015250,67015252",
-                                        "bookmakers":  "Bet365,Unibet"
-                                    },
-                         "status":  200,
-                         "durationMs":  274,
-                         "bodyLength":  140619,
-                         "rateLimitRemaining":  87,
-                         "sample":  "[{\"id\": 67015252, \"home\": \"Sarpsborg\", \"away\": \"Viking\", \"homeId\": 822, \"awayId\": 1164, \"date\": \"2026-07-12T17:15:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E196566918/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"196566918\", \"Bet365_4\": \"196566918-bot365\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"home\": \"4.000\", \"draw\": \"3.900\", \"away\": \"1.700\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"home\": \"3.250\", \"away\": \"1.333\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-21T16:49:35.038Z\", \"odds\": [{\"label\": \"Sarpsborg or Draw\", \"under\": \"2.100\"}, {\"label\": \"Draw or Viking FK\", \"under\": \"1.222\"}, {\"label\": \"Sarpsborg or Viking FK\", \"under\": \"1.250\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-21T13:09:51.857Z\", \"odds\": [{\"hdp\": 0.75, \"home\": \"1.875\", \"away\": \"1.925\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-21T13:09:51.857Z\", \"odds\": [{\"hdp\": 3.25, \"over\": \"1.925\", \"under\": \"1.875\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.444\", \"under\": \"2.700\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"yes\": \"1.500\", \"no\": \"2.500\"}]}, {\"na..."
-                     },
-                     {
-                         "path":  "/events",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "sport":  "football",
-                                        "league":  "sweden-allsvenskan",
-                                        "status":  "pending,live",
-                                        "from":  "2026-06-22T19:12:22Z",
-                                        "to":  "2026-07-13T19:12:22Z",
-                                        "limit":  500
-                                    },
-                         "status":  200,
-                         "durationMs":  218,
-                         "bodyLength":  4355,
-                         "rateLimitRemaining":  86,
-                         "sample":  "[{\"id\": 67126608, \"home\": \"Sirius\", \"away\": \"Mjallby\", \"homeId\": 1793, \"awayId\": 1783, \"date\": \"2026-07-03T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126606, \"home\": \"Degerfors\", \"away\": \"Malmo\", \"homeId\": 1807, \"awayId\": 1892, \"date\": \"2026-07-04T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126612, \"home\": \"Halmstad\", \"away\": \"Vasteraas\", \"homeId\": 1767, \"awayId\": 1775, \"date\": \"2026-07-04T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126598, \"home\": \"Goteborg\", \"away\": \"AIK\", \"homeId\": 1761, \"awayId\": 1764, \"date\": \"2026-07-05T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126610, \"home\": \"Kalmar\", \"away\": \"Orgryte\", \"homeId\": 1891, \"awayId\": 1766, \"date\": \"2026-07-05T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Al..."
-                     },
-                     {
-                         "path":  "/odds/multi",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "eventIds":  "67126608,67126606,67126612,67126598,67126610,67126602,67126600,67126604,67126622,67126620",
-                                        "bookmakers":  "Bet365,Unibet"
-                                    },
-                         "status":  200,
-                         "durationMs":  354,
-                         "bodyLength":  222453,
-                         "rateLimitRemaining":  85,
-                         "sample":  "[{\"id\": 67126604, \"home\": \"Brommapojkarna\", \"away\": \"GAIS\", \"homeId\": 1787, \"awayId\": 1786, \"date\": \"2026-07-06T17:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E195609651/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026062352\"}, \"bookmakerIds\": {\"Bet365\": \"195609651\", \"Bet365_4\": \"195609651-bot365\", \"Unibet\": \"1026062352\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"home\": \"3.100\", \"draw\": \"3.400\", \"away\": \"2.150\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"home\": \"2.250\", \"away\": \"1.571\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-01T18:01:21.051Z\", \"odds\": [{\"label\": \"Brommapojkarna or Draw\", \"under\": \"1.666\"}, {\"label\": \"Draw or GAIS\", \"under\": \"1.363\"}, {\"label\": \"Brommapojkarna or GAIS\", \"under\": \"1.300\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-01T17:08:02.606Z\", \"odds\": [{\"hdp\": 0.25, \"home\": \"1.900\", \"away\": \"1.900\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-01T17:08:02.606Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Both Teams To Sc..."
-                     },
-                     {
-                         "path":  "/odds/multi",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "eventIds":  "67126616,67126624,67126628,67126618,67126626,67126614",
-                                        "bookmakers":  "Bet365,Unibet"
-                                    },
-                         "status":  200,
-                         "durationMs":  207,
-                         "bodyLength":  2,
-                         "rateLimitRemaining":  84,
-                         "sample":  [
-
-                                    ]
-                     },
-                     {
-                         "path":  "/events",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "sport":  "football",
-                                        "league":  "finland-veikkausliiga",
-                                        "status":  "pending,live",
-                                        "from":  "2026-06-22T19:12:23Z",
-                                        "to":  "2026-07-13T19:12:23Z",
-                                        "limit":  500
-                                    },
-                         "status":  200,
-                         "durationMs":  214,
-                         "bodyLength":  5561,
-                         "rateLimitRemaining":  83,
-                         "sample":  "[{\"id\": 67091364, \"home\": \"Lahti\", \"away\": \"Turun\", \"homeId\": 2249, \"awayId\": 2254, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091366, \"home\": \"Kuopion Palloseura\", \"away\": \"Ilves\", \"homeId\": 2244, \"awayId\": 22386, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091368, \"home\": \"Vaasa\", \"away\": \"Oulu\", \"homeId\": 2246, \"awayId\": 5114, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091370, \"home\": \"Inter Turku\", \"away\": \"Seinajoen\", \"homeId\": 2247, \"awayId\": 22395, \"date\": \"2026-06-23T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091372, \"home\": \"Jaro\", \"away\": \"Gnistan\", \"homeId\": 2252, \"awayId\": 2271, \"date\": \"2026-06-23T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, ..."
-                     },
-                     {
-                         "path":  "/odds/multi",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "eventIds":  "67091364,67091366,67091368,67091370,67091372,67091374,67091376,67091378,67091380,67091382",
-                                        "bookmakers":  "Bet365,Unibet"
-                                    },
-                         "status":  200,
-                         "durationMs":  257,
-                         "bodyLength":  85402,
-                         "rateLimitRemaining":  82,
-                         "sample":  "[{\"id\": 67091374, \"home\": \"Mariehamn\", \"away\": \"HJK Helsinki\", \"homeId\": 5058, \"awayId\": 2242, \"date\": \"2026-06-23T17:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E196042959/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026051142\"}, \"bookmakerIds\": {\"Bet365\": \"196042959\", \"Bet365_4\": \"196042959-bot365\", \"Unibet\": \"1026051142\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"home\": \"7.500\", \"draw\": \"4.500\", \"away\": \"1.363\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"home\": \"6.500\", \"away\": \"1.111\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-21T12:13:49.718Z\", \"odds\": [{\"label\": \"IFK Mariehamn or Draw\", \"under\": \"3.000\"}, {\"label\": \"Draw or HJK Helsinki\", \"under\": \"1.100\"}, {\"label\": \"IFK Mariehamn or HJK Helsinki\", \"under\": \"1.181\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-22T13:57:54.161Z\", \"odds\": [{\"hdp\": 1.5, \"home\": \"1.825\", \"away\": \"1.975\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-22T10:42:36.425Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.533\", \"under\": \"2.400\"}]}, {\"name..."
-                     },
-                     {
-                         "path":  "/odds/multi",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "eventIds":  "67091384,67091386,67091392,67091394,67091396,67091398,67091404,67091406,67091408,67091410",
-                                        "bookmakers":  "Bet365,Unibet"
-                                    },
-                         "status":  200,
-                         "durationMs":  217,
-                         "bodyLength":  5944,
-                         "rateLimitRemaining":  81,
-                         "sample":  "[{\"id\": 67091386, \"home\": \"Oulu\", \"away\": \"Lahti\", \"homeId\": 5114, \"awayId\": 2249, \"date\": \"2026-06-27T18:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1026051160\"}, \"bookmakerIds\": {\"Unibet\": \"1026051160\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"home\": \"2.00\", \"draw\": \"3.40\", \"away\": \"3.40\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"home\": \"1.47\", \"away\": \"2.45\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"1X\": \"1.25\", \"12\": \"1.26\", \"X2\": \"1.68\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"hdp\": -1.5, \"home\": \"3.60\", \"away\": \"1.23\"}, {\"hdp\": -0.5, \"home\": \"1.95\", \"away\": \"1.74\"}, {\"hdp\": 0.5, \"home\": \"1.29\", \"away\": \"3.20\"}, {\"hdp\": 1.5, \"home\": \"1.07\", \"away\": \"6.50\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.84\", \"under\": \"1.84\"}, {\"hdp\": 3.5, \"over\": \"3.10\", \"under\": \"1.30\"}, {\"hdp\": 1.5, \"over\": \"1.26\", \"under\": \"3.45\"}, {\"hdp\": 4.5, \"over\": \"5.60\", \"under\": \"1.10\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"yes\": \"1.68\", \"no\": \"2.02\"}]}, {\"name\": \"ML ..."
-                     },
-                     {
-                         "path":  "/events",
-                         "params":  {
-                                        "apiKey":  "***",
-                                        "sport":  "football",
-                                        "league":  "denmark-superliga",
-                                        "status":  "pending,live",
-                                        "from":  "2026-06-22T19:12:24Z",
-                                        "to":  "2026-07-13T19:12:24Z",
-                                        "limit":  500
-                                    },
-                         "status":  200,
-                         "durationMs":  213,
-                         "bodyLength":  2,
-                         "rateLimitRemaining":  80,
-                         "sample":  [
-
-                                    ]
-                     }
-                 ],
-    "generatedAt":  "2026-06-22T19:12:21Z",
-    "scriptVersion":  "domestic-odds-api-io-v2-emission-fix",
-    "dryRun":  false,
-    "bookmakersRequested":  [
-                                "Bet365",
-                                "Unibet"
-                            ],
-    "leaguesRequested":  [
-                             "NOR",
-                             "SWE",
-                             "FIN",
-                             "DNK"
-                         ],
-    "rateLimitLimit":  "100",
-    "rateLimitReset":  "2026-06-22T20:09:59Z",
-    "rateLimitRemaining":  80,
-    "providerLeagueCount":  1273,
-    "providerLeagueSample":  [
-                                 {
-                                     "name":  "Albania - Kategoria e Pare",
-                                     "slug":  "albania-kategoria-e-pare",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Albania - Kategoria Superiore",
-                                     "slug":  "albania-kategoria-superiore",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Albania - Kupa e Shqiperise",
-                                     "slug":  "albania-kupa-e-shqiperise",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Albania - Superkupa e Shqiperise",
-                                     "slug":  "albania-superkupa-e-shqiperise",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Algeria - Coupe d Algerie",
-                                     "slug":  "algeria-coupe-d-algerie",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Algeria - Ligue 1",
-                                     "slug":  "algeria-ligue-1",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Algeria - Ligue 2",
-                                     "slug":  "algeria-ligue-2",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Algeria - Supercoupe",
-                                     "slug":  "algeria-supercoupe",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Andorra - Copa Constitucio",
-                                     "slug":  "andorra-copa-constitucio",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Andorra - Primera Divisio",
-                                     "slug":  "andorra-primera-divisio",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Andorra - Second Divisio",
-                                     "slug":  "andorra-second-divisio",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Angola - Girabola",
-                                     "slug":  "angola-girabola",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Antigua and Barbuda - Premier Division",
-                                     "slug":  "antigua-and-barbuda-premier-division",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Copa Argentina",
-                                     "slug":  "argentina-copa-argentina",
-                                     "sport":  null,
-                                     "eventsCount":  5
-                                 },
-                                 {
-                                     "name":  "Argentina - Copa Proyeccion Final, Reserves",
-                                     "slug":  "argentina-copa-proyeccion-final-reserves",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Liga Profesional",
-                                     "slug":  "argentina-liga-profesional",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera B",
-                                     "slug":  "argentina-primera-b",
-                                     "sport":  null,
-                                     "eventsCount":  165
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera B Nacional",
-                                     "slug":  "argentina-primera-b-nacional",
-                                     "sport":  null,
-                                     "eventsCount":  235
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera C",
-                                     "slug":  "argentina-primera-c",
-                                     "sport":  null,
-                                     "eventsCount":  182
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera Division A, Women, Apertura",
-                                     "slug":  "argentina-primera-division-a-women-apertura",
-                                     "sport":  null,
-                                     "eventsCount":  9
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera Division, Women",
-                                     "slug":  "argentina-primera-division-women",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera LPF, Reserves, Apertura",
-                                     "slug":  "argentina-primera-lpf-reserves-apertura",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera LPF, Reserves, Apertura, Playoffs",
-                                     "slug":  "argentina-primera-lpf-reserves-apertura-playoffs",
-                                     "sport":  null,
-                                     "eventsCount":  4
-                                 },
-                                 {
-                                     "name":  "Argentina - Primera Nacional",
-                                     "slug":  "argentina-primera-nacional",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Torneo Federal A",
-                                     "slug":  "argentina-torneo-federal-a",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 },
-                                 {
-                                     "name":  "Argentina - Torneo Federal A, Group 1",
-                                     "slug":  "argentina-torneo-federal-a-group-1",
-                                     "sport":  null,
-                                     "eventsCount":  21
-                                 },
-                                 {
-                                     "name":  "Argentina - Torneo Federal A, Group 2",
-                                     "slug":  "argentina-torneo-federal-a-group-2",
-                                     "sport":  null,
-                                     "eventsCount":  16
-                                 },
-                                 {
-                                     "name":  "Argentina - Torneo Federal A, Group 3",
-                                     "slug":  "argentina-torneo-federal-a-group-3",
-                                     "sport":  null,
-                                     "eventsCount":  16
-                                 },
-                                 {
-                                     "name":  "Argentina - Torneo Federal A, Group 4",
-                                     "slug":  "argentina-torneo-federal-a-group-4",
-                                     "sport":  null,
-                                     "eventsCount":  16
-                                 },
-                                 {
-                                     "name":  "Argentina - Trofeo de Campeones",
-                                     "slug":  "argentina-trofeo-de-campeones",
-                                     "sport":  null,
-                                     "eventsCount":  0
-                                 }
-                             ],
-    "leaguesMatched":  [
-                           {
-                               "leagueCode":  "NOR",
-                               "competition":  "Eliteserien",
-                               "providerLeagueSlug":  "norway-eliteserien",
-                               "providerName":  "Norway - Eliteserien"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "competition":  "Allsvenskan",
-                               "providerLeagueSlug":  "sweden-allsvenskan",
-                               "providerName":  "Sweden - Allsvenskan"
-                           },
-                           {
-                               "leagueCode":  "FIN",
-                               "competition":  "Veikkausliiga",
-                               "providerLeagueSlug":  "finland-veikkausliiga",
-                               "providerName":  "Finland - Veikkausliiga"
-                           },
-                           {
-                               "leagueCode":  "DNK",
-                               "competition":  "Superliga",
-                               "providerLeagueSlug":  "denmark-superliga",
-                               "providerName":  "Denmark - Superliga"
-                           }
-                       ],
-    "unmatchedTeams":  [
-                           {
-                               "leagueCode":  "NOR",
-                               "providerTeam":  "Fredrikstad",
-                               "normalized":  "fredrikstad"
-                           },
-                           {
-                               "leagueCode":  "NOR",
-                               "providerTeam":  "KFUM Oslo",
-                               "normalized":  "kfum oslo"
-                           },
-                           {
-                               "leagueCode":  "NOR",
-                               "providerTeam":  "Start",
-                               "normalized":  "start"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "Sirius",
-                               "normalized":  "sirius"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "Degerfors",
-                               "normalized":  "degerfors"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "Halmstad",
-                               "normalized":  "halmstad"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "Kalmar",
-                               "normalized":  "kalmar"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "Brommapojkarna",
-                               "normalized":  "brommapojkarna"
-                           },
-                           {
-                               "leagueCode":  "SWE",
-                               "providerTeam":  "GAIS",
-                               "normalized":  "gais"
-                           },
-                           {
-                               "leagueCode":  "FIN",
-                               "providerTeam":  "Turun",
-                               "normalized":  "turun"
-                           }
-                       ],
-    "skippedMarketSummary":  [
-                                 {
-                                     "market":  "Team Goalscorer",
-                                     "reason":  "team market without clear team",
-                                     "count":  1262
-                                 },
-                                 {
-                                     "market":  "Exact Total Goals",
-                                     "reason":  "line missing",
-                                     "count":  160
-                                 },
-                                 {
-                                     "market":  "Number of Goals In Match",
-                                     "reason":  "line missing",
-                                     "count":  60
-                                 },
-                                 {
-                                     "market":  "Team Goalscorer",
-                                     "reason":  "line missing",
-                                     "count":  50
-                                 },
-                                 {
-                                     "market":  "Alternative Corners",
-                                     "reason":  "non half-line skipped",
-                                     "count":  48
-                                 },
-                                 {
-                                     "market":  "Spread",
-                                     "reason":  "unsupported market family",
-                                     "count":  47
-                                 },
-                                 {
-                                     "market":  "Correct Score",
-                                     "reason":  "unsupported market family",
-                                     "count":  36
-                                 },
-                                 {
-                                     "market":  "Double Chance",
-                                     "reason":  "unsupported market family",
-                                     "count":  36
-                                 },
-                                 {
-                                     "market":  "Draw No Bet",
-                                     "reason":  "unsupported market family",
-                                     "count":  36
-                                 },
-                                 {
-                                     "market":  "European Handicap",
-                                     "reason":  "unsupported market family",
-                                     "count":  36
-                                 },
-                                 {
-                                     "market":  "Totals",
-                                     "reason":  "non half-line skipped",
-                                     "count":  22
-                                 },
-                                 {
-                                     "market":  "1st Half Handicap",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Alternative Asian Handicap",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Alternative Goal Line",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "First 10 Minutes (00:00 - 09:59)",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Half Time Result",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Specials",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Spread HT",
-                                     "reason":  "unsupported market family",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Total Corners",
-                                     "reason":  "line missing",
-                                     "count":  20
-                                 },
-                                 {
-                                     "market":  "Totals HT",
-                                     "reason":  "non half-line skipped",
-                                     "count":  19
-                                 },
-                                 {
-                                     "market":  "Corners Race",
-                                     "reason":  "non half-line skipped",
-                                     "count":  16
-                                 },
-                                 {
-                                     "market":  "Half Time / Full Time",
-                                     "reason":  "unsupported market family",
-                                     "count":  16
-                                 },
-                                 {
-                                     "market":  "ML 2H",
-                                     "reason":  "unsupported market family",
-                                     "count":  16
-                                 },
-                                 {
-                                     "market":  "ML HT",
-                                     "reason":  "unsupported market family",
-                                     "count":  16
-                                 },
-                                 {
-                                     "market":  "Multi Scorers",
-                                     "reason":  "unsupported market family",
-                                     "count":  15
-                                 },
-                                 {
-                                     "market":  "Corner Handicap",
-                                     "reason":  "non half-line skipped",
-                                     "count":  8
-                                 },
-                                 {
-                                     "market":  "Corners",
-                                     "reason":  "non half-line skipped",
-                                     "count":  4
-                                 },
-                                 {
-                                     "market":  "1st Half Goal Line",
-                                     "reason":  "unsupported market family",
-                                     "count":  1
-                                 },
-                                 {
-                                     "market":  "Corners Spread",
-                                     "reason":  "line missing",
-                                     "count":  1
-                                 },
-                                 {
-                                     "market":  "Corners Totals",
-                                     "reason":  "non half-line skipped",
-                                     "count":  1
-                                 },
-                                 {
-                                     "market":  "Corners Totals HT",
-                                     "reason":  "non half-line skipped",
-                                     "count":  1
-                                 }
-                             ],
-    "skippedMarketExamples":  [
-                                  {
-                                      "market":  "Draw No Bet",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Double Chance",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Spread",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Totals",
-                                      "reason":  "non half-line skipped"
-                                  },
-                                  {
-                                      "market":  "Spread HT",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Totals HT",
-                                      "reason":  "non half-line skipped"
-                                  },
-                                  {
-                                      "market":  "European Handicap",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Number of Goals In Match",
-                                      "reason":  "line missing",
-                                      "row":  "Under 2 goals"
-                                  },
-                                  {
-                                      "market":  "Number of Goals In Match",
-                                      "reason":  "line missing",
-                                      "row":  "2 or 3 goals"
-                                  },
-                                  {
-                                      "market":  "Number of Goals In Match",
-                                      "reason":  "line missing",
-                                      "row":  "Over 3 goals"
-                                  },
-                                  {
-                                      "market":  "First 10 Minutes (00:00 - 09:59)",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "1st Half Handicap",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Alternative Asian Handicap",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "0 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "1 Goal"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "2 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "3 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "4 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "5 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "6 Goals"
-                                  },
-                                  {
-                                      "market":  "Exact Total Goals",
-                                      "reason":  "line missing",
-                                      "row":  "7+ Goals"
-                                  },
-                                  {
-                                      "market":  "Specials",
-                                      "reason":  "unsupported market family"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Johannes Nunez (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Salim Laghzaoui (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Sondre Sorlokk (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Rocco Robert Shein (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Henrik Skogvold (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Oskar Ohlenschlaeger (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Benjamin Faraas (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Samuel Leach Holm (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Aleksander Andresen (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Eirik Granaas (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Max Nilsson (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Simen Rafn (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Joachim Nysveen (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Leonard Owusu (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Fanuel Yrga-Alem (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Elias Toft Nordrum (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Chris Pondy (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Ulrik Fredriksen (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Jonathan Norbye (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Kennedy Okpaleke (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Fredrik Holme (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Daniel Eid (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "line missing",
-                                      "row":  "No Goalscorer (Fredrikstad) (First)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Johannes Nunez (Last)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Salim Laghzaoui (Last)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Sondre Sorlokk (Last)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Rocco Robert Shein (Last)"
-                                  },
-                                  {
-                                      "market":  "Team Goalscorer",
-                                      "reason":  "team market without clear team",
-                                      "row":  "Henrik Skogvold (Last)"
-                                  }
-                              ],
-    "leagueReports":  [
-                          {
-                              "leagueCode":  "NOR",
-                              "providerLeagueSlug":  "norway-eliteserien",
-                              "eventsFetched":  8,
-                              "eventsWithOddsResponse":  8,
-                              "matchesEmitted":  8,
-                              "marketsEmitted":  320,
-                              "matchedTeamPairs":  5,
-                              "partialTeamPairs":  3,
-                              "unmatchedTeamPairs":  0
-                          },
-                          {
-                              "leagueCode":  "SWE",
-                              "providerLeagueSlug":  "sweden-allsvenskan",
-                              "eventsFetched":  16,
-                              "eventsWithOddsResponse":  8,
-                              "matchesEmitted":  8,
-                              "marketsEmitted":  540,
-                              "matchedTeamPairs":  3,
-                              "partialTeamPairs":  4,
-                              "unmatchedTeamPairs":  1
-                          },
-                          {
-                              "leagueCode":  "FIN",
-                              "providerLeagueSlug":  "finland-veikkausliiga",
-                              "eventsFetched":  20,
-                              "eventsWithOddsResponse":  9,
-                              "matchesEmitted":  9,
-                              "marketsEmitted":  489,
-                              "matchedTeamPairs":  9,
-                              "partialTeamPairs":  0,
-                              "unmatchedTeamPairs":  0
-                          },
-                          {
-                              "leagueCode":  "DNK",
-                              "providerLeagueSlug":  "denmark-superliga",
-                              "eventsFetched":  0,
-                              "eventsWithOddsResponse":  0,
-                              "matchesEmitted":  0,
-                              "marketsEmitted":  0,
-                              "matchedTeamPairs":  0,
-                              "partialTeamPairs":  0,
-                              "unmatchedTeamPairs":  0
-                          }
-                      ],
-    "outputPath":  "odds/odds_api_io/domestic_odds.json",
-    "reportPath":  "reports/domestic_odds_debug.json",
-    "partialOutput":  false,
-    "leaguesEmitted":  [
-                           "NOR",
-                           "SWE",
-                           "FIN",
-                           "DNK"
-                       ],
-    "matchesEmitted":  25,
-    "marketsEmitted":  1349,
-    "emittedMarketCounts":  {
-                                "1X2":  75,
-                                "BTTS":  50,
-                                "MATCH_GOALS":  348,
-                                "TEAM_TOTAL_GOALS":  432,
-                                "FIRST_HALF_GOALS":  0,
-                                "MATCH_CORNERS":  208,
-                                "TEAM_CORNERS":  236,
-                                "MATCH_CARDS":  0,
-                                "TEAM_CARDS":  0,
-                                "MATCH_SHOTS":  0,
-                                "TEAM_SHOTS":  0,
-                                "MATCH_SHOTS_ON_TARGET":  0,
-                                "TEAM_SHOTS_ON_TARGET":  0
-                            },
-    "rawMarketCounts":  {
-                            "1X2":  75,
-                            "BTTS":  50,
-                            "MATCH_GOALS":  348,
-                            "TEAM_TOTAL_GOALS":  432,
-                            "MATCH_CORNERS":  208,
-                            "TEAM_CORNERS":  236
-                        },
-    "classifiedMarketCounts":  {
-                                   "1X2":  75,
-                                   "BTTS":  50,
-                                   "MATCH_GOALS":  348,
-                                   "TEAM_TOTAL_GOALS":  432,
-                                   "CORNERS":  444
-                               }
+{
+  "warnings": [],
+  "apiCalls": [
+    {
+      "path": "/leagues",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "all": "true"
+      },
+      "status": 200,
+      "durationMs": 371,
+      "bodyLength": 125218,
+      "rateLimitRemaining": 89,
+      "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 0}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 5}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"even..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "norway-eliteserien",
+        "status": "pending,live",
+        "from": "2026-06-22T19:12:22Z",
+        "to": "2026-07-13T19:12:22Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 213,
+      "bodyLength": 2178,
+      "rateLimitRemaining": 88,
+      "sample": "[{\"id\": 67015244, \"home\": \"Fredrikstad\", \"away\": \"Lillestroem\", \"homeId\": 687, \"awayId\": 664, \"date\": \"2026-07-11T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015256, \"home\": \"Aalesund\", \"away\": \"Molde\", \"homeId\": 677, \"awayId\": 661, \"date\": \"2026-07-11T14:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015254, \"home\": \"Tromsoe\", \"away\": \"Valerenga\", \"homeId\": 660, \"awayId\": 1165, \"date\": \"2026-07-11T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015246, \"home\": \"KFUM Oslo\", \"away\": \"Bodoe/Glimt\", \"homeId\": 786, \"awayId\": 656, \"date\": \"2026-07-12T12:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67015242, \"home\": \"Brann\", \"away\": \"Start\", \"homeId\": 1159, \"awayId\": 667, \"date\": \"2026-07-12T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "67015244,67015256,67015254,67015246,67015242,67015248,67015250,67015252",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 274,
+      "bodyLength": 140619,
+      "rateLimitRemaining": 87,
+      "sample": "[{\"id\": 67015252, \"home\": \"Sarpsborg\", \"away\": \"Viking\", \"homeId\": 822, \"awayId\": 1164, \"date\": \"2026-07-12T17:15:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Norway - Eliteserien\", \"slug\": \"norway-eliteserien\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E196566918/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"196566918\", \"Bet365_4\": \"196566918-bot365\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"home\": \"4.000\", \"draw\": \"3.900\", \"away\": \"1.700\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"home\": \"3.250\", \"away\": \"1.333\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-21T16:49:35.038Z\", \"odds\": [{\"label\": \"Sarpsborg or Draw\", \"under\": \"2.100\"}, {\"label\": \"Draw or Viking FK\", \"under\": \"1.222\"}, {\"label\": \"Sarpsborg or Viking FK\", \"under\": \"1.250\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-21T13:09:51.857Z\", \"odds\": [{\"hdp\": 0.75, \"home\": \"1.875\", \"away\": \"1.925\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-21T13:09:51.857Z\", \"odds\": [{\"hdp\": 3.25, \"over\": \"1.925\", \"under\": \"1.875\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.444\", \"under\": \"2.700\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-21T12:20:22.565Z\", \"odds\": [{\"yes\": \"1.500\", \"no\": \"2.500\"}]}, {\"na..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "sweden-allsvenskan",
+        "status": "pending,live",
+        "from": "2026-06-22T19:12:22Z",
+        "to": "2026-07-13T19:12:22Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 218,
+      "bodyLength": 4355,
+      "rateLimitRemaining": 86,
+      "sample": "[{\"id\": 67126608, \"home\": \"Sirius\", \"away\": \"Mjallby\", \"homeId\": 1793, \"awayId\": 1783, \"date\": \"2026-07-03T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126606, \"home\": \"Degerfors\", \"away\": \"Malmo\", \"homeId\": 1807, \"awayId\": 1892, \"date\": \"2026-07-04T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126612, \"home\": \"Halmstad\", \"away\": \"Vasteraas\", \"homeId\": 1767, \"awayId\": 1775, \"date\": \"2026-07-04T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126598, \"home\": \"Goteborg\", \"away\": \"AIK\", \"homeId\": 1761, \"awayId\": 1764, \"date\": \"2026-07-05T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126610, \"home\": \"Kalmar\", \"away\": \"Orgryte\", \"homeId\": 1891, \"awayId\": 1766, \"date\": \"2026-07-05T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Al..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "67126608,67126606,67126612,67126598,67126610,67126602,67126600,67126604,67126622,67126620",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 354,
+      "bodyLength": 222453,
+      "rateLimitRemaining": 85,
+      "sample": "[{\"id\": 67126604, \"home\": \"Brommapojkarna\", \"away\": \"GAIS\", \"homeId\": 1787, \"awayId\": 1786, \"date\": \"2026-07-06T17:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E195609651/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026062352\"}, \"bookmakerIds\": {\"Bet365\": \"195609651\", \"Bet365_4\": \"195609651-bot365\", \"Unibet\": \"1026062352\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"home\": \"3.100\", \"draw\": \"3.400\", \"away\": \"2.150\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"home\": \"2.250\", \"away\": \"1.571\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-01T18:01:21.051Z\", \"odds\": [{\"label\": \"Brommapojkarna or Draw\", \"under\": \"1.666\"}, {\"label\": \"Draw or GAIS\", \"under\": \"1.363\"}, {\"label\": \"Brommapojkarna or GAIS\", \"under\": \"1.300\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-01T17:08:02.606Z\", \"odds\": [{\"hdp\": 0.25, \"home\": \"1.900\", \"away\": \"1.900\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-01T17:08:02.606Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-01T17:04:49.264Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Both Teams To Sc..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "67126616,67126624,67126628,67126618,67126626,67126614",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 207,
+      "bodyLength": 2,
+      "rateLimitRemaining": 84,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "finland-veikkausliiga",
+        "status": "pending,live",
+        "from": "2026-06-22T19:12:23Z",
+        "to": "2026-07-13T19:12:23Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 214,
+      "bodyLength": 5561,
+      "rateLimitRemaining": 83,
+      "sample": "[{\"id\": 67091364, \"home\": \"Lahti\", \"away\": \"Turun\", \"homeId\": 2249, \"awayId\": 2254, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091366, \"home\": \"Kuopion Palloseura\", \"away\": \"Ilves\", \"homeId\": 2244, \"awayId\": 22386, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091368, \"home\": \"Vaasa\", \"away\": \"Oulu\", \"homeId\": 2246, \"awayId\": 5114, \"date\": \"2026-06-23T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091370, \"home\": \"Inter Turku\", \"away\": \"Seinajoen\", \"homeId\": 2247, \"awayId\": 22395, \"date\": \"2026-06-23T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091372, \"home\": \"Jaro\", \"away\": \"Gnistan\", \"homeId\": 2252, \"awayId\": 2271, \"date\": \"2026-06-23T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, ..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "67091364,67091366,67091368,67091370,67091372,67091374,67091376,67091378,67091380,67091382",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 257,
+      "bodyLength": 85402,
+      "rateLimitRemaining": 82,
+      "sample": "[{\"id\": 67091374, \"home\": \"Mariehamn\", \"away\": \"HJK Helsinki\", \"homeId\": 5058, \"awayId\": 2242, \"date\": \"2026-06-23T17:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E196042959/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026051142\"}, \"bookmakerIds\": {\"Bet365\": \"196042959\", \"Bet365_4\": \"196042959-bot365\", \"Unibet\": \"1026051142\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"home\": \"7.500\", \"draw\": \"4.500\", \"away\": \"1.363\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"home\": \"6.500\", \"away\": \"1.111\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-21T12:13:49.718Z\", \"odds\": [{\"label\": \"IFK Mariehamn or Draw\", \"under\": \"3.000\"}, {\"label\": \"Draw or HJK Helsinki\", \"under\": \"1.100\"}, {\"label\": \"IFK Mariehamn or HJK Helsinki\", \"under\": \"1.181\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-22T13:57:54.161Z\", \"odds\": [{\"hdp\": 1.5, \"home\": \"1.825\", \"away\": \"1.975\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-22T10:42:36.425Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-21T12:03:05.869Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.533\", \"under\": \"2.400\"}]}, {\"name..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "67091384,67091386,67091392,67091394,67091396,67091398,67091404,67091406,67091408,67091410",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 217,
+      "bodyLength": 5944,
+      "rateLimitRemaining": 81,
+      "sample": "[{\"id\": 67091386, \"home\": \"Oulu\", \"away\": \"Lahti\", \"homeId\": 5114, \"awayId\": 2249, \"date\": \"2026-06-27T18:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1026051160\"}, \"bookmakerIds\": {\"Unibet\": \"1026051160\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"home\": \"2.00\", \"draw\": \"3.40\", \"away\": \"3.40\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"home\": \"1.47\", \"away\": \"2.45\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"1X\": \"1.25\", \"12\": \"1.26\", \"X2\": \"1.68\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"hdp\": -1.5, \"home\": \"3.60\", \"away\": \"1.23\"}, {\"hdp\": -0.5, \"home\": \"1.95\", \"away\": \"1.74\"}, {\"hdp\": 0.5, \"home\": \"1.29\", \"away\": \"3.20\"}, {\"hdp\": 1.5, \"home\": \"1.07\", \"away\": \"6.50\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.84\", \"under\": \"1.84\"}, {\"hdp\": 3.5, \"over\": \"3.10\", \"under\": \"1.30\"}, {\"hdp\": 1.5, \"over\": \"1.26\", \"under\": \"3.45\"}, {\"hdp\": 4.5, \"over\": \"5.60\", \"under\": \"1.10\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-06-20T18:09:51.49Z\", \"odds\": [{\"yes\": \"1.68\", \"no\": \"2.02\"}]}, {\"name\": \"ML ..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "denmark-superliga",
+        "status": "pending,live",
+        "from": "2026-06-22T19:12:24Z",
+        "to": "2026-07-13T19:12:24Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 213,
+      "bodyLength": 2,
+      "rateLimitRemaining": 80,
+      "sample": []
+    }
+  ],
+  "generatedAt": "2026-06-22T19:12:21Z",
+  "scriptVersion": "domestic-odds-api-io-v2-emission-fix",
+  "dryRun": false,
+  "bookmakersRequested": [
+    "Bet365",
+    "Unibet"
+  ],
+  "leaguesRequested": [
+    "NOR",
+    "SWE",
+    "FIN",
+    "DNK"
+  ],
+  "rateLimitLimit": "100",
+  "rateLimitReset": "2026-06-22T20:09:59Z",
+  "rateLimitRemaining": 80,
+  "providerLeagueCount": 1273,
+  "providerLeagueSample": [
+    {
+      "name": "Albania - Kategoria e Pare",
+      "slug": "albania-kategoria-e-pare",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Kategoria Superiore",
+      "slug": "albania-kategoria-superiore",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Kupa e Shqiperise",
+      "slug": "albania-kupa-e-shqiperise",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Superkupa e Shqiperise",
+      "slug": "albania-superkupa-e-shqiperise",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Coupe d Algerie",
+      "slug": "algeria-coupe-d-algerie",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Ligue 1",
+      "slug": "algeria-ligue-1",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Ligue 2",
+      "slug": "algeria-ligue-2",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Supercoupe",
+      "slug": "algeria-supercoupe",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Copa Constitucio",
+      "slug": "andorra-copa-constitucio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Primera Divisio",
+      "slug": "andorra-primera-divisio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Second Divisio",
+      "slug": "andorra-second-divisio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Angola - Girabola",
+      "slug": "angola-girabola",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Antigua and Barbuda - Premier Division",
+      "slug": "antigua-and-barbuda-premier-division",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Copa Argentina",
+      "slug": "argentina-copa-argentina",
+      "sport": null,
+      "eventsCount": 5
+    },
+    {
+      "name": "Argentina - Copa Proyeccion Final, Reserves",
+      "slug": "argentina-copa-proyeccion-final-reserves",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Liga Profesional",
+      "slug": "argentina-liga-profesional",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera B",
+      "slug": "argentina-primera-b",
+      "sport": null,
+      "eventsCount": 165
+    },
+    {
+      "name": "Argentina - Primera B Nacional",
+      "slug": "argentina-primera-b-nacional",
+      "sport": null,
+      "eventsCount": 235
+    },
+    {
+      "name": "Argentina - Primera C",
+      "slug": "argentina-primera-c",
+      "sport": null,
+      "eventsCount": 182
+    },
+    {
+      "name": "Argentina - Primera Division A, Women, Apertura",
+      "slug": "argentina-primera-division-a-women-apertura",
+      "sport": null,
+      "eventsCount": 9
+    },
+    {
+      "name": "Argentina - Primera Division, Women",
+      "slug": "argentina-primera-division-women",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera LPF, Reserves, Apertura",
+      "slug": "argentina-primera-lpf-reserves-apertura",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera LPF, Reserves, Apertura, Playoffs",
+      "slug": "argentina-primera-lpf-reserves-apertura-playoffs",
+      "sport": null,
+      "eventsCount": 4
+    },
+    {
+      "name": "Argentina - Primera Nacional",
+      "slug": "argentina-primera-nacional",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Torneo Federal A",
+      "slug": "argentina-torneo-federal-a",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 1",
+      "slug": "argentina-torneo-federal-a-group-1",
+      "sport": null,
+      "eventsCount": 21
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 2",
+      "slug": "argentina-torneo-federal-a-group-2",
+      "sport": null,
+      "eventsCount": 16
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 3",
+      "slug": "argentina-torneo-federal-a-group-3",
+      "sport": null,
+      "eventsCount": 16
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 4",
+      "slug": "argentina-torneo-federal-a-group-4",
+      "sport": null,
+      "eventsCount": 16
+    },
+    {
+      "name": "Argentina - Trofeo de Campeones",
+      "slug": "argentina-trofeo-de-campeones",
+      "sport": null,
+      "eventsCount": 0
+    }
+  ],
+  "leaguesMatched": [
+    {
+      "leagueCode": "NOR",
+      "competition": "Eliteserien",
+      "providerLeagueSlug": "norway-eliteserien",
+      "providerName": "Norway - Eliteserien"
+    },
+    {
+      "leagueCode": "SWE",
+      "competition": "Allsvenskan",
+      "providerLeagueSlug": "sweden-allsvenskan",
+      "providerName": "Sweden - Allsvenskan"
+    },
+    {
+      "leagueCode": "FIN",
+      "competition": "Veikkausliiga",
+      "providerLeagueSlug": "finland-veikkausliiga",
+      "providerName": "Finland - Veikkausliiga"
+    },
+    {
+      "leagueCode": "DNK",
+      "competition": "Superliga",
+      "providerLeagueSlug": "denmark-superliga",
+      "providerName": "Denmark - Superliga"
+    }
+  ],
+  "unmatchedTeams": [
+    {
+      "leagueCode": "NOR",
+      "providerTeam": "Fredrikstad",
+      "normalized": "fredrikstad"
+    },
+    {
+      "leagueCode": "NOR",
+      "providerTeam": "KFUM Oslo",
+      "normalized": "kfum oslo"
+    },
+    {
+      "leagueCode": "NOR",
+      "providerTeam": "Start",
+      "normalized": "start"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "Sirius",
+      "normalized": "sirius"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "Degerfors",
+      "normalized": "degerfors"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "Halmstad",
+      "normalized": "halmstad"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "Kalmar",
+      "normalized": "kalmar"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "Brommapojkarna",
+      "normalized": "brommapojkarna"
+    },
+    {
+      "leagueCode": "SWE",
+      "providerTeam": "GAIS",
+      "normalized": "gais"
+    },
+    {
+      "leagueCode": "FIN",
+      "providerTeam": "Turun",
+      "normalized": "turun"
+    }
+  ],
+  "skippedMarketSummary": [
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "count": 1262
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "count": 160
+    },
+    {
+      "market": "Number of Goals In Match",
+      "reason": "line missing",
+      "count": 60
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "line missing",
+      "count": 50
+    },
+    {
+      "market": "Alternative Corners",
+      "reason": "non half-line skipped",
+      "count": 48
+    },
+    {
+      "market": "Spread",
+      "reason": "unsupported market family",
+      "count": 47
+    },
+    {
+      "market": "Correct Score",
+      "reason": "unsupported market family",
+      "count": 36
+    },
+    {
+      "market": "Double Chance",
+      "reason": "unsupported market family",
+      "count": 36
+    },
+    {
+      "market": "Draw No Bet",
+      "reason": "unsupported market family",
+      "count": 36
+    },
+    {
+      "market": "European Handicap",
+      "reason": "unsupported market family",
+      "count": 36
+    },
+    {
+      "market": "Totals",
+      "reason": "non half-line skipped",
+      "count": 22
+    },
+    {
+      "market": "1st Half Handicap",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Alternative Asian Handicap",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Half Time Result",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Specials",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Spread HT",
+      "reason": "unsupported market family",
+      "count": 20
+    },
+    {
+      "market": "Total Corners",
+      "reason": "line missing",
+      "count": 20
+    },
+    {
+      "market": "Totals HT",
+      "reason": "non half-line skipped",
+      "count": 19
+    },
+    {
+      "market": "Corners Race",
+      "reason": "non half-line skipped",
+      "count": 16
+    },
+    {
+      "market": "Half Time / Full Time",
+      "reason": "unsupported market family",
+      "count": 16
+    },
+    {
+      "market": "ML 2H",
+      "reason": "unsupported market family",
+      "count": 16
+    },
+    {
+      "market": "ML HT",
+      "reason": "unsupported market family",
+      "count": 16
+    },
+    {
+      "market": "Multi Scorers",
+      "reason": "unsupported market family",
+      "count": 15
+    },
+    {
+      "market": "Corner Handicap",
+      "reason": "non half-line skipped",
+      "count": 8
+    },
+    {
+      "market": "Corners",
+      "reason": "non half-line skipped",
+      "count": 4
+    },
+    {
+      "market": "1st Half Goal Line",
+      "reason": "unsupported market family",
+      "count": 1
+    },
+    {
+      "market": "Corners Spread",
+      "reason": "line missing",
+      "count": 1
+    },
+    {
+      "market": "Corners Totals",
+      "reason": "non half-line skipped",
+      "count": 1
+    },
+    {
+      "market": "Corners Totals HT",
+      "reason": "non half-line skipped",
+      "count": 1
+    }
+  ],
+  "skippedMarketExamples": [
+    {
+      "market": "Draw No Bet",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Double Chance",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Spread",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Totals",
+      "reason": "non half-line skipped"
+    },
+    {
+      "market": "Spread HT",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
+    },
+    {
+      "market": "European Handicap",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Number of Goals In Match",
+      "reason": "line missing",
+      "row": "Under 2 goals"
+    },
+    {
+      "market": "Number of Goals In Match",
+      "reason": "line missing",
+      "row": "2 or 3 goals"
+    },
+    {
+      "market": "Number of Goals In Match",
+      "reason": "line missing",
+      "row": "Over 3 goals"
+    },
+    {
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "1st Half Handicap",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Alternative Asian Handicap",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "0 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "1 Goal"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "2 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "3 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "4 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "5 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "6 Goals"
+    },
+    {
+      "market": "Exact Total Goals",
+      "reason": "line missing",
+      "row": "7+ Goals"
+    },
+    {
+      "market": "Specials",
+      "reason": "unsupported market family"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Johannes Nunez (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Salim Laghzaoui (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Sondre Sorlokk (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Rocco Robert Shein (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Henrik Skogvold (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Oskar Ohlenschlaeger (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Benjamin Faraas (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Samuel Leach Holm (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Aleksander Andresen (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Eirik Granaas (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Max Nilsson (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Simen Rafn (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Joachim Nysveen (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Leonard Owusu (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Fanuel Yrga-Alem (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Elias Toft Nordrum (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Chris Pondy (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Ulrik Fredriksen (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Jonathan Norbye (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Kennedy Okpaleke (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Fredrik Holme (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Daniel Eid (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "line missing",
+      "row": "No Goalscorer (Fredrikstad) (First)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Johannes Nunez (Last)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Salim Laghzaoui (Last)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Sondre Sorlokk (Last)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Rocco Robert Shein (Last)"
+    },
+    {
+      "market": "Team Goalscorer",
+      "reason": "team market without clear team",
+      "row": "Henrik Skogvold (Last)"
+    }
+  ],
+  "leagueReports": [
+    {
+      "leagueCode": "NOR",
+      "providerLeagueSlug": "norway-eliteserien",
+      "eventsFetched": 8,
+      "eventsWithOddsResponse": 8,
+      "matchesEmitted": 8,
+      "marketsEmitted": 320,
+      "matchedTeamPairs": 5,
+      "partialTeamPairs": 3,
+      "unmatchedTeamPairs": 0
+    },
+    {
+      "leagueCode": "SWE",
+      "providerLeagueSlug": "sweden-allsvenskan",
+      "eventsFetched": 16,
+      "eventsWithOddsResponse": 8,
+      "matchesEmitted": 8,
+      "marketsEmitted": 540,
+      "matchedTeamPairs": 3,
+      "partialTeamPairs": 4,
+      "unmatchedTeamPairs": 1
+    },
+    {
+      "leagueCode": "FIN",
+      "providerLeagueSlug": "finland-veikkausliiga",
+      "eventsFetched": 20,
+      "eventsWithOddsResponse": 9,
+      "matchesEmitted": 9,
+      "marketsEmitted": 489,
+      "matchedTeamPairs": 9,
+      "partialTeamPairs": 0,
+      "unmatchedTeamPairs": 0
+    },
+    {
+      "leagueCode": "DNK",
+      "providerLeagueSlug": "denmark-superliga",
+      "eventsFetched": 0,
+      "eventsWithOddsResponse": 0,
+      "matchesEmitted": 0,
+      "marketsEmitted": 0,
+      "matchedTeamPairs": 0,
+      "partialTeamPairs": 0,
+      "unmatchedTeamPairs": 0
+    }
+  ],
+  "outputPath": "odds/odds_api_io/domestic_odds.json",
+  "reportPath": "reports/domestic_odds_debug.json",
+  "partialOutput": false,
+  "leaguesEmitted": [
+    "NOR",
+    "SWE",
+    "FIN",
+    "DNK"
+  ],
+  "matchesEmitted": 25,
+  "marketsEmitted": 1349,
+  "emittedMarketCounts": {
+    "1X2": 75,
+    "BTTS": 50,
+    "MATCH_GOALS": 348,
+    "TEAM_TOTAL_GOALS": 432,
+    "FIRST_HALF_GOALS": 0,
+    "MATCH_CORNERS": 208,
+    "TEAM_CORNERS": 236,
+    "MATCH_CARDS": 0,
+    "TEAM_CARDS": 0,
+    "MATCH_SHOTS": 0,
+    "TEAM_SHOTS": 0,
+    "MATCH_SHOTS_ON_TARGET": 0,
+    "TEAM_SHOTS_ON_TARGET": 0
+  },
+  "rawMarketCounts": {
+    "1X2": 75,
+    "BTTS": 50,
+    "MATCH_GOALS": 348,
+    "TEAM_TOTAL_GOALS": 432,
+    "MATCH_CORNERS": 208,
+    "TEAM_CORNERS": 236
+  },
+  "classifiedMarketCounts": {
+    "1X2": 75,
+    "BTTS": 50,
+    "MATCH_GOALS": 348,
+    "TEAM_TOTAL_GOALS": 432,
+    "CORNERS": 444
+  },
+  "skippedMarketReasons": [
+    {
+      "family": "TEAM_TOTAL_GOALS",
+      "reason": "team market without clear team",
+      "count": 1262
+    },
+    {
+      "family": "OTHER",
+      "reason": "unsupported market family",
+      "count": 394
+    },
+    {
+      "family": "MATCH_GOALS",
+      "reason": "line missing",
+      "count": 220
+    },
+    {
+      "family": "CORNERS",
+      "reason": "non half-line skipped",
+      "count": 78
+    },
+    {
+      "family": "TEAM_TOTAL_GOALS",
+      "reason": "line missing",
+      "count": 50
+    },
+    {
+      "family": "MATCH_GOALS",
+      "reason": "non half-line skipped",
+      "count": 22
+    },
+    {
+      "family": "CORNERS",
+      "reason": "line missing",
+      "count": 21
+    },
+    {
+      "family": "FIRST_HALF_GOALS",
+      "reason": "non half-line skipped",
+      "count": 19
+    },
+    {
+      "family": "FIRST_HALF_GOALS",
+      "reason": "unsupported market family",
+      "count": 1
+    }
+  ]
 }
