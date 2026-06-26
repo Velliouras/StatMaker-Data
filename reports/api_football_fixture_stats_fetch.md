@@ -1,10 +1,23 @@
 # API-Football fixture statistics fetch
 
-Generated at: `2026-06-26T15:54:13Z`
-Requests used: `1` / `30`
+Generated at: `2026-06-26T16:02:19Z`
+Requests used: `14` / `85`
 
 API-Football is used only for fixture statistics enrichment. Odds remain with Odds-API.io.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Missing stats responses | Requests used | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Norway | Eliteserien | 2026 | 103 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json | ok |
+| Argentina | Liga Profesional Argentina | 2026 | 128 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | no fixtures returned for league/season |
+| Austria | Bundesliga | 2025 | 218 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/austria/bundesliga/2025/fixture_stats.json | no fixtures returned for league/season |
+| Austria | 2. Liga | 2025 | 219 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/austria/2-liga/2025/fixture_stats.json | no fixtures returned for league/season |
+| Brazil | Serie A | 2026 | 71 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/brazil/serie-a/2026/fixture_stats.json | no fixtures returned for league/season |
+| Brazil | Serie B | 2026 | 72 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json | no fixtures returned for league/season |
+| Denmark | Superliga | 2025 | 119 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/denmark/superliga/2025/fixture_stats.json | no fixtures returned for league/season |
+| Finland | Veikkausliiga | 2026 | 244 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | no fixtures returned for league/season |
+| Ireland | Premier Division | 2026 | 357 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/ireland/premier-division/2026/fixture_stats.json | no fixtures returned for league/season |
+| Japan | J1 League | 2026 | 98 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/japan/j1-league/2026/fixture_stats.json | no fixtures returned for league/season |
+| Norway | Eliteserien | 2026 | 103 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json | no fixtures returned for league/season |
+| Poland | Ekstraklasa | 2025 | 106 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/poland/ekstraklasa/2025/fixture_stats.json | no fixtures returned for league/season |
+| Romania | Liga I | 2025 | 283 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/romania/liga-i/2025/fixture_stats.json | no fixtures returned for league/season |
+| Sweden | Allsvenskan | 2026 | 113 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/sweden/allsvenskan/2026/fixture_stats.json | no fixtures returned for league/season |
+| Sweden | Superettan | 2026 | 114 | 0 | 0 | 0 | 0 | 1 | data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json | no fixtures returned for league/season |
