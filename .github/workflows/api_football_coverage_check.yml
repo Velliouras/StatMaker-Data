@@ -1,0 +1,36 @@
+name: API-Football Yellow League Coverage Check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  api-football-coverage-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check API-Football coverage
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python scripts/api_football_coverage_check.py
+
+      - name: Commit coverage reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/api_football_yellow_coverage.json reports/api_football_yellow_coverage.csv reports/api_football_yellow_coverage.md
+          if git diff --cached --quiet; then
+            echo "No API-Football coverage report changes to commit."
+          else
+            git commit -m "Update API-Football yellow league coverage reports"
+            git push
+          fi
