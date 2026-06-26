@@ -1,24 +1,24 @@
 {
-  "generated_at": "2026-06-26T16:12:24Z",
+  "generated_at": "2026-06-26T16:16:41Z",
   "provider": "api-football",
   "purpose": "fixture statistics enrichment cache fetch",
-  "request_count": 4,
-  "max_requests": 30,
+  "request_count": 20,
+  "max_requests": 20,
   "reports": [
     {
       "country": "Norway",
       "league": "Eliteserien",
-      "season": "2026",
+      "season": "2024",
       "api_football_league_id": 103,
-      "completed_fixtures_found": 0,
+      "completed_fixtures_found": 242,
       "already_cached": 0,
-      "newly_fetched": 0,
-      "missing_stats_responses": 0,
-      "requests_used": 4,
-      "fixture_query_used": "none",
-      "fixtures_returned": 0,
-      "cache_path": "data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json",
-      "notes": "league+season:2026 errors=plan: Free plans do not have access to this season, try from 2022 to 2024.; league+season:2026 returned=0 completed=0; league+season:2025 errors=plan: Free plans do not have access to this season, try from 2022 to 2024.; league+season:2025 returned=0 completed=0; league+season:2027 errors=plan: Free plans do not have access to this season, try from 2022 to 2024.; league+season:2027 returned=0 completed=0; league+last:50 errors=plan: Free plans do not have access to the Last parameter.; league+last:50 returned=0 completed=0; no fixtures returned after fallback queries"
+      "newly_fetched": 9,
+      "missing_stats_responses": 10,
+      "requests_used": 20,
+      "fixture_query_used": "league+season:2024",
+      "fixtures_returned": 242,
+      "cache_path": "data/api_football/fixture_stats/norway/eliteserien/2024/fixture_stats.json",
+      "notes": "league+season:2024 returned=242 completed=242; statistics request failed for fixture 1164329: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164332: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164333: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164331: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164330: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164335: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164336: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164337: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164338: HTTP Error 429: Too Many Requests; statistics request failed for fixture 1164339: HTTP Error 429: Too Many Requests; request cap reached before all fixture statistics were fetched"
     }
   ]
 }
