@@ -1,13 +1,41 @@
-country,football_data_code,configured_display_name,api_football_league_id,api_football_league_name,api_football_country,season,coverage_fixtures_statistics,coverage_fixtures_events,coverage_fixtures_lineups,coverage_fixtures_players_statistics,coverage_standings,coverage_odds,usable_for_enrichment,notes
-Argentina,ARG,Primera Division,,,Argentina,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Austria,AUT,Bundesliga,,,Austria,2025,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Brazil,BRA,Serie A,,,Brazil,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Denmark,DNK,Superliga,,,Denmark,2025,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Finland,FIN,Veikkausliiga,,,Finland,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Ireland,IRL,Premier Division,,,Ireland,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Japan,JPN,J1 League,,,Japan,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Mexico,MEX,Liga MX,,,Mexico,2025,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Norway,NOR,Eliteserien,,,Norway,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Poland,POL,Ekstraklasa,,,Poland,2025,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Romania,ROM,Liga I,,,Romania,2025,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
-Sweden,SWE,Allsvenskan,,,Sweden,2026,False,False,False,False,False,False,False,no API-Football leagues returned for country/season
+country,football_data_code,configured_display_name,requested_season,selected_api_season,api_football_league_id,api_football_league_name,api_football_country,available_seasons,discovery_status,discovery_source,coverage_fixtures_statistics,coverage_fixtures_events,coverage_fixtures_lineups,coverage_fixtures_players_statistics,coverage_standings,coverage_odds,usable_for_enrichment,notes
+Argentina,ARG,Liga Profesional Argentina,2026,2026,128,Liga Profesional Argentina,Argentina,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Argentina,ARG,Liga Profesional Argentina,2026,2026,129,Primera Nacional,Argentina,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Austria,AUT,Bundesliga,2025,2025,219,2. Liga,Austria,"2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Austria,AUT,Bundesliga,2025,2025,218,Bundesliga,Austria,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Brazil,BRA,Serie A,2026,2026,1098,Paulista Série B,Brazil,"2026, 2025, 2024",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Brazil,BRA,Serie A,2026,2026,71,Serie A,Brazil,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Brazil,BRA,Serie A,2026,2026,72,Serie B,Brazil,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Denmark,DNK,Superliga,2025,2025,119,Superliga,Denmark,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Finland,FIN,Veikkausliiga,2026,2026,244,Veikkausliiga,Finland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Finland,FIN,Veikkausliiga,2026,2026,245,Ykkönen,Finland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Ireland,IRL,Premier Division,2026,2026,358,First Division,Ireland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Ireland,IRL,Premier Division,2026,2026,357,Premier Division,Ireland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Japan,JPN,J1 League,2026,2026,98,J1 League,Japan,"2027, 2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Mexico,MEX,Liga MX,2025,,,,Mexico,,NOT_FOUND,none,,,,,,,False,"No league discovered, not a stats coverage failure"
+Norway,NOR,Eliteserien,2026,2026,104,1. Division,Norway,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Norway,NOR,Eliteserien,2026,2026,915,1. Division Women,Norway,"2026, 2025, 2024, 2023, 2022",FOUND,country,False,True,True,False,True,True,False,fixture statistics not advertised for selected season
+Norway,NOR,Eliteserien,2026,2026,103,Eliteserien,Norway,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Poland,POL,Ekstraklasa,2025,2025,106,Ekstraklasa,Poland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Poland,POL,Ekstraklasa,2025,2025,107,I Liga,Poland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Poland,POL,Ekstraklasa,2025,2025,109,II Liga - East,Poland,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Poland,POL,Ekstraklasa,2025,2025,780,III Liga - Group 1,Poland,"2025, 2024, 2023, 2022, 2021, 2020",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Poland,POL,Ekstraklasa,2025,2025,781,III Liga - Group 2,Poland,"2025, 2024, 2023, 2022, 2021, 2020",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Poland,POL,Ekstraklasa,2025,2025,782,III Liga - Group 3,Poland,"2025, 2024, 2023, 2022, 2021, 2020",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Poland,POL,Ekstraklasa,2025,2025,783,III Liga - Group 4,Poland,"2025, 2024, 2023, 2022, 2021, 2020",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,283,Liga I,Romania,"2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,True,True,True,True,True,False,True,fixture statistics available
+Romania,ROM,Liga I,2025,2025,284,Liga II,Romania,"2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,False,True,True,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,1009,Liga III - Play-offs,Romania,"2025, 2024, 2023, 2022",FOUND,country,False,False,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,784,Liga III - Serie 1,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2024,793,Liga III - Serie 10,Romania,"2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,"fixture statistics not advertised for selected season; requested season 2025 not available, used latest available season 2024"
+Romania,ROM,Liga I,2025,2025,785,Liga III - Serie 2,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,True,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,786,Liga III - Serie 3,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,True,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,787,Liga III - Serie 4,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,True,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,788,Liga III - Serie 5,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,789,Liga III - Serie 6,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,790,Liga III - Serie 7,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2025,791,Liga III - Serie 8,Romania,"2025, 2024, 2023, 2022, 2020",FOUND,country,False,True,False,False,True,False,False,fixture statistics not advertised for selected season
+Romania,ROM,Liga I,2025,2024,792,Liga III - Serie 9,Romania,"2024, 2023, 2022, 2020",FOUND,country,False,False,False,False,True,False,False,"fixture statistics not advertised for selected season; requested season 2025 not available, used latest available season 2024"
+Sweden,SWE,Allsvenskan,2026,2026,113,Allsvenskan,Sweden,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Sweden,SWE,Allsvenskan,2026,2026,549,Damallsvenskan,Sweden,"2026, 2025, 2024, 2023, 2022, 2021, 2020",FOUND,country,True,True,True,True,True,True,True,fixture statistics available
+Sweden,SWE,Allsvenskan,2026,2026,114,Superettan,Sweden,"2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016",FOUND,country,True,True,True,True,True,True,True,fixture statistics available

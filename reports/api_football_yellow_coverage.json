@@ -1,214 +1,4468 @@
 {
-  "generated_at": "2026-06-26T14:51:12Z",
+  "generated_at": "2026-06-26T15:04:12Z",
   "source": "api-football",
   "endpoint": "leagues",
-  "request_count": 12,
-  "usable_for_enrichment_rule": "coverage.fixtures.statistics == true",
-  "config_version": 1,
+  "request_count": 14,
+  "discovery_logic": "country-only discovery first, then candidate league name fallback; coverage evaluated only after league discovery",
+  "usable_for_enrichment_rule": "discovery_status == FOUND and coverage.fixtures.statistics == true",
+  "config_version": 2,
   "leagues": [
     {
       "country": "Argentina",
       "football_data_code": "ARG",
-      "configured_display_name": "Primera Division",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "configured_display_name": "Liga Profesional Argentina",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015"
+      ],
+      "season_coverages": [
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 128,
+      "api_football_league_name": "Liga Profesional Argentina",
       "api_football_country": "Argentina",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Argentina",
+      "football_data_code": "ARG",
+      "configured_display_name": "Liga Profesional Argentina",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012",
+        "2011"
+      ],
+      "season_coverages": [
+        {
+          "season": "2011",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 129,
+      "api_football_league_name": "Primera Nacional",
+      "api_football_country": "Argentina",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
     },
     {
       "country": "Austria",
       "football_data_code": "AUT",
       "configured_display_name": "Bundesliga",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012",
+        "2011"
+      ],
+      "season_coverages": [
+        {
+          "season": "2011",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 219,
+      "api_football_league_name": "2. Liga",
       "api_football_country": "Austria",
-      "season": "2025",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
-      "coverage_fixtures_statistics": false,
-      "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
       "coverage_odds": false,
-      "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Austria",
+      "football_data_code": "AUT",
+      "configured_display_name": "Bundesliga",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012",
+        "2011"
+      ],
+      "season_coverages": [
+        {
+          "season": "2011",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 218,
+      "api_football_league_name": "Bundesliga",
+      "api_football_country": "Austria",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Brazil",
       "football_data_code": "BRA",
       "configured_display_name": "Serie A",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024"
+      ],
+      "season_coverages": [
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 1098,
+      "api_football_league_name": "Paulista Série B",
       "api_football_country": "Brazil",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Brazil",
+      "football_data_code": "BRA",
+      "configured_display_name": "Serie A",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012",
+        "2011",
+        "2010"
+      ],
+      "season_coverages": [
+        {
+          "season": "2010",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2011",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 71,
+      "api_football_league_name": "Serie A",
+      "api_football_country": "Brazil",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Brazil",
+      "football_data_code": "BRA",
+      "configured_display_name": "Serie A",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012"
+      ],
+      "season_coverages": [
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 72,
+      "api_football_league_name": "Serie B",
+      "api_football_country": "Brazil",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Denmark",
       "football_data_code": "DNK",
       "configured_display_name": "Superliga",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012",
+        "2011"
+      ],
+      "season_coverages": [
+        {
+          "season": "2011",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 119,
+      "api_football_league_name": "Superliga",
       "api_football_country": "Denmark",
-      "season": "2025",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
-      "coverage_fixtures_statistics": false,
-      "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
       "coverage_odds": false,
-      "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Finland",
       "football_data_code": "FIN",
       "configured_display_name": "Veikkausliiga",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012"
+      ],
+      "season_coverages": [
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 244,
+      "api_football_league_name": "Veikkausliiga",
       "api_football_country": "Finland",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Finland",
+      "football_data_code": "FIN",
+      "configured_display_name": "Veikkausliiga",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012"
+      ],
+      "season_coverages": [
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 245,
+      "api_football_league_name": "Ykkönen",
+      "api_football_country": "Finland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
     },
     {
       "country": "Ireland",
       "football_data_code": "IRL",
       "configured_display_name": "Premier Division",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019"
+      ],
+      "season_coverages": [
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 358,
+      "api_football_league_name": "First Division",
       "api_football_country": "Ireland",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Ireland",
+      "football_data_code": "IRL",
+      "configured_display_name": "Premier Division",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019"
+      ],
+      "season_coverages": [
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 357,
+      "api_football_league_name": "Premier Division",
+      "api_football_country": "Ireland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Japan",
       "football_data_code": "JPN",
       "configured_display_name": "J1 League",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2027",
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016",
+        "2015",
+        "2014",
+        "2013",
+        "2012"
+      ],
+      "season_coverages": [
+        {
+          "season": "2012",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2013",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2014",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2015",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2027",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 98,
+      "api_football_league_name": "J1 League",
       "api_football_country": "Japan",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
-      "coverage_fixtures_statistics": false,
-      "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
       "coverage_odds": false,
-      "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Mexico",
       "football_data_code": "MEX",
       "configured_display_name": "Liga MX",
+      "requested_season": "2025",
+      "selected_api_season": null,
+      "available_seasons": [],
       "api_football_league_id": null,
       "api_football_league_name": "",
       "api_football_country": "Mexico",
-      "season": "2025",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
-      "coverage_fixtures_statistics": false,
-      "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "discovery_status": "NOT_FOUND",
+      "discovery_source": "none",
+      "coverage_fixtures_events": null,
+      "coverage_fixtures_lineups": null,
+      "coverage_fixtures_statistics": null,
+      "coverage_fixtures_players_statistics": null,
+      "coverage_standings": null,
+      "coverage_odds": null,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "No league discovered, not a stats coverage failure"
     },
     {
       "country": "Norway",
       "football_data_code": "NOR",
       "configured_display_name": "Eliteserien",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 104,
+      "api_football_league_name": "1. Division",
       "api_football_country": "Norway",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Norway",
+      "football_data_code": "NOR",
+      "configured_display_name": "Eliteserien",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022"
+      ],
+      "season_coverages": [
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 915,
+      "api_football_league_name": "1. Division Women",
+      "api_football_country": "Norway",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Norway",
+      "football_data_code": "NOR",
+      "configured_display_name": "Eliteserien",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 103,
+      "api_football_league_name": "Eliteserien",
+      "api_football_country": "Norway",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     },
     {
       "country": "Poland",
       "football_data_code": "POL",
       "configured_display_name": "Ekstraklasa",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018"
+      ],
+      "season_coverages": [
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 106,
+      "api_football_league_name": "Ekstraklasa",
       "api_football_country": "Poland",
-      "season": "2025",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018"
+      ],
+      "season_coverages": [
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 107,
+      "api_football_league_name": "I Liga",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
+      "coverage_standings": true,
       "coverage_odds": false,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019"
+      ],
+      "season_coverages": [
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 109,
+      "api_football_league_name": "II Liga - East",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 780,
+      "api_football_league_name": "III Liga - Group 1",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 781,
+      "api_football_league_name": "III Liga - Group 2",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 782,
+      "api_football_league_name": "III Liga - Group 3",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Poland",
+      "football_data_code": "POL",
+      "configured_display_name": "Ekstraklasa",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 783,
+      "api_football_league_name": "III Liga - Group 4",
+      "api_football_country": "Poland",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
     },
     {
       "country": "Romania",
       "football_data_code": "ROM",
       "configured_display_name": "Liga I",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 283,
+      "api_football_league_name": "Liga I",
       "api_football_country": "Romania",
-      "season": "2025",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 284,
+      "api_football_league_name": "Liga II",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022"
+      ],
+      "season_coverages": [
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 1009,
+      "api_football_league_name": "Liga III - Play-offs",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
       "coverage_fixtures_events": false,
       "coverage_fixtures_lineups": false,
       "coverage_fixtures_statistics": false,
       "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
+      "coverage_standings": true,
       "coverage_odds": false,
       "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 784,
+      "api_football_league_name": "Liga III - Serie 1",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2024",
+      "available_seasons": [
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 793,
+      "api_football_league_name": "Liga III - Serie 10",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season; requested season 2025 not available, used latest available season 2024"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 785,
+      "api_football_league_name": "Liga III - Serie 2",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 786,
+      "api_football_league_name": "Liga III - Serie 3",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 787,
+      "api_football_league_name": "Liga III - Serie 4",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 788,
+      "api_football_league_name": "Liga III - Serie 5",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 789,
+      "api_football_league_name": "Liga III - Serie 6",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 790,
+      "api_football_league_name": "Liga III - Serie 7",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2025",
+      "available_seasons": [
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 791,
+      "api_football_league_name": "Liga III - Serie 8",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season"
+    },
+    {
+      "country": "Romania",
+      "football_data_code": "ROM",
+      "configured_display_name": "Liga I",
+      "requested_season": "2025",
+      "selected_api_season": "2024",
+      "available_seasons": [
+        "2024",
+        "2023",
+        "2022",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": false,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": false,
+          "coverage_fixtures_lineups": false,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        }
+      ],
+      "api_football_league_id": 792,
+      "api_football_league_name": "Liga III - Serie 9",
+      "api_football_country": "Romania",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": false,
+      "coverage_fixtures_lineups": false,
+      "coverage_fixtures_statistics": false,
+      "coverage_fixtures_players_statistics": false,
+      "coverage_standings": true,
+      "coverage_odds": false,
+      "usable_for_enrichment": false,
+      "notes": "fixture statistics not advertised for selected season; requested season 2025 not available, used latest available season 2024"
     },
     {
       "country": "Sweden",
       "football_data_code": "SWE",
       "configured_display_name": "Allsvenskan",
-      "api_football_league_id": null,
-      "api_football_league_name": "",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 113,
+      "api_football_league_name": "Allsvenskan",
       "api_football_country": "Sweden",
-      "season": "2026",
-      "coverage_fixtures_events": false,
-      "coverage_fixtures_lineups": false,
-      "coverage_fixtures_statistics": false,
-      "coverage_fixtures_players_statistics": false,
-      "coverage_standings": false,
-      "coverage_odds": false,
-      "usable_for_enrichment": false,
-      "notes": "no API-Football leagues returned for country/season"
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Sweden",
+      "football_data_code": "SWE",
+      "configured_display_name": "Allsvenskan",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020"
+      ],
+      "season_coverages": [
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 549,
+      "api_football_league_name": "Damallsvenskan",
+      "api_football_country": "Sweden",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
+    },
+    {
+      "country": "Sweden",
+      "football_data_code": "SWE",
+      "configured_display_name": "Allsvenskan",
+      "requested_season": "2026",
+      "selected_api_season": "2026",
+      "available_seasons": [
+        "2026",
+        "2025",
+        "2024",
+        "2023",
+        "2022",
+        "2021",
+        "2020",
+        "2019",
+        "2018",
+        "2017",
+        "2016"
+      ],
+      "season_coverages": [
+        {
+          "season": "2016",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2017",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2018",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2019",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": false,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2020",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2021",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2022",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2023",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": false,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2024",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2025",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": false
+        },
+        {
+          "season": "2026",
+          "coverage_fixtures_events": true,
+          "coverage_fixtures_lineups": true,
+          "coverage_fixtures_statistics": true,
+          "coverage_fixtures_players_statistics": true,
+          "coverage_standings": true,
+          "coverage_odds": true
+        }
+      ],
+      "api_football_league_id": 114,
+      "api_football_league_name": "Superettan",
+      "api_football_country": "Sweden",
+      "discovery_status": "FOUND",
+      "discovery_source": "country",
+      "coverage_fixtures_events": true,
+      "coverage_fixtures_lineups": true,
+      "coverage_fixtures_statistics": true,
+      "coverage_fixtures_players_statistics": true,
+      "coverage_standings": true,
+      "coverage_odds": true,
+      "usable_for_enrichment": true,
+      "notes": "fixture statistics available"
     }
   ]
 }
