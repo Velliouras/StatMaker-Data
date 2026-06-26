@@ -30,14 +30,18 @@ CACHE_ROOT = ROOT / "data" / "api_football" / "fixture_stats"
 REPORT_JSON = ROOT / "reports" / "api_football_fixture_stats_fetch.json"
 REPORT_CSV = ROOT / "reports" / "api_football_fixture_stats_fetch.csv"
 REPORT_MD = ROOT / "reports" / "api_football_fixture_stats_fetch.md"
+
 BASE_URL = "https://v3.football.api-sports.io"
 DEFAULT_MAX_REQUESTS = 85
 REQUEST_DELAY_SECONDS = 0.75
 TIMEOUT_SECONDS = 30
 
-# Do not rely on API-Football server-side status=FT filtering.
-# Fetch fixtures for the league/season, then keep completed fixtures locally.
+# Do not rely only on server-side status=FT filtering.
+# Fetch fixtures, then keep completed fixtures locally.
 COMPLETED_STATUS_SHORT_CODES = {"FT", "AET", "PEN"}
+
+# Diagnostic fallback when league+season returns no fixtures.
+FIXTURE_LAST_FALLBACK_COUNT = 50
 
 NORMALIZED_FIELDS = [
     "HS", "AS",
@@ -72,6 +76,10 @@ STAT_FIELD_MAP = {
 }
 
 
+class RequestLimitReached(RuntimeError):
+    pass
+
+
 def now_utc() -> str:
     return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -93,19 +101,32 @@ def normalize_key(value: Any) -> str:
 def parse_number(value: Any) -> Optional[float | int]:
     if value is None:
         return None
+
     if isinstance(value, (int, float)):
         return value
+
     text = str(value).strip()
     if not text:
         return None
+
     if text.endswith("%"):
         text = text[:-1].strip()
+
     text = text.replace(",", ".")
+
     try:
         number = float(text)
     except ValueError:
         return None
+
     return int(number) if number.is_integer() else number
+
+
+def parse_season(value: Any) -> Optional[int]:
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None
 
 
 def load_json(path: Path, default: Any) -> Any:
@@ -146,6 +167,7 @@ def api_get(
         raise RequestLimitReached
 
     query = urlencode({key: value for key, value in params.items() if value is not None and value != ""})
+
     request = Request(
         f"{BASE_URL}/{endpoint}?{query}" if query else f"{BASE_URL}/{endpoint}",
         headers={
@@ -165,13 +187,24 @@ def api_get(
     return payload
 
 
-class RequestLimitReached(RuntimeError):
-    pass
-
-
 def response_items(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     response = payload.get("response") if isinstance(payload, dict) else []
     return response if isinstance(response, list) else []
+
+
+def api_errors(payload: Dict[str, Any]) -> str:
+    errors = payload.get("errors") if isinstance(payload, dict) else None
+
+    if not errors:
+        return ""
+
+    if isinstance(errors, dict):
+        return "; ".join(f"{key}: {value}" for key, value in errors.items())
+
+    if isinstance(errors, list):
+        return "; ".join(str(item) for item in errors)
+
+    return str(errors)
 
 
 def fixture_identity(fixture: Dict[str, Any]) -> Optional[int]:
@@ -206,6 +239,18 @@ def fixture_summary(fixture: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def fixture_source_league(fixture: Dict[str, Any]) -> Dict[str, Any]:
+    league = fixture.get("league") or {}
+
+    return {
+        "id": league.get("id"),
+        "name": league.get("name"),
+        "country": league.get("country"),
+        "season": league.get("season"),
+        "round": league.get("round"),
+    }
+
+
 def empty_normalized_stats() -> Dict[str, Any]:
     return {field: None for field in NORMALIZED_FIELDS}
 
@@ -213,6 +258,7 @@ def empty_normalized_stats() -> Dict[str, Any]:
 def normalize_statistics(raw_statistics: List[Dict[str, Any]], fixture: Dict[str, Any]) -> Dict[str, Any]:
     stats = empty_normalized_stats()
     summary = fixture_summary(fixture)
+
     home_id = summary.get("home_team_id")
     away_id = summary.get("away_team_id")
     home_name = str(summary.get("home_team") or "").strip().lower()
@@ -233,6 +279,7 @@ def normalize_statistics(raw_statistics: List[Dict[str, Any]], fixture: Dict[str
         for stat in team_block.get("statistics") or []:
             stat_type = normalize_key(stat.get("type"))
             field_pair = STAT_FIELD_MAP.get(stat_type)
+
             if not field_pair:
                 continue
 
@@ -279,9 +326,104 @@ def league_filter(
         selected = [league for league in selected if str(league.get("priority_group") or "") == priority_group]
 
     if league_id is not None:
-        selected = [league for league in selected if int(league.get("api_football_league_id") or -1) == league_id]
+        selected = [
+            league for league in selected
+            if int(league.get("api_football_league_id") or -1) == league_id
+        ]
 
     return selected
+
+
+def fixture_query_candidates(league: Dict[str, Any]) -> List[Tuple[str, Dict[str, Any]]]:
+    league_id = league.get("api_football_league_id")
+    requested_season = parse_season(league.get("season"))
+
+    candidates: List[Tuple[str, Dict[str, Any]]] = []
+    seen: set[Tuple[Tuple[str, Any], ...]] = set()
+
+    def add(label: str, params: Dict[str, Any]) -> None:
+        clean_params = {key: value for key, value in params.items() if value is not None and value != ""}
+        key = tuple(sorted(clean_params.items()))
+
+        if key not in seen:
+            candidates.append((label, clean_params))
+            seen.add(key)
+
+    if requested_season is not None:
+        add(
+            f"league+season:{requested_season}",
+            {
+                "league": league_id,
+                "season": requested_season,
+            },
+        )
+        add(
+            f"league+season:{requested_season - 1}",
+            {
+                "league": league_id,
+                "season": requested_season - 1,
+            },
+        )
+        add(
+            f"league+season:{requested_season + 1}",
+            {
+                "league": league_id,
+                "season": requested_season + 1,
+            },
+        )
+    else:
+        add(
+            "league+season:raw",
+            {
+                "league": league_id,
+                "season": league.get("season"),
+            },
+        )
+
+    add(
+        f"league+last:{FIXTURE_LAST_FALLBACK_COUNT}",
+        {
+            "league": league_id,
+            "last": FIXTURE_LAST_FALLBACK_COUNT,
+        },
+    )
+
+    return candidates
+
+
+def fetch_fixtures_with_fallback(
+    api_key: str,
+    league: Dict[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], str, List[str]]:
+    attempt_notes: List[str] = []
+
+    for query_label, params in fixture_query_candidates(league):
+        if request_state["count"] >= max_requests:
+            raise RequestLimitReached
+
+        try:
+            payload = api_get(api_key, "fixtures", params, request_state, max_requests)
+        except (HTTPError, URLError) as exc:
+            attempt_notes.append(f"{query_label} failed: {exc}")
+            continue
+
+        errors_text = api_errors(payload)
+        all_fixtures = response_items(payload)
+        completed_fixtures = [fixture for fixture in all_fixtures if is_completed_fixture(fixture)]
+
+        if errors_text:
+            attempt_notes.append(f"{query_label} errors={errors_text}")
+
+        attempt_notes.append(
+            f"{query_label} returned={len(all_fixtures)} completed={len(completed_fixtures)}"
+        )
+
+        if all_fixtures:
+            return all_fixtures, completed_fixtures, query_label, attempt_notes
+
+    return [], [], "none", attempt_notes
 
 
 def report_row(
@@ -293,6 +435,8 @@ def report_row(
     missing: int,
     requests_before: int,
     requests_after: int,
+    fixture_query_used: str,
+    fixtures_returned: int,
     notes: str,
 ) -> Dict[str, Any]:
     return {
@@ -305,6 +449,8 @@ def report_row(
         "newly_fetched": fetched,
         "missing_stats_responses": missing,
         "requests_used": requests_after - requests_before,
+        "fixture_query_used": fixture_query_used,
+        "fixtures_returned": fixtures_returned,
         "cache_path": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
         "notes": notes,
     }
@@ -325,26 +471,24 @@ def fetch_league(
     already_cached = 0
     newly_fetched = 0
     missing_stats = 0
+    fixtures_returned = 0
+    fixture_query_used = "none"
     notes: List[str] = []
 
     try:
-        fixtures_payload = api_get(
+        all_fixtures, fixtures, fixture_query_used, query_notes = fetch_fixtures_with_fallback(
             api_key,
-            "fixtures",
-            {
-                "league": league.get("api_football_league_id"),
-                "season": league.get("season"),
-            },
+            league,
             request_state,
             max_requests,
         )
 
-        all_fixtures = response_items(fixtures_payload)
-        fixtures = [fixture for fixture in all_fixtures if is_completed_fixture(fixture)]
+        fixtures_returned = len(all_fixtures)
         completed_count = len(fixtures)
+        notes.extend(query_notes)
 
         if not all_fixtures:
-            notes.append("no fixtures returned for league/season")
+            notes.append("no fixtures returned after fallback queries")
         elif not fixtures:
             statuses = sorted({fixture_status_short(fixture) or "UNKNOWN" for fixture in all_fixtures})
             notes.append(
@@ -364,21 +508,8 @@ def fetch_league(
             missing_stats,
             requests_before,
             request_state["count"],
-            "; ".join(notes),
-        )
-
-    except (HTTPError, URLError) as exc:
-        notes.append(f"fixtures request failed: {exc}")
-        write_json(cache_path, cache_payload(league, existing_by_id.values()))
-        return report_row(
-            league,
-            cache_path,
-            completed_count,
-            already_cached,
-            newly_fetched,
-            missing_stats,
-            requests_before,
-            request_state["count"],
+            fixture_query_used,
+            fixtures_returned,
             "; ".join(notes),
         )
 
@@ -408,19 +539,24 @@ def fetch_league(
             continue
 
         raw_statistics = response_items(stats_payload)
+
         if not raw_statistics:
             missing_stats += 1
 
         summary = fixture_summary(fixture)
+
         existing_by_id[fixture_id] = {
             "fixture_id": summary.get("fixture_id"),
             "date": summary.get("date"),
             "home_team": summary.get("home_team"),
             "away_team": summary.get("away_team"),
             "status": summary.get("status"),
+            "fixture_query_used": fixture_query_used,
+            "source_league": fixture_source_league(fixture),
             "raw_statistics": raw_statistics,
             "normalized_stats": normalize_statistics(raw_statistics, fixture),
         }
+
         newly_fetched += 1
 
     write_json(cache_path, cache_payload(league, existing_by_id.values()))
@@ -437,6 +573,8 @@ def fetch_league(
         missing_stats,
         requests_before,
         request_state["count"],
+        fixture_query_used,
+        fixtures_returned,
         "; ".join(notes),
     )
 
@@ -463,14 +601,18 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
         "newly_fetched",
         "missing_stats_responses",
         "requests_used",
+        "fixture_query_used",
+        "fixtures_returned",
         "cache_path",
         "notes",
     ]
 
     REPORT_CSV.parent.mkdir(parents=True, exist_ok=True)
+
     with REPORT_CSV.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
+
         for row in rows:
             writer.writerow({key: row.get(key) for key in fieldnames})
 
@@ -484,6 +626,8 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
         "Newly fetched",
         "Missing stats responses",
         "Requests used",
+        "Fixture query used",
+        "Fixtures returned",
         "Cache path",
         "Notes",
     ]
@@ -511,9 +655,12 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
             row.get("newly_fetched"),
             row.get("missing_stats_responses"),
             row.get("requests_used"),
+            row.get("fixture_query_used"),
+            row.get("fixtures_returned"),
             row.get("cache_path"),
             row.get("notes"),
         ]
+
         lines.append(
             "| "
             + " | ".join(str(value if value is not None else "").replace("|", "\\|") for value in values)
@@ -539,6 +686,7 @@ def main() -> int:
         return 2
 
     api_key = os.environ.get("API_FOOTBALL_KEY", "").strip()
+
     if not api_key:
         print("ERROR: API_FOOTBALL_KEY environment variable is required.", file=sys.stderr)
         return 2
@@ -563,12 +711,17 @@ def main() -> int:
 
         print(
             f"fixture-stats league={league.get('display_name')} season={league.get('season')} "
-            f"fixtures={row['completed_fixtures_found']} fetched={row['newly_fetched']} "
-            f"cached={row['already_cached']} requests={request_state['count']}"
+            f"fixtures={row['completed_fixtures_found']} returned={row['fixtures_returned']} "
+            f"fetched={row['newly_fetched']} cached={row['already_cached']} "
+            f"query={row['fixture_query_used']} requests={request_state['count']}"
         )
 
     write_reports(rows, request_state["count"], args.max_requests)
-    print(f"fixture-stats reports written leagues={len(rows)} requests={request_state['count']} max_requests={args.max_requests}")
+
+    print(
+        f"fixture-stats reports written leagues={len(rows)} "
+        f"requests={request_state['count']} max_requests={args.max_requests}"
+    )
 
     return 0
 
