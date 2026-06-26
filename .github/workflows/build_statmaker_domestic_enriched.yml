@@ -1,0 +1,65 @@
+name: Build StatMaker Domestic Enriched
+
+on:
+  workflow_dispatch:
+    inputs:
+      countries:
+        description: "Comma-separated countries. Empty means all enabled leagues."
+        required: false
+        default: "Finland,Norway,Sweden"
+        type: string
+      league_ids:
+        description: "Optional comma-separated API-Football league ids"
+        required: false
+        default: ""
+        type: string
+      min_fixtures:
+        description: "Minimum completed fixtures for BB readiness"
+        required: true
+        default: "15"
+        type: string
+      min_coverage:
+        description: "Minimum coverage ratio for BB readiness"
+        required: true
+        default: "0.65"
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-statmaker-domestic-enriched:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build app-facing domestic enriched JSON
+        run: |
+          args=(--min-fixtures "${{ inputs.min_fixtures }}" --min-coverage "${{ inputs.min_coverage }}")
+          if [ -n "${{ inputs.countries }}" ]; then
+            args+=(--countries "${{ inputs.countries }}")
+          else
+            args+=(--countries "")
+          fi
+          if [ -n "${{ inputs.league_ids }}" ]; then
+            args+=(--league-ids "${{ inputs.league_ids }}")
+          fi
+          python scripts/build_statmaker_domestic_enriched.py "${args[@]}"
+
+      - name: Commit StatMaker domestic enriched artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/domestic_enriched reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md
+          if git diff --cached --quiet; then
+            echo "No StatMaker domestic enriched changes to commit."
+          else
+            git commit -m "Build StatMaker domestic enriched data"
+            git push
+          fi
