@@ -1,0 +1,60 @@
+name: API-Football Fixture Stats Fetch
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Safe API request cap for this run"
+        required: true
+        default: "85"
+        type: string
+      priority_group:
+        description: "Optional priority_group from config"
+        required: false
+        default: ""
+        type: string
+      league_id:
+        description: "Optional API-Football league id"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  api-football-fixture-stats-fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch API-Football fixture statistics
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          args=(--max-requests "${{ inputs.max_requests }}")
+          if [ -n "${{ inputs.priority_group }}" ]; then
+            args+=(--priority-group "${{ inputs.priority_group }}")
+          fi
+          if [ -n "${{ inputs.league_id }}" ]; then
+            args+=(--league-id "${{ inputs.league_id }}")
+          fi
+          python scripts/api_football_fetch_fixture_stats.py "${args[@]}"
+
+      - name: Commit fixture statistics cache and reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/api_football/fixture_stats reports/api_football_fixture_stats_fetch.json reports/api_football_fixture_stats_fetch.csv reports/api_football_fixture_stats_fetch.md
+          if git diff --cached --quiet; then
+            echo "No API-Football fixture statistics cache changes to commit."
+          else
+            git commit -m "Update API-Football fixture statistics cache"
+            git push
+          fi
