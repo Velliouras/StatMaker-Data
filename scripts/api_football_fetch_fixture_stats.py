@@ -35,6 +35,10 @@ DEFAULT_MAX_REQUESTS = 85
 REQUEST_DELAY_SECONDS = 0.75
 TIMEOUT_SECONDS = 30
 
+# Do not rely on API-Football server-side status=FT filtering.
+# Fetch fixtures for the league/season, then keep completed fixtures locally.
+COMPLETED_STATUS_SHORT_CODES = {"FT", "AET", "PEN"}
+
 NORMALIZED_FIELDS = [
     "HS", "AS",
     "HST", "AST",
@@ -122,12 +126,25 @@ def load_config() -> Dict[str, Any]:
 
 
 def cache_path_for(league: Dict[str, Any]) -> Path:
-    return CACHE_ROOT / slug(league.get("country")) / slug(league.get("display_name")) / str(league.get("season")) / "fixture_stats.json"
+    return (
+        CACHE_ROOT
+        / slug(league.get("country"))
+        / slug(league.get("display_name"))
+        / str(league.get("season"))
+        / "fixture_stats.json"
+    )
 
 
-def api_get(api_key: str, endpoint: str, params: Dict[str, Any], request_state: Dict[str, int], max_requests: int) -> Dict[str, Any]:
+def api_get(
+    api_key: str,
+    endpoint: str,
+    params: Dict[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> Dict[str, Any]:
     if request_state["count"] >= max_requests:
         raise RequestLimitReached
+
     query = urlencode({key: value for key, value in params.items() if value is not None and value != ""})
     request = Request(
         f"{BASE_URL}/{endpoint}?{query}" if query else f"{BASE_URL}/{endpoint}",
@@ -138,9 +155,12 @@ def api_get(api_key: str, endpoint: str, params: Dict[str, Any], request_state: 
         },
         method="GET",
     )
+
     request_state["count"] += 1
+
     with urlopen(request, timeout=TIMEOUT_SECONDS) as response:
         payload = json.loads(response.read().decode("utf-8"))
+
     time.sleep(REQUEST_DELAY_SECONDS)
     return payload
 
@@ -159,12 +179,22 @@ def fixture_identity(fixture: Dict[str, Any]) -> Optional[int]:
     return int(fixture_id) if fixture_id is not None else None
 
 
+def fixture_status_short(fixture: Dict[str, Any]) -> str:
+    status = ((fixture.get("fixture") or {}).get("status") or {}) if isinstance(fixture, dict) else {}
+    return str(status.get("short") or "").upper()
+
+
+def is_completed_fixture(fixture: Dict[str, Any]) -> bool:
+    return fixture_status_short(fixture) in COMPLETED_STATUS_SHORT_CODES
+
+
 def fixture_summary(fixture: Dict[str, Any]) -> Dict[str, Any]:
     fixture_info = fixture.get("fixture") or {}
     teams = fixture.get("teams") or {}
     home = teams.get("home") or {}
     away = teams.get("away") or {}
     status = fixture_info.get("status") or {}
+
     return {
         "fixture_id": fixture_info.get("id"),
         "date": fixture_info.get("date"),
@@ -192,34 +222,41 @@ def normalize_statistics(raw_statistics: List[Dict[str, Any]], fixture: Dict[str
         team = team_block.get("team") or {}
         team_id = team.get("id")
         team_name = str(team.get("name") or "").strip().lower()
+
         if team_id == home_id or (team_name and team_name == home_name):
             side = "home"
         elif team_id == away_id or (team_name and team_name == away_name):
             side = "away"
         else:
             continue
+
         for stat in team_block.get("statistics") or []:
             stat_type = normalize_key(stat.get("type"))
             field_pair = STAT_FIELD_MAP.get(stat_type)
             if not field_pair:
                 continue
+
             field = field_pair[0] if side == "home" else field_pair[1]
             stats[field] = parse_number(stat.get("value"))
+
     return stats
 
 
 def cached_fixture_map(cache: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     fixtures = cache.get("fixtures") if isinstance(cache, dict) else []
     result: Dict[int, Dict[str, Any]] = {}
+
     for item in fixtures if isinstance(fixtures, list) else []:
         fixture_id = item.get("fixture_id")
         if fixture_id is not None:
             result[int(fixture_id)] = item
+
     return result
 
 
 def cache_payload(league: Dict[str, Any], fixtures: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
     ordered = sorted(fixtures, key=lambda item: (str(item.get("date") or ""), int(item.get("fixture_id") or 0)))
+
     return {
         "provider": "api-football",
         "league_id": league.get("api_football_league_id"),
@@ -231,16 +268,33 @@ def cache_payload(league: Dict[str, Any], fixtures: Iterable[Dict[str, Any]]) ->
     }
 
 
-def league_filter(leagues: List[Dict[str, Any]], priority_group: Optional[str], league_id: Optional[int]) -> List[Dict[str, Any]]:
+def league_filter(
+    leagues: List[Dict[str, Any]],
+    priority_group: Optional[str],
+    league_id: Optional[int],
+) -> List[Dict[str, Any]]:
     selected = [league for league in leagues if bool(league.get("enabled"))]
+
     if priority_group:
         selected = [league for league in selected if str(league.get("priority_group") or "") == priority_group]
+
     if league_id is not None:
         selected = [league for league in selected if int(league.get("api_football_league_id") or -1) == league_id]
+
     return selected
 
 
-def report_row(league: Dict[str, Any], cache_path: Path, completed: int, cached: int, fetched: int, missing: int, requests_before: int, requests_after: int, notes: str) -> Dict[str, Any]:
+def report_row(
+    league: Dict[str, Any],
+    cache_path: Path,
+    completed: int,
+    cached: int,
+    fetched: int,
+    missing: int,
+    requests_before: int,
+    requests_after: int,
+    notes: str,
+) -> Dict[str, Any]:
     return {
         "country": league.get("country"),
         "league": league.get("display_name"),
@@ -256,10 +310,16 @@ def report_row(league: Dict[str, Any], cache_path: Path, completed: int, cached:
     }
 
 
-def fetch_league(api_key: str, league: Dict[str, Any], request_state: Dict[str, int], max_requests: int) -> Dict[str, Any]:
+def fetch_league(
+    api_key: str,
+    league: Dict[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> Dict[str, Any]:
     cache_path = cache_path_for(league)
     existing_cache = load_json(cache_path, {})
     existing_by_id = cached_fixture_map(existing_cache)
+
     requests_before = request_state["count"]
     completed_count = 0
     already_cached = 0
@@ -274,37 +334,74 @@ def fetch_league(api_key: str, league: Dict[str, Any], request_state: Dict[str, 
             {
                 "league": league.get("api_football_league_id"),
                 "season": league.get("season"),
-                "status": "FT",
             },
             request_state,
             max_requests,
         )
-        fixtures = response_items(fixtures_payload)
+
+        all_fixtures = response_items(fixtures_payload)
+        fixtures = [fixture for fixture in all_fixtures if is_completed_fixture(fixture)]
         completed_count = len(fixtures)
+
+        if not all_fixtures:
+            notes.append("no fixtures returned for league/season")
+        elif not fixtures:
+            statuses = sorted({fixture_status_short(fixture) or "UNKNOWN" for fixture in all_fixtures})
+            notes.append(
+                f"fixtures returned={len(all_fixtures)} but no completed fixtures with status FT/AET/PEN; "
+                f"statuses={','.join(statuses)}"
+            )
+
     except RequestLimitReached:
         notes.append("request cap reached before fixtures request")
         write_json(cache_path, cache_payload(league, existing_by_id.values()))
-        return report_row(league, cache_path, completed_count, already_cached, newly_fetched, missing_stats, requests_before, request_state["count"], "; ".join(notes))
+        return report_row(
+            league,
+            cache_path,
+            completed_count,
+            already_cached,
+            newly_fetched,
+            missing_stats,
+            requests_before,
+            request_state["count"],
+            "; ".join(notes),
+        )
+
     except (HTTPError, URLError) as exc:
         notes.append(f"fixtures request failed: {exc}")
         write_json(cache_path, cache_payload(league, existing_by_id.values()))
-        return report_row(league, cache_path, completed_count, already_cached, newly_fetched, missing_stats, requests_before, request_state["count"], "; ".join(notes))
+        return report_row(
+            league,
+            cache_path,
+            completed_count,
+            already_cached,
+            newly_fetched,
+            missing_stats,
+            requests_before,
+            request_state["count"],
+            "; ".join(notes),
+        )
 
     for fixture in fixtures:
         fixture_id = fixture_identity(fixture)
         if fixture_id is None:
             continue
+
         if fixture_id in existing_by_id:
             already_cached += 1
             continue
+
         if request_state["count"] >= max_requests:
             notes.append("request cap reached before all fixture statistics were fetched")
             break
+
         try:
             stats_payload = api_get(api_key, "fixtures/statistics", {"fixture": fixture_id}, request_state, max_requests)
+
         except RequestLimitReached:
             notes.append("request cap reached before statistics request")
             break
+
         except (HTTPError, URLError) as exc:
             missing_stats += 1
             notes.append(f"statistics request failed for fixture {fixture_id}: {exc}")
@@ -313,6 +410,7 @@ def fetch_league(api_key: str, league: Dict[str, Any], request_state: Dict[str, 
         raw_statistics = response_items(stats_payload)
         if not raw_statistics:
             missing_stats += 1
+
         summary = fixture_summary(fixture)
         existing_by_id[fixture_id] = {
             "fixture_id": summary.get("fixture_id"),
@@ -326,9 +424,21 @@ def fetch_league(api_key: str, league: Dict[str, Any], request_state: Dict[str, 
         newly_fetched += 1
 
     write_json(cache_path, cache_payload(league, existing_by_id.values()))
+
     if not notes:
         notes.append("ok")
-    return report_row(league, cache_path, completed_count, already_cached, newly_fetched, missing_stats, requests_before, request_state["count"], "; ".join(notes))
+
+    return report_row(
+        league,
+        cache_path,
+        completed_count,
+        already_cached,
+        newly_fetched,
+        missing_stats,
+        requests_before,
+        request_state["count"],
+        "; ".join(notes),
+    )
 
 
 def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: int) -> None:
@@ -340,13 +450,23 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
         "max_requests": max_requests,
         "reports": rows,
     }
+
     write_json(REPORT_JSON, payload)
 
     fieldnames = [
-        "country", "league", "season", "api_football_league_id",
-        "completed_fixtures_found", "already_cached", "newly_fetched",
-        "missing_stats_responses", "requests_used", "cache_path", "notes",
+        "country",
+        "league",
+        "season",
+        "api_football_league_id",
+        "completed_fixtures_found",
+        "already_cached",
+        "newly_fetched",
+        "missing_stats_responses",
+        "requests_used",
+        "cache_path",
+        "notes",
     ]
+
     REPORT_CSV.parent.mkdir(parents=True, exist_ok=True)
     with REPORT_CSV.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -355,10 +475,19 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
             writer.writerow({key: row.get(key) for key in fieldnames})
 
     headers = [
-        "Country", "League", "Season", "API league ID", "Completed fixtures found",
-        "Already cached", "Newly fetched", "Missing stats responses", "Requests used",
-        "Cache path", "Notes",
+        "Country",
+        "League",
+        "Season",
+        "API league ID",
+        "Completed fixtures found",
+        "Already cached",
+        "Newly fetched",
+        "Missing stats responses",
+        "Requests used",
+        "Cache path",
+        "Notes",
     ]
+
     lines = [
         "# API-Football fixture statistics fetch",
         "",
@@ -370,13 +499,27 @@ def write_reports(rows: List[Dict[str, Any]], request_count: int, max_requests: 
         "| " + " | ".join(headers) + " |",
         "| " + " | ".join(["---"] * len(headers)) + " |",
     ]
+
     for row in rows:
         values = [
-            row.get("country"), row.get("league"), row.get("season"), row.get("api_football_league_id"),
-            row.get("completed_fixtures_found"), row.get("already_cached"), row.get("newly_fetched"),
-            row.get("missing_stats_responses"), row.get("requests_used"), row.get("cache_path"), row.get("notes"),
+            row.get("country"),
+            row.get("league"),
+            row.get("season"),
+            row.get("api_football_league_id"),
+            row.get("completed_fixtures_found"),
+            row.get("already_cached"),
+            row.get("newly_fetched"),
+            row.get("missing_stats_responses"),
+            row.get("requests_used"),
+            row.get("cache_path"),
+            row.get("notes"),
         ]
-        lines.append("| " + " | ".join(str(value if value is not None else "").replace("|", "\\|") for value in values) + " |")
+        lines.append(
+            "| "
+            + " | ".join(str(value if value is not None else "").replace("|", "\\|") for value in values)
+            + " |"
+        )
+
     REPORT_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -390,9 +533,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+
     if args.max_requests < 1:
         print("ERROR: --max-requests must be at least 1", file=sys.stderr)
         return 2
+
     api_key = os.environ.get("API_FOOTBALL_KEY", "").strip()
     if not api_key:
         print("ERROR: API_FOOTBALL_KEY environment variable is required.", file=sys.stderr)
@@ -400,17 +545,22 @@ def main() -> int:
 
     config = load_config()
     leagues = league_filter(config.get("leagues", []), args.priority_group, args.league_id)
+
     request_state = {"count": 0}
     rows: List[Dict[str, Any]] = []
+
     for league in leagues:
         if request_state["count"] >= args.max_requests:
             break
+
         print(
             f"fixture-stats league={league.get('display_name')} country={league.get('country')} "
             f"season={league.get('season')} request_count={request_state['count']}"
         )
+
         row = fetch_league(api_key, league, request_state, args.max_requests)
         rows.append(row)
+
         print(
             f"fixture-stats league={league.get('display_name')} season={league.get('season')} "
             f"fixtures={row['completed_fixtures_found']} fetched={row['newly_fetched']} "
@@ -419,6 +569,7 @@ def main() -> int:
 
     write_reports(rows, request_state["count"], args.max_requests)
     print(f"fixture-stats reports written leagues={len(rows)} requests={request_state['count']} max_requests={args.max_requests}")
+
     return 0
 
 
