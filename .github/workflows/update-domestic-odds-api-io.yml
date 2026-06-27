@@ -1,4 +1,4 @@
-﻿name: Update Domestic Odds-API.io Odds
+name: Update Domestic Odds-API.io Odds
 
 on:
   workflow_dispatch:
@@ -6,21 +6,21 @@ on:
       mode:
         description: "Run scope: league, group, or all"
         required: true
-        default: "group"
+        default: "all"
         type: choice
         options:
           - league
           - group
           - all
       target:
-        description: "League code such as NOR, or group such as scandinavia"
+        description: "League code such as NOR, group such as scandinavia, or all_initial"
         required: false
-        default: "scandinavia"
+        default: "all_initial"
         type: string
       dry_run:
         description: "Run without API calls and write structural JSON/report"
         required: true
-        default: true
+        default: false
         type: boolean
 
 permissions:
