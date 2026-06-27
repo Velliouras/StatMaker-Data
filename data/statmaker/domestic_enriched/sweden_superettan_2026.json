@@ -1,15 +1,16 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-06-26T18:01:52Z",
+  "schema_version": 2,
+  "generated_at": "2026-06-27T06:56:36Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "rule": "The app reads this repository artifact and must not call API-Football directly.",
-    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές"
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-06-26T17:03:58Z"
+    "cache_generated_at": "2026-06-27T06:54:56Z"
   },
   "competition": {
     "country": "Sweden",
@@ -23,11 +24,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 104,
+    "completed_fixtures": 105,
     "fixtures_with_any_stats": 61,
     "fixtures_with_bb_core_stats": 59,
-    "any_stats_coverage": 0.5865,
-    "bb_core_coverage": 0.5673,
+    "any_stats_coverage": 0.581,
+    "bb_core_coverage": 0.5619,
     "group_counts": {
       "shots_total": 31,
       "shots_on_target": 59,
@@ -40,23 +41,25 @@
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.2981,
-      "shots_on_target": 0.5673,
-      "corners": 0.5673,
-      "fouls": 0.2596,
-      "yellow_cards": 0.5865,
-      "red_cards": 0.5865,
-      "possession": 0.5673,
-      "passes": 0.25,
-      "xg": 0.25
+      "shots_total": 0.2952,
+      "shots_on_target": 0.5619,
+      "corners": 0.5619,
+      "fouls": 0.2571,
+      "yellow_cards": 0.581,
+      "red_cards": 0.581,
+      "possession": 0.5619,
+      "passes": 0.2476,
+      "xg": 0.2476
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5865 < 0.65",
-      "low BB-core coverage: 0.5673 < 0.65",
+      "low any-stats coverage: 0.581 < 0.65",
+      "low BB-core coverage: 0.5619 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
-    ]
+    ],
+    "fixtures_with_score": 105,
+    "score_coverage": 1.0
   },
   "matches": [
     {
@@ -106,6 +109,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -156,6 +190,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 6,
+      "away_goals": 0,
+      "home_score": 6,
+      "away_score": 0,
+      "fthg": 6,
+      "ftag": 0,
+      "hthg": 4,
+      "htag": 0,
+      "goals": {
+        "home": 6,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 4,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 6,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -206,6 +271,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -256,6 +352,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -306,6 +433,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -356,6 +514,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -406,6 +595,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -456,6 +676,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -506,6 +757,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -556,6 +838,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -606,6 +919,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -656,6 +1000,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -706,6 +1081,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 4,
+      "home_score": 3,
+      "away_score": 4,
+      "fthg": 3,
+      "ftag": 4,
+      "hthg": 1,
+      "htag": 3,
+      "goals": {
+        "home": 3,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 3
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -756,6 +1162,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -806,6 +1243,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -856,6 +1324,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -906,6 +1405,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -956,6 +1486,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1006,6 +1567,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1056,6 +1648,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1106,6 +1729,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1156,6 +1810,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1206,6 +1891,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1256,6 +1972,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1306,6 +2053,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1356,6 +2134,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1406,6 +2215,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1456,6 +2296,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1506,6 +2377,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1556,6 +2458,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1606,6 +2539,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1656,6 +2620,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1706,6 +2701,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1756,6 +2782,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1806,6 +2863,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1856,6 +2944,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1906,6 +3025,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -1956,6 +3106,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2006,6 +3187,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2056,6 +3268,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2106,6 +3349,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2156,6 +3430,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2206,6 +3511,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 2,
+      "home_score": 4,
+      "away_score": 2,
+      "fthg": 4,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2256,6 +3592,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2306,6 +3673,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2356,6 +3754,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 3,
+      "home_score": 3,
+      "away_score": 3,
+      "fthg": 3,
+      "ftag": 3,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2406,6 +3835,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2456,6 +3916,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2506,6 +3997,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2556,6 +4078,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2606,6 +4159,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 4,
+      "home_score": 2,
+      "away_score": 4,
+      "fthg": 2,
+      "ftag": 4,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2656,6 +4240,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2706,6 +4321,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2756,6 +4402,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2806,6 +4483,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2856,6 +4564,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2906,6 +4645,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -2956,6 +4726,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3006,6 +4807,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 4,
+      "home_score": 1,
+      "away_score": 4,
+      "fthg": 1,
+      "ftag": 4,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3056,6 +4888,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 4,
+      "home_score": 1,
+      "away_score": 4,
+      "fthg": 1,
+      "ftag": 4,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3106,6 +4969,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3156,6 +5050,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3206,6 +5131,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3256,6 +5212,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3306,6 +5293,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3356,6 +5374,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3406,6 +5455,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3456,6 +5536,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3506,6 +5617,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3556,6 +5698,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3606,6 +5779,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3656,6 +5860,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3706,6 +5941,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3756,6 +6022,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3806,6 +6103,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3856,6 +6184,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3906,6 +6265,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -3956,6 +6346,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4006,6 +6427,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4056,6 +6508,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4106,6 +6589,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4156,6 +6670,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4206,6 +6751,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4256,6 +6832,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4306,6 +6913,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 4,
+      "away_goals": 2,
+      "home_score": 4,
+      "away_score": 2,
+      "fthg": 4,
+      "ftag": 2,
+      "hthg": 4,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 4,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4356,6 +6994,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4406,6 +7075,37 @@
           "possession": true,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4456,6 +7156,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4506,6 +7237,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4556,6 +7318,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4606,6 +7399,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4656,6 +7480,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4706,6 +7561,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 4,
+      "home_score": 0,
+      "away_score": 4,
+      "fthg": 0,
+      "ftag": 4,
+      "hthg": 0,
+      "htag": 4,
+      "goals": {
+        "home": 0,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 4
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4756,6 +7642,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4806,6 +7723,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4856,6 +7804,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4906,6 +7885,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 5,
+      "away_goals": 1,
+      "home_score": 5,
+      "away_score": 1,
+      "fthg": 5,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 5,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -4956,6 +7966,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 5,
+      "away_goals": 2,
+      "home_score": 5,
+      "away_score": 2,
+      "fthg": 5,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 5,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5006,6 +8047,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5056,6 +8128,37 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5106,6 +8209,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5156,6 +8290,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5206,6 +8371,37 @@
           "possession": true,
           "passes": true,
           "xg": true
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     },
@@ -5256,8 +8452,121 @@
           "possession": false,
           "passes": false,
           "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497617,
+      "date_utc": "2026-06-26T17:00:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "season": "2026",
+      "round": "Regular Season - 14",
+      "home_team": "IK brage",
+      "away_team": "Falkenbergs FF",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        },
+        "has_score": true
+      },
+      "home_goals": 2,
+      "away_goals": 4,
+      "home_score": 2,
+      "away_score": 4,
+      "fthg": 2,
+      "ftag": 4,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
         }
       }
     }
-  ]
+  ],
+  "score_patched_at": "2026-06-27T06:56:36Z"
 }
