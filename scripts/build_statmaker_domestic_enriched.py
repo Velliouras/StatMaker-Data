@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Build app-facing StatMaker domestic enriched JSON files from API-Football caches.
 
-This script does not call external APIs. It converts the repository's cached
-API-Football fixture statistics into stable JSON artifacts that the Android app
-can consume. The app should read these generated artifacts from StatMaker-Data
-and must not call API-Football directly.
+Domestic stats/history are API-Football only. Football-Data CSV files are kept as
+inactive archive/reference material and must not be used as runtime fallback.
+
+This script does not call external APIs. It converts cached API-Football fixture
+statistics into stable JSON artifacts that the Android app consumes from the
+StatMaker-Data repository.
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ import json
 import re
 import unicodedata
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "api_football_enrichment_leagues.json"
@@ -67,11 +69,25 @@ def slug(value: Any) -> str:
     return text or "unknown"
 
 
+def league_code(league: Dict[str, Any]) -> str:
+    return str(league.get("leagueCode") or league.get("football_data_code") or "UNKNOWN").strip()
+
+
+def app_season(league: Dict[str, Any]) -> str:
+    return str(league.get("app_season") or league.get("season") or "unknown")
+
+
+def api_season(league: Dict[str, Any]) -> str:
+    return str(league.get("season") or "unknown")
+
+
 def file_stem_for(league: Dict[str, Any]) -> str:
+    # Keep the API season in the filename so existing cache/artifact naming stays stable.
+    # App-facing season is written inside the artifact as app_season/competition.season.
     return "_".join([
         slug(league.get("country")).replace("-", "_"),
         slug(league.get("display_name")).replace("-", "_"),
-        str(league.get("season") or "unknown"),
+        api_season(league).replace("-", "_"),
     ])
 
 
@@ -91,7 +107,7 @@ def cache_path_for(league: Dict[str, Any]) -> Path:
         CACHE_ROOT
         / slug(league.get("country"))
         / slug(league.get("display_name"))
-        / str(league.get("season"))
+        / api_season(league)
         / "fixture_stats.json"
     )
 
@@ -212,7 +228,11 @@ def build_match(cache_item: Dict[str, Any], league: Dict[str, Any]) -> Dict[str,
         "date_utc": cache_item.get("date"),
         "country": league.get("country"),
         "league": league.get("display_name"),
-        "season": str(league.get("season")),
+        "league_code": league_code(league),
+        "season": app_season(league),
+        "app_season": app_season(league),
+        "api_football_season": api_season(league),
+        "api_football_league_id": league.get("api_football_league_id"),
         "round": source_league.get("round"),
         "home_team": cache_item.get("home_team"),
         "away_team": cache_item.get("away_team"),
@@ -235,24 +255,30 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
     output_path = output_path_for(league)
 
     artifact = {
-        "schema_version": 1,
+        "schema_version": 3,
         "generated_at": now_utc(),
         "data_contract": {
             "consumer": "StatMaker Android app",
-            "rule": "The app reads this repository artifact and must not call API-Football directly.",
+            "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+            "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
             "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
         },
         "source": {
             "provider": "api-football",
             "cache_path": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
             "cache_generated_at": cache.get("generated_at") if isinstance(cache, dict) else None,
+            "api_football_season": api_season(league),
+            "csv_import": "inactive_archive_only",
         },
         "competition": {
+            "league_code": league_code(league),
             "country": league.get("country"),
             "league": league.get("display_name"),
             "football_data_code": league.get("football_data_code"),
             "api_football_league_id": league.get("api_football_league_id"),
-            "season": str(league.get("season")),
+            "api_football_season": api_season(league),
+            "season": app_season(league),
+            "app_season": app_season(league),
             "priority_group": league.get("priority_group"),
             "data_level": "fixture_statistics_enriched",
         },
@@ -261,10 +287,13 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
     }
 
     report_row = {
+        "league_code": league_code(league),
         "country": league.get("country"),
         "league": league.get("display_name"),
-        "season": str(league.get("season")),
+        "app_season": app_season(league),
+        "api_football_season": api_season(league),
         "api_football_league_id": league.get("api_football_league_id"),
+        "priority_group": league.get("priority_group"),
         "output_path": str(output_path.relative_to(ROOT)).replace("\\", "/"),
         "cache_path": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
         "completed_fixtures": readiness["completed_fixtures"],
@@ -281,9 +310,12 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
 
 def write_index(rows: List[Dict[str, Any]]) -> None:
     payload = {
-        "schema_version": 1,
+        "schema_version": 3,
         "generated_at": now_utc(),
         "artifact_type": "statmaker_domestic_enriched_index",
+        "active_source": "api-football",
+        "csv_import": "inactive_archive_only",
+        "league_count": len(rows),
         "leagues": rows,
     }
     write_json(OUTPUT_ROOT / "index.json", payload)
@@ -293,15 +325,21 @@ def write_reports(rows: List[Dict[str, Any]]) -> None:
     payload = {
         "generated_at": now_utc(),
         "artifact_type": "statmaker_domestic_enriched_build_report",
+        "active_source": "api-football",
+        "csv_import": "inactive_archive_only",
+        "league_count": len(rows),
         "leagues": rows,
     }
     write_json(REPORT_JSON, payload)
 
     fieldnames = [
+        "league_code",
         "country",
         "league",
-        "season",
+        "app_season",
+        "api_football_season",
         "api_football_league_id",
+        "priority_group",
         "output_path",
         "cache_path",
         "completed_fixtures",
@@ -325,16 +363,21 @@ def write_reports(rows: List[Dict[str, Any]]) -> None:
         "",
         f"Generated at: `{payload['generated_at']}`",
         "",
-        "| Country | League | Season | API league ID | Completed | Any stats | BB-core stats | Any coverage | BB-core coverage | BB-ready candidate | Output | Notes |",
-        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
+        "Active source: `API-Football`. Football-Data CSV: `inactive archive only`.",
+        "",
+        "| Code | Country | League | App season | API season | API league ID | Group | Completed | Any stats | BB-core stats | Any coverage | BB-core coverage | BB-ready candidate | Output | Notes |",
+        "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
     ]
 
     for row in rows:
         values = [
+            row.get("league_code"),
             row.get("country"),
             row.get("league"),
-            row.get("season"),
+            row.get("app_season"),
+            row.get("api_football_season"),
             row.get("api_football_league_id"),
+            row.get("priority_group"),
             row.get("completed_fixtures"),
             row.get("fixtures_with_any_stats"),
             row.get("fixtures_with_bb_core_stats"),
@@ -353,8 +396,8 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build StatMaker domestic enriched JSON files from API-Football caches")
     parser.add_argument(
         "--countries",
-        default="Finland,Norway,Sweden",
-        help="Comma-separated countries to build. Empty means all enabled config leagues.",
+        default="",
+        help="Comma-separated countries to build. Empty means all enabled API-Football registry leagues.",
     )
     parser.add_argument(
         "--league-ids",
@@ -375,7 +418,7 @@ def main() -> int:
     leagues = selected_leagues(config, countries=countries, league_ids=league_ids)
 
     if not leagues:
-        raise SystemExit("No matching enabled leagues found in config.")
+        raise SystemExit("No matching enabled leagues found in API-Football domestic registry.")
 
     rows: List[Dict[str, Any]] = []
 
@@ -389,11 +432,11 @@ def main() -> int:
         write_json(output_path, artifact)
         rows.append(row)
         print(
-            f"built {row['output_path']} fixtures={row['completed_fixtures']} "
+            f"built {row['league_code']} {row['output_path']} fixtures={row['completed_fixtures']} "
             f"bb_ready={row['bb_ready_candidate']} bb_core={row['bb_core_coverage']}"
         )
 
-    rows = sorted(rows, key=lambda row: (str(row.get("country")), str(row.get("league"))))
+    rows = sorted(rows, key=lambda row: (str(row.get("country")), str(row.get("league")), str(row.get("league_code"))))
     write_index(rows)
     write_reports(rows)
 
