@@ -1,15 +1,15 @@
-﻿#!/usr/bin/env python3
-"""Fetch domestic upcoming schedule + exact odds from Odds-API.io.
+#!/usr/bin/env python3
+"""Fetch Domestic upcoming schedule + exact odds from Odds-API.io.
+
+Domestic source contract:
+  - API-Football is the only active Domestic history/statistics source.
+  - Football-Data CSV is inactive archive/reference only.
+  - Odds-API.io is the only active Domestic odds source.
+  - The Android app reads repository JSON artifacts and must not call either API directly.
 
 Outputs:
   odds/odds_api_io/domestic_odds.json
   reports/domestic_odds_debug.json
-
-Policy:
-  - The Android app must read ready JSON only; it must not call this API.
-  - Upcoming odds events are the first domestic betting schedule source.
-  - Only exact mapped markets with historical-stat support are emitted.
-  - One league failure must not fail the whole update; partial JSON is valid.
 """
 
 from __future__ import annotations
@@ -28,7 +28,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "domestic-odds-api-io-v2-emission-fix"
+SCRIPT_VERSION = "domestic-odds-api-io-v3-full-registry-sync"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -71,7 +71,6 @@ EMITTED_MARKET_COUNT_KEYS = [
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
 ]
-
 COMMON_SUFFIXES = {"fc", "fk", "cf", "sc", "ac", "afc", "bk", "if"}
 
 
@@ -138,27 +137,62 @@ def compact(value: Any, limit: int = 1200) -> Any:
     return value if len(text) <= limit else text[:limit] + "..."
 
 
+def registry_summary(config: Dict[str, Any]) -> Dict[str, Any]:
+    leagues = config.get("leagues", []) if isinstance(config.get("leagues"), list) else []
+    enabled = [x for x in leagues if bool(x.get("enabled", True))]
+    odds_enabled = [x for x in enabled if bool(x.get("enabledForOdds", True))]
+    betting_enabled = [x for x in enabled if bool(x.get("enabledForBetting", True))]
+    return {
+        "registryVersion": config.get("version"),
+        "registryLeagueCount": len(leagues),
+        "enabledLeagueCount": len(enabled),
+        "enabledForOddsCount": len(odds_enabled),
+        "enabledForBettingCount": len(betting_enabled),
+        "csvImport": "inactive_archive_only",
+        "statsSource": "api-football",
+        "oddsSource": "odds-api-io",
+    }
+
+
+def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "generatedAt": generated_at,
+        "scriptVersion": SCRIPT_VERSION,
+        "registry": debug.get("registry", {}),
+        "dryRun": debug.get("dryRun", False),
+        "bookmakersRequested": debug.get("bookmakersRequested", []),
+        "leaguesRequested": debug.get("leaguesRequested", []),
+        "leaguesMatched": debug.get("leaguesMatched", []),
+        "leaguesMissing": debug.get("leaguesMissing", []),
+        "leagueReports": debug.get("leagueReports", []),
+        "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
+        "rawMarketCounts": debug.get("rawMarketCounts", {}),
+        "classifiedMarketCounts": debug.get("classifiedMarketCounts", {}),
+        "skippedMarketReasons": skipped_market_reasons(debug),
+        "skippedMarketSummary": skipped_market_summary(debug),
+        "skippedMarketExamples": debug.get("skippedMarketExamples", []),
+        "emittedMarketCounts": debug.get("emittedMarketCounts", {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}),
+        "rateLimitRemaining": debug.get("rateLimitRemaining"),
+        "warnings": debug.get("warnings", []),
+    }
+
+
 def empty_output(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
     return {
+        "schemaVersion": 3,
         "source": "odds-api-io",
         "provider": "Odds-API.io",
         "generatedAt": generated_at,
-        "leagues": [],
-        "debug": {
-            "generatedAt": generated_at,
-            "scriptVersion": SCRIPT_VERSION,
-            "leaguesRequested": debug.get("leaguesRequested", []),
-            "leaguesMatched": debug.get("leaguesMatched", []),
-            "leaguesMissing": debug.get("leaguesMissing", []),
-            "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
-            "leagueReports": debug.get("leagueReports", []),
-            "emittedMarketCounts": emitted_market_counts(debug.get("lastOutput", {})),
-            "skippedMarketReasons": skipped_market_reasons(debug),
-            "skippedMarketSummary": skipped_market_summary(debug),
-            "skippedMarketExamples": debug.get("skippedMarketExamples", []),
-            "rateLimitRemaining": debug.get("rateLimitRemaining"),
-            "warnings": debug.get("warnings", []),
+        "dataContract": {
+            "statsSource": "API-Football domestic history/stat JSON",
+            "oddsSource": "Odds-API.io exact bookmaker odds",
+            "csvImport": "inactive_archive_only",
+            "appRule": "Android app reads repository JSON only; it must not call Odds-API.io directly.",
+            "emptyState": "If no valid exact odds + historical support exists, show only: Δεν βρέθηκαν αγορές",
         },
+        "registry": debug.get("registry", {}),
+        "leagues": [],
+        "debug": output_debug(generated_at, debug),
     }
 
 
@@ -258,11 +292,15 @@ def canonical_team_info(name: str, league_code: str, aliases: Dict[str, Dict[str
 
 
 def choose_leagues(config: Dict[str, Any], mode: str, target: str) -> List[Dict[str, Any]]:
-    leagues = [x for x in config.get("leagues", []) if x.get("enabled", True)]
+    all_leagues = config.get("leagues", []) if isinstance(config.get("leagues"), list) else []
+    leagues = [
+        x for x in all_leagues
+        if bool(x.get("enabled", True)) and bool(x.get("enabledForOdds", True))
+    ]
     if mode == "league":
         return [x for x in leagues if str(x.get("leagueCode", "")).upper() == target.upper()]
     if mode == "group":
-        groups = config.get("groups", {})
+        groups = config.get("groups", {}) if isinstance(config.get("groups"), dict) else {}
         codes = {str(x).upper() for x in groups.get(target, [])}
         if not codes:
             codes = {str(x.get("leagueCode", "")).upper() for x in leagues if x.get("group") == target}
@@ -277,7 +315,7 @@ def discover_provider_leagues(api_key: str, debug: Dict[str, Any]) -> List[Dict[
         return []
     provider = [x for x in data if isinstance(x, dict)]
     debug["providerLeagueCount"] = len(provider)
-    debug["providerLeagueSample"] = [provider_league_summary(x) for x in provider[:30]]
+    debug["providerLeagueSample"] = [provider_league_summary(x) for x in provider[:50]]
     return provider
 
 
@@ -523,6 +561,7 @@ def add_market(out: List[Dict[str, Any]], market: str, selection: str, odds: Opt
         "odds": odds,
         "bookmaker": bookmaker,
         "confidence": "high",
+        "exactBookmakerOdds": True,
     }
     if line is not None:
         item["line"] = line
@@ -631,7 +670,6 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
         elif "over" in n:
             add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
         else:
-            # Some APIs provide rows named only by side keys over/under.
             side = normalize_text(row.get("side"))
             if side == "under":
                 add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
@@ -698,6 +736,7 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
     aliases = load_aliases()
     debug["generatedAt"] = generated_at
     debug["scriptVersion"] = SCRIPT_VERSION
+    debug["registry"] = registry_summary(config)
     debug["dryRun"] = dry_run
     debug["bookmakersRequested"] = [x.strip() for x in bookmakers.split(",") if x.strip()]
     debug["leaguesRequested"] = [x.get("leagueCode") for x in selected]
@@ -719,10 +758,23 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
         try:
             provider = match_provider_league(league, provider_leagues)
             if not provider:
-                debug.setdefault("leaguesMissing", []).append({"leagueCode": league_code, "competition": league.get("competition"), "reason": "provider slug not found"})
+                debug.setdefault("leaguesMissing", []).append({
+                    "leagueCode": league_code,
+                    "country": league.get("country"),
+                    "competition": league.get("competition"),
+                    "apiFootballLeagueId": league.get("apiFootballLeagueId"),
+                    "reason": "provider league slug not found in Odds-API.io discovery",
+                })
                 continue
             slug = str(provider.get("slug") or "")
-            debug.setdefault("leaguesMatched", []).append({"leagueCode": league_code, "competition": league.get("competition"), "providerLeagueSlug": slug, "providerName": provider.get("name")})
+            debug.setdefault("leaguesMatched", []).append({
+                "leagueCode": league_code,
+                "country": league.get("country"),
+                "competition": league.get("competition"),
+                "apiFootballLeagueId": league.get("apiFootballLeagueId"),
+                "providerLeagueSlug": slug,
+                "providerName": provider.get("name"),
+            })
             if should_stop_for_rate_limit(debug):
                 debug.setdefault("warnings", []).append("Stopped before events fetch because rateLimitRemaining is below guard.")
                 break
@@ -730,10 +782,13 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
             event_ids = [event_id(e) for e in events if event_id(e)]
             odds_by_event = fetch_odds(api_key, event_ids, bookmakers, debug) if event_ids else {}
             matches = []
+            events_without_markets = 0
             for event in events:
                 match = normalize_event_match(league, event, odds_by_event.get(event_id(event)) or event, aliases, debug)
                 if match and match["markets"]:
                     matches.append(match)
+                elif match:
+                    events_without_markets += 1
             matched_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "matched")
             partial_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "partial")
             unmatched_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "unmatched")
@@ -742,14 +797,23 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
                 "country": league.get("country"),
                 "competition": league.get("competition"),
                 "season": league.get("season"),
+                "apiFootballLeagueId": league.get("apiFootballLeagueId"),
+                "enabledForStats": bool(league.get("enabledForStats", True)),
+                "enabledForOdds": bool(league.get("enabledForOdds", True)),
+                "enabledForBetting": bool(league.get("enabledForBetting", True)),
                 "providerLeagueSlug": slug,
+                "providerName": provider.get("name"),
                 "matches": matches,
             })
             debug.setdefault("leagueReports", []).append({
                 "leagueCode": league_code,
+                "country": league.get("country"),
+                "competition": league.get("competition"),
+                "apiFootballLeagueId": league.get("apiFootballLeagueId"),
                 "providerLeagueSlug": slug,
                 "eventsFetched": len(events),
                 "eventsWithOddsResponse": len(odds_by_event),
+                "eventsWithoutMappedMarkets": events_without_markets,
                 "matchesEmitted": len(matches),
                 "marketsEmitted": sum(len(m.get("markets", [])) for m in matches),
                 "matchedTeamPairs": matched_pairs,
@@ -764,26 +828,6 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
 
     output["debug"] = output_debug(generated_at, debug)
     return output
-
-
-def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
-    return {
-        "generatedAt": generated_at,
-        "scriptVersion": SCRIPT_VERSION,
-        "leaguesRequested": debug.get("leaguesRequested", []),
-        "leaguesMatched": debug.get("leaguesMatched", []),
-        "leaguesMissing": debug.get("leaguesMissing", []),
-        "leagueReports": debug.get("leagueReports", []),
-        "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
-        "rawMarketCounts": debug.get("rawMarketCounts", {}),
-        "classifiedMarketCounts": debug.get("classifiedMarketCounts", {}),
-        "skippedMarketReasons": skipped_market_reasons(debug),
-        "skippedMarketSummary": skipped_market_summary(debug),
-        "skippedMarketExamples": debug.get("skippedMarketExamples", []),
-        "emittedMarketCounts": debug.get("emittedMarketCounts", {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}),
-        "rateLimitRemaining": debug.get("rateLimitRemaining"),
-        "warnings": debug.get("warnings", []),
-    }
 
 
 def skipped_market_summary(debug: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -811,18 +855,6 @@ def unique_unmatched_teams(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
-def unique_debug_list(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    seen = set()
-    out = []
-    for item in items:
-        key = json.dumps(item, sort_keys=True, ensure_ascii=False)
-        if key in seen:
-            continue
-        seen.add(key)
-        out.append(item)
-    return out
-
-
 def emitted_market_counts(output: Dict[str, Any]) -> Dict[str, int]:
     counts = {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}
     for league in output.get("leagues", []) or []:
@@ -835,9 +867,9 @@ def emitted_market_counts(output: Dict[str, Any]) -> Dict[str, int]:
 
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Update domestic Odds-API.io schedule + odds JSON.")
-    parser.add_argument("--mode", choices=["all", "group", "league"], default=os.getenv("STATMAKER_DOMESTIC_MODE", "group"))
-    parser.add_argument("--target", default=os.getenv("STATMAKER_DOMESTIC_TARGET", "scandinavia"))
+    parser = argparse.ArgumentParser(description="Update Domestic Odds-API.io schedule + exact odds JSON.")
+    parser.add_argument("--mode", choices=["all", "group", "league"], default=os.getenv("STATMAKER_DOMESTIC_MODE", "all"))
+    parser.add_argument("--target", default=os.getenv("STATMAKER_DOMESTIC_TARGET", "all_initial"))
     parser.add_argument("--dry-run", action="store_true", default=os.getenv("STATMAKER_DOMESTIC_DRY_RUN", "false").lower() == "true")
     parser.add_argument("--bookmakers", default=os.getenv("ODDS_API_IO_BOOKMAKERS", DEFAULT_BOOKMAKERS))
     return parser.parse_args(argv)
@@ -849,7 +881,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     config = read_json(CONFIG_PATH)
     selected = choose_leagues(config, args.mode, args.target)
     if not selected:
-        debug.setdefault("warnings", []).append(f"No domestic leagues selected for mode={args.mode} target={args.target}.")
+        debug.setdefault("warnings", []).append(f"No Domestic leagues selected for mode={args.mode} target={args.target}.")
     api_key = os.getenv("ODDS_API_IO_KEY", "").strip()
     if not api_key and not args.dry_run:
         debug.setdefault("warnings", []).append("ODDS_API_IO_KEY is missing; wrote structural output without API calls.")
@@ -860,7 +892,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     output.setdefault("debug", {})["rawMarketCounts"] = debug.get("rawMarketCounts", {})
     output.setdefault("debug", {})["classifiedMarketCounts"] = debug.get("classifiedMarketCounts", {})
     output.setdefault("debug", {})["skippedMarketReasons"] = skipped_market_reasons(debug)
+    output.setdefault("debug", {})["skippedMarketSummary"] = skipped_market_summary(debug)
     report = dict(debug)
+    report["registry"] = registry_summary(config)
     report["outputPath"] = str(OUT_PATH.relative_to(ROOT))
     report["reportPath"] = str(REPORT_PATH.relative_to(ROOT))
     report["partialOutput"] = bool(debug.get("warnings")) or should_stop_for_rate_limit(debug)
@@ -877,7 +911,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(json.dumps({
         "output": str(OUT_PATH.relative_to(ROOT)),
         "report": str(REPORT_PATH.relative_to(ROOT)),
+        "scriptVersion": SCRIPT_VERSION,
         "dryRun": args.dry_run,
+        "registry": report["registry"],
         "leaguesRequested": debug.get("leaguesRequested", []),
         "leaguesMatched": debug.get("leaguesMatched", []),
         "leaguesMissing": debug.get("leaguesMissing", []),
@@ -890,4 +926,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
