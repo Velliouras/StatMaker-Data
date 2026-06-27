@@ -1,18 +1,599 @@
 {
-  "version": 2,
+  "version": 3,
   "sport": "football",
   "defaultSeason": "2026",
   "horizonDays": 21,
-  "sourceOfTruth": "Synced with config/api_football_enrichment_leagues.json. These are the domestic API-Football historical leagues enabled for StatMaker betting tools and Odds-API.io odds matching.",
+  "sourceOfTruth": "API-Football domestic league registry. Football-Data CSV is inactive archive only. Odds-API.io entries must sync to this registry.",
   "groups": {
-    "scandinavia": ["NOR", "SWE", "SWE2", "FIN", "DNK"],
-    "optional_europe": ["AUT", "AUT2", "IRL", "POL", "ROM"],
-    "americas": ["ARG", "BRA", "BRA2"],
-    "asia": ["JPN"],
-    "all_blue_yellow": ["ARG", "AUT", "AUT2", "BRA", "BRA2", "DNK", "FIN", "IRL", "JPN", "NOR", "POL", "ROM", "SWE", "SWE2"],
-    "all_initial": ["ARG", "AUT", "AUT2", "BRA", "BRA2", "DNK", "FIN", "IRL", "JPN", "NOR", "POL", "ROM", "SWE", "SWE2"]
+    "england": [
+      "E0",
+      "E1",
+      "E2",
+      "E3",
+      "EC"
+    ],
+    "scotland": [
+      "SC0",
+      "SC1",
+      "SC2",
+      "SC3"
+    ],
+    "top_europe": [
+      "D1",
+      "D2",
+      "I1",
+      "I2",
+      "SP1",
+      "SP2",
+      "F1",
+      "F2"
+    ],
+    "western_europe": [
+      "N1",
+      "B1",
+      "P1",
+      "IRL"
+    ],
+    "southern_europe": [
+      "T1",
+      "G1"
+    ],
+    "central_europe": [
+      "AUT",
+      "AUT2",
+      "POL",
+      "ROM",
+      "SWZ"
+    ],
+    "eastern_europe": [
+      "RUS"
+    ],
+    "scandinavia": [
+      "DNK",
+      "FIN",
+      "NOR",
+      "SWE",
+      "SWE2"
+    ],
+    "americas": [
+      "ARG",
+      "BRA",
+      "BRA2",
+      "MEX",
+      "USA"
+    ],
+    "asia": [
+      "CHN",
+      "JPN"
+    ],
+    "all_blue_yellow": [
+      "E0",
+      "E1",
+      "E2",
+      "E3",
+      "EC",
+      "SC0",
+      "SC1",
+      "SC2",
+      "SC3",
+      "D1",
+      "D2",
+      "I1",
+      "I2",
+      "SP1",
+      "SP2",
+      "F1",
+      "F2",
+      "N1",
+      "B1",
+      "P1",
+      "T1",
+      "G1",
+      "ARG",
+      "AUT",
+      "AUT2",
+      "BRA",
+      "BRA2",
+      "CHN",
+      "DNK",
+      "FIN",
+      "IRL",
+      "JPN",
+      "MEX",
+      "NOR",
+      "POL",
+      "ROM",
+      "RUS",
+      "SWE",
+      "SWE2",
+      "SWZ",
+      "USA"
+    ],
+    "all_initial": [
+      "E0",
+      "E1",
+      "E2",
+      "E3",
+      "EC",
+      "SC0",
+      "SC1",
+      "SC2",
+      "SC3",
+      "D1",
+      "D2",
+      "I1",
+      "I2",
+      "SP1",
+      "SP2",
+      "F1",
+      "F2",
+      "N1",
+      "B1",
+      "P1",
+      "T1",
+      "G1",
+      "ARG",
+      "AUT",
+      "AUT2",
+      "BRA",
+      "BRA2",
+      "CHN",
+      "DNK",
+      "FIN",
+      "IRL",
+      "JPN",
+      "MEX",
+      "NOR",
+      "POL",
+      "ROM",
+      "RUS",
+      "SWE",
+      "SWE2",
+      "SWZ",
+      "USA"
+    ]
   },
   "leagues": [
+    {
+      "leagueCode": "E0",
+      "continent": "Europe",
+      "country": "England",
+      "competition": "Premier League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "england",
+      "apiFootballLeagueId": 39,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "england premier league",
+        "premier league",
+        "english premier league"
+      ]
+    },
+    {
+      "leagueCode": "E1",
+      "continent": "Europe",
+      "country": "England",
+      "competition": "Championship",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "england",
+      "apiFootballLeagueId": 40,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "england championship",
+        "efl championship",
+        "english championship"
+      ]
+    },
+    {
+      "leagueCode": "E2",
+      "continent": "Europe",
+      "country": "England",
+      "competition": "League One",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "england",
+      "apiFootballLeagueId": 41,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "england league one",
+        "efl league one",
+        "english league one"
+      ]
+    },
+    {
+      "leagueCode": "E3",
+      "continent": "Europe",
+      "country": "England",
+      "competition": "League Two",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "england",
+      "apiFootballLeagueId": 42,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "england league two",
+        "efl league two",
+        "english league two"
+      ]
+    },
+    {
+      "leagueCode": "EC",
+      "continent": "Europe",
+      "country": "England",
+      "competition": "National League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "england",
+      "apiFootballLeagueId": 43,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "england national league",
+        "conference",
+        "national league england"
+      ]
+    },
+    {
+      "leagueCode": "SC0",
+      "continent": "Europe",
+      "country": "Scotland",
+      "competition": "Premiership",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "scotland",
+      "apiFootballLeagueId": 179,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "scotland premiership",
+        "scottish premiership"
+      ]
+    },
+    {
+      "leagueCode": "SC1",
+      "continent": "Europe",
+      "country": "Scotland",
+      "competition": "Championship",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "scotland",
+      "apiFootballLeagueId": 180,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "scotland championship",
+        "scottish championship"
+      ]
+    },
+    {
+      "leagueCode": "SC2",
+      "continent": "Europe",
+      "country": "Scotland",
+      "competition": "League One",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "scotland",
+      "apiFootballLeagueId": 181,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "scotland league one",
+        "scottish league one"
+      ]
+    },
+    {
+      "leagueCode": "SC3",
+      "continent": "Europe",
+      "country": "Scotland",
+      "competition": "League Two",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "scotland",
+      "apiFootballLeagueId": 182,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "scotland league two",
+        "scottish league two"
+      ]
+    },
+    {
+      "leagueCode": "D1",
+      "continent": "Europe",
+      "country": "Germany",
+      "competition": "Bundesliga",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 78,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "germany bundesliga",
+        "bundesliga",
+        "german bundesliga"
+      ]
+    },
+    {
+      "leagueCode": "D2",
+      "continent": "Europe",
+      "country": "Germany",
+      "competition": "Bundesliga 2",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 79,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "germany bundesliga 2",
+        "2 bundesliga",
+        "german bundesliga 2"
+      ]
+    },
+    {
+      "leagueCode": "I1",
+      "continent": "Europe",
+      "country": "Italy",
+      "competition": "Serie A",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 135,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "italy serie a",
+        "serie a italy",
+        "italian serie a"
+      ]
+    },
+    {
+      "leagueCode": "I2",
+      "continent": "Europe",
+      "country": "Italy",
+      "competition": "Serie B",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 136,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "italy serie b",
+        "serie b italy",
+        "italian serie b"
+      ]
+    },
+    {
+      "leagueCode": "SP1",
+      "continent": "Europe",
+      "country": "Spain",
+      "competition": "La Liga",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 140,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "spain la liga",
+        "la liga",
+        "laliga",
+        "primera division spain"
+      ]
+    },
+    {
+      "leagueCode": "SP2",
+      "continent": "Europe",
+      "country": "Spain",
+      "competition": "Segunda División",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 141,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "spain segunda division",
+        "segunda division",
+        "laliga 2",
+        "la liga 2"
+      ]
+    },
+    {
+      "leagueCode": "F1",
+      "continent": "Europe",
+      "country": "France",
+      "competition": "Ligue 1",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 61,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "france ligue 1",
+        "ligue 1",
+        "french ligue 1"
+      ]
+    },
+    {
+      "leagueCode": "F2",
+      "continent": "Europe",
+      "country": "France",
+      "competition": "Ligue 2",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "top_europe",
+      "apiFootballLeagueId": 62,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "france ligue 2",
+        "ligue 2",
+        "french ligue 2"
+      ]
+    },
+    {
+      "leagueCode": "N1",
+      "continent": "Europe",
+      "country": "Netherlands",
+      "competition": "Eredivisie",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "western_europe",
+      "apiFootballLeagueId": 88,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "netherlands eredivisie",
+        "eredivisie",
+        "dutch eredivisie"
+      ]
+    },
+    {
+      "leagueCode": "B1",
+      "continent": "Europe",
+      "country": "Belgium",
+      "competition": "Jupiler Pro League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "western_europe",
+      "apiFootballLeagueId": 144,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "belgium jupiler pro league",
+        "belgian pro league",
+        "jupiler pro league",
+        "belgium jupiler league"
+      ]
+    },
+    {
+      "leagueCode": "P1",
+      "continent": "Europe",
+      "country": "Portugal",
+      "competition": "Liga Portugal",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "western_europe",
+      "apiFootballLeagueId": 94,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "portugal liga portugal",
+        "primeira liga",
+        "liga portugal"
+      ]
+    },
+    {
+      "leagueCode": "T1",
+      "continent": "Europe",
+      "country": "Turkey",
+      "competition": "Süper Lig",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "southern_europe",
+      "apiFootballLeagueId": 203,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "turkey super lig",
+        "turkish super lig",
+        "süper lig",
+        "super lig"
+      ]
+    },
+    {
+      "leagueCode": "G1",
+      "continent": "Europe",
+      "country": "Greece",
+      "competition": "Super League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "southern_europe",
+      "apiFootballLeagueId": 197,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "greece super league",
+        "greek super league",
+        "super league greece"
+      ]
+    },
     {
       "leagueCode": "ARG",
       "continent": "South America",
@@ -26,7 +607,12 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["argentina liga profesional", "liga profesional argentina", "argentina primera division", "argentine primera division"]
+      "searchTerms": [
+        "argentina liga profesional",
+        "liga profesional argentina",
+        "argentina primera division",
+        "argentine primera division"
+      ]
     },
     {
       "leagueCode": "AUT",
@@ -35,14 +621,18 @@
       "competition": "Bundesliga",
       "season": "2025-2026",
       "apiFootballSeason": "2025",
-      "group": "optional_europe",
+      "group": "central_europe",
       "apiFootballLeagueId": 218,
       "enabled": true,
       "enabledForStats": true,
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["austria bundesliga", "austrian bundesliga", "bundesliga austria"]
+      "searchTerms": [
+        "austria bundesliga",
+        "austrian bundesliga",
+        "bundesliga austria"
+      ]
     },
     {
       "leagueCode": "AUT2",
@@ -51,14 +641,19 @@
       "competition": "2. Liga",
       "season": "2025-2026",
       "apiFootballSeason": "2025",
-      "group": "optional_europe",
+      "group": "central_europe",
       "apiFootballLeagueId": 219,
       "enabled": true,
       "enabledForStats": true,
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["austria 2 liga", "austrian 2 liga", "2 liga austria", "erste liga austria"]
+      "searchTerms": [
+        "austria 2 liga",
+        "austrian 2 liga",
+        "2 liga austria",
+        "erste liga austria"
+      ]
     },
     {
       "leagueCode": "BRA",
@@ -73,7 +668,11 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["brazil serie a", "brasileirao", "campeonato brasileiro serie a"]
+      "searchTerms": [
+        "brazil serie a",
+        "brasileirao",
+        "campeonato brasileiro serie a"
+      ]
     },
     {
       "leagueCode": "BRA2",
@@ -88,7 +687,29 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["brazil serie b", "campeonato brasileiro serie b", "brasileirao serie b"]
+      "searchTerms": [
+        "brazil serie b",
+        "campeonato brasileiro serie b",
+        "brasileirao serie b"
+      ]
+    },
+    {
+      "leagueCode": "CHN",
+      "continent": "Asia",
+      "country": "China",
+      "competition": "Super League",
+      "season": "2026",
+      "group": "asia",
+      "apiFootballLeagueId": 169,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "china super league",
+        "chinese super league"
+      ]
     },
     {
       "leagueCode": "DNK",
@@ -104,7 +725,11 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["denmark superliga", "danish superliga", "superliga denmark"]
+      "searchTerms": [
+        "denmark superliga",
+        "danish superliga",
+        "superliga denmark"
+      ]
     },
     {
       "leagueCode": "FIN",
@@ -119,7 +744,10 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["finland veikkausliiga", "veikkausliiga"]
+      "searchTerms": [
+        "finland veikkausliiga",
+        "veikkausliiga"
+      ]
     },
     {
       "leagueCode": "IRL",
@@ -127,14 +755,18 @@
       "country": "Ireland",
       "competition": "Premier Division",
       "season": "2026",
-      "group": "optional_europe",
+      "group": "western_europe",
       "apiFootballLeagueId": 357,
       "enabled": true,
       "enabledForStats": true,
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["ireland premier division", "republic of ireland premier division", "league of ireland premier division"]
+      "searchTerms": [
+        "ireland premier division",
+        "republic of ireland premier division",
+        "league of ireland premier division"
+      ]
     },
     {
       "leagueCode": "JPN",
@@ -149,7 +781,31 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["japan j1 league", "j1 league", "j league division 1"]
+      "searchTerms": [
+        "japan j1 league",
+        "j1 league",
+        "j league division 1"
+      ]
+    },
+    {
+      "leagueCode": "MEX",
+      "continent": "North America",
+      "country": "Mexico",
+      "competition": "Liga MX",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "americas",
+      "apiFootballLeagueId": 262,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "mexico liga mx",
+        "liga mx",
+        "mexican liga mx"
+      ]
     },
     {
       "leagueCode": "NOR",
@@ -164,7 +820,11 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["norway eliteserien", "eliteserien", "norwegian eliteserien"]
+      "searchTerms": [
+        "norway eliteserien",
+        "eliteserien",
+        "norwegian eliteserien"
+      ]
     },
     {
       "leagueCode": "POL",
@@ -173,14 +833,18 @@
       "competition": "Ekstraklasa",
       "season": "2025-2026",
       "apiFootballSeason": "2025",
-      "group": "optional_europe",
+      "group": "central_europe",
       "apiFootballLeagueId": 106,
       "enabled": true,
       "enabledForStats": true,
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["poland ekstraklasa", "ekstraklasa", "polish ekstraklasa"]
+      "searchTerms": [
+        "poland ekstraklasa",
+        "ekstraklasa",
+        "polish ekstraklasa"
+      ]
     },
     {
       "leagueCode": "ROM",
@@ -189,14 +853,37 @@
       "competition": "Liga I",
       "season": "2025-2026",
       "apiFootballSeason": "2025",
-      "group": "optional_europe",
+      "group": "central_europe",
       "apiFootballLeagueId": 283,
       "enabled": true,
       "enabledForStats": true,
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["romania liga i", "romanian liga i", "superliga romania"]
+      "searchTerms": [
+        "romania liga i",
+        "romanian liga i",
+        "superliga romania"
+      ]
+    },
+    {
+      "leagueCode": "RUS",
+      "continent": "Europe",
+      "country": "Russia",
+      "competition": "Premier League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "eastern_europe",
+      "apiFootballLeagueId": 235,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "russia premier league",
+        "russian premier league"
+      ]
     },
     {
       "leagueCode": "SWE",
@@ -211,7 +898,11 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["sweden allsvenskan", "allsvenskan", "swedish allsvenskan"]
+      "searchTerms": [
+        "sweden allsvenskan",
+        "allsvenskan",
+        "swedish allsvenskan"
+      ]
     },
     {
       "leagueCode": "SWE2",
@@ -226,7 +917,49 @@
       "enabledForOdds": true,
       "enabledForBetting": true,
       "providerLeagueSlug": null,
-      "searchTerms": ["sweden superettan", "superettan", "swedish superettan"]
+      "searchTerms": [
+        "sweden superettan",
+        "superettan",
+        "swedish superettan"
+      ]
+    },
+    {
+      "leagueCode": "SWZ",
+      "continent": "Europe",
+      "country": "Switzerland",
+      "competition": "Super League",
+      "season": "2025-2026",
+      "apiFootballSeason": "2025",
+      "group": "central_europe",
+      "apiFootballLeagueId": 207,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "switzerland super league",
+        "swiss super league"
+      ]
+    },
+    {
+      "leagueCode": "USA",
+      "continent": "North America",
+      "country": "USA",
+      "competition": "Major League Soccer",
+      "season": "2026",
+      "group": "americas",
+      "apiFootballLeagueId": 253,
+      "enabled": true,
+      "enabledForStats": true,
+      "enabledForOdds": true,
+      "enabledForBetting": true,
+      "providerLeagueSlug": null,
+      "searchTerms": [
+        "major league soccer",
+        "mls",
+        "usa mls"
+      ]
     }
   ]
 }
