@@ -28,7 +28,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "domestic-odds-api-io-v3-full-registry-sync"
+SCRIPT_VERSION = "domestic-odds-api-io-v4-strict-provider-country"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -72,6 +72,35 @@ EMITTED_MARKET_COUNT_KEYS = [
     "TEAM_SHOTS_ON_TARGET",
 ]
 COMMON_SUFFIXES = {"fc", "fk", "cf", "sc", "ac", "afc", "bk", "if"}
+COUNTRY_ALIASES = {
+    "usa": ["usa", "united states", "mls"],
+    "england": ["england", "english"],
+    "scotland": ["scotland", "scottish"],
+    "germany": ["germany", "german"],
+    "italy": ["italy", "italian"],
+    "spain": ["spain", "spanish"],
+    "france": ["france", "french"],
+    "netherlands": ["netherlands", "dutch", "holland"],
+    "belgium": ["belgium", "belgian"],
+    "portugal": ["portugal", "portuguese"],
+    "turkey": ["turkey", "turkish"],
+    "greece": ["greece", "greek"],
+    "argentina": ["argentina", "argentine"],
+    "austria": ["austria", "austrian"],
+    "brazil": ["brazil", "brasileirao", "brasileiro"],
+    "china": ["china", "chinese"],
+    "denmark": ["denmark", "danish"],
+    "finland": ["finland", "finnish"],
+    "ireland": ["ireland", "republic of ireland"],
+    "japan": ["japan", "japanese", "j1"],
+    "mexico": ["mexico", "mexican"],
+    "norway": ["norway", "norwegian"],
+    "poland": ["poland", "polish"],
+    "romania": ["romania", "romanian"],
+    "russia": ["russia", "russian"],
+    "sweden": ["sweden", "swedish"],
+    "switzerland": ["switzerland", "swiss"],
+}
 
 
 def now_utc() -> str:
@@ -328,29 +357,44 @@ def provider_league_summary(item: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def country_aliases_for(country: Any) -> List[str]:
+    key = normalize_text(country)
+    return COUNTRY_ALIASES.get(key, [key])
+
+
+def provider_country_matches(config_league: Dict[str, Any], provider_item: Dict[str, Any]) -> bool:
+    haystack = normalize_text(f"{provider_item.get('name', '')} {provider_item.get('slug', '')}")
+    aliases = [normalize_text(x) for x in country_aliases_for(config_league.get("country")) if normalize_text(x)]
+    return any(alias and alias in haystack for alias in aliases)
+
+
 def match_provider_league(config_league: Dict[str, Any], provider_leagues: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     configured_slug = str(config_league.get("providerLeagueSlug") or "").strip()
     if configured_slug:
         for item in provider_leagues:
-            if str(item.get("slug") or "") == configured_slug:
+            if str(item.get("slug") or "") == configured_slug and provider_country_matches(config_league, item):
                 return item
         return None
 
     search_terms = [normalize_text(x) for x in config_league.get("searchTerms", [])]
     best: Tuple[int, Optional[Dict[str, Any]]] = (0, None)
     for item in provider_leagues:
+        if not provider_country_matches(config_league, item):
+            continue
         haystack = normalize_text(f"{item.get('name', '')} {item.get('slug', '')}")
         score = 0
         for term in search_terms:
-            if term and term in haystack:
+            if not term:
+                continue
+            if term in haystack:
                 score = max(score, 100 + len(term))
-            elif term:
+            else:
                 words = [w for w in term.split() if len(w) > 2]
                 hits = sum(1 for w in words if w in haystack)
                 if words and hits == len(words):
                     score = max(score, 70 + hits)
-                elif hits:
-                    score = max(score, 10 + hits)
+                elif hits >= 2:
+                    score = max(score, 20 + hits)
         if score > best[0]:
             best = (score, item)
     return best[1] if best[0] >= 50 else None
@@ -763,7 +807,7 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
                     "country": league.get("country"),
                     "competition": league.get("competition"),
                     "apiFootballLeagueId": league.get("apiFootballLeagueId"),
-                    "reason": "provider league slug not found in Odds-API.io discovery",
+                    "reason": "provider league slug not found with strict country guard",
                 })
                 continue
             slug = str(provider.get("slug") or "")
@@ -783,10 +827,13 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
             odds_by_event = fetch_odds(api_key, event_ids, bookmakers, debug) if event_ids else {}
             matches = []
             events_without_markets = 0
+            events_without_team_mapping = 0
             for event in events:
                 match = normalize_event_match(league, event, odds_by_event.get(event_id(event)) or event, aliases, debug)
-                if match and match["markets"]:
+                if match and match["markets"] and match.get("usableForStats"):
                     matches.append(match)
+                elif match and match["markets"]:
+                    events_without_team_mapping += 1
                 elif match:
                     events_without_markets += 1
             matched_pairs = sum(1 for m in matches if m.get("teamMappingStatus") == "matched")
@@ -814,6 +861,7 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
                 "eventsFetched": len(events),
                 "eventsWithOddsResponse": len(odds_by_event),
                 "eventsWithoutMappedMarkets": events_without_markets,
+                "eventsWithMarketsButUnmatchedTeams": events_without_team_mapping,
                 "matchesEmitted": len(matches),
                 "marketsEmitted": sum(len(m.get("markets", [])) for m in matches),
                 "matchedTeamPairs": matched_pairs,
