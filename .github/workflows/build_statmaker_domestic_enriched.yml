@@ -6,7 +6,7 @@ on:
       countries:
         description: "Comma-separated countries. Empty means all enabled leagues."
         required: false
-        default: "Finland,Norway,Sweden"
+        default: ""
         type: string
       league_ids:
         description: "Optional comma-separated API-Football league ids"
@@ -52,14 +52,168 @@ jobs:
           fi
           python scripts/build_statmaker_domestic_enriched.py "${args[@]}"
 
+      - name: Patch match scores into app-facing JSON
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          out_root = root / 'data' / 'statmaker' / 'domestic_enriched'
+          report_json = root / 'reports' / 'statmaker_domestic_score_patch.json'
+          report_md = root / 'reports' / 'statmaker_domestic_score_patch.md'
+
+          def now_utc():
+              return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+
+          def load_json(path, default):
+              if not path.exists():
+                  return default
+              return json.loads(path.read_text(encoding='utf-8-sig'))
+
+          def write_json(path, payload):
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          def to_int(value):
+              if value is None or isinstance(value, bool):
+                  return None
+              if isinstance(value, int):
+                  return value
+              if isinstance(value, float):
+                  return int(value) if value.is_integer() else None
+              try:
+                  number = float(str(value).strip().replace(',', '.'))
+              except ValueError:
+                  return None
+              return int(number) if number.is_integer() else None
+
+          def pair(block):
+              if not isinstance(block, dict):
+                  return None, None
+              return to_int(block.get('home')), to_int(block.get('away'))
+
+          def score_fields(item):
+              score = item.get('score') if isinstance(item.get('score'), dict) else {}
+              goals = item.get('goals') if isinstance(item.get('goals'), dict) else {}
+              home = to_int(item.get('home_goals'))
+              away = to_int(item.get('away_goals'))
+              if home is None or away is None:
+                  home = to_int(item.get('home_score'))
+                  away = to_int(item.get('away_score'))
+              if home is None or away is None:
+                  home, away = pair(score.get('fulltime'))
+              if home is None or away is None:
+                  home, away = pair(goals)
+              hthg, htag = pair(score.get('halftime'))
+              if hthg is None or htag is None:
+                  hthg, htag = to_int(item.get('hthg')), to_int(item.get('htag'))
+              return {
+                  'home_goals': home,
+                  'away_goals': away,
+                  'home_score': home,
+                  'away_score': away,
+                  'fthg': home,
+                  'ftag': away,
+                  'hthg': hthg,
+                  'htag': htag,
+                  'goals': {
+                      'home': to_int(goals.get('home')) if goals else home,
+                      'away': to_int(goals.get('away')) if goals else away,
+                  },
+                  'score': {
+                      'halftime': {'home': hthg, 'away': htag},
+                      'fulltime': {'home': home, 'away': away},
+                      'extratime': score.get('extratime') if isinstance(score.get('extratime'), dict) else {'home': None, 'away': None},
+                      'penalty': score.get('penalty') if isinstance(score.get('penalty'), dict) else {'home': None, 'away': None},
+                  },
+              }
+
+          rows = []
+          for artifact_path in sorted(out_root.glob('*.json')):
+              if artifact_path.name == 'index.json':
+                  continue
+              artifact = load_json(artifact_path, {})
+              if not isinstance(artifact, dict):
+                  continue
+              cache_rel = ((artifact.get('source') or {}).get('cache_path'))
+              cache_path = root / cache_rel if cache_rel else None
+              cache = load_json(cache_path, {}) if cache_path else {}
+              cache_map = {}
+              for item in cache.get('fixtures', []) if isinstance(cache.get('fixtures'), list) else []:
+                  fixture_id = item.get('fixture_id')
+                  if fixture_id is not None:
+                      cache_map[str(fixture_id)] = item
+              matches = artifact.get('matches') if isinstance(artifact.get('matches'), list) else []
+              patched = 0
+              missing = 0
+              for match in matches:
+                  item = cache_map.get(str(match.get('fixture_id')))
+                  if not item:
+                      missing += 1
+                      continue
+                  scores = score_fields(item)
+                  if scores['home_goals'] is None or scores['away_goals'] is None:
+                      missing += 1
+                      continue
+                  match.update(scores)
+                  quality = match.setdefault('quality', {})
+                  if isinstance(quality, dict):
+                      quality['has_score'] = True
+                  patched += 1
+              readiness = artifact.setdefault('readiness', {})
+              if isinstance(readiness, dict):
+                  total = len(matches)
+                  readiness['fixtures_with_score'] = patched
+                  readiness['score_coverage'] = round(patched / total, 4) if total else 0.0
+                  notes = readiness.get('notes') if isinstance(readiness.get('notes'), list) else []
+                  notes = [note for note in notes if not str(note).startswith('score coverage') and not str(note).startswith('missing scores')]
+                  if total and patched < total:
+                      notes.append(f'missing scores after score patch: {patched}/{total}')
+                  readiness['notes'] = notes or ['ok']
+              artifact['schema_version'] = max(int(artifact.get('schema_version') or 1), 2)
+              artifact.setdefault('data_contract', {})['active_source'] = 'API-Football domestic history and fixture statistics. Football-Data CSV is inactive.'
+              artifact['score_patched_at'] = now_utc()
+              write_json(artifact_path, artifact)
+              rows.append({
+                  'output_path': str(artifact_path).replace('\\', '/'),
+                  'matches': len(matches),
+                  'scores_patched': patched,
+                  'missing_scores': missing,
+              })
+
+          index_path = out_root / 'index.json'
+          index = load_json(index_path, {})
+          if isinstance(index, dict):
+              index['schema_version'] = max(int(index.get('schema_version') or 1), 2)
+              index['active_source'] = 'api-football'
+              index['csv_import'] = 'disabled'
+              index['score_patched_at'] = now_utc()
+              by_output = {row['output_path']: row for row in rows}
+              for league in index.get('leagues', []) if isinstance(index.get('leagues'), list) else []:
+                  row = by_output.get(str(league.get('output_path')))
+                  if row:
+                      league['fixtures_with_score'] = row['scores_patched']
+                      league['score_coverage'] = round(row['scores_patched'] / row['matches'], 4) if row['matches'] else 0.0
+              write_json(index_path, index)
+
+          write_json(report_json, {'generated_at': now_utc(), 'reports': rows})
+          lines = ['# StatMaker domestic score patch', '', f"Generated at: `{now_utc()}`", '', '| Output | Matches | Scores patched | Missing scores |', '| --- | ---: | ---: | ---: |']
+          for row in rows:
+              lines.append(f"| {row['output_path']} | {row['matches']} | {row['scores_patched']} | {row['missing_scores']} |")
+          report_md.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          print(f"score patch artifacts={len(rows)} scores={sum(row['scores_patched'] for row in rows)}")
+          PY
+
       - name: Commit StatMaker domestic enriched artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/statmaker/domestic_enriched reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md
+          git add data/statmaker/domestic_enriched reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md reports/statmaker_domestic_score_patch.json reports/statmaker_domestic_score_patch.md
           if git diff --cached --quiet; then
             echo "No StatMaker domestic enriched changes to commit."
           else
-            git commit -m "Build StatMaker domestic enriched data"
+            git commit -m "Build StatMaker domestic API-Football data"
             git push
           fi
