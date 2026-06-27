@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       countries:
-        description: "Comma-separated countries. Empty means all enabled leagues."
+        description: "Comma-separated countries. Empty means all enabled API-Football registry leagues."
         required: false
         default: ""
         type: string
@@ -172,8 +172,8 @@ jobs:
                   if total and patched < total:
                       notes.append(f'missing scores after score patch: {patched}/{total}')
                   readiness['notes'] = notes or ['ok']
-              artifact['schema_version'] = max(int(artifact.get('schema_version') or 1), 2)
-              artifact.setdefault('data_contract', {})['active_source'] = 'API-Football domestic history and fixture statistics. Football-Data CSV is inactive.'
+              artifact['schema_version'] = max(int(artifact.get('schema_version') or 1), 3)
+              artifact.setdefault('data_contract', {})['active_source'] = 'API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.'
               artifact['score_patched_at'] = now_utc()
               write_json(artifact_path, artifact)
               rows.append({
@@ -186,9 +186,9 @@ jobs:
           index_path = out_root / 'index.json'
           index = load_json(index_path, {})
           if isinstance(index, dict):
-              index['schema_version'] = max(int(index.get('schema_version') or 1), 2)
+              index['schema_version'] = max(int(index.get('schema_version') or 1), 3)
               index['active_source'] = 'api-football'
-              index['csv_import'] = 'disabled'
+              index['csv_import'] = 'inactive_archive_only'
               index['score_patched_at'] = now_utc()
               by_output = {row['output_path']: row for row in rows}
               for league in index.get('leagues', []) if isinstance(index.get('leagues'), list) else []:
