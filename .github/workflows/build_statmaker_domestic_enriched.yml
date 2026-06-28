@@ -39,6 +39,47 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Apply Nordic extra leagues
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.')
+          extra = json.loads((root / 'config/nordic_extra_leagues.json').read_text(encoding='utf-8'))['leagues']
+          path = root / 'config/api_football_enrichment_leagues.json'
+          cfg = json.loads(path.read_text(encoding='utf-8-sig'))
+          leagues = cfg.setdefault('leagues', [])
+          by_code = {str(x.get('leagueCode', '')).upper(): i for i, x in enumerate(leagues)}
+          changed = False
+          for item in extra:
+              code = item['leagueCode']
+              entry = {
+                  'leagueCode': code,
+                  'continent': 'Europe',
+                  'country': item['country'],
+                  'display_name': item['competition'],
+                  'football_data_code': code,
+                  'api_football_league_id': item['apiFootballLeagueId'],
+                  'season': item.get('season', '2026'),
+                  'app_season': item.get('season', '2026'),
+                  'enabled': True,
+                  'priority_group': 'scandinavia',
+              }
+              if code in by_code:
+                  old = leagues[by_code[code]]
+                  merged = {**old, **entry}
+                  if merged != old:
+                      leagues[by_code[code]] = merged
+                      changed = True
+              else:
+                  leagues.append(entry)
+                  changed = True
+          if changed:
+              cfg['version'] = max(int(cfg.get('version', 3)), 4)
+              path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'Nordic extra enrichment leagues applied: {changed}')
+          PY
+
       - name: Build app-facing domestic enriched JSON
         run: |
           args=(--min-fixtures "${{ inputs.min_fixtures }}" --min-coverage "${{ inputs.min_coverage }}")
@@ -158,62 +199,22 @@ jobs:
                       missing += 1
                       continue
                   match.update(scores)
-                  quality = match.setdefault('quality', {})
-                  if isinstance(quality, dict):
-                      quality['has_score'] = True
                   patched += 1
-              readiness = artifact.setdefault('readiness', {})
-              if isinstance(readiness, dict):
-                  total = len(matches)
-                  readiness['fixtures_with_score'] = patched
-                  readiness['score_coverage'] = round(patched / total, 4) if total else 0.0
-                  notes = readiness.get('notes') if isinstance(readiness.get('notes'), list) else []
-                  notes = [note for note in notes if not str(note).startswith('score coverage') and not str(note).startswith('missing scores')]
-                  if total and patched < total:
-                      notes.append(f'missing scores after score patch: {patched}/{total}')
-                  readiness['notes'] = notes or ['ok']
-              artifact['schema_version'] = max(int(artifact.get('schema_version') or 1), 3)
-              artifact.setdefault('data_contract', {})['active_source'] = 'API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.'
-              artifact['score_patched_at'] = now_utc()
-              write_json(artifact_path, artifact)
-              rows.append({
-                  'output_path': str(artifact_path).replace('\\', '/'),
-                  'matches': len(matches),
-                  'scores_patched': patched,
-                  'missing_scores': missing,
-              })
-
-          index_path = out_root / 'index.json'
-          index = load_json(index_path, {})
-          if isinstance(index, dict):
-              index['schema_version'] = max(int(index.get('schema_version') or 1), 3)
-              index['active_source'] = 'api-football'
-              index['csv_import'] = 'inactive_archive_only'
-              index['score_patched_at'] = now_utc()
-              by_output = {row['output_path']: row for row in rows}
-              for league in index.get('leagues', []) if isinstance(index.get('leagues'), list) else []:
-                  row = by_output.get(str(league.get('output_path')))
-                  if row:
-                      league['fixtures_with_score'] = row['scores_patched']
-                      league['score_coverage'] = round(row['scores_patched'] / row['matches'], 4) if row['matches'] else 0.0
-              write_json(index_path, index)
-
-          write_json(report_json, {'generated_at': now_utc(), 'reports': rows})
-          lines = ['# StatMaker domestic score patch', '', f"Generated at: `{now_utc()}`", '', '| Output | Matches | Scores patched | Missing scores |', '| --- | ---: | ---: | ---: |']
-          for row in rows:
-              lines.append(f"| {row['output_path']} | {row['matches']} | {row['scores_patched']} | {row['missing_scores']} |")
-          report_md.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-          print(f"score patch artifacts={len(rows)} scores={sum(row['scores_patched'] for row in rows)}")
+              if patched:
+                  write_json(artifact_path, artifact)
+              rows.append({'artifact': str(artifact_path), 'patched': patched, 'missing': missing})
+          write_json(report_json, {'generated_at': now_utc(), 'rows': rows})
+          report_md.write_text('\n'.join(['# StatMaker domestic score patch', '', *[f"- `{row['artifact']}` patched={row['patched']} missing={row['missing']}" for row in rows]]) + '\n', encoding='utf-8')
           PY
 
-      - name: Commit StatMaker domestic enriched artifacts
+      - name: Commit domestic enriched JSON
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/statmaker/domestic_enriched reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md reports/statmaker_domestic_score_patch.json reports/statmaker_domestic_score_patch.md
           if git diff --cached --quiet; then
-            echo "No StatMaker domestic enriched changes to commit."
+            echo "No domestic enriched changes to commit."
           else
-            git commit -m "Build StatMaker domestic API-Football data"
+            git commit -m "Build StatMaker Domestic enriched artifacts"
             git push
           fi
