@@ -1,23 +1,28 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-06-27T06:56:36Z",
+  "schema_version": 3,
+  "generated_at": "2026-06-28T14:45:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
-    "rule": "The app reads this repository artifact and must not call API-Football directly.",
-    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
-    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/denmark/superliga/2025/fixture_stats.json",
-    "cache_generated_at": "2026-06-27T06:54:52Z"
+    "cache_generated_at": "2026-06-27T06:54:52Z",
+    "api_football_season": "2025",
+    "csv_import": "inactive_archive_only"
   },
   "competition": {
+    "league_code": "DNK",
     "country": "Denmark",
     "league": "Superliga",
     "football_data_code": "DNK",
     "api_football_league_id": 119,
-    "season": "2025",
+    "api_football_season": "2025",
+    "season": "2025-2026",
+    "app_season": "2025-2026",
     "priority_group": "scandinavia",
     "data_level": "fixture_statistics_enriched"
   },
@@ -54,9 +59,7 @@
     "bb_ready_candidate": true,
     "notes": [
       "ok"
-    ],
-    "fixtures_with_score": 193,
-    "score_coverage": 1.0
+    ]
   },
   "matches": [
     {
@@ -64,7 +67,11 @@
       "date_utc": "2025-07-18T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "Viborg",
       "away_team": "FC Copenhagen",
@@ -106,8 +113,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -145,7 +151,11 @@
       "date_utc": "2025-07-20T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "FC Fredericia",
       "away_team": "FC Nordsjaelland",
@@ -187,8 +197,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -226,7 +235,11 @@
       "date_utc": "2025-07-20T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "Vejle",
       "away_team": "Randers FC",
@@ -268,8 +281,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -307,7 +319,11 @@
       "date_utc": "2025-07-20T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "Sonderjyske",
       "away_team": "Aarhus",
@@ -349,8 +365,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -388,7 +403,11 @@
       "date_utc": "2025-07-20T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "FC Midtjylland",
       "away_team": "Odense",
@@ -430,8 +449,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -469,7 +487,11 @@
       "date_utc": "2025-07-20T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 1",
       "home_team": "Brondby",
       "away_team": "Silkeborg",
@@ -511,8 +533,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -550,7 +571,11 @@
       "date_utc": "2025-07-25T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "Aarhus",
       "away_team": "Randers FC",
@@ -592,8 +617,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -631,7 +655,11 @@
       "date_utc": "2025-07-26T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "FC Copenhagen",
       "away_team": "Vejle",
@@ -673,8 +701,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -712,7 +739,11 @@
       "date_utc": "2025-07-27T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "Odense",
       "away_team": "Viborg",
@@ -754,8 +785,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -793,7 +823,11 @@
       "date_utc": "2025-07-27T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "Silkeborg",
       "away_team": "FC Fredericia",
@@ -835,8 +869,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -874,7 +907,11 @@
       "date_utc": "2025-07-27T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "FC Nordsjaelland",
       "away_team": "Brondby",
@@ -916,8 +953,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -955,7 +991,11 @@
       "date_utc": "2025-07-28T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 2",
       "home_team": "FC Midtjylland",
       "away_team": "Sonderjyske",
@@ -997,8 +1037,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 6,
       "away_goals": 2,
@@ -1036,7 +1075,11 @@
       "date_utc": "2025-08-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "FC Fredericia",
       "away_team": "FC Copenhagen",
@@ -1078,8 +1121,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -1117,7 +1159,11 @@
       "date_utc": "2025-08-01T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "Vejle",
       "away_team": "Odense",
@@ -1159,8 +1205,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 0,
@@ -1198,7 +1243,11 @@
       "date_utc": "2025-08-03T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "Randers FC",
       "away_team": "Silkeborg",
@@ -1240,8 +1289,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -1279,7 +1327,11 @@
       "date_utc": "2025-08-03T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "Sonderjyske",
       "away_team": "FC Nordsjaelland",
@@ -1321,8 +1373,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -1360,7 +1411,11 @@
       "date_utc": "2025-08-03T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "Aarhus",
       "away_team": "FC Midtjylland",
@@ -1402,8 +1457,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -1441,7 +1495,11 @@
       "date_utc": "2025-08-03T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 3",
       "home_team": "Brondby",
       "away_team": "Viborg",
@@ -1483,8 +1541,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -1522,7 +1579,11 @@
       "date_utc": "2025-08-08T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "FC Copenhagen",
       "away_team": "Aarhus",
@@ -1564,8 +1625,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -1603,7 +1663,11 @@
       "date_utc": "2025-08-08T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "Viborg",
       "away_team": "Sonderjyske",
@@ -1645,8 +1709,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -1684,7 +1747,11 @@
       "date_utc": "2025-08-10T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "FC Midtjylland",
       "away_team": "FC Fredericia",
@@ -1726,8 +1793,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -1765,7 +1831,11 @@
       "date_utc": "2025-08-10T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "Silkeborg",
       "away_team": "FC Nordsjaelland",
@@ -1807,8 +1877,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 2,
@@ -1846,7 +1915,11 @@
       "date_utc": "2025-08-10T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "Brondby",
       "away_team": "Vejle",
@@ -1888,8 +1961,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -1927,7 +1999,11 @@
       "date_utc": "2025-08-11T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 4",
       "home_team": "Odense",
       "away_team": "Randers FC",
@@ -1969,8 +2045,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -2008,7 +2083,11 @@
       "date_utc": "2025-08-15T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "FC Nordsjaelland",
       "away_team": "FC Copenhagen",
@@ -2050,8 +2129,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -2089,7 +2167,11 @@
       "date_utc": "2025-08-15T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "FC Fredericia",
       "away_team": "Sonderjyske",
@@ -2131,8 +2213,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -2170,7 +2251,11 @@
       "date_utc": "2025-08-17T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "Vejle",
       "away_team": "FC Midtjylland",
@@ -2212,8 +2297,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -2251,7 +2335,11 @@
       "date_utc": "2025-08-17T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "Viborg",
       "away_team": "Silkeborg",
@@ -2293,8 +2381,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -2332,7 +2419,11 @@
       "date_utc": "2025-08-17T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "Randers FC",
       "away_team": "Brondby",
@@ -2374,8 +2465,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -2413,7 +2503,11 @@
       "date_utc": "2025-08-18T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 5",
       "home_team": "Odense",
       "away_team": "Aarhus",
@@ -2455,8 +2549,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 5,
@@ -2494,7 +2587,11 @@
       "date_utc": "2025-08-23T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "FC Copenhagen",
       "away_team": "Odense",
@@ -2536,8 +2633,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -2575,7 +2671,11 @@
       "date_utc": "2025-08-24T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "FC Fredericia",
       "away_team": "Randers FC",
@@ -2617,8 +2717,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -2656,7 +2755,11 @@
       "date_utc": "2025-08-24T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "FC Midtjylland",
       "away_team": "Silkeborg",
@@ -2698,8 +2801,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 2,
@@ -2737,7 +2839,11 @@
       "date_utc": "2025-08-24T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "Sonderjyske",
       "away_team": "Brondby",
@@ -2779,8 +2885,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -2818,7 +2923,11 @@
       "date_utc": "2025-08-24T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "Aarhus",
       "away_team": "Vejle",
@@ -2860,8 +2969,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -2899,7 +3007,11 @@
       "date_utc": "2025-08-25T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 6",
       "home_team": "FC Nordsjaelland",
       "away_team": "Viborg",
@@ -2941,8 +3053,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -2980,7 +3091,11 @@
       "date_utc": "2025-08-29T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Vejle",
       "away_team": "Viborg",
@@ -3022,8 +3137,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -3061,7 +3175,11 @@
       "date_utc": "2025-08-31T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Aarhus",
       "away_team": "FC Fredericia",
@@ -3103,8 +3221,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -3142,7 +3259,11 @@
       "date_utc": "2025-08-31T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Silkeborg",
       "away_team": "Sonderjyske",
@@ -3184,8 +3305,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -3223,7 +3343,11 @@
       "date_utc": "2025-08-31T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Odense",
       "away_team": "FC Nordsjaelland",
@@ -3265,8 +3389,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -3304,7 +3427,11 @@
       "date_utc": "2025-08-31T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Randers FC",
       "away_team": "FC Copenhagen",
@@ -3346,8 +3473,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 5,
@@ -3385,7 +3511,11 @@
       "date_utc": "2025-08-31T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 7",
       "home_team": "Brondby",
       "away_team": "FC Midtjylland",
@@ -3427,8 +3557,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -3466,7 +3595,11 @@
       "date_utc": "2025-09-12T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "Sonderjyske",
       "away_team": "Randers FC",
@@ -3508,8 +3641,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -3547,7 +3679,11 @@
       "date_utc": "2025-09-13T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "Brondby",
       "away_team": "FC Copenhagen",
@@ -3589,8 +3725,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -3628,7 +3763,11 @@
       "date_utc": "2025-09-14T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "Viborg",
       "away_team": "Aarhus",
@@ -3670,8 +3809,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -3709,7 +3847,11 @@
       "date_utc": "2025-09-14T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "FC Nordsjaelland",
       "away_team": "FC Midtjylland",
@@ -3751,8 +3893,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -3790,7 +3931,11 @@
       "date_utc": "2025-09-14T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "Silkeborg",
       "away_team": "Odense",
@@ -3832,8 +3977,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -3871,7 +4015,11 @@
       "date_utc": "2025-09-15T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 8",
       "home_team": "FC Fredericia",
       "away_team": "Vejle",
@@ -3913,8 +4061,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -3952,7 +4099,11 @@
       "date_utc": "2025-09-19T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "Odense",
       "away_team": "FC Fredericia",
@@ -3994,8 +4145,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -4033,7 +4183,11 @@
       "date_utc": "2025-09-20T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "FC Midtjylland",
       "away_team": "Viborg",
@@ -4075,8 +4229,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -4114,7 +4267,11 @@
       "date_utc": "2025-09-21T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "Vejle",
       "away_team": "Sonderjyske",
@@ -4156,8 +4313,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -4195,7 +4351,11 @@
       "date_utc": "2025-09-21T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "FC Copenhagen",
       "away_team": "Silkeborg",
@@ -4237,8 +4397,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -4276,7 +4435,11 @@
       "date_utc": "2025-09-21T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "Aarhus",
       "away_team": "Brondby",
@@ -4318,8 +4481,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -4357,7 +4519,11 @@
       "date_utc": "2025-09-22T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 9",
       "home_team": "Randers FC",
       "away_team": "FC Nordsjaelland",
@@ -4399,8 +4565,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -4438,7 +4603,11 @@
       "date_utc": "2025-09-27T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "Sonderjyske",
       "away_team": "FC Copenhagen",
@@ -4480,8 +4649,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -4519,7 +4687,11 @@
       "date_utc": "2025-09-28T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "Viborg",
       "away_team": "FC Fredericia",
@@ -4561,8 +4733,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -4600,7 +4771,11 @@
       "date_utc": "2025-09-28T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "Silkeborg",
       "away_team": "Vejle",
@@ -4642,8 +4817,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -4681,7 +4855,11 @@
       "date_utc": "2025-09-28T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "FC Nordsjaelland",
       "away_team": "Aarhus",
@@ -4723,8 +4901,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -4762,7 +4939,11 @@
       "date_utc": "2025-09-28T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "Brondby",
       "away_team": "Odense",
@@ -4804,8 +4985,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 1,
@@ -4843,7 +5023,11 @@
       "date_utc": "2025-09-29T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 10",
       "home_team": "FC Midtjylland",
       "away_team": "Randers FC",
@@ -4885,8 +5069,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -4924,7 +5107,11 @@
       "date_utc": "2025-10-03T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "Odense",
       "away_team": "Sonderjyske",
@@ -4966,8 +5153,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -5005,7 +5191,11 @@
       "date_utc": "2025-10-05T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "Randers FC",
       "away_team": "Viborg",
@@ -5047,8 +5237,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -5086,7 +5275,11 @@
       "date_utc": "2025-10-05T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "Vejle",
       "away_team": "FC Nordsjaelland",
@@ -5128,8 +5321,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -5167,7 +5359,11 @@
       "date_utc": "2025-10-05T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "Aarhus",
       "away_team": "Silkeborg",
@@ -5209,8 +5405,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -5248,7 +5443,11 @@
       "date_utc": "2025-10-05T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "FC Copenhagen",
       "away_team": "FC Midtjylland",
@@ -5290,8 +5489,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -5329,7 +5527,11 @@
       "date_utc": "2025-10-05T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 11",
       "home_team": "FC Fredericia",
       "away_team": "Brondby",
@@ -5371,8 +5573,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -5410,7 +5611,11 @@
       "date_utc": "2025-10-17T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "Silkeborg",
       "away_team": "FC Copenhagen",
@@ -5452,8 +5657,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -5491,7 +5695,11 @@
       "date_utc": "2025-10-19T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "FC Nordsjaelland",
       "away_team": "Randers FC",
@@ -5533,8 +5741,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -5572,7 +5779,11 @@
       "date_utc": "2025-10-19T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "Viborg",
       "away_team": "Odense",
@@ -5614,8 +5825,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -5653,7 +5863,11 @@
       "date_utc": "2025-10-19T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "Brondby",
       "away_team": "Aarhus",
@@ -5695,8 +5909,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -5734,7 +5947,11 @@
       "date_utc": "2025-10-19T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "FC Midtjylland",
       "away_team": "Vejle",
@@ -5776,8 +5993,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 1,
@@ -5815,7 +6031,11 @@
       "date_utc": "2025-10-20T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 12",
       "home_team": "Sonderjyske",
       "away_team": "FC Fredericia",
@@ -5857,8 +6077,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -5896,7 +6115,11 @@
       "date_utc": "2025-10-24T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "Aarhus",
       "away_team": "FC Nordsjaelland",
@@ -5938,8 +6161,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -5977,7 +6199,11 @@
       "date_utc": "2025-10-26T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "FC Fredericia",
       "away_team": "FC Midtjylland",
@@ -6019,8 +6245,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 4,
@@ -6058,7 +6283,11 @@
       "date_utc": "2025-10-26T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "Vejle",
       "away_team": "Silkeborg",
@@ -6100,8 +6329,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -6139,7 +6367,11 @@
       "date_utc": "2025-10-26T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "Randers FC",
       "away_team": "Sonderjyske",
@@ -6181,8 +6413,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -6220,7 +6451,11 @@
       "date_utc": "2025-10-26T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "FC Copenhagen",
       "away_team": "Viborg",
@@ -6262,8 +6497,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -6301,7 +6535,11 @@
       "date_utc": "2025-10-27T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 13",
       "home_team": "Odense",
       "away_team": "Brondby",
@@ -6343,8 +6581,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -6382,7 +6619,11 @@
       "date_utc": "2025-11-01T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "FC Copenhagen",
       "away_team": "FC Fredericia",
@@ -6424,8 +6665,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -6463,7 +6703,11 @@
       "date_utc": "2025-11-02T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "Viborg",
       "away_team": "Randers FC",
@@ -6505,8 +6749,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -6544,7 +6787,11 @@
       "date_utc": "2025-11-02T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "Sonderjyske",
       "away_team": "Vejle",
@@ -6586,8 +6833,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -6625,7 +6871,11 @@
       "date_utc": "2025-11-02T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "FC Nordsjaelland",
       "away_team": "Odense",
@@ -6667,8 +6917,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 4,
@@ -6706,7 +6955,11 @@
       "date_utc": "2025-11-02T19:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "Silkeborg",
       "away_team": "Brondby",
@@ -6748,8 +7001,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -6787,7 +7039,11 @@
       "date_utc": "2025-11-03T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 14",
       "home_team": "FC Midtjylland",
       "away_team": "Aarhus",
@@ -6829,8 +7085,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -6868,7 +7123,11 @@
       "date_utc": "2025-11-07T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "Odense",
       "away_team": "Silkeborg",
@@ -6910,8 +7169,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -6949,7 +7207,11 @@
       "date_utc": "2025-11-09T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "FC Fredericia",
       "away_team": "Viborg",
@@ -6991,8 +7253,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -7030,7 +7291,11 @@
       "date_utc": "2025-11-09T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "Vejle",
       "away_team": "FC Copenhagen",
@@ -7072,8 +7337,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -7111,7 +7375,11 @@
       "date_utc": "2025-11-09T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "Randers FC",
       "away_team": "FC Midtjylland",
@@ -7153,8 +7421,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -7192,7 +7459,11 @@
       "date_utc": "2025-11-09T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "Aarhus",
       "away_team": "Sonderjyske",
@@ -7234,8 +7505,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -7273,7 +7543,11 @@
       "date_utc": "2025-11-09T19:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 15",
       "home_team": "Brondby",
       "away_team": "FC Nordsjaelland",
@@ -7315,8 +7589,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -7354,7 +7627,11 @@
       "date_utc": "2025-11-21T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "Silkeborg",
       "away_team": "Aarhus",
@@ -7396,8 +7673,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -7435,7 +7711,11 @@
       "date_utc": "2025-11-23T11:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "FC Copenhagen",
       "away_team": "Brondby",
@@ -7477,8 +7757,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -7516,7 +7795,11 @@
       "date_utc": "2025-11-23T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "Viborg",
       "away_team": "Vejle",
@@ -7558,8 +7841,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 2,
@@ -7597,7 +7879,11 @@
       "date_utc": "2025-11-23T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "FC Nordsjaelland",
       "away_team": "FC Fredericia",
@@ -7639,8 +7925,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 0,
@@ -7678,7 +7963,11 @@
       "date_utc": "2025-11-23T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "Sonderjyske",
       "away_team": "FC Midtjylland",
@@ -7720,8 +8009,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -7759,7 +8047,11 @@
       "date_utc": "2025-11-24T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 16",
       "home_team": "Randers FC",
       "away_team": "Odense",
@@ -7801,8 +8093,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -7840,7 +8131,11 @@
       "date_utc": "2025-11-28T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "Sonderjyske",
       "away_team": "Viborg",
@@ -7882,8 +8177,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -7921,7 +8215,11 @@
       "date_utc": "2025-11-30T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "Aarhus",
       "away_team": "FC Copenhagen",
@@ -7963,8 +8261,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -8002,7 +8299,11 @@
       "date_utc": "2025-11-30T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "Silkeborg",
       "away_team": "Randers FC",
@@ -8044,8 +8345,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -8083,7 +8383,11 @@
       "date_utc": "2025-11-30T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "FC Midtjylland",
       "away_team": "FC Nordsjaelland",
@@ -8125,8 +8429,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 6,
       "away_goals": 0,
@@ -8164,7 +8467,11 @@
       "date_utc": "2025-11-30T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "Odense",
       "away_team": "Vejle",
@@ -8206,8 +8513,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -8245,7 +8551,11 @@
       "date_utc": "2025-12-01T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 17",
       "home_team": "Brondby",
       "away_team": "FC Fredericia",
@@ -8287,8 +8597,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -8326,7 +8635,11 @@
       "date_utc": "2025-12-05T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "FC Fredericia",
       "away_team": "Odense",
@@ -8368,8 +8681,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -8407,7 +8719,11 @@
       "date_utc": "2025-12-07T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "FC Nordsjaelland",
       "away_team": "Silkeborg",
@@ -8449,8 +8765,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 0,
@@ -8488,7 +8803,11 @@
       "date_utc": "2025-12-07T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "Viborg",
       "away_team": "FC Midtjylland",
@@ -8530,8 +8849,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -8569,7 +8887,11 @@
       "date_utc": "2025-12-07T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "Randers FC",
       "away_team": "Aarhus",
@@ -8611,8 +8933,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -8650,7 +8971,11 @@
       "date_utc": "2025-12-07T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "FC Copenhagen",
       "away_team": "Sonderjyske",
@@ -8692,8 +9017,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -8731,7 +9055,11 @@
       "date_utc": "2025-12-08T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 18",
       "home_team": "Vejle",
       "away_team": "Brondby",
@@ -8773,8 +9101,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -8812,7 +9139,11 @@
       "date_utc": "2026-02-08T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "FC Nordsjaelland",
       "away_team": "Sonderjyske",
@@ -8854,8 +9185,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -8893,7 +9223,11 @@
       "date_utc": "2026-02-08T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "Silkeborg",
       "away_team": "Viborg",
@@ -8935,8 +9269,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -8974,7 +9307,11 @@
       "date_utc": "2026-02-08T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "FC Midtjylland",
       "away_team": "FC Copenhagen",
@@ -9016,8 +9353,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -9055,7 +9391,11 @@
       "date_utc": "2026-02-08T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "Brondby",
       "away_team": "Randers FC",
@@ -9097,8 +9437,7 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -9136,7 +9475,11 @@
       "date_utc": "2026-02-09T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "Vejle",
       "away_team": "FC Fredericia",
@@ -9178,8 +9521,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -9217,7 +9559,11 @@
       "date_utc": "2026-02-09T20:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 19",
       "home_team": "Aarhus",
       "away_team": "Odense",
@@ -9259,8 +9605,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -9298,7 +9643,11 @@
       "date_utc": "2026-02-13T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "Randers FC",
       "away_team": "Vejle",
@@ -9340,8 +9689,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -9379,7 +9727,11 @@
       "date_utc": "2026-02-14T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "FC Copenhagen",
       "away_team": "FC Nordsjaelland",
@@ -9421,8 +9773,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -9460,7 +9811,11 @@
       "date_utc": "2026-02-15T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "FC Fredericia",
       "away_team": "Aarhus",
@@ -9502,8 +9857,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -9541,7 +9895,11 @@
       "date_utc": "2026-02-15T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "Odense",
       "away_team": "FC Midtjylland",
@@ -9583,8 +9941,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -9622,7 +9979,11 @@
       "date_utc": "2026-02-15T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "Viborg",
       "away_team": "Brondby",
@@ -9664,8 +10025,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -9703,7 +10063,11 @@
       "date_utc": "2026-02-16T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 20",
       "home_team": "Sonderjyske",
       "away_team": "Silkeborg",
@@ -9745,8 +10109,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -9784,7 +10147,11 @@
       "date_utc": "2026-02-20T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "FC Nordsjaelland",
       "away_team": "Vejle",
@@ -9826,8 +10193,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -9865,7 +10231,11 @@
       "date_utc": "2026-02-21T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "Odense",
       "away_team": "FC Copenhagen",
@@ -9907,8 +10277,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -9946,7 +10315,11 @@
       "date_utc": "2026-02-22T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "Randers FC",
       "away_team": "FC Fredericia",
@@ -9988,8 +10361,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -10027,7 +10399,11 @@
       "date_utc": "2026-02-22T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "Silkeborg",
       "away_team": "FC Midtjylland",
@@ -10069,8 +10445,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 4,
@@ -10108,7 +10483,11 @@
       "date_utc": "2026-02-22T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "Aarhus",
       "away_team": "Viborg",
@@ -10150,8 +10529,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 2,
@@ -10189,7 +10567,11 @@
       "date_utc": "2026-02-23T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 21",
       "home_team": "Brondby",
       "away_team": "Sonderjyske",
@@ -10231,8 +10613,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -10270,7 +10651,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "FC Copenhagen",
       "away_team": "Randers FC",
@@ -10312,8 +10697,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -10351,7 +10735,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "FC Fredericia",
       "away_team": "Silkeborg",
@@ -10393,8 +10781,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -10432,7 +10819,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "FC Midtjylland",
       "away_team": "Brondby",
@@ -10474,8 +10865,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -10513,7 +10903,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "Sonderjyske",
       "away_team": "Odense",
@@ -10555,8 +10949,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -10594,7 +10987,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "Vejle",
       "away_team": "Aarhus",
@@ -10636,8 +11033,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -10675,7 +11071,11 @@
       "date_utc": "2026-03-01T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Regular Season - 22",
       "home_team": "Viborg",
       "away_team": "FC Nordsjaelland",
@@ -10717,8 +11117,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -10756,7 +11155,11 @@
       "date_utc": "2026-03-13T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 23",
       "home_team": "FC Fredericia",
       "away_team": "Randers FC",
@@ -10798,8 +11201,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -10837,7 +11239,11 @@
       "date_utc": "2026-03-15T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 23",
       "home_team": "Odense",
       "away_team": "FC Copenhagen",
@@ -10879,8 +11285,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -10918,7 +11323,11 @@
       "date_utc": "2026-03-15T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 23",
       "home_team": "FC Midtjylland",
       "away_team": "FC Nordsjaelland",
@@ -10960,8 +11369,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -10999,7 +11407,11 @@
       "date_utc": "2026-03-15T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 23",
       "home_team": "Sonderjyske",
       "away_team": "Aarhus",
@@ -11041,8 +11453,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -11080,7 +11491,11 @@
       "date_utc": "2026-03-15T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 23",
       "home_team": "Brondby",
       "away_team": "Viborg",
@@ -11122,8 +11537,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -11161,7 +11575,11 @@
       "date_utc": "2026-03-16T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 23",
       "home_team": "Silkeborg",
       "away_team": "Vejle",
@@ -11203,8 +11621,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -11242,7 +11659,11 @@
       "date_utc": "2026-03-20T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 24",
       "home_team": "Vejle",
       "away_team": "Odense",
@@ -11284,8 +11705,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -11323,7 +11743,11 @@
       "date_utc": "2026-03-22T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 24",
       "home_team": "Randers FC",
       "away_team": "Silkeborg",
@@ -11365,8 +11789,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -11404,7 +11827,11 @@
       "date_utc": "2026-03-22T13:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 24",
       "home_team": "FC Nordsjaelland",
       "away_team": "Sonderjyske",
@@ -11446,8 +11873,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -11485,7 +11911,11 @@
       "date_utc": "2026-03-22T15:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 24",
       "home_team": "FC Copenhagen",
       "away_team": "FC Fredericia",
@@ -11527,8 +11957,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -11566,7 +11995,11 @@
       "date_utc": "2026-03-22T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 24",
       "home_team": "Aarhus",
       "away_team": "Brondby",
@@ -11608,8 +12041,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -11647,7 +12079,11 @@
       "date_utc": "2026-03-22T19:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 24",
       "home_team": "Viborg",
       "away_team": "FC Midtjylland",
@@ -11689,8 +12125,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -11728,7 +12163,11 @@
       "date_utc": "2026-04-04T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 25",
       "home_team": "FC Midtjylland",
       "away_team": "Sonderjyske",
@@ -11770,8 +12209,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -11809,7 +12247,11 @@
       "date_utc": "2026-04-05T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 25",
       "home_team": "FC Copenhagen",
       "away_team": "Silkeborg",
@@ -11851,8 +12293,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 7,
       "away_goals": 0,
@@ -11890,7 +12331,11 @@
       "date_utc": "2026-04-06T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 25",
       "home_team": "Vejle",
       "away_team": "Randers FC",
@@ -11932,8 +12377,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -11971,7 +12415,11 @@
       "date_utc": "2026-04-06T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 25",
       "home_team": "Odense",
       "away_team": "FC Fredericia",
@@ -12013,8 +12461,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -12052,7 +12499,11 @@
       "date_utc": "2026-04-06T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 25",
       "home_team": "Viborg",
       "away_team": "Aarhus",
@@ -12094,8 +12545,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -12133,7 +12583,11 @@
       "date_utc": "2026-04-07T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 25",
       "home_team": "FC Nordsjaelland",
       "away_team": "Brondby",
@@ -12175,8 +12629,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -12214,7 +12667,11 @@
       "date_utc": "2026-04-10T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 26",
       "home_team": "Aarhus",
       "away_team": "FC Nordsjaelland",
@@ -12256,8 +12713,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -12295,7 +12751,11 @@
       "date_utc": "2026-04-12T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 26",
       "home_team": "Silkeborg",
       "away_team": "Odense",
@@ -12337,8 +12797,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -12376,7 +12835,11 @@
       "date_utc": "2026-04-12T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 26",
       "home_team": "Sonderjyske",
       "away_team": "Viborg",
@@ -12418,8 +12881,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -12457,7 +12919,11 @@
       "date_utc": "2026-04-12T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 26",
       "home_team": "Brondby",
       "away_team": "FC Midtjylland",
@@ -12499,8 +12965,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -12538,7 +13003,11 @@
       "date_utc": "2026-04-12T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 26",
       "home_team": "Randers FC",
       "away_team": "FC Copenhagen",
@@ -12580,8 +13049,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -12619,7 +13087,11 @@
       "date_utc": "2026-04-13T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 26",
       "home_team": "FC Fredericia",
       "away_team": "Vejle",
@@ -12661,8 +13133,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -12700,7 +13171,11 @@
       "date_utc": "2026-04-17T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 27",
       "home_team": "Brondby",
       "away_team": "Sonderjyske",
@@ -12742,8 +13217,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 6,
       "away_goals": 0,
@@ -12781,7 +13255,11 @@
       "date_utc": "2026-04-19T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 27",
       "home_team": "Odense",
       "away_team": "Randers FC",
@@ -12823,8 +13301,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -12862,7 +13339,11 @@
       "date_utc": "2026-04-19T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 27",
       "home_team": "Silkeborg",
       "away_team": "FC Fredericia",
@@ -12904,8 +13385,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -12943,7 +13423,11 @@
       "date_utc": "2026-04-19T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 27",
       "home_team": "FC Nordsjaelland",
       "away_team": "Viborg",
@@ -12985,8 +13469,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -13024,7 +13507,11 @@
       "date_utc": "2026-04-19T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 27",
       "home_team": "Vejle",
       "away_team": "FC Copenhagen",
@@ -13066,8 +13553,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -13105,7 +13591,11 @@
       "date_utc": "2026-04-20T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 27",
       "home_team": "FC Midtjylland",
       "away_team": "Aarhus",
@@ -13147,8 +13637,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -13186,7 +13675,11 @@
       "date_utc": "2026-04-22T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 28",
       "home_team": "FC Copenhagen",
       "away_team": "Odense",
@@ -13228,8 +13721,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -13267,7 +13759,11 @@
       "date_utc": "2026-04-22T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 28",
       "home_team": "Vejle",
       "away_team": "Silkeborg",
@@ -13309,8 +13805,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -13348,7 +13843,11 @@
       "date_utc": "2026-04-22T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 28",
       "home_team": "Viborg",
       "away_team": "Brondby",
@@ -13390,8 +13889,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -13429,7 +13927,11 @@
       "date_utc": "2026-04-23T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 28",
       "home_team": "Randers FC",
       "away_team": "FC Fredericia",
@@ -13471,8 +13973,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -13510,7 +14011,11 @@
       "date_utc": "2026-04-23T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 28",
       "home_team": "FC Nordsjaelland",
       "away_team": "Aarhus",
@@ -13552,8 +14057,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -13591,7 +14095,11 @@
       "date_utc": "2026-04-23T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 28",
       "home_team": "Sonderjyske",
       "away_team": "FC Midtjylland",
@@ -13633,8 +14141,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -13672,7 +14179,11 @@
       "date_utc": "2026-04-26T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 29",
       "home_team": "FC Fredericia",
       "away_team": "Odense",
@@ -13714,8 +14225,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -13753,7 +14263,11 @@
       "date_utc": "2026-04-26T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 29",
       "home_team": "Silkeborg",
       "away_team": "Randers FC",
@@ -13795,8 +14309,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -13834,7 +14347,11 @@
       "date_utc": "2026-04-26T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 29",
       "home_team": "Sonderjyske",
       "away_team": "Brondby",
@@ -13876,8 +14393,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -13915,7 +14431,11 @@
       "date_utc": "2026-04-26T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 29",
       "home_team": "Viborg",
       "away_team": "FC Nordsjaelland",
@@ -13957,8 +14477,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -13996,7 +14515,11 @@
       "date_utc": "2026-04-26T18:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 29",
       "home_team": "Aarhus",
       "away_team": "FC Midtjylland",
@@ -14038,8 +14561,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -14077,7 +14599,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 29",
       "home_team": "FC Copenhagen",
       "away_team": "Vejle",
@@ -14119,8 +14645,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -14158,7 +14683,11 @@
       "date_utc": "2026-05-01T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 30",
       "home_team": "Brondby",
       "away_team": "FC Nordsjaelland",
@@ -14200,8 +14729,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -14239,7 +14767,11 @@
       "date_utc": "2026-05-03T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 30",
       "home_team": "Odense",
       "away_team": "Silkeborg",
@@ -14281,8 +14813,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -14320,7 +14851,11 @@
       "date_utc": "2026-05-03T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 30",
       "home_team": "Randers FC",
       "away_team": "Vejle",
@@ -14362,8 +14897,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -14401,7 +14935,11 @@
       "date_utc": "2026-05-03T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 30",
       "home_team": "FC Fredericia",
       "away_team": "FC Copenhagen",
@@ -14443,8 +14981,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -14482,7 +15019,11 @@
       "date_utc": "2026-05-03T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 30",
       "home_team": "Aarhus",
       "away_team": "Sonderjyske",
@@ -14524,8 +15065,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -14563,7 +15103,11 @@
       "date_utc": "2026-05-04T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 30",
       "home_team": "FC Midtjylland",
       "away_team": "Viborg",
@@ -14605,8 +15149,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -14644,7 +15187,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 31",
       "home_team": "Viborg",
       "away_team": "Sonderjyske",
@@ -14686,8 +15233,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -14725,7 +15271,11 @@
       "date_utc": "2026-05-10T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 31",
       "home_team": "Vejle",
       "away_team": "FC Fredericia",
@@ -14767,8 +15317,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -14806,7 +15355,11 @@
       "date_utc": "2026-05-10T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 31",
       "home_team": "FC Nordsjaelland",
       "away_team": "FC Midtjylland",
@@ -14848,8 +15401,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -14887,7 +15439,11 @@
       "date_utc": "2026-05-10T14:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 31",
       "home_team": "Silkeborg",
       "away_team": "FC Copenhagen",
@@ -14929,8 +15485,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 4,
@@ -14968,7 +15523,11 @@
       "date_utc": "2026-05-10T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 31",
       "home_team": "Brondby",
       "away_team": "Aarhus",
@@ -15010,8 +15569,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -15049,7 +15607,11 @@
       "date_utc": "2026-05-11T17:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 31",
       "home_team": "Randers FC",
       "away_team": "Odense",
@@ -15091,8 +15653,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -15130,7 +15691,11 @@
       "date_utc": "2026-05-17T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 32",
       "home_team": "FC Copenhagen",
       "away_team": "Randers FC",
@@ -15172,8 +15737,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 0,
@@ -15211,7 +15775,11 @@
       "date_utc": "2026-05-17T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 32",
       "home_team": "FC Fredericia",
       "away_team": "Silkeborg",
@@ -15253,8 +15821,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -15292,7 +15859,11 @@
       "date_utc": "2026-05-17T12:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Relegation Group - 32",
       "home_team": "Odense",
       "away_team": "Vejle",
@@ -15334,8 +15905,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -15373,7 +15943,11 @@
       "date_utc": "2026-05-17T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 32",
       "home_team": "Aarhus",
       "away_team": "Viborg",
@@ -15415,8 +15989,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 6,
       "away_goals": 2,
@@ -15454,7 +16027,11 @@
       "date_utc": "2026-05-17T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 32",
       "home_team": "FC Midtjylland",
       "away_team": "Brondby",
@@ -15496,8 +16073,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -15535,7 +16111,11 @@
       "date_utc": "2026-05-17T16:00:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Championship Group - 32",
       "home_team": "Sonderjyske",
       "away_team": "FC Nordsjaelland",
@@ -15577,8 +16157,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -15616,7 +16195,11 @@
       "date_utc": "2026-05-21T16:30:00+00:00",
       "country": "Denmark",
       "league": "Superliga",
-      "season": "2025",
+      "league_code": "DNK",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 119,
       "round": "Final",
       "home_team": "Brondby",
       "away_team": "FC Copenhagen",
@@ -15658,8 +16241,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -15692,6 +16274,5 @@
         }
       }
     }
-  ],
-  "score_patched_at": "2026-06-27T06:56:36Z"
+  ]
 }

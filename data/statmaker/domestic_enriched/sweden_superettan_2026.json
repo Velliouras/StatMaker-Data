@@ -1,23 +1,28 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-06-27T06:56:36Z",
+  "schema_version": 3,
+  "generated_at": "2026-06-28T14:45:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
-    "rule": "The app reads this repository artifact and must not call API-Football directly.",
-    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
-    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-06-27T06:54:56Z"
+    "cache_generated_at": "2026-06-27T06:54:56Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
   },
   "competition": {
+    "league_code": "SWE2",
     "country": "Sweden",
     "league": "Superettan",
-    "football_data_code": "SWE",
+    "football_data_code": "SWE2",
     "api_football_league_id": 114,
+    "api_football_season": "2026",
     "season": "2026",
+    "app_season": "2026",
     "priority_group": "scandinavia",
     "data_level": "fixture_statistics_enriched"
   },
@@ -57,9 +62,7 @@
       "low BB-core coverage: 0.5619 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
-    ],
-    "fixtures_with_score": 105,
-    "score_coverage": 1.0
+    ]
   },
   "matches": [
     {
@@ -67,7 +70,11 @@
       "date_utc": "2026-04-03T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Helsingborg",
       "away_team": "Osters IF",
@@ -109,8 +116,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -148,7 +154,11 @@
       "date_utc": "2026-04-04T10:30:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "IFK Norrkoping",
       "away_team": "IFK Varnamo",
@@ -190,8 +200,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 6,
       "away_goals": 0,
@@ -229,7 +238,11 @@
       "date_utc": "2026-04-05T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Norrby IF",
       "away_team": "IK brage",
@@ -271,8 +284,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -310,7 +322,11 @@
       "date_utc": "2026-04-06T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Falkenbergs FF",
       "away_team": "Ljungskile SK",
@@ -352,8 +368,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -391,7 +406,11 @@
       "date_utc": "2026-04-06T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "GIF Sundsvall",
       "away_team": "United Nordic",
@@ -433,8 +452,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -472,7 +490,11 @@
       "date_utc": "2026-04-06T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Orebro SK",
       "away_team": "Landskrona BoIS",
@@ -514,8 +536,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -553,7 +574,11 @@
       "date_utc": "2026-04-06T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Varbergs BoIS FC",
       "away_team": "Ostersunds FK",
@@ -595,8 +620,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -634,7 +658,11 @@
       "date_utc": "2026-04-07T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 1",
       "home_team": "Oddevold",
       "away_team": "Sandviken",
@@ -676,8 +704,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -715,7 +742,11 @@
       "date_utc": "2026-04-11T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "Ljungskile SK",
       "away_team": "IFK Norrkoping",
@@ -757,8 +788,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -796,7 +826,11 @@
       "date_utc": "2026-04-11T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "Osters IF",
       "away_team": "Orebro SK",
@@ -838,8 +872,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -877,7 +910,11 @@
       "date_utc": "2026-04-11T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "United Nordic",
       "away_team": "Helsingborg",
@@ -919,8 +956,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -958,7 +994,11 @@
       "date_utc": "2026-04-11T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "Ostersunds FK",
       "away_team": "Norrby IF",
@@ -1000,8 +1040,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -1039,7 +1078,11 @@
       "date_utc": "2026-04-12T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "IK brage",
       "away_team": "Oddevold",
@@ -1081,8 +1124,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 4,
@@ -1120,7 +1162,11 @@
       "date_utc": "2026-04-12T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "Landskrona BoIS",
       "away_team": "Falkenbergs FF",
@@ -1162,8 +1208,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -1201,7 +1246,11 @@
       "date_utc": "2026-04-12T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "Sandviken",
       "away_team": "Varbergs BoIS FC",
@@ -1243,8 +1292,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -1282,7 +1330,11 @@
       "date_utc": "2026-04-14T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 2",
       "home_team": "IFK Varnamo",
       "away_team": "GIF Sundsvall",
@@ -1324,8 +1376,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -1363,7 +1414,11 @@
       "date_utc": "2026-04-18T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Varbergs BoIS FC",
       "away_team": "United Nordic",
@@ -1405,8 +1460,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -1444,7 +1498,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Sandviken",
       "away_team": "IFK Varnamo",
@@ -1486,8 +1544,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -1525,7 +1582,11 @@
       "date_utc": "2026-04-18T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Landskrona BoIS",
       "away_team": "Ljungskile SK",
@@ -1567,8 +1628,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -1606,7 +1666,11 @@
       "date_utc": "2026-04-19T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Norrby IF",
       "away_team": "Falkenbergs FF",
@@ -1648,8 +1712,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -1687,7 +1750,11 @@
       "date_utc": "2026-04-19T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Helsingborg",
       "away_team": "Ostersunds FK",
@@ -1729,8 +1796,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -1768,7 +1834,11 @@
       "date_utc": "2026-04-20T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Oddevold",
       "away_team": "Osters IF",
@@ -1810,8 +1880,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -1849,7 +1918,11 @@
       "date_utc": "2026-04-20T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "GIF Sundsvall",
       "away_team": "IK brage",
@@ -1891,8 +1964,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -1930,7 +2002,11 @@
       "date_utc": "2026-04-21T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 3",
       "home_team": "Orebro SK",
       "away_team": "IFK Norrkoping",
@@ -1972,8 +2048,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -2011,7 +2086,11 @@
       "date_utc": "2026-04-24T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "Ljungskile SK",
       "away_team": "Helsingborg",
@@ -2053,8 +2132,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -2092,7 +2170,11 @@
       "date_utc": "2026-04-25T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "Osters IF",
       "away_team": "Ostersunds FK",
@@ -2134,8 +2216,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -2173,7 +2254,11 @@
       "date_utc": "2026-04-25T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "Falkenbergs FF",
       "away_team": "GIF Sundsvall",
@@ -2215,8 +2300,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -2254,7 +2338,11 @@
       "date_utc": "2026-04-25T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "United Nordic",
       "away_team": "Sandviken",
@@ -2296,8 +2384,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -2335,7 +2422,11 @@
       "date_utc": "2026-04-25T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "Orebro SK",
       "away_team": "Norrby IF",
@@ -2377,8 +2468,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -2416,7 +2506,11 @@
       "date_utc": "2026-04-26T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "IFK Varnamo",
       "away_team": "Oddevold",
@@ -2458,8 +2552,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -2497,7 +2590,11 @@
       "date_utc": "2026-04-26T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "IK brage",
       "away_team": "Varbergs BoIS FC",
@@ -2539,8 +2636,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -2578,7 +2674,11 @@
       "date_utc": "2026-04-28T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 4",
       "home_team": "IFK Norrkoping",
       "away_team": "Landskrona BoIS",
@@ -2620,8 +2720,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -2659,7 +2758,11 @@
       "date_utc": "2026-05-02T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Ljungskile SK",
       "away_team": "United Nordic",
@@ -2701,8 +2804,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -2740,7 +2842,11 @@
       "date_utc": "2026-05-02T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Sandviken",
       "away_team": "Norrby IF",
@@ -2782,8 +2888,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -2821,7 +2926,11 @@
       "date_utc": "2026-05-02T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Varbergs BoIS FC",
       "away_team": "Orebro SK",
@@ -2863,8 +2972,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -2902,7 +3010,11 @@
       "date_utc": "2026-05-02T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "GIF Sundsvall",
       "away_team": "Oddevold",
@@ -2944,8 +3056,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -2983,7 +3094,11 @@
       "date_utc": "2026-05-03T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Ostersunds FK",
       "away_team": "IFK Varnamo",
@@ -3025,8 +3140,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -3064,7 +3178,11 @@
       "date_utc": "2026-05-03T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Helsingborg",
       "away_team": "IK brage",
@@ -3106,8 +3224,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -3145,7 +3262,11 @@
       "date_utc": "2026-05-04T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Landskrona BoIS",
       "away_team": "Osters IF",
@@ -3187,8 +3308,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -3226,7 +3346,11 @@
       "date_utc": "2026-05-05T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 5",
       "home_team": "Falkenbergs FF",
       "away_team": "IFK Norrkoping",
@@ -3268,8 +3392,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -3307,7 +3430,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Orebro SK",
       "away_team": "IK brage",
@@ -3349,8 +3476,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -3388,7 +3514,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Varbergs BoIS FC",
       "away_team": "IFK Varnamo",
@@ -3430,8 +3560,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -3469,7 +3598,11 @@
       "date_utc": "2026-05-09T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "United Nordic",
       "away_team": "Osters IF",
@@ -3511,8 +3644,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 2,
@@ -3550,7 +3682,11 @@
       "date_utc": "2026-05-09T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Oddevold",
       "away_team": "Landskrona BoIS",
@@ -3592,8 +3728,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -3631,7 +3766,11 @@
       "date_utc": "2026-05-09T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Ostersunds FK",
       "away_team": "Falkenbergs FF",
@@ -3673,8 +3812,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -3712,7 +3850,11 @@
       "date_utc": "2026-05-09T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Norrby IF",
       "away_team": "Helsingborg",
@@ -3754,8 +3896,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 3,
@@ -3793,7 +3934,11 @@
       "date_utc": "2026-05-09T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "Sandviken",
       "away_team": "Ljungskile SK",
@@ -3835,8 +3980,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -3874,7 +4018,11 @@
       "date_utc": "2026-05-09T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 6",
       "home_team": "GIF Sundsvall",
       "away_team": "IFK Norrkoping",
@@ -3916,8 +4064,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -3955,7 +4102,11 @@
       "date_utc": "2026-05-12T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "Landskrona BoIS",
       "away_team": "Norrby IF",
@@ -3997,8 +4148,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -4036,7 +4186,11 @@
       "date_utc": "2026-05-12T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "IFK Varnamo",
       "away_team": "Orebro SK",
@@ -4078,8 +4232,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -4117,7 +4270,11 @@
       "date_utc": "2026-05-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "IK brage",
       "away_team": "Ostersunds FK",
@@ -4159,8 +4316,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 4,
@@ -4198,7 +4354,11 @@
       "date_utc": "2026-05-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "Falkenbergs FF",
       "away_team": "Varbergs BoIS FC",
@@ -4240,8 +4400,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -4279,7 +4438,11 @@
       "date_utc": "2026-05-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "Helsingborg",
       "away_team": "Oddevold",
@@ -4321,8 +4484,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -4360,7 +4522,11 @@
       "date_utc": "2026-05-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "IFK Norrkoping",
       "away_team": "United Nordic",
@@ -4402,8 +4568,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -4441,7 +4606,11 @@
       "date_utc": "2026-05-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "Osters IF",
       "away_team": "Sandviken",
@@ -4483,8 +4652,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -4522,7 +4690,11 @@
       "date_utc": "2026-05-14T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 7",
       "home_team": "Ljungskile SK",
       "away_team": "GIF Sundsvall",
@@ -4564,8 +4736,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -4603,7 +4774,11 @@
       "date_utc": "2026-05-16T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "IK brage",
       "away_team": "IFK Norrkoping",
@@ -4645,8 +4820,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -4684,7 +4858,11 @@
       "date_utc": "2026-05-17T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "Ostersunds FK",
       "away_team": "Sandviken",
@@ -4726,8 +4904,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -4765,7 +4942,11 @@
       "date_utc": "2026-05-17T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "United Nordic",
       "away_team": "Falkenbergs FF",
@@ -4807,8 +4988,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -4846,7 +5026,11 @@
       "date_utc": "2026-05-17T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "Osters IF",
       "away_team": "Ljungskile SK",
@@ -4888,8 +5072,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 4,
@@ -4927,7 +5110,11 @@
       "date_utc": "2026-05-17T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "IFK Varnamo",
       "away_team": "Norrby IF",
@@ -4969,8 +5156,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -5008,7 +5194,11 @@
       "date_utc": "2026-05-18T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "GIF Sundsvall",
       "away_team": "Landskrona BoIS",
@@ -5050,8 +5240,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -5089,7 +5278,11 @@
       "date_utc": "2026-05-18T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "Oddevold",
       "away_team": "Orebro SK",
@@ -5131,8 +5324,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 1,
@@ -5170,7 +5362,11 @@
       "date_utc": "2026-05-19T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 8",
       "home_team": "Helsingborg",
       "away_team": "Varbergs BoIS FC",
@@ -5212,8 +5408,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -5251,7 +5446,11 @@
       "date_utc": "2026-05-23T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Norrby IF",
       "away_team": "Ljungskile SK",
@@ -5293,8 +5492,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -5332,7 +5530,11 @@
       "date_utc": "2026-05-23T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "United Nordic",
       "away_team": "IK brage",
@@ -5374,8 +5576,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -5413,7 +5614,11 @@
       "date_utc": "2026-05-23T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Oddevold",
       "away_team": "Ostersunds FK",
@@ -5455,8 +5660,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -5494,7 +5698,11 @@
       "date_utc": "2026-05-23T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Falkenbergs FF",
       "away_team": "IFK Varnamo",
@@ -5536,8 +5744,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 1,
@@ -5575,7 +5782,11 @@
       "date_utc": "2026-05-24T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Varbergs BoIS FC",
       "away_team": "GIF Sundsvall",
@@ -5617,8 +5828,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 0,
@@ -5656,7 +5866,11 @@
       "date_utc": "2026-05-24T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Sandviken",
       "away_team": "Landskrona BoIS",
@@ -5698,8 +5912,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -5737,7 +5950,11 @@
       "date_utc": "2026-05-25T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "IFK Norrkoping",
       "away_team": "Osters IF",
@@ -5779,8 +5996,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -5818,7 +6034,11 @@
       "date_utc": "2026-05-26T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 9",
       "home_team": "Orebro SK",
       "away_team": "Helsingborg",
@@ -5860,8 +6080,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -5899,7 +6118,11 @@
       "date_utc": "2026-05-30T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Landskrona BoIS",
       "away_team": "IK brage",
@@ -5941,8 +6164,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -5980,7 +6202,11 @@
       "date_utc": "2026-05-30T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Ljungskile SK",
       "away_team": "Varbergs BoIS FC",
@@ -6022,8 +6248,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -6061,7 +6286,11 @@
       "date_utc": "2026-05-30T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Falkenbergs FF",
       "away_team": "Oddevold",
@@ -6103,8 +6332,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -6142,7 +6370,11 @@
       "date_utc": "2026-05-30T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "GIF Sundsvall",
       "away_team": "Sandviken",
@@ -6184,8 +6416,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -6223,7 +6454,11 @@
       "date_utc": "2026-05-30T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Osters IF",
       "away_team": "Norrby IF",
@@ -6265,8 +6500,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 1,
@@ -6304,7 +6538,11 @@
       "date_utc": "2026-05-31T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "IFK Varnamo",
       "away_team": "United Nordic",
@@ -6346,8 +6584,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -6385,7 +6622,11 @@
       "date_utc": "2026-05-31T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Helsingborg",
       "away_team": "IFK Norrkoping",
@@ -6427,8 +6668,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -6466,7 +6706,11 @@
       "date_utc": "2026-05-31T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 10",
       "home_team": "Ostersunds FK",
       "away_team": "Orebro SK",
@@ -6508,8 +6752,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -6547,7 +6790,11 @@
       "date_utc": "2026-06-09T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "IK brage",
       "away_team": "Ljungskile SK",
@@ -6589,8 +6836,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 2,
@@ -6628,7 +6874,11 @@
       "date_utc": "2026-06-09T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "United Nordic",
       "away_team": "Ostersunds FK",
@@ -6670,8 +6920,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -6709,7 +6958,11 @@
       "date_utc": "2026-06-09T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Oddevold",
       "away_team": "IFK Norrkoping",
@@ -6751,8 +7004,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 2,
@@ -6790,7 +7042,11 @@
       "date_utc": "2026-06-09T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Osters IF",
       "away_team": "IFK Varnamo",
@@ -6832,8 +7088,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 0,
@@ -6871,7 +7126,11 @@
       "date_utc": "2026-06-09T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Sandviken",
       "away_team": "Falkenbergs FF",
@@ -6913,8 +7172,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 4,
       "away_goals": 2,
@@ -6952,7 +7210,11 @@
       "date_utc": "2026-06-10T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Orebro SK",
       "away_team": "GIF Sundsvall",
@@ -6994,8 +7256,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -7033,7 +7294,11 @@
       "date_utc": "2026-06-10T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Varbergs BoIS FC",
       "away_team": "Norrby IF",
@@ -7075,8 +7340,7 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -7114,7 +7378,11 @@
       "date_utc": "2026-06-11T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 11",
       "home_team": "Helsingborg",
       "away_team": "Landskrona BoIS",
@@ -7156,8 +7424,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 3,
@@ -7195,7 +7462,11 @@
       "date_utc": "2026-06-14T11:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "Norrby IF",
       "away_team": "Oddevold",
@@ -7237,8 +7508,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -7276,7 +7546,11 @@
       "date_utc": "2026-06-14T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "Falkenbergs FF",
       "away_team": "Orebro SK",
@@ -7318,8 +7592,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -7357,7 +7630,11 @@
       "date_utc": "2026-06-14T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "Ljungskile SK",
       "away_team": "Ostersunds FK",
@@ -7399,8 +7676,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -7438,7 +7714,11 @@
       "date_utc": "2026-06-14T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "Sandviken",
       "away_team": "IK brage",
@@ -7480,8 +7760,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 3,
       "away_goals": 2,
@@ -7519,7 +7798,11 @@
       "date_utc": "2026-06-15T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "GIF Sundsvall",
       "away_team": "Osters IF",
@@ -7561,8 +7844,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 4,
@@ -7600,7 +7882,11 @@
       "date_utc": "2026-06-15T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "IFK Norrkoping",
       "away_team": "Varbergs BoIS FC",
@@ -7642,8 +7928,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -7681,7 +7966,11 @@
       "date_utc": "2026-06-16T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "Landskrona BoIS",
       "away_team": "United Nordic",
@@ -7723,8 +8012,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 0,
@@ -7762,7 +8050,11 @@
       "date_utc": "2026-06-16T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 12",
       "home_team": "IFK Varnamo",
       "away_team": "Helsingborg",
@@ -7804,8 +8096,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 1,
@@ -7843,7 +8134,11 @@
       "date_utc": "2026-06-21T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "IK brage",
       "away_team": "IFK Varnamo",
@@ -7885,8 +8180,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 1,
@@ -7924,7 +8218,11 @@
       "date_utc": "2026-06-21T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Helsingborg",
       "away_team": "GIF Sundsvall",
@@ -7966,8 +8264,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 5,
       "away_goals": 2,
@@ -8005,7 +8302,11 @@
       "date_utc": "2026-06-21T13:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Osters IF",
       "away_team": "Falkenbergs FF",
@@ -8047,8 +8348,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 3,
@@ -8086,7 +8386,11 @@
       "date_utc": "2026-06-21T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Norrby IF",
       "away_team": "United Nordic",
@@ -8128,8 +8432,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -8167,7 +8470,11 @@
       "date_utc": "2026-06-21T15:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Ostersunds FK",
       "away_team": "IFK Norrkoping",
@@ -8209,8 +8516,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 2,
@@ -8248,7 +8554,11 @@
       "date_utc": "2026-06-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Oddevold",
       "away_team": "Ljungskile SK",
@@ -8290,8 +8600,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 0,
       "away_goals": 0,
@@ -8329,7 +8638,11 @@
       "date_utc": "2026-06-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Varbergs BoIS FC",
       "away_team": "Landskrona BoIS",
@@ -8371,8 +8684,7 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 3,
@@ -8410,7 +8722,11 @@
       "date_utc": "2026-06-22T17:05:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 13",
       "home_team": "Orebro SK",
       "away_team": "Sandviken",
@@ -8452,8 +8768,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 1,
       "away_goals": 1,
@@ -8491,7 +8806,11 @@
       "date_utc": "2026-06-26T17:00:00+00:00",
       "country": "Sweden",
       "league": "Superettan",
+      "league_code": "SWE2",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
       "round": "Regular Season - 14",
       "home_team": "IK brage",
       "away_team": "Falkenbergs FF",
@@ -8533,8 +8852,7 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
+        }
       },
       "home_goals": 2,
       "away_goals": 4,
@@ -8567,6 +8885,5 @@
         }
       }
     }
-  ],
-  "score_patched_at": "2026-06-27T06:56:36Z"
+  ]
 }
