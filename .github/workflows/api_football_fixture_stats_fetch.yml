@@ -34,6 +34,47 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Apply Nordic extra leagues
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('.')
+          extra = json.loads((root / 'config/nordic_extra_leagues.json').read_text(encoding='utf-8'))['leagues']
+          path = root / 'config/api_football_enrichment_leagues.json'
+          cfg = json.loads(path.read_text(encoding='utf-8-sig'))
+          leagues = cfg.setdefault('leagues', [])
+          by_code = {str(x.get('leagueCode', '')).upper(): i for i, x in enumerate(leagues)}
+          changed = False
+          for item in extra:
+              code = item['leagueCode']
+              entry = {
+                  'leagueCode': code,
+                  'continent': 'Europe',
+                  'country': item['country'],
+                  'display_name': item['competition'],
+                  'football_data_code': code,
+                  'api_football_league_id': item['apiFootballLeagueId'],
+                  'season': item.get('season', '2026'),
+                  'app_season': item.get('season', '2026'),
+                  'enabled': True,
+                  'priority_group': 'scandinavia',
+              }
+              if code in by_code:
+                  old = leagues[by_code[code]]
+                  merged = {**old, **entry}
+                  if merged != old:
+                      leagues[by_code[code]] = merged
+                      changed = True
+              else:
+                  leagues.append(entry)
+                  changed = True
+          if changed:
+              cfg['version'] = max(int(cfg.get('version', 3)), 4)
+              path.write_text(json.dumps(cfg, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'Nordic extra enrichment leagues applied: {changed}')
+          PY
+
       - name: Fetch API-Football fixture statistics
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
