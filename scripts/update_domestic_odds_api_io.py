@@ -28,7 +28,15 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "domestic-odds-api-io-v4-strict-provider-country"
+from odds_api_io_market_audit import (
+    AUDIT_ONLY_FAMILIES,
+    market_audit_report,
+    provider_market_text,
+    record_market_audit,
+    run_market_audit_self_check,
+)
+
+SCRIPT_VERSION = "domestic-odds-api-io-v5-strict-provider-country-market-audit"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -201,6 +209,8 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
         "skippedMarketSummary": skipped_market_summary(debug),
         "skippedMarketExamples": debug.get("skippedMarketExamples", []),
         "emittedMarketCounts": debug.get("emittedMarketCounts", {key: 0 for key in EMITTED_MARKET_COUNT_KEYS}),
+        **market_audit_report(debug),
+        "marketAuditSelfCheck": debug.get("marketAuditSelfCheck"),
         "rateLimitRemaining": debug.get("rateLimitRemaining"),
         "warnings": debug.get("warnings", []),
     }
@@ -523,12 +533,19 @@ def row_side_price(row: Dict[str, Any], side: str) -> Optional[float]:
     return to_float(row.get(side))
 
 
-def record_skipped_market(debug: Dict[str, Any], market: str, reason: str, row: str = "") -> None:
+def record_skipped_market(
+    debug: Dict[str, Any],
+    market: str,
+    reason: str,
+    row: str = "",
+    *,
+    family_override: Optional[str] = None,
+) -> None:
     key = f"{market}|{reason}"
     summary = debug.setdefault("skippedMarketSummary", {})
     bucket = summary.setdefault(key, {"market": market, "reason": reason, "count": 0})
     bucket["count"] += 1
-    family = market_family_from_name(market)
+    family = family_override or market_family_from_name(market)
     reason_key = f"{family}|{reason}"
     reasons = debug.setdefault("skippedMarketReasons", {})
     reason_bucket = reasons.setdefault(reason_key, {"family": family, "reason": reason, "count": 0})
@@ -617,7 +634,25 @@ def add_market(out: List[Dict[str, Any]], market: str, selection: str, odds: Opt
 def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: str, debug: Dict[str, Any]) -> List[Dict[str, Any]]:
     raw_name = raw_market_name(market)
     family = market_family_from_name(raw_name)
+    audit = record_market_audit(
+        debug,
+        raw_name,
+        {
+            "bookmaker": bookmaker,
+            "fixture": f"{home} - {away}",
+            "marketSample": compact(market, 700),
+        },
+        classification_text=provider_market_text(market),
+    )
     record_raw_market(debug, raw_name, family)
+    if audit["status"] != "supported":
+        record_skipped_market(
+            debug,
+            raw_name,
+            audit["reason"],
+            family_override=audit["family"],
+        )
+        return []
     rows = outcome_rows(market)
     out: List[Dict[str, Any]] = []
     if not rows:
@@ -784,10 +819,18 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
     debug["dryRun"] = dry_run
     debug["bookmakersRequested"] = [x.strip() for x in bookmakers.split(",") if x.strip()]
     debug["leaguesRequested"] = [x.get("leagueCode") for x in selected]
+    debug["marketAuditPolicy"] = {
+        "auditOnlyFamilies": sorted(AUDIT_ONLY_FAMILIES),
+        "normalMarketsUnchanged": True,
+        "extraApiCalls": 0,
+    }
 
     output = empty_output(generated_at, debug)
     if dry_run:
-        debug.setdefault("warnings", []).append("Dry run: skipped Odds-API.io calls and wrote an empty structural output.")
+        debug["marketAuditSelfCheck"] = run_market_audit_self_check()
+        debug.setdefault("warnings", []).append(
+            "Dry run: market classification self-check passed; skipped Odds-API.io calls and production output writes."
+        )
         output["debug"] = output_debug(generated_at, debug)
         return output
 
@@ -941,6 +984,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     output.setdefault("debug", {})["classifiedMarketCounts"] = debug.get("classifiedMarketCounts", {})
     output.setdefault("debug", {})["skippedMarketReasons"] = skipped_market_reasons(debug)
     output.setdefault("debug", {})["skippedMarketSummary"] = skipped_market_summary(debug)
+    output.setdefault("debug", {}).update(market_audit_report(debug))
     report = dict(debug)
     report["registry"] = registry_summary(config)
     report["outputPath"] = str(OUT_PATH.relative_to(ROOT))
@@ -954,8 +998,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     report["skippedMarketReasons"] = skipped_market_reasons(debug)
     report["skippedMarketSummary"] = skipped_market_summary(debug)
     report["skippedMarketExamples"] = debug.get("skippedMarketExamples", [])
-    write_json(OUT_PATH, output)
-    write_json(REPORT_PATH, report)
+    report.update(market_audit_report(debug))
+    if not args.dry_run:
+        write_json(OUT_PATH, output)
+        write_json(REPORT_PATH, report)
     print(json.dumps({
         "output": str(OUT_PATH.relative_to(ROOT)),
         "report": str(REPORT_PATH.relative_to(ROOT)),
@@ -967,6 +1013,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         "leaguesMissing": debug.get("leaguesMissing", []),
         "matchesEmitted": report["matchesEmitted"],
         "marketsEmitted": report["marketsEmitted"],
+        "scriptVersion": SCRIPT_VERSION,
+        "marketAuditSelfCheck": debug.get("marketAuditSelfCheck"),
+        "productionFilesWritten": not args.dry_run,
         "warnings": debug.get("warnings", []),
     }, ensure_ascii=False, indent=2))
     return 0

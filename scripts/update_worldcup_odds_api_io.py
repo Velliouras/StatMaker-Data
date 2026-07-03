@@ -14,6 +14,7 @@ Policy:
 
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import json
 import os
@@ -27,11 +28,20 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-SCRIPT_VERSION = "odds-api-io-wc-v3-full-statmaker-market-mapping"
+from odds_api_io_market_audit import (
+    AUDIT_ONLY_FAMILIES,
+    market_audit_report,
+    provider_market_text,
+    record_market_audit,
+    run_market_audit_self_check,
+)
+
+SCRIPT_VERSION = "odds-api-io-wc-v4-market-expansion-audit"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
 MAIN_TOTAL_LINES = {1.5, 2.5, 3.5}
+RATE_LIMIT_STOP_BELOW = 20
 MAX_EVENTS_PER_MULTI_CALL = 10
 
 DISCOVERY_TARGETS = [
@@ -156,6 +166,24 @@ def write_json(path: Path, data: Any) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def update_rate_limit(debug: Dict[str, Any], headers: Any) -> None:
+    remaining = headers.get("x-ratelimit-remaining") or headers.get("X-RateLimit-Remaining")
+    limit = headers.get("x-ratelimit-limit") or headers.get("X-RateLimit-Limit")
+    reset = headers.get("x-ratelimit-reset") or headers.get("X-RateLimit-Reset")
+    debug["rateLimitLimit"] = limit
+    debug["rateLimitReset"] = reset
+    if remaining is not None:
+        try:
+            debug["rateLimitRemaining"] = int(str(remaining))
+        except ValueError:
+            debug["rateLimitRemaining"] = remaining
+
+
+def should_stop_for_rate_limit(debug: Dict[str, Any]) -> bool:
+    remaining = debug.get("rateLimitRemaining")
+    return isinstance(remaining, int) and remaining < RATE_LIMIT_STOP_BELOW
+
+
 def api_get(path: str, params: Dict[str, Any], debug: Dict[str, Any], *, allow_error: bool = False) -> Any:
     url = f"{BASE_URL}{path}?{urlencode({k: v for k, v in params.items() if v is not None})}"
     safe_params = dict(params)
@@ -167,6 +195,7 @@ def api_get(path: str, params: Dict[str, Any], debug: Dict[str, Any], *, allow_e
         req = Request(url, headers={"User-Agent": "StatMaker-Data/1.0"})
         with urlopen(req, timeout=45) as response:
             body = response.read().decode("utf-8")
+            update_rate_limit(debug, response.headers)
             record.update(
                 {
                     "status": response.status,
@@ -264,6 +293,11 @@ def discover_leagues(api_key: str, debug: Dict[str, Any]) -> List[str]:
 
 
 def fetch_events(api_key: str, leagues: List[str], fixtures: List[Dict[str, Any]], debug: Dict[str, Any]) -> List[Dict[str, Any]]:
+    if should_stop_for_rate_limit(debug):
+        debug.setdefault("warnings", []).append(
+            "Stopped before World Cup events fetch because rateLimitRemaining is below guard."
+        )
+        return []
     start, end = fixture_date_range(fixtures)
     base_params = {
         "apiKey": api_key,
@@ -276,6 +310,11 @@ def fetch_events(api_key: str, leagues: List[str], fixtures: List[Dict[str, Any]
     events: List[Dict[str, Any]] = []
     if leagues:
         for league in leagues:
+            if should_stop_for_rate_limit(debug):
+                debug.setdefault("warnings", []).append(
+                    "Stopped before World Cup events fetch because rateLimitRemaining is below guard."
+                )
+                break
             params = dict(base_params)
             params["league"] = league
             data = api_get("/events", params, debug, allow_error=True)
@@ -371,6 +410,11 @@ def fetch_odds_for_matches(api_key: str, matches: List[Tuple[Dict[str, Any], Dic
     event_ids = [str(event.get("id")) for _, event, _ in matches if event.get("id") is not None]
     result_by_id: Dict[str, Dict[str, Any]] = {}
     for start in range(0, len(event_ids), MAX_EVENTS_PER_MULTI_CALL):
+        if should_stop_for_rate_limit(debug):
+            debug.setdefault("warnings", []).append(
+                "Stopped before World Cup odds fetch because rateLimitRemaining is below guard."
+            )
+            break
         chunk = event_ids[start:start + MAX_EVENTS_PER_MULTI_CALL]
         if not chunk:
             continue
@@ -512,9 +556,25 @@ def odds_shape_sample(market: Dict[str, Any], limit: int = 500) -> Any:
     return compact(rows[:2], limit)
 
 
-def observe_raw_market(debug: Dict[str, Any], fixture: Dict[str, Any], bookmaker: str, market: Dict[str, Any]) -> None:
+def observe_raw_market(
+    debug: Dict[str, Any],
+    fixture: Dict[str, Any],
+    bookmaker: str,
+    market: Dict[str, Any],
+) -> Dict[str, str]:
     raw_name = raw_market_display_name(market)
     normalized = market_name(market)
+    audit = record_market_audit(
+        debug,
+        raw_name,
+        {
+            "matchId": fixture.get("matchId"),
+            "fixture": f"{fixture.get('homeTeam')} - {fixture.get('awayTeam')}",
+            "bookmaker": bookmaker,
+            "oddsShape": odds_shape_sample(market),
+        },
+        classification_text=provider_market_text(market),
+    )
 
     inventory = debug.setdefault("rawMarketInventory", {})
     inv = inventory.setdefault(raw_name, {"count": 0, "bookmakers": {}, "examples": []})
@@ -544,6 +604,30 @@ def observe_raw_market(debug: Dict[str, Any], fixture: Dict[str, Any], bookmaker
                 "normalizedName": normalized,
                 "oddsShape": odds_shape_sample(market),
             })
+    return audit
+
+
+def record_skipped_market(
+    debug: Dict[str, Any],
+    raw_name: str,
+    family: str,
+    reason: str,
+    example: Optional[Dict[str, Any]] = None,
+) -> None:
+    key = f"{family}|{reason}"
+    reasons = debug.setdefault("skippedMarketReasons", {})
+    bucket = reasons.setdefault(key, {"family": family, "reason": reason, "count": 0})
+    bucket["count"] += 1
+    examples = debug.setdefault("skippedMarketExamples", [])
+    if len(examples) < 50:
+        item: Dict[str, Any] = {
+            "rawMarketName": raw_name,
+            "family": family,
+            "reason": reason,
+        }
+        if example:
+            item.update(example)
+        examples.append(item)
 
 
 def finalize_market_discovery(debug: Dict[str, Any]) -> None:
@@ -876,8 +960,23 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
                 if not isinstance(market, dict):
                     continue
                 raw_name = raw_market_display_name(market)
-                observe_raw_market(debug, fixture, str(bookmaker), market)
+                audit = observe_raw_market(debug, fixture, str(bookmaker), market)
                 raw_market_names[raw_name] = raw_market_names.get(raw_name, 0) + 1
+                skip_example = {
+                    "matchId": fixture.get("matchId"),
+                    "fixture": f"{fixture.get('homeTeam')} - {fixture.get('awayTeam')}",
+                    "bookmaker": str(bookmaker),
+                }
+                if audit["status"] != "supported":
+                    record_skipped_market(
+                        debug,
+                        raw_name,
+                        audit["family"],
+                        audit["reason"],
+                        skip_example,
+                    )
+                    continue
+                before = len(markets_out)
                 markets_out.extend(extract_1x2(market, fixture, orientation, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_match_goals(market, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_btts(market, str(bookmaker), accepted_counts))
@@ -886,6 +985,14 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
                 markets_out.extend(extract_cards(market, fixture, orientation, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_shots(market, fixture, orientation, str(bookmaker), accepted_counts))
                 markets_out.extend(extract_shots_on_target(market, fixture, orientation, str(bookmaker), accepted_counts))
+                if len(markets_out) == before:
+                    record_skipped_market(
+                        debug,
+                        raw_name,
+                        audit["family"],
+                        "supported family did not satisfy existing exact-emission rules",
+                        skip_example,
+                    )
 
     return {
         "matchId": fixture.get("matchId"),
@@ -912,7 +1019,14 @@ def normalize_event_odds(fixture: Dict[str, Any], event: Dict[str, Any], orienta
     }
 
 
-def main() -> int:
+def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Update World Cup Odds-API.io odds JSON.")
+    parser.add_argument("--dry-run", action="store_true")
+    return parser.parse_args(argv)
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    args = parse_args(argv)
     debug: Dict[str, Any] = {
         "source": "odds_api_io",
         "generatedAt": now_utc(),
@@ -928,9 +1042,26 @@ def main() -> int:
             "matchGoalsLines": sorted(MAIN_TOTAL_LINES),
             "note": "Corners/cards/shots/SOT are emitted only from clean full-time over/under rows with hdp + over + under odds. HT/2H/player/spread/handicap/N/A odds are excluded.",
         },
+        "marketAuditPolicy": {
+            "auditOnlyFamilies": sorted(AUDIT_ONLY_FAMILIES),
+            "normalMarketsUnchanged": True,
+            "extraApiCalls": 0,
+        },
     }
 
     try:
+        if args.dry_run:
+            debug["dryRun"] = True
+            debug["marketAuditSelfCheck"] = run_market_audit_self_check()
+            debug.update(market_audit_report(debug))
+            print(json.dumps({
+                "dryRun": True,
+                "scriptVersion": SCRIPT_VERSION,
+                "marketAuditSelfCheck": debug["marketAuditSelfCheck"],
+                "productionFilesWritten": False,
+            }, ensure_ascii=False, indent=2))
+            return 0
+
         api_key = os.getenv("ODDS_API_IO_KEY", "").strip()
         if not api_key:
             raise RuntimeError("Missing required environment variable ODDS_API_IO_KEY")
@@ -979,6 +1110,8 @@ def main() -> int:
             "marketsFound": sum(global_counts.values()),
             "marketCounts": global_counts,
         }
+        debug["emittedMarketCounts"] = global_counts
+        debug.update(market_audit_report(debug))
         finalize_market_discovery(debug)
         output["marketDiscoverySummary"] = {
             key: {
