@@ -1,4 +1,4 @@
-name: Domestic Active and July Pipeline
+name: Domestic Active and July Statistics
 
 on:
   workflow_dispatch:
@@ -8,13 +8,8 @@ on:
         required: true
         default: "85"
         type: string
-      odds_cycle_size:
-        description: "Domestic leagues to refresh from Odds-API.io per run"
-        required: true
-        default: "8"
-        type: string
   schedule:
-    - cron: "17 * * * *"
+    - cron: "11 3 * * *"
   push:
     branches:
       - main
@@ -29,7 +24,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: domestic-active-july-pipeline
+  group: domestic-active-july-statistics
   cancel-in-progress: true
 
 jobs:
@@ -50,26 +45,22 @@ jobs:
       - name: Test active and July policy
         run: python -m unittest tests/test_domestic_live_july_pipeline.py
 
-      - name: Refresh statistics, app artifacts and exact odds
+      - name: Refresh API-Football history and app artifacts
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
           INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
-          INPUT_ODDS_CYCLE_SIZE: ${{ inputs.odds_cycle_size }}
         run: |
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-85}"
-          odds_cycle="${INPUT_ODDS_CYCLE_SIZE:-8}"
           python scripts/domestic_live_july_pipeline.py \
             --stats-max-requests "$stats_requests" \
-            --odds-cycle-size "$odds_cycle"
+            --skip-odds-fetch
 
-      - name: Finalize score and statistics contracts
+      - name: Finalize complete statistics contracts
         run: |
           python scripts/finalize_domestic_live_july_artifacts.py
           python scripts/build_domestic_live_july_normalized_stats.py
 
-      - name: Validate published contracts
+      - name: Validate published statistics and betting boundaries
         run: |
           python - <<'PY'
           import json
@@ -92,7 +83,8 @@ jobs:
               raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
           if registry_codes != odds_codes:
               raise SystemExit(f'Odds registry mismatch: registry={len(registry_codes)} odds={len(odds_codes)}')
-          if not normalized_codes.issubset({"ROU" if code == "ROM" else code for code in registry_codes}):
+          normalized_registry_codes = {"ROU" if code == "ROM" else code for code in registry_codes}
+          if not normalized_codes.issubset(normalized_registry_codes):
               raise SystemExit('Normalized stats contain a league outside the active/July registry')
 
           index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
@@ -108,19 +100,16 @@ jobs:
           for league in odds.get('leagues', []):
               for match in league.get('matches', []) or []:
                   for market in match.get('markets', []) or []:
-                      if market.get('exactBookmakerOdds') is not True:
+                      if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
                           raise SystemExit('Non-exact market found in production Domestic odds artifact')
-                      if not market.get('bookmaker'):
-                          raise SystemExit('Market without bookmaker found in production Domestic odds artifact')
 
           print(
               f"Validated {len(registry_codes)} leagues; "
-              f"{len(normalized.get('fixtures', []))} normalized fixtures; "
-              f"{sum(len(x.get('matches', []) or []) for x in odds.get('leagues', []))} odds matches"
+              f"{len(normalized.get('fixtures', []))} normalized fixtures"
           )
           PY
 
-      - name: Commit refreshed artifacts
+      - name: Commit refreshed statistics artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -130,20 +119,18 @@ jobs:
             data/statmaker/domestic_enriched \
             data/statmaker/domestic_live_july_registry.json \
             data/statmaker/domestic_live_july_state.json \
-            odds/odds_api_io/domestic_odds.json \
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
             reports/api_football_fixture_stats_fetch.md \
             reports/statmaker_domestic_enriched_build.json \
             reports/statmaker_domestic_enriched_build.csv \
             reports/statmaker_domestic_enriched_build.md \
-            reports/domestic_odds_debug.json \
             reports/domestic_live_july_pipeline.json \
             reports/domestic_live_july_artifact_contract.json \
             reports/domestic_live_july_normalized_stats.json
           if git diff --cached --quiet; then
-            echo "No Domestic active/July changes to commit."
+            echo "No Domestic active/July statistics changes to commit."
           else
-            git commit -m "Refresh active and July Domestic data"
+            git commit -m "Refresh active and July Domestic statistics"
             git push origin HEAD:main
           fi
