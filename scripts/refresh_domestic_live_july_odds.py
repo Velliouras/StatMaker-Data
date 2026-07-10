@@ -14,6 +14,7 @@ import os
 import sys
 
 import domestic_live_july_pipeline as pipeline
+import domestic_odds_expansion
 import update_domestic_odds_api_io as odds_fetch
 
 
@@ -25,6 +26,8 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    domestic_odds_expansion.install(odds_fetch, pipeline)
+
     api_key = os.getenv("ODDS_API_IO_KEY", "").strip()
     if not api_key:
         print("ERROR: ODDS_API_IO_KEY is required.", file=sys.stderr)
@@ -64,6 +67,13 @@ def main() -> int:
             len(match.get("markets", []) or [])
             for league in feed.get("leagues", []) or []
             for match in league.get("matches", []) or []
+        ),
+        "doubleChanceMarkets": sum(
+            1
+            for league in feed.get("leagues", []) or []
+            for match in league.get("matches", []) or []
+            for market in match.get("markets", []) or []
+            if market.get("market") == "DOUBLE_CHANCE"
         ),
     }
     pipeline.write_json(pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json", report)
