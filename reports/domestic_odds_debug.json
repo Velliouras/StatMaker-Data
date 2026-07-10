@@ -1,5 +1,23 @@
 {
-  "generatedAt": "2026-07-10T16:37:57Z",
+  "warnings": [
+    "Stopped after league discovery because rateLimitRemaining is below guard."
+  ],
+  "apiCalls": [
+    {
+      "path": "/leagues",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "all": "true"
+      },
+      "status": 200,
+      "durationMs": 297,
+      "bodyLength": 139038,
+      "rateLimitRemaining": 10,
+      "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 0}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 5}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"even..."
+    }
+  ],
+  "generatedAt": "2026-07-10T16:39:20Z",
   "scriptVersion": "domestic-odds-api-io-v5-strict-provider-country-market-audit",
   "registry": {
     "registryVersion": 4,
@@ -17,39 +35,29 @@
     "Unibet"
   ],
   "leaguesRequested": [
-    "BRA",
-    "IRL",
-    "USA",
-    "CHN",
-    "NOR",
-    "BRA2",
-    "SWE2",
-    "FIN"
+    "SWE",
+    "MEX",
+    "ROM",
+    "DNK",
+    "POL",
+    "RUS",
+    "SWZ",
+    "AUT2"
   ],
-  "leaguesMatched": [],
-  "leaguesMissing": [],
-  "leagueReports": [],
-  "unmatchedTeams": [],
-  "rawMarketCounts": {},
-  "classifiedMarketCounts": {},
-  "skippedMarketReasons": [],
-  "skippedMarketSummary": [],
-  "skippedMarketExamples": [],
-  "emittedMarketCounts": {
-    "1X2": 0,
-    "BTTS": 0,
-    "MATCH_GOALS": 0,
-    "TEAM_TOTAL_GOALS": 0,
-    "FIRST_HALF_GOALS": 0,
-    "MATCH_CORNERS": 0,
-    "TEAM_CORNERS": 0,
-    "MATCH_CARDS": 0,
-    "TEAM_CARDS": 0,
-    "MATCH_SHOTS": 0,
-    "TEAM_SHOTS": 0,
-    "MATCH_SHOTS_ON_TARGET": 0,
-    "TEAM_SHOTS_ON_TARGET": 0,
-    "DOUBLE_CHANCE": 0
+  "marketAuditPolicy": {
+    "auditOnlyFamilies": [
+      "ASIAN_HANDICAP",
+      "ASIAN_TOTALS",
+      "CORRECT_SCORE",
+      "DRAW_NO_BET",
+      "HALF_TIME_BTTS",
+      "HALF_TIME_RESULT",
+      "PLAYER_PROPS",
+      "TEAM_GOALS_ALT_LINES"
+    ],
+    "normalMarketsUnchanged": true,
+    "extraApiCalls": 0,
+    "allProviderMarketsArchivedSeparately": true
   },
   "providerRawMarketNames": {},
   "providerRawMarketClassifications": {},
@@ -59,13 +67,310 @@
   "auditOnlyMarketExamples": {},
   "unsupportedMarketCounts": {},
   "unsupportedMarketExamples": {},
-  "marketAuditSelfCheck": null,
-  "rateLimitRemaining": 12,
-  "warnings": [
-    "Stopped after league discovery because rateLimitRemaining is below guard."
-  ],
-  "mergePolicy": "replace with non-empty fresh exact odds; preserve unexpired previous matches after empty refresh; prune expired matches",
-  "selectedLeagueCount": 19,
-  "leaguesWithUsableMatches": 11,
-  "preservedAfterEmptyRefresh": []
+  "rateLimitLimit": "100",
+  "rateLimitReset": "2026-07-10T17:30:15Z",
+  "rateLimitRemaining": 10,
+  "providerLeagueCount": 1393,
+  "providerLeagueSample": [
+    {
+      "name": "Albania - Kategoria e Pare",
+      "slug": "albania-kategoria-e-pare",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Kategoria Superiore",
+      "slug": "albania-kategoria-superiore",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Kupa e Shqiperise",
+      "slug": "albania-kupa-e-shqiperise",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Albania - Superkupa e Shqiperise",
+      "slug": "albania-superkupa-e-shqiperise",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Coupe d Algerie",
+      "slug": "algeria-coupe-d-algerie",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Ligue 1",
+      "slug": "algeria-ligue-1",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Ligue 2",
+      "slug": "algeria-ligue-2",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Algeria - Supercoupe",
+      "slug": "algeria-supercoupe",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Copa Constitucio",
+      "slug": "andorra-copa-constitucio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Primera Divisio",
+      "slug": "andorra-primera-divisio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Andorra - Second Divisio",
+      "slug": "andorra-second-divisio",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Angola - Girabola",
+      "slug": "angola-girabola",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Antigua and Barbuda - Premier Division",
+      "slug": "antigua-and-barbuda-premier-division",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Copa Argentina",
+      "slug": "argentina-copa-argentina",
+      "sport": null,
+      "eventsCount": 5
+    },
+    {
+      "name": "Argentina - Copa Proyeccion Final, Reserves",
+      "slug": "argentina-copa-proyeccion-final-reserves",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Liga Profesional",
+      "slug": "argentina-liga-profesional",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera B",
+      "slug": "argentina-primera-b",
+      "sport": null,
+      "eventsCount": 163
+    },
+    {
+      "name": "Argentina - Primera B Nacional",
+      "slug": "argentina-primera-b-nacional",
+      "sport": null,
+      "eventsCount": 242
+    },
+    {
+      "name": "Argentina - Primera C",
+      "slug": "argentina-primera-c",
+      "sport": null,
+      "eventsCount": 182
+    },
+    {
+      "name": "Argentina - Primera Division A, Women, Apertura",
+      "slug": "argentina-primera-division-a-women-apertura",
+      "sport": null,
+      "eventsCount": 8
+    },
+    {
+      "name": "Argentina - Primera Division, Women",
+      "slug": "argentina-primera-division-women",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera LPF, Clausura",
+      "slug": "argentina-primera-lpf-clausura",
+      "sport": null,
+      "eventsCount": 45
+    },
+    {
+      "name": "Argentina - Primera LPF, Reserves, Apertura",
+      "slug": "argentina-primera-lpf-reserves-apertura",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Primera LPF, Reserves, Apertura, Playoffs",
+      "slug": "argentina-primera-lpf-reserves-apertura-playoffs",
+      "sport": null,
+      "eventsCount": 54
+    },
+    {
+      "name": "Argentina - Primera Nacional",
+      "slug": "argentina-primera-nacional",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Torneo Federal A",
+      "slug": "argentina-torneo-federal-a",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 1",
+      "slug": "argentina-torneo-federal-a-group-1",
+      "sport": null,
+      "eventsCount": 10
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 2",
+      "slug": "argentina-torneo-federal-a-group-2",
+      "sport": null,
+      "eventsCount": 8
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 3",
+      "slug": "argentina-torneo-federal-a-group-3",
+      "sport": null,
+      "eventsCount": 8
+    },
+    {
+      "name": "Argentina - Torneo Federal A, Group 4",
+      "slug": "argentina-torneo-federal-a-group-4",
+      "sport": null,
+      "eventsCount": 8
+    },
+    {
+      "name": "Argentina - Trofeo de Campeones",
+      "slug": "argentina-trofeo-de-campeones",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Argentina - Trofeo de Campeones, Reserves",
+      "slug": "argentina-trofeo-de-campeones-reserves",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Armenia - Armenian Cup",
+      "slug": "armenia-armenian-cup",
+      "sport": null,
+      "eventsCount": 6
+    },
+    {
+      "name": "Armenia - First League",
+      "slug": "armenia-first-league",
+      "sport": null,
+      "eventsCount": 8
+    },
+    {
+      "name": "Armenia - Premier League",
+      "slug": "armenia-premier-league",
+      "sport": null,
+      "eventsCount": 6
+    },
+    {
+      "name": "Armenia - Super Cup",
+      "slug": "armenia-super-cup",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Aruba - Division Honor",
+      "slug": "aruba-division-honor",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - A-League",
+      "slug": "australia-a-league",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - A-League, Women",
+      "slug": "australia-a-league-women",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - Australia Cup, Knockout Stage",
+      "slug": "australia-australia-cup-knockout-stage",
+      "sport": null,
+      "eventsCount": 17
+    },
+    {
+      "name": "Australia - Australia Cup, Preliminary",
+      "slug": "australia-australia-cup-preliminary",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - Australian Championship",
+      "slug": "australia-australian-championship",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - Capital NPL 1",
+      "slug": "australia-capital-npl-1",
+      "sport": null,
+      "eventsCount": 33
+    },
+    {
+      "name": "Australia - Capital NPL, Women",
+      "slug": "australia-capital-npl-women",
+      "sport": null,
+      "eventsCount": 18
+    },
+    {
+      "name": "Australia - Northern NSW League One",
+      "slug": "australia-northern-nsw-league-one",
+      "sport": null,
+      "eventsCount": 25
+    },
+    {
+      "name": "Australia - Northern NSW League One, Reserves",
+      "slug": "australia-northern-nsw-league-one-reserves",
+      "sport": null,
+      "eventsCount": 25
+    },
+    {
+      "name": "Australia - Northern NSW League One, Reserves, Women",
+      "slug": "australia-northern-nsw-league-one-reserves-women",
+      "sport": null,
+      "eventsCount": 0
+    },
+    {
+      "name": "Australia - Northern NSW NPL",
+      "slug": "australia-northern-nsw-npl",
+      "sport": null,
+      "eventsCount": 44
+    },
+    {
+      "name": "Australia - Northern NSW NPL, Reserves",
+      "slug": "australia-northern-nsw-npl-reserves",
+      "sport": null,
+      "eventsCount": 31
+    },
+    {
+      "name": "Australia - Northern NSW NPL, Reserves, Women",
+      "slug": "australia-northern-nsw-npl-reserves-women",
+      "sport": null,
+      "eventsCount": 11
+    }
+  ]
 }
