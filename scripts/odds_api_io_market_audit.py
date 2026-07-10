@@ -22,10 +22,10 @@ SUPPORTED_FAMILIES = {
     "TEAM_SHOTS",
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
+    "DOUBLE_CHANCE",
 }
 
 AUDIT_ONLY_FAMILIES = {
-    "DOUBLE_CHANCE",
     "DRAW_NO_BET",
     "ASIAN_HANDICAP",
     "ASIAN_TOTALS",
@@ -236,7 +236,7 @@ def run_market_audit_self_check() -> Dict[str, Any]:
         ({"name": "Away Team Shots"}, "TEAM_SHOTS", "supported"),
         ({"name": "Total Shots on Target"}, "MATCH_SHOTS_ON_TARGET", "supported"),
         ({"name": "Home Team Shots on Target"}, "TEAM_SHOTS_ON_TARGET", "supported"),
-        ({"name": "Double Chance"}, "DOUBLE_CHANCE", "audit_only"),
+        ({"name": "Double Chance"}, "DOUBLE_CHANCE", "supported"),
         ({"name": "Draw No Bet"}, "DRAW_NO_BET", "audit_only"),
         ({"name": "Asian Handicap"}, "ASIAN_HANDICAP", "audit_only"),
         ({"name": "Asian Totals"}, "ASIAN_TOTALS", "audit_only"),
