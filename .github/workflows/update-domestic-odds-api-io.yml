@@ -99,6 +99,57 @@ jobs:
           fi
           python scripts/update_domestic_odds_api_io.py "${args[@]}"
 
+      - name: Protect last usable Domestic odds artifact
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          python - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          path = Path('odds/odds_api_io/domestic_odds.json')
+          current = json.loads(path.read_text(encoding='utf-8'))
+          previous = json.loads(
+              subprocess.check_output(
+                  ['git', 'show', f'HEAD:{path.as_posix()}'],
+                  text=True,
+                  encoding='utf-8',
+              )
+          )
+
+          def usable_match_count(payload):
+              return sum(
+                  1
+                  for league in payload.get('leagues', []) or []
+                  for match in league.get('matches', []) or []
+                  if match.get('usableForStats') and match.get('markets')
+              )
+
+          warnings = current.get('debug', {}).get('warnings', []) or []
+          stopped_by_guard = any(
+              'rateLimitRemaining is below guard' in str(warning)
+              for warning in warnings
+          )
+          current_count = usable_match_count(current)
+          previous_count = usable_match_count(previous)
+
+          if stopped_by_guard and current_count < previous_count:
+              subprocess.run(
+                  ['git', 'checkout', 'HEAD', '--', path.as_posix()],
+                  check=True,
+              )
+              print(
+                  'Restored previous Domestic odds artifact because the rate-limit '
+                  f'guard reduced usable matches from {previous_count} to {current_count}.'
+              )
+          else:
+              print(
+                  'Domestic odds artifact accepted: '
+                  f'usable matches {previous_count} -> {current_count}; '
+                  f'rate-limit guard={stopped_by_guard}.'
+              )
+          PY
+
       - name: Commit updated domestic odds JSON
         run: |
           git config user.name "github-actions[bot]"
