@@ -10,6 +10,7 @@ if str(SCRIPTS) not in sys.path:
 
 import domestic_live_july_pipeline as pipeline
 import expand_domestic_full_stats as full_stats
+import refresh_domestic_live_july_odds as odds_refresh
 
 
 class DomesticLiveJulyPipelineTest(unittest.TestCase):
@@ -83,10 +84,59 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
                 {"leagueCode": "B", "matches": [{"date": "2026-07-13", "id": "new-b"}]},
             ],
         }
-        merged = pipeline.merge_odds_feed(previous, fresh, registry, dt.date(2026, 7, 10))
+        merged = odds_refresh.safe_merge_odds_feed(previous, fresh, registry, dt.date(2026, 7, 10))
         by_code = {league["leagueCode"]: league for league in merged["leagues"]}
         self.assertEqual(["keep"], [match["id"] for match in by_code["A"]["matches"]])
         self.assertEqual(["new-b"], [match["id"] for match in by_code["B"]["matches"]])
+
+    def test_empty_fresh_odds_do_not_erase_valid_previous_matches(self):
+        registry = [{"leagueCode": "A", "country": "A", "competition": "A"}]
+        previous = {
+            "schemaVersion": 3,
+            "leagues": [
+                {"leagueCode": "A", "matches": [{"date": "2026-07-12", "id": "keep"}]},
+            ],
+        }
+        fresh = {
+            "schemaVersion": 3,
+            "generatedAt": "2026-07-10T12:00:00Z",
+            "leagues": [{"leagueCode": "A", "matches": []}],
+        }
+        merged = odds_refresh.safe_merge_odds_feed(previous, fresh, registry, dt.date(2026, 7, 10))
+        self.assertEqual(["keep"], [match["id"] for match in merged["leagues"][0]["matches"]])
+        self.assertEqual(["A"], merged["debug"]["preservedAfterEmptyRefresh"])
+
+    def test_odds_validation_rejects_non_exact_market(self):
+        registry = [{"leagueCode": "A"}]
+        feed = {
+            "leagues": [{
+                "leagueCode": "A",
+                "matches": [{
+                    "date": "2026-07-12",
+                    "teamMappingStatus": "matched",
+                    "usableForStats": True,
+                    "markets": [{"odds": 1.9, "bookmaker": "Bet365", "exactBookmakerOdds": False}],
+                }],
+            }],
+        }
+        with self.assertRaises(RuntimeError):
+            odds_refresh.validate_feed(feed, registry, dt.date(2026, 7, 10))
+
+    def test_odds_validation_accepts_exact_market(self):
+        registry = [{"leagueCode": "A"}]
+        feed = {
+            "leagues": [{
+                "leagueCode": "A",
+                "matches": [{
+                    "date": "2026-07-12",
+                    "teamMappingStatus": "matched",
+                    "usableForStats": True,
+                    "markets": [{"odds": 1.9, "bookmaker": "Bet365", "exactBookmakerOdds": True}],
+                }],
+            }],
+        }
+        result = odds_refresh.validate_feed(feed, registry, dt.date(2026, 7, 10))
+        self.assertEqual({"leagueCount": 1, "matchCount": 1, "marketCount": 1}, result)
 
     def test_app_season_label(self):
         self.assertEqual(
