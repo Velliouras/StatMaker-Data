@@ -21,6 +21,7 @@ on:
     paths:
       - "scripts/domestic_live_july_pipeline.py"
       - "scripts/finalize_domestic_live_july_artifacts.py"
+      - "scripts/build_domestic_live_july_normalized_stats.py"
       - "tests/test_domestic_live_july_pipeline.py"
       - ".github/workflows/domestic-live-july-pipeline.yml"
 
@@ -64,7 +65,9 @@ jobs:
             --odds-cycle-size "$odds_cycle"
 
       - name: Finalize score and statistics contracts
-        run: python scripts/finalize_domestic_live_july_artifacts.py
+        run: |
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
 
       - name: Validate published contracts
         run: |
@@ -76,10 +79,12 @@ jobs:
           registry = json.loads((root / 'data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
           index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
           odds = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          normalized = json.loads((root / 'data/api_football/domestic_normalized_fixture_stats.json').read_text(encoding='utf-8'))
 
           registry_codes = {str(item.get('leagueCode') or '') for item in registry.get('leagues', [])}
           index_codes = {str(item.get('league_code') or '') for item in index.get('leagues', [])}
           odds_codes = {str(item.get('leagueCode') or '') for item in odds.get('leagues', [])}
+          normalized_codes = {str(item.get('league_code') or '') for item in normalized.get('fixtures', [])}
 
           if not registry_codes:
               raise SystemExit('Domestic live/July registry is empty')
@@ -87,6 +92,8 @@ jobs:
               raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
           if registry_codes != odds_codes:
               raise SystemExit(f'Odds registry mismatch: registry={len(registry_codes)} odds={len(odds_codes)}')
+          if not normalized_codes.issubset({"ROU" if code == "ROM" else code for code in registry_codes}):
+              raise SystemExit('Normalized stats contain a league outside the active/July registry')
 
           index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
           for code, row in index_rows.items():
@@ -108,6 +115,7 @@ jobs:
 
           print(
               f"Validated {len(registry_codes)} leagues; "
+              f"{len(normalized.get('fixtures', []))} normalized fixtures; "
               f"{sum(len(x.get('matches', []) or []) for x in odds.get('leagues', []))} odds matches"
           )
           PY
@@ -118,6 +126,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             data/api_football/fixture_stats \
+            data/api_football/domestic_normalized_fixture_stats.json \
             data/statmaker/domestic_enriched \
             data/statmaker/domestic_live_july_registry.json \
             data/statmaker/domestic_live_july_state.json \
@@ -130,7 +139,8 @@ jobs:
             reports/statmaker_domestic_enriched_build.md \
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_pipeline.json \
-            reports/domestic_live_july_artifact_contract.json
+            reports/domestic_live_july_artifact_contract.json \
+            reports/domestic_live_july_normalized_stats.json
           if git diff --cached --quiet; then
             echo "No Domestic active/July changes to commit."
           else
