@@ -1,25 +1,39 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-06-27T06:56:36Z",
+  "schema_version": 3,
+  "generated_at": "2026-07-10T13:36:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
-    "rule": "The app reads this repository artifact and must not call API-Football directly.",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
     "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
-    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json",
-    "cache_generated_at": "2026-06-27T06:54:54Z"
+    "cache_generated_at": "2026-06-27T06:54:54Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
   },
   "competition": {
+    "league_code": "NOR",
     "country": "Norway",
     "league": "Eliteserien",
     "football_data_code": "NOR",
     "api_football_league_id": 103,
+    "api_football_season": "2026",
     "season": "2026",
+    "app_season": "2026",
     "priority_group": "scandinavia",
-    "data_level": "fixture_statistics_enriched"
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-03-14",
+    "target_season_end": "2026-12-06",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
@@ -54,9 +68,7 @@
     "bb_ready_candidate": true,
     "notes": [
       "ok"
-    ],
-    "fixtures_with_score": 89,
-    "score_coverage": 1.0
+    ]
   },
   "matches": [
     {
@@ -64,7 +76,11 @@
       "date_utc": "2026-03-14T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Ham-Kam",
       "away_team": "Viking",
@@ -106,37 +122,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -145,7 +130,11 @@
       "date_utc": "2026-03-14T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Molde",
       "away_team": "Rosenborg",
@@ -187,37 +176,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -226,7 +184,11 @@
       "date_utc": "2026-03-15T13:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Kristiansund BK",
       "away_team": "Brann",
@@ -268,37 +230,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -307,7 +238,11 @@
       "date_utc": "2026-03-15T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Aalesund",
       "away_team": "Lillestrom",
@@ -349,37 +284,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 3,
-      "home_score": 1,
-      "away_score": 3,
-      "fthg": 1,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -388,7 +292,11 @@
       "date_utc": "2026-03-15T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "KFUM Oslo",
       "away_team": "Start",
@@ -430,37 +338,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -469,7 +346,11 @@
       "date_utc": "2026-03-15T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Valerenga",
       "away_team": "Sandefjord",
@@ -511,37 +392,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -550,7 +400,11 @@
       "date_utc": "2026-03-15T18:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Tromso",
       "away_team": "Fredrikstad",
@@ -592,37 +446,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 0,
-      "home_score": 4,
-      "away_score": 0,
-      "fthg": 4,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -631,7 +454,11 @@
       "date_utc": "2026-03-21T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Start",
       "away_team": "Aalesund",
@@ -673,37 +500,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -712,7 +508,11 @@
       "date_utc": "2026-03-21T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Viking",
       "away_team": "Molde",
@@ -754,37 +554,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 1,
-      "home_score": 4,
-      "away_score": 1,
-      "fthg": 4,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 1,
-      "goals": {
-        "home": 4,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -793,7 +562,11 @@
       "date_utc": "2026-03-22T13:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Rosenborg",
       "away_team": "Valerenga",
@@ -835,37 +608,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -874,7 +616,11 @@
       "date_utc": "2026-03-22T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Brann",
       "away_team": "Tromso",
@@ -916,37 +662,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -955,7 +670,11 @@
       "date_utc": "2026-03-22T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Fredrikstad",
       "away_team": "KFUM Oslo",
@@ -997,37 +716,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1036,7 +724,11 @@
       "date_utc": "2026-03-22T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Sandefjord",
       "away_team": "Sarpsborg 08 FF",
@@ -1078,37 +770,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1117,7 +778,11 @@
       "date_utc": "2026-04-06T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Valerenga",
       "away_team": "Viking",
@@ -1159,37 +824,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1198,7 +832,11 @@
       "date_utc": "2026-04-06T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Ham-Kam",
       "away_team": "Brann",
@@ -1240,37 +878,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 5,
-      "home_score": 1,
-      "away_score": 5,
-      "fthg": 1,
-      "ftag": 5,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 5
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 5
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1279,7 +886,11 @@
       "date_utc": "2026-04-06T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Kristiansund BK",
       "away_team": "Bodo/Glimt",
@@ -1321,37 +932,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1360,7 +940,11 @@
       "date_utc": "2026-04-06T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Molde",
       "away_team": "Lillestrom",
@@ -1402,37 +986,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1441,7 +994,11 @@
       "date_utc": "2026-04-06T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Sarpsborg 08 FF",
       "away_team": "Start",
@@ -1483,37 +1040,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1522,7 +1048,11 @@
       "date_utc": "2026-04-06T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Tromso",
       "away_team": "Rosenborg",
@@ -1564,37 +1094,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1603,7 +1102,11 @@
       "date_utc": "2026-04-07T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "Aalesund",
       "away_team": "Fredrikstad",
@@ -1645,37 +1148,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1684,7 +1156,11 @@
       "date_utc": "2026-04-07T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 3",
       "home_team": "KFUM Oslo",
       "away_team": "Sandefjord",
@@ -1726,37 +1202,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1765,7 +1210,11 @@
       "date_utc": "2026-04-11T12:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Lillestrom",
       "away_team": "Start",
@@ -1807,37 +1256,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1846,7 +1264,11 @@
       "date_utc": "2026-04-11T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Tromso",
       "away_team": "Kristiansund BK",
@@ -1888,37 +1310,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1927,7 +1318,11 @@
       "date_utc": "2026-04-11T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Viking",
       "away_team": "Bodo/Glimt",
@@ -1969,37 +1364,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2008,7 +1372,11 @@
       "date_utc": "2026-04-12T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Rosenborg",
       "away_team": "Sarpsborg 08 FF",
@@ -2050,37 +1418,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2089,7 +1426,11 @@
       "date_utc": "2026-04-12T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Aalesund",
       "away_team": "KFUM Oslo",
@@ -2131,37 +1472,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2170,7 +1480,11 @@
       "date_utc": "2026-04-12T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Fredrikstad",
       "away_team": "Valerenga",
@@ -2212,37 +1526,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2251,7 +1534,11 @@
       "date_utc": "2026-04-12T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Molde",
       "away_team": "Ham-Kam",
@@ -2293,37 +1580,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 1,
-      "home_score": 4,
-      "away_score": 1,
-      "fthg": 4,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2332,7 +1588,11 @@
       "date_utc": "2026-04-12T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 4",
       "home_team": "Brann",
       "away_team": "Sandefjord",
@@ -2374,37 +1634,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2413,7 +1642,11 @@
       "date_utc": "2026-04-15T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 1",
       "home_team": "Sarpsborg 08 FF",
       "away_team": "Bodo/Glimt",
@@ -2455,37 +1688,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2494,7 +1696,11 @@
       "date_utc": "2026-04-15T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 15",
       "home_team": "Tromso",
       "away_team": "Lillestrom",
@@ -2536,37 +1742,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2575,7 +1750,11 @@
       "date_utc": "2026-04-18T12:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Bodo/Glimt",
       "away_team": "Aalesund",
@@ -2617,37 +1796,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2656,7 +1804,11 @@
       "date_utc": "2026-04-18T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Sandefjord",
       "away_team": "Rosenborg",
@@ -2698,37 +1850,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2737,7 +1858,11 @@
       "date_utc": "2026-04-18T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Viking",
       "away_team": "Brann",
@@ -2779,37 +1904,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2818,7 +1912,11 @@
       "date_utc": "2026-04-19T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Valerenga",
       "away_team": "Lillestrom",
@@ -2860,37 +1958,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2899,7 +1966,11 @@
       "date_utc": "2026-04-19T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Ham-Kam",
       "away_team": "KFUM Oslo",
@@ -2941,37 +2012,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 0,
-      "home_score": 4,
-      "away_score": 0,
-      "fthg": 4,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2980,7 +2020,11 @@
       "date_utc": "2026-04-19T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Kristiansund BK",
       "away_team": "Fredrikstad",
@@ -3022,37 +2066,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3061,7 +2074,11 @@
       "date_utc": "2026-04-19T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Sarpsborg 08 FF",
       "away_team": "Tromso",
@@ -3103,37 +2120,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3142,7 +2128,11 @@
       "date_utc": "2026-04-19T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 5",
       "home_team": "Start",
       "away_team": "Molde",
@@ -3184,37 +2174,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3223,7 +2182,11 @@
       "date_utc": "2026-04-25T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Fredrikstad",
       "away_team": "Viking",
@@ -3265,37 +2228,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3304,7 +2236,11 @@
       "date_utc": "2026-04-25T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Rosenborg",
       "away_team": "Brann",
@@ -3346,37 +2282,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3385,7 +2290,11 @@
       "date_utc": "2026-04-26T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Molde",
       "away_team": "Valerenga",
@@ -3427,37 +2336,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 1,
-      "home_score": 5,
-      "away_score": 1,
-      "fthg": 5,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 5,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3466,7 +2344,11 @@
       "date_utc": "2026-04-26T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Aalesund",
       "away_team": "Kristiansund BK",
@@ -3508,37 +2390,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3547,7 +2398,11 @@
       "date_utc": "2026-04-26T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Ham-Kam",
       "away_team": "Start",
@@ -3589,37 +2444,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3628,7 +2452,11 @@
       "date_utc": "2026-04-26T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "KFUM Oslo",
       "away_team": "Sarpsborg 08 FF",
@@ -3670,37 +2498,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3709,7 +2506,11 @@
       "date_utc": "2026-04-26T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Tromso",
       "away_team": "Sandefjord",
@@ -3751,37 +2552,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3790,7 +2560,11 @@
       "date_utc": "2026-04-26T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 6",
       "home_team": "Lillestrom",
       "away_team": "Bodo/Glimt",
@@ -3832,37 +2606,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3871,7 +2614,11 @@
       "date_utc": "2026-04-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 17",
       "home_team": "Tromso",
       "away_team": "Brann",
@@ -3913,37 +2660,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 5,
-      "home_score": 0,
-      "away_score": 5,
-      "fthg": 0,
-      "ftag": 5,
-      "hthg": 0,
-      "htag": 3,
-      "goals": {
-        "home": 0,
-        "away": 5
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 3
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 5
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3952,7 +2668,11 @@
       "date_utc": "2026-04-30T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 18",
       "home_team": "Bodo/Glimt",
       "away_team": "Start",
@@ -3994,37 +2714,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4033,7 +2722,11 @@
       "date_utc": "2026-05-01T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Viking",
       "away_team": "Rosenborg",
@@ -4075,37 +2768,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4114,7 +2776,11 @@
       "date_utc": "2026-05-02T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Brann",
       "away_team": "Fredrikstad",
@@ -4156,37 +2822,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4195,7 +2830,11 @@
       "date_utc": "2026-05-03T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Lillestrom",
       "away_team": "Sarpsborg 08 FF",
@@ -4237,37 +2876,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 0,
-      "home_score": 4,
-      "away_score": 0,
-      "fthg": 4,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4276,7 +2884,11 @@
       "date_utc": "2026-05-03T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Kristiansund BK",
       "away_team": "Ham-Kam",
@@ -4318,37 +2930,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4357,7 +2938,11 @@
       "date_utc": "2026-05-03T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Sandefjord",
       "away_team": "Aalesund",
@@ -4399,37 +2984,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4438,7 +2992,11 @@
       "date_utc": "2026-05-03T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Start",
       "away_team": "Tromso",
@@ -4480,37 +3038,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4519,7 +3046,11 @@
       "date_utc": "2026-05-03T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Valerenga",
       "away_team": "KFUM Oslo",
@@ -4561,37 +3092,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4600,7 +3100,11 @@
       "date_utc": "2026-05-04T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 7",
       "home_team": "Bodo/Glimt",
       "away_team": "Molde",
@@ -4642,37 +3146,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4681,7 +3154,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Ham-Kam",
       "away_team": "Valerenga",
@@ -4723,37 +3200,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4762,7 +3208,11 @@
       "date_utc": "2026-05-09T12:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Sarpsborg 08 FF",
       "away_team": "Fredrikstad",
@@ -4804,37 +3254,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4843,7 +3262,11 @@
       "date_utc": "2026-05-10T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Rosenborg",
       "away_team": "Lillestrom",
@@ -4885,37 +3308,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4924,7 +3316,11 @@
       "date_utc": "2026-05-10T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "KFUM Oslo",
       "away_team": "Viking",
@@ -4966,37 +3362,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5005,7 +3370,11 @@
       "date_utc": "2026-05-10T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Sandefjord",
       "away_team": "Kristiansund BK",
@@ -5047,37 +3416,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5086,7 +3424,11 @@
       "date_utc": "2026-05-10T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Tromso",
       "away_team": "Molde",
@@ -5128,37 +3470,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5167,7 +3478,11 @@
       "date_utc": "2026-05-16T12:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Brann",
       "away_team": "KFUM Oslo",
@@ -5209,37 +3524,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5248,7 +3532,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Fredrikstad",
       "away_team": "Ham-Kam",
@@ -5290,37 +3578,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5329,7 +3586,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Lillestrom",
       "away_team": "Sandefjord",
@@ -5371,37 +3632,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5410,7 +3640,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Molde",
       "away_team": "Kristiansund BK",
@@ -5452,37 +3686,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5491,7 +3694,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Rosenborg",
       "away_team": "Aalesund",
@@ -5533,37 +3740,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5572,7 +3748,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Viking",
       "away_team": "Start",
@@ -5614,37 +3794,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 6,
-      "away_goals": 3,
-      "home_score": 6,
-      "away_score": 3,
-      "fthg": 6,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 3,
-      "goals": {
-        "home": 6,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 3
-        },
-        "fulltime": {
-          "home": 6,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5653,7 +3802,11 @@
       "date_utc": "2026-05-16T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Bodo/Glimt",
       "away_team": "Tromso",
@@ -5695,37 +3848,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5734,7 +3856,11 @@
       "date_utc": "2026-05-16T18:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 9",
       "home_team": "Valerenga",
       "away_team": "Sarpsborg 08 FF",
@@ -5776,37 +3902,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 2,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5815,7 +3910,11 @@
       "date_utc": "2026-05-20T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Start",
       "away_team": "Bodo/Glimt",
@@ -5857,37 +3956,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 4,
-      "home_score": 1,
-      "away_score": 4,
-      "fthg": 1,
-      "ftag": 4,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 4
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 4
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5896,7 +3964,11 @@
       "date_utc": "2026-05-20T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 2",
       "home_team": "Lillestrom",
       "away_team": "Kristiansund BK",
@@ -5938,37 +4010,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5977,7 +4018,11 @@
       "date_utc": "2026-05-20T18:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 8",
       "home_team": "Aalesund",
       "away_team": "Brann",
@@ -6019,37 +4064,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6058,7 +4072,11 @@
       "date_utc": "2026-05-24T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Bodo/Glimt",
       "away_team": "Brann",
@@ -6100,37 +4118,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6139,7 +4126,11 @@
       "date_utc": "2026-05-24T16:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Kristiansund BK",
       "away_team": "Viking",
@@ -6181,37 +4172,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6220,7 +4180,11 @@
       "date_utc": "2026-05-25T12:30:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Start",
       "away_team": "Valerenga",
@@ -6262,37 +4226,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6301,7 +4234,11 @@
       "date_utc": "2026-05-25T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Ham-Kam",
       "away_team": "Lillestrom",
@@ -6343,37 +4280,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6382,7 +4288,11 @@
       "date_utc": "2026-05-25T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "KFUM Oslo",
       "away_team": "Rosenborg",
@@ -6424,37 +4334,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6463,7 +4342,11 @@
       "date_utc": "2026-05-25T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Sarpsborg 08 FF",
       "away_team": "Molde",
@@ -6505,37 +4388,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6544,7 +4396,11 @@
       "date_utc": "2026-05-25T15:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Tromso",
       "away_team": "Aalesund",
@@ -6586,37 +4442,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6625,7 +4450,11 @@
       "date_utc": "2026-05-25T17:15:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 10",
       "home_team": "Sandefjord",
       "away_team": "Fredrikstad",
@@ -6667,37 +4496,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6706,7 +4504,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Aalesund",
       "away_team": "Ham-Kam",
@@ -6748,37 +4550,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6787,7 +4558,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Brann",
       "away_team": "Sarpsborg 08 FF",
@@ -6829,37 +4604,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6868,7 +4612,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Fredrikstad",
       "away_team": "Start",
@@ -6910,37 +4658,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6949,7 +4666,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "KFUM Oslo",
       "away_team": "Tromso",
@@ -6991,37 +4712,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -7030,7 +4720,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Rosenborg",
       "away_team": "Bodo/Glimt",
@@ -7072,37 +4766,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -7111,7 +4774,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Valerenga",
       "away_team": "Kristiansund BK",
@@ -7153,37 +4820,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -7192,7 +4828,11 @@
       "date_utc": "2026-05-30T14:00:00+00:00",
       "country": "Norway",
       "league": "Eliteserien",
+      "league_code": "NOR",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
       "round": "Regular Season - 11",
       "home_team": "Molde",
       "away_team": "Sandefjord",
@@ -7234,40 +4874,8 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     }
-  ],
-  "score_patched_at": "2026-06-27T06:56:36Z"
+  ]
 }

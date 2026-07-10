@@ -1,25 +1,39 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-06-27T06:56:36Z",
+  "schema_version": 3,
+  "generated_at": "2026-07-10T13:36:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
-    "rule": "The app reads this repository artifact and must not call API-Football directly.",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
     "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
-    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/allsvenskan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-06-27T06:54:55Z"
+    "cache_generated_at": "2026-06-27T06:54:55Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
   },
   "competition": {
+    "league_code": "SWE",
     "country": "Sweden",
     "league": "Allsvenskan",
     "football_data_code": "SWE",
     "api_football_league_id": 113,
+    "api_football_season": "2026",
     "season": "2026",
+    "app_season": "2026",
     "priority_group": "scandinavia",
-    "data_level": "fixture_statistics_enriched"
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-04-04",
+    "target_season_end": "2026-11-29",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
@@ -54,9 +68,7 @@
     "bb_ready_candidate": true,
     "notes": [
       "ok"
-    ],
-    "fixtures_with_score": 81,
-    "score_coverage": 1.0
+    ]
   },
   "matches": [
     {
@@ -64,7 +76,11 @@
       "date_utc": "2026-04-04T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "Degerfors IF",
       "away_team": "Sirius",
@@ -106,37 +122,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -145,7 +130,11 @@
       "date_utc": "2026-04-04T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "Hammarby FF",
       "away_team": "Mjallby AIF",
@@ -187,37 +176,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -226,7 +184,11 @@
       "date_utc": "2026-04-05T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "AIK Stockholm",
       "away_team": "Halmstad",
@@ -268,37 +230,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -307,7 +238,11 @@
       "date_utc": "2026-04-05T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "Kalmar FF",
       "away_team": "Vasteras SK FK",
@@ -349,37 +284,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -388,7 +292,11 @@
       "date_utc": "2026-04-05T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "Orgryte IS",
       "away_team": "Malmo FF",
@@ -430,37 +338,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -469,7 +346,11 @@
       "date_utc": "2026-04-06T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "IF Elfsborg",
       "away_team": "IFK Goteborg",
@@ -511,37 +392,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -550,7 +400,11 @@
       "date_utc": "2026-04-06T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "BK Hacken",
       "away_team": "IF Brommapojkarna",
@@ -592,37 +446,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -631,7 +454,11 @@
       "date_utc": "2026-04-06T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 1",
       "home_team": "Gais",
       "away_team": "Djurgardens IF",
@@ -673,37 +500,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -712,7 +508,11 @@
       "date_utc": "2026-04-11T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "IFK Goteborg",
       "away_team": "BK Hacken",
@@ -754,37 +554,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -793,7 +562,11 @@
       "date_utc": "2026-04-11T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Mjallby AIF",
       "away_team": "Orgryte IS",
@@ -835,37 +608,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -874,7 +616,11 @@
       "date_utc": "2026-04-11T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Vasteras SK FK",
       "away_team": "IF Elfsborg",
@@ -916,37 +662,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -955,7 +670,11 @@
       "date_utc": "2026-04-12T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Djurgardens IF",
       "away_team": "Kalmar FF",
@@ -997,37 +716,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 2,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1036,7 +724,11 @@
       "date_utc": "2026-04-12T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Halmstad",
       "away_team": "Degerfors IF",
@@ -1078,37 +770,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1117,7 +778,11 @@
       "date_utc": "2026-04-12T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Malmo FF",
       "away_team": "Gais",
@@ -1159,37 +824,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 1,
-      "home_score": 3,
-      "away_score": 1,
-      "fthg": 3,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1198,7 +832,11 @@
       "date_utc": "2026-04-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "IF Brommapojkarna",
       "away_team": "AIK Stockholm",
@@ -1240,37 +878,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1279,7 +886,11 @@
       "date_utc": "2026-04-13T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 2",
       "home_team": "Sirius",
       "away_team": "Hammarby FF",
@@ -1321,37 +932,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1360,7 +940,11 @@
       "date_utc": "2026-04-17T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Degerfors IF",
       "away_team": "IF Elfsborg",
@@ -1402,37 +986,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1441,7 +994,11 @@
       "date_utc": "2026-04-17T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Djurgardens IF",
       "away_team": "Malmo FF",
@@ -1483,37 +1040,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1522,7 +1048,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Halmstad",
       "away_team": "IFK Goteborg",
@@ -1564,37 +1094,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1603,7 +1102,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Hammarby FF",
       "away_team": "Orgryte IS",
@@ -1645,37 +1148,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 8,
-      "away_goals": 1,
-      "home_score": 8,
-      "away_score": 1,
-      "fthg": 8,
-      "ftag": 1,
-      "hthg": 4,
-      "htag": 1,
-      "goals": {
-        "home": 8,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 4,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 8,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1684,7 +1156,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Mjallby AIF",
       "away_team": "IF Brommapojkarna",
@@ -1726,37 +1202,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1765,7 +1210,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "Sirius",
       "away_team": "Vasteras SK FK",
@@ -1807,37 +1256,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 1,
-      "home_score": 4,
-      "away_score": 1,
-      "fthg": 4,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1846,7 +1264,11 @@
       "date_utc": "2026-04-19T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "AIK Stockholm",
       "away_team": "Kalmar FF",
@@ -1888,37 +1310,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1927,7 +1318,11 @@
       "date_utc": "2026-04-19T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 3",
       "home_team": "BK Hacken",
       "away_team": "Gais",
@@ -1969,37 +1364,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2008,7 +1372,11 @@
       "date_utc": "2026-04-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "IF Elfsborg",
       "away_team": "Djurgardens IF",
@@ -2050,37 +1418,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2089,7 +1426,11 @@
       "date_utc": "2026-04-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Hammarby FF",
       "away_team": "Halmstad",
@@ -2131,37 +1472,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2170,7 +1480,11 @@
       "date_utc": "2026-04-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Orgryte IS",
       "away_team": "IF Brommapojkarna",
@@ -2212,37 +1526,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2251,7 +1534,11 @@
       "date_utc": "2026-04-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Vasteras SK FK",
       "away_team": "BK Hacken",
@@ -2293,37 +1580,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 3,
-      "home_score": 3,
-      "away_score": 3,
-      "fthg": 3,
-      "ftag": 3,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2332,7 +1588,11 @@
       "date_utc": "2026-04-23T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Degerfors IF",
       "away_team": "AIK Stockholm",
@@ -2374,37 +1634,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2413,7 +1642,11 @@
       "date_utc": "2026-04-23T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Gais",
       "away_team": "Mjallby AIF",
@@ -2455,37 +1688,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2494,7 +1696,11 @@
       "date_utc": "2026-04-23T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Kalmar FF",
       "away_team": "IFK Goteborg",
@@ -2536,37 +1742,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2575,7 +1750,11 @@
       "date_utc": "2026-04-23T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 4",
       "home_team": "Malmo FF",
       "away_team": "Sirius",
@@ -2617,37 +1796,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2656,7 +1804,11 @@
       "date_utc": "2026-04-26T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "Djurgardens IF",
       "away_team": "Hammarby FF",
@@ -2698,37 +1850,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2737,7 +1858,11 @@
       "date_utc": "2026-04-26T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "IF Brommapojkarna",
       "away_team": "Vasteras SK FK",
@@ -2779,37 +1904,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2818,7 +1912,11 @@
       "date_utc": "2026-04-26T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "IFK Goteborg",
       "away_team": "Gais",
@@ -2860,37 +1958,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2899,7 +1966,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "AIK Stockholm",
       "away_team": "Malmo FF",
@@ -2941,37 +2012,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2980,7 +2020,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "BK Hacken",
       "away_team": "Sirius",
@@ -3022,37 +2066,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3061,7 +2074,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "Kalmar FF",
       "away_team": "IF Elfsborg",
@@ -3103,37 +2120,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3142,7 +2128,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "Mjallby AIF",
       "away_team": "Halmstad",
@@ -3184,37 +2174,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3223,7 +2182,11 @@
       "date_utc": "2026-04-27T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 5",
       "home_team": "Orgryte IS",
       "away_team": "Degerfors IF",
@@ -3265,37 +2228,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3304,7 +2236,11 @@
       "date_utc": "2026-05-02T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Degerfors IF",
       "away_team": "BK Hacken",
@@ -3346,37 +2282,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3385,7 +2290,11 @@
       "date_utc": "2026-05-02T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Sirius",
       "away_team": "Kalmar FF",
@@ -3427,37 +2336,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3466,7 +2344,11 @@
       "date_utc": "2026-05-03T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Hammarby FF",
       "away_team": "Vasteras SK FK",
@@ -3508,37 +2390,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3547,7 +2398,11 @@
       "date_utc": "2026-05-03T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Malmo FF",
       "away_team": "Mjallby AIF",
@@ -3589,37 +2444,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3628,7 +2452,11 @@
       "date_utc": "2026-05-03T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "IF Elfsborg",
       "away_team": "AIK Stockholm",
@@ -3670,37 +2498,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3709,7 +2506,11 @@
       "date_utc": "2026-05-03T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Gais",
       "away_team": "Orgryte IS",
@@ -3751,37 +2552,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 0,
-      "home_score": 4,
-      "away_score": 0,
-      "fthg": 4,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 4,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3790,7 +2560,11 @@
       "date_utc": "2026-05-04T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Djurgardens IF",
       "away_team": "IFK Goteborg",
@@ -3832,37 +2606,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 6,
-      "away_goals": 0,
-      "home_score": 6,
-      "away_score": 0,
-      "fthg": 6,
-      "ftag": 0,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 6,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 6,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3871,7 +2614,11 @@
       "date_utc": "2026-05-04T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 6",
       "home_team": "Halmstad",
       "away_team": "IF Brommapojkarna",
@@ -3913,37 +2660,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 3,
-      "home_score": 1,
-      "away_score": 3,
-      "fthg": 1,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3952,7 +2668,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "IF Elfsborg",
       "away_team": "IF Brommapojkarna",
@@ -3994,37 +2714,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4033,7 +2722,11 @@
       "date_utc": "2026-05-09T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "Degerfors IF",
       "away_team": "Mjallby AIF",
@@ -4075,37 +2768,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 4,
-      "home_score": 1,
-      "away_score": 4,
-      "fthg": 1,
-      "ftag": 4,
-      "hthg": 0,
-      "htag": 3,
-      "goals": {
-        "home": 1,
-        "away": 4
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 3
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 4
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4114,7 +2776,11 @@
       "date_utc": "2026-05-09T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "IFK Goteborg",
       "away_team": "Hammarby FF",
@@ -4156,37 +2822,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4195,7 +2830,11 @@
       "date_utc": "2026-05-09T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "Vasteras SK FK",
       "away_team": "Gais",
@@ -4237,37 +2876,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4276,7 +2884,11 @@
       "date_utc": "2026-05-10T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "AIK Stockholm",
       "away_team": "Djurgardens IF",
@@ -4318,37 +2930,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 4,
-      "home_score": 2,
-      "away_score": 4,
-      "fthg": 2,
-      "ftag": 4,
-      "hthg": 1,
-      "htag": 3,
-      "goals": {
-        "home": 2,
-        "away": 4
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 3
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 4
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4357,7 +2938,11 @@
       "date_utc": "2026-05-10T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "Kalmar FF",
       "away_team": "Halmstad",
@@ -4399,37 +2984,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4438,7 +2992,11 @@
       "date_utc": "2026-05-10T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "BK Hacken",
       "away_team": "Malmo FF",
@@ -4480,37 +3038,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 3,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4519,7 +3046,11 @@
       "date_utc": "2026-05-11T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 7",
       "home_team": "Sirius",
       "away_team": "Orgryte IS",
@@ -4561,37 +3092,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4600,7 +3100,11 @@
       "date_utc": "2026-05-16T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Gais",
       "away_team": "Degerfors IF",
@@ -4642,37 +3146,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4681,7 +3154,11 @@
       "date_utc": "2026-05-16T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Halmstad",
       "away_team": "IF Elfsborg",
@@ -4723,37 +3200,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4762,7 +3208,11 @@
       "date_utc": "2026-05-17T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "IF Brommapojkarna",
       "away_team": "Kalmar FF",
@@ -4804,37 +3254,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4843,7 +3262,11 @@
       "date_utc": "2026-05-17T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Hammarby FF",
       "away_team": "Malmo FF",
@@ -4885,37 +3308,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 1,
-      "home_score": 4,
-      "away_score": 1,
-      "fthg": 4,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 1,
-      "goals": {
-        "home": 4,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4924,7 +3316,11 @@
       "date_utc": "2026-05-17T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Mjallby AIF",
       "away_team": "BK Hacken",
@@ -4966,37 +3362,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5005,7 +3370,11 @@
       "date_utc": "2026-05-17T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Vasteras SK FK",
       "away_team": "AIK Stockholm",
@@ -5047,37 +3416,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5086,7 +3424,11 @@
       "date_utc": "2026-05-18T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Djurgardens IF",
       "away_team": "Sirius",
@@ -5128,37 +3470,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5167,7 +3478,11 @@
       "date_utc": "2026-05-19T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 8",
       "home_team": "Orgryte IS",
       "away_team": "IFK Goteborg",
@@ -5209,37 +3524,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5248,7 +3532,11 @@
       "date_utc": "2026-05-20T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 15",
       "home_team": "Gais",
       "away_team": "Hammarby FF",
@@ -5290,37 +3578,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5329,7 +3586,11 @@
       "date_utc": "2026-05-21T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 15",
       "home_team": "IF Elfsborg",
       "away_team": "Mjallby AIF",
@@ -5371,37 +3632,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5410,7 +3640,11 @@
       "date_utc": "2026-05-22T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Djurgardens IF",
       "away_team": "IF Brommapojkarna",
@@ -5452,37 +3686,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5491,7 +3694,11 @@
       "date_utc": "2026-05-23T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Halmstad",
       "away_team": "Orgryte IS",
@@ -5533,37 +3740,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5572,7 +3748,11 @@
       "date_utc": "2026-05-23T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Kalmar FF",
       "away_team": "Degerfors IF",
@@ -5614,37 +3794,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5653,7 +3802,11 @@
       "date_utc": "2026-05-24T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Hammarby FF",
       "away_team": "AIK Stockholm",
@@ -5695,37 +3848,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5734,7 +3856,11 @@
       "date_utc": "2026-05-24T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Sirius",
       "away_team": "Gais",
@@ -5776,37 +3902,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5815,7 +3910,11 @@
       "date_utc": "2026-05-24T14:30:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "Malmo FF",
       "away_team": "Vasteras SK FK",
@@ -5857,37 +3956,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5896,7 +3964,11 @@
       "date_utc": "2026-05-25T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "IF Elfsborg",
       "away_team": "BK Hacken",
@@ -5938,37 +4010,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5977,7 +4018,11 @@
       "date_utc": "2026-05-25T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 9",
       "home_team": "IFK Goteborg",
       "away_team": "Mjallby AIF",
@@ -6019,37 +4064,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6058,7 +4072,11 @@
       "date_utc": "2026-05-29T17:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "Orgryte IS",
       "away_team": "IF Elfsborg",
@@ -6100,37 +4118,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6139,7 +4126,11 @@
       "date_utc": "2026-05-30T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "AIK Stockholm",
       "away_team": "Sirius",
@@ -6181,37 +4172,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6220,7 +4180,11 @@
       "date_utc": "2026-05-30T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "Gais",
       "away_team": "Kalmar FF",
@@ -6262,37 +4226,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6301,7 +4234,11 @@
       "date_utc": "2026-05-30T13:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "Malmo FF",
       "away_team": "Halmstad",
@@ -6343,37 +4280,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 2,
-      "home_score": 5,
-      "away_score": 2,
-      "fthg": 5,
-      "ftag": 2,
-      "hthg": 2,
-      "htag": 2,
-      "goals": {
-        "home": 5,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6382,7 +4288,11 @@
       "date_utc": "2026-05-31T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "Degerfors IF",
       "away_team": "IF Brommapojkarna",
@@ -6424,37 +4334,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6463,7 +4342,11 @@
       "date_utc": "2026-05-31T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "BK Hacken",
       "away_team": "Hammarby FF",
@@ -6505,37 +4388,6 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6544,7 +4396,11 @@
       "date_utc": "2026-05-31T12:00:00+00:00",
       "country": "Sweden",
       "league": "Allsvenskan",
+      "league_code": "SWE",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 113,
       "round": "Regular Season - 10",
       "home_team": "Vasteras SK FK",
       "away_team": "IFK Goteborg",
@@ -6586,40 +4442,8 @@
           "possession": true,
           "passes": true,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 5,
-      "home_score": 4,
-      "away_score": 5,
-      "fthg": 4,
-      "ftag": 5,
-      "hthg": 2,
-      "htag": 4,
-      "goals": {
-        "home": 4,
-        "away": 5
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 4
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 5
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     }
-  ],
-  "score_patched_at": "2026-06-27T06:56:36Z"
+  ]
 }

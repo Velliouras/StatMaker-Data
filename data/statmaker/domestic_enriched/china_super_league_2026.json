@@ -1,0 +1,78 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-07-10T13:36:06Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/china/super-league/2026/fixture_stats.json",
+    "cache_generated_at": null,
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "CHN",
+    "country": "China",
+    "league": "Super League",
+    "football_data_code": "CHN",
+    "api_football_league_id": 169,
+    "api_football_season": "2026",
+    "season": "2026",
+    "app_season": "2026",
+    "priority_group": "asia",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-03-06",
+    "target_season_end": "2026-11-08",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 0,
+    "fixtures_with_any_stats": 0,
+    "fixtures_with_bb_core_stats": 0,
+    "any_stats_coverage": 0.0,
+    "bb_core_coverage": 0.0,
+    "group_counts": {
+      "shots_total": 0,
+      "shots_on_target": 0,
+      "corners": 0,
+      "fouls": 0,
+      "yellow_cards": 0,
+      "red_cards": 0,
+      "possession": 0,
+      "passes": 0,
+      "xg": 0
+    },
+    "group_coverage": {
+      "shots_total": 0.0,
+      "shots_on_target": 0.0,
+      "corners": 0.0,
+      "fouls": 0.0,
+      "yellow_cards": 0.0,
+      "red_cards": 0.0,
+      "possession": 0.0,
+      "passes": 0.0,
+      "xg": 0.0
+    },
+    "bb_ready_candidate": false,
+    "notes": [
+      "not enough completed fixtures: 0 < 15",
+      "low any-stats coverage: 0.0 < 0.65",
+      "low BB-core coverage: 0.0 < 0.65",
+      "required BB groups below threshold",
+      "no shot group reaches threshold"
+    ]
+  },
+  "matches": []
+}

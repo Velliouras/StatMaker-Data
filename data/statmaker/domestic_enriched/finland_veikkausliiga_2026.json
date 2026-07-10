@@ -1,25 +1,39 @@
 {
-  "schema_version": 2,
-  "generated_at": "2026-06-27T06:56:36Z",
+  "schema_version": 3,
+  "generated_at": "2026-07-10T13:36:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
-    "rule": "The app reads this repository artifact and must not call API-Football directly.",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
     "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
-    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive."
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-06-27T06:54:53Z"
+    "cache_generated_at": "2026-06-27T06:54:53Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
   },
   "competition": {
+    "league_code": "FIN",
     "country": "Finland",
     "league": "Veikkausliiga",
     "football_data_code": "FIN",
     "api_football_league_id": 244,
+    "api_football_season": "2026",
     "season": "2026",
+    "app_season": "2026",
     "priority_group": "scandinavia",
-    "data_level": "fixture_statistics_enriched"
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-04-04",
+    "target_season_end": "2026-08-31",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
@@ -57,9 +71,7 @@
       "low BB-core coverage: 0.4474 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
-    ],
-    "fixtures_with_score": 76,
-    "score_coverage": 1.0
+    ]
   },
   "matches": [
     {
@@ -67,7 +79,11 @@
       "date_utc": "2026-04-04T10:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "Inter Turku",
       "away_team": "VPS",
@@ -109,37 +125,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -148,7 +133,11 @@
       "date_utc": "2026-04-04T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "HJK Helsinki",
       "away_team": "SJK",
@@ -190,37 +179,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -229,7 +187,11 @@
       "date_utc": "2026-04-04T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "Ilves",
       "away_team": "KuPS",
@@ -271,37 +233,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 3,
-      "home_score": 1,
-      "away_score": 3,
-      "fthg": 1,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -310,7 +241,11 @@
       "date_utc": "2026-04-04T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "FF Jaro",
       "away_team": "Lahti",
@@ -352,37 +287,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -391,7 +295,11 @@
       "date_utc": "2026-04-04T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "Mariehamn",
       "away_team": "Turku PS",
@@ -433,37 +341,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -472,7 +349,11 @@
       "date_utc": "2026-04-04T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 1",
       "home_team": "Gnistan",
       "away_team": "AC Oulu",
@@ -514,37 +395,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 5,
-      "home_score": 1,
-      "away_score": 5,
-      "fthg": 1,
-      "ftag": 5,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 5
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 5
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -553,7 +403,11 @@
       "date_utc": "2026-04-10T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "Turku PS",
       "away_team": "Lahti",
@@ -595,37 +449,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -634,7 +457,11 @@
       "date_utc": "2026-04-10T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "SJK",
       "away_team": "Mariehamn",
@@ -676,37 +503,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -715,7 +511,11 @@
       "date_utc": "2026-04-10T17:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "VPS",
       "away_team": "FF Jaro",
@@ -757,37 +557,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -796,7 +565,11 @@
       "date_utc": "2026-04-11T11:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "KuPS",
       "away_team": "Gnistan",
@@ -838,37 +611,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -877,7 +619,11 @@
       "date_utc": "2026-04-11T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "HJK Helsinki",
       "away_team": "AC Oulu",
@@ -919,37 +665,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -958,7 +673,11 @@
       "date_utc": "2026-04-11T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 2",
       "home_team": "Inter Turku",
       "away_team": "Ilves",
@@ -1000,37 +719,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1039,7 +727,11 @@
       "date_utc": "2026-04-18T11:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "Gnistan",
       "away_team": "HJK Helsinki",
@@ -1081,37 +773,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1120,7 +781,11 @@
       "date_utc": "2026-04-18T13:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "FF Jaro",
       "away_team": "KuPS",
@@ -1162,37 +827,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1201,7 +835,11 @@
       "date_utc": "2026-04-18T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "AC Oulu",
       "away_team": "VPS",
@@ -1243,37 +881,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1282,7 +889,11 @@
       "date_utc": "2026-04-18T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "Lahti",
       "away_team": "Inter Turku",
@@ -1324,37 +935,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 2,
-      "home_score": 0,
-      "away_score": 2,
-      "fthg": 0,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1363,7 +943,11 @@
       "date_utc": "2026-04-18T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "Turku PS",
       "away_team": "SJK",
@@ -1405,37 +989,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1444,7 +997,11 @@
       "date_utc": "2026-04-18T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 3",
       "home_team": "Mariehamn",
       "away_team": "Ilves",
@@ -1486,37 +1043,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1525,7 +1051,11 @@
       "date_utc": "2026-04-22T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 14",
       "home_team": "KuPS",
       "away_team": "AC Oulu",
@@ -1567,37 +1097,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1606,7 +1105,11 @@
       "date_utc": "2026-04-24T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "Turku PS",
       "away_team": "Gnistan",
@@ -1648,37 +1151,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1687,7 +1159,11 @@
       "date_utc": "2026-04-24T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "VPS",
       "away_team": "Ilves",
@@ -1729,37 +1205,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1768,7 +1213,11 @@
       "date_utc": "2026-04-24T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "SJK",
       "away_team": "FF Jaro",
@@ -1810,37 +1259,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1849,7 +1267,11 @@
       "date_utc": "2026-04-25T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "Lahti",
       "away_team": "AC Oulu",
@@ -1891,37 +1313,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -1930,7 +1321,11 @@
       "date_utc": "2026-04-25T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "Inter Turku",
       "away_team": "Mariehamn",
@@ -1972,37 +1367,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2011,7 +1375,11 @@
       "date_utc": "2026-04-26T13:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 4",
       "home_team": "KuPS",
       "away_team": "HJK Helsinki",
@@ -2053,37 +1421,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2092,7 +1429,11 @@
       "date_utc": "2026-04-29T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 14",
       "home_team": "Inter Turku",
       "away_team": "HJK Helsinki",
@@ -2134,37 +1475,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2173,7 +1483,11 @@
       "date_utc": "2026-05-02T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "SJK",
       "away_team": "Ilves",
@@ -2215,37 +1529,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2254,7 +1537,11 @@
       "date_utc": "2026-05-02T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "FF Jaro",
       "away_team": "Turku PS",
@@ -2296,37 +1583,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2335,7 +1591,11 @@
       "date_utc": "2026-05-02T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "Mariehamn",
       "away_team": "VPS",
@@ -2377,37 +1637,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2416,7 +1645,11 @@
       "date_utc": "2026-05-02T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "AC Oulu",
       "away_team": "KuPS",
@@ -2458,37 +1691,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2497,7 +1699,11 @@
       "date_utc": "2026-05-04T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "HJK Helsinki",
       "away_team": "Lahti",
@@ -2539,37 +1745,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2578,7 +1753,11 @@
       "date_utc": "2026-05-05T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 5",
       "home_team": "Gnistan",
       "away_team": "Inter Turku",
@@ -2620,37 +1799,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2659,7 +1807,11 @@
       "date_utc": "2026-05-08T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "Ilves",
       "away_team": "AC Oulu",
@@ -2701,37 +1853,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2740,7 +1861,11 @@
       "date_utc": "2026-05-08T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "Turku PS",
       "away_team": "HJK Helsinki",
@@ -2782,37 +1907,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2821,7 +1915,11 @@
       "date_utc": "2026-05-08T17:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "KuPS",
       "away_team": "SJK",
@@ -2863,37 +1961,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2902,7 +1969,11 @@
       "date_utc": "2026-05-09T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "Inter Turku",
       "away_team": "FF Jaro",
@@ -2944,37 +2015,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -2983,7 +2023,11 @@
       "date_utc": "2026-05-09T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "VPS",
       "away_team": "Gnistan",
@@ -3025,37 +2069,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3064,7 +2077,11 @@
       "date_utc": "2026-05-10T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 6",
       "home_team": "Lahti",
       "away_team": "Mariehamn",
@@ -3106,37 +2123,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3145,7 +2131,11 @@
       "date_utc": "2026-05-16T11:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "HJK Helsinki",
       "away_team": "Ilves",
@@ -3187,37 +2177,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 2,
-      "home_score": 2,
-      "away_score": 2,
-      "fthg": 2,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3226,7 +2185,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "Mariehamn",
       "away_team": "KuPS",
@@ -3268,37 +2231,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3307,7 +2239,11 @@
       "date_utc": "2026-05-16T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "SJK",
       "away_team": "Inter Turku",
@@ -3349,37 +2285,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 3,
-      "home_score": 1,
-      "away_score": 3,
-      "fthg": 1,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3388,7 +2293,11 @@
       "date_utc": "2026-05-16T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "AC Oulu",
       "away_team": "Turku PS",
@@ -3430,37 +2339,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3469,7 +2347,11 @@
       "date_utc": "2026-05-16T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "Gnistan",
       "away_team": "FF Jaro",
@@ -3511,37 +2393,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3550,7 +2401,11 @@
       "date_utc": "2026-05-18T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 7",
       "home_team": "Lahti",
       "away_team": "VPS",
@@ -3592,37 +2447,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3631,7 +2455,11 @@
       "date_utc": "2026-05-20T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 15",
       "home_team": "Ilves",
       "away_team": "Inter Turku",
@@ -3673,37 +2501,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 3,
-      "home_score": 1,
-      "away_score": 3,
-      "fthg": 1,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 1,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3712,7 +2509,11 @@
       "date_utc": "2026-05-20T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 15",
       "home_team": "KuPS",
       "away_team": "FF Jaro",
@@ -3754,37 +2555,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3793,7 +2563,11 @@
       "date_utc": "2026-05-22T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "VPS",
       "away_team": "HJK Helsinki",
@@ -3835,37 +2609,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3874,7 +2617,11 @@
       "date_utc": "2026-05-23T11:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "Inter Turku",
       "away_team": "Turku PS",
@@ -3916,37 +2663,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -3955,7 +2671,11 @@
       "date_utc": "2026-05-23T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "Ilves",
       "away_team": "Gnistan",
@@ -3997,37 +2717,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 0,
-      "home_score": 2,
-      "away_score": 0,
-      "fthg": 2,
-      "ftag": 0,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4036,7 +2725,11 @@
       "date_utc": "2026-05-23T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "FF Jaro",
       "away_team": "Mariehamn",
@@ -4078,37 +2771,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 0,
-      "home_score": 3,
-      "away_score": 0,
-      "fthg": 3,
-      "ftag": 0,
-      "hthg": 2,
-      "htag": 0,
-      "goals": {
-        "home": 3,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4117,7 +2779,11 @@
       "date_utc": "2026-05-23T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "KuPS",
       "away_team": "Lahti",
@@ -4159,37 +2825,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4198,7 +2833,11 @@
       "date_utc": "2026-05-23T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 8",
       "home_team": "SJK",
       "away_team": "AC Oulu",
@@ -4240,37 +2879,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 1,
-      "home_score": 0,
-      "away_score": 1,
-      "fthg": 0,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4279,7 +2887,11 @@
       "date_utc": "2026-05-30T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "HJK Helsinki",
       "away_team": "Mariehamn",
@@ -4321,37 +2933,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4360,7 +2941,11 @@
       "date_utc": "2026-05-30T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "Gnistan",
       "away_team": "SJK",
@@ -4402,37 +2987,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 2,
-      "home_score": 3,
-      "away_score": 2,
-      "fthg": 3,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 3,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4441,7 +2995,11 @@
       "date_utc": "2026-05-30T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "KuPS",
       "away_team": "Inter Turku",
@@ -4483,37 +3041,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4522,7 +3049,11 @@
       "date_utc": "2026-05-30T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "Turku PS",
       "away_team": "VPS",
@@ -4564,37 +3095,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4603,7 +3103,11 @@
       "date_utc": "2026-05-30T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "Lahti",
       "away_team": "Ilves",
@@ -4645,37 +3149,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 3,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4684,7 +3157,11 @@
       "date_utc": "2026-05-31T13:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 9",
       "home_team": "AC Oulu",
       "away_team": "FF Jaro",
@@ -4726,37 +3203,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4765,7 +3211,11 @@
       "date_utc": "2026-06-13T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "Ilves",
       "away_team": "Turku PS",
@@ -4807,37 +3257,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4846,7 +3265,11 @@
       "date_utc": "2026-06-13T12:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "Inter Turku",
       "away_team": "AC Oulu",
@@ -4888,37 +3311,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -4927,7 +3319,11 @@
       "date_utc": "2026-06-13T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "FF Jaro",
       "away_team": "HJK Helsinki",
@@ -4969,37 +3365,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 5,
-      "home_score": 2,
-      "away_score": 5,
-      "fthg": 2,
-      "ftag": 5,
-      "hthg": 2,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 5
-      },
-      "score": {
-        "halftime": {
-          "home": 2,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 5
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5008,7 +3373,11 @@
       "date_utc": "2026-06-13T14:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "VPS",
       "away_team": "KuPS",
@@ -5050,37 +3419,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5089,7 +3427,11 @@
       "date_utc": "2026-06-13T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "Lahti",
       "away_team": "SJK",
@@ -5131,37 +3473,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 3,
-      "home_score": 2,
-      "away_score": 3,
-      "fthg": 2,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 1,
-      "goals": {
-        "home": 2,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5170,7 +3481,11 @@
       "date_utc": "2026-06-13T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 10",
       "home_team": "Mariehamn",
       "away_team": "Gnistan",
@@ -5212,37 +3527,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 3,
-      "home_score": 0,
-      "away_score": 3,
-      "fthg": 0,
-      "ftag": 3,
-      "hthg": 0,
-      "htag": 2,
-      "goals": {
-        "home": 0,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5251,7 +3535,11 @@
       "date_utc": "2026-06-17T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "HJK Helsinki",
       "away_team": "Inter Turku",
@@ -5293,37 +3581,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 3,
-      "away_goals": 3,
-      "home_score": 3,
-      "away_score": 3,
-      "fthg": 3,
-      "ftag": 3,
-      "hthg": 1,
-      "htag": 2,
-      "goals": {
-        "home": 3,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 2
-        },
-        "fulltime": {
-          "home": 3,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5332,7 +3589,11 @@
       "date_utc": "2026-06-17T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "Ilves",
       "away_team": "FF Jaro",
@@ -5374,37 +3635,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 0,
-      "home_score": 5,
-      "away_score": 0,
-      "fthg": 5,
-      "ftag": 0,
-      "hthg": 4,
-      "htag": 0,
-      "goals": {
-        "home": 5,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 4,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5413,7 +3643,11 @@
       "date_utc": "2026-06-17T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "Turku PS",
       "away_team": "KuPS",
@@ -5455,37 +3689,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5494,7 +3697,11 @@
       "date_utc": "2026-06-17T18:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "Gnistan",
       "away_team": "Lahti",
@@ -5536,37 +3743,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 0,
-      "home_score": 1,
-      "away_score": 0,
-      "fthg": 1,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5575,7 +3751,11 @@
       "date_utc": "2026-06-17T18:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "SJK",
       "away_team": "VPS",
@@ -5617,37 +3797,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 2,
-      "home_score": 1,
-      "away_score": 2,
-      "fthg": 1,
-      "ftag": 2,
-      "hthg": 1,
-      "htag": 0,
-      "goals": {
-        "home": 1,
-        "away": 2
-      },
-      "score": {
-        "halftime": {
-          "home": 1,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 2
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5656,7 +3805,11 @@
       "date_utc": "2026-06-18T09:59:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 11",
       "home_team": "AC Oulu",
       "away_team": "Mariehamn",
@@ -5698,37 +3851,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 2,
-      "away_goals": 1,
-      "home_score": 2,
-      "away_score": 1,
-      "fthg": 2,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 2,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 2,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5737,7 +3859,11 @@
       "date_utc": "2026-06-23T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "KuPS",
       "away_team": "Ilves",
@@ -5779,37 +3905,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 4,
-      "away_goals": 3,
-      "home_score": 4,
-      "away_score": 3,
-      "fthg": 4,
-      "ftag": 3,
-      "hthg": 4,
-      "htag": 1,
-      "goals": {
-        "home": 4,
-        "away": 3
-      },
-      "score": {
-        "halftime": {
-          "home": 4,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 4,
-          "away": 3
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5818,7 +3913,11 @@
       "date_utc": "2026-06-23T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "Lahti",
       "away_team": "Turku PS",
@@ -5860,37 +3959,6 @@
           "possession": true,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 0,
-      "home_score": 0,
-      "away_score": 0,
-      "fthg": 0,
-      "ftag": 0,
-      "hthg": 0,
-      "htag": 0,
-      "goals": {
-        "home": 0,
-        "away": 0
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 0
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 0
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5899,7 +3967,11 @@
       "date_utc": "2026-06-23T15:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "VPS",
       "away_team": "AC Oulu",
@@ -5941,37 +4013,6 @@
           "possession": true,
           "passes": true,
           "xg": true
-        },
-        "has_score": true
-      },
-      "home_goals": 5,
-      "away_goals": 1,
-      "home_score": 5,
-      "away_score": 1,
-      "fthg": 5,
-      "ftag": 1,
-      "hthg": 3,
-      "htag": 1,
-      "goals": {
-        "home": 5,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 3,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 5,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -5980,7 +4021,11 @@
       "date_utc": "2026-06-23T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "Inter Turku",
       "away_team": "SJK",
@@ -6022,37 +4067,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6061,7 +4075,11 @@
       "date_utc": "2026-06-23T16:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "FF Jaro",
       "away_team": "Gnistan",
@@ -6103,37 +4121,6 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 1,
-      "away_goals": 1,
-      "home_score": 1,
-      "away_score": 1,
-      "fthg": 1,
-      "ftag": 1,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 1,
-        "away": 1
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 1,
-          "away": 1
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     },
@@ -6142,7 +4129,11 @@
       "date_utc": "2026-06-23T17:00:00+00:00",
       "country": "Finland",
       "league": "Veikkausliiga",
+      "league_code": "FIN",
       "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
       "round": "Regular Season - 12",
       "home_team": "Mariehamn",
       "away_team": "HJK Helsinki",
@@ -6184,40 +4175,8 @@
           "possession": false,
           "passes": false,
           "xg": false
-        },
-        "has_score": true
-      },
-      "home_goals": 0,
-      "away_goals": 4,
-      "home_score": 0,
-      "away_score": 4,
-      "fthg": 0,
-      "ftag": 4,
-      "hthg": 0,
-      "htag": 1,
-      "goals": {
-        "home": 0,
-        "away": 4
-      },
-      "score": {
-        "halftime": {
-          "home": 0,
-          "away": 1
-        },
-        "fulltime": {
-          "home": 0,
-          "away": 4
-        },
-        "extratime": {
-          "home": null,
-          "away": null
-        },
-        "penalty": {
-          "home": null,
-          "away": null
         }
       }
     }
-  ],
-  "score_patched_at": "2026-06-27T06:56:36Z"
+  ]
 }
