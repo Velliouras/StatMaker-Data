@@ -1,0 +1,39 @@
+name: API-Football Domestic Trend Readiness
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "config/api_football_enrichment_leagues.json"
+      - "data/api_football/fixture_stats/**"
+      - "scripts/api_football_trend_readiness_audit.py"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build zero-call trend readiness audit
+        run: python scripts/api_football_trend_readiness_audit.py
+
+      - name: Commit generated reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/api_football_trend_readiness.json reports/api_football_trend_readiness.csv reports/api_football_trend_readiness.md
+          if git diff --cached --quiet; then
+            echo "No trend readiness report changes"
+            exit 0
+          fi
+          git commit -m "Refresh API-Football Domestic trend readiness"
+          git push
