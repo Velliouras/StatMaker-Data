@@ -2,20 +2,134 @@
 """Refresh exact Domestic odds for the published active/July registry only.
 
 This job makes zero API-Football calls. It rotates Odds-API.io league batches,
-merges refreshed leagues into the existing artifact, and preserves valid leagues
-that were not processed in the current rate-limited cycle.
+keeps all registry leagues in the app artifact, prunes expired matches, and
+preserves still-valid previous odds when a processed league returns no usable
+replacement because of provider or rate-limit conditions.
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import os
 import sys
+from typing import Any, Dict, List, Sequence
 
 import domestic_live_july_pipeline as pipeline
 import domestic_odds_expansion
 import update_domestic_odds_api_io as odds_fetch
+
+REPORT_PATH = pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json"
+
+
+def safe_merge_odds_feed(
+    previous: Dict[str, Any],
+    fresh: Dict[str, Any],
+    registry: Sequence[Dict[str, Any]],
+    today: dt.date,
+) -> Dict[str, Any]:
+    selected_codes = {str(league.get("leagueCode") or "") for league in registry}
+    previous_by_code = {
+        str(league.get("leagueCode") or ""): pipeline.prune_expired_matches(league, today)
+        for league in previous.get("leagues", []) or []
+        if str(league.get("leagueCode") or "") in selected_codes
+    }
+    fresh_by_code = {
+        str(league.get("leagueCode") or ""): pipeline.prune_expired_matches(league, today)
+        for league in fresh.get("leagues", []) or []
+        if str(league.get("leagueCode") or "") in selected_codes
+    }
+    registry_by_code = {str(item.get("leagueCode") or ""): item for item in registry}
+
+    combined: List[Dict[str, Any]] = []
+    preserved_after_empty_refresh: List[str] = []
+    for code in sorted(selected_codes):
+        fresh_league = fresh_by_code.get(code)
+        previous_league = previous_by_code.get(code)
+        if fresh_league and fresh_league.get("matches"):
+            league = fresh_league
+        elif previous_league and previous_league.get("matches"):
+            league = previous_league
+            if fresh_league is not None:
+                preserved_after_empty_refresh.append(code)
+        elif fresh_league is not None:
+            league = fresh_league
+        elif previous_league is not None:
+            league = previous_league
+        else:
+            meta = registry_by_code[code]
+            league = {
+                "leagueCode": code,
+                "country": meta.get("country"),
+                "competition": meta.get("competition"),
+                "season": meta.get("targetAppSeason"),
+                "apiFootballLeagueId": meta.get("apiFootballLeagueId"),
+                "enabledForStats": True,
+                "enabledForOdds": bool(meta.get("enabledForOdds", True)),
+                "enabledForBetting": bool(meta.get("enabledForBetting", True)),
+                "matches": [],
+            }
+        combined.append(league)
+
+    merged = dict(previous)
+    merged.update({
+        "schemaVersion": max(
+            int(previous.get("schemaVersion") or 0),
+            int(fresh.get("schemaVersion") or 0),
+            3,
+        ),
+        "source": "odds-api-io",
+        "provider": "Odds-API.io",
+        "generatedAt": fresh.get("generatedAt") or pipeline.now_utc(),
+        "registry": fresh.get("registry") or previous.get("registry") or {},
+        "dataContract": fresh.get("dataContract") or previous.get("dataContract") or {},
+        "leagues": combined,
+    })
+    merged["debug"] = {
+        **(previous.get("debug") or {}),
+        **(fresh.get("debug") or {}),
+        "mergePolicy": "replace with non-empty fresh exact odds; preserve unexpired previous matches after empty refresh; prune expired matches",
+        "selectedLeagueCount": len(selected_codes),
+        "leaguesWithUsableMatches": sum(1 for league in combined if league.get("matches")),
+        "preservedAfterEmptyRefresh": preserved_after_empty_refresh,
+    }
+    return merged
+
+
+def validate_feed(
+    feed: Dict[str, Any],
+    registry: Sequence[Dict[str, Any]],
+    today: dt.date,
+) -> Dict[str, int]:
+    registry_codes = {str(item.get("leagueCode") or "") for item in registry}
+    feed_codes = {str(item.get("leagueCode") or "") for item in feed.get("leagues", []) or []}
+    if registry_codes != feed_codes:
+        raise RuntimeError(f"Odds registry mismatch: registry={len(registry_codes)} feed={len(feed_codes)}")
+
+    matches = 0
+    markets = 0
+    for league in feed.get("leagues", []) or []:
+        for match in league.get("matches", []) or []:
+            date = str(match.get("date") or "")[:10]
+            if date and date < today.isoformat():
+                raise RuntimeError(f"Expired match remained in odds feed: {league.get('leagueCode')} {date}")
+            if match.get("teamMappingStatus") != "matched" or match.get("usableForStats") is not True:
+                raise RuntimeError(f"Unmatched teams reached production odds: {league.get('leagueCode')}")
+            matches += 1
+            for market in match.get("markets", []) or []:
+                if market.get("exactBookmakerOdds") is not True:
+                    raise RuntimeError("Non-exact market reached production odds")
+                if not str(market.get("bookmaker") or "").strip():
+                    raise RuntimeError("Bookmaker name missing from production market")
+                try:
+                    price = float(market.get("odds"))
+                except (TypeError, ValueError) as exc:
+                    raise RuntimeError("Invalid decimal odds in production market") from exc
+                if price <= 1.0:
+                    raise RuntimeError("Invalid decimal odds in production market")
+                markets += 1
+    return {"leagueCount": len(feed_codes), "matchCount": matches, "marketCount": markets}
 
 
 def parse_args() -> argparse.Namespace:
@@ -41,42 +155,63 @@ def main() -> int:
 
     domestic_config = pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
     state = pipeline.load_json(pipeline.STATE_PATH, {"statsCursor": 0, "oddsCursor": 0})
-    feed = pipeline.fetch_odds_cycle(
-        api_key=api_key,
-        bookmakers=os.getenv("ODDS_API_IO_BOOKMAKERS", odds_fetch.DEFAULT_BOOKMAKERS).strip(),
-        registry=registry,
-        domestic_config=domestic_config,
-        state=state,
-        cycle_size=max(1, args.cycle_size),
-        today=pipeline.today_utc(),
-    )
-    state["generatedAt"] = pipeline.now_utc()
-    state["registryLeagueCount"] = len(registry)
+    eligible = [league for league in registry if bool(league.get("enabledForOdds", True))]
+    cursor = int(state.get("oddsCursor") or 0)
+    selected_registry = pipeline.rotated(eligible, cursor)[:max(1, args.cycle_size)]
+    selected = [pipeline.odds_league_view(league) for league in selected_registry]
+    config = {
+        "version": max(int(domestic_config.get("version") or 0), 4),
+        "horizonDays": max(int(domestic_config.get("horizonDays") or 0), 31),
+        "leagues": selected,
+    }
+
+    debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
+    aliases = pipeline.generated_aliases(registry)
+    original_alias_loader = odds_fetch.load_aliases
+    odds_fetch.load_aliases = lambda: aliases
+    try:
+        fresh = odds_fetch.build_output(
+            config,
+            selected,
+            api_key,
+            False,
+            os.getenv("ODDS_API_IO_BOOKMAKERS", odds_fetch.DEFAULT_BOOKMAKERS).strip(),
+            debug,
+        )
+    finally:
+        odds_fetch.load_aliases = original_alias_loader
+
+    fresh.setdefault("debug", {})["emittedMarketCounts"] = odds_fetch.emitted_market_counts(fresh)
+    previous = pipeline.load_json(pipeline.ODDS_PATH, {})
+    feed = safe_merge_odds_feed(previous, fresh, registry, pipeline.today_utc())
+    validation = validate_feed(feed, registry, pipeline.today_utc())
+    pipeline.write_json(pipeline.ODDS_PATH, feed)
+    pipeline.write_json(odds_fetch.REPORT_PATH, feed.get("debug", {}))
+
+    if eligible:
+        state["oddsCursor"] = (cursor + len(selected_registry)) % len(eligible)
+    state.update({
+        "lastOddsLeagues": [league.get("leagueCode") for league in selected_registry],
+        "lastOddsRateLimitRemaining": debug.get("rateLimitRemaining"),
+        "lastOddsRefreshAt": pipeline.now_utc(),
+        "registryLeagueCount": len(registry),
+        "generatedAt": pipeline.now_utc(),
+    })
     pipeline.write_json(pipeline.STATE_PATH, state)
 
     report = {
         "generatedAt": pipeline.now_utc(),
         "registryLeagueCount": len(registry),
-        "cycleSize": max(1, args.cycle_size),
+        "cycleSize": len(selected_registry),
         "refreshedLeagueCodes": state.get("lastOddsLeagues", []),
         "rateLimitRemaining": state.get("lastOddsRateLimitRemaining"),
-        "oddsLeagueCount": len(feed.get("leagues", []) or []),
+        "validation": validation,
         "oddsLeaguesWithMatches": sum(1 for league in feed.get("leagues", []) or [] if league.get("matches")),
-        "matches": sum(len(league.get("matches", []) or []) for league in feed.get("leagues", []) or []),
-        "markets": sum(
-            len(match.get("markets", []) or [])
-            for league in feed.get("leagues", []) or []
-            for match in league.get("matches", []) or []
-        ),
-        "doubleChanceMarkets": sum(
-            1
-            for league in feed.get("leagues", []) or []
-            for match in league.get("matches", []) or []
-            for market in match.get("markets", []) or []
-            if market.get("market") == "DOUBLE_CHANCE"
-        ),
+        "preservedAfterEmptyRefresh": feed.get("debug", {}).get("preservedAfterEmptyRefresh", []),
+        "nextCursor": state.get("oddsCursor"),
+        "warnings": debug.get("warnings", []),
     }
-    pipeline.write_json(pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json", report)
+    pipeline.write_json(REPORT_PATH, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
 
