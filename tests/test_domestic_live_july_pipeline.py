@@ -9,6 +9,7 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import domestic_live_july_pipeline as pipeline
+import expand_domestic_full_stats as full_stats
 
 
 class DomesticLiveJulyPipelineTest(unittest.TestCase):
@@ -96,6 +97,45 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
             "2026",
             pipeline.app_season_label(dt.date(2026, 3, 1), dt.date(2026, 11, 30)),
         )
+
+    def test_full_stat_number_parser_handles_provider_percentages(self):
+        self.assertEqual(89, full_stats.parse_number("89%"))
+        self.assertEqual(4.72, full_stats.parse_number("4,72"))
+        self.assertIsNone(full_stats.parse_number(""))
+        self.assertIsNone(full_stats.parse_number(None))
+
+    def test_full_stat_expansion_maps_home_and_away_values(self):
+        fixture = {
+            "home_team_id": 1,
+            "away_team_id": 2,
+            "home_team": "Home",
+            "away_team": "Away",
+            "normalized_stats": {},
+            "raw_statistics": [
+                {
+                    "team": {"id": 1, "name": "Home"},
+                    "statistics": [
+                        {"type": "Shots off Goal", "value": 7},
+                        {"type": "Passes %", "value": "84%"},
+                    ],
+                },
+                {
+                    "team": {"id": 2, "name": "Away"},
+                    "statistics": [
+                        {"type": "Shots off Goal", "value": 3},
+                        {"type": "Passes %", "value": "76%"},
+                    ],
+                },
+            ],
+        }
+        expanded, counts = full_stats.expand_fixture(fixture)
+        stats = expanded["normalized_stats"]
+        self.assertEqual(7, stats["HShotsOffGoal"])
+        self.assertEqual(3, stats["AShotsOffGoal"])
+        self.assertEqual(84, stats["HPassAccuracy"])
+        self.assertEqual(76, stats["APassAccuracy"])
+        self.assertEqual(1, counts["HShotsOffGoal"])
+        self.assertEqual(1, counts["AShotsOffGoal"])
 
 
 if __name__ == "__main__":
