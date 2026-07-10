@@ -20,6 +20,7 @@ on:
       - main
     paths:
       - "scripts/domestic_live_july_pipeline.py"
+      - "scripts/finalize_domestic_live_july_artifacts.py"
       - "tests/test_domestic_live_july_pipeline.py"
       - ".github/workflows/domestic-live-july-pipeline.yml"
 
@@ -62,6 +63,9 @@ jobs:
             --stats-max-requests "$stats_requests" \
             --odds-cycle-size "$odds_cycle"
 
+      - name: Finalize score and statistics contracts
+        run: python scripts/finalize_domestic_live_july_artifacts.py
+
       - name: Validate published contracts
         run: |
           python - <<'PY'
@@ -83,6 +87,16 @@ jobs:
               raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
           if registry_codes != odds_codes:
               raise SystemExit(f'Odds registry mismatch: registry={len(registry_codes)} odds={len(odds_codes)}')
+
+          index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
+          for code, row in index_rows.items():
+              output_path = root / str(row.get('output_path') or '')
+              if not output_path.is_file():
+                  raise SystemExit(f'Missing app stats artifact for {code}: {output_path}')
+              artifact = json.loads(output_path.read_text(encoding='utf-8'))
+              for match in artifact.get('matches', []) or []:
+                  if match.get('home_goals') is None or match.get('away_goals') is None:
+                      raise SystemExit(f'Completed stats match without full-time score: {code}')
 
           for league in odds.get('leagues', []):
               for match in league.get('matches', []) or []:
@@ -115,7 +129,8 @@ jobs:
             reports/statmaker_domestic_enriched_build.csv \
             reports/statmaker_domestic_enriched_build.md \
             reports/domestic_odds_debug.json \
-            reports/domestic_live_july_pipeline.json
+            reports/domestic_live_july_pipeline.json \
+            reports/domestic_live_july_artifact_contract.json
           if git diff --cached --quiet; then
             echo "No Domestic active/July changes to commit."
           else
