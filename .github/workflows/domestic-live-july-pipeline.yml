@@ -16,6 +16,7 @@ on:
     paths:
       - "scripts/domestic_live_july_pipeline.py"
       - "scripts/refresh_domestic_live_july_stats.py"
+      - "scripts/expand_domestic_full_stats.py"
       - "scripts/finalize_domestic_live_july_artifacts.py"
       - "scripts/build_domestic_live_july_normalized_stats.py"
       - "tests/test_domestic_live_july_pipeline.py"
@@ -79,9 +80,18 @@ jobs:
             > reports/domestic_live_july_stats.log 2>&1
           cat reports/domestic_live_july_stats.log
 
+      - name: Expand every available cached statistic
+        id: expand
+        if: steps.stats.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python scripts/expand_domestic_full_stats.py \
+            > reports/domestic_live_july_full_stats.log 2>&1
+          cat reports/domestic_live_july_full_stats.log
+
       - name: Rebuild app statistics from refreshed caches
         id: rebuild
-        if: steps.stats.outcome == 'success'
+        if: steps.expand.outcome == 'success'
         continue-on-error: true
         run: |
           {
@@ -119,6 +129,15 @@ jobs:
           index_codes = {str(item.get('league_code') or '') for item in index.get('leagues', [])}
           odds_codes = {str(item.get('leagueCode') or '') for item in odds.get('leagues', [])}
           normalized_codes = {str(item.get('league_code') or '') for item in normalized.get('fixtures', [])}
+          required_fields = {
+              'HS', 'AS', 'HST', 'AST', 'HC', 'AC', 'HF', 'AF', 'HY', 'AY', 'HR', 'AR',
+              'HPossession', 'APossession', 'HSaves', 'ASaves', 'HPasses', 'APasses',
+              'HPassesAccurate', 'APassesAccurate', 'HxG', 'AxG',
+              'HShotsOffGoal', 'AShotsOffGoal', 'HBlockedShots', 'ABlockedShots',
+              'HShotsInsideBox', 'AShotsInsideBox', 'HShotsOutsideBox', 'AShotsOutsideBox',
+              'HOffsides', 'AOffsides', 'HPassAccuracy', 'APassAccuracy',
+              'HGoalsPrevented', 'AGoalsPrevented', 'HFreeKicks', 'AFreeKicks'
+          }
 
           if not registry_codes:
               raise SystemExit('Domestic live/July registry is empty')
@@ -129,6 +148,8 @@ jobs:
           normalized_registry_codes = {"ROU" if code == "ROM" else code for code in registry_codes}
           if not normalized_codes.issubset(normalized_registry_codes):
               raise SystemExit('Normalized stats contain a league outside the active/July registry')
+          if not required_fields.issubset(set(normalized.get('fields', []))):
+              raise SystemExit('Normalized stats export is missing one or more available stat fields')
 
           index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
           for code, row in index_rows.items():
@@ -146,7 +167,7 @@ jobs:
                       if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
                           raise SystemExit('Non-exact market found in production Domestic odds artifact')
 
-          print(f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures")
+          print(f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures; {len(normalized.get('fields', []))} stat fields")
           PY
           cat reports/domestic_live_july_validate.log
 
@@ -156,6 +177,7 @@ jobs:
             echo "tests=${{ steps.tests.outcome }}"
             echo "registry=${{ steps.registry.outcome }}"
             echo "stats=${{ steps.stats.outcome }}"
+            echo "expand=${{ steps.expand.outcome }}"
             echo "rebuild=${{ steps.rebuild.outcome }}"
             echo "validate=${{ steps.validate.outcome }}"
             echo "commit=${GITHUB_SHA}"
@@ -182,6 +204,7 @@ jobs:
               reports/statmaker_domestic_enriched_build.md \
               reports/domestic_live_july_pipeline.json \
               reports/domestic_live_july_stats_refresh.json \
+              reports/domestic_live_july_full_stats_expansion.json \
               reports/domestic_live_july_artifact_contract.json \
               reports/domestic_live_july_normalized_stats.json
           fi
