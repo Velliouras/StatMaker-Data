@@ -1,0 +1,124 @@
+name: Domestic Active and July Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      stats_max_requests:
+        description: "Maximum API-Football requests for this run"
+        required: true
+        default: "85"
+        type: string
+      odds_cycle_size:
+        description: "Domestic leagues to refresh from Odds-API.io per run"
+        required: true
+        default: "8"
+        type: string
+  schedule:
+    - cron: "17 * * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/domestic_live_july_pipeline.py"
+      - "tests/test_domestic_live_july_pipeline.py"
+      - ".github/workflows/domestic-live-july-pipeline.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-active-july-pipeline
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Test active and July policy
+        run: python -m unittest tests/test_domestic_live_july_pipeline.py
+
+      - name: Refresh statistics, app artifacts and exact odds
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
+          INPUT_ODDS_CYCLE_SIZE: ${{ inputs.odds_cycle_size }}
+        run: |
+          stats_requests="${INPUT_STATS_MAX_REQUESTS:-85}"
+          odds_cycle="${INPUT_ODDS_CYCLE_SIZE:-8}"
+          python scripts/domestic_live_july_pipeline.py \
+            --stats-max-requests "$stats_requests" \
+            --odds-cycle-size "$odds_cycle"
+
+      - name: Validate published contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          registry = json.loads((root / 'data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
+          index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          odds = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+
+          registry_codes = {str(item.get('leagueCode') or '') for item in registry.get('leagues', [])}
+          index_codes = {str(item.get('league_code') or '') for item in index.get('leagues', [])}
+          odds_codes = {str(item.get('leagueCode') or '') for item in odds.get('leagues', [])}
+
+          if not registry_codes:
+              raise SystemExit('Domestic live/July registry is empty')
+          if registry_codes != index_codes:
+              raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
+          if registry_codes != odds_codes:
+              raise SystemExit(f'Odds registry mismatch: registry={len(registry_codes)} odds={len(odds_codes)}')
+
+          for league in odds.get('leagues', []):
+              for match in league.get('matches', []) or []:
+                  for market in match.get('markets', []) or []:
+                      if market.get('exactBookmakerOdds') is not True:
+                          raise SystemExit('Non-exact market found in production Domestic odds artifact')
+                      if not market.get('bookmaker'):
+                          raise SystemExit('Market without bookmaker found in production Domestic odds artifact')
+
+          print(
+              f"Validated {len(registry_codes)} leagues; "
+              f"{sum(len(x.get('matches', []) or []) for x in odds.get('leagues', []))} odds matches"
+          )
+          PY
+
+      - name: Commit refreshed artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/api_football/fixture_stats \
+            data/statmaker/domestic_enriched \
+            data/statmaker/domestic_live_july_registry.json \
+            data/statmaker/domestic_live_july_state.json \
+            odds/odds_api_io/domestic_odds.json \
+            reports/api_football_fixture_stats_fetch.json \
+            reports/api_football_fixture_stats_fetch.csv \
+            reports/api_football_fixture_stats_fetch.md \
+            reports/statmaker_domestic_enriched_build.json \
+            reports/statmaker_domestic_enriched_build.csv \
+            reports/statmaker_domestic_enriched_build.md \
+            reports/domestic_odds_debug.json \
+            reports/domestic_live_july_pipeline.json
+          if git diff --cached --quiet; then
+            echo "No Domestic active/July changes to commit."
+          else
+            git commit -m "Refresh active and July Domestic data"
+            git push origin HEAD:main
+          fi
