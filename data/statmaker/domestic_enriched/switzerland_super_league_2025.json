@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-10T14:31:28Z",
+  "generated_at": "2026-07-10T16:17:00Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/switzerland/super-league/2025/fixture_stats.json",
-    "cache_generated_at": "2026-07-10T14:30:32Z",
+    "cache_generated_at": "2026-07-10T16:16:15Z",
     "api_football_season": "2025",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 6,
-    "fixtures_with_any_stats": 5,
-    "fixtures_with_bb_core_stats": 5,
-    "any_stats_coverage": 0.8333,
-    "bb_core_coverage": 0.8333,
+    "completed_fixtures": 16,
+    "fixtures_with_any_stats": 15,
+    "fixtures_with_bb_core_stats": 15,
+    "any_stats_coverage": 0.9375,
+    "bb_core_coverage": 0.9375,
     "group_counts": {
-      "shots_total": 5,
-      "shots_on_target": 5,
-      "corners": 5,
-      "fouls": 5,
-      "yellow_cards": 5,
-      "red_cards": 1,
-      "possession": 5,
-      "passes": 5,
-      "xg": 5
+      "shots_total": 15,
+      "shots_on_target": 15,
+      "corners": 15,
+      "fouls": 15,
+      "yellow_cards": 15,
+      "red_cards": 3,
+      "possession": 15,
+      "passes": 15,
+      "xg": 15
     },
     "group_coverage": {
-      "shots_total": 0.8333,
-      "shots_on_target": 0.8333,
-      "corners": 0.8333,
-      "fouls": 0.8333,
-      "yellow_cards": 0.8333,
-      "red_cards": 0.1667,
-      "possession": 0.8333,
-      "passes": 0.8333,
-      "xg": 0.8333
+      "shots_total": 0.9375,
+      "shots_on_target": 0.9375,
+      "corners": 0.9375,
+      "fouls": 0.9375,
+      "yellow_cards": 0.9375,
+      "red_cards": 0.1875,
+      "possession": 0.9375,
+      "passes": 0.9375,
+      "xg": 0.9375
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "not enough completed fixtures: 6 < 15"
+      "ok"
     ]
   },
   "matches": [
@@ -423,42 +423,42 @@
       "away_team": "FC Winterthur",
       "status": "FT",
       "normalized_stats": {
-        "HS": null,
-        "AS": null,
-        "HST": null,
-        "AST": null,
-        "HC": null,
-        "AC": null,
-        "HF": null,
-        "AF": null,
-        "HY": null,
-        "AY": null,
-        "HR": null,
-        "AR": null,
-        "HPossession": null,
-        "APossession": null,
-        "HSaves": null,
-        "ASaves": null,
-        "HPasses": null,
-        "APasses": null,
-        "HPassesAccurate": null,
-        "APassesAccurate": null,
-        "HxG": null,
-        "AxG": null
+        "HS": 23,
+        "AS": 6,
+        "HST": 6,
+        "AST": 2,
+        "HC": 12,
+        "AC": 2,
+        "HF": 11,
+        "AF": 19,
+        "HY": 2,
+        "AY": 5,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 63,
+        "APossession": 37,
+        "HSaves": 0,
+        "ASaves": 3,
+        "HPasses": 502,
+        "APasses": 310,
+        "HPassesAccurate": 408,
+        "APassesAccurate": 228,
+        "HxG": 3.5,
+        "AxG": 0.64
       },
       "quality": {
-        "has_any_stats": false,
-        "has_bb_core_stats": false,
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
         "groups": {
-          "shots_total": false,
-          "shots_on_target": false,
-          "corners": false,
-          "fouls": false,
-          "yellow_cards": false,
-          "red_cards": false,
-          "possession": false,
-          "passes": false,
-          "xg": false
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
         }
       },
       "home_goals": 3,
@@ -565,6 +565,846 @@
         "fulltime": {
           "home": 1,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382300,
+      "date_utc": "2025-08-02T16:00:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "Servette FC",
+      "away_team": "FC ST. Gallen",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 16,
+        "HST": 5,
+        "AST": 5,
+        "HC": 1,
+        "AC": 6,
+        "HF": 14,
+        "AF": 13,
+        "HY": 7,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 470,
+        "APasses": 265,
+        "HPassesAccurate": 379,
+        "APassesAccurate": 176,
+        "HxG": 1.28,
+        "AxG": 3.56
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 4,
+      "home_score": 1,
+      "away_score": 4,
+      "fthg": 1,
+      "ftag": 4,
+      "hthg": 1,
+      "htag": 3,
+      "goals": {
+        "home": 1,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 3
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382301,
+      "date_utc": "2025-08-02T16:00:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "FC Winterthur",
+      "away_team": "BSC Young Boys",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 17,
+        "HST": 3,
+        "AST": 5,
+        "HC": 3,
+        "AC": 4,
+        "HF": 14,
+        "AF": 12,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 312,
+        "APasses": 434,
+        "HPassesAccurate": 231,
+        "APassesAccurate": 334,
+        "HxG": 1.6,
+        "AxG": 1.05
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382302,
+      "date_utc": "2025-08-02T18:30:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "FC Basel 1893",
+      "away_team": "Grasshoppers",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 9,
+        "HST": 7,
+        "AST": 1,
+        "HC": 5,
+        "AC": 2,
+        "HF": 10,
+        "AF": 20,
+        "HY": 2,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 0,
+        "ASaves": 5,
+        "HPasses": 459,
+        "APasses": 369,
+        "HPassesAccurate": 363,
+        "APassesAccurate": 251,
+        "HxG": 2.88,
+        "AxG": 0.57
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382303,
+      "date_utc": "2025-08-03T12:00:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "FC Thun",
+      "away_team": "Lausanne",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 13,
+        "HST": 3,
+        "AST": 5,
+        "HC": 8,
+        "AC": 3,
+        "HF": 19,
+        "AF": 12,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 4,
+        "ASaves": 1,
+        "HPasses": 268,
+        "APasses": 332,
+        "HPassesAccurate": 179,
+        "APassesAccurate": 233,
+        "HxG": 1.5,
+        "AxG": 3.17
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382304,
+      "date_utc": "2025-08-03T14:30:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "FC Luzern",
+      "away_team": "FC Zurich",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 5,
+        "HST": 1,
+        "AST": 2,
+        "HC": 4,
+        "AC": 5,
+        "HF": 11,
+        "AF": 13,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 1,
+        "ASaves": 0,
+        "HPasses": 363,
+        "APasses": 427,
+        "HPassesAccurate": 303,
+        "APassesAccurate": 378,
+        "HxG": 1.15,
+        "AxG": 0.25
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382305,
+      "date_utc": "2025-08-03T14:30:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 2",
+      "home_team": "FC Sion",
+      "away_team": "FC Lugano",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 17,
+        "HST": 8,
+        "AST": 3,
+        "HC": 1,
+        "AC": 4,
+        "HF": 13,
+        "AF": 15,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 34,
+        "APossession": 66,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 303,
+        "APasses": 598,
+        "HPassesAccurate": 223,
+        "APassesAccurate": 525,
+        "HxG": 1.27,
+        "AxG": 1.75
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 0,
+      "home_score": 4,
+      "away_score": 0,
+      "fthg": 4,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382306,
+      "date_utc": "2025-08-06T18:30:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 4",
+      "home_team": "FC Basel 1893",
+      "away_team": "BSC Young Boys",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 13,
+        "HST": 12,
+        "AST": 4,
+        "HC": 13,
+        "AC": 5,
+        "HF": 16,
+        "AF": 12,
+        "HY": 4,
+        "AY": 4,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 3,
+        "ASaves": 8,
+        "HPasses": 399,
+        "APasses": 330,
+        "HPassesAccurate": 318,
+        "APassesAccurate": 266,
+        "HxG": 3.71,
+        "AxG": 0.7
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382308,
+      "date_utc": "2025-08-09T16:00:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 3",
+      "home_team": "FC ST. Gallen",
+      "away_team": "FC Winterthur",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 19,
+        "HST": 8,
+        "AST": 4,
+        "HC": 3,
+        "AC": 5,
+        "HF": 9,
+        "AF": 13,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 254,
+        "APasses": 435,
+        "HPassesAccurate": 161,
+        "APassesAccurate": 323,
+        "HxG": 3.59,
+        "AxG": 1.84
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 0,
+      "home_score": 5,
+      "away_score": 0,
+      "fthg": 5,
+      "ftag": 0,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 5,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382309,
+      "date_utc": "2025-08-09T18:30:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 3",
+      "home_team": "FC Luzern",
+      "away_team": "FC Thun",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 20,
+        "HST": 2,
+        "AST": 4,
+        "HC": 6,
+        "AC": 5,
+        "HF": 12,
+        "AF": 15,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 395,
+        "APasses": 313,
+        "HPassesAccurate": 296,
+        "APassesAccurate": 223,
+        "HxG": 1.13,
+        "AxG": 1.62
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382310,
+      "date_utc": "2025-08-10T12:00:00+00:00",
+      "country": "Switzerland",
+      "league": "Super League",
+      "league_code": "SWZ",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 207,
+      "round": "Regular Season - 3",
+      "home_team": "BSC Young Boys",
+      "away_team": "FC Sion",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,
