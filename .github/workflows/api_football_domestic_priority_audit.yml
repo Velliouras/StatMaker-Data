@@ -28,12 +28,12 @@ jobs:
 
       - name: Commit generated reports
         run: |
-          if git diff --quiet -- reports/api_football_domestic_priority_audit.json reports/api_football_domestic_priority_audit.csv reports/api_football_domestic_priority_audit.md; then
-            echo "No audit report changes"
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/api_football_domestic_priority_audit.json reports/api_football_domestic_priority_audit.csv reports/api_football_domestic_priority_audit.md
+          if git diff --cached --quiet; then
+            echo "No audit report changes"
+            exit 0
+          fi
           git commit -m "Refresh API-Football Domestic priority audit"
           git push
