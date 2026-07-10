@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Refresh exact Domestic odds for the published active/July registry only.
+"""Refresh exact odds for the active/July Domestic registry.
 
-This job makes zero API-Football calls. It rotates Odds-API.io league batches,
-keeps all registry leagues in the app artifact, prunes expired matches, and
-preserves still-valid previous odds when a processed league returns no usable
-replacement. Canonical betting markets and the complete provider-market archive
-are written to separate artifacts.
+The job uses no API-Football quota. Canonical betting markets and every raw
+Odds-API.io bookmaker market payload are stored separately. Empty/partial
+refreshes preserve valid prior data, and rate-limited batches are retried rather
+than skipped by the rotation cursor.
 """
 
 from __future__ import annotations
@@ -25,126 +24,85 @@ REPORT_PATH = pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json"
 PROVIDER_ARCHIVE_PATH = pipeline.ROOT / "odds" / "odds_api_io" / "domestic_provider_markets.json"
 
 
-def _league_maps(
-    previous: Dict[str, Any],
-    fresh: Dict[str, Any],
-    registry: Sequence[Dict[str, Any]],
-    today: dt.date,
-) -> tuple[set[str], Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]], Dict[str, Dict[str, Any]]]:
-    selected_codes = {str(league.get("leagueCode") or "") for league in registry}
+def _maps(previous, fresh, registry, today):
+    codes = {str(row.get("leagueCode") or "") for row in registry}
     previous_by_code = {
-        str(league.get("leagueCode") or ""): pipeline.prune_expired_matches(league, today)
-        for league in previous.get("leagues", []) or []
-        if str(league.get("leagueCode") or "") in selected_codes
+        str(row.get("leagueCode") or ""): pipeline.prune_expired_matches(row, today)
+        for row in previous.get("leagues", []) or []
+        if str(row.get("leagueCode") or "") in codes
     }
     fresh_by_code = {
-        str(league.get("leagueCode") or ""): pipeline.prune_expired_matches(league, today)
-        for league in fresh.get("leagues", []) or []
-        if str(league.get("leagueCode") or "") in selected_codes
+        str(row.get("leagueCode") or ""): pipeline.prune_expired_matches(row, today)
+        for row in fresh.get("leagues", []) or []
+        if str(row.get("leagueCode") or "") in codes
     }
-    registry_by_code = {str(item.get("leagueCode") or ""): item for item in registry}
-    return selected_codes, previous_by_code, fresh_by_code, registry_by_code
+    metadata = {str(row.get("leagueCode") or ""): row for row in registry}
+    return codes, previous_by_code, fresh_by_code, metadata
 
 
-def safe_merge_odds_feed(
-    previous: Dict[str, Any],
-    fresh: Dict[str, Any],
-    registry: Sequence[Dict[str, Any]],
-    today: dt.date,
-) -> Dict[str, Any]:
-    selected_codes, previous_by_code, fresh_by_code, registry_by_code = _league_maps(
-        previous, fresh, registry, today
-    )
+def _merged_leagues(previous, fresh, registry, today, archive=False):
+    codes, previous_by_code, fresh_by_code, metadata = _maps(previous, fresh, registry, today)
     combined: List[Dict[str, Any]] = []
-    preserved_after_empty_refresh: List[str] = []
-    for code in sorted(selected_codes):
-        fresh_league = fresh_by_code.get(code)
-        previous_league = previous_by_code.get(code)
-        if fresh_league and fresh_league.get("matches"):
-            league = fresh_league
-        elif previous_league and previous_league.get("matches"):
-            league = previous_league
-            if fresh_league is not None:
-                preserved_after_empty_refresh.append(code)
-        elif fresh_league is not None:
-            league = fresh_league
-        elif previous_league is not None:
-            league = previous_league
+    preserved: List[str] = []
+    for code in sorted(codes):
+        new = fresh_by_code.get(code)
+        old = previous_by_code.get(code)
+        if new and new.get("matches"):
+            league = new
+        elif old and old.get("matches"):
+            league = old
+            if new is not None:
+                preserved.append(code)
+        elif new is not None:
+            league = new
+        elif old is not None:
+            league = old
         else:
-            meta = registry_by_code[code]
+            meta = metadata[code]
             league = {
                 "leagueCode": code,
                 "country": meta.get("country"),
                 "competition": meta.get("competition"),
                 "season": meta.get("targetAppSeason"),
-                "apiFootballLeagueId": meta.get("apiFootballLeagueId"),
-                "enabledForStats": True,
-                "enabledForOdds": bool(meta.get("enabledForOdds", True)),
-                "enabledForBetting": bool(meta.get("enabledForBetting", True)),
                 "matches": [],
             }
+            if not archive:
+                league.update({
+                    "apiFootballLeagueId": meta.get("apiFootballLeagueId"),
+                    "enabledForStats": True,
+                    "enabledForOdds": bool(meta.get("enabledForOdds", True)),
+                    "enabledForBetting": bool(meta.get("enabledForBetting", True)),
+                })
         combined.append(league)
+    return codes, combined, preserved
 
+
+def safe_merge_odds_feed(previous, fresh, registry, today):
+    codes, leagues, preserved = _merged_leagues(previous, fresh, registry, today)
     merged = dict(previous)
     merged.update({
-        "schemaVersion": max(
-            int(previous.get("schemaVersion") or 0),
-            int(fresh.get("schemaVersion") or 0),
-            3,
-        ),
+        "schemaVersion": max(int(previous.get("schemaVersion") or 0), int(fresh.get("schemaVersion") or 0), 3),
         "source": "odds-api-io",
         "provider": "Odds-API.io",
         "generatedAt": fresh.get("generatedAt") or pipeline.now_utc(),
         "registry": fresh.get("registry") or previous.get("registry") or {},
         "dataContract": fresh.get("dataContract") or previous.get("dataContract") or {},
-        "leagues": combined,
+        "leagues": leagues,
     })
     merged.pop("providerMarketsArchive", None)
     merged["debug"] = {
         **(previous.get("debug") or {}),
         **(fresh.get("debug") or {}),
-        "mergePolicy": "replace with non-empty fresh exact odds; preserve unexpired previous matches after empty refresh; prune expired matches",
-        "selectedLeagueCount": len(selected_codes),
-        "leaguesWithUsableMatches": sum(1 for league in combined if league.get("matches")),
-        "preservedAfterEmptyRefresh": preserved_after_empty_refresh,
+        "mergePolicy": "replace only with non-empty fresh exact odds; preserve unexpired prior matches; prune expired matches",
+        "selectedLeagueCount": len(codes),
+        "leaguesWithUsableMatches": sum(1 for row in leagues if row.get("matches")),
+        "preservedAfterEmptyRefresh": preserved,
     }
     return merged
 
 
-def safe_merge_provider_archive(
-    previous: Dict[str, Any],
-    fresh: Dict[str, Any],
-    registry: Sequence[Dict[str, Any]],
-    today: dt.date,
-) -> Dict[str, Any]:
-    selected_codes, previous_by_code, fresh_by_code, registry_by_code = _league_maps(
-        previous, fresh, registry, today
-    )
-    combined: List[Dict[str, Any]] = []
-    preserved: List[str] = []
-    for code in sorted(selected_codes):
-        fresh_league = fresh_by_code.get(code)
-        previous_league = previous_by_code.get(code)
-        if fresh_league and fresh_league.get("matches"):
-            league = fresh_league
-        elif previous_league and previous_league.get("matches"):
-            league = previous_league
-            if fresh_league is not None:
-                preserved.append(code)
-        elif fresh_league is not None:
-            league = fresh_league
-        elif previous_league is not None:
-            league = previous_league
-        else:
-            meta = registry_by_code[code]
-            league = {
-                "leagueCode": code,
-                "country": meta.get("country"),
-                "competition": meta.get("competition"),
-                "season": meta.get("targetAppSeason"),
-                "matches": [],
-            }
-        combined.append(league)
+def safe_merge_provider_archive(previous, fresh, registry, today):
+    _, leagues, preserved = _merged_leagues(previous, fresh, registry, today, archive=True)
     return {
         "schemaVersion": max(int(previous.get("schemaVersion") or 0), int(fresh.get("schemaVersion") or 0), 1),
         "source": "odds-api-io",
@@ -155,77 +113,69 @@ def safe_merge_provider_archive(
             "bettingInput": False,
             "estimatedPrices": False,
         },
-        "mergePolicy": "rotate league batches; preserve unexpired provider payloads after empty refresh",
+        "mergePolicy": "rotate batches; preserve unexpired provider payloads after empty refresh",
         "preservedAfterEmptyRefresh": preserved,
-        "leagues": combined,
+        "leagues": leagues,
     }
 
 
-def validate_feed(
-    feed: Dict[str, Any],
-    registry: Sequence[Dict[str, Any]],
-    today: dt.date,
-) -> Dict[str, int]:
-    registry_codes = {str(item.get("leagueCode") or "") for item in registry}
-    feed_codes = {str(item.get("leagueCode") or "") for item in feed.get("leagues", []) or []}
-    if registry_codes != feed_codes:
-        raise RuntimeError(f"Odds registry mismatch: registry={len(registry_codes)} feed={len(feed_codes)}")
-    matches = 0
-    markets = 0
+def validate_feed(feed, registry, today):
+    expected = {str(row.get("leagueCode") or "") for row in registry}
+    actual = {str(row.get("leagueCode") or "") for row in feed.get("leagues", []) or []}
+    if expected != actual:
+        raise RuntimeError(f"Odds registry mismatch: registry={len(expected)} feed={len(actual)}")
+    matches = markets = 0
     for league in feed.get("leagues", []) or []:
         for match in league.get("matches", []) or []:
             date = str(match.get("date") or "")[:10]
             if date and date < today.isoformat():
-                raise RuntimeError(f"Expired match remained in odds feed: {league.get('leagueCode')} {date}")
+                raise RuntimeError(f"Expired odds match: {league.get('leagueCode')} {date}")
             if match.get("teamMappingStatus") != "matched" or match.get("usableForStats") is not True:
-                raise RuntimeError(f"Unmatched teams reached production odds: {league.get('leagueCode')}")
+                raise RuntimeError(f"Unmatched teams in canonical odds: {league.get('leagueCode')}")
             matches += 1
             for market in match.get("markets", []) or []:
-                if market.get("exactBookmakerOdds") is not True:
-                    raise RuntimeError("Non-exact market reached production odds")
-                if not str(market.get("bookmaker") or "").strip():
-                    raise RuntimeError("Bookmaker name missing from production market")
+                if market.get("exactBookmakerOdds") is not True or not str(market.get("bookmaker") or "").strip():
+                    raise RuntimeError("Invalid canonical exact-odds market")
                 try:
-                    price = float(market.get("odds"))
-                except (TypeError, ValueError) as exc:
-                    raise RuntimeError("Invalid decimal odds in production market") from exc
-                if price <= 1.0:
-                    raise RuntimeError("Invalid decimal odds in production market")
+                    valid_price = float(market.get("odds")) > 1.0
+                except (TypeError, ValueError):
+                    valid_price = False
+                if not valid_price:
+                    raise RuntimeError("Invalid canonical decimal odds")
                 markets += 1
-    return {"leagueCount": len(feed_codes), "matchCount": matches, "marketCount": markets}
+    return {"leagueCount": len(actual), "matchCount": matches, "marketCount": markets}
 
 
-def validate_provider_archive(
-    archive: Dict[str, Any],
-    registry: Sequence[Dict[str, Any]],
-    today: dt.date,
-) -> Dict[str, int]:
-    registry_codes = {str(item.get("leagueCode") or "") for item in registry}
-    archive_codes = {str(item.get("leagueCode") or "") for item in archive.get("leagues", []) or []}
-    if registry_codes != archive_codes:
-        raise RuntimeError(
-            f"Provider archive registry mismatch: registry={len(registry_codes)} archive={len(archive_codes)}"
-        )
-    matches = 0
-    payloads = 0
+def validate_provider_archive(archive, registry, today):
+    expected = {str(row.get("leagueCode") or "") for row in registry}
+    actual = {str(row.get("leagueCode") or "") for row in archive.get("leagues", []) or []}
+    if expected != actual:
+        raise RuntimeError(f"Provider archive mismatch: registry={len(expected)} archive={len(actual)}")
+    matches = payloads = 0
     for league in archive.get("leagues", []) or []:
         for match in league.get("matches", []) or []:
             date = str(match.get("date") or "")[:10]
             if date and date < today.isoformat():
-                raise RuntimeError(f"Expired match remained in provider archive: {league.get('leagueCode')} {date}")
+                raise RuntimeError(f"Expired provider archive match: {league.get('leagueCode')} {date}")
             matches += 1
             for payload in match.get("providerMarkets", []) or []:
                 if payload.get("exactProviderPayload") is not True:
-                    raise RuntimeError("Non-exact payload reached provider archive")
-                if not str(payload.get("bookmaker") or "").strip():
-                    raise RuntimeError("Bookmaker missing from provider archive")
-                if not isinstance(payload.get("market"), dict):
-                    raise RuntimeError("Raw provider market object missing")
+                    raise RuntimeError("Non-exact provider payload")
+                if not str(payload.get("bookmaker") or "").strip() or not isinstance(payload.get("market"), dict):
+                    raise RuntimeError("Invalid provider market payload")
                 payloads += 1
-    return {"leagueCount": len(archive_codes), "matchCount": matches, "marketPayloadCount": payloads}
+    return {"leagueCount": len(actual), "matchCount": matches, "marketPayloadCount": payloads}
 
 
-def parse_args() -> argparse.Namespace:
+def processed_codes(debug: Dict[str, Any], selected: Sequence[Dict[str, Any]]) -> List[str]:
+    completed = {
+        str(row.get("leagueCode") or "")
+        for row in (debug.get("leagueReports", []) or []) + (debug.get("leaguesMissing", []) or [])
+    }
+    return [str(row.get("leagueCode") or "") for row in selected if str(row.get("leagueCode") or "") in completed]
+
+
+def parse_args():
     parser = argparse.ArgumentParser(description="Refresh exact odds for active/July Domestic leagues")
     parser.add_argument("--cycle-size", type=int, default=pipeline.DEFAULT_ODDS_CYCLE_SIZE)
     return parser.parse_args()
@@ -244,20 +194,20 @@ def main() -> int:
         print("ERROR: active/July registry is empty; refusing to overwrite odds.", file=sys.stderr)
         return 3
 
-    domestic_config = pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
+    config_all = pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
     state = pipeline.load_json(pipeline.STATE_PATH, {"statsCursor": 0, "oddsCursor": 0})
-    eligible = [league for league in registry if bool(league.get("enabledForOdds", True))]
+    eligible = [row for row in registry if bool(row.get("enabledForOdds", True))]
     cursor = int(state.get("oddsCursor") or 0)
     selected_registry = pipeline.rotated(eligible, cursor)[:max(1, args.cycle_size)]
-    selected = [pipeline.odds_league_view(league) for league in selected_registry]
+    selected = [pipeline.odds_league_view(row) for row in selected_registry]
     config = {
-        "version": max(int(domestic_config.get("version") or 0), 4),
-        "horizonDays": max(int(domestic_config.get("horizonDays") or 0), 31),
+        "version": max(int(config_all.get("version") or 0), 4),
+        "horizonDays": max(int(config_all.get("horizonDays") or 0), 31),
         "leagues": selected,
     }
     debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     aliases = pipeline.generated_aliases(registry)
-    original_alias_loader = odds_fetch.load_aliases
+    original_loader = odds_fetch.load_aliases
     odds_fetch.load_aliases = lambda: aliases
     try:
         fresh = odds_fetch.build_output(
@@ -269,25 +219,31 @@ def main() -> int:
             debug,
         )
     finally:
-        odds_fetch.load_aliases = original_alias_loader
+        odds_fetch.load_aliases = original_loader
 
-    fresh_archive = fresh.pop("providerMarketsArchive", {})
-    fresh.setdefault("debug", {})["emittedMarketCounts"] = odds_fetch.emitted_market_counts(fresh)
+    completed = processed_codes(debug, selected_registry)
     today = pipeline.today_utc()
     previous = pipeline.load_json(pipeline.ODDS_PATH, {})
-    feed = safe_merge_odds_feed(previous, fresh, registry, today)
     previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})
-    archive = safe_merge_provider_archive(previous_archive, fresh_archive, registry, today)
+    if completed:
+        fresh_archive = fresh.pop("providerMarketsArchive", {})
+        fresh.setdefault("debug", {})["emittedMarketCounts"] = odds_fetch.emitted_market_counts(fresh)
+        feed = safe_merge_odds_feed(previous, fresh, registry, today)
+        archive = safe_merge_provider_archive(previous_archive, fresh_archive, registry, today)
+        pipeline.write_json(pipeline.ODDS_PATH, feed)
+        pipeline.write_json(PROVIDER_ARCHIVE_PATH, archive)
+    else:
+        feed = previous
+        archive = previous_archive
     validation = validate_feed(feed, registry, today)
     archive_validation = validate_provider_archive(archive, registry, today)
-    pipeline.write_json(pipeline.ODDS_PATH, feed)
-    pipeline.write_json(PROVIDER_ARCHIVE_PATH, archive)
-    pipeline.write_json(odds_fetch.REPORT_PATH, feed.get("debug", {}))
+    pipeline.write_json(odds_fetch.REPORT_PATH, debug)
 
-    if eligible:
-        state["oddsCursor"] = (cursor + len(selected_registry)) % len(eligible)
+    if eligible and completed:
+        state["oddsCursor"] = (cursor + len(completed)) % len(eligible)
     state.update({
-        "lastOddsLeagues": [league.get("leagueCode") for league in selected_registry],
+        "lastOddsLeagues": completed,
+        "lastOddsRequestedLeagues": [row.get("leagueCode") for row in selected_registry],
         "lastOddsRateLimitRemaining": debug.get("rateLimitRemaining"),
         "lastOddsRefreshAt": pipeline.now_utc(),
         "registryLeagueCount": len(registry),
@@ -297,17 +253,14 @@ def main() -> int:
     report = {
         "generatedAt": pipeline.now_utc(),
         "registryLeagueCount": len(registry),
-        "cycleSize": len(selected_registry),
-        "refreshedLeagueCodes": state.get("lastOddsLeagues", []),
+        "requestedLeagueCodes": state["lastOddsRequestedLeagues"],
+        "processedLeagueCodes": completed,
+        "deferredByRateLimit": len(completed) < len(selected_registry),
         "rateLimitRemaining": state.get("lastOddsRateLimitRemaining"),
         "validation": validation,
         "providerArchiveValidation": archive_validation,
-        "oddsLeaguesWithMatches": sum(1 for league in feed.get("leagues", []) or [] if league.get("matches")),
-        "providerArchiveLeaguesWithMatches": sum(
-            1 for league in archive.get("leagues", []) or [] if league.get("matches")
-        ),
-        "preservedAfterEmptyRefresh": feed.get("debug", {}).get("preservedAfterEmptyRefresh", []),
-        "providerArchivePreservedAfterEmptyRefresh": archive.get("preservedAfterEmptyRefresh", []),
+        "oddsLeaguesWithMatches": sum(1 for row in feed.get("leagues", []) or [] if row.get("matches")),
+        "providerArchiveLeaguesWithMatches": sum(1 for row in archive.get("leagues", []) or [] if row.get("matches")),
         "nextCursor": state.get("oddsCursor"),
         "warnings": debug.get("warnings", []),
     }
