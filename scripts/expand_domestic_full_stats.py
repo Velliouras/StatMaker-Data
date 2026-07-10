@@ -54,7 +54,7 @@ def parse_number(value: Any) -> Optional[float | int]:
         return None
     if isinstance(value, (int, float)):
         return value
-    text = str(value).strip().removeSuffix("%").replace(",", ".")
+    text = str(value).strip().removesuffix("%").replace(",", ".")
     if not text:
         return None
     try:
