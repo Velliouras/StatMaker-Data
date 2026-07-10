@@ -8,7 +8,7 @@ retains the bookmaker's exact decimal odd.
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 TEAM_NAME_PREFIX_TOKENS = {
     "club", "clube", "deportivo", "deportes", "sporting", "atletico",
@@ -160,8 +160,8 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
         away: str,
         debug: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
-        family = odds_module.market_family_from_name(odds_module.raw_market_name(market))
-        if family == "DOUBLE_CHANCE":
+        raw_name = odds_module.raw_market_name(market)
+        if "double chance" in odds_module.normalize_text(raw_name):
             return normalize_double_chance(
                 odds_module,
                 market,
