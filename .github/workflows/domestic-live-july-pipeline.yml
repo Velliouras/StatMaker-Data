@@ -20,6 +20,7 @@ on:
       - "scripts/finalize_domestic_live_july_artifacts.py"
       - "scripts/build_domestic_live_july_normalized_stats.py"
       - "tests/test_domestic_live_july_pipeline.py"
+      - "tests/test_domestic_stats_completeness.py"
       - ".github/workflows/domestic-live-july-pipeline.yml"
 
 permissions:
@@ -44,12 +45,14 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Test active and July policy
+      - name: Test active, July and real-stat completeness policy
         id: tests
         continue-on-error: true
         run: |
           mkdir -p reports
-          python -m unittest tests/test_domestic_live_july_pipeline.py \
+          python -m unittest \
+            tests/test_domestic_live_july_pipeline.py \
+            tests/test_domestic_stats_completeness.py \
             > reports/domestic_live_july_tests.log 2>&1
           cat reports/domestic_live_july_tests.log
 
@@ -124,6 +127,7 @@ jobs:
           index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
           odds = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
           normalized = json.loads((root / 'data/api_football/domestic_normalized_fixture_stats.json').read_text(encoding='utf-8'))
+          progress = json.loads((root / 'reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
 
           registry_codes = {str(item.get('leagueCode') or '') for item in registry.get('leagues', [])}
           index_codes = {str(item.get('league_code') or '') for item in index.get('leagues', [])}
@@ -150,6 +154,8 @@ jobs:
               raise SystemExit('Normalized stats contain a league outside the active/July registry')
           if not required_fields.issubset(set(normalized.get('fields', []))):
               raise SystemExit('Normalized stats export is missing one or more available stat fields')
+          if progress.get('completenessContract') != 'final score plus at least one non-null normalized API-Football statistic':
+              raise SystemExit('Stats refresh used the obsolete dictionary-existence completeness rule')
 
           index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
           for code, row in index_rows.items():
@@ -167,7 +173,10 @@ jobs:
                       if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
                           raise SystemExit('Non-exact market found in production Domestic odds artifact')
 
-          print(f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures; {len(normalized.get('fields', []))} stat fields")
+          print(
+              f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures; "
+              f"{len(normalized.get('fields', []))} stat fields; incomplete leagues={progress.get('incompleteAfter')}"
+          )
           PY
           cat reports/domestic_live_july_validate.log
 
@@ -212,6 +221,7 @@ jobs:
             echo "No Domestic active/July statistics changes to commit."
           else
             git commit -m "Record active and July Domestic statistics run"
+            git pull --rebase origin main
             git push origin HEAD:main
           fi
 
