@@ -9,8 +9,10 @@ if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
 import domestic_live_july_pipeline as pipeline
+import domestic_odds_expansion
 import expand_domestic_full_stats as full_stats
 import refresh_domestic_live_july_odds as odds_refresh
+import update_domestic_odds_api_io as odds_fetch
 
 
 class DomesticLiveJulyPipelineTest(unittest.TestCase):
@@ -20,8 +22,7 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
     def test_active_season_is_selected(self):
         today = dt.date(2026, 7, 10)
         result = pipeline.select_target_season(
-            [self.season(2026, "2026-03-01", "2026-11-30")],
-            today,
+            [self.season(2026, "2026-03-01", "2026-11-30")], today
         )
         self.assertIsNotNone(result)
         season, lifecycle = result
@@ -32,8 +33,7 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
         today = dt.date(2026, 7, 10)
         for day in range(1, 32):
             result = pipeline.select_target_season(
-                [self.season(2026, f"2026-07-{day:02d}", "2027-05-31")],
-                today,
+                [self.season(2026, f"2026-07-{day:02d}", "2027-05-31")], today
             )
             self.assertIsNotNone(result, f"July {day} must be selected")
 
@@ -47,11 +47,7 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
     def test_upcoming_july_uses_previous_history_season(self):
         target = self.season(2026, "2026-07-25", "2027-05-30")
         previous = self.season(2025, "2025-07-20", "2026-05-30")
-        chosen = pipeline.select_history_season(
-            [previous, target],
-            target,
-            "starts_in_july",
-        )
+        chosen = pipeline.select_history_season([previous, target], target, "starts_in_july")
         self.assertEqual(2025, chosen["year"])
 
     def test_active_season_uses_current_history(self):
@@ -93,9 +89,7 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
         registry = [{"leagueCode": "A", "country": "A", "competition": "A"}]
         previous = {
             "schemaVersion": 3,
-            "leagues": [
-                {"leagueCode": "A", "matches": [{"date": "2026-07-12", "id": "keep"}]},
-            ],
+            "leagues": [{"leagueCode": "A", "matches": [{"date": "2026-07-12", "id": "keep"}]}],
         }
         fresh = {
             "schemaVersion": 3,
@@ -105,6 +99,45 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
         merged = odds_refresh.safe_merge_odds_feed(previous, fresh, registry, dt.date(2026, 7, 10))
         self.assertEqual(["keep"], [match["id"] for match in merged["leagues"][0]["matches"]])
         self.assertEqual(["A"], merged["debug"]["preservedAfterEmptyRefresh"])
+
+    def test_provider_archive_preserves_empty_refresh(self):
+        registry = [{"leagueCode": "A", "country": "A", "competition": "A"}]
+        previous = {
+            "schemaVersion": 1,
+            "leagues": [{"leagueCode": "A", "matches": [{"date": "2026-07-12", "id": "keep"}]}],
+        }
+        fresh = {"schemaVersion": 1, "leagues": [{"leagueCode": "A", "matches": []}]}
+        merged = odds_refresh.safe_merge_provider_archive(
+            previous, fresh, registry, dt.date(2026, 7, 10)
+        )
+        self.assertEqual(["keep"], [match["id"] for match in merged["leagues"][0]["matches"]])
+        self.assertEqual(["A"], merged["preservedAfterEmptyRefresh"])
+
+    def test_every_raw_provider_market_block_is_archived(self):
+        event_odds = {
+            "bookmakers": [{
+                "name": "Bet365",
+                "markets": [
+                    {"name": "ML", "odds": [{"name": "Home", "odds": 1.8}]},
+                    {"name": "Anytime Goalscorer", "odds": [{"name": "Player", "odds": 2.5}]},
+                ],
+            }],
+        }
+        payloads = domestic_odds_expansion.exact_provider_market_payloads(odds_fetch, event_odds)
+        self.assertEqual(2, len(payloads))
+        self.assertEqual({"ML", "Anytime Goalscorer"}, {row["providerMarket"] for row in payloads})
+        self.assertTrue(all(row["exactProviderPayload"] for row in payloads))
+
+    def test_verified_slug_rejects_wrong_brazil_serie_b(self):
+        config = {"leagueCode": "BRA2", "country": "Brazil", "searchTerms": ["brazil serie b"]}
+        providers = [
+            {"slug": "brazil-alagoano-serie-b-u23", "name": "Brazil - Alagoano, Serie B U23"},
+            {"slug": "brazil-serie-b", "name": "Brazil - Serie B"},
+        ]
+        selected = domestic_odds_expansion.strict_provider_league_match(
+            odds_fetch, odds_fetch.match_provider_league, config, providers
+        )
+        self.assertEqual("brazil-serie-b", selected["slug"])
 
     def test_odds_validation_rejects_non_exact_market(self):
         registry = [{"leagueCode": "A"}]
@@ -138,15 +171,31 @@ class DomesticLiveJulyPipelineTest(unittest.TestCase):
         result = odds_refresh.validate_feed(feed, registry, dt.date(2026, 7, 10))
         self.assertEqual({"leagueCount": 1, "matchCount": 1, "marketCount": 1}, result)
 
+    def test_provider_archive_validation_accepts_exact_payload(self):
+        registry = [{"leagueCode": "A"}]
+        archive = {
+            "leagues": [{
+                "leagueCode": "A",
+                "matches": [{
+                    "date": "2026-07-12",
+                    "providerMarkets": [{
+                        "bookmaker": "Bet365",
+                        "providerMarket": "Anytime Goalscorer",
+                        "exactProviderPayload": True,
+                        "market": {"name": "Anytime Goalscorer", "odds": []},
+                    }],
+                }],
+            }],
+        }
+        result = odds_refresh.validate_provider_archive(archive, registry, dt.date(2026, 7, 10))
+        self.assertEqual({"leagueCount": 1, "matchCount": 1, "marketPayloadCount": 1}, result)
+
     def test_app_season_label(self):
         self.assertEqual(
             "2026-2027",
             pipeline.app_season_label(dt.date(2026, 7, 25), dt.date(2027, 5, 30)),
         )
-        self.assertEqual(
-            "2026",
-            pipeline.app_season_label(dt.date(2026, 3, 1), dt.date(2026, 11, 30)),
-        )
+        self.assertEqual("2026", pipeline.app_season_label(dt.date(2026, 3, 1), dt.date(2026, 11, 30)))
 
     def test_full_stat_number_parser_handles_provider_percentages(self):
         self.assertEqual(89, full_stats.parse_number("89%"))
