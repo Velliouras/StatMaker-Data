@@ -15,6 +15,7 @@ on:
       - main
     paths:
       - "scripts/domestic_live_july_pipeline.py"
+      - "scripts/refresh_domestic_live_july_stats.py"
       - "scripts/finalize_domestic_live_july_artifacts.py"
       - "scripts/build_domestic_live_july_normalized_stats.py"
       - "tests/test_domestic_live_july_pipeline.py"
@@ -45,18 +46,35 @@ jobs:
       - name: Test active and July policy
         run: python -m unittest tests/test_domestic_live_july_pipeline.py
 
-      - name: Refresh API-Football history and app artifacts
+      - name: Refresh active and July registry
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          python scripts/domestic_live_july_pipeline.py \
+            --skip-stats-fetch \
+            --skip-odds-fetch
+
+      - name: Fairly refresh incomplete API-Football statistics
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
         run: |
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-85}"
-          python scripts/domestic_live_july_pipeline.py \
-            --stats-max-requests "$stats_requests" \
-            --skip-odds-fetch
+          python scripts/refresh_domestic_live_july_stats.py \
+            --max-requests "$stats_requests"
 
-      - name: Finalize complete statistics contracts
+      - name: Rebuild app statistics from refreshed caches
         run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic live/July registry is empty')
+          pipeline.build_app_statistics(registry)
+          PY
           python scripts/finalize_domestic_live_july_artifacts.py
           python scripts/build_domestic_live_july_normalized_stats.py
 
@@ -126,6 +144,7 @@ jobs:
             reports/statmaker_domestic_enriched_build.csv \
             reports/statmaker_domestic_enriched_build.md \
             reports/domestic_live_july_pipeline.json \
+            reports/domestic_live_july_stats_refresh.json \
             reports/domestic_live_july_artifact_contract.json \
             reports/domestic_live_july_normalized_stats.json
           if git diff --cached --quiet; then
