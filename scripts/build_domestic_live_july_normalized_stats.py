@@ -18,6 +18,10 @@ FIELDS = (
     "HS", "AS", "HST", "AST", "HC", "AC", "HF", "AF", "HY", "AY", "HR", "AR",
     "HPossession", "APossession", "HSaves", "ASaves", "HPasses", "APasses",
     "HPassesAccurate", "APassesAccurate", "HxG", "AxG",
+    "HShotsOffGoal", "AShotsOffGoal", "HBlockedShots", "ABlockedShots",
+    "HShotsInsideBox", "AShotsInsideBox", "HShotsOutsideBox", "AShotsOutsideBox",
+    "HOffsides", "AOffsides", "HPassAccuracy", "APassAccuracy",
+    "HGoalsPrevented", "AGoalsPrevented", "HFreeKicks", "AFreeKicks",
 )
 
 
@@ -92,9 +96,9 @@ def main() -> int:
         str(item.get("fixture_id") or ""),
     ))
     output = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "provider": "api-football",
-        "sourceContract": "active and July-starting Domestic API-Football cache only",
+        "sourceContract": "all available team statistics for active and July-starting Domestic leagues",
         "leagueCount": len(league_reports),
         "fixtureCount": len(fixtures),
         "fields": list(FIELDS),
