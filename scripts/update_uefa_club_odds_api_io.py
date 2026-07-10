@@ -17,7 +17,11 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
+import domestic_live_july_pipeline as domestic_pipeline
+import domestic_odds_expansion
 import update_domestic_odds_api_io as odds
+
+domestic_odds_expansion.install(odds, domestic_pipeline)
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"
@@ -81,26 +85,30 @@ def competition_provider_match(
     return scored[0][1]
 
 
+def simplified_team_name(value: Any) -> str:
+    return domestic_odds_expansion.simplified_team_name(odds, value)
+
+
 def canonical_map(competition: Dict[str, Any]) -> Dict[str, str]:
     mapping: Dict[str, str] = {}
     for canonical in competition.get("canonicalTeams", []) or []:
         name = str(canonical or "").strip()
         if name:
             mapping[odds.normalize_text(name, drop_suffixes=True)] = name
-            mapping[odds.simplified_team_name(name)] = name
+            mapping[simplified_team_name(name)] = name
     for alias, canonical in (competition.get("aliases") or {}).items():
         canonical_name = str(canonical or "").strip()
         alias_name = str(alias or "").strip()
         if alias_name and canonical_name:
             mapping[odds.normalize_text(alias_name, drop_suffixes=True)] = canonical_name
-            mapping[odds.simplified_team_name(alias_name)] = canonical_name
+            mapping[simplified_team_name(alias_name)] = canonical_name
     return {key: value for key, value in mapping.items() if key}
 
 
 def canonical_team(name: str, mapping: Dict[str, str]) -> Optional[str]:
     candidates = [
         odds.normalize_text(name, drop_suffixes=True),
-        odds.simplified_team_name(name),
+        simplified_team_name(name),
     ]
     for candidate in dict.fromkeys(candidates):
         if candidate in mapping:
