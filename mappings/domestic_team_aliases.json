@@ -1,11 +1,12 @@
 {
-  "version": 2,
+  "version": 3,
   "normalizationRules": [
     "lowercase",
     "remove accents",
     "replace punctuation with spaces",
     "collapse whitespace",
-    "drop common club suffixes only for matching candidates: fc, fk, cf, sc, ac, afc, bk, if"
+    "drop common club suffixes only for matching candidates: fc, fk, cf, sc, ac, afc, bk, if",
+    "remove unique organization prefixes and trailing foundation years only when the result maps to one canonical team"
   ],
   "aliases": {
     "NOR": {
@@ -32,7 +33,7 @@
       "Malmö FF": ["Malmo FF", "Malmö", "Malmo"],
       "IFK Göteborg": ["IFK Goteborg", "Goteborg", "Göteborg", "Gothenburg"],
       "Mjällby": ["Mjallby", "Mjällby AIF", "Mjallby AIF"],
-      "Västerås": ["Vasteraas", "Vasteras", "Västerås SK", "Vasteras SK"],
+      "Västerås": ["Vasteraas", "Vasteras", "Västerås SK", "Vasteras SK", "Vasteraas SK"],
       "BK Häcken": ["BK Hacken", "Häcken", "Hacken"],
       "Djurgården": ["Djurgarden", "Djurgårdens IF", "Djurgardens IF"],
       "Örgryte": ["Orgryte", "Örgryte IS", "Orgryte IS"],
@@ -65,7 +66,7 @@
     "FIN": {
       "HJK Helsinki": ["HJK", "Helsingin Jalkapalloklubi"],
       "KuPS": ["Kuopion Palloseura"],
-      "SJK": ["Seinajoen", "Seinäjoen", "SJK Seinäjoki", "SJK Seinajoki", "Seinäjoen Jalkapallokerho", "Seinajoen Jalkapallokerho"],
+      "SJK": ["Seinajoen", "Seinäjoen", "SJK Seinäjoki", "SJK Seinajoki", "Seinäjoen Jalkapallokerho", "Seinajoen Jalkapallokerho", "Seinajoen JK", "Seinäjoen JK"],
       "VPS": ["Vaasa", "Vaasan Palloseura", "VPS Vaasa"],
       "Inter Turku": ["FC Inter Turku", "Inter"],
       "IFK Mariehamn": ["Mariehamn"],
@@ -73,7 +74,8 @@
       "Ilves": ["Tampereen Ilves"],
       "Lahti": ["FC Lahti"],
       "Gnistan": ["IF Gnistan"],
-      "Jaro": ["FF Jaro"]
+      "Jaro": ["FF Jaro"],
+      "Turku PS": ["TPS", "Turun Palloseura"]
     },
     "IRL": {
       "Derry City": ["Derry"],
