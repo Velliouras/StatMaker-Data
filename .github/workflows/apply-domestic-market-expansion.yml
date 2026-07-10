@@ -1,0 +1,66 @@
+name: Apply Domestic Market Expansion
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/apply_domestic_market_expansion.py"
+      - "tests/test_domestic_market_expansion.py"
+      - ".github/workflows/apply-domestic-market-expansion.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-domestic-market-expansion
+  cancel-in-progress: true
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Apply idempotent migration
+        run: python scripts/apply_domestic_market_expansion.py
+
+      - name: Verify supported markets and team mapping
+        run: |
+          python -m unittest tests/test_domestic_market_expansion.py
+          python -m unittest tests/test_domestic_live_july_pipeline.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import odds_api_io_market_audit as audit
+          result = audit.run_market_audit_self_check()
+          if result.get('status') != 'passed':
+              raise SystemExit('market audit self-check failed')
+          print(result)
+          PY
+
+      - name: Commit production-module changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            scripts/odds_api_io_market_audit.py \
+            scripts/update_domestic_odds_api_io.py \
+            scripts/domestic_live_july_pipeline.py
+          if git diff --cached --quiet; then
+            echo "Domestic market expansion already applied."
+          else
+            git commit -m "Support exact Double Chance and safe team aliases"
+            git push origin HEAD:main
+          fi
