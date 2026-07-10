@@ -44,28 +44,48 @@ jobs:
           python-version: "3.11"
 
       - name: Test active and July policy
-        run: python -m unittest tests/test_domestic_live_july_pipeline.py
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p reports
+          python -m unittest tests/test_domestic_live_july_pipeline.py \
+            > reports/domestic_live_july_tests.log 2>&1
+          cat reports/domestic_live_july_tests.log
 
       - name: Refresh active and July registry
+        id: registry
+        if: steps.tests.outcome == 'success'
+        continue-on-error: true
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           python scripts/domestic_live_july_pipeline.py \
             --skip-stats-fetch \
-            --skip-odds-fetch
+            --skip-odds-fetch \
+            > reports/domestic_live_july_registry.log 2>&1
+          cat reports/domestic_live_july_registry.log
 
       - name: Fairly refresh incomplete API-Football statistics
+        id: stats
+        if: steps.registry.outcome == 'success'
+        continue-on-error: true
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
         run: |
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-85}"
           python scripts/refresh_domestic_live_july_stats.py \
-            --max-requests "$stats_requests"
+            --max-requests "$stats_requests" \
+            > reports/domestic_live_july_stats.log 2>&1
+          cat reports/domestic_live_july_stats.log
 
       - name: Rebuild app statistics from refreshed caches
+        id: rebuild
+        if: steps.stats.outcome == 'success'
+        continue-on-error: true
         run: |
-          python - <<'PY'
+          {
+            python - <<'PY'
           import sys
           from pathlib import Path
           sys.path.insert(0, str(Path('scripts').resolve()))
@@ -75,12 +95,17 @@ jobs:
               raise SystemExit('Domestic live/July registry is empty')
           pipeline.build_app_statistics(registry)
           PY
-          python scripts/finalize_domestic_live_july_artifacts.py
-          python scripts/build_domestic_live_july_normalized_stats.py
+            python scripts/finalize_domestic_live_july_artifacts.py
+            python scripts/build_domestic_live_july_normalized_stats.py
+          } > reports/domestic_live_july_rebuild.log 2>&1
+          cat reports/domestic_live_july_rebuild.log
 
       - name: Validate published statistics and betting boundaries
+        id: validate
+        if: steps.rebuild.outcome == 'success'
+        continue-on-error: true
         run: |
-          python - <<'PY'
+          python - <<'PY' > reports/domestic_live_july_validate.log 2>&1
           import json
           from pathlib import Path
 
@@ -121,35 +146,52 @@ jobs:
                       if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
                           raise SystemExit('Non-exact market found in production Domestic odds artifact')
 
-          print(
-              f"Validated {len(registry_codes)} leagues; "
-              f"{len(normalized.get('fixtures', []))} normalized fixtures"
-          )
+          print(f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures")
           PY
+          cat reports/domestic_live_july_validate.log
 
-      - name: Commit refreshed statistics artifacts
+      - name: Write pipeline status
+        run: |
+          {
+            echo "tests=${{ steps.tests.outcome }}"
+            echo "registry=${{ steps.registry.outcome }}"
+            echo "stats=${{ steps.stats.outcome }}"
+            echo "rebuild=${{ steps.rebuild.outcome }}"
+            echo "validate=${{ steps.validate.outcome }}"
+            echo "commit=${GITHUB_SHA}"
+            echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > reports/domestic_live_july_workflow_status.txt
+
+      - name: Commit artifacts and diagnostics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add \
-            data/api_football/fixture_stats \
-            data/api_football/domestic_normalized_fixture_stats.json \
-            data/statmaker/domestic_enriched \
-            data/statmaker/domestic_live_july_registry.json \
-            data/statmaker/domestic_live_july_state.json \
-            reports/api_football_fixture_stats_fetch.json \
-            reports/api_football_fixture_stats_fetch.csv \
-            reports/api_football_fixture_stats_fetch.md \
-            reports/statmaker_domestic_enriched_build.json \
-            reports/statmaker_domestic_enriched_build.csv \
-            reports/statmaker_domestic_enriched_build.md \
-            reports/domestic_live_july_pipeline.json \
-            reports/domestic_live_july_stats_refresh.json \
-            reports/domestic_live_july_artifact_contract.json \
-            reports/domestic_live_july_normalized_stats.json
+          git add reports/domestic_live_july_*.log reports/domestic_live_july_workflow_status.txt
+          if [ "${{ steps.validate.outcome }}" = "success" ]; then
+            git add \
+              data/api_football/fixture_stats \
+              data/api_football/domestic_normalized_fixture_stats.json \
+              data/statmaker/domestic_enriched \
+              data/statmaker/domestic_live_july_registry.json \
+              data/statmaker/domestic_live_july_state.json \
+              reports/api_football_fixture_stats_fetch.json \
+              reports/api_football_fixture_stats_fetch.csv \
+              reports/api_football_fixture_stats_fetch.md \
+              reports/statmaker_domestic_enriched_build.json \
+              reports/statmaker_domestic_enriched_build.csv \
+              reports/statmaker_domestic_enriched_build.md \
+              reports/domestic_live_july_pipeline.json \
+              reports/domestic_live_july_stats_refresh.json \
+              reports/domestic_live_july_artifact_contract.json \
+              reports/domestic_live_july_normalized_stats.json
+          fi
           if git diff --cached --quiet; then
             echo "No Domestic active/July statistics changes to commit."
           else
-            git commit -m "Refresh active and July Domestic statistics"
+            git commit -m "Record active and July Domestic statistics run"
             git push origin HEAD:main
           fi
+
+      - name: Fail when the pipeline is not valid
+        if: steps.validate.outcome != 'success'
+        run: exit 1
