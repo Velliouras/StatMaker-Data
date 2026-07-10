@@ -7,8 +7,12 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
+import domestic_live_july_pipeline as pipeline
+import domestic_odds_expansion as expansion
 import odds_api_io_market_audit as audit
 import update_domestic_odds_api_io as odds
+
+expansion.install(odds, pipeline)
 
 
 class DomesticMarketExpansionTest(unittest.TestCase):
@@ -58,9 +62,10 @@ class DomesticMarketExpansionTest(unittest.TestCase):
         )
 
     def test_club_prefix_simplification(self):
-        self.assertEqual("necaxa", odds.simplified_team_name("Club Necaxa"))
-        self.assertEqual("fcsb", odds.simplified_team_name("Fotbal Club FCSB"))
-        self.assertEqual("toluca", odds.simplified_team_name("Deportivo Toluca FC"))
+        self.assertEqual("necaxa", expansion.simplified_team_name(odds, "Club Necaxa"))
+        self.assertEqual("fcsb", expansion.simplified_team_name(odds, "Fotbal Club FCSB"))
+        self.assertEqual("toluca", expansion.simplified_team_name(odds, "Deportivo Toluca FC"))
+        self.assertEqual("rapid bucuresti", expansion.simplified_team_name(odds, "Rapid Bucuresti 1923"))
 
     def test_exact_alias_is_preferred(self):
         debug = {}
