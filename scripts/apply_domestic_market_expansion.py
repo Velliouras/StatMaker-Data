@@ -83,7 +83,8 @@ def patch_odds_generator() -> None:
     helpers = '''TEAM_NAME_PREFIX_TOKENS = {
     "club", "clube", "deportivo", "deportes", "sporting", "atletico",
     "association", "asociacion", "fotbal", "fotboll", "football",
-    "sociedad", "racing", "royal", "real",
+    "sociedad", "racing", "royal", "real", "cd", "cs", "acs", "asc",
+    "rks", "wks", "kks", "ks", "lkp", "gks", "afk",
 }
 
 
@@ -91,6 +92,8 @@ def simplified_team_name(value: Any) -> str:
     words = normalize_text(value, drop_suffixes=True).split()
     while len(words) > 1 and words[0] in TEAM_NAME_PREFIX_TOKENS:
         words.pop(0)
+    while len(words) > 1 and words[-1].isdigit() and len(words[-1]) == 4:
+        words.pop()
     return " ".join(words)
 
 
