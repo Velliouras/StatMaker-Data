@@ -63,6 +63,7 @@ SUPPORTED_MARKETS = {
     "TEAM_SHOTS",
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
+    "DOUBLE_CHANCE",
 }
 EMITTED_MARKET_COUNT_KEYS = [
     "1X2",
@@ -78,6 +79,7 @@ EMITTED_MARKET_COUNT_KEYS = [
     "TEAM_SHOTS",
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
+    "DOUBLE_CHANCE",
 ]
 COMMON_SUFFIXES = {"fc", "fk", "cf", "sc", "ac", "afc", "bk", "if"}
 COUNTRY_ALIASES = {
@@ -311,6 +313,23 @@ def load_aliases() -> Dict[str, Dict[str, str]]:
     return mapping
 
 
+TEAM_NAME_PREFIX_TOKENS = {
+    "club", "clube", "deportivo", "deportes", "sporting", "atletico",
+    "association", "asociacion", "fotbal", "fotboll", "football",
+    "sociedad", "racing", "royal", "real", "cd", "cs", "acs", "asc",
+    "rks", "wks", "kks", "ks", "lkp", "gks", "afk",
+}
+
+
+def simplified_team_name(value: Any) -> str:
+    words = normalize_text(value, drop_suffixes=True).split()
+    while len(words) > 1 and words[0] in TEAM_NAME_PREFIX_TOKENS:
+        words.pop(0)
+    while len(words) > 1 and words[-1].isdigit() and len(words[-1]) == 4:
+        words.pop()
+    return " ".join(words)
+
+
 def record_unmatched_team(debug: Dict[str, Any], league_code: str, provider_team: str, normalized: str) -> None:
     debug.setdefault("unmatchedTeams", []).append({
         "leagueCode": league_code,
@@ -321,14 +340,15 @@ def record_unmatched_team(debug: Dict[str, Any], league_code: str, provider_team
 
 def canonical_team_info(name: str, league_code: str, aliases: Dict[str, Dict[str, str]], debug: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     normalized = normalize_text(name, drop_suffixes=True)
+    simplified = simplified_team_name(normalized)
     league_aliases = aliases.get(league_code, {})
-    if normalized in league_aliases:
-        canonical = league_aliases[normalized]
-        return canonical, canonical
+    for candidate in dict.fromkeys([normalized, simplified]):
+        if candidate and candidate in league_aliases:
+            canonical = league_aliases[candidate]
+            return canonical, canonical
     record_unmatched_team(debug, league_code, str(name or "").strip(), normalized)
     provider_name = str(name or "").strip()
     return provider_name, None
-
 
 def choose_leagues(config: Dict[str, Any], mode: str, target: str) -> List[Dict[str, Any]]:
     all_leagues = config.get("leagues", []) if isinstance(config.get("leagues"), list) else []
@@ -678,6 +698,31 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
                 add_market(out, "1X2", "Home", price, bookmaker, team=home)
             elif n == normalize_text(away, drop_suffixes=True) or "away" in n:
                 add_market(out, "1X2", "Away", price, bookmaker, team=away)
+        return out
+
+    if family == "DOUBLE_CHANCE":
+        for row in rows:
+            direct_1x = to_float(row.get("1X") or row.get("1x"))
+            direct_12 = to_float(row.get("12"))
+            direct_x2 = to_float(row.get("X2") or row.get("x2") or row.get("2X") or row.get("2x"))
+            if direct_1x is not None or direct_12 is not None or direct_x2 is not None:
+                add_market(out, "DOUBLE_CHANCE", "1X", direct_1x, bookmaker)
+                add_market(out, "DOUBLE_CHANCE", "12", direct_12, bookmaker)
+                add_market(out, "DOUBLE_CHANCE", "X2", direct_x2, bookmaker)
+                continue
+
+            label = normalize_text(row_name(row), drop_suffixes=True)
+            price = to_float(row.get("under") or row.get("over")) or row_price(row)
+            if not label or price is None:
+                continue
+            if label in {"1x", "home or draw", "home draw"} or label.endswith(" or draw"):
+                add_market(out, "DOUBLE_CHANCE", "1X", price, bookmaker)
+            elif label in {"x2", "2x", "draw or away", "away or draw"} or label.startswith("draw or "):
+                add_market(out, "DOUBLE_CHANCE", "X2", price, bookmaker)
+            elif label in {"12", "home or away", "no draw"} or (" or " in label and "draw" not in label):
+                add_market(out, "DOUBLE_CHANCE", "12", price, bookmaker)
+            else:
+                record_skipped_market(debug, raw_name, "unrecognized Double Chance row", row_name(row))
         return out
 
     if family == "BTTS":

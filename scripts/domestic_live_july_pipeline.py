@@ -341,16 +341,26 @@ def generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str,
         code = str(league.get("leagueCode") or "")
         bucket = aliases.setdefault(code, {})
         cache = load_json(stats_fetch.cache_path_for(league), {})
-        for fixture in cache.get("fixtures", []) or []:
-            if not isinstance(fixture, dict):
-                continue
-            for key in ("home_team", "away_team"):
-                canonical = str(fixture.get(key) or "").strip()
-                normalized = odds_fetch.normalize_text(canonical, drop_suffixes=True)
-                if canonical and normalized:
-                    bucket[normalized] = canonical
+        canonical_names = {
+            str(fixture.get(key) or "").strip()
+            for fixture in cache.get("fixtures", []) or []
+            if isinstance(fixture, dict)
+            for key in ("home_team", "away_team")
+            if str(fixture.get(key) or "").strip()
+        }
+        owners: Dict[str, set[str]] = {}
+        for canonical in canonical_names:
+            variants = {
+                odds_fetch.normalize_text(canonical, drop_suffixes=True),
+                odds_fetch.simplified_team_name(canonical),
+            }
+            for variant in variants:
+                if variant:
+                    owners.setdefault(variant, set()).add(canonical)
+        for variant, candidates in owners.items():
+            if len(candidates) == 1:
+                bucket.setdefault(variant, next(iter(candidates)))
     return aliases
-
 
 def odds_league_view(league: Dict[str, Any]) -> Dict[str, Any]:
     result = dict(league)
