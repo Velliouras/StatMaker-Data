@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """Refresh incomplete API-Football stats and scores fairly within the daily quota.
 
-The scheduler allocates the remaining request budget across every incomplete
-active/July league. A single large competition can no longer consume the whole
-run. Completion requires both normalized statistics and final scores for every
-completed fixture. This is quota scheduling only; it does not alter betting
-evidence or apply market heuristics.
+The scheduler allocates the request budget across every incomplete active/July
+league. A fixture is complete only when it has a final score and at least one
+real provider statistic value. An all-null normalized dictionary is not data.
 """
 
 from __future__ import annotations
@@ -42,6 +40,23 @@ def has_final_score(item: Dict[str, Any]) -> bool:
     return home is not None and away is not None
 
 
+def has_real_normalized_stats(item: Dict[str, Any]) -> bool:
+    """Return true only for an actual, non-empty API-Football stats response."""
+    normalized = item.get("normalized_stats")
+    raw = item.get("raw_statistics")
+    return (
+        isinstance(normalized, dict)
+        and any(value is not None for value in normalized.values())
+        and isinstance(raw, list)
+        and bool(raw)
+    )
+
+
+# fetch_league resolves this function dynamically from its own module. Replace
+# the old dict-existence check so all-null caches are refetched in this pipeline.
+stats_fetch.has_cached_stats = has_real_normalized_stats
+
+
 def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
     cache = pipeline.load_json(stats_fetch.cache_path_for(league), {})
     fixtures = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
@@ -49,7 +64,7 @@ def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
         item for item in fixtures
         if str(item.get("status") or item.get("status_short") or "").upper() in COMPLETED_STATUSES
     ]
-    with_stats = [item for item in completed if isinstance(item.get("normalized_stats"), dict)]
+    with_stats = [item for item in completed if has_real_normalized_stats(item)]
     with_scores = [item for item in completed if has_final_score(item)]
     denominator = len(completed)
     stats_coverage = len(with_stats) / denominator if denominator else 0.0
@@ -64,9 +79,9 @@ def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
         "coverage": round(stats_coverage, 6),
         "scoreCoverage": round(score_coverage, 6),
         "complete": (
-            denominator > 0 and
-            len(with_stats) == denominator and
-            len(with_scores) == denominator
+            denominator > 0
+            and len(with_stats) == denominator
+            and len(with_scores) == denominator
         ),
     }
 
@@ -122,6 +137,7 @@ def refresh_fairly(
     final_progress = [cache_progress(league) for league in registry]
     return {
         "generatedAt": pipeline.now_utc(),
+        "completenessContract": "final score plus at least one non-null normalized API-Football statistic",
         "maxRequests": max_requests,
         "requestsUsed": request_state["count"],
         "registryLeagueCount": len(registry),
