@@ -1,18 +1,19 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-10T13:36:06Z",
+  "generated_at": "2026-07-10T14:31:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
     "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
     "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
     "stats_visibility": "published independently of odds availability",
-    "betting_gate": "exact bookmaker odds plus valid historical support"
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/china/super-league/2026/fixture_stats.json",
-    "cache_generated_at": null,
+    "cache_generated_at": "2026-07-10T14:30:15Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -38,41 +39,542 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 0,
-    "fixtures_with_any_stats": 0,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.0,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 6,
+    "fixtures_with_any_stats": 5,
+    "fixtures_with_bb_core_stats": 5,
+    "any_stats_coverage": 0.8333,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
-      "fouls": 0,
-      "yellow_cards": 0,
-      "red_cards": 0,
-      "possession": 0,
-      "passes": 0,
-      "xg": 0
+      "shots_total": 5,
+      "shots_on_target": 5,
+      "corners": 5,
+      "fouls": 5,
+      "yellow_cards": 5,
+      "red_cards": 1,
+      "possession": 5,
+      "passes": 5,
+      "xg": 5
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
-      "fouls": 0.0,
-      "yellow_cards": 0.0,
-      "red_cards": 0.0,
-      "possession": 0.0,
-      "passes": 0.0,
-      "xg": 0.0
+      "shots_total": 0.8333,
+      "shots_on_target": 0.8333,
+      "corners": 0.8333,
+      "fouls": 0.8333,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.1667,
+      "possession": 0.8333,
+      "passes": 0.8333,
+      "xg": 0.8333
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 0 < 15",
-      "low any-stats coverage: 0.0 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 6 < 15"
     ]
   },
-  "matches": []
+  "matches": [
+    {
+      "fixture_id": 1523059,
+      "date_utc": "2026-03-06T11:35:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "Chengdu Better City",
+      "away_team": "Sichuan Jiuniu",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 29,
+        "AS": 6,
+        "HST": 8,
+        "AST": 3,
+        "HC": 14,
+        "AC": 4,
+        "HF": 7,
+        "AF": 6,
+        "HY": 1,
+        "AY": 0,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 79,
+        "APossession": 21,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 645,
+        "APasses": 183,
+        "HPassesAccurate": 576,
+        "APassesAccurate": 107,
+        "HxG": 4.72,
+        "AxG": 0.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 1,
+      "home_score": 5,
+      "away_score": 1,
+      "fthg": 5,
+      "ftag": 1,
+      "hthg": 3,
+      "htag": 1,
+      "goals": {
+        "home": 5,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1523060,
+      "date_utc": "2026-03-07T07:30:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "Shandong Luneng",
+      "away_team": "Shenyang Urban",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 12,
+        "HST": 7,
+        "AST": 1,
+        "HC": 9,
+        "AC": 3,
+        "HF": 24,
+        "AF": 10,
+        "HY": 1,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 35,
+        "APossession": 65,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 317,
+        "APasses": 598,
+        "HPassesAccurate": 255,
+        "APassesAccurate": 511,
+        "HxG": 3.36,
+        "AxG": 1.75
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1523061,
+      "date_utc": "2026-03-07T07:30:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "Tianjin Teda",
+      "away_team": "Chongqing Tongliang Long",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 5,
+        "HST": 2,
+        "AST": 1,
+        "HC": 2,
+        "AC": 4,
+        "HF": 15,
+        "AF": 13,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 1,
+        "ASaves": 2,
+        "HPasses": 490,
+        "APasses": 494,
+        "HPassesAccurate": 421,
+        "APassesAccurate": 426,
+        "HxG": 0.78,
+        "AxG": 0.09
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1523062,
+      "date_utc": "2026-03-07T09:00:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "Shanghai Shenhua",
+      "away_team": "Dalian Zhixing",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 12,
+        "HST": 11,
+        "AST": 4,
+        "HC": 10,
+        "AC": 6,
+        "HF": 15,
+        "AF": 8,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 69,
+        "APossession": 31,
+        "HSaves": 1,
+        "ASaves": 6,
+        "HPasses": 588,
+        "APasses": 258,
+        "HPassesAccurate": 518,
+        "APassesAccurate": 187,
+        "HxG": 4.11,
+        "AxG": 1.48
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 3,
+      "home_score": 5,
+      "away_score": 3,
+      "fthg": 5,
+      "ftag": 3,
+      "hthg": 3,
+      "htag": 1,
+      "goals": {
+        "home": 5,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1523063,
+      "date_utc": "2026-03-07T11:35:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "SHANGHAI SIPG",
+      "away_team": "Henan Jianye",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 23,
+        "AS": 10,
+        "HST": 6,
+        "AST": 3,
+        "HC": 11,
+        "AC": 6,
+        "HF": 14,
+        "AF": 10,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 65,
+        "APossession": 35,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 534,
+        "APasses": 307,
+        "HPassesAccurate": 468,
+        "APassesAccurate": 228,
+        "HxG": 1.62,
+        "AxG": 2.11
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1523064,
+      "date_utc": "2026-03-07T11:35:00+00:00",
+      "country": "China",
+      "league": "Super League",
+      "league_code": "CHN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 169,
+      "round": "Regular Season - 1",
+      "home_team": "Yunnan Yukun",
+      "away_team": "Qingdao Jonoon",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
 }

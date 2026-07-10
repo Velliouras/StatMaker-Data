@@ -1,18 +1,19 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-10T13:36:06Z",
+  "generated_at": "2026-07-10T14:31:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
     "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
     "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
     "stats_visibility": "published independently of odds availability",
-    "betting_gate": "exact bookmaker odds plus valid historical support"
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/scotland/premiership/2025/fixture_stats.json",
-    "cache_generated_at": null,
+    "cache_generated_at": "2026-07-10T14:30:37Z",
     "api_football_season": "2025",
     "csv_import": "inactive_archive_only"
   },
@@ -38,41 +39,542 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 0,
-    "fixtures_with_any_stats": 0,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.0,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 6,
+    "fixtures_with_any_stats": 5,
+    "fixtures_with_bb_core_stats": 5,
+    "any_stats_coverage": 0.8333,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
-      "fouls": 0,
-      "yellow_cards": 0,
-      "red_cards": 0,
-      "possession": 0,
-      "passes": 0,
-      "xg": 0
+      "shots_total": 5,
+      "shots_on_target": 5,
+      "corners": 5,
+      "fouls": 5,
+      "yellow_cards": 5,
+      "red_cards": 1,
+      "possession": 5,
+      "passes": 5,
+      "xg": 5
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
-      "fouls": 0.0,
-      "yellow_cards": 0.0,
-      "red_cards": 0.0,
-      "possession": 0.0,
-      "passes": 0.0,
-      "xg": 0.0
+      "shots_total": 0.8333,
+      "shots_on_target": 0.8333,
+      "corners": 0.8333,
+      "fouls": 0.8333,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.1667,
+      "possession": 0.8333,
+      "passes": 0.8333,
+      "xg": 0.8333
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 0 < 15",
-      "low any-stats coverage: 0.0 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 6 < 15"
     ]
   },
-  "matches": []
+  "matches": [
+    {
+      "fixture_id": 1382666,
+      "date_utc": "2025-08-02T14:00:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Kilmarnock",
+      "away_team": "Livingston",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 15,
+        "HST": 2,
+        "AST": 6,
+        "HC": 3,
+        "AC": 5,
+        "HF": 11,
+        "AF": 14,
+        "HY": 2,
+        "AY": 2,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 4,
+        "ASaves": 0,
+        "HPasses": 264,
+        "APasses": 479,
+        "HPassesAccurate": 174,
+        "APassesAccurate": 382,
+        "HxG": 1.6,
+        "AxG": 1.44
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382667,
+      "date_utc": "2025-08-02T16:30:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Motherwell",
+      "away_team": "Rangers",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 15,
+        "HST": 5,
+        "AST": 5,
+        "HC": 1,
+        "AC": 12,
+        "HF": 11,
+        "AF": 13,
+        "HY": 1,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 4,
+        "ASaves": 5,
+        "HPasses": 344,
+        "APasses": 585,
+        "HPassesAccurate": 282,
+        "APassesAccurate": 516,
+        "HxG": 2.75,
+        "AxG": 0.72
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382668,
+      "date_utc": "2025-08-03T13:00:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Falkirk",
+      "away_team": "Dundee Utd",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 11,
+        "HST": 4,
+        "AST": 5,
+        "HC": 2,
+        "AC": 4,
+        "HF": 9,
+        "AF": 13,
+        "HY": 1,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 3,
+        "ASaves": 2,
+        "HPasses": 397,
+        "APasses": 380,
+        "HPassesAccurate": 323,
+        "APassesAccurate": 298,
+        "HxG": 1.17,
+        "AxG": 1.09
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382669,
+      "date_utc": "2025-08-03T14:00:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Dundee",
+      "away_team": "Hibernian",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 2,
+        "AS": 15,
+        "HST": 1,
+        "AST": 5,
+        "HC": 3,
+        "AC": 11,
+        "HF": 6,
+        "AF": 8,
+        "HY": 3,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 32,
+        "APossession": 68,
+        "HSaves": 3,
+        "ASaves": 0,
+        "HPasses": 311,
+        "APasses": 663,
+        "HPassesAccurate": 235,
+        "APassesAccurate": 583,
+        "HxG": 0.32,
+        "AxG": 1.15
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382670,
+      "date_utc": "2025-08-03T15:30:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Celtic",
+      "away_team": "ST Mirren",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 4,
+        "HST": 6,
+        "AST": 2,
+        "HC": 12,
+        "AC": 1,
+        "HF": 10,
+        "AF": 6,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 76,
+        "APossession": 24,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 743,
+        "APasses": 233,
+        "HPassesAccurate": 661,
+        "APassesAccurate": 143,
+        "HxG": 2.05,
+        "AxG": 0.28
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1382671,
+      "date_utc": "2025-08-04T19:00:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 179,
+      "round": "1st Phase - 1",
+      "home_team": "Heart Of Midlothian",
+      "away_team": "Aberdeen",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
 }
