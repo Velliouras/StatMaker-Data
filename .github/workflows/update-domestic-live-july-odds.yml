@@ -66,7 +66,7 @@ jobs:
             > reports/domestic_live_july_odds.log 2>&1
           cat reports/domestic_live_july_odds.log
 
-      - name: Validate app-facing odds boundary
+      - name: Validate canonical betting and full provider archive
         id: validate
         if: steps.refresh.outcome == 'success'
         continue-on-error: true
@@ -79,10 +79,14 @@ jobs:
           root = Path('.')
           registry = json.loads((root / 'data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
           feed = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          archive = json.loads((root / 'odds/odds_api_io/domestic_provider_markets.json').read_text(encoding='utf-8'))
           registry_codes = {str(row.get('leagueCode') or '') for row in registry.get('leagues', [])}
           feed_codes = {str(row.get('leagueCode') or '') for row in feed.get('leagues', [])}
-          if not registry_codes or registry_codes != feed_codes:
-              raise SystemExit(f'Registry/feed mismatch: registry={len(registry_codes)} feed={len(feed_codes)}')
+          archive_codes = {str(row.get('leagueCode') or '') for row in archive.get('leagues', [])}
+          if not registry_codes or registry_codes != feed_codes or registry_codes != archive_codes:
+              raise SystemExit(
+                  f'Registry mismatch: registry={len(registry_codes)} feed={len(feed_codes)} archive={len(archive_codes)}'
+              )
 
           today = dt.datetime.now(dt.timezone.utc).date().isoformat()
           matches = 0
@@ -101,7 +105,26 @@ jobs:
                       if not market.get('bookmaker') or float(market.get('odds') or 0) <= 1.0:
                           raise SystemExit('Invalid bookmaker/price in exact market')
                       markets += 1
-          print(f'Validated {len(feed_codes)} leagues, {matches} matches, {markets} exact markets')
+
+          provider_matches = 0
+          provider_payloads = 0
+          for league in archive.get('leagues', []) or []:
+              for match in league.get('matches', []) or []:
+                  date = str(match.get('date') or '')[:10]
+                  if date and date < today:
+                      raise SystemExit(f'Expired provider archive match: {league.get("leagueCode")} {date}')
+                  provider_matches += 1
+                  for payload in match.get('providerMarkets', []) or []:
+                      if payload.get('exactProviderPayload') is not True:
+                          raise SystemExit('Non-exact provider payload found')
+                      if not payload.get('bookmaker') or not isinstance(payload.get('market'), dict):
+                          raise SystemExit('Invalid full provider market payload')
+                      provider_payloads += 1
+          print(
+              f'Validated {len(feed_codes)} leagues, {matches} canonical matches, '
+              f'{markets} canonical exact markets, {provider_matches} provider matches, '
+              f'{provider_payloads} complete provider market payloads'
+          )
           PY
           cat reports/domestic_live_july_odds_validate.log
 
@@ -122,6 +145,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             odds/odds_api_io/domestic_odds.json \
+            odds/odds_api_io/domestic_provider_markets.json \
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_live_july_odds_tests.log \
