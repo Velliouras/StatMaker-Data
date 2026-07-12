@@ -28,6 +28,7 @@ on:
     paths:
       - "scripts/update_domestic_odds_api_io.py"
       - "scripts/update_domestic_odds_api_io_push_aware.py"
+      - "scripts/rebuild_domestic_corners_from_archive.py"
       - ".github/workflows/update-domestic-odds-api-io.yml"
   push:
     branches:
@@ -35,6 +36,7 @@ on:
     paths:
       - "scripts/update_domestic_odds_api_io.py"
       - "scripts/update_domestic_odds_api_io_push_aware.py"
+      - "scripts/rebuild_domestic_corners_from_archive.py"
       - ".github/workflows/update-domestic-odds-api-io.yml"
 
 permissions:
@@ -171,12 +173,18 @@ jobs:
               )
           PY
 
+      - name: Rebuild exact corners from provider archive
+        run: python scripts/rebuild_domestic_corners_from_archive.py
+
       - name: Commit updated domestic odds JSON
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run != true)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add odds/odds_api_io/domestic_odds.json reports/domestic_odds_debug.json
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            reports/domestic_odds_debug.json \
+            reports/domestic_corner_archive_rebuild.json
           if git diff --cached --quiet; then
             echo "No domestic odds changes to commit."
           else
