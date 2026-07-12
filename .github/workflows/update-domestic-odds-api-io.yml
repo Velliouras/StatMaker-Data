@@ -22,9 +22,27 @@ on:
         required: true
         default: false
         type: boolean
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/update_domestic_odds_api_io.py"
+      - "scripts/update_domestic_odds_api_io_push_aware.py"
+      - ".github/workflows/update-domestic-odds-api-io.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/update_domestic_odds_api_io.py"
+      - "scripts/update_domestic_odds_api_io_push_aware.py"
+      - ".github/workflows/update-domestic-odds-api-io.yml"
 
 permissions:
   contents: write
+
+concurrency:
+  group: update-domestic-odds-api-io-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   update-domestic-odds-api-io:
@@ -88,19 +106,22 @@ jobs:
           print(f'Nordic extra domestic leagues applied: {changed}')
           PY
 
-      - name: Fetch Domestic Odds-API.io odds
+      - name: Verify corner-line policy and fetch Domestic odds
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          RUN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'all' }}
+          RUN_TARGET: ${{ github.event_name == 'workflow_dispatch' && inputs.target || 'all_initial' }}
+          RUN_DRY: ${{ github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.dry_run) }}
         run: |
-          args=(--mode "${{ inputs.mode }}" --target "${{ inputs.target }}")
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          args=(--mode "$RUN_MODE" --target "$RUN_TARGET")
+          if [ "$RUN_DRY" = "true" ]; then
             args+=(--dry-run)
           fi
-          python scripts/update_domestic_odds_api_io.py "${args[@]}"
+          python scripts/update_domestic_odds_api_io_push_aware.py "${args[@]}"
 
       - name: Protect last usable Domestic odds artifact
-        if: ${{ inputs.dry_run != true }}
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run != true)
         run: |
           python - <<'PY'
           import json
@@ -151,6 +172,7 @@ jobs:
           PY
 
       - name: Commit updated domestic odds JSON
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.dry_run != true)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
