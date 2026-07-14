@@ -1,5 +1,29 @@
-................
-----------------------------------------------------------------------
-Ran 16 tests in 0.001s
-
-OK
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/__main__.py", line 18, in <module>
+    main(module=None)
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/main.py", line 101, in __init__
+    self.parseArgs(argv)
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/main.py", line 150, in parseArgs
+    self.createTests()
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/main.py", line 161, in createTests
+    self.test = self.testLoader.loadTestsFromNames(self.testNames,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/loader.py", line 232, in loadTestsFromNames
+    suites = [self.loadTestsFromName(name, module) for name in names]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/loader.py", line 232, in <listcomp>
+    suites = [self.loadTestsFromName(name, module) for name in names]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/unittest/loader.py", line 162, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/StatMaker-Data/StatMaker-Data/tests/test_domestic_live_july_pipeline.py", line 14, in <module>
+    import refresh_domestic_live_july_odds as odds_refresh
+  File "/home/runner/work/StatMaker-Data/StatMaker-Data/scripts/refresh_domestic_live_july_odds.py", line 26, in <module>
+    import rebuild_domestic_corners_from_archive as corner_rebuild
+  File "/home/runner/work/StatMaker-Data/StatMaker-Data/scripts/rebuild_domestic_corners_from_archive.py", line 15
+    from pathlib import import Path
+                        ^^^^^^
+SyntaxError: invalid syntax
