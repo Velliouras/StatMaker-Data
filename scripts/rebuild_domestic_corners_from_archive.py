@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Rebuild canonical integer corner totals from exact archived provider payloads.
 
-This script performs no network calls. It reads the existing exact provider archive,
-normalizes only full-time match/team corner total markets with the push-aware corner
-policy, and merges those exact selections into matching canonical Domestic fixtures.
-All non-corner markets remain byte-for-byte equivalent at the object level.
+This module performs no network calls. It reads exact provider archive payloads,
+normalizes only full-time match/team corner total markets with the push-aware
+corner policy, and merges those selections into matching canonical Domestic
+fixtures. The reusable ``rebuild_feed_corners`` entry point is also used by the
+rotating Domestic refresh so a fresh league replacement cannot silently remove
+real corner markets that are still present in the provider archive.
 """
 
 from __future__ import annotations
 
 import json
-from pathlib import Path
+from pathlib import import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
 import update_domestic_odds_api_io as base
@@ -102,8 +104,8 @@ def market_key(item: Dict[str, Any]) -> Tuple[str, str, str, str]:
 def merge_exact_corners(existing: Iterable[Dict[str, Any]], rebuilt: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     non_corners = [dict(item) for item in existing if item.get("market") not in CORNER_MARKETS]
     corners = base.dedupe_markets(
-        [dict(item) for item in existing if item.get("market") in CORNER_MARKETS] +
-        [dict(item) for item in rebuilt]
+        [dict(item) for item in existing if item.get("market") in CORNER_MARKETS]
+        + [dict(item) for item in rebuilt]
     )
     return sorted(
         non_corners + corners,
@@ -116,10 +118,20 @@ def merge_exact_corners(existing: Iterable[Dict[str, Any]], rebuilt: Iterable[Di
     )
 
 
-def main() -> int:
+def rebuild_feed_corners(
+    feed: Dict[str, Any],
+    archive: Dict[str, Any],
+    *,
+    require_corners: bool = True,
+) -> Dict[str, Any]:
+    """Merge exact archived corner prices into an in-memory canonical feed.
+
+    ``require_corners`` remains strict for the dedicated manual rebuild command.
+    The rotating live refresh uses ``False`` so a provider cycle with genuinely no
+    corner payloads is reported as zero rather than replaced with synthetic data.
+    """
+
     push_aware._self_check()
-    feed = read_json(ODDS_PATH)
-    archive = read_json(ARCHIVE_PATH)
     matches = canonical_matches(feed)
 
     archive_matches = 0
@@ -143,18 +155,21 @@ def main() -> int:
             target["markets"] = merge_exact_corners(target.get("markets", []) or [], rebuilt)
             after = {market_key(item): item for item in target.get("markets", []) or []}
             changed_keys = {
-                key for key, item in after.items()
+                key
+                for key, item in after.items()
                 if key not in before or before[key] != item
             }
             added_or_replaced += len(changed_keys)
             for item in rebuilt:
                 emitted_by_market[str(item.get("market"))] += 1
             if len(examples) < 8:
-                examples.append({
-                    "leagueCode": code,
-                    "fixture": f"{target.get('homeTeam')} - {target.get('awayTeam')}",
-                    "corners": rebuilt[:6],
-                })
+                examples.append(
+                    {
+                        "leagueCode": code,
+                        "fixture": f"{target.get('homeTeam')} - {target.get('awayTeam')}",
+                        "corners": rebuilt[:6],
+                    }
+                )
 
     total_corner_rows = sum(
         1
@@ -163,13 +178,12 @@ def main() -> int:
         for market in match.get("markets", []) or []
         if market.get("market") in CORNER_MARKETS
     )
-    if total_corner_rows <= 0:
+    if require_corners and total_corner_rows <= 0:
         raise RuntimeError(
             "Provider archive rebuild emitted zero canonical corner markets; refusing to write feed"
         )
 
-    debug = feed.setdefault("debug", {})
-    debug["cornerArchiveRebuild"] = {
+    summary = {
         "source": "exact archived Odds-API.io provider payloads",
         "syntheticOdds": False,
         "archiveMatchesScanned": archive_matches,
@@ -178,12 +192,17 @@ def main() -> int:
         "totalCanonicalCornerSelections": total_corner_rows,
         "rebuiltByMarket": emitted_by_market,
     }
+    debug = feed.setdefault("debug", {})
+    debug["cornerArchiveRebuild"] = summary
     debug["emittedMarketCounts"] = base.emitted_market_counts(feed)
 
-    report = {
-        **debug["cornerArchiveRebuild"],
-        "examples": examples,
-    }
+    return {**summary, "examples": examples}
+
+
+def main() -> int:
+    feed = read_json(ODDS_PATH)
+    archive = read_json(ARCHIVE_PATH)
+    report = rebuild_feed_corners(feed, archive, require_corners=True)
     write_json(ODDS_PATH, feed)
     write_json(REPORT_PATH, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
