@@ -12,7 +12,7 @@ real corner markets that are still present in the provider archive.
 from __future__ import annotations
 
 import json
-from pathlib import import Path
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple
 
 import update_domestic_odds_api_io as base
