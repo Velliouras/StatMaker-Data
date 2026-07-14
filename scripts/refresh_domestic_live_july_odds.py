@@ -5,6 +5,11 @@ The job uses no API-Football quota. Canonical betting markets and every raw
 Odds-API.io bookmaker market payload are stored separately. Empty/partial
 refreshes preserve valid prior data, and rate-limited batches are retried rather
 than skipped by the rotation cursor.
+
+After each successful rotating batch, exact full-time corner totals are rebuilt
+from the matching provider archive before the canonical feed is written. This
+prevents a non-empty fresh league replacement from silently deleting legitimate
+MATCH_CORNERS / TEAM_CORNERS selections added by the push-aware archive path.
 """
 
 from __future__ import annotations
@@ -14,10 +19,11 @@ import datetime as dt
 import json
 import os
 import sys
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Sequence, Tuple
 
 import domestic_live_july_pipeline as pipeline
 import domestic_odds_expansion
+import rebuild_domestic_corners_from_archive as corner_rebuild
 import update_domestic_odds_api_io as odds_fetch
 
 REPORT_PATH = pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json"
@@ -67,12 +73,14 @@ def _merged_leagues(previous, fresh, registry, today, archive=False):
                 "matches": [],
             }
             if not archive:
-                league.update({
-                    "apiFootballLeagueId": meta.get("apiFootballLeagueId"),
-                    "enabledForStats": True,
-                    "enabledForOdds": bool(meta.get("enabledForOdds", True)),
-                    "enabledForBetting": bool(meta.get("enabledForBetting", True)),
-                })
+                league.update(
+                    {
+                        "apiFootballLeagueId": meta.get("apiFootballLeagueId"),
+                        "enabledForStats": True,
+                        "enabledForOdds": bool(meta.get("enabledForOdds", True)),
+                        "enabledForBetting": bool(meta.get("enabledForBetting", True)),
+                    }
+                )
         combined.append(league)
     return codes, combined, preserved
 
@@ -80,15 +88,21 @@ def _merged_leagues(previous, fresh, registry, today, archive=False):
 def safe_merge_odds_feed(previous, fresh, registry, today):
     codes, leagues, preserved = _merged_leagues(previous, fresh, registry, today)
     merged = dict(previous)
-    merged.update({
-        "schemaVersion": max(int(previous.get("schemaVersion") or 0), int(fresh.get("schemaVersion") or 0), 3),
-        "source": "odds-api-io",
-        "provider": "Odds-API.io",
-        "generatedAt": fresh.get("generatedAt") or pipeline.now_utc(),
-        "registry": fresh.get("registry") or previous.get("registry") or {},
-        "dataContract": fresh.get("dataContract") or previous.get("dataContract") or {},
-        "leagues": leagues,
-    })
+    merged.update(
+        {
+            "schemaVersion": max(
+                int(previous.get("schemaVersion") or 0),
+                int(fresh.get("schemaVersion") or 0),
+                3,
+            ),
+            "source": "odds-api-io",
+            "provider": "Odds-API.io",
+            "generatedAt": fresh.get("generatedAt") or pipeline.now_utc(),
+            "registry": fresh.get("registry") or previous.get("registry") or {},
+            "dataContract": fresh.get("dataContract") or previous.get("dataContract") or {},
+            "leagues": leagues,
+        }
+    )
     merged.pop("providerMarketsArchive", None)
     merged["debug"] = {
         **(previous.get("debug") or {}),
@@ -104,11 +118,17 @@ def safe_merge_odds_feed(previous, fresh, registry, today):
 def safe_merge_provider_archive(previous, fresh, registry, today):
     _, leagues, preserved = _merged_leagues(previous, fresh, registry, today, archive=True)
     return {
-        "schemaVersion": max(int(previous.get("schemaVersion") or 0), int(fresh.get("schemaVersion") or 0), 1),
+        "schemaVersion": max(
+            int(previous.get("schemaVersion") or 0),
+            int(fresh.get("schemaVersion") or 0),
+            1,
+        ),
         "source": "odds-api-io",
         "provider": "Odds-API.io",
         "generatedAt": fresh.get("generatedAt") or pipeline.now_utc(),
-        "dataContract": fresh.get("dataContract") or previous.get("dataContract") or {
+        "dataContract": fresh.get("dataContract")
+        or previous.get("dataContract")
+        or {
             "purpose": "Store every bookmaker market payload returned by Odds-API.io",
             "bettingInput": False,
             "estimatedPrices": False,
@@ -117,6 +137,31 @@ def safe_merge_provider_archive(previous, fresh, registry, today):
         "preservedAfterEmptyRefresh": preserved,
         "leagues": leagues,
     }
+
+
+def merge_refresh_payloads(
+    previous: Dict[str, Any],
+    fresh: Dict[str, Any],
+    previous_archive: Dict[str, Any],
+    fresh_archive: Dict[str, Any],
+    registry: Sequence[Dict[str, Any]],
+    today: dt.date,
+) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+    """Merge a rotating refresh and restore exact archive-backed corner markets.
+
+    The fresh canonical feed is still authoritative for fixtures and current odds.
+    Corner rows are re-normalized only from the exact provider payload archive; no
+    line conversion, estimated price, or synthetic fallback is introduced.
+    """
+
+    feed = safe_merge_odds_feed(previous, fresh, registry, today)
+    archive = safe_merge_provider_archive(previous_archive, fresh_archive, registry, today)
+    corner_report = corner_rebuild.rebuild_feed_corners(
+        feed,
+        archive,
+        require_corners=False,
+    )
+    return feed, archive, corner_report
 
 
 def validate_feed(feed, registry, today):
@@ -172,7 +217,11 @@ def processed_codes(debug: Dict[str, Any], selected: Sequence[Dict[str, Any]]) -
         str(row.get("leagueCode") or "")
         for row in (debug.get("leagueReports", []) or []) + (debug.get("leaguesMissing", []) or [])
     }
-    return [str(row.get("leagueCode") or "") for row in selected if str(row.get("leagueCode") or "") in completed]
+    return [
+        str(row.get("leagueCode") or "")
+        for row in selected
+        if str(row.get("leagueCode") or "") in completed
+    ]
 
 
 def parse_args():
@@ -198,7 +247,7 @@ def main() -> int:
     state = pipeline.load_json(pipeline.STATE_PATH, {"statsCursor": 0, "oddsCursor": 0})
     eligible = [row for row in registry if bool(row.get("enabledForOdds", True))]
     cursor = int(state.get("oddsCursor") or 0)
-    selected_registry = pipeline.rotated(eligible, cursor)[:max(1, args.cycle_size)]
+    selected_registry = pipeline.rotated(eligible, cursor)[: max(1, args.cycle_size)]
     selected = [pipeline.odds_league_view(row) for row in selected_registry]
     config = {
         "version": max(int(config_all.get("version") or 0), 4),
@@ -225,30 +274,41 @@ def main() -> int:
     today = pipeline.today_utc()
     previous = pipeline.load_json(pipeline.ODDS_PATH, {})
     previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})
+    corner_report: Dict[str, Any]
     if completed:
         fresh_archive = fresh.pop("providerMarketsArchive", {})
         fresh.setdefault("debug", {})["emittedMarketCounts"] = odds_fetch.emitted_market_counts(fresh)
-        feed = safe_merge_odds_feed(previous, fresh, registry, today)
-        archive = safe_merge_provider_archive(previous_archive, fresh_archive, registry, today)
+        feed, archive, corner_report = merge_refresh_payloads(
+            previous,
+            fresh,
+            previous_archive,
+            fresh_archive,
+            registry,
+            today,
+        )
         pipeline.write_json(pipeline.ODDS_PATH, feed)
         pipeline.write_json(PROVIDER_ARCHIVE_PATH, archive)
     else:
         feed = previous
         archive = previous_archive
+        corner_report = dict((feed.get("debug") or {}).get("cornerArchiveRebuild") or {})
+
     validation = validate_feed(feed, registry, today)
     archive_validation = validate_provider_archive(archive, registry, today)
     pipeline.write_json(odds_fetch.REPORT_PATH, debug)
 
     if eligible and completed:
         state["oddsCursor"] = (cursor + len(completed)) % len(eligible)
-    state.update({
-        "lastOddsLeagues": completed,
-        "lastOddsRequestedLeagues": [row.get("leagueCode") for row in selected_registry],
-        "lastOddsRateLimitRemaining": debug.get("rateLimitRemaining"),
-        "lastOddsRefreshAt": pipeline.now_utc(),
-        "registryLeagueCount": len(registry),
-        "generatedAt": pipeline.now_utc(),
-    })
+    state.update(
+        {
+            "lastOddsLeagues": completed,
+            "lastOddsRequestedLeagues": [row.get("leagueCode") for row in selected_registry],
+            "lastOddsRateLimitRemaining": debug.get("rateLimitRemaining"),
+            "lastOddsRefreshAt": pipeline.now_utc(),
+            "registryLeagueCount": len(registry),
+            "generatedAt": pipeline.now_utc(),
+        }
+    )
     pipeline.write_json(pipeline.STATE_PATH, state)
     report = {
         "generatedAt": pipeline.now_utc(),
@@ -259,8 +319,11 @@ def main() -> int:
         "rateLimitRemaining": state.get("lastOddsRateLimitRemaining"),
         "validation": validation,
         "providerArchiveValidation": archive_validation,
+        "cornerArchiveRebuild": corner_report,
         "oddsLeaguesWithMatches": sum(1 for row in feed.get("leagues", []) or [] if row.get("matches")),
-        "providerArchiveLeaguesWithMatches": sum(1 for row in archive.get("leagues", []) or [] if row.get("matches")),
+        "providerArchiveLeaguesWithMatches": sum(
+            1 for row in archive.get("leagues", []) or [] if row.get("matches")
+        ),
         "nextCursor": state.get("oddsCursor"),
         "warnings": debug.get("warnings", []),
     }
