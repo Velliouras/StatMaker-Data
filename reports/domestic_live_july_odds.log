@@ -1,45 +1,41 @@
 {
-  "generatedAt": "2026-07-15T22:14:47Z",
+  "generatedAt": "2026-07-15T23:13:24Z",
   "registryLeagueCount": 19,
   "requestedLeagueCodes": [
+    "DNK",
+    "POL",
+    "RUS",
     "SWZ",
     "AUT2",
     "AUT",
     "SC0",
-    "ARG",
-    "BRA",
-    "IRL",
-    "USA"
+    "ARG"
   ],
   "processedLeagueCodes": [
-    "SWZ",
-    "AUT2",
-    "AUT",
-    "SC0",
-    "ARG",
-    "BRA",
-    "IRL",
-    "USA"
+    "DNK",
+    "POL",
+    "RUS",
+    "SWZ"
   ],
-  "deferredByRateLimit": false,
-  "rateLimitRemaining": 75,
+  "deferredByRateLimit": true,
+  "rateLimitRemaining": 19,
   "validation": {
     "leagueCount": 19,
     "matchCount": 74,
-    "marketCount": 6165
+    "marketCount": 6250
   },
   "providerArchiveValidation": {
     "leagueCount": 19,
     "matchCount": 103,
-    "marketPayloadCount": 4716
+    "marketPayloadCount": 4714
   },
   "cornerArchiveRebuild": {
     "source": "exact archived Odds-API.io provider payloads",
     "syntheticOdds": false,
     "archiveMatchesScanned": 103,
     "canonicalFixturesMatched": 50,
-    "addedOrReplacedSelections": 117,
-    "totalCanonicalCornerSelections": 2796,
+    "addedOrReplacedSelections": 106,
+    "totalCanonicalCornerSelections": 2863,
     "rebuiltByMarket": {
       "MATCH_CORNERS": 1872,
       "TEAM_CORNERS": 842
@@ -529,6 +525,9 @@
   },
   "oddsLeaguesWithMatches": 11,
   "providerArchiveLeaguesWithMatches": 11,
-  "nextCursor": 4,
-  "warnings": []
+  "nextCursor": 16,
+  "warnings": [
+    "Stopped before odds fetch because rateLimitRemaining is below guard.",
+    "Stopped safely because rateLimitRemaining is below guard; partial output written."
+  ]
 }
