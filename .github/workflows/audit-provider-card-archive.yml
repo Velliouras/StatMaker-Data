@@ -1,0 +1,126 @@
+name: Audit Provider Card Archive
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Analyze archived exact card markets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import collections
+          import json
+          import sys
+          from pathlib import Path
+
+          root = Path('.')
+          sys.path.insert(0, str(root / 'scripts'))
+          import update_domestic_odds_api_io as base
+
+          archive_path = root / 'odds/odds_api_io/domestic_provider_markets.json'
+          feed_path = root / 'odds/odds_api_io/domestic_odds.json'
+          archive = json.loads(archive_path.read_text(encoding='utf-8-sig'))
+          feed = json.loads(feed_path.read_text(encoding='utf-8-sig'))
+
+          raw_names = collections.Counter()
+          raw_card_payloads = 0
+          exact_card_payloads = 0
+          normalized = []
+          examples = []
+          archive_matches = 0
+          matched_archive_matches = 0
+
+          current_keys = {
+              (str(l.get('leagueCode') or ''), str(m.get('id') or ''), str(m.get('homeTeam') or '').casefold(), str(m.get('awayTeam') or '').casefold())
+              for l in feed.get('leagues', []) or []
+              for m in l.get('matches', []) or []
+          }
+
+          for league in archive.get('leagues', []) or []:
+              code = str(league.get('leagueCode') or '')
+              for match in league.get('matches', []) or []:
+                  archive_matches += 1
+                  key = (code, str(match.get('id') or ''), str(match.get('homeTeam') or '').casefold(), str(match.get('awayTeam') or '').casefold())
+                  if key in current_keys:
+                      matched_archive_matches += 1
+                  home = str(match.get('homeTeam') or '')
+                  away = str(match.get('awayTeam') or '')
+                  for payload in match.get('providerMarkets', []) or []:
+                      bookmaker = str(payload.get('bookmaker') or '')
+                      market = payload.get('market')
+                      if not isinstance(market, dict):
+                          continue
+                      raw_name = base.raw_market_name(market)
+                      family = base.market_family_from_name(raw_name)
+                      if family != 'CARDS':
+                          continue
+                      raw_card_payloads += 1
+                      raw_names[raw_name] += 1
+                      if payload.get('exactProviderPayload') is True:
+                          exact_card_payloads += 1
+                      debug = {}
+                      rows = base.normalize_market(market, bookmaker, home, away, debug)
+                      card_rows = [r for r in rows if r.get('market') in {'MATCH_CARDS', 'TEAM_CARDS'}]
+                      for row in card_rows:
+                          normalized.append({
+                              'leagueCode': code,
+                              'matchId': str(match.get('id') or ''),
+                              'homeTeam': home,
+                              'awayTeam': away,
+                              'rawMarket': raw_name,
+                              **row,
+                              'matchesCurrentFeed': key in current_keys,
+                          })
+                      if len(examples) < 30:
+                          examples.append({
+                              'leagueCode': code,
+                              'fixture': f'{home} - {away}',
+                              'rawMarket': raw_name,
+                              'bookmaker': bookmaker,
+                              'exactProviderPayload': payload.get('exactProviderPayload'),
+                              'outcomeRows': base.outcome_rows(market)[:5],
+                              'normalizedRows': card_rows,
+                              'skipReasons': debug.get('skippedMarketReasons', {}),
+                              'matchesCurrentFeed': key in current_keys,
+                          })
+
+          deduped = base.dedupe_markets(normalized)
+          current_cards = [
+              {'leagueCode': str(l.get('leagueCode') or ''), 'matchId': str(m.get('id') or ''), **row}
+              for l in feed.get('leagues', []) or []
+              for m in l.get('matches', []) or []
+              for row in m.get('markets', []) or []
+              if row.get('market') in {'MATCH_CARDS', 'TEAM_CARDS'}
+          ]
+          report = {
+              'archiveMatches': archive_matches,
+              'archiveMatchesPresentInCurrentFeed': matched_archive_matches,
+              'rawCardPayloads': raw_card_payloads,
+              'exactCardPayloads': exact_card_payloads,
+              'rawCardMarketNames': raw_names.most_common(),
+              'normalizedCardRowsBeforeDedupe': len(normalized),
+              'normalizedCardRowsAfterDedupe': len(deduped),
+              'normalizedRowsMatchingCurrentFixtures': sum(1 for x in normalized if x.get('matchesCurrentFeed')),
+              'currentFeedCardRows': len(current_cards),
+              'currentFeedCards': current_cards,
+              'examples': examples,
+          }
+          Path('provider-card-archive-audit.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps({k: v for k, v in report.items() if k not in {'examples','currentFeedCards'}}, ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: provider-card-archive-audit
+          path: provider-card-archive-audit.json
+          if-no-files-found: error
