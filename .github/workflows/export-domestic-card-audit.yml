@@ -1,0 +1,80 @@
+name: Export Domestic Card Audit
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build card audit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          python3 - <<'PY'
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          odds_path = Path('odds/odds_api_io/domestic_odds.json')
+          data = json.loads(odds_path.read_text(encoding='utf-8'))
+          matches=[]
+          for league in data.get('leagues', []):
+              for m in league.get('matches', []):
+                  row=dict(m)
+                  row['_leagueCode']=league.get('leagueCode')
+                  row['_competition']=league.get('competition')
+                  matches.append(row)
+          if not matches:
+              matches=data.get('matches', [])
+
+          counts=Counter()
+          selections=[]
+          for m in matches:
+              for s in m.get('markets', []):
+                  market=str(s.get('market',''))
+                  if 'CARD' in market.upper():
+                      counts[market]+=1
+                      selections.append({
+                          'leagueCode':m.get('_leagueCode') or m.get('leagueCode'),
+                          'competition':m.get('_competition') or m.get('competition'),
+                          'matchId':m.get('id'),
+                          'date':m.get('date'),
+                          'homeTeam':m.get('homeTeam'),
+                          'awayTeam':m.get('awayTeam'),
+                          **s,
+                      })
+          odds=[float(x.get('odds',0) or 0) for x in selections]
+          report={
+              'generatedAt':data.get('generatedAt'),
+              'matchCount':len(matches),
+              'cardMarketCounts':dict(counts),
+              'cardSelectionCount':len(selections),
+              'cardOddsMin':min(odds) if odds else None,
+              'cardOddsMax':max(odds) if odds else None,
+              'cardOddsAtLeast120':sum(x>=1.20 for x in odds),
+              'sampleSelections':selections[:500],
+          }
+          Path('audit/card_market_report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          Path('audit/domestic_odds.json').write_bytes(odds_path.read_bytes())
+          for p in [
+              Path('data/api_football/domestic_normalized_fixture_stats.json'),
+              Path('data/statmaker/domestic_enriched/index.json'),
+          ]:
+              if p.exists():
+                  (Path('audit')/p.name).write_bytes(p.read_bytes())
+          print(json.dumps({k:v for k,v in report.items() if k!='sampleSelections'},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: domestic-card-audit-data
+          path: audit
+          if-no-files-found: error
