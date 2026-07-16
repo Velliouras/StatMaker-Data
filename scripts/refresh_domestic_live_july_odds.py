@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 """Refresh exact odds for the active/July Domestic registry.
 
-The job uses no API-Football quota. Canonical betting markets and every raw
-Odds-API.io bookmaker market payload are stored separately. Empty/partial
-refreshes preserve valid prior data, and rate-limited batches are retried rather
-than skipped by the rotation cursor.
-
-After each successful rotating batch, exact full-time corner totals are rebuilt
-from the matching provider archive before the canonical feed is written. This
-prevents a non-empty fresh league replacement from silently deleting legitimate
-MATCH_CORNERS / TEAM_CORNERS selections added by the push-aware archive path.
+This cumulative version installs the v15 exact-market normalizer and rebuilds
+expanded canonical markets from the exact provider archive. No synthetic or
+estimated price is created.
 """
-
 from __future__ import annotations
 
 import argparse
@@ -23,7 +16,9 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 import domestic_live_july_pipeline as pipeline
 import domestic_odds_expansion
+import domestic_market_expansion_v15
 import rebuild_domestic_corners_from_archive as corner_rebuild
+import rebuild_domestic_expanded_markets_from_archive as expanded_rebuild
 import update_domestic_odds_api_io as odds_fetch
 
 REPORT_PATH = pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json"
@@ -107,7 +102,10 @@ def safe_merge_odds_feed(previous, fresh, registry, today):
     merged["debug"] = {
         **(previous.get("debug") or {}),
         **(fresh.get("debug") or {}),
-        "mergePolicy": "replace only with non-empty fresh exact odds; preserve unexpired prior matches; prune expired matches",
+        "mergePolicy": (
+            "replace only with non-empty fresh exact odds; preserve unexpired "
+            "prior matches; prune expired matches"
+        ),
         "selectedLeagueCount": len(codes),
         "leaguesWithUsableMatches": sum(1 for row in leagues if row.get("matches")),
         "preservedAfterEmptyRefresh": preserved,
@@ -147,13 +145,6 @@ def merge_refresh_payloads(
     registry: Sequence[Dict[str, Any]],
     today: dt.date,
 ) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
-    """Merge a rotating refresh and restore exact archive-backed corner markets.
-
-    The fresh canonical feed is still authoritative for fixtures and current odds.
-    Corner rows are re-normalized only from the exact provider payload archive; no
-    line conversion, estimated price, or synthetic fallback is introduced.
-    """
-
     feed = safe_merge_odds_feed(previous, fresh, registry, today)
     archive = safe_merge_provider_archive(previous_archive, fresh_archive, registry, today)
     corner_report = corner_rebuild.rebuild_feed_corners(
@@ -161,6 +152,7 @@ def merge_refresh_payloads(
         archive,
         require_corners=False,
     )
+    expanded_rebuild.rebuild_feed_markets(feed, archive, odds_fetch)
     return feed, archive, corner_report
 
 
@@ -179,8 +171,10 @@ def validate_feed(feed, registry, today):
                 raise RuntimeError(f"Unmatched teams in canonical odds: {league.get('leagueCode')}")
             matches += 1
             for market in match.get("markets", []) or []:
-                if market.get("exactBookmakerOdds") is not True or not str(market.get("bookmaker") or "").strip():
+                if market.get("exactBookmakerOdds") is not True:
                     raise RuntimeError("Invalid canonical exact-odds market")
+                if not str(market.get("bookmaker") or "").strip():
+                    raise RuntimeError("Canonical market without bookmaker")
                 try:
                     valid_price = float(market.get("odds")) > 1.0
                 except (TypeError, ValueError):
@@ -206,7 +200,9 @@ def validate_provider_archive(archive, registry, today):
             for payload in match.get("providerMarkets", []) or []:
                 if payload.get("exactProviderPayload") is not True:
                     raise RuntimeError("Non-exact provider payload")
-                if not str(payload.get("bookmaker") or "").strip() or not isinstance(payload.get("market"), dict):
+                if not str(payload.get("bookmaker") or "").strip():
+                    raise RuntimeError("Provider payload without bookmaker")
+                if not isinstance(payload.get("market"), dict):
                     raise RuntimeError("Invalid provider market payload")
                 payloads += 1
     return {"leagueCount": len(actual), "matchCount": matches, "marketPayloadCount": payloads}
@@ -233,10 +229,13 @@ def parse_args():
 def main() -> int:
     args = parse_args()
     domestic_odds_expansion.install(odds_fetch, pipeline)
+    domestic_market_expansion_v15.install(odds_fetch, pipeline)
+
     api_key = os.getenv("ODDS_API_IO_KEY", "").strip()
     if not api_key:
         print("ERROR: ODDS_API_IO_KEY is required.", file=sys.stderr)
         return 2
+
     registry_payload = pipeline.load_json(pipeline.REGISTRY_PATH, {})
     registry = registry_payload.get("leagues", []) if isinstance(registry_payload, dict) else []
     if not registry:
@@ -254,6 +253,7 @@ def main() -> int:
         "horizonDays": max(int(config_all.get("horizonDays") or 0), 31),
         "leagues": selected,
     }
+
     debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     aliases = pipeline.generated_aliases(registry)
     original_loader = odds_fetch.load_aliases
@@ -274,7 +274,7 @@ def main() -> int:
     today = pipeline.today_utc()
     previous = pipeline.load_json(pipeline.ODDS_PATH, {})
     previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})
-    corner_report: Dict[str, Any]
+
     if completed:
         fresh_archive = fresh.pop("providerMarketsArchive", {})
         fresh.setdefault("debug", {})["emittedMarketCounts"] = odds_fetch.emitted_market_counts(fresh)
@@ -310,6 +310,7 @@ def main() -> int:
         }
     )
     pipeline.write_json(pipeline.STATE_PATH, state)
+
     report = {
         "generatedAt": pipeline.now_utc(),
         "registryLeagueCount": len(registry),
@@ -320,7 +321,12 @@ def main() -> int:
         "validation": validation,
         "providerArchiveValidation": archive_validation,
         "cornerArchiveRebuild": corner_report,
-        "oddsLeaguesWithMatches": sum(1 for row in feed.get("leagues", []) or [] if row.get("matches")),
+        "expandedMarketArchiveRebuild": (feed.get("debug") or {}).get(
+            "expandedMarketArchiveRebuild", {}
+        ),
+        "oddsLeaguesWithMatches": sum(
+            1 for row in feed.get("leagues", []) or [] if row.get("matches")
+        ),
         "providerArchiveLeaguesWithMatches": sum(
             1 for row in archive.get("leagues", []) or [] if row.get("matches")
         ),
