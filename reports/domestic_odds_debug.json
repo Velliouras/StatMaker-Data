@@ -9,9 +9,9 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 289,
+      "durationMs": 224,
       "bodyLength": 142652,
-      "rateLimitRemaining": 91,
+      "rateLimitRemaining": 57,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 30}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 4}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eve..."
     },
     {
@@ -19,55 +19,141 @@
       "params": {
         "apiKey": "***",
         "sport": "football",
-        "league": "finland-veikkausliiga",
+        "league": "austria-2-liga",
         "status": "pending,live",
-        "from": "2026-07-16T21:15:34Z",
-        "to": "2026-08-16T21:15:34Z",
+        "from": "2026-07-16T21:16:22Z",
+        "to": "2026-08-16T21:16:22Z",
         "limit": 500
+      },
+      "status": 200,
+      "durationMs": 158,
+      "bodyLength": 6751,
+      "rateLimitRemaining": 56,
+      "sample": "[{\"id\": 72440570, \"home\": \"FC Admira Wacker Modling\", \"away\": \"Rapid Wien II\", \"homeId\": 2050, \"awayId\": 2092, \"date\": \"2026-07-31T16:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - 2. Liga\", \"slug\": \"austria-2-liga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72440576, \"home\": \"Young Violets Wien\", \"away\": \"Blau-Weiss Linz\", \"homeId\": 2108, \"awayId\": 2113, \"date\": \"2026-07-31T16:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - 2. Liga\", \"slug\": \"austria-2-liga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72440580, \"home\": \"Kapfenberger SV\", \"away\": \"FC Liefering\", \"homeId\": 2067, \"awayId\": 7790, \"date\": \"2026-07-31T16:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - 2. Liga\", \"slug\": \"austria-2-liga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72440582, \"home\": \"ASK Voitsberg\", \"away\": \"SKU Amstetten\", \"homeId\": 2081, \"awayId\": 6281, \"date\": \"2026-07-31T16:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - 2. Liga\", \"slug\": \"austria-2-liga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72440584, \"home\": \"Wacker Innsbruck\", \"away\": \"Schwarz-Weiss Bregenz\", \"homeId\": 2088, \"awayId\": 7786, \"date\": \"2026-07-31T16:30:00Z\", \"sport\": {\"name\": ..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72440570,72440576,72440580,72440582,72440584,72440572,72440574,72440578,72440588,72440590",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 172,
+      "bodyLength": 2,
+      "rateLimitRemaining": 55,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72440586,72440596,72440594,72440598,72440600,72440592,72440602,72440606,72440610,72440604",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 218,
+      "bodyLength": 2,
+      "rateLimitRemaining": 54,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72440614,72440608,72440612,72440616",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 150,
+      "bodyLength": 2,
+      "rateLimitRemaining": 53,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "austria-bundesliga",
+        "status": "pending,live",
+        "from": "2026-07-16T21:16:22Z",
+        "to": "2026-08-16T21:16:22Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 144,
+      "bodyLength": 5041,
+      "rateLimitRemaining": 52,
+      "sample": "[{\"id\": 72345436, \"home\": \"LASK Linz\", \"away\": \"Grazer AK 1902\", \"homeId\": 2058, \"awayId\": 2052, \"date\": \"2026-07-31T17:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - Bundesliga\", \"slug\": \"austria-bundesliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72345438, \"home\": \"WSG Tirol\", \"away\": \"SK Sturm Graz\", \"homeId\": 5405, \"awayId\": 2051, \"date\": \"2026-08-01T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - Bundesliga\", \"slug\": \"austria-bundesliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72345440, \"home\": \"FC Salzburg\", \"away\": \"TSV Hartberg\", \"homeId\": 2046, \"awayId\": 2075, \"date\": \"2026-08-01T17:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - Bundesliga\", \"slug\": \"austria-bundesliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72345442, \"home\": \"Wolfsberger AC\", \"away\": \"FK Austria Wien\", \"homeId\": 2076, \"awayId\": 2203, \"date\": \"2026-08-02T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - Bundesliga\", \"slug\": \"austria-bundesliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72345444, \"home\": \"Austria Lustenau\", \"away\": \"SV Ried\", \"homeId\": 2062, \"awayId\": 2049, \"date\": \"2026-08-02T15:00:00Z\", \"sport\": {\"name\": \"Football\", ..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72345436,72345438,72345440,72345442,72345444,72345446,72345448,72345450,72345452,72345454",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 186,
+      "bodyLength": 41848,
+      "rateLimitRemaining": 51,
+      "sample": "[{\"id\": 72345436, \"home\": \"LASK Linz\", \"away\": \"Grazer AK 1902\", \"homeId\": 2058, \"awayId\": 2052, \"date\": \"2026-07-31T17:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Austria - Bundesliga\", \"slug\": \"austria-bundesliga\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197151793/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"197151793\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:27.499Z\", \"odds\": [{\"home\": \"1.615\", \"draw\": \"3.800\", \"away\": \"5.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-01T05:38:58.25Z\", \"odds\": [{\"home\": \"1.250\", \"away\": \"3.750\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-01T07:34:29.937Z\", \"odds\": [{\"label\": \"LASK Linz or Draw\", \"under\": \"1.166\"}, {\"label\": \"Draw or Grazer AK\", \"under\": \"2.250\"}, {\"label\": \"LASK Linz or Grazer AK\", \"under\": \"1.250\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-06-30T13:24:36.801Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"1.800\", \"away\": \"2.000\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-06-30T13:24:36.801Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"2.000\", \"under\": \"1.800\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-06-30T12:44:49.533Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.800\", \"under\": \"2.000\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-07-16T21:15:27.499Z\", \"odds\": [{\"yes\": \"1.800\", \"no\": \"1.950\"}]}, {\"name\": \"Spread HT\", \"upda..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72345456,72345458,72345460,72345462,72345464,72345466,72345468,72345470",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 156,
+      "bodyLength": 2,
+      "rateLimitRemaining": 50,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "scotland-premiership",
+        "status": "pending,live",
+        "from": "2026-07-16T21:16:23Z",
+        "to": "2026-08-16T21:16:23Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 150,
+      "bodyLength": 3453,
+      "rateLimitRemaining": 49,
+      "sample": "[{\"id\": 72201562, \"home\": \"Dundee United\", \"away\": \"Glasgow Rangers\", \"homeId\": 2349, \"awayId\": 2351, \"date\": \"2026-07-31T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Scotland - Premiership\", \"slug\": \"scotland-premiership\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72201564, \"home\": \"Falkirk FC\", \"away\": \"St Mirren FC\", \"homeId\": 2363, \"awayId\": 2359, \"date\": \"2026-08-01T14:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Scotland - Premiership\", \"slug\": \"scotland-premiership\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72201566, \"home\": \"Aberdeen FC\", \"away\": \"Heart of Midlothian FC\", \"homeId\": 2355, \"awayId\": 2353, \"date\": \"2026-08-01T16:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Scotland - Premiership\", \"slug\": \"scotland-premiership\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72201568, \"home\": \"St. Johnstone FC\", \"away\": \"Kilmarnock FC\", \"homeId\": 2348, \"awayId\": 2347, \"date\": \"2026-08-02T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Scotland - Premiership\", \"slug\": \"scotland-premiership\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72201570, \"home\": \"Hibernian FC\", \"away\": \"Motherwell FC\", \"homeId\": 2354, \"awayId\": 2346, \"date\": \"2026-08-02T15:30:00Z..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72201562,72201564,72201566,72201568,72201570,72201572,72201574,72201576,72201578,72201580",
+        "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
       "durationMs": 199,
-      "bodyLength": 8357,
-      "rateLimitRemaining": 90,
-      "sample": "[{\"id\": 67091412, \"home\": \"HJK Helsinki\", \"away\": \"Vaasan Palloseura\", \"homeId\": 2242, \"awayId\": 2246, \"date\": \"2026-07-18T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091414, \"home\": \"AC Oulu\", \"away\": \"IF Gnistan\", \"homeId\": 5114, \"awayId\": 2271, \"date\": \"2026-07-18T14:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091416, \"home\": \"Seinajoen JK\", \"away\": \"Kuopion Palloseura\", \"homeId\": 22395, \"awayId\": 2244, \"date\": \"2026-07-18T14:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091418, \"home\": \"FF Jaro\", \"away\": \"FC Inter Turku\", \"homeId\": 2252, \"awayId\": 2247, \"date\": \"2026-07-19T15:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67091420, \"home\": \"Turun Palloseura\", \"away\": \"Tampereen Ilves\", \"homeId\": 2254, \"awayId\": 22386, \"date\": \"2026-07-20T15:00:00..."
+      "bodyLength": 60507,
+      "rateLimitRemaining": 48,
+      "sample": "[{\"id\": 72201566, \"home\": \"Aberdeen FC\", \"away\": \"Heart of Midlothian FC\", \"homeId\": 2355, \"awayId\": 2353, \"date\": \"2026-08-01T16:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Scotland - Premiership\", \"slug\": \"scotland-premiership\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E196514399/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1028061441\"}, \"bookmakerIds\": {\"Bet365\": \"196514399\", \"Bet365_4\": \"196514399-bot365\", \"Unibet\": \"1028061441\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:43.488Z\", \"odds\": [{\"home\": \"4.500\", \"draw\": \"3.900\", \"away\": \"1.666\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-15T12:27:49.273Z\", \"odds\": [{\"home\": \"3.500\", \"away\": \"1.285\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-15T11:55:38.746Z\", \"odds\": [{\"label\": \"Aberdeen or Draw\", \"under\": \"2.150\"}, {\"label\": \"Draw or Hearts\", \"under\": \"1.181\"}, {\"label\": \"Aberdeen or Hearts\", \"under\": \"1.250\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-15T09:57:16.79Z\", \"odds\": [{\"hdp\": 0.75, \"home\": \"1.975\", \"away\": \"1.875\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-10T13:24:17.089Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.875\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-10T16:25:36.463Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.666\", \"under\": \"2.200\"}]}, {\"name\": \"Both ..."
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "67091412,67091414,67091416,67091418,67091420,67091422,67091424,67091426,67091428,67091430",
+        "eventIds": "72201582,72201584",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 326,
-      "bodyLength": 77658,
-      "rateLimitRemaining": 89,
-      "sample": "[{\"id\": 67091414, \"home\": \"AC Oulu\", \"away\": \"IF Gnistan\", \"homeId\": 5114, \"awayId\": 2271, \"date\": \"2026-07-18T14:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Finland - Veikkausliiga\", \"slug\": \"finland-veikkausliiga\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197151971/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026051139\"}, \"bookmakerIds\": {\"Bet365\": \"197151971\", \"Bet365_4\": \"197151971-bot365\", \"Unibet\": \"1026051139\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:12.231Z\", \"odds\": [{\"home\": \"2.100\", \"draw\": \"3.300\", \"away\": \"3.100\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-16T15:09:35.244Z\", \"odds\": [{\"home\": \"1.571\", \"away\": \"2.250\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-13T05:03:34.111Z\", \"odds\": [{\"label\": \"AC Oulu or Draw\", \"under\": \"1.333\"}, {\"label\": \"Draw or IF Gnistan\", \"under\": \"1.615\"}, {\"label\": \"AC Oulu or IF Gnistan\", \"under\": \"1.300\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-16T12:17:48.881Z\", \"odds\": [{\"hdp\": -0.25, \"home\": \"1.900\", \"away\": \"1.900\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-16T12:17:04.017Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.825\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-16T15:07:51.953Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.850\", \"under\": \"1.950\"}]}, {\"name\": \"Both Teams T..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67091432,67091434,67091438,67091436,67091440,67091442,67091444,67091446,67091448,67091450",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 215,
+      "durationMs": 150,
       "bodyLength": 2,
-      "rateLimitRemaining": 88,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67091452,67091454,67091456,67091458,67091460,67091462,67091464,67091466,67091468",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 214,
-      "bodyLength": 2,
-      "rateLimitRemaining": 87,
+      "rateLimitRemaining": 47,
       "sample": []
     },
     {
@@ -75,68 +161,16 @@
       "params": {
         "apiKey": "***",
         "sport": "football",
-        "league": "sweden-allsvenskan",
+        "league": "argentina-liga-profesional",
         "status": "pending,live",
-        "from": "2026-07-16T21:15:35Z",
-        "to": "2026-08-16T21:15:35Z",
+        "from": "2026-07-16T21:16:23Z",
+        "to": "2026-08-16T21:16:23Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 209,
-      "bodyLength": 10272,
-      "rateLimitRemaining": 86,
-      "sample": "[{\"id\": 67126634, \"home\": \"IFK Goteborg\", \"away\": \"IF Brommapojkarna\", \"homeId\": 1761, \"awayId\": 1787, \"date\": \"2026-07-17T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126638, \"home\": \"Mjallby AIF\", \"away\": \"Vasteraas SK\", \"homeId\": 1783, \"awayId\": 1775, \"date\": \"2026-07-17T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126630, \"home\": \"AIK\", \"away\": \"GAIS\", \"homeId\": 1764, \"awayId\": 1786, \"date\": \"2026-07-18T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126632, \"home\": \"Hammarby IF\", \"away\": \"Degerfors IF\", \"homeId\": 1758, \"awayId\": 1807, \"date\": \"2026-07-19T14:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 67126640, \"home\": \"IF Elfsborg\", \"away\": \"IK Sirius\", \"homeId\": 1762, \"awayId\": 1793, \"date\": \"2026-07-19T14:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67126634,67126638,67126630,67126632,67126640,67126644,67126636,67126642,67126658,67126654",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 396,
-      "bodyLength": 311149,
-      "rateLimitRemaining": 85,
-      "sample": "[{\"id\": 67126632, \"home\": \"Hammarby IF\", \"away\": \"Degerfors IF\", \"homeId\": 1758, \"awayId\": 1807, \"date\": \"2026-07-19T14:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Sweden - Allsvenskan\", \"slug\": \"sweden-allsvenskan\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197152654/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026062341\"}, \"bookmakerIds\": {\"Bet365\": \"197152654\", \"Bet365_4\": \"197152654-bot365\", \"Unibet\": \"1026062341\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"home\": \"1.270\", \"draw\": \"5.500\", \"away\": \"11.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-13T07:22:17.615Z\", \"odds\": [{\"home\": \"1.071\", \"away\": \"9.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-16T02:36:22.549Z\", \"odds\": [{\"label\": \"Draw or Degerfors\", \"under\": \"3.750\"}, {\"label\": \"Hammarby or Draw\", \"under\": \"1.050\"}, {\"label\": \"Hammarby or Degerfors\", \"under\": \"1.142\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-13T07:35:48.312Z\", \"odds\": [{\"hdp\": -1.75, \"home\": \"2.000\", \"away\": \"1.800\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-14T15:36:48.178Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.825\", \"under\": \"1.975\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-13T07:22:17.615Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.533\", \"under\": \"2.400\"}]}, {\"name\": \"Both Teams To..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67126660,67126656,67126652,67126646,67126650,67126648,67126670,67126666,67126674,67126662",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 191,
+      "durationMs": 148,
       "bodyLength": 2,
-      "rateLimitRemaining": 84,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67126664,67126676,67126682,67126684,67126678,67126686,67126680,67126692,67126688,67126690",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 213,
-      "bodyLength": 2,
-      "rateLimitRemaining": 83,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "67126702,67126700,67126694,67126704,67126706,67126696,67126708",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 235,
-      "bodyLength": 2,
-      "rateLimitRemaining": 82,
+      "rateLimitRemaining": 46,
       "sample": []
     },
     {
@@ -144,155 +178,42 @@
       "params": {
         "apiKey": "***",
         "sport": "football",
-        "league": "mexico-liga-mx-apertura",
+        "league": "ireland-premier-division",
         "status": "pending,live",
-        "from": "2026-07-16T21:15:36Z",
-        "to": "2026-08-16T21:15:36Z",
+        "from": "2026-07-16T21:16:24Z",
+        "to": "2026-08-16T21:16:24Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 200,
-      "bodyLength": 9095,
-      "rateLimitRemaining": 81,
-      "sample": "[{\"id\": 72055030, \"home\": \"Club Necaxa\", \"away\": \"Atlante FC\", \"homeId\": 1944, \"awayId\": 1943, \"date\": \"2026-07-17T01:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72055032, \"home\": \"Club Tijuana de Caliente\", \"away\": \"Tigres UANL\", \"homeId\": 36525, \"awayId\": 1940, \"date\": \"2026-07-17T03:10:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72055034, \"home\": \"Atletico San Luis\", \"away\": \"CF Cruz Azul\", \"homeId\": 1950, \"awayId\": 1947, \"date\": \"2026-07-18T01:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72055036, \"home\": \"Club Leon\", \"away\": \"Atlas FC\", \"homeId\": 36534, \"awayId\": 1949, \"date\": \"2026-07-18T01:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72055038, \"home\": \"FC Juarez\", \"away\": \"Club Puebla\", \"homeId\": 215048, \"awayId\": 1941, \"date\": \"202..."
+      "durationMs": 157,
+      "bodyLength": 3912,
+      "rateLimitRemaining": 45,
+      "sample": "[{\"id\": 66854132, \"home\": \"Saint Patrick´s Athletic FC\", \"away\": \"Dundalk FC\", \"homeId\": 3169, \"awayId\": 3179, \"date\": \"2026-07-24T19:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Ireland - Premier Division\", \"slug\": \"ireland-premier-division\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66854130, \"home\": \"Galway United FC\", \"away\": \"Waterford FC\", \"homeId\": 3172, \"awayId\": 3194, \"date\": \"2026-07-25T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Ireland - Premier Division\", \"slug\": \"ireland-premier-division\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66854134, \"home\": \"Sligo Rovers FC\", \"away\": \"Drogheda United FC\", \"homeId\": 3190, \"awayId\": 3180, \"date\": \"2026-07-25T18:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Ireland - Premier Division\", \"slug\": \"ireland-premier-division\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66854136, \"home\": \"Bohemians Dublin FC\", \"away\": \"Galway United FC\", \"homeId\": 3173, \"awayId\": 3172, \"date\": \"2026-07-31T18:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Ireland - Premier Division\", \"slug\": \"ireland-premier-division\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66854138, \"home\": \"Drogheda United FC\", \"away\": \"Shamrock Rovers\", ..."
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72055030,72055032,72055034,72055036,72055038,72055040,72055044,72055042,72055046,72055048",
+        "eventIds": "66854132,66854130,66854134,66854136,66854138,66854140,66854142,66854144,66854146,66854148",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 423,
-      "bodyLength": 825091,
-      "rateLimitRemaining": 80,
-      "sample": "[{\"id\": 72055034, \"home\": \"Atletico San Luis\", \"away\": \"CF Cruz Azul\", \"homeId\": 1950, \"awayId\": 1947, \"date\": \"2026-07-18T01:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197151845/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1027986329\"}, \"bookmakerIds\": {\"Bet365\": \"197151845\", \"Bet365_4\": \"197151845-bot365\", \"Unibet\": \"1027986329\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:12.231Z\", \"odds\": [{\"home\": \"4.000\", \"draw\": \"3.700\", \"away\": \"1.900\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-15T04:13:15.346Z\", \"odds\": [{\"home\": \"3.000\", \"away\": \"1.363\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-16T12:54:36.04Z\", \"odds\": [{\"label\": \"Draw or Cruz Azul\", \"under\": \"1.222\"}, {\"label\": \"Atletico San Luis or Draw\", \"under\": \"1.909\"}, {\"label\": \"Atletico San Luis or Cruz Azul\", \"under\": \"1.285\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-10T23:43:49.309Z\", \"odds\": [{\"hdp\": 0.5, \"home\": \"1.950\", \"away\": \"1.850\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-16T09:57:50.095Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.925\", \"under\": \"1.875\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-12T17:07:34.626Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.727\", \"under\": \"..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72055050,72055052,72055054,72055056,72055058,72055060,72055062,72055064,72055066,72055070",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 258,
-      "bodyLength": 65195,
-      "rateLimitRemaining": 79,
-      "sample": "[{\"id\": 72055050, \"home\": \"Deportivo Toluca FC\", \"away\": \"Pumas UNAM\", \"homeId\": 1931, \"awayId\": 1933, \"date\": \"2026-07-22T03:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Mexico - Liga MX, Apertura\", \"slug\": \"mexico-liga-mx-apertura\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197535151/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1027986326\"}, \"bookmakerIds\": {\"Bet365\": \"197535151\", \"Bet365_4\": \"197535151-bot365\", \"Unibet\": \"1027986326\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:27.499Z\", \"odds\": [{\"home\": \"1.700\", \"draw\": \"3.900\", \"away\": \"4.500\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-12T19:51:48.154Z\", \"odds\": [{\"home\": \"1.300\", \"away\": \"3.400\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-13T00:01:34.054Z\", \"odds\": [{\"label\": \"Toluca or Draw\", \"under\": \"1.181\"}, {\"label\": \"Draw or Unam Pumas\", \"under\": \"2.100\"}, {\"label\": \"Toluca or Unam Pumas\", \"under\": \"1.250\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-12T20:05:17.43Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"1.875\", \"away\": \"1.925\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-12T20:05:17.43Z\", \"odds\": [{\"hdp\": 3, \"over\": \"2.000\", \"under\": \"1.800\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-12T19:51:48.154Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.615\", \"under\": \"2.250\"}]}, {\"name\": \"B..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72055068,72055072,72055074,72055076,72055078,72055080,72055082,72055084,72055086,72055088",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 235,
+      "durationMs": 153,
       "bodyLength": 2,
-      "rateLimitRemaining": 78,
-      "sample": []
-    },
-    {
-      "path": "/odds",
-      "params": {
-        "apiKey": "***",
-        "eventId": "72055090",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 191,
-      "bodyLength": 286,
-      "rateLimitRemaining": 77,
-      "sample": {
-        "id": 72055090,
-        "home": "Pumas UNAM",
-        "away": "Queretaro FC",
-        "homeId": 1933,
-        "awayId": 1951,
-        "date": "2026-08-16T17:00:00Z",
-        "status": "pending",
-        "sport": {
-          "name": "Football",
-          "slug": "football"
-        },
-        "league": {
-          "name": "Mexico - Liga MX, Apertura",
-          "slug": "mexico-liga-mx-apertura"
-        },
-        "urls": {},
-        "bookmakers": {}
-      }
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "romania-superliga",
-        "status": "pending,live",
-        "from": "2026-07-16T21:15:37Z",
-        "to": "2026-08-16T21:15:37Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 188,
-      "bodyLength": 11871,
-      "rateLimitRemaining": 76,
-      "sample": "[{\"id\": 72387864, \"home\": \"SC FC Voluntari\", \"away\": \"FC Botosani\", \"homeId\": 44255, \"awayId\": 24798, \"date\": \"2026-07-17T15:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Romania - Superliga\", \"slug\": \"romania-superliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72387856, \"home\": \"Fotbal Club FCSB\", \"away\": \"ACS Champions FC Arges\", \"homeId\": 3301, \"awayId\": 116221, \"date\": \"2026-07-17T18:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Romania - Superliga\", \"slug\": \"romania-superliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72387866, \"home\": \"ASC Otelul Galati\", \"away\": \"FC CFR 1907 Cluj\", \"homeId\": 3291, \"awayId\": 5287, \"date\": \"2026-07-18T15:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Romania - Superliga\", \"slug\": \"romania-superliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72387868, \"home\": \"CS Universitatea Craiova\", \"away\": \"FC Uta Arad\", \"homeId\": 116223, \"awayId\": 221210, \"date\": \"2026-07-18T18:15:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Romania - Superliga\", \"slug\": \"romania-superliga\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72387860, \"home\": \"FC Universitatea Cluj\", \"away\": \"FC Farul Constanta\", \"homeId\": 7734, \"awayId\": 3294, \"date\": \"20..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72387864,72387856,72387866,72387868,72387860,72387870,72387858,72387862,72387882,72387886",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 267,
-      "bodyLength": 107252,
-      "rateLimitRemaining": 75,
-      "sample": "[{\"id\": 72387864, \"home\": \"SC FC Voluntari\", \"away\": \"FC Botosani\", \"homeId\": 44255, \"awayId\": 24798, \"date\": \"2026-07-17T15:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Romania - Superliga\", \"slug\": \"romania-superliga\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197538543/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1028167517\"}, \"bookmakerIds\": {\"Bet365\": \"197538543\", \"Bet365_4\": \"197538543-bot365\", \"Unibet\": \"1028167517\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:13:29.207Z\", \"odds\": [{\"home\": \"2.350\", \"draw\": \"3.100\", \"away\": \"2.900\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-16T18:22:05.149Z\", \"odds\": [{\"home\": \"1.666\", \"away\": \"2.100\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-13T21:24:23.517Z\", \"odds\": [{\"label\": \"FC Voluntari or FC Botosani\", \"under\": \"1.333\"}, {\"label\": \"Draw or FC Botosani\", \"under\": \"1.500\"}, {\"label\": \"FC Voluntari or Draw\", \"under\": \"1.363\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-16T15:31:04.538Z\", \"odds\": [{\"hdp\": -0.25, \"home\": \"2.050\", \"away\": \"1.750\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-16T20:21:05.643Z\", \"odds\": [{\"hdp\": 2.25, \"over\": \"1.925\", \"under\": \"1.875\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-16T09:45:18.094Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"2.200\", \"under\": \"1.650\"}]}, {\"name..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72387874,72387884,72387876,72387872,72387880,72387878,72387888,72387890,72387892,72387894",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 187,
-      "bodyLength": 2,
-      "rateLimitRemaining": 74,
+      "rateLimitRemaining": 44,
       "sample": []
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72387896,72387898,72387900,72387902,72387904,72387906,72387908,72387910,72387912,72387914",
+        "eventIds": "66854150,66854152,66854154",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 213,
+      "durationMs": 150,
       "bodyLength": 2,
-      "rateLimitRemaining": 73,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72387916,72387918,72387920,72387922,72387924,72387926,72387928,72387930,72387932,72387934",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 227,
-      "bodyLength": 2,
-      "rateLimitRemaining": 72,
+      "rateLimitRemaining": 43,
       "sample": []
     },
     {
@@ -300,16 +221,107 @@
       "params": {
         "apiKey": "***",
         "sport": "football",
-        "league": "denmark-superliga",
+        "league": "usa-mls",
         "status": "pending,live",
-        "from": "2026-07-16T21:15:39Z",
-        "to": "2026-08-16T21:15:39Z",
+        "from": "2026-07-16T21:16:24Z",
+        "to": "2026-08-16T21:16:24Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 207,
+      "durationMs": 149,
+      "bodyLength": 16827,
+      "rateLimitRemaining": 42,
+      "sample": "[{\"id\": 66299236, \"home\": \"CF Montreal\", \"away\": \"Toronto FC\", \"homeId\": 22006, \"awayId\": 7080, \"date\": \"2026-07-16T23:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66299238, \"home\": \"Chicago Fire\", \"away\": \"Vancouver Whitecaps FC\", \"homeId\": 2505, \"awayId\": 22010, \"date\": \"2026-07-17T00:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66299240, \"home\": \"Saint Louis City SC\", \"away\": \"Sporting Kansas City\", \"homeId\": 874725, \"awayId\": 2509, \"date\": \"2026-07-17T00:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66299242, \"home\": \"Seattle Sounders\", \"away\": \"Portland Timbers\", \"homeId\": 22009, \"awayId\": 22007, \"date\": \"2026-07-17T02:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 66299244, \"home\": \"Nashville SC\", \"away\": \"Atlanta United FC\", \"homeId\": 668063, \"awayId\": 305920, \"date\": \"2026-07-18T00:10:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"US..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299236,66299238,66299240,66299242,66299244,66299246,66299248,66299250,66299252,66299254",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 279,
+      "bodyLength": 519929,
+      "rateLimitRemaining": 41,
+      "sample": "[{\"id\": 66299236, \"home\": \"CF Montreal\", \"away\": \"Toronto FC\", \"homeId\": 22006, \"awayId\": 7080, \"date\": \"2026-07-16T23:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197151872/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1025806500\"}, \"bookmakerIds\": {\"Bet365\": \"197151872\", \"Bet365_4\": \"197151872-bot365\", \"Unibet\": \"1025806500\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:57.217Z\", \"odds\": [{\"home\": \"2.375\", \"draw\": \"3.600\", \"away\": \"2.900\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"home\": \"1.666\", \"away\": \"2.100\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-16T18:11:20.519Z\", \"odds\": [{\"label\": \"CF Montreal or Draw\", \"under\": \"1.400\"}, {\"label\": \"Draw or Toronto FC\", \"under\": \"1.533\"}, {\"label\": \"CF Montreal or Toronto FC\", \"under\": \"1.285\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-16T20:49:57.307Z\", \"odds\": [{\"hdp\": -0.25, \"home\": \"2.025\", \"away\": \"1.775\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-16T19:17:21.149Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.775\", \"under\": \"2.025\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-10T01:09:17.71Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.615\", \"under\": \"2.250\"}]}, {\"name\": \"Both Teams To Score\", \"upda..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299256,66299258,66299260,66299262,66299264,66299266,66299268,66299270,66299272,66299274",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 223,
+      "bodyLength": 75845,
+      "rateLimitRemaining": 40,
+      "sample": "[{\"id\": 66299260, \"home\": \"Austin FC\", \"away\": \"Seattle Sounders\", \"homeId\": 772256, \"awayId\": 22009, \"date\": \"2026-07-23T00:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197539350/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"197539350\", \"Bet365_4\": \"197539350-bot365\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:15:43.488Z\", \"odds\": [{\"home\": \"3.250\", \"draw\": \"3.600\", \"away\": \"2.050\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-12T09:49:34.869Z\", \"odds\": [{\"home\": \"2.500\", \"away\": \"1.500\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-12T11:29:35.39Z\", \"odds\": [{\"label\": \"Austin FC or Draw\", \"under\": \"1.727\"}, {\"label\": \"Draw or Seattle Sounders\", \"under\": \"1.333\"}, {\"label\": \"Austin FC or Seattle Sounders\", \"under\": \"1.285\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-12T10:15:34.278Z\", \"odds\": [{\"hdp\": 0.25, \"home\": \"2.025\", \"away\": \"1.775\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-12T10:15:34.278Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.900\", \"under\": \"1.900\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-12T09:49:34.869Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.700\", \"under\": \"2.100\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-07-16T21:15:43.488Z\", \"odds\": [{\"yes\": \"1.615\", \"no\": \"2.200\"}]},..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299276,66299288,66299278,66299290,66299292,66299280,66299282,66299284,66299286,66299294",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 199,
+      "bodyLength": 6651,
+      "rateLimitRemaining": 39,
+      "sample": "[{\"id\": 66299276, \"home\": \"San Jose Earthquakes\", \"away\": \"Orlando City SC\", \"homeId\": 21825, \"awayId\": 52237, \"date\": \"2026-07-23T02:30:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"USA - MLS\", \"slug\": \"usa-mls\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197539369/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"197539369\", \"Bet365_4\": \"197539369-bot365\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:14:42.043Z\", \"odds\": [{\"home\": \"1.444\", \"draw\": \"4.750\", \"away\": \"6.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-12T09:51:33.942Z\", \"odds\": [{\"home\": \"1.166\", \"away\": \"5.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-12T12:40:05.509Z\", \"odds\": [{\"label\": \"San Jose or Draw\", \"under\": \"1.125\"}, {\"label\": \"Draw or Orlando City\", \"under\": \"2.625\"}, {\"label\": \"San Jose or Orlando City\", \"under\": \"1.181\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-12T10:06:19.238Z\", \"odds\": [{\"hdp\": -1.25, \"home\": \"1.850\", \"away\": \"1.950\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-12T10:06:19.238Z\", \"odds\": [{\"hdp\": 3.75, \"over\": \"1.975\", \"under\": \"1.825\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-12T09:51:33.942Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.300\", \"under\": \"3.500\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-07-16T21:14:42.043Z\", \"odds\": [{\"yes\": \"1.444\", \"no\": \"2.625\"}]}..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299296,66299298,66299300,66299302,66299304,66299306,66299308,66299310,66299312,66299314",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 169,
       "bodyLength": 2,
-      "rateLimitRemaining": 71,
+      "rateLimitRemaining": 38,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299316,66299318,66299320,66299322,66299324,66299326,66299328,66299330,66299332,66299334",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 170,
+      "bodyLength": 2,
+      "rateLimitRemaining": 37,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299336,69829676,66299342,66299344,66299346,66299338,66299340,66299350,66299352,66299354",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 169,
+      "bodyLength": 2,
+      "rateLimitRemaining": 36,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "66299356,66299358,66299360",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 150,
+      "bodyLength": 2,
+      "rateLimitRemaining": 35,
       "sample": []
     },
     {
@@ -317,184 +329,72 @@
       "params": {
         "apiKey": "***",
         "sport": "football",
-        "league": "poland-ekstraklasa",
+        "league": "china-chinese-super-league",
         "status": "pending,live",
-        "from": "2026-07-16T21:15:39Z",
-        "to": "2026-08-16T21:15:39Z",
+        "from": "2026-07-16T21:16:26Z",
+        "to": "2026-08-16T21:16:26Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 206,
-      "bodyLength": 10065,
-      "rateLimitRemaining": 70,
-      "sample": "[{\"id\": 72043020, \"home\": \"RKS Radomiak Radom\", \"away\": \"Wieczysta Krakow\", \"homeId\": 7295, \"awayId\": 406863, \"date\": \"2026-07-24T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Poland - Ekstraklasa\", \"slug\": \"poland-ekstraklasa\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72043022, \"home\": \"Pogon Szczecin\", \"away\": \"Legia Warszawa\", \"homeId\": 3117, \"awayId\": 3106, \"date\": \"2026-07-24T18:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Poland - Ekstraklasa\", \"slug\": \"poland-ekstraklasa\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72043028, \"home\": \"Jagiellonia Bialystok\", \"away\": \"Korona Kielce\", \"homeId\": 7691, \"awayId\": 5065, \"date\": \"2026-07-25T12:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Poland - Ekstraklasa\", \"slug\": \"poland-ekstraklasa\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72043030, \"home\": \"Gornik Zabrze\", \"away\": \"WKS Slask Wroclaw\", \"homeId\": 3110, \"awayId\": 3108, \"date\": \"2026-07-25T15:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Poland - Ekstraklasa\", \"slug\": \"poland-ekstraklasa\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72043034, \"home\": \"KKS Lech Poznan\", \"away\": \"KS Cracovia Krakow\", \"homeId\": 3121, \"awayId\": 4901, \"date\": \"2026-07-25T1..."
+      "durationMs": 159,
+      "bodyLength": 12376,
+      "rateLimitRemaining": 34,
+      "sample": "[{\"id\": 68995260, \"home\": \"Qingdao West Coast FC\", \"away\": \"Chengdu Rongcheng\", \"homeId\": 754363, \"awayId\": 252167, \"date\": \"2026-07-17T11:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"China - Chinese Super League\", \"slug\": \"china-chinese-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 68995252, \"home\": \"Henan\", \"away\": \"Qingdao Hainiu FC\", \"homeId\": 34692, \"awayId\": 34695, \"date\": \"2026-07-17T11:35:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"China - Chinese Super League\", \"slug\": \"china-chinese-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 68995254, \"home\": \"Beijing Guoan\", \"away\": \"Liaoning Tieren FC\", \"homeId\": 3376, \"awayId\": 252175, \"date\": \"2026-07-17T11:35:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"China - Chinese Super League\", \"slug\": \"china-chinese-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 68995256, \"home\": \"Yunnan Yukun\", \"away\": \"Shanghai Port FC\", \"homeId\": 1009011, \"awayId\": 41537, \"date\": \"2026-07-17T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"China - Chinese Super League\", \"slug\": \"china-chinese-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 68995258, \"home\": \"Chongqing Tonglianglong FC\", \"away..."
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72043020,72043022,72043028,72043030,72043034,72043024,72043026,72043018,72043032,72043052",
+        "eventIds": "68995260,68995252,68995254,68995256,68995258,68995262,68995264,68995266,68995268,68995270",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 205,
+      "durationMs": 284,
+      "bodyLength": 193016,
+      "rateLimitRemaining": 33,
+      "sample": "[{\"id\": 68995260, \"home\": \"Qingdao West Coast FC\", \"away\": \"Chengdu Rongcheng\", \"homeId\": 754363, \"awayId\": 252167, \"date\": \"2026-07-17T11:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"China - Chinese Super League\", \"slug\": \"china-chinese-super-league\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197152396/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1026658670\"}, \"bookmakerIds\": {\"Bet365\": \"197152396\", \"Bet365_4\": \"197152396-bot365\", \"Unibet\": \"1026658670\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:11:57.481Z\", \"odds\": [{\"home\": \"4.100\", \"draw\": \"4.000\", \"away\": \"1.727\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-15T01:10:43.813Z\", \"odds\": [{\"home\": \"3.250\", \"away\": \"1.333\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-16T14:54:20.298Z\", \"odds\": [{\"label\": \"Qingdao West Coast or Chengdu Rongcheng\", \"under\": \"1.222\"}, {\"label\": \"Qingdao West Coast or Draw\", \"under\": \"2.050\"}, {\"label\": \"Draw or Chengdu Rongcheng\", \"under\": \"1.222\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-15T14:41:45.249Z\", \"odds\": [{\"hdp\": 0.75, \"home\": \"1.850\", \"away\": \"1.950\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-16T16:50:36.356Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.975\", \"under\": \"1.825\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-16T17:07:23.313Z\", \"odds\": [{\"hdp..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "68995272,68995274,68995276,68995280,68995278,68995282,68995284,68995286,68995288,68995290",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 133,
       "bodyLength": 2,
-      "rateLimitRemaining": 69,
+      "rateLimitRemaining": 32,
       "sample": []
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72043036,72043050,72043040,72043038,72043044,72043048,72043046,72043042,72043060,72043056",
+        "eventIds": "68995292,68995294,68995296,68995298,68995300,68995302,68995304,68995306,68995308,68995310",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 209,
+      "durationMs": 158,
       "bodyLength": 2,
-      "rateLimitRemaining": 68,
+      "rateLimitRemaining": 31,
       "sample": []
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72043058,72043070,72043054,72043062,72043064,72043068,72043066,72043078,72043076,72043086",
+        "eventIds": "68995312,68995314,68995316,68995318,68995320,68995322,68995324,68995326,68995330,68995328",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 209,
+      "durationMs": 173,
       "bodyLength": 2,
-      "rateLimitRemaining": 67,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72043088,72043084,72043072,72043082,72043074",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 207,
-      "bodyLength": 2,
-      "rateLimitRemaining": 66,
-      "sample": []
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "russia-premier-league",
-        "status": "pending,live",
-        "from": "2026-07-16T21:15:40Z",
-        "to": "2026-08-16T21:15:40Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 211,
-      "bodyLength": 9501,
-      "rateLimitRemaining": 65,
-      "sample": "[{\"id\": 72334210, \"home\": \"CSKA Moscow\", \"away\": \"FC Baltika Kaliningrad\", \"homeId\": 2325, \"awayId\": 7517, \"date\": \"2026-07-24T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Russia - Premier League\", \"slug\": \"russia-premier-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72334202, \"home\": \"FK Dinamo Moscow\", \"away\": \"PFK Krylia Sovetov Samara\", \"homeId\": 2315, \"awayId\": 2322, \"date\": \"2026-07-25T11:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Russia - Premier League\", \"slug\": \"russia-premier-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72334214, \"home\": \"FK Akron Tolyatti\", \"away\": \"FK Zenit Saint Petersburg\", \"homeId\": 432781, \"awayId\": 2321, \"date\": \"2026-07-25T13:15:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Russia - Premier League\", \"slug\": \"russia-premier-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72334216, \"home\": \"FC Fakel Voronezh\", \"away\": \"FC Dynamo-Makhachkala\", \"homeId\": 2317, \"awayId\": 737435, \"date\": \"2026-07-25T15:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Russia - Premier League\", \"slug\": \"russia-premier-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72334204, \"home\": \"FK Spartak Moscow\", \"away\": \"Rodina Moscow\", \"h..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72334210,72334202,72334214,72334216,72334204,72334206,72334208,72334212,72334230,72334232",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 208,
-      "bodyLength": 2,
-      "rateLimitRemaining": 64,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72334228,72334218,72334220,72334222,72334224,72334226,72334238,72334242,72334240,72334234",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 230,
-      "bodyLength": 2,
-      "rateLimitRemaining": 63,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72334246,72334236,72334244,72334248,72334256,72334262,72334260,72334252,72334258,72334264",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 213,
-      "bodyLength": 2,
-      "rateLimitRemaining": 62,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72334250,72334254",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 206,
-      "bodyLength": 2,
-      "rateLimitRemaining": 61,
-      "sample": []
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "switzerland-super-league",
-        "status": "pending,live",
-        "from": "2026-07-16T21:15:41Z",
-        "to": "2026-08-16T21:15:41Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 198,
-      "bodyLength": 5284,
-      "rateLimitRemaining": 60,
-      "sample": "[{\"id\": 72176852, \"home\": \"Servette Geneva\", \"away\": \"FC Basel 1893\", \"homeId\": 2448, \"awayId\": 2501, \"date\": \"2026-07-25T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Switzerland - Super League\", \"slug\": \"switzerland-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176854, \"home\": \"Lausanne-Sport\", \"away\": \"Grasshopper Club Zurich\", \"homeId\": 2446, \"awayId\": 2449, \"date\": \"2026-07-25T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Switzerland - Super League\", \"slug\": \"switzerland-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176856, \"home\": \"FC Luzern\", \"away\": \"FC Thun\", \"homeId\": 2453, \"awayId\": 2454, \"date\": \"2026-07-25T18:30:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Switzerland - Super League\", \"slug\": \"switzerland-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176858, \"home\": \"Young Boys Bern\", \"away\": \"FC Sion\", \"homeId\": 2445, \"awayId\": 2452, \"date\": \"2026-07-26T12:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Switzerland - Super League\", \"slug\": \"switzerland-super-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176860, \"home\": \"FC St. Gallen 1879\", \"away\": \"FC Zurich\", \"homeId\": 2442, \"awayId\": 2450, \"dat..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72176852,72176854,72176856,72176858,72176860,72176862,72176864,72176866,72176868,72176870",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 255,
-      "bodyLength": 42486,
-      "rateLimitRemaining": 59,
-      "sample": "[{\"id\": 72176852, \"home\": \"Servette Geneva\", \"away\": \"FC Basel 1893\", \"homeId\": 2448, \"awayId\": 2501, \"date\": \"2026-07-25T16:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Switzerland - Super League\", \"slug\": \"switzerland-super-league\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E197152013/F3/I1/\"}, \"bookmakerIds\": {\"Bet365\": \"197152013\", \"Bet365_4\": \"197152013-bot365\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"home\": \"2.350\", \"draw\": \"3.600\", \"away\": \"2.625\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-07-11T11:11:37.037Z\", \"odds\": [{\"home\": \"1.800\", \"away\": \"1.909\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-07-11T12:10:34.994Z\", \"odds\": [{\"label\": \"Servette or Basel\", \"under\": \"1.285\"}, {\"label\": \"Servette or Draw\", \"under\": \"1.444\"}, {\"label\": \"Draw or Basel\", \"under\": \"1.571\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-07-11T08:38:05.054Z\", \"odds\": [{\"hdp\": 0, \"home\": \"1.800\", \"away\": \"N/A\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-07-10T14:08:07.257Z\", \"odds\": [{\"hdp\": 3.25, \"over\": \"1.925\", \"under\": \"1.875\"}]}, {\"name\": \"Goals Over/Under\", \"updatedAt\": \"2026-07-10T16:17:05.541Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.475\", \"under\": \"2.600\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"yes\": \"1.400\", \"no\": \"2.75..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "72176872,72176874,72176876,72176878,72176880,72176882,72176884,72176886",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 219,
-      "bodyLength": 2,
-      "rateLimitRemaining": 58,
+      "rateLimitRemaining": 30,
       "sample": []
     }
   ],
-  "generatedAt": "2026-07-16T21:15:33Z",
+  "generatedAt": "2026-07-16T21:16:21Z",
   "scriptVersion": "domestic-odds-api-io-v5-strict-provider-country-market-audit",
   "registry": {
     "registryVersion": 4,
@@ -512,14 +412,14 @@
     "Unibet"
   ],
   "leaguesRequested": [
-    "FIN",
-    "SWE",
-    "MEX",
-    "ROM",
-    "DNK",
-    "POL",
-    "RUS",
-    "SWZ"
+    "AUT2",
+    "AUT",
+    "SC0",
+    "ARG",
+    "BRA",
+    "IRL",
+    "USA",
+    "CHN"
   ],
   "marketAuditPolicy": {
     "auditOnlyFamilies": [
@@ -537,451 +437,405 @@
     "allProviderMarketsArchivedSeparately": true
   },
   "providerRawMarketNames": {
-    "ML": 94,
-    "Double Chance": 76,
-    "Spread": 92,
-    "Totals": 98,
-    "Goals Over/Under": 44,
-    "Both Teams To Score": 76,
-    "Totals HT": 74,
-    "Corners Totals": 52,
-    "Corners Totals HT": 29,
-    "Team Corners Home": 29,
-    "Total Corners": 29,
-    "Corners 2-Way": 29,
-    "Alternative Goal Line": 44,
-    "Corners": 29,
-    "Alternative Corners": 29,
-    "Team Total Goals Away": 40,
-    "Team Corners Away": 29,
-    "Specials": 44,
-    "1st Half Handicap": 44,
-    "Alternative Total Goals": 44,
-    "Team Total Goals Home": 40,
-    "First 10 Minutes (00:00 - 09:59)": 44,
-    "Alternative Asian Handicap": 44,
-    "Corners Race": 29,
-    "Both Teams To Score HT": 44,
-    "Both Teams To Score 2H": 44,
-    "Team Total Home": 32,
-    "Team Total Away": 32,
-    "Anytime Goalscorer": 49,
-    "To Score 2+ Goals": 32,
-    "ML 2H": 32,
-    "Spread HT": 43,
-    "Corners Totals Away": 31,
-    "Corners Totals Home": 31,
-    "Player Cards": 17,
-    "Multi Scorers": 13,
-    "Player to be Booked": 17,
-    "Team Goalscorer": 10,
-    "To Score 3+ Goals": 7,
-    "Bookings Spread": 5,
-    "Player Shots on Target": 18,
-    "Player To Score or Assist": 9,
-    "Player Shots": 9,
-    "Goal Method": 4,
-    "Total Shots on Target Away": 9,
-    "Goalkeeper Saves Home": 11,
-    "Goalkeeper Saves": 11,
-    "Total Shots on Target": 9,
-    "Total Shots on Target Home": 9,
-    "Goalkeeper Saves Away": 11,
-    "Match Shots on Target": 1,
-    "Card Handicap": 2,
-    "Match Shots": 4,
-    "Team Shots Away": 3,
-    "Team Shots Home": 3,
-    "Team Shots on Target Away": 2,
-    "Team Shots on Target Home": 2,
-    "1st Half Goal Line": 2
+    "ML": 76,
+    "Double Chance": 65,
+    "Spread": 84,
+    "Totals": 91,
+    "Goals Over/Under": 41,
+    "Both Teams To Score": 66,
+    "Spread HT": 44,
+    "Totals HT": 57,
+    "First 10 Minutes (00:00 - 09:59)": 41,
+    "Alternative Total Goals": 41,
+    "Team Total Goals Away": 36,
+    "Team Total Goals Home": 36,
+    "Specials": 41,
+    "Alternative Asian Handicap": 41,
+    "1st Half Handicap": 41,
+    "Alternative Goal Line": 41,
+    "Both Teams To Score 2H": 41,
+    "Both Teams To Score HT": 41,
+    "Team Total Home": 25,
+    "Team Total Away": 25,
+    "1st Half Goal Line": 7,
+    "Corners Totals": 30,
+    "Corners Totals HT": 14,
+    "Bookings Spread": 6,
+    "Anytime Goalscorer": 20,
+    "Total Corners": 14,
+    "Team Corners Home": 14,
+    "Corners 2-Way": 14,
+    "Corners Race": 14,
+    "Player Shots on Target": 12,
+    "Player to be Booked": 6,
+    "Player Shots": 6,
+    "Team Corners Away": 14,
+    "Player To Score or Assist": 6,
+    "Player Cards": 6,
+    "Team Goalscorer": 13,
+    "Goal Method": 6,
+    "Alternative Corners": 14,
+    "Corners": 14,
+    "Multi Scorers": 10,
+    "ML 2H": 19,
+    "To Score 2+ Goals": 6,
+    "Corners Totals Away": 19,
+    "Total Shots on Target Home": 6,
+    "Goalkeeper Saves Away": 6,
+    "Total Shots on Target Away": 6,
+    "To Score 3+ Goals": 6,
+    "Total Shots on Target": 6,
+    "Corners Totals Home": 19,
+    "Goalkeeper Saves Home": 6,
+    "Goalkeeper Saves": 6,
+    "Card Handicap": 3
   },
   "providerRawMarketClassifications": {
     "ML": {
       "family": "1X2",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 94
+      "count": 76
     },
     "Double Chance": {
       "family": "DOUBLE_CHANCE",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 76
+      "count": 65
     },
     "Spread": {
       "family": "ASIAN_HANDICAP",
       "status": "audit_only",
       "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 92
+      "count": 84
     },
     "Totals": {
       "family": "MATCH_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 98
+      "count": 91
     },
     "Goals Over/Under": {
       "family": "MATCH_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 44
+      "count": 41
     },
     "Both Teams To Score": {
       "family": "BTTS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 76
-    },
-    "Totals HT": {
-      "family": "FIRST_HALF_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 74
-    },
-    "Corners Totals": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 52
-    },
-    "Corners Totals HT": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Team Corners Home": {
-      "family": "TEAM_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Total Corners": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Corners 2-Way": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Alternative Goal Line": {
-      "family": "MATCH_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 44
-    },
-    "Corners": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Alternative Corners": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Team Total Goals Away": {
-      "family": "TEAM_TOTAL_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 40
-    },
-    "Team Corners Away": {
-      "family": "TEAM_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Specials": {
-      "family": "UNSUPPORTED",
-      "status": "unsupported",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 44
-    },
-    "1st Half Handicap": {
-      "family": "ASIAN_HANDICAP",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "Alternative Total Goals": {
-      "family": "MATCH_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 44
-    },
-    "Team Total Goals Home": {
-      "family": "TEAM_TOTAL_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 40
-    },
-    "First 10 Minutes (00:00 - 09:59)": {
-      "family": "UNSUPPORTED",
-      "status": "unsupported",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 44
-    },
-    "Alternative Asian Handicap": {
-      "family": "ASIAN_HANDICAP",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "Corners Race": {
-      "family": "MATCH_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 29
-    },
-    "Both Teams To Score HT": {
-      "family": "HALF_TIME_BTTS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "Both Teams To Score 2H": {
-      "family": "BTTS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 44
-    },
-    "Team Total Home": {
-      "family": "TEAM_TOTAL_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 32
-    },
-    "Team Total Away": {
-      "family": "TEAM_TOTAL_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 32
-    },
-    "Anytime Goalscorer": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 49
-    },
-    "To Score 2+ Goals": {
-      "family": "MATCH_GOALS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 32
-    },
-    "ML 2H": {
-      "family": "UNSUPPORTED",
-      "status": "unsupported",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 32
+      "count": 66
     },
     "Spread HT": {
       "family": "ASIAN_HANDICAP",
       "status": "audit_only",
       "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 43
+      "count": 44
     },
-    "Corners Totals Away": {
-      "family": "TEAM_CORNERS",
+    "Totals HT": {
+      "family": "FIRST_HALF_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 31
+      "count": 57
     },
-    "Corners Totals Home": {
-      "family": "TEAM_CORNERS",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 31
-    },
-    "Player Cards": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 17
-    },
-    "Multi Scorers": {
+    "First 10 Minutes (00:00 - 09:59)": {
       "family": "UNSUPPORTED",
       "status": "unsupported",
       "reason": "unrecognized or unsupported provider market",
-      "count": 13
+      "count": 41
     },
-    "Player to be Booked": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 17
-    },
-    "Team Goalscorer": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 10
-    },
-    "To Score 3+ Goals": {
+    "Alternative Total Goals": {
       "family": "MATCH_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 7
+      "count": 41
     },
-    "Bookings Spread": {
-      "family": "ASIAN_HANDICAP",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 5
-    },
-    "Player Shots on Target": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 18
-    },
-    "Player To Score or Assist": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 9
-    },
-    "Player Shots": {
-      "family": "PLAYER_PROPS",
-      "status": "audit_only",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 9
-    },
-    "Goal Method": {
-      "family": "UNSUPPORTED",
-      "status": "unsupported",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 4
-    },
-    "Total Shots on Target Away": {
-      "family": "TEAM_SHOTS_ON_TARGET",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 9
-    },
-    "Goalkeeper Saves Home": {
+    "Team Total Goals Away": {
       "family": "TEAM_TOTAL_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 11
+      "count": 36
     },
-    "Goalkeeper Saves": {
-      "family": "UNSUPPORTED",
-      "status": "unsupported",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 11
-    },
-    "Total Shots on Target": {
-      "family": "MATCH_SHOTS_ON_TARGET",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 9
-    },
-    "Total Shots on Target Home": {
-      "family": "TEAM_SHOTS_ON_TARGET",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 9
-    },
-    "Goalkeeper Saves Away": {
+    "Team Total Goals Home": {
       "family": "TEAM_TOTAL_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 11
+      "count": 36
     },
-    "Match Shots on Target": {
-      "family": "MATCH_SHOTS_ON_TARGET",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 1
+    "Specials": {
+      "family": "UNSUPPORTED",
+      "status": "unsupported",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 41
     },
-    "Card Handicap": {
+    "Alternative Asian Handicap": {
       "family": "ASIAN_HANDICAP",
       "status": "audit_only",
       "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 2
+      "count": 41
     },
-    "Match Shots": {
-      "family": "MATCH_SHOTS",
+    "1st Half Handicap": {
+      "family": "ASIAN_HANDICAP",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
+    },
+    "Alternative Goal Line": {
+      "family": "MATCH_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 4
+      "count": 41
     },
-    "Team Shots Away": {
-      "family": "TEAM_SHOTS",
+    "Both Teams To Score 2H": {
+      "family": "BTTS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 3
+      "count": 41
     },
-    "Team Shots Home": {
-      "family": "TEAM_SHOTS",
+    "Both Teams To Score HT": {
+      "family": "HALF_TIME_BTTS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
+    },
+    "Team Total Home": {
+      "family": "TEAM_TOTAL_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 3
+      "count": 25
     },
-    "Team Shots on Target Away": {
-      "family": "TEAM_SHOTS_ON_TARGET",
+    "Team Total Away": {
+      "family": "TEAM_TOTAL_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 2
-    },
-    "Team Shots on Target Home": {
-      "family": "TEAM_SHOTS_ON_TARGET",
-      "status": "supported",
-      "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 2
+      "count": 25
     },
     "1st Half Goal Line": {
       "family": "FIRST_HALF_GOALS",
       "status": "supported",
       "reason": "recognized supported family; normal exact-emission rules still apply",
-      "count": 2
+      "count": 7
+    },
+    "Corners Totals": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 30
+    },
+    "Corners Totals HT": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Bookings Spread": {
+      "family": "ASIAN_HANDICAP",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Anytime Goalscorer": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 20
+    },
+    "Total Corners": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Team Corners Home": {
+      "family": "TEAM_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Corners 2-Way": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Corners Race": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Player Shots on Target": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 12
+    },
+    "Player to be Booked": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Player Shots": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Team Corners Away": {
+      "family": "TEAM_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Player To Score or Assist": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Player Cards": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Team Goalscorer": {
+      "family": "PLAYER_PROPS",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 13
+    },
+    "Goal Method": {
+      "family": "UNSUPPORTED",
+      "status": "unsupported",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 6
+    },
+    "Alternative Corners": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Corners": {
+      "family": "MATCH_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 14
+    },
+    "Multi Scorers": {
+      "family": "UNSUPPORTED",
+      "status": "unsupported",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 10
+    },
+    "ML 2H": {
+      "family": "UNSUPPORTED",
+      "status": "unsupported",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 19
+    },
+    "To Score 2+ Goals": {
+      "family": "MATCH_GOALS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Corners Totals Away": {
+      "family": "TEAM_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 19
+    },
+    "Total Shots on Target Home": {
+      "family": "TEAM_SHOTS_ON_TARGET",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Goalkeeper Saves Away": {
+      "family": "TEAM_TOTAL_GOALS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Total Shots on Target Away": {
+      "family": "TEAM_SHOTS_ON_TARGET",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "To Score 3+ Goals": {
+      "family": "MATCH_GOALS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Total Shots on Target": {
+      "family": "MATCH_SHOTS_ON_TARGET",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Corners Totals Home": {
+      "family": "TEAM_CORNERS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 19
+    },
+    "Goalkeeper Saves Home": {
+      "family": "TEAM_TOTAL_GOALS",
+      "status": "supported",
+      "reason": "recognized supported family; normal exact-emission rules still apply",
+      "count": 6
+    },
+    "Goalkeeper Saves": {
+      "family": "UNSUPPORTED",
+      "status": "unsupported",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 6
+    },
+    "Card Handicap": {
+      "family": "ASIAN_HANDICAP",
+      "status": "audit_only",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 3
     }
   },
   "providerMarketFamilyCounts": {
-    "1X2": 94,
-    "DOUBLE_CHANCE": 76,
-    "ASIAN_HANDICAP": 230,
-    "MATCH_GOALS": 269,
-    "BTTS": 120,
-    "FIRST_HALF_GOALS": 76,
-    "MATCH_CORNERS": 226,
-    "TEAM_CORNERS": 120,
-    "TEAM_TOTAL_GOALS": 166,
-    "UNSUPPORTED": 148,
-    "HALF_TIME_BTTS": 44,
-    "PLAYER_PROPS": 129,
-    "TEAM_SHOTS_ON_TARGET": 22,
-    "MATCH_SHOTS_ON_TARGET": 10,
-    "MATCH_SHOTS": 4,
-    "TEAM_SHOTS": 6
+    "1X2": 76,
+    "DOUBLE_CHANCE": 65,
+    "ASIAN_HANDICAP": 219,
+    "MATCH_GOALS": 226,
+    "BTTS": 107,
+    "FIRST_HALF_GOALS": 64,
+    "UNSUPPORTED": 123,
+    "TEAM_TOTAL_GOALS": 134,
+    "HALF_TIME_BTTS": 41,
+    "MATCH_CORNERS": 114,
+    "PLAYER_PROPS": 69,
+    "TEAM_CORNERS": 66,
+    "TEAM_SHOTS_ON_TARGET": 12,
+    "MATCH_SHOTS_ON_TARGET": 6
   },
   "supportedProviderMarketCounts": {
-    "1X2": 94,
-    "DOUBLE_CHANCE": 76,
-    "MATCH_GOALS": 269,
-    "BTTS": 120,
-    "FIRST_HALF_GOALS": 76,
-    "MATCH_CORNERS": 226,
-    "TEAM_CORNERS": 120,
-    "TEAM_TOTAL_GOALS": 166,
-    "TEAM_SHOTS_ON_TARGET": 22,
-    "MATCH_SHOTS_ON_TARGET": 10,
-    "MATCH_SHOTS": 4,
-    "TEAM_SHOTS": 6
+    "1X2": 76,
+    "DOUBLE_CHANCE": 65,
+    "MATCH_GOALS": 226,
+    "BTTS": 107,
+    "FIRST_HALF_GOALS": 64,
+    "TEAM_TOTAL_GOALS": 134,
+    "MATCH_CORNERS": 114,
+    "TEAM_CORNERS": 66,
+    "TEAM_SHOTS_ON_TARGET": 12,
+    "MATCH_SHOTS_ON_TARGET": 6
   },
   "auditOnlyMarketCounts": {
-    "ASIAN_HANDICAP": 230,
-    "HALF_TIME_BTTS": 44,
-    "PLAYER_PROPS": 129
+    "ASIAN_HANDICAP": 219,
+    "HALF_TIME_BTTS": 41,
+    "PLAYER_PROPS": 69
   },
   "auditOnlyMarketExamples": {
     "ASIAN_HANDICAP": [
@@ -990,38 +844,33 @@
         "family": "ASIAN_HANDICAP",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
           "name": "Spread",
-          "updatedAt": "2026-07-16T12:17:48.881Z",
+          "updatedAt": "2026-06-30T13:24:36.801Z",
           "odds": [
             {
-              "hdp": -0.25,
-              "home": "1.900",
-              "away": "1.900"
+              "hdp": -0.75,
+              "home": "1.800",
+              "away": "2.000"
             }
           ]
         }
       },
       {
-        "rawMarketName": "1st Half Handicap",
+        "rawMarketName": "Spread HT",
         "family": "ASIAN_HANDICAP",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
-          "name": "1st Half Handicap",
-          "updatedAt": "2026-07-16T11:15:47.906Z",
+          "name": "Spread HT",
+          "updatedAt": "2026-07-16T20:04:50.192Z",
           "odds": [
             {
-              "label": "Tie (1)",
-              "hdp": 1,
-              "away": "1.400"
-            },
-            {
-              "label": "1 (-1)",
-              "hdp": -1,
-              "home": "8.500"
+              "hdp": -0.25,
+              "home": "1.775",
+              "away": "2.025"
             }
           ]
         }
@@ -1031,38 +880,28 @@
         "family": "ASIAN_HANDICAP",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
-        "marketSample": "{\"name\": \"Alternative Asian Handicap\", \"updatedAt\": \"2026-07-16T15:07:51.953Z\", \"odds\": [{\"hdp\": -1, \"home\": \"3.300\", \"away\": \"5.750\"}, {\"hdp\": -0.75, \"home\": \"2.500\", \"away\": \"3.800\"}, {\"hdp\": -0.5, \"home\": \"2.150\", \"away\": \"3.100\"}, {\"hdp\": 0, \"home\": \"1.600\", \"away\": \"2.300\"}, {\"hdp\": 0.25, \"home\": \"1.450\", \"away\": \"2.675\"}, {\"hdp\": 0.5, \"home\": \"1.350\", \"away\": \"1.675\"}, {\"hdp\": 0.75, \"home\": \"1.250\", \"away\": \"1.500\"}, {\"hdp\": 1, \"home\": \"1.140\", \"away\": \"1.325\"}, {\"hdp\": -1.75, \"home\": \"5.500\", \"away\": \"1.150\"}, {\"hdp\": -1.5, \"home\": \"4.100\", \"away\": \"6.600\"}, {\"hdp\": -1.25, \"home\": \"3.700\", \"away\": \"6.000\"}, {\"hdp\": 1.25, \"home\": \"1.125\", \"away\": \"1.260\"}, {\"hdp\": 1.5, \"home\": \"1.110\",..."
+        "fixture": "Lask Linz - Grazer AK",
+        "marketSample": "{\"name\": \"Alternative Asian Handicap\", \"updatedAt\": \"2026-07-14T22:22:30.964Z\", \"odds\": [{\"hdp\": -2.75, \"home\": \"7.000\", \"away\": \"1.100\"}, {\"hdp\": -2.5, \"home\": \"5.500\", \"away\": \"1.150\"}, {\"hdp\": -2.25, \"home\": \"5.000\", \"away\": \"1.170\"}, {\"hdp\": -2, \"home\": \"4.400\", \"away\": \"1.200\"}, {\"hdp\": -1.75, \"home\": \"3.300\", \"away\": \"1.325\"}, {\"hdp\": -1.5, \"home\": \"2.675\", \"away\": \"1.450\"}, {\"hdp\": -1.25, \"home\": \"2.375\", \"away\": \"1.550\"}, {\"hdp\": -1, \"home\": \"2.075\", \"away\": \"1.725\"}, {\"hdp\": -0.5, \"home\": \"1.625\", \"away\": \"4.650\"}, {\"hdp\": -0.25, \"home\": \"1.450\", \"away\": \"4.250\"}, {\"hdp\": 0, \"home\": \"1.260\", \"away\": \"3.700\"}, {\"hdp\": 0.25, \"home\": \"1.210\", \"away\": \"2.675\"}, {\"hdp\": 0.5, \"home\": \"1.1..."
       },
       {
-        "rawMarketName": "Spread",
+        "rawMarketName": "1st Half Handicap",
         "family": "ASIAN_HANDICAP",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "AC Oulu - Gnistan",
+        "bookmaker": "Bet365",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
-          "name": "Spread",
-          "updatedAt": "2026-07-14T17:49:18.867Z",
+          "name": "1st Half Handicap",
+          "updatedAt": "2026-07-01T04:25:13.893Z",
           "odds": [
             {
-              "hdp": -1.5,
-              "home": "3.80",
-              "away": "1.22"
+              "label": "1 (-1)",
+              "hdp": -1,
+              "home": "5.500"
             },
             {
-              "hdp": 0.5,
-              "home": "1.33",
-              "away": "2.95"
-            },
-            {
-              "hdp": -0.5,
-              "home": "2.05",
-              "away": "1.67"
-            },
-            {
-              "hdp": 1.5,
-              "home": "1.09",
-              "away": "5.80"
+              "label": "Tie (1)",
+              "hdp": 1,
+              "away": "1.615"
             }
           ]
         }
@@ -1072,15 +911,15 @@
         "family": "ASIAN_HANDICAP",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "SJK - KuPS",
+        "fixture": "WSG Tirol - SK Sturm Graz",
         "marketSample": {
           "name": "Spread",
-          "updatedAt": "2026-07-16T14:54:06.048Z",
+          "updatedAt": "2026-07-11T21:28:50.172Z",
           "odds": [
             {
-              "hdp": 0.25,
-              "home": "1.875",
-              "away": "1.925"
+              "hdp": 0.5,
+              "home": "1.800",
+              "away": "2.000"
             }
           ]
         }
@@ -1092,14 +931,14 @@
         "family": "HALF_TIME_BTTS",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
           "name": "Both Teams To Score HT",
-          "updatedAt": "2026-07-16T21:15:12.231Z",
+          "updatedAt": "2026-07-16T21:15:27.499Z",
           "odds": [
             {
-              "yes": "4.333",
-              "no": "1.200"
+              "yes": "4.500",
+              "no": "1.181"
             }
           ]
         }
@@ -1109,44 +948,10 @@
         "family": "HALF_TIME_BTTS",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "SJK - KuPS",
+        "fixture": "WSG Tirol - SK Sturm Graz",
         "marketSample": {
           "name": "Both Teams To Score HT",
-          "updatedAt": "2026-07-16T21:15:12.231Z",
-          "odds": [
-            {
-              "yes": "3.500",
-              "no": "1.285"
-            }
-          ]
-        }
-      },
-      {
-        "rawMarketName": "Both Teams To Score HT",
-        "family": "HALF_TIME_BTTS",
-        "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Bet365",
-        "fixture": "Jaro - Inter Turku",
-        "marketSample": {
-          "name": "Both Teams To Score HT",
-          "updatedAt": "2026-07-16T21:15:12.231Z",
-          "odds": [
-            {
-              "yes": "4.333",
-              "no": "1.200"
-            }
-          ]
-        }
-      },
-      {
-        "rawMarketName": "Both Teams To Score HT",
-        "family": "HALF_TIME_BTTS",
-        "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Bet365",
-        "fixture": "Turku PS - Ilves",
-        "marketSample": {
-          "name": "Both Teams To Score HT",
-          "updatedAt": "2026-07-16T21:15:12.231Z",
+          "updatedAt": "2026-07-16T21:16:09.866Z",
           "odds": [
             {
               "yes": "4.000",
@@ -1160,14 +965,48 @@
         "family": "HALF_TIME_BTTS",
         "reason": "recognized audit-only family; not emitted to app markets",
         "bookmaker": "Bet365",
-        "fixture": "IFK Mariehamn - Lahti",
+        "fixture": "FC Salzburg - TSV Hartberg",
         "marketSample": {
           "name": "Both Teams To Score HT",
-          "updatedAt": "2026-07-16T21:15:12.231Z",
+          "updatedAt": "2026-07-16T21:15:43.488Z",
           "odds": [
             {
               "yes": "4.333",
               "no": "1.200"
+            }
+          ]
+        }
+      },
+      {
+        "rawMarketName": "Both Teams To Score HT",
+        "family": "HALF_TIME_BTTS",
+        "reason": "recognized audit-only family; not emitted to app markets",
+        "bookmaker": "Bet365",
+        "fixture": "Wolfsberger AC - FK Austria Wien",
+        "marketSample": {
+          "name": "Both Teams To Score HT",
+          "updatedAt": "2026-07-16T21:14:57.306Z",
+          "odds": [
+            {
+              "yes": "4.333",
+              "no": "1.200"
+            }
+          ]
+        }
+      },
+      {
+        "rawMarketName": "Both Teams To Score HT",
+        "family": "HALF_TIME_BTTS",
+        "reason": "recognized audit-only family; not emitted to app markets",
+        "bookmaker": "Bet365",
+        "fixture": "Austria Lustenau - SV Ried",
+        "marketSample": {
+          "name": "Both Teams To Score HT",
+          "updatedAt": "2026-07-16T21:15:43.488Z",
+          "odds": [
+            {
+              "yes": "4.500",
+              "no": "1.181"
             }
           ]
         }
@@ -1178,81 +1017,58 @@
         "rawMarketName": "Anytime Goalscorer",
         "family": "PLAYER_PROPS",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "AC Oulu - Gnistan",
-        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-14T17:49:18.867Z\", \"odds\": [{\"label\": \"Elias Kallio\", \"hdp\": 0.5, \"over\": \"3.85\"}, {\"label\": \"Adeleke Akinyemi\", \"hdp\": 0.5, \"over\": \"3.70\"}, {\"label\": \"Jeff Selenge\", \"hdp\": 0.5, \"over\": \"6.10\"}, {\"label\": \"Evgeniy Bashkirov\", \"hdp\": 0.5, \"over\": \"6.10\"}, {\"label\": \"Julius Paananen\", \"hdp\": 0.5, \"over\": \"4.90\"}, {\"label\": \"Joakim Latonen\", \"hdp\": 0.5, \"over\": \"4.80\"}, {\"label\": \"Ayo Obileye\", \"hdp\": 0.5, \"over\": \"12.00\"}, {\"label\": \"Rasmus Karjalainen\", \"hdp\": 0.5, \"over\": \"2.70\"}, {\"label\": \"Saku Ylätupa\", \"hdp\": 0.5, \"over\": \"4.90\"}, {\"label\": \"Mikko Pitkänen\", \"hdp\": 0.5, \"over\": \"9.50\"}, {\"label\": \"Adam Jouhi\", \"hdp\": 0.5, \"over\": \"5...."
+        "bookmaker": "Bet365",
+        "fixture": "CF Montreal - Toronto FC",
+        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-16T18:15:36.114Z\", \"odds\": [{\"label\": \"Djordje Mihailovic\", \"hdp\": 0.5, \"over\": \"2.875\"}, {\"label\": \"Daniel Salloi\", \"hdp\": 0.5, \"over\": \"3.250\"}, {\"label\": \"Jonathan Osorio\", \"hdp\": 0.5, \"over\": \"5.500\"}, {\"label\": \"Daniel Rios\", \"hdp\": 0.5, \"over\": \"2.625\"}, {\"label\": \"Emilio Aristizabal\", \"hdp\": 0.5, \"over\": \"2.875\"}, {\"label\": \"Owen Graham-Roache\", \"hdp\": 0.5, \"over\": \"3.200\"}, {\"label\": \"Theo Corbeanu\", \"hdp\": 0.5, \"over\": \"3.200\"}, {\"label\": \"Derrick Etienne\", \"hdp\": 0.5, \"over\": \"3.250\"}, {\"label\": \"Jules-Anthony Vilsaint\", \"hdp\": 0.5, \"over\": \"3.250\"}, {\"label\": \"Dagur Thorhallsson\", \"hdp\": 0.5, \"over\": \"5.500\"}, {\"label\": \"Frankie..."
       },
       {
-        "rawMarketName": "Anytime Goalscorer",
+        "rawMarketName": "Player Shots on Target",
         "family": "PLAYER_PROPS",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "SJK - KuPS",
-        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-12T14:20:28.443Z\", \"odds\": [{\"label\": \"Danila Bulgakov\", \"hdp\": 0.5, \"over\": \"7.00\"}, {\"label\": \"Salim Giabo Yussif\", \"hdp\": 0.5, \"over\": \"10.50\"}, {\"label\": \"Markus Arsalo\", \"hdp\": 0.5, \"over\": \"5.80\"}, {\"label\": \"Gustav Engvall\", \"hdp\": 0.5, \"over\": \"3.10\"}, {\"label\": \"Muhammed Suso\", \"hdp\": 0.5, \"over\": \"4.40\"}, {\"label\": \"Armaan Wilson\", \"hdp\": 0.5, \"over\": \"6.50\"}, {\"label\": \"Eemil Tanninen\", \"hdp\": 0.5, \"over\": \"4.25\"}, {\"label\": \"Eetu Mömmö\", \"hdp\": 0.5, \"over\": \"5.50\"}, {\"label\": \"Samuel Pasanen\", \"hdp\": 0.5, \"over\": \"5.60\"}, {\"label\": \"Joslyn Luyeye-Lutumba\", \"hdp\": 0.5, \"over\": \"3.25\"}, {\"label\": \"Kelvin Pires\", \"hdp\": 0.5, \"over..."
+        "bookmaker": "Bet365",
+        "fixture": "CF Montreal - Toronto FC",
+        "marketSample": "{\"name\": \"Player Shots on Target\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"label\": \"Benjamin Kuscevic (2)\", \"hdp\": 1.5, \"over\": \"21.000\"}, {\"label\": \"Henry Wingo (2)\", \"hdp\": 1.5, \"over\": \"21.000\"}, {\"label\": \"Nelson Palacio (2)\", \"hdp\": 1.5, \"over\": \"21.000\"}, {\"label\": \"Deandre Kerr (2)\", \"hdp\": 0.5, \"over\": \"1.615\"}, {\"label\": \"Jose Cifuentes (2)\", \"hdp\": 0.5, \"over\": \"2.500\"}, {\"label\": \"Malik Henry (2)\", \"hdp\": 0.5, \"over\": \"2.500\"}, {\"label\": \"Antone Bossenberry (2)\", \"hdp\": 0.5, \"over\": \"2.625\"}, {\"label\": \"Matthew Longstaff (1)\", \"hdp\": 0.5, \"over\": \"2.625\"}, {\"label\": \"Markus Cimermancic (2)\", \"hdp\": 0.5, \"over\": \"3.000\"}, {\"label\": \"Luca Petrasso (1)\", \"hdp\": 0.5, \"over..."
       },
       {
-        "rawMarketName": "Anytime Goalscorer",
+        "rawMarketName": "Player to be Booked",
         "family": "PLAYER_PROPS",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "Jaro - Inter Turku",
-        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-14T17:49:18.867Z\", \"odds\": [{\"label\": \"Elliot Holmäng\", \"hdp\": 0.5, \"over\": \"5.75\"}, {\"label\": \"Rudi Vikström\", \"hdp\": 0.5, \"over\": \"4.50\"}, {\"label\": \"Erik Gunnarsson\", \"hdp\": 0.5, \"over\": \"17.00\"}, {\"label\": \"Antoin Loic Essomba Bikoula\", \"hdp\": 0.5, \"over\": \"4.00\"}, {\"label\": \"Johan Brunell\", \"hdp\": 0.5, \"over\": \"15.00\"}, {\"label\": \"Luca Weckström\", \"hdp\": 0.5, \"over\": \"7.00\"}, {\"label\": \"Ville Vuorinen\", \"hdp\": 0.5, \"over\": \"7.00\"}, {\"label\": \"Bismark Ampofo\", \"hdp\": 0.5, \"over\": \"5.10\"}, {\"label\": \"Jim Myrevik\", \"hdp\": 0.5, \"over\": \"8.00\"}, {\"label\": \"Janne-Pekka Laine\", \"hdp\": 0.5, \"over\": \"8.50\"}, {\"label\": \"Jean Botué\", \"hdp\": 0.5,..."
+        "bookmaker": "Bet365",
+        "fixture": "CF Montreal - Toronto FC",
+        "marketSample": "{\"name\": \"Player to be Booked\", \"updatedAt\": \"2026-07-16T20:54:57.528Z\", \"odds\": [{\"label\": \"Djordje Mihailovic (Booked)\", \"hdp\": 0.5, \"over\": \"5.000\"}, {\"label\": \"Emilio Aristizabal (Booked)\", \"hdp\": 0.5, \"over\": \"5.000\"}, {\"label\": \"Walker Zimmerman (Booked)\", \"hdp\": 0.5, \"over\": \"5.000\"}, {\"label\": \"Jules-Anthony Vilsaint (Booked)\", \"hdp\": 0.5, \"over\": \"5.500\"}, {\"label\": \"Noah Streit (Booked)\", \"hdp\": 0.5, \"over\": \"5.000\"}, {\"label\": \"Yuri Guboglo (Booked)\", \"hdp\": 0.5, \"over\": \"5.000\"}, {\"label\": \"Brayan Vera (Booked)\", \"hdp\": 0.5, \"over\": \"2.600\"}, {\"label\": \"Victor Loturi (Booked)\", \"hdp\": 0.5, \"over\": \"3.250\"}, {\"label\": \"Ivan Jaime (Booked)\", \"hdp\": 0.5, \"over\": \"3.400\"}, {\"label\": ..."
       },
       {
-        "rawMarketName": "Anytime Goalscorer",
+        "rawMarketName": "Player Shots",
         "family": "PLAYER_PROPS",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "Turku PS - Ilves",
-        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-14T17:49:18.867Z\", \"odds\": [{\"label\": \"Atte Sihvonen\", \"hdp\": 0.5, \"over\": \"9.50\"}, {\"label\": \"Theodoros Tsirigotis\", \"hdp\": 0.5, \"over\": \"3.40\"}, {\"label\": \"Tobias Karkulowski\", \"hdp\": 0.5, \"over\": \"11.50\"}, {\"label\": \"Anton Popovitch\", \"hdp\": 0.5, \"over\": \"4.60\"}, {\"label\": \"Kalle Erik Juhani Wallius\", \"hdp\": 0.5, \"over\": \"9.50\"}, {\"label\": \"Miika Kauppila\", \"hdp\": 0.5, \"over\": \"3.65\"}, {\"label\": \"Stanislav Baranov\", \"hdp\": 0.5, \"over\": \"3.45\"}, {\"label\": \"Rasmus Harjanne\", \"hdp\": 0.5, \"over\": \"3.80\"}, {\"label\": \"Lauri Ala-Myllymäki\", \"hdp\": 0.5, \"over\": \"4.00\"}, {\"label\": \"Oliver Pettersson\", \"hdp\": 0.5, \"over\": \"10.00\"}, {\"label\": \"Cha..."
+        "bookmaker": "Bet365",
+        "fixture": "CF Montreal - Toronto FC",
+        "marketSample": "{\"name\": \"Player Shots\", \"updatedAt\": \"2026-07-16T21:14:57.306Z\", \"odds\": [{\"label\": \"Raheem Edwards (2)\", \"hdp\": 3.5, \"over\": \"21.000\"}, {\"label\": \"Richie Laryea (2)\", \"hdp\": 3.5, \"over\": \"21.000\"}, {\"label\": \"Walker Zimmerman (2)\", \"hdp\": 3.5, \"over\": \"21.000\"}, {\"label\": \"Deandre Kerr (2)\", \"hdp\": 0.5, \"over\": \"1.083\"}, {\"label\": \"Jose Cifuentes (2)\", \"hdp\": 0.5, \"over\": \"1.222\"}, {\"label\": \"Malik Henry (2)\", \"hdp\": 0.5, \"over\": \"1.333\"}, {\"label\": \"Matthew Longstaff (1)\", \"hdp\": 0.5, \"over\": \"1.333\"}, {\"label\": \"Antone Bossenberry (2)\", \"hdp\": 0.5, \"over\": \"1.363\"}, {\"label\": \"Markus Cimermancic (2)\", \"hdp\": 0.5, \"over\": \"1.444\"}, {\"label\": \"Luca Petrasso (1)\", \"hdp\": 0.5, \"over\": \"1.666..."
       },
       {
-        "rawMarketName": "Anytime Goalscorer",
+        "rawMarketName": "Player To Score or Assist",
         "family": "PLAYER_PROPS",
         "reason": "recognized audit-only family; not emitted to app markets",
-        "bookmaker": "Unibet",
-        "fixture": "IFK Mariehamn - Lahti",
-        "marketSample": "{\"name\": \"Anytime Goalscorer\", \"updatedAt\": \"2026-07-14T17:49:18.867Z\", \"odds\": [{\"label\": \"Emmanuel Patut\", \"hdp\": 0.5, \"over\": \"6.75\"}, {\"label\": \"Momodou Sarr\", \"hdp\": 0.5, \"over\": \"4.00\"}, {\"label\": \"Joel Lehtonen\", \"hdp\": 0.5, \"over\": \"9.00\"}, {\"label\": \"Nikolaos Dosis\", \"hdp\": 0.5, \"over\": \"7.50\"}, {\"label\": \"Topias Inkinen\", \"hdp\": 0.5, \"over\": \"10.00\"}, {\"label\": \"Jiri Nissinen\", \"hdp\": 0.5, \"over\": \"13.00\"}, {\"label\": \"Martim Ferreira\", \"hdp\": 0.5, \"over\": \"4.10\"}, {\"label\": \"Aaron Lindholm\", \"hdp\": 0.5, \"over\": \"2.75\"}, {\"label\": \"Anttoni Huttunen\", \"hdp\": 0.5, \"over\": \"5.60\"}, {\"label\": \"Adam Larsson\", \"hdp\": 0.5, \"over\": \"4.20\"}, {\"label\": \"Justus Ojanen\", \"hdp\": 0.5, \"over\": \"4...."
+        "bookmaker": "Bet365",
+        "fixture": "CF Montreal - Toronto FC",
+        "marketSample": "{\"name\": \"Player To Score or Assist\", \"updatedAt\": \"2026-07-16T19:36:35.751Z\", \"odds\": [{\"label\": \"Tomas Aviles (Score or Assist) (1)\", \"over\": \"7.500\"}, {\"label\": \"Yuri Guboglo (Score) (1)\", \"over\": \"9.000\"}, {\"label\": \"Raheem Edwards (Score) (2)\", \"over\": \"10.000\"}, {\"label\": \"Henry Wingo (Score) (2)\", \"over\": \"13.000\"}, {\"label\": \"Samuel Piette (Score) (1)\", \"over\": \"13.000\"}, {\"label\": \"Walker Zimmerman (Score) (2)\", \"over\": \"10.000\"}, {\"label\": \"Tomas Aviles (Score) (1)\", \"over\": \"13.000\"}, {\"label\": \"Benjamin Kuscevic (Score) (2)\", \"over\": \"13.000\"}, {\"label\": \"Brandan Craig (Assist) (1)\", \"over\": \"11.000\"}, {\"label\": \"Tomas Aviles (Assist) (1)\", \"over\": \"11.000\"}, {\"label\": \"Nicksoen ..."
       }
     ]
   },
   "unsupportedMarketCounts": {
-    "UNSUPPORTED": 148
+    "UNSUPPORTED": 123
   },
   "unsupportedMarketExamples": {
     "UNSUPPORTED": [
-      {
-        "rawMarketName": "Specials",
-        "family": "UNSUPPORTED",
-        "reason": "unrecognized or unsupported provider market",
-        "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
-        "marketSample": {
-          "name": "Specials",
-          "updatedAt": "2026-07-16T13:31:22.941Z",
-          "odds": [
-            {
-              "label": "To Win From Behind (1)",
-              "hdp": 1,
-              "home": "3.250"
-            },
-            {
-              "label": "To Win From Behind (2)",
-              "hdp": 2,
-              "away": "4.333"
-            }
-          ]
-        }
-      },
       {
         "rawMarketName": "First 10 Minutes (00:00 - 09:59)",
         "family": "UNSUPPORTED",
         "reason": "unrecognized or unsupported provider market",
         "bookmaker": "Bet365",
-        "fixture": "AC Oulu - Gnistan",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
           "name": "First 10 Minutes (00:00 - 09:59)",
-          "updatedAt": "2026-07-13T03:09:34.133Z",
+          "updatedAt": "2026-07-01T05:11:16.023Z",
           "odds": [
             {
               "label": "Goals (Over) (0.5)",
@@ -1264,42 +1080,24 @@
         }
       },
       {
-        "rawMarketName": "ML 2H",
-        "family": "UNSUPPORTED",
-        "reason": "unrecognized or unsupported provider market",
-        "bookmaker": "Unibet",
-        "fixture": "AC Oulu - Gnistan",
-        "marketSample": {
-          "name": "ML 2H",
-          "updatedAt": "2026-07-14T17:49:18.867Z",
-          "odds": [
-            {
-              "home": "2.45",
-              "draw": "2.63",
-              "away": "3.25"
-            }
-          ]
-        }
-      },
-      {
         "rawMarketName": "Specials",
         "family": "UNSUPPORTED",
         "reason": "unrecognized or unsupported provider market",
         "bookmaker": "Bet365",
-        "fixture": "SJK - KuPS",
+        "fixture": "Lask Linz - Grazer AK",
         "marketSample": {
           "name": "Specials",
-          "updatedAt": "2026-07-15T07:23:49.575Z",
+          "updatedAt": "2026-07-01T11:11:39.323Z",
           "odds": [
             {
               "label": "To Win From Behind (1)",
               "hdp": 1,
-              "home": "3.500"
+              "home": "2.500"
             },
             {
               "label": "To Win From Behind (2)",
               "hdp": 2,
-              "away": "2.750"
+              "away": "6.000"
             }
           ]
         }
@@ -1309,16 +1107,62 @@
         "family": "UNSUPPORTED",
         "reason": "unrecognized or unsupported provider market",
         "bookmaker": "Bet365",
-        "fixture": "SJK - KuPS",
+        "fixture": "WSG Tirol - SK Sturm Graz",
         "marketSample": {
           "name": "First 10 Minutes (00:00 - 09:59)",
-          "updatedAt": "2026-07-15T19:45:20.722Z",
+          "updatedAt": "2026-07-01T04:49:28.609Z",
           "odds": [
             {
               "label": "Goals (Over) (0.5)",
               "hdp": 0.5,
-              "over": "4.000",
-              "under": "1.222"
+              "over": "4.333",
+              "under": "1.200"
+            }
+          ]
+        }
+      },
+      {
+        "rawMarketName": "Specials",
+        "family": "UNSUPPORTED",
+        "reason": "unrecognized or unsupported provider market",
+        "bookmaker": "Bet365",
+        "fixture": "WSG Tirol - SK Sturm Graz",
+        "marketSample": {
+          "name": "Specials",
+          "updatedAt": "2026-07-11T23:54:33.168Z",
+          "odds": [
+            {
+              "label": "To Win From Behind (1)",
+              "hdp": 1,
+              "home": "4.333"
+            },
+            {
+              "label": "To Win From Behind (2)",
+              "hdp": 2,
+              "away": "3.000"
+            }
+          ]
+        }
+      },
+      {
+        "rawMarketName": "Specials",
+        "family": "UNSUPPORTED",
+        "reason": "unrecognized or unsupported provider market",
+        "bookmaker": "Bet365",
+        "fixture": "FC Salzburg - TSV Hartberg",
+        "marketSample": {
+          "name": "Specials",
+          "updatedAt": "2026-07-01T11:50:40.697Z",
+          "odds": [
+            {
+              "label": "To Win From Behind (1)",
+              "hdp": 1,
+              "home": "2.000"
+            },
+            {
+              "label": "To Win From Behind (2)",
+              "hdp": 2,
+              "away": "7.000"
             }
           ]
         }
@@ -1327,7 +1171,7 @@
   },
   "rateLimitLimit": "100",
   "rateLimitReset": "2026-07-16T21:31:17Z",
-  "rateLimitRemaining": 58,
+  "rateLimitRemaining": 30,
   "providerLeagueCount": 1426,
   "providerLeagueSample": [
     {
@@ -1633,765 +1477,460 @@
   ],
   "leaguesMatched": [
     {
-      "leagueCode": "FIN",
-      "country": "Finland",
-      "competition": "Veikkausliiga",
-      "apiFootballLeagueId": 244,
-      "providerLeagueSlug": "finland-veikkausliiga",
-      "providerName": "Finland - Veikkausliiga"
+      "leagueCode": "AUT2",
+      "country": "Austria",
+      "competition": "2. Liga",
+      "apiFootballLeagueId": 219,
+      "providerLeagueSlug": "austria-2-liga",
+      "providerName": "Austria - 2. Liga"
     },
     {
-      "leagueCode": "SWE",
-      "country": "Sweden",
-      "competition": "Allsvenskan",
-      "apiFootballLeagueId": 113,
-      "providerLeagueSlug": "sweden-allsvenskan",
-      "providerName": "Sweden - Allsvenskan"
+      "leagueCode": "AUT",
+      "country": "Austria",
+      "competition": "Bundesliga",
+      "apiFootballLeagueId": 218,
+      "providerLeagueSlug": "austria-bundesliga",
+      "providerName": "Austria - Bundesliga"
     },
     {
-      "leagueCode": "MEX",
-      "country": "Mexico",
-      "competition": "Liga MX",
-      "apiFootballLeagueId": 262,
-      "providerLeagueSlug": "mexico-liga-mx-apertura",
-      "providerName": "Mexico - Liga MX, Apertura"
+      "leagueCode": "SC0",
+      "country": "Scotland",
+      "competition": "Premiership",
+      "apiFootballLeagueId": 179,
+      "providerLeagueSlug": "scotland-premiership",
+      "providerName": "Scotland - Premiership"
     },
     {
-      "leagueCode": "ROM",
-      "country": "Romania",
-      "competition": "Liga I",
-      "apiFootballLeagueId": 283,
-      "providerLeagueSlug": "romania-superliga",
-      "providerName": "Romania - Superliga"
+      "leagueCode": "ARG",
+      "country": "Argentina",
+      "competition": "Liga Profesional Argentina",
+      "apiFootballLeagueId": 128,
+      "providerLeagueSlug": "argentina-liga-profesional",
+      "providerName": "Argentina - Liga Profesional"
     },
     {
-      "leagueCode": "DNK",
-      "country": "Denmark",
-      "competition": "Superliga",
-      "apiFootballLeagueId": 119,
-      "providerLeagueSlug": "denmark-superliga",
-      "providerName": "Denmark - Superliga"
+      "leagueCode": "IRL",
+      "country": "Ireland",
+      "competition": "Premier Division",
+      "apiFootballLeagueId": 357,
+      "providerLeagueSlug": "ireland-premier-division",
+      "providerName": "Ireland - Premier Division"
     },
     {
-      "leagueCode": "POL",
-      "country": "Poland",
-      "competition": "Ekstraklasa",
-      "apiFootballLeagueId": 106,
-      "providerLeagueSlug": "poland-ekstraklasa",
-      "providerName": "Poland - Ekstraklasa"
+      "leagueCode": "USA",
+      "country": "USA",
+      "competition": "Major League Soccer",
+      "apiFootballLeagueId": 253,
+      "providerLeagueSlug": "usa-mls",
+      "providerName": "USA - MLS"
     },
     {
-      "leagueCode": "RUS",
-      "country": "Russia",
-      "competition": "Premier League",
-      "apiFootballLeagueId": 235,
-      "providerLeagueSlug": "russia-premier-league",
-      "providerName": "Russia - Premier League"
-    },
-    {
-      "leagueCode": "SWZ",
-      "country": "Switzerland",
+      "leagueCode": "CHN",
+      "country": "China",
       "competition": "Super League",
-      "apiFootballLeagueId": 207,
-      "providerLeagueSlug": "switzerland-super-league",
-      "providerName": "Switzerland - Super League"
+      "apiFootballLeagueId": 169,
+      "providerLeagueSlug": "china-chinese-super-league",
+      "providerName": "China - Chinese Super League"
     }
   ],
-  "rawMarketCounts": {
-    "ML": 94,
-    "Draw No Bet": 76,
-    "Double Chance": 76,
-    "Spread": 92,
-    "Totals": 98,
-    "Goals Over/Under": 44,
-    "Both Teams To Score": 76,
-    "Totals HT": 74,
-    "European Handicap": 75,
-    "Corners Totals": 52,
-    "Corners Totals HT": 29,
-    "Team Corners Home": 29,
-    "Total Corners": 29,
-    "Corners 2-Way": 29,
-    "Alternative Goal Line": 44,
-    "Corners": 29,
-    "Alternative Corners": 29,
-    "Exact Total Goals": 41,
-    "Team Total Goals Away": 40,
-    "Team Corners Away": 29,
-    "Corner Handicap": 19,
-    "Specials": 44,
-    "1st Half Handicap": 44,
-    "Alternative Total Goals": 44,
-    "Team Total Goals Home": 40,
-    "First 10 Minutes (00:00 - 09:59)": 44,
-    "Alternative Asian Handicap": 44,
-    "Number of Goals In Match": 44,
-    "Correct Score": 76,
-    "Half Time Result": 44,
-    "Corners Race": 29,
-    "Both Teams To Score HT": 44,
-    "Both Teams To Score 2H": 44,
-    "ML HT": 32,
-    "Team Total Home": 32,
-    "Team Total Away": 32,
-    "Half Time / Full Time": 32,
-    "Anytime Goalscorer": 49,
-    "To Score 2+ Goals": 32,
-    "ML 2H": 32,
-    "Totals 2H": 32,
-    "Spread HT": 43,
-    "Corners Spread": 43,
-    "Corners Totals Away": 31,
-    "Corners Totals Home": 31,
-    "Player Cards": 17,
-    "Multi Scorers": 13,
-    "Player to be Booked": 17,
-    "Team Goalscorer": 10,
-    "To Score 3+ Goals": 7,
-    "Bookings Spread": 5,
-    "Bookings Totals": 7,
-    "Team Cards Away": 4,
-    "Player Shots on Target": 18,
-    "Player To Score or Assist": 9,
-    "Team Cards Home": 4,
-    "Player Shots": 9,
-    "Goal Method": 4,
-    "Number of Cards In Match": 5,
-    "Total Shots on Target Away": 9,
-    "Goalkeeper Saves Home": 11,
-    "Goalkeeper Saves": 11,
-    "Total Shots on Target": 9,
-    "Total Shots on Target Home": 9,
-    "Goalkeeper Saves Away": 11,
-    "Most Shots on Target": 11,
-    "Match Shots on Target": 1,
-    "Card Handicap": 2,
-    "Match Shots": 4,
-    "Team Shots Away": 3,
-    "Team Shots Home": 3,
-    "Team Shots on Target Away": 2,
-    "Team Shots on Target Home": 2,
-    "1st Half Goal Line": 2
-  },
-  "classifiedMarketCounts": {
-    "1X2": 94,
-    "DRAW_NO_BET": 76,
-    "DOUBLE_CHANCE": 76,
-    "OTHER": 463,
-    "MATCH_GOALS": 274,
-    "BTTS": 164,
-    "FIRST_HALF_GOALS": 76,
-    "EUROPEAN_HANDICAP": 75,
-    "CORNERS": 346,
-    "GOAL_BANDS": 85,
-    "TEAM_TOTAL_GOALS": 154,
-    "CORNER_HANDICAP": 62,
-    "CORRECT_SCORE": 76,
-    "HALF_TIME_1X2": 76,
-    "HALF_TIME_FULL_TIME": 32,
-    "SECOND_HALF_GOALS": 32,
-    "CARDS": 24,
-    "MATCH_YELLOW_CARDS": 12,
-    "TEAM_YELLOW_CARDS": 8,
-    "SHOTS_ON_TARGET": 50,
-    "SHOTS": 19,
-    "MOST_SHOTS_ON_TARGET": 11
-  },
-  "expandedExactMarketCounts": {
-    "DRAW_NO_BET": 152,
-    "EUROPEAN_HANDICAP": 657,
-    "GOAL_BANDS": 460,
-    "CORNER_HANDICAP": 122,
-    "CORRECT_SCORE": 2638,
-    "HALF_TIME_1X2": 228,
-    "HALF_TIME_FULL_TIME": 288,
-    "SECOND_HALF_GOALS": 108,
-    "MATCH_YELLOW_CARDS": 24,
-    "TEAM_YELLOW_CARDS": 16,
-    "MOST_SHOTS_ON_TARGET": 22
-  },
-  "expandedExactRawMarkets": {
-    "Draw No Bet": {
-      "family": "DRAW_NO_BET",
-      "payloads": 76,
-      "selections": 152
-    },
-    "European Handicap": {
-      "family": "EUROPEAN_HANDICAP",
-      "payloads": 75,
-      "selections": 657
-    },
-    "Exact Total Goals": {
-      "family": "GOAL_BANDS",
-      "payloads": 41,
-      "selections": 328
-    },
-    "Corner Handicap": {
-      "family": "CORNER_HANDICAP",
-      "payloads": 19,
-      "selections": 38
-    },
-    "Number of Goals In Match": {
-      "family": "GOAL_BANDS",
-      "payloads": 44,
-      "selections": 132
-    },
-    "Correct Score": {
-      "family": "CORRECT_SCORE",
-      "payloads": 76,
-      "selections": 2638
-    },
-    "Half Time Result": {
-      "family": "HALF_TIME_1X2",
-      "payloads": 44,
-      "selections": 132
-    },
-    "ML HT": {
-      "family": "HALF_TIME_1X2",
-      "payloads": 32,
-      "selections": 96
-    },
-    "Half Time / Full Time": {
-      "family": "HALF_TIME_FULL_TIME",
-      "payloads": 32,
-      "selections": 288
-    },
-    "Totals 2H": {
-      "family": "SECOND_HALF_GOALS",
-      "payloads": 32,
-      "selections": 108
-    },
-    "Corners Spread": {
-      "family": "CORNER_HANDICAP",
-      "payloads": 43,
-      "selections": 84
-    },
-    "Bookings Totals": {
-      "family": "MATCH_YELLOW_CARDS",
-      "payloads": 7,
-      "selections": 14
-    },
-    "Team Cards Away": {
-      "family": "TEAM_YELLOW_CARDS",
-      "payloads": 4,
-      "selections": 8
-    },
-    "Team Cards Home": {
-      "family": "TEAM_YELLOW_CARDS",
-      "payloads": 4,
-      "selections": 8
-    },
-    "Number of Cards In Match": {
-      "family": "MATCH_YELLOW_CARDS",
-      "payloads": 5,
-      "selections": 10
-    },
-    "Most Shots on Target": {
-      "family": "MOST_SHOTS_ON_TARGET",
-      "payloads": 11,
-      "selections": 22
-    }
-  },
-  "skippedMarketSummary": {
-    "Spread|recognized audit-only family; not emitted to app markets": {
-      "market": "Spread",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 92
-    },
-    "Totals HT|non half-line skipped": {
-      "market": "Totals HT",
-      "reason": "non half-line skipped",
-      "count": 42
-    },
-    "Total Corners|non half-line skipped": {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "count": 145
-    },
-    "Alternative Goal Line|unsupported market family": {
-      "market": "Alternative Goal Line",
-      "reason": "unsupported market family",
-      "count": 44
-    },
-    "Corners|non half-line skipped": {
-      "market": "Corners",
-      "reason": "non half-line skipped",
-      "count": 29
-    },
-    "Alternative Corners|non half-line skipped": {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped",
-      "count": 396
-    },
-    "Specials|unrecognized or unsupported provider market": {
-      "market": "Specials",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 44
-    },
-    "1st Half Handicap|recognized audit-only family; not emitted to app markets": {
-      "market": "1st Half Handicap",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "First 10 Minutes (00:00 - 09:59)|unrecognized or unsupported provider market": {
-      "market": "First 10 Minutes (00:00 - 09:59)",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 44
-    },
-    "Alternative Asian Handicap|recognized audit-only family; not emitted to app markets": {
-      "market": "Alternative Asian Handicap",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "Corners Race|non half-line skipped": {
-      "market": "Corners Race",
-      "reason": "non half-line skipped",
-      "count": 116
-    },
-    "Both Teams To Score HT|recognized audit-only family; not emitted to app markets": {
-      "market": "Both Teams To Score HT",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "Anytime Goalscorer|recognized audit-only family; not emitted to app markets": {
-      "market": "Anytime Goalscorer",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 49
-    },
-    "ML 2H|unrecognized or unsupported provider market": {
-      "market": "ML 2H",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 32
-    },
-    "Totals|non half-line skipped": {
-      "market": "Totals",
-      "reason": "non half-line skipped",
-      "count": 39
-    },
-    "Spread HT|recognized audit-only family; not emitted to app markets": {
-      "market": "Spread HT",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 43
-    },
-    "Corners Totals|non half-line skipped": {
-      "market": "Corners Totals",
-      "reason": "non half-line skipped",
-      "count": 7
-    },
-    "Player Cards|recognized audit-only family; not emitted to app markets": {
-      "market": "Player Cards",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 17
-    },
-    "Multi Scorers|unrecognized or unsupported provider market": {
-      "market": "Multi Scorers",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 13
-    },
-    "Player to be Booked|recognized audit-only family; not emitted to app markets": {
-      "market": "Player to be Booked",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 17
-    },
-    "Team Goalscorer|recognized audit-only family; not emitted to app markets": {
-      "market": "Team Goalscorer",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 10
-    },
-    "Bookings Spread|recognized audit-only family; not emitted to app markets": {
-      "market": "Bookings Spread",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 5
-    },
-    "Player Shots on Target|recognized audit-only family; not emitted to app markets": {
-      "market": "Player Shots on Target",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 18
-    },
-    "Player To Score or Assist|recognized audit-only family; not emitted to app markets": {
-      "market": "Player To Score or Assist",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 9
-    },
-    "Player Shots|recognized audit-only family; not emitted to app markets": {
-      "market": "Player Shots",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 9
-    },
-    "Goal Method|unrecognized or unsupported provider market": {
-      "market": "Goal Method",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 4
-    },
-    "Goalkeeper Saves Home|unsupported market family": {
-      "market": "Goalkeeper Saves Home",
-      "reason": "unsupported market family",
-      "count": 11
-    },
-    "Goalkeeper Saves|unrecognized or unsupported provider market": {
-      "market": "Goalkeeper Saves",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 11
-    },
-    "Goalkeeper Saves Away|unsupported market family": {
-      "market": "Goalkeeper Saves Away",
-      "reason": "unsupported market family",
-      "count": 11
-    },
-    "Corners Totals HT|non half-line skipped": {
-      "market": "Corners Totals HT",
-      "reason": "non half-line skipped",
-      "count": 3
-    },
-    "Card Handicap|recognized audit-only family; not emitted to app markets": {
-      "market": "Card Handicap",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 2
-    },
-    "Corners Spread|recognized expanded market but no exact outcome rows were normalized": {
-      "market": "Corners Spread",
-      "reason": "recognized expanded market but no exact outcome rows were normalized",
-      "count": 1
-    }
-  },
-  "skippedMarketReasons": {
-    "ASIAN_HANDICAP|recognized audit-only family; not emitted to app markets": {
-      "family": "ASIAN_HANDICAP",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 230
-    },
-    "FIRST_HALF_GOALS|non half-line skipped": {
-      "family": "FIRST_HALF_GOALS",
-      "reason": "non half-line skipped",
-      "count": 42
-    },
-    "CORNERS|non half-line skipped": {
-      "family": "CORNERS",
-      "reason": "non half-line skipped",
-      "count": 696
-    },
-    "OTHER|unsupported market family": {
-      "family": "OTHER",
-      "reason": "unsupported market family",
-      "count": 66
-    },
-    "UNSUPPORTED|unrecognized or unsupported provider market": {
-      "family": "UNSUPPORTED",
-      "reason": "unrecognized or unsupported provider market",
-      "count": 148
-    },
-    "HALF_TIME_BTTS|recognized audit-only family; not emitted to app markets": {
-      "family": "HALF_TIME_BTTS",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 44
-    },
-    "PLAYER_PROPS|recognized audit-only family; not emitted to app markets": {
-      "family": "PLAYER_PROPS",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 129
-    },
-    "MATCH_GOALS|non half-line skipped": {
-      "family": "MATCH_GOALS",
-      "reason": "non half-line skipped",
-      "count": 39
-    },
-    "CORNER_HANDICAP|recognized expanded market but no exact outcome rows were normalized": {
-      "family": "CORNER_HANDICAP",
-      "reason": "recognized expanded market but no exact outcome rows were normalized",
-      "count": 1
-    }
-  },
-  "skippedMarketExamples": [
+  "unmatchedTeams": [
     {
-      "market": "Spread",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Admira Wacker Modling",
+      "normalized": "admira wacker modling"
     },
     {
-      "market": "Totals HT",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "Young Violets Wien",
+      "normalized": "young violets wien"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "Under 6"
+      "leagueCode": "AUT2",
+      "providerTeam": "Blau-Weiss Linz",
+      "normalized": "blau weiss linz"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "6 - 8"
+      "leagueCode": "AUT2",
+      "providerTeam": "Kapfenberger SV",
+      "normalized": "kapfenberger sv"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "9 - 11"
+      "leagueCode": "AUT2",
+      "providerTeam": "ASK Voitsberg",
+      "normalized": "ask voitsberg"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "12 - 14"
+      "leagueCode": "AUT2",
+      "providerTeam": "Wacker Innsbruck",
+      "normalized": "wacker innsbruck"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "Over 14"
+      "leagueCode": "AUT2",
+      "providerTeam": "Schwarz-Weiss Bregenz",
+      "normalized": "schwarz weiss bregenz"
     },
     {
-      "market": "Alternative Goal Line",
-      "reason": "unsupported market family"
+      "leagueCode": "AUT2",
+      "providerTeam": "FAC Wien",
+      "normalized": "fac wien"
     },
     {
-      "market": "Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "SK Sturm Graz II",
+      "normalized": "sk sturm graz ii"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Hertha Wels",
+      "normalized": "hertha wels"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "Young Violets Wien",
+      "normalized": "young violets wien"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Hertha Wels",
+      "normalized": "hertha wels"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "Blau-Weiss Linz",
+      "normalized": "blau weiss linz"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "Wacker Innsbruck",
+      "normalized": "wacker innsbruck"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "ASK Voitsberg",
+      "normalized": "ask voitsberg"
     },
     {
-      "market": "Specials",
-      "reason": "unrecognized or unsupported provider market"
+      "leagueCode": "AUT2",
+      "providerTeam": "SK Sturm Graz II",
+      "normalized": "sk sturm graz ii"
     },
     {
-      "market": "1st Half Handicap",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "FAC Wien",
+      "normalized": "fac wien"
     },
     {
-      "market": "First 10 Minutes (00:00 - 09:59)",
-      "reason": "unrecognized or unsupported provider market"
+      "leagueCode": "AUT2",
+      "providerTeam": "Schwarz-Weiss Bregenz",
+      "normalized": "schwarz weiss bregenz"
     },
     {
-      "market": "Alternative Asian Handicap",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "Kapfenberger SV",
+      "normalized": "kapfenberger sv"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Admira Wacker Modling",
+      "normalized": "admira wacker modling"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "Blau-Weiss Linz",
+      "normalized": "blau weiss linz"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Hertha Wels",
+      "normalized": "hertha wels"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "FAC Wien",
+      "normalized": "fac wien"
     },
     {
-      "market": "Both Teams To Score HT",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "SK Sturm Graz II",
+      "normalized": "sk sturm graz ii"
     },
     {
-      "market": "Spread",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "FC Admira Wacker Modling",
+      "normalized": "admira wacker modling"
     },
     {
-      "market": "Anytime Goalscorer",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "Young Violets Wien",
+      "normalized": "young violets wien"
     },
     {
-      "market": "ML 2H",
-      "reason": "unrecognized or unsupported provider market"
+      "leagueCode": "AUT2",
+      "providerTeam": "Kapfenberger SV",
+      "normalized": "kapfenberger sv"
     },
     {
-      "market": "Spread",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "Wacker Innsbruck",
+      "normalized": "wacker innsbruck"
     },
     {
-      "market": "Totals",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT2",
+      "providerTeam": "ASK Voitsberg",
+      "normalized": "ask voitsberg"
     },
     {
-      "market": "Spread HT",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT2",
+      "providerTeam": "Schwarz-Weiss Bregenz",
+      "normalized": "schwarz weiss bregenz"
     },
     {
-      "market": "Totals HT",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "WSG Tirol",
+      "normalized": "wsg tirol"
     },
     {
-      "market": "Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "SK Sturm Graz",
+      "normalized": "sk sturm graz"
     },
     {
-      "market": "Specials",
-      "reason": "unrecognized or unsupported provider market"
+      "leagueCode": "AUT",
+      "providerTeam": "FC Salzburg",
+      "normalized": "salzburg"
     },
     {
-      "market": "First 10 Minutes (00:00 - 09:59)",
-      "reason": "unrecognized or unsupported provider market"
+      "leagueCode": "AUT",
+      "providerTeam": "FK Austria Wien",
+      "normalized": "austria wien"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "Austria Lustenau",
+      "normalized": "austria lustenau"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "SV Ried",
+      "normalized": "sv ried"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "SK Rapid",
+      "normalized": "sk rapid"
     },
     {
-      "market": "Corners Race",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "WSG Tirol",
+      "normalized": "wsg tirol"
     },
     {
-      "market": "Both Teams To Score HT",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "leagueCode": "AUT",
+      "providerTeam": "Austria Lustenau",
+      "normalized": "austria lustenau"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "Under 6"
+      "leagueCode": "AUT",
+      "providerTeam": "SK Sturm Graz",
+      "normalized": "sk sturm graz"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "6 - 8"
+      "leagueCode": "AUT",
+      "providerTeam": "SV Ried",
+      "normalized": "sv ried"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "9 - 11"
+      "leagueCode": "AUT",
+      "providerTeam": "SK Rapid",
+      "normalized": "sk rapid"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "12 - 14"
+      "leagueCode": "AUT",
+      "providerTeam": "FC Salzburg",
+      "normalized": "salzburg"
     },
     {
-      "market": "Total Corners",
-      "reason": "non half-line skipped",
-      "row": "Over 14"
+      "leagueCode": "AUT",
+      "providerTeam": "FK Austria Wien",
+      "normalized": "austria wien"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "SV Ried",
+      "normalized": "sv ried"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "Austria Lustenau",
+      "normalized": "austria lustenau"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "SK Sturm Graz",
+      "normalized": "sk sturm graz"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "FK Austria Wien",
+      "normalized": "austria wien"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "WSG Tirol",
+      "normalized": "wsg tirol"
     },
     {
-      "market": "Alternative Corners",
-      "reason": "non half-line skipped"
+      "leagueCode": "AUT",
+      "providerTeam": "FC Salzburg",
+      "normalized": "salzburg"
+    },
+    {
+      "leagueCode": "AUT",
+      "providerTeam": "SK Rapid",
+      "normalized": "sk rapid"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Dundee United",
+      "normalized": "dundee united"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Glasgow Rangers",
+      "normalized": "glasgow rangers"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "St. Johnstone FC",
+      "normalized": "st johnstone"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Celtic Glasgow",
+      "normalized": "celtic glasgow"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Dundee United",
+      "normalized": "dundee united"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "St. Johnstone FC",
+      "normalized": "st johnstone"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Celtic Glasgow",
+      "normalized": "celtic glasgow"
+    },
+    {
+      "leagueCode": "SC0",
+      "providerTeam": "Glasgow Rangers",
+      "normalized": "glasgow rangers"
+    },
+    {
+      "leagueCode": "IRL",
+      "providerTeam": "Saint Patrick´s Athletic FC",
+      "normalized": "saint patrick s athletic"
+    },
+    {
+      "leagueCode": "IRL",
+      "providerTeam": "Saint Patrick´s Athletic FC",
+      "normalized": "saint patrick s athletic"
+    },
+    {
+      "leagueCode": "IRL",
+      "providerTeam": "Saint Patrick´s Athletic FC",
+      "normalized": "saint patrick s athletic"
+    },
+    {
+      "leagueCode": "USA",
+      "providerTeam": "Saint Louis City SC",
+      "normalized": "saint louis city"
+    },
+    {
+      "leagueCode": "USA",
+      "providerTeam": "Saint Louis City SC",
+      "normalized": "saint louis city"
+    },
+    {
+      "leagueCode": "USA",
+      "providerTeam": "Saint Louis City SC",
+      "normalized": "saint louis city"
+    },
+    {
+      "leagueCode": "USA",
+      "providerTeam": "Saint Louis City SC",
+      "normalized": "saint louis city"
+    },
+    {
+      "leagueCode": "USA",
+      "providerTeam": "Saint Louis City SC",
+      "normalized": "saint louis city"
     }
   ],
   "leagueReports": [
     {
-      "leagueCode": "FIN",
-      "country": "Finland",
-      "competition": "Veikkausliiga",
-      "apiFootballLeagueId": 244,
-      "providerLeagueSlug": "finland-veikkausliiga",
-      "eventsFetched": 29,
-      "eventsWithOddsResponse": 5,
+      "leagueCode": "AUT2",
+      "country": "Austria",
+      "competition": "2. Liga",
+      "apiFootballLeagueId": 219,
+      "providerLeagueSlug": "austria-2-liga",
+      "eventsFetched": 24,
+      "eventsWithOddsResponse": 0,
       "eventsWithoutMappedMarkets": 24,
       "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 5,
-      "marketsEmitted": 756,
-      "providerMatchesArchived": 5,
-      "providerMarketPayloadsArchived": 273,
-      "matchedTeamPairs": 5,
+      "matchesEmitted": 0,
+      "marketsEmitted": 0,
+      "providerMatchesArchived": 0,
+      "providerMarketPayloadsArchived": 0,
+      "matchedTeamPairs": 0,
       "partialTeamPairs": 0,
       "unmatchedTeamPairs": 0
     },
     {
-      "leagueCode": "SWE",
-      "country": "Sweden",
-      "competition": "Allsvenskan",
-      "apiFootballLeagueId": 113,
-      "providerLeagueSlug": "sweden-allsvenskan",
-      "eventsFetched": 37,
-      "eventsWithOddsResponse": 8,
-      "eventsWithoutMappedMarkets": 29,
-      "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 8,
-      "marketsEmitted": 1269,
-      "providerMatchesArchived": 8,
-      "providerMarketPayloadsArchived": 481,
-      "matchedTeamPairs": 8,
+      "leagueCode": "AUT",
+      "country": "Austria",
+      "competition": "Bundesliga",
+      "apiFootballLeagueId": 218,
+      "providerLeagueSlug": "austria-bundesliga",
+      "eventsFetched": 18,
+      "eventsWithOddsResponse": 6,
+      "eventsWithoutMappedMarkets": 12,
+      "eventsWithMarketsButUnmatchedTeams": 5,
+      "matchesEmitted": 1,
+      "marketsEmitted": 106,
+      "providerMatchesArchived": 6,
+      "providerMarketPayloadsArchived": 150,
+      "matchedTeamPairs": 1,
       "partialTeamPairs": 0,
       "unmatchedTeamPairs": 0
     },
     {
-      "leagueCode": "MEX",
-      "country": "Mexico",
-      "competition": "Liga MX",
-      "apiFootballLeagueId": 262,
-      "providerLeagueSlug": "mexico-liga-mx-apertura",
-      "eventsFetched": 31,
-      "eventsWithOddsResponse": 19,
-      "eventsWithoutMappedMarkets": 13,
-      "eventsWithMarketsButUnmatchedTeams": 8,
-      "matchesEmitted": 10,
-      "marketsEmitted": 1668,
-      "providerMatchesArchived": 18,
-      "providerMarketPayloadsArchived": 975,
-      "matchedTeamPairs": 10,
+      "leagueCode": "SC0",
+      "country": "Scotland",
+      "competition": "Premiership",
+      "apiFootballLeagueId": 179,
+      "providerLeagueSlug": "scotland-premiership",
+      "eventsFetched": 12,
+      "eventsWithOddsResponse": 6,
+      "eventsWithoutMappedMarkets": 6,
+      "eventsWithMarketsButUnmatchedTeams": 3,
+      "matchesEmitted": 3,
+      "marketsEmitted": 357,
+      "providerMatchesArchived": 6,
+      "providerMarketPayloadsArchived": 230,
+      "matchedTeamPairs": 3,
       "partialTeamPairs": 0,
       "unmatchedTeamPairs": 0
     },
     {
-      "leagueCode": "ROM",
-      "country": "Romania",
-      "competition": "Liga I",
-      "apiFootballLeagueId": 283,
-      "providerLeagueSlug": "romania-superliga",
-      "eventsFetched": 40,
-      "eventsWithOddsResponse": 8,
-      "eventsWithoutMappedMarkets": 32,
-      "eventsWithMarketsButUnmatchedTeams": 4,
-      "matchesEmitted": 4,
-      "marketsEmitted": 571,
-      "providerMatchesArchived": 8,
-      "providerMarketPayloadsArchived": 409,
-      "matchedTeamPairs": 4,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    },
-    {
-      "leagueCode": "DNK",
-      "country": "Denmark",
-      "competition": "Superliga",
-      "apiFootballLeagueId": 119,
-      "providerLeagueSlug": "denmark-superliga",
+      "leagueCode": "ARG",
+      "country": "Argentina",
+      "competition": "Liga Profesional Argentina",
+      "apiFootballLeagueId": 128,
+      "providerLeagueSlug": "argentina-liga-profesional",
       "eventsFetched": 0,
       "eventsWithOddsResponse": 0,
       "eventsWithoutMappedMarkets": 0,
@@ -2405,14 +1944,14 @@
       "unmatchedTeamPairs": 0
     },
     {
-      "leagueCode": "POL",
-      "country": "Poland",
-      "competition": "Ekstraklasa",
-      "apiFootballLeagueId": 106,
-      "providerLeagueSlug": "poland-ekstraklasa",
-      "eventsFetched": 35,
+      "leagueCode": "IRL",
+      "country": "Ireland",
+      "competition": "Premier Division",
+      "apiFootballLeagueId": 357,
+      "providerLeagueSlug": "ireland-premier-division",
+      "eventsFetched": 13,
       "eventsWithOddsResponse": 0,
-      "eventsWithoutMappedMarkets": 35,
+      "eventsWithoutMappedMarkets": 13,
       "eventsWithMarketsButUnmatchedTeams": 0,
       "matchesEmitted": 0,
       "marketsEmitted": 0,
@@ -2423,652 +1962,643 @@
       "unmatchedTeamPairs": 0
     },
     {
-      "leagueCode": "RUS",
-      "country": "Russia",
-      "competition": "Premier League",
-      "apiFootballLeagueId": 235,
-      "providerLeagueSlug": "russia-premier-league",
-      "eventsFetched": 32,
-      "eventsWithOddsResponse": 0,
+      "leagueCode": "USA",
+      "country": "USA",
+      "competition": "Major League Soccer",
+      "apiFootballLeagueId": 253,
+      "providerLeagueSlug": "usa-mls",
+      "eventsFetched": 63,
+      "eventsWithOddsResponse": 21,
+      "eventsWithoutMappedMarkets": 42,
+      "eventsWithMarketsButUnmatchedTeams": 2,
+      "matchesEmitted": 19,
+      "marketsEmitted": 2699,
+      "providerMatchesArchived": 21,
+      "providerMarketPayloadsArchived": 947,
+      "matchedTeamPairs": 19,
+      "partialTeamPairs": 0,
+      "unmatchedTeamPairs": 0
+    },
+    {
+      "leagueCode": "CHN",
+      "country": "China",
+      "competition": "Super League",
+      "apiFootballLeagueId": 169,
+      "providerLeagueSlug": "china-chinese-super-league",
+      "eventsFetched": 40,
+      "eventsWithOddsResponse": 8,
       "eventsWithoutMappedMarkets": 32,
       "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 0,
-      "marketsEmitted": 0,
-      "providerMatchesArchived": 0,
-      "providerMarketPayloadsArchived": 0,
-      "matchedTeamPairs": 0,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    },
-    {
-      "leagueCode": "SWZ",
-      "country": "Switzerland",
-      "competition": "Super League",
-      "apiFootballLeagueId": 207,
-      "providerLeagueSlug": "switzerland-super-league",
-      "eventsFetched": 18,
-      "eventsWithOddsResponse": 6,
-      "eventsWithoutMappedMarkets": 12,
-      "eventsWithMarketsButUnmatchedTeams": 4,
-      "matchesEmitted": 2,
-      "marketsEmitted": 214,
-      "providerMatchesArchived": 6,
-      "providerMarketPayloadsArchived": 147,
-      "matchedTeamPairs": 2,
+      "matchesEmitted": 8,
+      "marketsEmitted": 1183,
+      "providerMatchesArchived": 8,
+      "providerMarketPayloadsArchived": 444,
+      "matchedTeamPairs": 8,
       "partialTeamPairs": 0,
       "unmatchedTeamPairs": 0
     }
   ],
-  "unmatchedTeams": [
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Atlante FC",
-      "normalized": "atlante"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Club Tijuana de Caliente",
-      "normalized": "club tijuana de caliente"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Pumas UNAM",
-      "normalized": "pumas unam"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "CD Guadalajara",
-      "normalized": "cd guadalajara"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Pumas UNAM",
-      "normalized": "pumas unam"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Atlante FC",
-      "normalized": "atlante"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Club Tijuana de Caliente",
-      "normalized": "club tijuana de caliente"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "CD Guadalajara",
-      "normalized": "cd guadalajara"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "CD Guadalajara",
-      "normalized": "cd guadalajara"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Pumas UNAM",
-      "normalized": "pumas unam"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Club Tijuana de Caliente",
-      "normalized": "club tijuana de caliente"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Atlante FC",
-      "normalized": "atlante"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Atlante FC",
-      "normalized": "atlante"
-    },
-    {
-      "leagueCode": "MEX",
-      "providerTeam": "Pumas UNAM",
-      "normalized": "pumas unam"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Champions FC Arges",
-      "normalized": "acs champions arges"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ASC Otelul Galati",
-      "normalized": "asc otelul galati"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "FC Corvinul Hunedoara 1921",
-      "normalized": "corvinul hunedoara 1921"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "AFK Csikszereda Miercurea Ciuc",
-      "normalized": "afk csikszereda miercurea ciuc"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "Rapid Bucuresti 1923",
-      "normalized": "rapid bucuresti 1923"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Sepsi OSK Sfantu Gheorghe",
-      "normalized": "acs sepsi osk sfantu gheorghe"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ASC Otelul Galati",
-      "normalized": "asc otelul galati"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Champions FC Arges",
-      "normalized": "acs champions arges"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "FC Corvinul Hunedoara 1921",
-      "normalized": "corvinul hunedoara 1921"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Sepsi OSK Sfantu Gheorghe",
-      "normalized": "acs sepsi osk sfantu gheorghe"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "AFK Csikszereda Miercurea Ciuc",
-      "normalized": "afk csikszereda miercurea ciuc"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "Rapid Bucuresti 1923",
-      "normalized": "rapid bucuresti 1923"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "FC Corvinul Hunedoara 1921",
-      "normalized": "corvinul hunedoara 1921"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Sepsi OSK Sfantu Gheorghe",
-      "normalized": "acs sepsi osk sfantu gheorghe"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "Rapid Bucuresti 1923",
-      "normalized": "rapid bucuresti 1923"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ASC Otelul Galati",
-      "normalized": "asc otelul galati"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Champions FC Arges",
-      "normalized": "acs champions arges"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "AFK Csikszereda Miercurea Ciuc",
-      "normalized": "afk csikszereda miercurea ciuc"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Sepsi OSK Sfantu Gheorghe",
-      "normalized": "acs sepsi osk sfantu gheorghe"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "FC Corvinul Hunedoara 1921",
-      "normalized": "corvinul hunedoara 1921"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "Rapid Bucuresti 1923",
-      "normalized": "rapid bucuresti 1923"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ASC Otelul Galati",
-      "normalized": "asc otelul galati"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "AFK Csikszereda Miercurea Ciuc",
-      "normalized": "afk csikszereda miercurea ciuc"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Champions FC Arges",
-      "normalized": "acs champions arges"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "FC Corvinul Hunedoara 1921",
-      "normalized": "corvinul hunedoara 1921"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "Rapid Bucuresti 1923",
-      "normalized": "rapid bucuresti 1923"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "AFK Csikszereda Miercurea Ciuc",
-      "normalized": "afk csikszereda miercurea ciuc"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Sepsi OSK Sfantu Gheorghe",
-      "normalized": "acs sepsi osk sfantu gheorghe"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ASC Otelul Galati",
-      "normalized": "asc otelul galati"
-    },
-    {
-      "leagueCode": "ROM",
-      "providerTeam": "ACS Champions FC Arges",
-      "normalized": "acs champions arges"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wieczysta Krakow",
-      "normalized": "wieczysta krakow"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Jagiellonia Bialystok",
-      "normalized": "jagiellonia bialystok"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "WKS Slask Wroclaw",
-      "normalized": "wks slask wroclaw"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Widzew Lodz",
-      "normalized": "widzew lodz"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wisla Krakow",
-      "normalized": "wisla krakow"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Widzew Lodz",
-      "normalized": "widzew lodz"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Jagiellonia Bialystok",
-      "normalized": "jagiellonia bialystok"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wisla Krakow",
-      "normalized": "wisla krakow"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wieczysta Krakow",
-      "normalized": "wieczysta krakow"
+  "rawMarketCounts": {
+    "ML": 76,
+    "Draw No Bet": 66,
+    "Double Chance": 65,
+    "Spread": 84,
+    "Totals": 91,
+    "Goals Over/Under": 41,
+    "Both Teams To Score": 66,
+    "Spread HT": 44,
+    "Totals HT": 57,
+    "European Handicap": 66,
+    "Exact Total Goals": 40,
+    "First 10 Minutes (00:00 - 09:59)": 41,
+    "Alternative Total Goals": 41,
+    "Team Total Goals Away": 36,
+    "Team Total Goals Home": 36,
+    "Correct Score": 66,
+    "Number of Goals In Match": 41,
+    "Specials": 41,
+    "Alternative Asian Handicap": 41,
+    "1st Half Handicap": 41,
+    "Alternative Goal Line": 41,
+    "Both Teams To Score 2H": 41,
+    "Both Teams To Score HT": 41,
+    "Half Time Result": 41,
+    "Odd/Even": 6,
+    "ML HT": 25,
+    "Team Total Home": 25,
+    "Team Total Away": 25,
+    "Half Time / Full Time": 25,
+    "1st Half Goal Line": 7,
+    "Corners Spread": 26,
+    "Corners Totals": 30,
+    "Corners Totals HT": 14,
+    "Bookings Spread": 6,
+    "Bookings Totals": 7,
+    "Anytime Goalscorer": 20,
+    "Total Corners": 14,
+    "Corner Handicap": 9,
+    "Team Corners Home": 14,
+    "Number of Cards In Match": 6,
+    "Corners 2-Way": 14,
+    "Corners Race": 14,
+    "Player Shots on Target": 12,
+    "Player to be Booked": 6,
+    "Player Shots": 6,
+    "Team Corners Away": 14,
+    "Player To Score or Assist": 6,
+    "Player Cards": 6,
+    "Team Goalscorer": 13,
+    "Goal Method": 6,
+    "Alternative Corners": 14,
+    "Corners": 14,
+    "Multi Scorers": 10,
+    "ML 2H": 19,
+    "Totals 2H": 19,
+    "To Score 2+ Goals": 6,
+    "Corners Totals Away": 19,
+    "Most Shots on Target": 6,
+    "Total Shots on Target Home": 6,
+    "Goalkeeper Saves Away": 6,
+    "Total Shots on Target Away": 6,
+    "To Score 3+ Goals": 6,
+    "Total Shots on Target": 6,
+    "Corners Totals Home": 19,
+    "Goalkeeper Saves Home": 6,
+    "Goalkeeper Saves": 6,
+    "Card Handicap": 3
+  },
+  "classifiedMarketCounts": {
+    "1X2": 76,
+    "DRAW_NO_BET": 66,
+    "DOUBLE_CHANCE": 65,
+    "OTHER": 398,
+    "MATCH_GOALS": 205,
+    "BTTS": 148,
+    "FIRST_HALF_GOALS": 64,
+    "EUROPEAN_HANDICAP": 66,
+    "GOAL_BANDS": 81,
+    "TEAM_TOTAL_GOALS": 135,
+    "CORRECT_SCORE": 66,
+    "HALF_TIME_1X2": 66,
+    "ODD_EVEN_GOALS": 6,
+    "HALF_TIME_FULL_TIME": 25,
+    "CORNER_HANDICAP": 35,
+    "CORNERS": 180,
+    "CARDS": 15,
+    "MATCH_YELLOW_CARDS": 13,
+    "SHOTS_ON_TARGET": 30,
+    "SHOTS": 6,
+    "SECOND_HALF_GOALS": 19,
+    "MOST_SHOTS_ON_TARGET": 6
+  },
+  "expandedExactMarketCounts": {
+    "DRAW_NO_BET": 132,
+    "EUROPEAN_HANDICAP": 465,
+    "GOAL_BANDS": 443,
+    "CORRECT_SCORE": 2373,
+    "HALF_TIME_1X2": 198,
+    "ODD_EVEN_GOALS": 12,
+    "HALF_TIME_FULL_TIME": 225,
+    "CORNER_HANDICAP": 68,
+    "MATCH_YELLOW_CARDS": 26,
+    "SECOND_HALF_GOALS": 62,
+    "MOST_SHOTS_ON_TARGET": 12
+  },
+  "expandedExactRawMarkets": {
+    "Draw No Bet": {
+      "family": "DRAW_NO_BET",
+      "payloads": 66,
+      "selections": 132
+    },
+    "European Handicap": {
+      "family": "EUROPEAN_HANDICAP",
+      "payloads": 66,
+      "selections": 465
+    },
+    "Exact Total Goals": {
+      "family": "GOAL_BANDS",
+      "payloads": 40,
+      "selections": 320
+    },
+    "Correct Score": {
+      "family": "CORRECT_SCORE",
+      "payloads": 66,
+      "selections": 2373
+    },
+    "Number of Goals In Match": {
+      "family": "GOAL_BANDS",
+      "payloads": 41,
+      "selections": 123
+    },
+    "Half Time Result": {
+      "family": "HALF_TIME_1X2",
+      "payloads": 41,
+      "selections": 123
+    },
+    "Odd/Even": {
+      "family": "ODD_EVEN_GOALS",
+      "payloads": 6,
+      "selections": 12
+    },
+    "ML HT": {
+      "family": "HALF_TIME_1X2",
+      "payloads": 25,
+      "selections": 75
+    },
+    "Half Time / Full Time": {
+      "family": "HALF_TIME_FULL_TIME",
+      "payloads": 25,
+      "selections": 225
+    },
+    "Corners Spread": {
+      "family": "CORNER_HANDICAP",
+      "payloads": 26,
+      "selections": 50
+    },
+    "Bookings Totals": {
+      "family": "MATCH_YELLOW_CARDS",
+      "payloads": 7,
+      "selections": 14
+    },
+    "Corner Handicap": {
+      "family": "CORNER_HANDICAP",
+      "payloads": 9,
+      "selections": 18
+    },
+    "Number of Cards In Match": {
+      "family": "MATCH_YELLOW_CARDS",
+      "payloads": 6,
+      "selections": 12
+    },
+    "Totals 2H": {
+      "family": "SECOND_HALF_GOALS",
+      "payloads": 19,
+      "selections": 62
+    },
+    "Most Shots on Target": {
+      "family": "MOST_SHOTS_ON_TARGET",
+      "payloads": 6,
+      "selections": 12
+    }
+  },
+  "skippedMarketSummary": {
+    "Spread|recognized audit-only family; not emitted to app markets": {
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 84
+    },
+    "Totals|non half-line skipped": {
+      "market": "Totals",
+      "reason": "non half-line skipped",
+      "count": 130
+    },
+    "Spread HT|recognized audit-only family; not emitted to app markets": {
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 44
+    },
+    "Totals HT|non half-line skipped": {
+      "market": "Totals HT",
+      "reason": "non half-line skipped",
+      "count": 81
+    },
+    "First 10 Minutes (00:00 - 09:59)|unrecognized or unsupported provider market": {
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 41
+    },
+    "Specials|unrecognized or unsupported provider market": {
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 41
+    },
+    "Alternative Asian Handicap|recognized audit-only family; not emitted to app markets": {
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
+    },
+    "1st Half Handicap|recognized audit-only family; not emitted to app markets": {
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
+    },
+    "Alternative Goal Line|unsupported market family": {
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family",
+      "count": 41
+    },
+    "Both Teams To Score HT|recognized audit-only family; not emitted to app markets": {
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
+    },
+    "Corners Totals|non half-line skipped": {
+      "market": "Corners Totals",
+      "reason": "non half-line skipped",
+      "count": 7
+    },
+    "Bookings Spread|recognized audit-only family; not emitted to app markets": {
+      "market": "Bookings Spread",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Anytime Goalscorer|recognized audit-only family; not emitted to app markets": {
+      "market": "Anytime Goalscorer",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 20
+    },
+    "Total Corners|non half-line skipped": {
+      "market": "Total Corners",
+      "reason": "non half-line skipped",
+      "count": 70
+    },
+    "Corners Race|non half-line skipped": {
+      "market": "Corners Race",
+      "reason": "non half-line skipped",
+      "count": 56
+    },
+    "Player Shots on Target|recognized audit-only family; not emitted to app markets": {
+      "market": "Player Shots on Target",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 12
+    },
+    "Player to be Booked|recognized audit-only family; not emitted to app markets": {
+      "market": "Player to be Booked",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Player Shots|recognized audit-only family; not emitted to app markets": {
+      "market": "Player Shots",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Player To Score or Assist|recognized audit-only family; not emitted to app markets": {
+      "market": "Player To Score or Assist",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Player Cards|recognized audit-only family; not emitted to app markets": {
+      "market": "Player Cards",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 6
+    },
+    "Team Goalscorer|recognized audit-only family; not emitted to app markets": {
+      "market": "Team Goalscorer",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 13
+    },
+    "Goal Method|unrecognized or unsupported provider market": {
+      "market": "Goal Method",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 6
+    },
+    "Alternative Corners|non half-line skipped": {
+      "market": "Alternative Corners",
+      "reason": "non half-line skipped",
+      "count": 224
+    },
+    "Corners|non half-line skipped": {
+      "market": "Corners",
+      "reason": "non half-line skipped",
+      "count": 14
+    },
+    "Multi Scorers|unrecognized or unsupported provider market": {
+      "market": "Multi Scorers",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 10
+    },
+    "ML 2H|unrecognized or unsupported provider market": {
+      "market": "ML 2H",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 19
+    },
+    "Goalkeeper Saves Away|unsupported market family": {
+      "market": "Goalkeeper Saves Away",
+      "reason": "unsupported market family",
+      "count": 6
+    },
+    "Goalkeeper Saves Home|unsupported market family": {
+      "market": "Goalkeeper Saves Home",
+      "reason": "unsupported market family",
+      "count": 6
+    },
+    "Goalkeeper Saves|unrecognized or unsupported provider market": {
+      "market": "Goalkeeper Saves",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 6
+    },
+    "Corners Spread|recognized expanded market but no exact outcome rows were normalized": {
+      "market": "Corners Spread",
+      "reason": "recognized expanded market but no exact outcome rows were normalized",
+      "count": 1
+    },
+    "Card Handicap|recognized audit-only family; not emitted to app markets": {
+      "market": "Card Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 3
+    },
+    "Corners Totals HT|non half-line skipped": {
+      "market": "Corners Totals HT",
+      "reason": "non half-line skipped",
+      "count": 1
+    }
+  },
+  "skippedMarketReasons": {
+    "ASIAN_HANDICAP|recognized audit-only family; not emitted to app markets": {
+      "family": "ASIAN_HANDICAP",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 219
+    },
+    "MATCH_GOALS|non half-line skipped": {
+      "family": "MATCH_GOALS",
+      "reason": "non half-line skipped",
+      "count": 130
+    },
+    "FIRST_HALF_GOALS|non half-line skipped": {
+      "family": "FIRST_HALF_GOALS",
+      "reason": "non half-line skipped",
+      "count": 81
+    },
+    "UNSUPPORTED|unrecognized or unsupported provider market": {
+      "family": "UNSUPPORTED",
+      "reason": "unrecognized or unsupported provider market",
+      "count": 123
+    },
+    "OTHER|unsupported market family": {
+      "family": "OTHER",
+      "reason": "unsupported market family",
+      "count": 53
+    },
+    "HALF_TIME_BTTS|recognized audit-only family; not emitted to app markets": {
+      "family": "HALF_TIME_BTTS",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 41
     },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "WKS Slask Wroclaw",
-      "normalized": "wks slask wroclaw"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wisla Krakow",
-      "normalized": "wisla krakow"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wieczysta Krakow",
-      "normalized": "wieczysta krakow"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Jagiellonia Bialystok",
-      "normalized": "jagiellonia bialystok"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Widzew Lodz",
-      "normalized": "widzew lodz"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "WKS Slask Wroclaw",
-      "normalized": "wks slask wroclaw"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Widzew Lodz",
-      "normalized": "widzew lodz"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "WKS Slask Wroclaw",
-      "normalized": "wks slask wroclaw"
-    },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Wisla Krakow",
-      "normalized": "wisla krakow"
+    "CORNERS|non half-line skipped": {
+      "family": "CORNERS",
+      "reason": "non half-line skipped",
+      "count": 372
     },
-    {
-      "leagueCode": "POL",
-      "providerTeam": "Jagiellonia Bialystok",
-      "normalized": "jagiellonia bialystok"
-    },
-    {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Baltika Kaliningrad",
-      "normalized": "baltika kaliningrad"
-    },
-    {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Dinamo Moscow",
-      "normalized": "dinamo moscow"
-    },
-    {
-      "leagueCode": "RUS",
-      "providerTeam": "PFK Krylia Sovetov Samara",
-      "normalized": "pfk krylia sovetov samara"
-    },
-    {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Akron Tolyatti",
-      "normalized": "akron tolyatti"
+    "PLAYER_PROPS|recognized audit-only family; not emitted to app markets": {
+      "family": "PLAYER_PROPS",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 69
     },
+    "CORNER_HANDICAP|recognized expanded market but no exact outcome rows were normalized": {
+      "family": "CORNER_HANDICAP",
+      "reason": "recognized expanded market but no exact outcome rows were normalized",
+      "count": 1
+    }
+  },
+  "skippedMarketExamples": [
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Zenit Saint Petersburg",
-      "normalized": "zenit saint petersburg"
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Fakel Voronezh",
-      "normalized": "fakel voronezh"
+      "market": "Totals",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Dynamo-Makhachkala",
-      "normalized": "dynamo makhachkala"
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Rodina Moscow",
-      "normalized": "rodina moscow"
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Lokomotiv Moscow",
-      "normalized": "lokomotiv moscow"
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "RFK Akhmat Grozny",
-      "normalized": "rfk akhmat grozny"
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Rubin Kazan",
-      "normalized": "rubin kazan"
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Rodina Moscow",
-      "normalized": "rodina moscow"
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Akron Tolyatti",
-      "normalized": "akron tolyatti"
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Rubin Kazan",
-      "normalized": "rubin kazan"
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "PFK Krylia Sovetov Samara",
-      "normalized": "pfk krylia sovetov samara"
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Dynamo-Makhachkala",
-      "normalized": "dynamo makhachkala"
+      "market": "Totals",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Lokomotiv Moscow",
-      "normalized": "lokomotiv moscow"
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Baltika Kaliningrad",
-      "normalized": "baltika kaliningrad"
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Dinamo Moscow",
-      "normalized": "dinamo moscow"
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Zenit Saint Petersburg",
-      "normalized": "zenit saint petersburg"
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Fakel Voronezh",
-      "normalized": "fakel voronezh"
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "RFK Akhmat Grozny",
-      "normalized": "rfk akhmat grozny"
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "PFK Krylia Sovetov Samara",
-      "normalized": "pfk krylia sovetov samara"
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Baltika Kaliningrad",
-      "normalized": "baltika kaliningrad"
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Lokomotiv Moscow",
-      "normalized": "lokomotiv moscow"
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Akron Tolyatti",
-      "normalized": "akron tolyatti"
+      "market": "Totals",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Dinamo Moscow",
-      "normalized": "dinamo moscow"
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Dynamo-Makhachkala",
-      "normalized": "dynamo makhachkala"
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Zenit Saint Petersburg",
-      "normalized": "zenit saint petersburg"
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Rodina Moscow",
-      "normalized": "rodina moscow"
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Rubin Kazan",
-      "normalized": "rubin kazan"
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Fakel Voronezh",
-      "normalized": "fakel voronezh"
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "RFK Akhmat Grozny",
-      "normalized": "rfk akhmat grozny"
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Lokomotiv Moscow",
-      "normalized": "lokomotiv moscow"
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "Rodina Moscow",
-      "normalized": "rodina moscow"
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Akron Tolyatti",
-      "normalized": "akron tolyatti"
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Fakel Voronezh",
-      "normalized": "fakel voronezh"
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Rubin Kazan",
-      "normalized": "rubin kazan"
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "RFK Akhmat Grozny",
-      "normalized": "rfk akhmat grozny"
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Zenit Saint Petersburg",
-      "normalized": "zenit saint petersburg"
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FK Dinamo Moscow",
-      "normalized": "dinamo moscow"
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "PFK Krylia Sovetov Samara",
-      "normalized": "pfk krylia sovetov samara"
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Dynamo-Makhachkala",
-      "normalized": "dynamo makhachkala"
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "RUS",
-      "providerTeam": "FC Baltika Kaliningrad",
-      "normalized": "baltika kaliningrad"
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Servette Geneva",
-      "normalized": "servette geneva"
+      "market": "Totals",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Lausanne-Sport",
-      "normalized": "lausanne sport"
+      "market": "Spread HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Grasshopper Club Zurich",
-      "normalized": "grasshopper club zurich"
+      "market": "Totals HT",
+      "reason": "non half-line skipped"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Young Boys Bern",
-      "normalized": "young boys bern"
+      "market": "Specials",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "FC Vaduz",
-      "normalized": "vaduz"
+      "market": "Alternative Goal Line",
+      "reason": "unsupported market family"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Servette Geneva",
-      "normalized": "servette geneva"
+      "market": "Alternative Asian Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Lausanne-Sport",
-      "normalized": "lausanne sport"
+      "market": "1st Half Handicap",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Young Boys Bern",
-      "normalized": "young boys bern"
+      "market": "Both Teams To Score HT",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "FC Vaduz",
-      "normalized": "vaduz"
+      "market": "First 10 Minutes (00:00 - 09:59)",
+      "reason": "unrecognized or unsupported provider market"
     },
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "Grasshopper Club Zurich",
-      "normalized": "grasshopper club zurich"
-    },
-    {
-      "leagueCode": "SWZ",
-      "providerTeam": "Lausanne-Sport",
-      "normalized": "lausanne sport"
-    },
-    {
-      "leagueCode": "SWZ",
-      "providerTeam": "Young Boys Bern",
-      "normalized": "young boys bern"
-    },
-    {
-      "leagueCode": "SWZ",
-      "providerTeam": "Servette Geneva",
-      "normalized": "servette geneva"
-    },
-    {
-      "leagueCode": "SWZ",
-      "providerTeam": "Grasshopper Club Zurich",
-      "normalized": "grasshopper club zurich"
-    },
+      "market": "Spread",
+      "reason": "recognized audit-only family; not emitted to app markets"
+    }
+  ],
+  "leaguesMissing": [
     {
-      "leagueCode": "SWZ",
-      "providerTeam": "FC Vaduz",
-      "normalized": "vaduz"
+      "leagueCode": "BRA",
+      "country": "Brazil",
+      "competition": "Serie A",
+      "apiFootballLeagueId": 71,
+      "reason": "verified provider league slug not found"
     }
   ]
 }
