@@ -1,9 +1,7 @@
 {
   "competitionId": "europa_league",
   "leagueCode": "EL",
-  "warnings": [
-    "Rate limit guard active before events fetch; previous future matches preserved."
-  ],
+  "warnings": [],
   "apiCalls": [
     {
       "path": "/leagues",
@@ -13,9 +11,9 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 517,
-      "bodyLength": 142653,
-      "rateLimitRemaining": 23,
+      "durationMs": 460,
+      "bodyLength": 142652,
+      "rateLimitRemaining": null,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 30}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 4}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eve..."
     },
     {
@@ -25,14 +23,14 @@
         "sport": "football",
         "league": "international-clubs-uefa-champions-league-qualification",
         "status": "pending,live",
-        "from": "2026-07-16T18:43:52Z",
-        "to": "2026-08-30T18:43:52Z",
+        "from": "2026-07-16T20:31:18Z",
+        "to": "2026-08-30T20:31:18Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 228,
+      "durationMs": 255,
       "bodyLength": 10207,
-      "rateLimitRemaining": 22,
+      "rateLimitRemaining": 98,
       "sample": "[{\"id\": 72868098, \"home\": \"Sabah Masazir\", \"away\": \"Kuopion Palloseura\", \"homeId\": 382568, \"awayId\": 2244, \"date\": \"2026-07-21T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176708, \"home\": \"Mjallby AIF\", \"away\": \"Lincoln Red Imps\", \"homeId\": 1783, \"awayId\": 126304, \"date\": \"2026-07-21T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176804, \"home\": \"FC Ararat-Armenia\", \"away\": \"Shamrock Rovers\", \"homeId\": 364472, \"awayId\": 3177, \"date\": \"2026-07-21T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176842, \"home\": \"FC Iberia 1999\", \"away\": \"SK Slovan Bratislava\", \"homeId\": 116312, \"awayId\": 2404, \"date\": \"2026-07-21T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"Internat..."
     },
     {
@@ -43,35 +41,78 @@
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 211,
+      "durationMs": 300,
       "bodyLength": 2,
-      "rateLimitRemaining": 21,
+      "rateLimitRemaining": 97,
       "sample": []
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72176836,72176814,72176810,72176850,72176706,72176834,72176848,72177120,72176802,72176812",
+        "eventIds": "72176836,72176814,72176810,72176850,72176706,72868102,72176834,72176848,72177120,72176802",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 227,
+      "durationMs": 255,
       "bodyLength": 2,
-      "rateLimitRemaining": 20,
+      "rateLimitRemaining": 96,
       "sample": []
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
-        "eventIds": "72868102,72176794,72176798,72176808,72176838,72176722,72177116,72176844",
+        "eventIds": "72176812,72176794,72176798,72176808,72176838,72176722,72177116,72176844",
         "bookmakers": "Bet365,Unibet"
       },
       "status": 200,
-      "durationMs": 226,
+      "durationMs": 243,
       "bodyLength": 2,
-      "rateLimitRemaining": 19,
+      "rateLimitRemaining": 95,
+      "sample": []
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "international-clubs-uefa-europa-league-qualification",
+        "status": "pending,live",
+        "from": "2026-07-16T20:31:19Z",
+        "to": "2026-08-30T20:31:19Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 239,
+      "bodyLength": 6569,
+      "rateLimitRemaining": 94,
+      "sample": "[{\"id\": 72533768, \"home\": \"Tromsoe IL\", \"away\": \"FC Hradec Kralove\", \"homeId\": 660, \"awayId\": 2217, \"date\": \"2026-07-23T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72179158, \"home\": \"Hammarby IF\", \"away\": \"RSC Anderlecht\", \"homeId\": 1758, \"awayId\": 2900, \"date\": \"2026-07-23T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72179162, \"home\": \"Winner Qarabag / Vestri\", \"away\": \"Winner CSKA Sofia / Derry\", \"homeId\": 1363182, \"awayId\": 1363184, \"date\": \"2026-07-23T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72179680, \"home\": \"FC Twente Enschede\", \"away\": \"Winner Vojvodina / Ferencvaros\", \"homeId\": 2955, \"awayId\": 1363190, \"date\": \"2026-07-23T13:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"In..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72533768,72179158,72179162,72179680,72179686,72179692,72179696,72179714,72179718,72533770",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 240,
+      "bodyLength": 2,
+      "rateLimitRemaining": 93,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72179156,72179160,72179682,72179684,72179690,72179694,72179716,72179712",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 326,
+      "bodyLength": 2,
+      "rateLimitRemaining": 92,
       "sample": []
     }
   ],
@@ -83,5 +124,143 @@
   "auditOnlyMarketExamples": {},
   "unsupportedMarketCounts": {},
   "unsupportedMarketExamples": {},
-  "rateLimitRemaining": 19
+  "rateLimitRemaining": 92,
+  "unmatchedTeams": [
+    {
+      "eventId": "72533768",
+      "providerHomeTeam": "Tromsoe IL",
+      "providerAwayTeam": "FC Hradec Kralove",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179158",
+      "providerHomeTeam": "Hammarby IF",
+      "providerAwayTeam": "RSC Anderlecht",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179162",
+      "providerHomeTeam": "Winner Qarabag / Vestri",
+      "providerAwayTeam": "Winner CSKA Sofia / Derry",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179680",
+      "providerHomeTeam": "FC Twente Enschede",
+      "providerAwayTeam": "Winner Vojvodina / Ferencvaros",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179686",
+      "providerHomeTeam": "Besiktas Istanbul",
+      "providerAwayTeam": "FC Midtjylland",
+      "homeMapped": null,
+      "awayMapped": "Midtjylland"
+    },
+    {
+      "eventId": "72179692",
+      "providerHomeTeam": "Winner Hajduk Split / Zilina",
+      "providerAwayTeam": "Pafos FC",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179696",
+      "providerHomeTeam": "Winner Sheriff / Aluminij",
+      "providerAwayTeam": "Maccabi Tel Aviv FC",
+      "homeMapped": null,
+      "awayMapped": "Maccabi Tel-Aviv"
+    },
+    {
+      "eventId": "72179714",
+      "providerHomeTeam": "FC St. Gallen 1879",
+      "providerAwayTeam": "SL Benfica",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179718",
+      "providerHomeTeam": "Winner Dynamo Kyiv / U Cluj",
+      "providerAwayTeam": "PAOK Thessaloniki",
+      "homeMapped": null,
+      "awayMapped": "PAOK"
+    },
+    {
+      "eventId": "72533770",
+      "providerHomeTeam": "FC Hradec Kralove",
+      "providerAwayTeam": "Tromsoe IL",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179156",
+      "providerHomeTeam": "RSC Anderlecht",
+      "providerAwayTeam": "Hammarby IF",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179160",
+      "providerHomeTeam": "Winner CSKA Sofia / Derry",
+      "providerAwayTeam": "Winner Qarabag / Vestri",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179682",
+      "providerHomeTeam": "Winner Vojvodina / Ferencvaros",
+      "providerAwayTeam": "FC Twente Enschede",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179684",
+      "providerHomeTeam": "FC Midtjylland",
+      "providerAwayTeam": "Besiktas Istanbul",
+      "homeMapped": "Midtjylland",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179690",
+      "providerHomeTeam": "Pafos FC",
+      "providerAwayTeam": "Winner Hajduk Split / Zilina",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179694",
+      "providerHomeTeam": "Maccabi Tel Aviv FC",
+      "providerAwayTeam": "Winner Sheriff / Aluminij",
+      "homeMapped": "Maccabi Tel-Aviv",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179716",
+      "providerHomeTeam": "PAOK Thessaloniki",
+      "providerAwayTeam": "Winner Dynamo Kyiv / U Cluj",
+      "homeMapped": "PAOK",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179712",
+      "providerHomeTeam": "SL Benfica",
+      "providerAwayTeam": "FC St. Gallen 1879",
+      "homeMapped": null,
+      "awayMapped": null
+    }
+  ],
+  "providerLeague": {
+    "name": "International Clubs - UEFA Europa League, Qualification",
+    "slug": "international-clubs-uefa-europa-league-qualification",
+    "sport": null,
+    "eventsCount": 19
+  },
+  "eventsFetched": 18,
+  "eventsWithOddsResponse": 0,
+  "matchesEmitted": 0,
+  "marketsEmitted": 0
 }
