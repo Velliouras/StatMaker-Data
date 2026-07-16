@@ -71,9 +71,18 @@ jobs:
             > reports/domestic_live_july_odds.log 2>&1
           cat reports/domestic_live_july_odds.log
 
+      - name: Rebuild expanded markets from exact provider archive
+        id: expanded_rebuild
+        if: steps.refresh.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python scripts/rebuild_domestic_expanded_markets_from_archive.py \
+            > reports/domestic_expanded_market_rebuild.log 2>&1
+          cat reports/domestic_expanded_market_rebuild.log
+
       - name: Validate canonical betting and full provider archive
         id: validate
-        if: steps.refresh.outcome == 'success'
+        if: steps.refresh.outcome == 'success' && steps.expanded_rebuild.outcome == 'success'
         continue-on-error: true
         run: |
           python - <<'PY' > reports/domestic_live_july_odds_validate.log 2>&1
@@ -138,6 +147,7 @@ jobs:
           {
             echo "tests=${{ steps.tests.outcome }}"
             echo "refresh=${{ steps.refresh.outcome }}"
+            echo "expanded_rebuild=${{ steps.expanded_rebuild.outcome }}"
             echo "validate=${{ steps.validate.outcome }}"
             echo "commit=${GITHUB_SHA}"
             echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -152,6 +162,8 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             odds/odds_api_io/domestic_provider_markets.json \
             reports/domestic_odds_debug.json \
+            reports/domestic_expanded_market_rebuild.json \
+            reports/domestic_expanded_market_rebuild.log \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_live_july_odds_tests.log \
             reports/domestic_live_july_odds.log \
@@ -175,6 +187,7 @@ jobs:
             reports/domestic_live_july_odds_tests.log \
             reports/domestic_live_july_odds_workflow_status.txt
           if [ -f reports/domestic_live_july_odds.log ]; then git add reports/domestic_live_july_odds.log; fi
+          if [ -f reports/domestic_expanded_market_rebuild.log ]; then git add reports/domestic_expanded_market_rebuild.log; fi
           if [ -f reports/domestic_live_july_odds_validate.log ]; then git add reports/domestic_live_july_odds_validate.log; fi
           if ! git diff --cached --quiet; then
             git commit -m "Record active and July Domestic odds failure"
