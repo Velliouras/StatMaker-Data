@@ -16,8 +16,11 @@ on:
     paths:
       - "scripts/refresh_domestic_live_july_odds.py"
       - "scripts/domestic_odds_expansion.py"
+      - "scripts/domestic_market_expansion_v15.py"
+      - "scripts/rebuild_domestic_expanded_markets_from_archive.py"
       - "scripts/update_domestic_odds_api_io.py"
       - "tests/test_domestic_live_july_pipeline.py"
+      - "tests/test_domestic_market_expansion_v15.py"
       - ".github/workflows/update-domestic-live-july-odds.yml"
 
 permissions:
@@ -47,7 +50,9 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p reports
-          python -m unittest tests/test_domestic_live_july_pipeline.py \
+          python -m unittest \
+            tests/test_domestic_live_july_pipeline.py \
+            tests/test_domestic_market_expansion_v15.py \
             > reports/domestic_live_july_odds_tests.log 2>&1
           cat reports/domestic_live_july_odds_tests.log
 
