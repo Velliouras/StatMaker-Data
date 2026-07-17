@@ -1,0 +1,248 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-07-17T05:50:02Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/mexico/liga-mx/2026/fixture_stats.json",
+    "cache_generated_at": "2026-07-17T05:48:49Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "MEX",
+    "country": "Mexico",
+    "league": "Liga MX",
+    "football_data_code": "MEX",
+    "api_football_league_id": 262,
+    "api_football_season": "2026",
+    "season": "2026",
+    "app_season": "2026",
+    "priority_group": "americas",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-07-17",
+    "target_season_end": "2026-11-23",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 2,
+    "fixtures_with_any_stats": 1,
+    "fixtures_with_bb_core_stats": 1,
+    "any_stats_coverage": 0.5,
+    "bb_core_coverage": 0.5,
+    "group_counts": {
+      "shots_total": 1,
+      "shots_on_target": 1,
+      "corners": 1,
+      "fouls": 1,
+      "yellow_cards": 1,
+      "red_cards": 1,
+      "possession": 1,
+      "passes": 1,
+      "xg": 1
+    },
+    "group_coverage": {
+      "shots_total": 0.5,
+      "shots_on_target": 0.5,
+      "corners": 0.5,
+      "fouls": 0.5,
+      "yellow_cards": 0.5,
+      "red_cards": 0.5,
+      "possession": 0.5,
+      "passes": 0.5,
+      "xg": 0.5
+    },
+    "bb_ready_candidate": false,
+    "notes": [
+      "not enough completed fixtures: 2 < 15",
+      "low any-stats coverage: 0.5 < 0.65",
+      "low BB-core coverage: 0.5 < 0.65",
+      "required BB groups below threshold",
+      "no shot group reaches threshold"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1550894,
+      "date_utc": "2026-07-17T01:00:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 1",
+      "home_team": "Necaxa",
+      "away_team": "Atlante FC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550895,
+      "date_utc": "2026-07-17T03:10:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 1",
+      "home_team": "Club Tijuana",
+      "away_team": "Tigres UANL",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 8,
+        "HST": 7,
+        "AST": 4,
+        "HC": 1,
+        "AC": 4,
+        "HF": 11,
+        "AF": 17,
+        "HY": 2,
+        "AY": 4,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 394,
+        "APasses": 375,
+        "HPassesAccurate": 329,
+        "APassesAccurate": 310,
+        "HxG": 2.12,
+        "AxG": 0.59
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}
