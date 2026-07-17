@@ -17,6 +17,8 @@ on:
       - "scripts/refresh_domestic_live_july_odds.py"
       - "scripts/domestic_odds_expansion.py"
       - "scripts/odds_api_io_market_audit.py"
+      - "scripts/clean_domestic_corner_scopes.py"
+      - "scripts/rebuild_domestic_corners_from_archive.py"
       - "mappings/domestic_team_aliases.json"
       - "tests/test_domestic_market_expansion.py"
       - ".github/workflows/domestic-live-july-odds.yml"
@@ -63,6 +65,10 @@ jobs:
           cycle_size="${INPUT_CYCLE_SIZE:-8}"
           python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
 
+      - name: Enforce full-time corner scope
+        run: |
+          python scripts/clean_domestic_corner_scopes.py
+
       - name: Validate exact odds contract
         run: |
           python - <<'PY'
@@ -96,7 +102,8 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             data/statmaker/domestic_live_july_state.json \
             reports/domestic_odds_debug.json \
-            reports/domestic_live_july_odds_refresh.json
+            reports/domestic_live_july_odds_refresh.json \
+            reports/domestic_corner_scope_cleanup.json
           if git diff --cached --quiet; then
             echo "No exact Domestic odds changes to commit."
           else
