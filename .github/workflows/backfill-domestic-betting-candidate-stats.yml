@@ -6,7 +6,7 @@ on:
       league_codes:
         description: "Comma-separated StatMaker league codes"
         required: true
-        default: "SRB,BGR,SVN,HUN,CZE,SVK,ISL,LVA,LTU,EST"
+        default: "CHN,SRB,BGR,SVN,HUN,CZE,SVK,ISL"
         type: string
       matches_per_team:
         description: "Recent completed matches per team to enrich"
@@ -18,6 +18,15 @@ on:
         required: true
         default: "85"
         type: string
+  schedule:
+    - cron: "5 20 18 7 *"
+    - cron: "5 21 18 7 *"
+    - cron: "5 22 18 7 *"
+    - cron: "5 23 18 7 *"
+    - cron: "5 0 19 7 *"
+    - cron: "5 1 19 7 *"
+    - cron: "5 2 19 7 *"
+    - cron: "5 3 19 7 *"
 
 permissions:
   contents: write
@@ -41,15 +50,58 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Resolve run scope
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          SCHEDULE_EXPR: ${{ github.event.schedule }}
+          INPUT_CODES: ${{ inputs.league_codes }}
+          INPUT_MATCHES_PER_TEAM: ${{ inputs.matches_per_team }}
+          INPUT_MAX_REQUESTS: ${{ inputs.max_requests }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run="true"
+          codes="${INPUT_CODES:-CHN,SRB,BGR,SVN,HUN,CZE,SVK,ISL}"
+          matches_per_team="${INPUT_MATCHES_PER_TEAM:-5}"
+          max_requests="${INPUT_MAX_REQUESTS:-85}"
+
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            # This overnight schedule is intentionally valid only for July 18-19, 2026.
+            # The cron entries may exist in later years but will no-op after 2026.
+            if [ "$(date -u +%Y)" != "2026" ]; then
+              run="false"
+            fi
+            case "$SCHEDULE_EXPR" in
+              "5 20 18 7 *") codes="CHN" ;;
+              "5 21 18 7 *") codes="SRB" ;;
+              "5 22 18 7 *") codes="BGR" ;;
+              "5 23 18 7 *") codes="SVN" ;;
+              "5 0 19 7 *") codes="HUN" ;;
+              "5 1 19 7 *") codes="CZE" ;;
+              "5 2 19 7 *") codes="SVK" ;;
+              "5 3 19 7 *") codes="ISL" ;;
+              *) run="false" ;;
+            esac
+          fi
+
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "codes=$codes" >> "$GITHUB_OUTPUT"
+          echo "matches_per_team=$matches_per_team" >> "$GITHUB_OUTPUT"
+          echo "max_requests=$max_requests" >> "$GITHUB_OUTPUT"
+          echo "Resolved run=$run codes=$codes matches_per_team=$matches_per_team max_requests=$max_requests"
+
       - name: Snapshot protected odds feed
+        if: steps.scope.outputs.run == 'true'
         run: sha256sum odds/odds_api_io/domestic_odds.json > /tmp/domestic_odds.before
 
       - name: Backfill recent betting-candidate statistics only
+        if: steps.scope.outputs.run == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          LEAGUE_CODES: ${{ inputs.league_codes }}
-          MATCHES_PER_TEAM: ${{ inputs.matches_per_team }}
-          MAX_REQUESTS: ${{ inputs.max_requests }}
+          LEAGUE_CODES: ${{ steps.scope.outputs.codes }}
+          MATCHES_PER_TEAM: ${{ steps.scope.outputs.matches_per_team }}
+          MAX_REQUESTS: ${{ steps.scope.outputs.max_requests }}
         run: |
           python scripts/backfill_betting_candidate_stats.py \
             --codes "$LEAGUE_CODES" \
@@ -57,9 +109,11 @@ jobs:
             --max-requests "$MAX_REQUESTS"
 
       - name: Verify protected odds feed is unchanged
+        if: steps.scope.outputs.run == 'true'
         run: sha256sum -c /tmp/domestic_odds.before
 
       - name: Guard changed paths
+        if: steps.scope.outputs.run == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -71,6 +125,7 @@ jobs:
           fi
 
       - name: Commit stats artifacts only
+        if: steps.scope.outputs.run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
