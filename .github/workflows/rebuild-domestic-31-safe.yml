@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "scripts/build_extra_12_enriched_safe.py"
+      - "scripts/refresh_extra_12_odds_safe.py"
       - ".github/workflows/rebuild-domestic-31-safe.yml"
   push:
     branches: [rebuild-domestic-31-safe]
     paths:
-      - "scripts/build_extra_12_enriched_safe.py"
+      - "scripts/refresh_extra_12_odds_safe.py"
       - ".github/workflows/rebuild-domestic-31-safe.yml"
   workflow_dispatch:
 
@@ -20,9 +20,9 @@ env:
   PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
-  validate-cache-only:
+  refresh-extra12-odds-only:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout isolated branch
         uses: actions/checkout@v4
@@ -35,42 +35,47 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Rebuild extra-12 artifacts from committed API-Football caches only
-        run: python scripts/build_extra_12_enriched_safe.py
+      - name: Refresh exact odds only for extra 12
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: Bet365,Unibet
+        run: python scripts/refresh_extra_12_odds_safe.py
 
-      - name: Validate 31-league registry and score import contract
+      - name: Validate preservation and exact odds
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          base = {"ARG","BRA","IRL","USA","CHN","NOR","BRA2","SWE2","FIN","SWE","MEX","ROM","DNK","POL","RUS","SWZ","AUT2","AUT","SC0"}
           extra = {"SRB","BGR","SVN","HUN","CZE","SVK","ISL","LVA","LTU","EST","FIN2","NOR2"}
-          live = json.loads(Path('data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
-          assert live.get('leagueCount') == 31
-          assert {str(x.get('leagueCode') or '') for x in live.get('leagues', [])} == base | extra
-          index = json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
-          assert index.get('league_count') == 31
-          assert {str(x.get('league_code') or '') for x in index.get('leagues', [])} == base | extra
-          report = json.loads(Path('reports/domestic_31_extra_enriched_safe.json').read_text(encoding='utf-8'))
-          assert report.get('scoreContractValidated') is True
-          assert set(report.get('base19Preserved') or []) == base
-          validation = report.get('scoreValidation') or {}
-          assert set(validation) == extra
-          for code, counts in validation.items():
-              assert int(counts.get('withoutFullTimeScore') or 0) == 0, (code, counts)
-              assert int(counts.get('withFullTimeScore') or 0) > 0, (code, counts)
-          print({'leagueCount': 31, 'scoreContractValidated': True, 'scoreValidation': validation})
+          report = json.loads(Path('reports/domestic_31_extra_odds_safe.json').read_text(encoding='utf-8'))
+          assert report.get('existingLeagueObjectsPreserved') is True
+          assert set(report.get('requested') or []) == extra
+          feed = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          assert (feed.get('registry') or {}).get('registryLeagueCount') == 31
+          for league in feed.get('leagues', []) or []:
+              for match in league.get('matches', []) or []:
+                  for market in match.get('markets', []) or []:
+                      assert market.get('exactBookmakerOdds') is True
+                      assert str(market.get('bookmaker') or '').strip()
+                      assert float(market.get('odds')) > 1.0
+          print({
+              'existingLeagueObjectsPreserved': True,
+              'feedLeagueRows': len(feed.get('leagues', []) or []),
+              'addedOrRefreshed': report.get('addedOrRefreshed'),
+              'rateLimitRemaining': report.get('rateLimitRemaining'),
+              'warnings': report.get('warnings'),
+          })
           PY
 
-      - name: Commit only score-complete artifacts to isolated branch
+      - name: Commit only odds data to isolated branch
         run: |
           find . -type d -name __pycache__ -prune -exec rm -rf {} +
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/statmaker/domestic_enriched reports/domestic_31_extra_enriched_safe.json
+          git add odds/odds_api_io/domestic_odds.json reports/domestic_31_extra_odds_safe.json
           if git diff --cached --quiet; then
-            echo "No artifact changes."
+            echo "No odds changes."
           else
-            git commit -m "Add score-complete history for 12 Domestic leagues"
+            git commit -m "Refresh exact odds for extra 12 without touching existing leagues"
             git push origin HEAD:rebuild-domestic-31-safe
           fi
