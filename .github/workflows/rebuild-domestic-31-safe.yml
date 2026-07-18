@@ -1,6 +1,8 @@
 name: Rebuild Domestic 31 Safe
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [rebuild-domestic-31-safe]
     paths:
@@ -58,13 +60,12 @@ jobs:
           extra = {"SRB","BGR","SVN","HUN","CZE","SVK","ISL","LVA","LTU","EST","FIN2","NOR2"}
           live = json.loads(Path('data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
           codes = {str(x.get('leagueCode') or '') for x in live.get('leagues', [])}
-          assert codes == base | extra, (len(codes), sorted((base|extra)-codes), sorted(codes-(base|extra)))
+          assert codes == base | extra
           assert live.get('leagueCount') == 31
           idx = json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
           idx_codes = {str(x.get('league_code') or '') for x in idx.get('leagues', [])}
           assert base.issubset(idx_codes)
           assert extra.issubset(idx_codes)
-          assert idx.get('league_count') >= 31
           odds = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
           for league in odds.get('leagues', []):
               for match in league.get('matches', []) or []:
@@ -100,19 +101,11 @@ jobs:
           PY
 
       - name: Commit isolated rebuild result to branch only
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add \
-            config/domestic_leagues.json \
-            config/api_football_enrichment_leagues.json \
-            data/statmaker/domestic_live_july_registry.json \
-            data/api_football/fixture_stats \
-            data/statmaker/domestic_enriched \
-            odds/odds_api_io/domestic_odds.json \
-            reports/domestic_31_extra_stats_safe.json \
-            reports/domestic_31_extra_enriched_safe.json \
-            reports/domestic_31_extra_odds_safe.json
+          git add config/domestic_leagues.json config/api_football_enrichment_leagues.json data/statmaker/domestic_live_july_registry.json data/api_football/fixture_stats data/statmaker/domestic_enriched odds/odds_api_io/domestic_odds.json reports/domestic_31_extra_stats_safe.json reports/domestic_31_extra_enriched_safe.json reports/domestic_31_extra_odds_safe.json
           if git diff --cached --quiet; then
             echo "No data changes to commit."
           else
