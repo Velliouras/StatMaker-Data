@@ -1,0 +1,67 @@
+name: Rebuild Extra 12 Artifacts From Cache
+
+on:
+  push:
+    branches: [rebuild-domestic-31-safe]
+    paths:
+      - "scripts/build_extra_12_enriched_safe.py"
+      - ".github/workflows/rebuild-extra-12-artifacts-from-cache.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
+jobs:
+  rebuild-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+        with:
+          ref: rebuild-domestic-31-safe
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Rebuild only extra-12 enriched artifacts from committed caches
+        run: python scripts/build_extra_12_enriched_safe.py
+
+      - name: Validate score import contract and base-19 preservation
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          extra = {"SRB","BGR","SVN","HUN","CZE","SVK","ISL","LVA","LTU","EST","FIN2","NOR2"}
+          base = {"ARG","BRA","IRL","USA","CHN","NOR","BRA2","SWE2","FIN","SWE","MEX","ROM","DNK","POL","RUS","SWZ","AUT2","AUT","SC0"}
+          report = json.loads(Path('reports/domestic_31_extra_enriched_safe.json').read_text(encoding='utf-8'))
+          assert report.get('scoreContractValidated') is True
+          assert set(report.get('base19Preserved') or []) == base
+          validation = report.get('scoreValidation') or {}
+          assert set(validation) == extra
+          for code, counts in validation.items():
+              assert int(counts.get('withoutFullTimeScore') or 0) == 0, (code, counts)
+              assert int(counts.get('withFullTimeScore') or 0) > 0, (code, counts)
+          index = json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          assert index.get('league_count') == 31
+          print({'scoreContractValidated': True, 'leagueCount': 31, 'scoreValidation': validation})
+          PY
+
+      - name: Commit only rebuilt data artifacts to isolated branch
+        run: |
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/domestic_enriched reports/domestic_31_extra_enriched_safe.json
+          if git diff --cached --quiet; then
+            echo "No artifact changes."
+          else
+            git commit -m "Add score-complete history for 12 Domestic leagues"
+            git push origin HEAD:rebuild-domestic-31-safe
+          fi
