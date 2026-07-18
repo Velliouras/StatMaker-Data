@@ -3,6 +3,14 @@ name: Rebuild Domestic 31 Safe
 on:
   pull_request:
     branches: [main]
+    paths:
+      - "config/july_extra_leagues_2026.json"
+      - "config/nordic_extra_leagues.json"
+      - "scripts/rebuild_domestic_31_registry_safe.py"
+      - "scripts/fetch_extra_12_stats_safe.py"
+      - "scripts/build_extra_12_enriched_safe.py"
+      - "scripts/refresh_extra_12_odds_safe.py"
+      - ".github/workflows/rebuild-domestic-31-safe.yml"
   push:
     branches: [rebuild-domestic-31-safe]
     paths:
@@ -69,14 +77,14 @@ jobs:
           idx_codes = {str(x.get('league_code') or '') for x in idx.get('leagues', [])}
           assert base.issubset(idx_codes)
           assert extra.issubset(idx_codes)
-          odds = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
-          for league in odds.get('leagues', []):
+          odds_data = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          for league in odds_data.get('leagues', []):
               for match in league.get('matches', []) or []:
                   for market in match.get('markets', []) or []:
                       assert market.get('exactBookmakerOdds') is True
                       assert str(market.get('bookmaker') or '').strip()
                       assert float(market.get('odds')) > 1.0
-          print({'liveLeagueCount': len(codes), 'indexLeagueCount': len(idx_codes), 'oddsLeagueRows': len(odds.get('leagues', []))})
+          print({'liveLeagueCount': len(codes), 'indexLeagueCount': len(idx_codes), 'oddsLeagueRows': len(odds_data.get('leagues', []))})
           PY
 
       - name: Refuse unexpected tracked changes
@@ -104,8 +112,7 @@ jobs:
           print('Tracked changes are data-only and within the allowlist.')
           PY
 
-      - name: Commit isolated rebuild result to branch only
-        if: github.event_name != 'pull_request'
+      - name: Commit validated rebuild result to isolated branch only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
