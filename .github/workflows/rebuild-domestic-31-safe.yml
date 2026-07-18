@@ -4,12 +4,12 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "scripts/refresh_extra_12_odds_safe.py"
+      - "scripts/salvage_extra_12_exact_odds_from_history.py"
       - ".github/workflows/rebuild-domestic-31-safe.yml"
   push:
     branches: [rebuild-domestic-31-safe]
     paths:
-      - "scripts/refresh_extra_12_odds_safe.py"
+      - "scripts/salvage_extra_12_exact_odds_from_history.py"
       - ".github/workflows/rebuild-domestic-31-safe.yml"
   workflow_dispatch:
 
@@ -20,11 +20,11 @@ env:
   PYTHONDONTWRITEBYTECODE: "1"
 
 jobs:
-  refresh-extra12-odds-only:
+  salvage-exact-history-only:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: Checkout isolated branch
+      - name: Checkout isolated branch with full history
         uses: actions/checkout@v4
         with:
           ref: rebuild-domestic-31-safe
@@ -35,47 +35,37 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Refresh exact odds only for extra 12
-        env:
-          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-          ODDS_API_IO_BOOKMAKERS: Bet365,Unibet
-        run: python scripts/refresh_extra_12_odds_safe.py
+      - name: Salvage only exact non-expired odds for extra 12
+        run: python scripts/salvage_extra_12_exact_odds_from_history.py
 
-      - name: Validate preservation and exact odds
+      - name: Validate preservation and inventory
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          extra = {"SRB","BGR","SVN","HUN","CZE","SVK","ISL","LVA","LTU","EST","FIN2","NOR2"}
-          report = json.loads(Path('reports/domestic_31_extra_odds_safe.json').read_text(encoding='utf-8'))
-          assert report.get('existingLeagueObjectsPreserved') is True
-          assert set(report.get('requested') or []) == extra
+          report = json.loads(Path('reports/domestic_31_extra_odds_salvage.json').read_text(encoding='utf-8'))
+          assert report.get('existingNonExtraObjectsPreserved') is True
+          inventory = report.get('inventory') or {}
           feed = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
           assert (feed.get('registry') or {}).get('registryLeagueCount') == 31
+          assert inventory.get('leagueRowCount') == len(feed.get('leagues', []) or [])
           for league in feed.get('leagues', []) or []:
               for match in league.get('matches', []) or []:
                   for market in match.get('markets', []) or []:
                       assert market.get('exactBookmakerOdds') is True
                       assert str(market.get('bookmaker') or '').strip()
                       assert float(market.get('odds')) > 1.0
-          print({
-              'existingLeagueObjectsPreserved': True,
-              'feedLeagueRows': len(feed.get('leagues', []) or []),
-              'addedOrRefreshed': report.get('addedOrRefreshed'),
-              'rateLimitRemaining': report.get('rateLimitRemaining'),
-              'warnings': report.get('warnings'),
-          })
+          print(report)
           PY
 
-      - name: Commit only odds data to isolated branch
+      - name: Commit only salvaged exact odds and report to isolated branch
         run: |
-          find . -type d -name __pycache__ -prune -exec rm -rf {} +
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add odds/odds_api_io/domestic_odds.json reports/domestic_31_extra_odds_safe.json
+          git add odds/odds_api_io/domestic_odds.json reports/domestic_31_extra_odds_salvage.json
           if git diff --cached --quiet; then
-            echo "No odds changes."
+            echo "No historical exact odds available to add."
           else
-            git commit -m "Refresh exact odds for extra 12 without touching existing leagues"
+            git commit -m "Salvage exact odds for extra Domestic leagues from Git history"
             git push origin HEAD:rebuild-domestic-31-safe
           fi
