@@ -1,0 +1,87 @@
+name: Backfill Domestic Betting Candidate Stats
+
+on:
+  workflow_dispatch:
+    inputs:
+      league_codes:
+        description: "Comma-separated StatMaker league codes"
+        required: true
+        default: "SRB,BGR,SVN,HUN,CZE,SVK,ISL,LVA,LTU,EST"
+        type: string
+      matches_per_team:
+        description: "Recent completed matches per team to enrich"
+        required: true
+        default: "5"
+        type: string
+      max_requests:
+        description: "Maximum API-Football requests for this run"
+        required: true
+        default: "85"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-betting-candidate-stats-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Snapshot protected odds feed
+        run: sha256sum odds/odds_api_io/domestic_odds.json > /tmp/domestic_odds.before
+
+      - name: Backfill recent betting-candidate statistics only
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          LEAGUE_CODES: ${{ inputs.league_codes }}
+          MATCHES_PER_TEAM: ${{ inputs.matches_per_team }}
+          MAX_REQUESTS: ${{ inputs.max_requests }}
+        run: |
+          python scripts/backfill_betting_candidate_stats.py \
+            --codes "$LEAGUE_CODES" \
+            --matches-per-team "$MATCHES_PER_TEAM" \
+            --max-requests "$MAX_REQUESTS"
+
+      - name: Verify protected odds feed is unchanged
+        run: sha256sum -c /tmp/domestic_odds.before
+
+      - name: Guard changed paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad_paths="$(git diff --name-only | grep -Ev '^(data/api_football/fixture_stats/|data/statmaker/domestic_enriched/|reports/betting_candidate_stats_backfill\.json$)' || true)"
+          if [ -n "$bad_paths" ]; then
+            echo "Unexpected files changed:"
+            echo "$bad_paths"
+            exit 1
+          fi
+
+      - name: Commit stats artifacts only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/api_football/fixture_stats \
+            data/statmaker/domestic_enriched \
+            reports/betting_candidate_stats_backfill.json
+          if git diff --cached --quiet; then
+            echo "No betting-candidate stats changes to commit."
+          else
+            git commit -m "Backfill Domestic betting candidate statistics"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
