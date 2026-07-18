@@ -1,0 +1,121 @@
+name: Rebuild Domestic 31 Safe
+
+on:
+  push:
+    branches: [rebuild-domestic-31-safe]
+    paths:
+      - "config/july_extra_leagues_2026.json"
+      - "config/nordic_extra_leagues.json"
+      - "scripts/rebuild_domestic_31_registry_safe.py"
+      - "scripts/fetch_extra_12_stats_safe.py"
+      - "scripts/build_extra_12_enriched_safe.py"
+      - "scripts/refresh_extra_12_odds_safe.py"
+      - ".github/workflows/rebuild-domestic-31-safe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+        with:
+          ref: rebuild-domestic-31-safe
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Rebuild 31-league registry with base-19 guard
+        run: python scripts/rebuild_domestic_31_registry_safe.py
+
+      - name: Fetch stats only for the 12 new leagues
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python scripts/fetch_extra_12_stats_safe.py
+
+      - name: Build enriched artifacts only for the 12 new leagues
+        run: python scripts/build_extra_12_enriched_safe.py
+
+      - name: Fetch exact odds only for the 12 new leagues
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: Bet365,Unibet
+        run: python scripts/refresh_extra_12_odds_safe.py
+
+      - name: Validate final data-only state
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          base = {"ARG","BRA","IRL","USA","CHN","NOR","BRA2","SWE2","FIN","SWE","MEX","ROM","DNK","POL","RUS","SWZ","AUT2","AUT","SC0"}
+          extra = {"SRB","BGR","SVN","HUN","CZE","SVK","ISL","LVA","LTU","EST","FIN2","NOR2"}
+          live = json.loads(Path('data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
+          codes = {str(x.get('leagueCode') or '') for x in live.get('leagues', [])}
+          assert codes == base | extra, (len(codes), sorted((base|extra)-codes), sorted(codes-(base|extra)))
+          assert live.get('leagueCount') == 31
+          idx = json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          idx_codes = {str(x.get('league_code') or '') for x in idx.get('leagues', [])}
+          assert base.issubset(idx_codes)
+          assert extra.issubset(idx_codes)
+          assert idx.get('league_count') >= 31
+          odds = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          for league in odds.get('leagues', []):
+              for match in league.get('matches', []) or []:
+                  for market in match.get('markets', []) or []:
+                      assert market.get('exactBookmakerOdds') is True
+                      assert str(market.get('bookmaker') or '').strip()
+                      assert float(market.get('odds')) > 1.0
+          print({'liveLeagueCount': len(codes), 'indexLeagueCount': len(idx_codes), 'oddsLeagueRows': len(odds.get('leagues', []))})
+          PY
+
+      - name: Refuse unexpected tracked changes
+        run: |
+          python - <<'PY'
+          import subprocess
+          allowed_prefixes = (
+              'config/domestic_leagues.json',
+              'config/api_football_enrichment_leagues.json',
+              'data/statmaker/domestic_live_july_registry.json',
+              'data/api_football/fixture_stats/',
+              'data/statmaker/domestic_enriched/',
+              'odds/odds_api_io/domestic_odds.json',
+              'reports/domestic_31_',
+          )
+          changed = subprocess.check_output(['git','status','--porcelain'], text=True).splitlines()
+          bad = []
+          for line in changed:
+              path = line[3:]
+              if not any(path == p or path.startswith(p) for p in allowed_prefixes):
+                  bad.append(path)
+          if bad:
+              raise SystemExit(f'Unexpected files changed: {bad}')
+          print('Tracked changes are data-only and within the allowlist.')
+          PY
+
+      - name: Commit isolated rebuild result to branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            config/domestic_leagues.json \
+            config/api_football_enrichment_leagues.json \
+            data/statmaker/domestic_live_july_registry.json \
+            data/api_football/fixture_stats \
+            data/statmaker/domestic_enriched \
+            odds/odds_api_io/domestic_odds.json \
+            reports/domestic_31_extra_stats_safe.json \
+            reports/domestic_31_extra_enriched_safe.json \
+            reports/domestic_31_extra_odds_safe.json
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Rebuild 31 Domestic leagues safely on isolated branch"
+            git push origin HEAD:rebuild-domestic-31-safe
+          fi
