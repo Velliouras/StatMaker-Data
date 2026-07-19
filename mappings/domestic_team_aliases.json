@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "normalizationRules": [
     "lowercase",
     "remove accents",
@@ -10,162 +10,995 @@
   ],
   "aliases": {
     "NOR": {
-      "Bodø/Glimt": ["Bodo/Glimt", "FK Bodo Glimt", "Bodoe/Glimt", "Bodo Glimt"],
-      "Lillestrøm": ["Lillestroem", "Lillestrom", "Lillestrøm SK", "Lillestrom SK"],
-      "Tromsø": ["Tromsoe", "Tromso", "Tromsø IL", "Tromso IL"],
-      "Vålerenga": ["Valerenga", "Vaalerenga", "Vålerenga IF", "Valerenga IF"],
-      "Aalesund": ["Aalesunds", "Aalesunds FK", "Aalesund FK"],
-      "Brann": ["SK Brann", "Brann Bergen"],
-      "Kristiansund": ["Kristiansund BK", "Kristiansund Ballklubb"],
-      "Sarpsborg 08": ["Sarpsborg", "Sarpsborg 08 FF"],
-      "HamKam": ["Hamarkameratene", "Ham-Kam"],
-      "Sandefjord": ["Sandefjord Fotball"],
-      "Fredrikstad": ["Fredrikstad FK"],
-      "KFUM Oslo": ["KFUM", "KFUM-Kameratene Oslo"],
-      "Start": ["IK Start"],
-      "Molde": ["Molde FK"],
-      "Rosenborg": ["Rosenborg BK"],
-      "Viking": ["Viking FK"]
+      "Bodø/Glimt": [
+        "Bodo/Glimt",
+        "FK Bodo Glimt",
+        "Bodoe/Glimt",
+        "Bodo Glimt"
+      ],
+      "Lillestrøm": [
+        "Lillestroem",
+        "Lillestrom",
+        "Lillestrøm SK",
+        "Lillestrom SK"
+      ],
+      "Tromsø": [
+        "Tromsoe",
+        "Tromso",
+        "Tromsø IL",
+        "Tromso IL"
+      ],
+      "Vålerenga": [
+        "Valerenga",
+        "Vaalerenga",
+        "Vålerenga IF",
+        "Valerenga IF",
+        "Vaalerenga IF"
+      ],
+      "Aalesund": [
+        "Aalesunds",
+        "Aalesunds FK",
+        "Aalesund FK"
+      ],
+      "Brann": [
+        "SK Brann",
+        "Brann Bergen"
+      ],
+      "Kristiansund": [
+        "Kristiansund BK",
+        "Kristiansund Ballklubb"
+      ],
+      "Sarpsborg 08": [
+        "Sarpsborg",
+        "Sarpsborg 08 FF"
+      ],
+      "HamKam": [
+        "Hamarkameratene",
+        "Ham-Kam"
+      ],
+      "Sandefjord": [
+        "Sandefjord Fotball"
+      ],
+      "Fredrikstad": [
+        "Fredrikstad FK"
+      ],
+      "KFUM Oslo": [
+        "KFUM",
+        "KFUM-Kameratene Oslo"
+      ],
+      "Start": [
+        "IK Start"
+      ],
+      "Molde": [
+        "Molde FK"
+      ],
+      "Rosenborg": [
+        "Rosenborg BK"
+      ],
+      "Viking": [
+        "Viking FK"
+      ]
     },
     "SWE": {
-      "AIK": ["AIK Stockholm"],
-      "Hammarby": ["Hammarby IF"],
-      "Malmö FF": ["Malmo FF", "Malmö", "Malmo"],
-      "IFK Göteborg": ["IFK Goteborg", "Goteborg", "Göteborg", "Gothenburg"],
-      "Mjällby": ["Mjallby", "Mjällby AIF", "Mjallby AIF"],
-      "Västerås": ["Vasteraas", "Vasteras", "Västerås SK", "Vasteras SK", "Vasteraas SK"],
-      "BK Häcken": ["BK Hacken", "Häcken", "Hacken"],
-      "Djurgården": ["Djurgarden", "Djurgårdens IF", "Djurgardens IF"],
-      "Örgryte": ["Orgryte", "Örgryte IS", "Orgryte IS"],
-      "Elfsborg": ["IF Elfsborg"],
-      "Sirius": ["IK Sirius", "Sirius FK"],
-      "Degerfors": ["Degerfors IF"],
-      "Halmstad": ["Halmstads BK", "Halmstad BK"],
-      "Kalmar FF": ["Kalmar"],
-      "Brommapojkarna": ["IF Brommapojkarna", "BP"],
-      "GAIS": ["Gais"]
+      "AIK": [
+        "AIK Stockholm"
+      ],
+      "Hammarby": [
+        "Hammarby IF"
+      ],
+      "Malmö FF": [
+        "Malmo FF",
+        "Malmö",
+        "Malmo"
+      ],
+      "IFK Göteborg": [
+        "IFK Goteborg",
+        "Goteborg",
+        "Göteborg",
+        "Gothenburg"
+      ],
+      "Mjällby": [
+        "Mjallby",
+        "Mjällby AIF",
+        "Mjallby AIF"
+      ],
+      "Västerås": [
+        "Vasteraas",
+        "Vasteras",
+        "Västerås SK",
+        "Vasteras SK",
+        "Vasteraas SK"
+      ],
+      "BK Häcken": [
+        "BK Hacken",
+        "Häcken",
+        "Hacken"
+      ],
+      "Djurgården": [
+        "Djurgarden",
+        "Djurgårdens IF",
+        "Djurgardens IF"
+      ],
+      "Örgryte": [
+        "Orgryte",
+        "Örgryte IS",
+        "Orgryte IS"
+      ],
+      "Elfsborg": [
+        "IF Elfsborg"
+      ],
+      "Sirius": [
+        "IK Sirius",
+        "Sirius FK"
+      ],
+      "Degerfors": [
+        "Degerfors IF"
+      ],
+      "Halmstad": [
+        "Halmstads BK",
+        "Halmstad BK"
+      ],
+      "Kalmar FF": [
+        "Kalmar"
+      ],
+      "Brommapojkarna": [
+        "IF Brommapojkarna",
+        "BP"
+      ],
+      "GAIS": [
+        "Gais"
+      ]
     },
     "SWE2": {
-      "Helsingborg": ["Helsingborgs", "Helsingborgs IF", "Helsingborg IF"],
-      "Osters IF": ["Osters", "Östers", "Osters IF", "Östers IF"],
-      "IFK Norrkoping": ["Norrkoping", "Norrköping", "IFK Norrköping"],
-      "IFK Varnamo": ["Varnamo", "Värnamo", "IFK Värnamo"],
-      "IK brage": ["Brage", "IK Brage"],
-      "Falkenbergs FF": ["Falkenberg", "Falkenbergs"],
-      "Ljungskile SK": ["Ljungskile"],
-      "GIF Sundsvall": ["Sundsvall"],
-      "United Nordic": ["United Nordic FC"],
-      "Orebro SK": ["Orebro", "Örebro", "Örebro SK"],
-      "Landskrona BoIS": ["Landskrona"],
-      "Varbergs BoIS FC": ["Varbergs", "Varberg", "Varbergs BoIS"],
-      "Ostersunds FK": ["Ostersund", "Östersund", "Ostersunds", "Östersunds"],
-      "Oddevold": ["IK Oddevold"],
-      "Norrby IF": ["Norrby"],
-      "Sandviken": ["Sandvikens", "Sandvikens IF", "Sandviken IF"]
+      "Helsingborg": [
+        "Helsingborgs",
+        "Helsingborgs IF",
+        "Helsingborg IF"
+      ],
+      "Osters IF": [
+        "Osters",
+        "Östers",
+        "Osters IF",
+        "Östers IF"
+      ],
+      "IFK Norrkoping": [
+        "Norrkoping",
+        "Norrköping",
+        "IFK Norrköping",
+        "IFK Norrkoping FK"
+      ],
+      "IFK Varnamo": [
+        "Varnamo",
+        "Värnamo",
+        "IFK Värnamo"
+      ],
+      "IK brage": [
+        "Brage",
+        "IK Brage"
+      ],
+      "Falkenbergs FF": [
+        "Falkenberg",
+        "Falkenbergs"
+      ],
+      "Ljungskile SK": [
+        "Ljungskile"
+      ],
+      "GIF Sundsvall": [
+        "Sundsvall"
+      ],
+      "United Nordic": [
+        "United Nordic FC",
+        "Nordic United FC"
+      ],
+      "Orebro SK": [
+        "Orebro",
+        "Örebro",
+        "Örebro SK"
+      ],
+      "Landskrona BoIS": [
+        "Landskrona"
+      ],
+      "Varbergs BoIS FC": [
+        "Varbergs",
+        "Varberg",
+        "Varbergs BoIS"
+      ],
+      "Ostersunds FK": [
+        "Ostersund",
+        "Östersund",
+        "Ostersunds",
+        "Östersunds"
+      ],
+      "Oddevold": [
+        "IK Oddevold"
+      ],
+      "Norrby IF": [
+        "Norrby"
+      ],
+      "Sandviken": [
+        "Sandvikens",
+        "Sandvikens IF",
+        "Sandviken IF"
+      ]
     },
     "FIN": {
-      "HJK Helsinki": ["HJK", "Helsingin Jalkapalloklubi"],
-      "KuPS": ["Kuopion Palloseura"],
-      "SJK": ["Seinajoen", "Seinäjoen", "SJK Seinäjoki", "SJK Seinajoki", "Seinäjoen Jalkapallokerho", "Seinajoen Jalkapallokerho", "Seinajoen JK", "Seinäjoen JK"],
-      "VPS": ["Vaasa", "Vaasan Palloseura", "VPS Vaasa"],
-      "Inter Turku": ["FC Inter Turku", "Inter"],
-      "IFK Mariehamn": ["Mariehamn"],
-      "AC Oulu": ["Oulu"],
-      "Ilves": ["Tampereen Ilves"],
-      "Lahti": ["FC Lahti"],
-      "Gnistan": ["IF Gnistan"],
-      "Jaro": ["FF Jaro"],
-      "Turku PS": ["TPS", "Turun Palloseura"]
+      "HJK Helsinki": [
+        "HJK",
+        "Helsingin Jalkapalloklubi"
+      ],
+      "KuPS": [
+        "Kuopion Palloseura"
+      ],
+      "SJK": [
+        "Seinajoen",
+        "Seinäjoen",
+        "SJK Seinäjoki",
+        "SJK Seinajoki",
+        "Seinäjoen Jalkapallokerho",
+        "Seinajoen Jalkapallokerho",
+        "Seinajoen JK",
+        "Seinäjoen JK"
+      ],
+      "VPS": [
+        "Vaasa",
+        "Vaasan Palloseura",
+        "VPS Vaasa"
+      ],
+      "Inter Turku": [
+        "FC Inter Turku",
+        "Inter"
+      ],
+      "IFK Mariehamn": [
+        "Mariehamn"
+      ],
+      "AC Oulu": [
+        "Oulu"
+      ],
+      "Ilves": [
+        "Tampereen Ilves"
+      ],
+      "Lahti": [
+        "FC Lahti"
+      ],
+      "Gnistan": [
+        "IF Gnistan"
+      ],
+      "Jaro": [
+        "FF Jaro"
+      ],
+      "Turku PS": [
+        "TPS",
+        "Turun Palloseura"
+      ]
     },
     "IRL": {
-      "Derry City": ["Derry"],
-      "Waterford": ["Waterford FC"],
-      "Drogheda United": ["Drogheda"],
-      "Bohemians": ["Bohemians D.", "Bohemians D", "Bohemian FC", "Bohemians Dublin"],
-      "St Patrick's Athl.": ["St. Patrick´s", "St. Patrick's", "St Patricks", "St Patrick's Athletic", "St. Patrick's Athletic", "St Patrick´s"],
-      "Galway United": ["Galway Utd", "Galway"],
-      "Sligo Rovers": ["Sligo"],
-      "Shamrock Rovers": ["Shamrock", "Shamrock Rovers FC"],
-      "Shelbourne": ["Shelbourne FC"],
-      "Dundalk": ["Dundalk FC"]
+      "Derry City": [
+        "Derry",
+        "Derry City FC"
+      ],
+      "Waterford": [
+        "Waterford FC"
+      ],
+      "Drogheda United": [
+        "Drogheda",
+        "Drogheda United FC"
+      ],
+      "Bohemians": [
+        "Bohemians D.",
+        "Bohemians D",
+        "Bohemian FC",
+        "Bohemians Dublin",
+        "Bohemians Dublin FC"
+      ],
+      "St Patrick's Athl.": [
+        "St. Patrick´s",
+        "St. Patrick's",
+        "St Patricks",
+        "St Patrick's Athletic",
+        "St. Patrick's Athletic",
+        "St Patrick´s"
+      ],
+      "Galway United": [
+        "Galway Utd",
+        "Galway",
+        "Galway United FC"
+      ],
+      "Sligo Rovers": [
+        "Sligo",
+        "Sligo Rovers FC"
+      ],
+      "Shamrock Rovers": [
+        "Shamrock",
+        "Shamrock Rovers FC"
+      ],
+      "Shelbourne": [
+        "Shelbourne FC"
+      ],
+      "Dundalk": [
+        "Dundalk FC"
+      ]
     },
     "CHN": {
-      "Yunnan Yukun": ["Yunnan Yukun FC"],
-      "Henan": ["Henan FC", "Henan Jianye", "Henan Songshan Longmen"],
-      "Liaoning Tieren": ["Liaoning Tieren FC"],
-      "Chongqing Tonglianglong FC": ["Chongqing Tonglianglong"],
-      "Qingdao West Coast FC": ["Qingdao West Coast"],
-      "Shanghai Port": ["Shanghai Port FC", "Shanghai SIPG"],
-      "Beijing Guoan": ["Beijing Guoan FC"],
-      "Shandong Taishan": ["Shandong Taishan FC", "Shandong Luneng"],
-      "Dalian Yingbo FC": ["Dalian Yingbo"],
-      "Wuhan Three Towns FC": ["Wuhan Three Towns"],
-      "Tianjin Jinmen Tiger": ["Tianjin Jinmen Tiger FC", "Tianjin Teda"],
-      "Shenzhen Peng City": ["Shenzhen Peng City FC"],
-      "Qingdao Hainiu": ["Qingdao Hainiu FC"],
-      "Chengdu Rongcheng": ["Chengdu Rongcheng FC"],
-      "Shanghai Shenhua": ["Shanghai Shenhua FC"],
-      "Zhejiang Prof.": ["Zhejiang Professional", "Zhejiang Pro", "Zhejiang FC"]
+      "Yunnan Yukun": [
+        "Yunnan Yukun FC"
+      ],
+      "Henan": [
+        "Henan FC",
+        "Henan Jianye",
+        "Henan Songshan Longmen"
+      ],
+      "Liaoning Tieren": [
+        "Liaoning Tieren FC"
+      ],
+      "Chongqing Tonglianglong FC": [
+        "Chongqing Tonglianglong"
+      ],
+      "Qingdao West Coast FC": [
+        "Qingdao West Coast"
+      ],
+      "Shanghai Port": [
+        "Shanghai Port FC",
+        "Shanghai SIPG"
+      ],
+      "Beijing Guoan": [
+        "Beijing Guoan FC"
+      ],
+      "Shandong Taishan": [
+        "Shandong Taishan FC",
+        "Shandong Luneng"
+      ],
+      "Dalian Yingbo FC": [
+        "Dalian Yingbo"
+      ],
+      "Wuhan Three Towns FC": [
+        "Wuhan Three Towns"
+      ],
+      "Tianjin Jinmen Tiger": [
+        "Tianjin Jinmen Tiger FC",
+        "Tianjin Teda"
+      ],
+      "Shenzhen Peng City": [
+        "Shenzhen Peng City FC"
+      ],
+      "Qingdao Hainiu": [
+        "Qingdao Hainiu FC"
+      ],
+      "Chengdu Rongcheng": [
+        "Chengdu Rongcheng FC"
+      ],
+      "Shanghai Shenhua": [
+        "Shanghai Shenhua FC"
+      ],
+      "Zhejiang Prof.": [
+        "Zhejiang Professional",
+        "Zhejiang Pro",
+        "Zhejiang FC"
+      ]
     },
     "SRB": {
-      "Vojvodina": ["FK Vojvodina", "FK Vojvodina Novi Sad", "Vojvodina Novi Sad"],
-      "Cukaricki": ["FK Cukaricki", "FK Cukaricki Belgrade", "Cukaricki Belgrade"],
-      "FK Crvena Zvezda": ["Crvena Zvezda", "FK Crvena Zvezda Belgrade", "Crvena Zvezda Belgrade", "Red Star Belgrade"],
-      "Radnicki 1923": ["FK Radnicki 1923", "FK Radnicki 1923 Kragujevac", "Radnicki 1923 Kragujevac"],
-      "FK Partizan": ["Partizan", "FK Partizan Belgrade", "Partizan Belgrade"]
+      "Vojvodina": [
+        "FK Vojvodina",
+        "FK Vojvodina Novi Sad",
+        "Vojvodina Novi Sad"
+      ],
+      "Cukaricki": [
+        "FK Cukaricki",
+        "FK Cukaricki Belgrade",
+        "Cukaricki Belgrade"
+      ],
+      "FK Crvena Zvezda": [
+        "Crvena Zvezda",
+        "FK Crvena Zvezda Belgrade",
+        "Crvena Zvezda Belgrade",
+        "Red Star Belgrade"
+      ],
+      "Radnicki 1923": [
+        "FK Radnicki 1923",
+        "FK Radnicki 1923 Kragujevac",
+        "Radnicki 1923 Kragujevac"
+      ],
+      "FK Partizan": [
+        "Partizan",
+        "FK Partizan Belgrade",
+        "Partizan Belgrade"
+      ],
+      "IMT Novi Beograd": [
+        "FK IMT Novi Beograd"
+      ],
+      "Mladost Lucani": [
+        "FK Mladost Lucani"
+      ],
+      "Novi Pazar": [
+        "FK Novi Pazar"
+      ],
+      "Radnicki NIS": [
+        "FK Radnicki Nis"
+      ],
+      "Radnik Surdulica": [
+        "FK Radnik Surdulica"
+      ],
+      "Železničar Pančevo": [
+        "FK Zeleznicar Pancevo"
+      ]
     },
     "CZE": {
-      "Plzen": ["FC Viktoria Plzen", "Viktoria Plzen"],
-      "Bohemians 1905": ["Bohemians Prague 1905"],
-      "Sparta Praha": ["Sparta Prague", "AC Sparta Prague"],
-      "Slavia Praha": ["Slavia Prague", "SK Slavia Prague"],
-      "Slovácko": ["1. FC Slovacko Uherske Hradiste", "1 FC Slovacko", "Slovacko"],
-      "Sigma Olomouc": ["SK Sigma Olomouc"]
+      "Plzen": [
+        "FC Viktoria Plzen",
+        "Viktoria Plzen"
+      ],
+      "Bohemians 1905": [
+        "Bohemians Prague 1905"
+      ],
+      "Sparta Praha": [
+        "Sparta Prague",
+        "AC Sparta Prague"
+      ],
+      "Slavia Praha": [
+        "Slavia Prague",
+        "SK Slavia Prague"
+      ],
+      "Slovácko": [
+        "1. FC Slovacko Uherske Hradiste",
+        "1 FC Slovacko",
+        "Slovacko"
+      ],
+      "Sigma Olomouc": [
+        "SK Sigma Olomouc"
+      ],
+      "Baník Ostrava": [
+        "FC Banik Ostrava"
+      ],
+      "Hradec Králové": [
+        "FC Hradec Kralove"
+      ],
+      "Slovan Liberec": [
+        "FC Slovan Liberec"
+      ],
+      "Zlin": [
+        "FC Zlin"
+      ],
+      "Mlada Boleslav": [
+        "FK Mlada Boleslav"
+      ],
+      "Pardubice": [
+        "FK Pardubice"
+      ],
+      "Teplice": [
+        "FK Teplice"
+      ],
+      "Artis": [
+        "SK Artis Brno"
+      ]
     },
     "DNK": {
-      "FC København": ["FC Copenhagen", "Kobenhavn", "København"],
-      "Brøndby": ["Brondby", "Brøndby IF", "Brondby IF"]
+      "FC København": [
+        "FC Copenhagen",
+        "Kobenhavn",
+        "København"
+      ],
+      "Brøndby": [
+        "Brondby",
+        "Brøndby IF",
+        "Brondby IF"
+      ],
+      "Aarhus": [
+        "AGF Aarhus"
+      ],
+      "Brondby": [
+        "Broendby IF"
+      ],
+      "Odense": [
+        "Odense Boldklub"
+      ],
+      "Silkeborg": [
+        "Silkeborg IF"
+      ],
+      "Sonderjyske": [
+        "Soenderjyske"
+      ],
+      "Viborg": [
+        "Viborg FF"
+      ]
     },
     "USA": {
-      "Inter Miami": ["Inter Miami CF"],
-      "Los Angeles FC": ["LAFC", "Los Angeles Football Club"],
-      "LA Galaxy": ["Los Angeles Galaxy"]
+      "Inter Miami": [
+        "Inter Miami CF"
+      ],
+      "Los Angeles FC": [
+        "LAFC",
+        "Los Angeles Football Club"
+      ],
+      "LA Galaxy": [
+        "Los Angeles Galaxy"
+      ],
+      "Austin": [
+        "Austin FC"
+      ],
+      "Charlotte": [
+        "Charlotte FC"
+      ],
+      "San Diego": [
+        "San Diego FC"
+      ],
+      "Vancouver Whitecaps": [
+        "Vancouver Whitecaps FC"
+      ]
     },
     "BRA": {
-      "Atlético Mineiro": ["Atletico Mineiro", "Atlético-MG", "Atletico MG"],
-      "Flamengo": ["CR Flamengo"],
-      "Fluminense": ["Fluminense FC"],
-      "São Paulo": ["Sao Paulo", "São Paulo FC", "Sao Paulo FC"]
+      "Atlético Mineiro": [
+        "Atletico Mineiro",
+        "Atlético-MG",
+        "Atletico MG"
+      ],
+      "Flamengo": [
+        "CR Flamengo"
+      ],
+      "Fluminense": [
+        "Fluminense FC"
+      ],
+      "São Paulo": [
+        "Sao Paulo",
+        "São Paulo FC",
+        "Sao Paulo FC"
+      ]
     },
     "JPN": {
-      "Cerezo Osaka": ["Cerezo Osaka FC"],
-      "Gamba Osaka": ["Gamba Osaka FC"],
-      "Kashima Antlers": ["Kashima"],
-      "Urawa Reds": ["Urawa Red Diamonds"]
+      "Cerezo Osaka": [
+        "Cerezo Osaka FC"
+      ],
+      "Gamba Osaka": [
+        "Gamba Osaka FC"
+      ],
+      "Kashima Antlers": [
+        "Kashima"
+      ],
+      "Urawa Reds": [
+        "Urawa Red Diamonds"
+      ]
     },
     "ARG": {
-      "Boca Juniors": ["Boca"],
-      "River Plate": ["River"],
-      "Racing Club": ["Racing"],
-      "San Lorenzo": ["San Lorenzo de Almagro"]
+      "Boca Juniors": [
+        "Boca"
+      ],
+      "River Plate": [
+        "River"
+      ],
+      "Racing Club": [
+        "Racing"
+      ],
+      "San Lorenzo": [
+        "San Lorenzo de Almagro"
+      ]
     },
     "G1": {
-      "AEK Athens": ["AEK", "AEK Athinon"],
-      "Olympiacos": ["Olympiakos", "Olympiacos Piraeus"],
-      "Panathinaikos": ["Panathinaikos Athens"],
-      "PAOK": ["PAOK Thessaloniki"]
+      "AEK Athens": [
+        "AEK",
+        "AEK Athinon"
+      ],
+      "Olympiacos": [
+        "Olympiakos",
+        "Olympiacos Piraeus"
+      ],
+      "Panathinaikos": [
+        "Panathinaikos Athens"
+      ],
+      "PAOK": [
+        "PAOK Thessaloniki"
+      ]
     },
     "T1": {
-      "Fenerbahçe": ["Fenerbahce"],
-      "Beşiktaş": ["Besiktas"],
-      "Galatasaray": ["Galatasaray SK"]
+      "Fenerbahçe": [
+        "Fenerbahce"
+      ],
+      "Beşiktaş": [
+        "Besiktas"
+      ],
+      "Galatasaray": [
+        "Galatasaray SK"
+      ]
     },
     "N1": {},
     "P1": {},
     "B1": {},
     "SC0": {
-      "Celtic": ["Celtic FC"],
-      "Rangers": ["Rangers FC"]
-    }
+      "Celtic": [
+        "Celtic FC",
+        "Celtic Glasgow"
+      ],
+      "Rangers": [
+        "Rangers FC",
+        "Glasgow Rangers"
+      ],
+      "Aberdeen": [
+        "Aberdeen FC"
+      ],
+      "Dundee": [
+        "Dundee FC"
+      ],
+      "Falkirk": [
+        "Falkirk FC"
+      ],
+      "Heart Of Midlothian": [
+        "Heart of Midlothian FC"
+      ],
+      "Hibernian": [
+        "Hibernian FC"
+      ],
+      "Kilmarnock": [
+        "Kilmarnock FC"
+      ],
+      "Motherwell": [
+        "Motherwell FC"
+      ],
+      "ST Mirren": [
+        "St Mirren FC"
+      ]
+    },
+    "BRA2": {
+      "Ponte Preta": [
+        "AA Ponte Preta SP"
+      ],
+      "Atletico Goianiense": [
+        "AC Goianiense GO"
+      ],
+      "Athletic Club": [
+        "Athletic Club Sjdr MG"
+      ],
+      "Avai": [
+        "Avai FC SC"
+      ],
+      "Botafogo SP": [
+        "Botafogo FC SP"
+      ],
+      "Ceara": [
+        "Ceara SC CE"
+      ],
+      "Criciuma": [
+        "Criciuma EC SC"
+      ],
+      "Cuiaba": [
+        "Cuiaba EC MT"
+      ],
+      "Juventude": [
+        "EC Juventude RS"
+      ],
+      "Fortaleza EC": [
+        "Fortaleza EC CE"
+      ],
+      "Goias": [
+        "Goias EC GO"
+      ],
+      "Novorizontino": [
+        "Gremio Novorizontino SP"
+      ],
+      "Londrina": [
+        "Londrina EC PR"
+      ],
+      "Operario-PR": [
+        "Operario Ferroviario EC PR"
+      ],
+      "São Bernardo": [
+        "Sao Bernardo FC"
+      ],
+      "Vila Nova": [
+        "Vila Nova FC GO"
+      ]
+    },
+    "MEX": {
+      "Atlas": [
+        "Atlas FC"
+      ],
+      "Guadalajara Chivas": [
+        "CD Guadalajara"
+      ],
+      "Club America": [
+        "CF America"
+      ],
+      "Cruz Azul": [
+        "CF Cruz Azul"
+      ],
+      "Monterrey": [
+        "CF Monterrey"
+      ],
+      "Leon": [
+        "Club Leon"
+      ],
+      "Necaxa": [
+        "Club Necaxa"
+      ],
+      "Puebla": [
+        "Club Puebla"
+      ],
+      "Santos Laguna": [
+        "Club Santos Laguna"
+      ],
+      "Club Tijuana": [
+        "Club Tijuana de Caliente"
+      ],
+      "Toluca": [
+        "Deportivo Toluca FC"
+      ],
+      "Club Queretaro": [
+        "Queretaro FC"
+      ]
+    },
+    "ROM": {
+      "Csikszereda": [
+        "AFK Csikszereda Miercurea Ciuc"
+      ],
+      "Oţelul": [
+        "ASC Otelul Galati"
+      ],
+      "Universitatea Craiova": [
+        "CS Universitatea Craiova"
+      ],
+      "CFR 1907 Cluj": [
+        "FC CFR 1907 Cluj"
+      ],
+      "Dinamo Bucuresti": [
+        "FC Dinamo Bucuresti 1948"
+      ],
+      "Farul Constanta": [
+        "FC Farul Constanta"
+      ],
+      "Petrolul Ploiesti": [
+        "FC Petrolul Ploiesti"
+      ],
+      "Universitatea Cluj": [
+        "FC Universitatea Cluj"
+      ],
+      "Uta Arad": [
+        "FC Uta Arad"
+      ],
+      "FCSB": [
+        "Fotbal Club FCSB"
+      ],
+      "Rapid": [
+        "Rapid Bucuresti 1923"
+      ],
+      "FC Voluntari": [
+        "SC FC Voluntari"
+      ]
+    },
+    "POL": {
+      "Piast Gliwice": [
+        "GKS Piast Gliwice"
+      ],
+      "Jagiellonia": [
+        "Jagiellonia Bialystok"
+      ],
+      "Lech Poznan": [
+        "KKS Lech Poznan"
+      ],
+      "Cracovia Krakow": [
+        "KS Cracovia Krakow"
+      ],
+      "Motor Lublin": [
+        "LKP Motor Lublin"
+      ],
+      "Radomiak Radom": [
+        "RKS Radomiak Radom"
+      ],
+      "Raków Częstochowa": [
+        "RKS Rakow Czestochowa"
+      ],
+      "Widzew Łódź": [
+        "Widzew Lodz"
+      ]
+    },
+    "RUS": {
+      "Baltika": [
+        "FC Baltika Kaliningrad"
+      ],
+      "Akron": [
+        "FK Akron Tolyatti"
+      ],
+      "FC Krasnodar": [
+        "FK Krasnodar"
+      ],
+      "FC Rostov": [
+        "FK Rostov"
+      ],
+      "Rubin": [
+        "FK Rubin Kazan"
+      ],
+      "Spartak Moscow": [
+        "FK Spartak Moscow"
+      ],
+      "Zenit": [
+        "FK Zenit Saint Petersburg"
+      ],
+      "Lokomotiv": [
+        "Lokomotiv Moscow"
+      ],
+      "Krylia Sovetov": [
+        "PFK Krylia Sovetov Samara"
+      ],
+      "Akhmat": [
+        "RFK Akhmat Grozny"
+      ]
+    },
+    "SWZ": {
+      "FC ST. Gallen": [
+        "FC St. Gallen 1879"
+      ],
+      "FC Zurich": [
+        "Grasshopper Club Zurich"
+      ],
+      "Lausanne": [
+        "Lausanne-Sport"
+      ],
+      "Servette FC": [
+        "Servette Geneva"
+      ]
+    },
+    "AUT2": {
+      "Admira Wacker": [
+        "FC Admira Wacker Modling"
+      ],
+      "First Vienna": [
+        "First Vienna FC 1894"
+      ],
+      "Sturm Graz II": [
+        "SK Sturm Graz II"
+      ],
+      "SKN ST. Polten": [
+        "SKN St Polten"
+      ],
+      "Schwarz-Weiß Bregenz": [
+        "Schwarz-Weiss Bregenz"
+      ]
+    },
+    "AUT": {
+      "Red Bull Salzburg": [
+        "FC Salzburg"
+      ],
+      "Grazer AK": [
+        "Grazer AK 1902"
+      ],
+      "Lask Linz": [
+        "LASK Linz"
+      ],
+      "Sturm Graz": [
+        "SK Sturm Graz"
+      ],
+      "Ried": [
+        "SV Ried"
+      ]
+    },
+    "BGR": {
+      "Arda Kardzhali": [
+        "FC Arda Kardzhali"
+      ],
+      "CSKA 1948": [
+        "FC CSKA 1948"
+      ],
+      "Lokomotiv Sofia": [
+        "FC Lokomotiv 1929 Sofia"
+      ],
+      "Septemvri Sofia": [
+        "FK Septemvri Sofia"
+      ],
+      "Spartak Varna": [
+        "FK Spartak 1918 Varna"
+      ],
+      "Cherno More Varna": [
+        "PFC Cherno More Varna"
+      ],
+      "Levski Sofia": [
+        "PFC Levski Sofia"
+      ],
+      "Lokomotiv Plovdiv": [
+        "PFC Lokomotiv Plovdiv"
+      ],
+      "Ludogorets": [
+        "PFC Ludogorets 1945 Razgrad"
+      ],
+      "Slavia Sofia": [
+        "PFC Slavia Sofia"
+      ],
+      "Botev Vratsa": [
+        "POFC Botev Vratsa"
+      ]
+    },
+    "SVN": {
+      "Aluminij": [
+        "Aluminij Kidricevo"
+      ],
+      "Bravo": [
+        "Bravo Ljubljana"
+      ],
+      "Koper": [
+        "FC Koper"
+      ],
+      "Mura": [
+        "Mura Murska Sobota"
+      ],
+      "Celje": [
+        "NK Celje"
+      ],
+      "Maribor": [
+        "NK Maribor"
+      ],
+      "Radomlje": [
+        "NK Radomlje"
+      ],
+      "Nafta": [
+        "Nafta 1903 Lendava"
+      ]
+    },
+    "SVK": {
+      "Dunajska Streda": [
+        "DAC 1904 Dunajska Streda"
+      ],
+      "Spartak Trnava": [
+        "FC Spartak Trnava"
+      ],
+      "FK Košice": [
+        "FK Kosice"
+      ],
+      "Podbrezová": [
+        "FK Zeleziarne Podbrezova"
+      ],
+      "Komárno": [
+        "KFC Komarno"
+      ],
+      "Ružomberok": [
+        "MFK Ruzomberok"
+      ],
+      "Skalica": [
+        "MFK Skalica"
+      ],
+      "Zemplín Michalovce": [
+        "MFK Zemplin Michalovce"
+      ],
+      "Žilina": [
+        "MSK Zilina"
+      ],
+      "Slovan Bratislava": [
+        "SK Slovan Bratislava"
+      ]
+    },
+    "LVA": {
+      "Grobiņa": [
+        "FK Grobina"
+      ],
+      "Tukums": [
+        "FK Tukums 2000/TSS"
+      ],
+      "Riga": [
+        "Riga FC"
+      ],
+      "Super Nova": [
+        "SK Super Nova"
+      ]
+    },
+    "LTU": {
+      "Džiugas Telšiai": [
+        "Dziugas"
+      ],
+      "Šiauliai": [
+        "FA Siauliai"
+      ],
+      "Banga": [
+        "FK Banga Gargzdai"
+      ],
+      "Kauno Žalgiris": [
+        "FK Kauno Zalgiris"
+      ],
+      "Panevėžys": [
+        "FK Panevezys"
+      ],
+      "Suduva Marijampole": [
+        "FK Suduva Marijampole"
+      ],
+      "TransINVEST Vilnius": [
+        "FK Transinvest"
+      ],
+      "FK Zalgiris Vilnius": [
+        "Vilnius FK Zalgiris"
+      ]
+    },
+    "FIN2": {}
   }
 }
