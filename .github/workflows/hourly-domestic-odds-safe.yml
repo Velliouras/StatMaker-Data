@@ -33,6 +33,9 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Snapshot current canonical odds before refresh
+        run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
+
       - name: Validate safe refresh code
         run: |
           python -m py_compile scripts/refresh_domestic_live_july_odds.py scripts/enrich_domestic_odds_team_logos.py
@@ -46,6 +49,83 @@ jobs:
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-8}"
           python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
+
+      - name: Preserve unexpired matches omitted by rotating refresh
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path('.')
+          before_path = Path(os.environ['RUNNER_TEMP']) / 'domestic_odds_before.json'
+          feed_path = root / 'odds/odds_api_io/domestic_odds.json'
+          registry_path = root / 'data/statmaker/domestic_live_july_registry.json'
+
+          before = json.loads(before_path.read_text(encoding='utf-8'))
+          feed = json.loads(feed_path.read_text(encoding='utf-8'))
+          registry = json.loads(registry_path.read_text(encoding='utf-8'))
+          today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+
+          def match_key(match):
+              match_id = str(match.get('id') or match.get('matchId') or '').strip()
+              if match_id:
+                  return ('id', match_id)
+              return (
+                  'fixture',
+                  str(match.get('canonicalHomeTeam') or match.get('homeTeam') or match.get('providerHomeTeam') or '').strip().casefold(),
+                  str(match.get('canonicalAwayTeam') or match.get('awayTeam') or match.get('providerAwayTeam') or '').strip().casefold(),
+                  str(match.get('date') or match.get('kickoff') or '')[:10],
+              )
+
+          old_by_code = {
+              str(league.get('leagueCode') or ''): league
+              for league in before.get('leagues', []) or []
+          }
+          fresh_by_code = {
+              str(league.get('leagueCode') or ''): league
+              for league in feed.get('leagues', []) or []
+          }
+
+          restored = 0
+          for code, old_league in old_by_code.items():
+              new_league = fresh_by_code.get(code)
+              if new_league is None:
+                  feed.setdefault('leagues', []).append(old_league)
+                  fresh_by_code[code] = old_league
+                  restored += len(old_league.get('matches', []) or [])
+                  continue
+
+              fresh_matches = list(new_league.get('matches', []) or [])
+              seen = {match_key(match) for match in fresh_matches}
+              for old_match in old_league.get('matches', []) or []:
+                  date = str(old_match.get('date') or old_match.get('kickoff') or '')[:10]
+                  if date and date < today:
+                      continue
+                  key = match_key(old_match)
+                  if key in seen:
+                      continue
+                  fresh_matches.append(old_match)
+                  seen.add(key)
+                  restored += 1
+              new_league['matches'] = fresh_matches
+
+          registry_leagues = registry.get('leagues', []) or []
+          registry_meta = dict(feed.get('registry') or {})
+          registry_meta.update({
+              'registryVersion': max(int(registry_meta.get('registryVersion') or 0), len(registry_leagues)),
+              'registryLeagueCount': len(registry_leagues),
+              'enabledLeagueCount': len(registry_leagues),
+              'enabledForOddsCount': sum(1 for row in registry_leagues if bool(row.get('enabledForOdds', True))),
+              'enabledForBettingCount': sum(1 for row in registry_leagues if bool(row.get('enabledForBetting', True))),
+          })
+          feed['registry'] = registry_meta
+          feed.setdefault('debug', {})['unexpiredMatchesRestoredAfterRotatingRefresh'] = restored
+
+          feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'Preserved {restored} unexpired canonical matches omitted by the rotating refresh.')
+          PY
 
       - name: Enrich team logos from cached API-Football metadata
         run: python scripts/enrich_domestic_odds_team_logos.py
