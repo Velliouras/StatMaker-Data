@@ -79,6 +79,10 @@ def main() -> int:
         "groups": {"betting_ready_targets": sorted(TARGET_CODES)},
     }
 
+    # Odds-API.io may label the country as Czechia instead of Czech Republic.
+    # Keep the strict country guard, but accept the verified equivalent names.
+    odds.COUNTRY_ALIASES["czech republic"] = ["czech republic", "czechia", "czech"]
+
     # Canonical mapping is generated from API-Football cache team names for every
     # live league, then explicit domestic_team_aliases.json aliases are layered in.
     # This keeps mapping in the data layer and does not touch betting-engine logic.
