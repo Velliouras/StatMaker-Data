@@ -1,0 +1,127 @@
+name: Hourly Domestic Odds Safe Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      cycle_size:
+        description: "Number of Domestic leagues to refresh in this cycle"
+        required: true
+        default: "8"
+        type: string
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: hourly-domestic-odds-safe
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate safe refresh code
+        run: |
+          python -m py_compile scripts/refresh_domestic_live_july_odds.py
+          python -m unittest tests/test_domestic_live_july_pipeline.py tests/test_domestic_market_expansion_v15.py
+
+      - name: Refresh rotating exact-odds batch safely
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '8' }}
+        run: |
+          cycle_size="${INPUT_CYCLE_SIZE:-8}"
+          python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
+
+      - name: Validate canonical odds contract
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          registry = json.loads((root / 'data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8'))
+          feed = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          archive = json.loads((root / 'odds/odds_api_io/domestic_provider_markets.json').read_text(encoding='utf-8'))
+
+          registry_codes = {str(x.get('leagueCode') or '') for x in registry.get('leagues', []) or []}
+          feed_codes = {str(x.get('leagueCode') or '') for x in feed.get('leagues', []) or []}
+          archive_codes = {str(x.get('leagueCode') or '') for x in archive.get('leagues', []) or []}
+          if not registry_codes or feed_codes != registry_codes or archive_codes != registry_codes:
+              raise SystemExit(
+                  f'Registry mismatch: registry={len(registry_codes)} feed={len(feed_codes)} archive={len(archive_codes)}'
+              )
+
+          today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+          for league in feed.get('leagues', []) or []:
+              for match in league.get('matches', []) or []:
+                  date = str(match.get('date') or '')[:10]
+                  if date and date < today:
+                      raise SystemExit(f'Expired odds match: {league.get("leagueCode")} {date}')
+                  if match.get('teamMappingStatus') != 'matched' or match.get('usableForStats') is not True:
+                      raise SystemExit(f'Unmatched canonical team mapping: {league.get("leagueCode")}')
+                  for market in match.get('markets', []) or []:
+                      if market.get('exactBookmakerOdds') is not True:
+                          raise SystemExit('Non-exact odds market found')
+                      if not str(market.get('bookmaker') or '').strip() or float(market.get('odds') or 0) <= 1.0:
+                          raise SystemExit('Invalid bookmaker or decimal odds')
+
+          print(f'Validated {len(feed_codes)} Domestic leagues.')
+          PY
+
+      - name: Guard generated paths
+        run: |
+          changed="$(git diff --name-only)"
+          echo "$changed"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              odds/odds_api_io/domestic_odds.json|\
+              odds/odds_api_io/domestic_provider_markets.json|\
+              data/statmaker/domestic_live_july_state.json|\
+              reports/domestic_odds_debug.json|\
+              reports/domestic_live_july_odds_refresh.json|\
+              reports/domestic_corner_archive_rebuild.json|\
+              reports/domestic_expanded_market_rebuild.json)
+                ;;
+              *)
+                echo "Unexpected generated change: $path"
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
+
+      - name: Commit validated odds artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            odds/odds_api_io/domestic_provider_markets.json \
+            data/statmaker/domestic_live_july_state.json \
+            reports/domestic_odds_debug.json \
+            reports/domestic_live_july_odds_refresh.json \
+            reports/domestic_corner_archive_rebuild.json \
+            reports/domestic_expanded_market_rebuild.json
+          if git diff --cached --quiet; then
+            echo "No validated Domestic odds changes to commit."
+          else
+            git commit -m "Hourly safe Domestic exact odds refresh"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
