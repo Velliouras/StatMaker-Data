@@ -1,0 +1,94 @@
+name: Refresh Verified New Domestic Odds Safe
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/refresh-verified-new-domestic-odds-safe.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-verified-new-domestic-odds-safe
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate safe refresh script
+        run: python -m py_compile scripts/refresh_verified_new_domestic_odds_safe.py
+
+      - name: Snapshot protected non-target odds objects
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          targets = {"CHN","SRB","BGR","SVN","CZE","SVK","LVA","LTU","FIN2"}
+          payload = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          rows = [x for x in payload.get('leagues', []) or [] if str(x.get('leagueCode') or '') not in targets]
+          canonical = json.dumps(rows, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+          Path('/tmp/non_target.sha256').write_text(hashlib.sha256(canonical).hexdigest(), encoding='utf-8')
+          PY
+
+      - name: Refresh verified new Domestic exact odds safely
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+        run: python scripts/refresh_verified_new_domestic_odds_safe.py
+
+      - name: Verify non-target odds objects unchanged
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          targets = {"CHN","SRB","BGR","SVN","CZE","SVK","LVA","LTU","FIN2"}
+          payload = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
+          rows = [x for x in payload.get('leagues', []) or [] if str(x.get('leagueCode') or '') not in targets]
+          canonical = json.dumps(rows, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')
+          before = Path('/tmp/non_target.sha256').read_text(encoding='utf-8').strip()
+          after = hashlib.sha256(canonical).hexdigest()
+          if before != after:
+              raise SystemExit('Protected non-target Domestic odds objects changed')
+          print('Non-target Domestic odds objects preserved exactly.')
+          PY
+
+      - name: Guard changed paths
+        run: |
+          changed="$(git diff --name-only)"
+          echo "$changed"
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            case "$path" in
+              odds/odds_api_io/domestic_odds.json|reports/verified_new_domestic_odds_safe.json)
+                ;;
+              *)
+                echo "Unexpected generated change: $path"
+                exit 1
+                ;;
+            esac
+          done <<< "$changed"
+
+      - name: Commit refreshed odds
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add odds/odds_api_io/domestic_odds.json reports/verified_new_domestic_odds_safe.json
+          if git diff --cached --quiet; then
+            echo "No verified-new Domestic odds changes to commit."
+          else
+            git commit -m "Refresh verified new Domestic exact odds safely"
+            git pull --rebase
+            git push
+          fi
