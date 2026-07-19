@@ -35,7 +35,7 @@ jobs:
 
       - name: Validate safe refresh code
         run: |
-          python -m py_compile scripts/refresh_domestic_live_july_odds.py
+          python -m py_compile scripts/refresh_domestic_live_july_odds.py scripts/enrich_domestic_odds_team_logos.py
           python -m unittest tests/test_domestic_live_july_pipeline.py tests/test_domestic_market_expansion_v15.py
 
       - name: Refresh rotating exact-odds batch safely
@@ -46,6 +46,9 @@ jobs:
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-8}"
           python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
+
+      - name: Enrich team logos from cached API-Football metadata
+        run: python scripts/enrich_domestic_odds_team_logos.py
 
       - name: Validate canonical odds contract
         run: |
@@ -97,7 +100,8 @@ jobs:
               reports/domestic_odds_debug.json|\
               reports/domestic_live_july_odds_refresh.json|\
               reports/domestic_corner_archive_rebuild.json|\
-              reports/domestic_expanded_market_rebuild.json)
+              reports/domestic_expanded_market_rebuild.json|\
+              reports/domestic_team_logo_enrichment.json)
                 ;;
               *)
                 echo "Unexpected generated change: $path"
@@ -117,7 +121,8 @@ jobs:
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_corner_archive_rebuild.json \
-            reports/domestic_expanded_market_rebuild.json
+            reports/domestic_expanded_market_rebuild.json \
+            reports/domestic_team_logo_enrichment.json
           if git diff --cached --quiet; then
             echo "No validated Domestic odds changes to commit."
           else
