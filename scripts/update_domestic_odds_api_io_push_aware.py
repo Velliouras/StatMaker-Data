@@ -79,6 +79,33 @@ def _self_check() -> None:
     )
     assert goals == [], "Integer goal totals must remain excluded"
 
+    full_time_btts = _normalize_market_with_integer_corners(
+        {
+            "name": "Both Teams To Score",
+            "odds": [{"yes": "1.57", "no": "2.25"}],
+        },
+        "Bet365",
+        "Home",
+        "Away",
+        {},
+    )
+    assert {(item["market"], item["selection"], item["odds"]) for item in full_time_btts} == {
+        ("BTTS", "Yes", 1.57),
+        ("BTTS", "No", 2.25),
+    }, full_time_btts
+
+    second_half_btts = _normalize_market_with_integer_corners(
+        {
+            "name": "Both Teams To Score 2H",
+            "odds": [{"yes": "2.75", "no": "1.40"}],
+        },
+        "Bet365",
+        "Home",
+        "Away",
+        {},
+    )
+    assert second_half_btts == [], "Second-half BTTS must never be emitted as full-time BTTS"
+
 
 if __name__ == "__main__":
     _self_check()
