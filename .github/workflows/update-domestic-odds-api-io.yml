@@ -29,6 +29,7 @@ on:
       - "scripts/update_domestic_odds_api_io.py"
       - "scripts/update_domestic_odds_api_io_push_aware.py"
       - "scripts/rebuild_domestic_btts_from_archive.py"
+      - "scripts/audit_domestic_btts_rebuild.py"
       - "scripts/rebuild_domestic_corners_from_archive.py"
       - ".github/workflows/update-domestic-odds-api-io.yml"
   push:
@@ -38,6 +39,7 @@ on:
       - "scripts/update_domestic_odds_api_io.py"
       - "scripts/update_domestic_odds_api_io_push_aware.py"
       - "scripts/rebuild_domestic_btts_from_archive.py"
+      - "scripts/audit_domestic_btts_rebuild.py"
       - "scripts/rebuild_domestic_corners_from_archive.py"
       - ".github/workflows/update-domestic-odds-api-io.yml"
 
@@ -178,6 +180,9 @@ jobs:
       - name: Rebuild full-time BTTS from exact provider archive
         run: python scripts/rebuild_domestic_btts_from_archive.py
 
+      - name: Audit rebuilt full-time BTTS
+        run: python scripts/audit_domestic_btts_rebuild.py
+
       - name: Rebuild exact corners from provider archive
         run: python scripts/rebuild_domestic_corners_from_archive.py
 
@@ -189,6 +194,7 @@ jobs:
           git add \
             odds/odds_api_io/domestic_odds.json \
             reports/domestic_odds_debug.json \
+            reports/domestic_btts_archive_rebuild.json \
             reports/domestic_corner_archive_rebuild.json
           if git diff --cached --quiet; then
             echo "No domestic odds changes to commit."
