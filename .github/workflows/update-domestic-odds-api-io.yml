@@ -183,14 +183,6 @@ jobs:
       - name: Audit rebuilt full-time BTTS
         run: python scripts/audit_domestic_btts_rebuild.py
 
-      - name: Upload BTTS audit report
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: domestic-btts-audit
-          path: reports/domestic_btts_archive_rebuild.json
-          if-no-files-found: error
-
       - name: Rebuild exact corners from provider archive
         run: python scripts/rebuild_domestic_corners_from_archive.py
 
