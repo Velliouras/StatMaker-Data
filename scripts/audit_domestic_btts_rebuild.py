@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Audit canonical Domestic BTTS against the exact archived provider payloads."""
-
+"""Audit canonical BTTS against the final effective archived provider state."""
 from __future__ import annotations
-
 import json
 from pathlib import Path
-from typing import Any, Dict, List
-
+from typing import Any, Dict, List, Tuple
 import odds_api_io_market_audit as market_audit
 import rebuild_domestic_btts_from_archive as rebuild
 
@@ -20,79 +17,69 @@ def btts_rows(match: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [dict(row) for row in match.get("markets", []) or [] if row.get("market") == "BTTS"]
 
 
-def provider_btts_markets(match: Dict[str, Any]) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def has_btts_payload(match: Dict[str, Any]) -> bool:
     for payload in match.get("providerMarkets", []) or []:
-        if payload.get("exactProviderPayload") is not True:
-            continue
         market = payload.get("market")
-        if not isinstance(market, dict):
+        if payload.get("exactProviderPayload") is not True or not isinstance(market, dict):
             continue
-        classification = market_audit.classify_provider_market(market_audit.provider_market_text(market))
-        if classification.get("family") not in rebuild.BTTS_FAMILIES:
-            continue
-        rows.append(
-            {
-                "bookmaker": str(payload.get("bookmaker") or ""),
-                "providerMarket": str(payload.get("providerMarket") or market.get("name") or ""),
-                "family": classification.get("family"),
-                "status": classification.get("status"),
-                "odds": market.get("odds") or market.get("outcomes") or market.get("prices") or [],
-            }
-        )
-    return rows
+        family = market_audit.classify_provider_market(market_audit.provider_market_text(market)).get("family")
+        if family in rebuild.BTTS_FAMILIES:
+            return True
+    return False
+
+
+def compact(rows: List[Dict[str, Any]]) -> List[Tuple[str, float, str]]:
+    return sorted((str(r.get("selection")), float(r.get("odds") or 0), str(r.get("bookmaker") or "")) for r in rows)
 
 
 def main() -> int:
     feed = rebuild.read_json(ODDS_PATH)
     archive = rebuild.read_json(ARCHIVE_PATH)
     canonical = rebuild.canonical_matches(feed)
-    fixtures: List[Dict[str, Any]] = []
-    mismatches = 0
 
+    effective: Dict[Tuple[str, str, str, str], Tuple[str, Dict[str, Any]]] = {}
+    counts: Dict[Tuple[str, str, str, str], int] = {}
     for league in archive.get("leagues", []) or []:
         code = str(league.get("leagueCode") or "")
-        for archived_match in league.get("matches", []) or []:
-            raw_btts = provider_btts_markets(archived_match)
-            if not raw_btts:
+        for match in league.get("matches", []) or []:
+            if not has_btts_payload(match):
                 continue
-            target = canonical.get(rebuild.archive_key(code, archived_match))
-            if target is None:
-                continue
-            _, expected = rebuild.normalize_archived_full_time_btts(archived_match)
-            actual = btts_rows(target)
-            expected_compact = sorted(
-                (str(row.get("selection")), float(row.get("odds") or 0), str(row.get("bookmaker") or ""))
-                for row in expected
-            )
-            actual_compact = sorted(
-                (str(row.get("selection")), float(row.get("odds") or 0), str(row.get("bookmaker") or ""))
-                for row in actual
-            )
-            matches_expected = expected_compact == actual_compact
-            if not matches_expected:
-                mismatches += 1
-            fixtures.append(
-                {
-                    "leagueCode": code,
-                    "id": str(target.get("id") or ""),
-                    "fixture": f"{target.get('homeTeam')} - {target.get('awayTeam')}",
-                    "providerBttsMarkets": raw_btts,
-                    "expectedFullTimeBtts": expected,
-                    "canonicalBtts": actual,
-                    "matchesExpected": matches_expected,
-                }
-            )
+            key = rebuild.archive_key(code, match)
+            effective[key] = (code, match)
+            counts[key] = counts.get(key, 0) + 1
+
+    fixtures: List[Dict[str, Any]] = []
+    mismatches = 0
+    focus = None
+    for key, (code, archived_match) in effective.items():
+        target = canonical.get(key)
+        if target is None:
+            continue
+        _, expected = rebuild.normalize_archived_full_time_btts(archived_match)
+        actual = btts_rows(target)
+        ok = compact(expected) == compact(actual)
+        mismatches += 0 if ok else 1
+        row = {
+            "leagueCode": code,
+            "id": str(target.get("id") or ""),
+            "fixture": f"{target.get('homeTeam')} - {target.get('awayTeam')}",
+            "archiveSnapshotCount": counts.get(key, 1),
+            "expectedFullTimeBtts": expected,
+            "canonicalBtts": actual,
+            "matchesExpected": ok,
+        }
+        fixtures.append(row)
+        text = row["fixture"].casefold()
+        if "ilves" in text and ("turku ps" in text or "tps" in text):
+            focus = row
 
     report = {
-        "source": "exact archived Odds-API.io provider payloads",
-        "syntheticOdds": False,
-        "policy": "canonical BTTS must equal full-time provider BTTS only; HT/2H excluded",
-        "fixtureAuditCount": len(fixtures),
+        "uniqueFixtureAuditCount": len(fixtures),
+        "duplicateArchiveSnapshotCount": sum(max(0, n - 1) for n in counts.values()),
         "mismatchCount": mismatches,
+        "focusFixture": focus,
         "fixtures": fixtures,
     }
-    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({k: v for k, v in report.items() if k != "fixtures"}, ensure_ascii=False, indent=2))
     if mismatches:
