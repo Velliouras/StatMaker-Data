@@ -1,16 +1,19 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-18T15:05:58Z",
+  "generated_at": "2026-07-20T06:25:12Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
     "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
-    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές"
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
   },
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/norway/obos-ligaen/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-18T14:57:13Z",
+    "cache_generated_at": "2026-07-20T06:24:14Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -24,7 +27,14 @@
     "season": "2026",
     "app_season": "2026",
     "priority_group": "scandinavia",
-    "data_level": "fixture_statistics_enriched"
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026",
+    "target_season_start": "2026-04-05",
+    "target_season_end": "2026-11-08",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
