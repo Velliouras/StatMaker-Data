@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
-import odds_api_io_market_audit as market_audit
 import rebuild_domestic_btts_from_archive as rebuild
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,17 +14,6 @@ REPORT_PATH = ROOT / "reports" / "domestic_btts_archive_rebuild.json"
 
 def btts_rows(match: Dict[str, Any]) -> List[Dict[str, Any]]:
     return [dict(row) for row in match.get("markets", []) or [] if row.get("market") == "BTTS"]
-
-
-def has_btts_payload(match: Dict[str, Any]) -> bool:
-    for payload in match.get("providerMarkets", []) or []:
-        market = payload.get("market")
-        if payload.get("exactProviderPayload") is not True or not isinstance(market, dict):
-            continue
-        family = market_audit.classify_provider_market(market_audit.provider_market_text(market)).get("family")
-        if family in rebuild.BTTS_FAMILIES:
-            return True
-    return False
 
 
 def compact(rows: List[Dict[str, Any]]) -> List[Tuple[str, float, str]]:
@@ -42,7 +30,8 @@ def main() -> int:
     for league in archive.get("leagues", []) or []:
         code = str(league.get("leagueCode") or "")
         for match in league.get("matches", []) or []:
-            if not has_btts_payload(match):
+            saw_btts, _ = rebuild.normalize_archived_full_time_btts(match)
+            if not saw_btts:
                 continue
             key = rebuild.archive_key(code, match)
             effective[key] = (code, match)
