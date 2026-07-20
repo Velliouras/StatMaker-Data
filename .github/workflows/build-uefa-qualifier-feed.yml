@@ -1,0 +1,97 @@
+name: Build UEFA Qualifier Feed
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/update_uefa_qualifier_odds_build.py"
+      - ".github/workflows/build-uefa-qualifier-feed.yml"
+  push:
+    branches:
+      - build/uefa-qualifier-feed-20260720
+    paths:
+      - "scripts/update_uefa_qualifier_odds_build.py"
+      - ".github/workflows/build-uefa-qualifier-feed.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-uefa-qualifier-feed-20260720
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout build branch
+        uses: actions/checkout@v4
+        with:
+          ref: build/uefa-qualifier-feed-20260720
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Refresh CL EL Conference exact odds
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+        run: python scripts/update_uefa_qualifier_odds_build.py
+
+      - name: Validate qualifier feed contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          paths = [
+              Path('odds/odds_api_io/champions_league_odds.json'),
+              Path('odds/odds_api_io/europa_league_odds.json'),
+              Path('odds/odds_api_io/conference_league_odds.json'),
+          ]
+          total_matches = 0
+          total_markets = 0
+          for path in paths:
+              payload = json.loads(path.read_text(encoding='utf-8'))
+              for match in payload.get('matches', []) or []:
+                  status = match.get('teamMappingStatus')
+                  usable = match.get('usableForStats')
+                  if status not in {'matched', 'provider_identity'}:
+                      raise SystemExit(f'Invalid mapping status {status} in {path}')
+                  if status == 'provider_identity' and usable is not False:
+                      raise SystemExit(f'provider_identity must be stats-closed in {path}')
+                  markets = match.get('markets', []) or []
+                  if not markets:
+                      raise SystemExit(f'Published match without markets in {path}')
+                  for market in markets:
+                      if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
+                          raise SystemExit(f'Non-exact market in {path}')
+                  total_matches += 1
+                  total_markets += len(markets)
+          if total_matches == 0 or total_markets == 0:
+              raise SystemExit('No exact UEFA qualifier odds were published')
+          print(f'Validated {total_matches} matches and {total_markets} exact markets')
+          PY
+
+      - name: Commit generated qualifier feeds to build branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/champions_league_odds.json \
+            odds/odds_api_io/europa_league_odds.json \
+            odds/odds_api_io/conference_league_odds.json \
+            reports/champions_league_odds_debug.json \
+            reports/europa_league_odds_debug.json \
+            reports/conference_league_odds_debug.json \
+            reports/uefa_qualifier_build_refresh.json
+          if git diff --cached --quiet; then
+            echo "No qualifier feed changes."
+          else
+            git commit -m "Refresh build-only UEFA qualifier feeds"
+            git push origin HEAD:build/uefa-qualifier-feed-20260720
+          fi
