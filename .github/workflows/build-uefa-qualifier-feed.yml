@@ -1,6 +1,11 @@
 name: Build UEFA Qualifier Feed
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/update_uefa_qualifier_odds_build.py"
+      - ".github/workflows/build-uefa-qualifier-feed.yml"
   push:
     branches:
       - build/uefa-qualifier-feed-20260720
@@ -72,6 +77,7 @@ jobs:
           PY
 
       - name: Commit generated qualifier feeds to build branch
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
