@@ -31,6 +31,7 @@ AUDIT_ONLY_FAMILIES = {
     "ASIAN_TOTALS",
     "HALF_TIME_RESULT",
     "HALF_TIME_BTTS",
+    "SECOND_HALF_BTTS",
     "CORRECT_SCORE",
     "TEAM_GOALS_ALT_LINES",
     "PLAYER_PROPS",
@@ -58,6 +59,9 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
     half_time = bool(re.search(r"\b(1h|ht)\b", name)) or any(
         token in name for token in ("first half", "1st half", "half time", "halftime")
     )
+    second_half = bool(re.search(r"\b2h\b", name)) or any(
+        token in name for token in ("second half", "2nd half")
+    )
 
     if any(
         token in name
@@ -72,6 +76,8 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
         )
     ):
         family = "PLAYER_PROPS"
+    elif second_half and any(token in name for token in ("both teams", "btts", "both teams to score")):
+        family = "SECOND_HALF_BTTS"
     elif half_time and any(token in name for token in ("both teams", "btts", "both teams to score")):
         family = "HALF_TIME_BTTS"
     elif half_time and any(token in name for token in ("result", "winner", "moneyline", "1x2", "money line")):
@@ -225,6 +231,7 @@ def run_market_audit_self_check() -> Dict[str, Any]:
     fixtures = [
         ({"name": "Match Result"}, "1X2", "supported"),
         ({"name": "Both Teams To Score"}, "BTTS", "supported"),
+        ({"name": "Both Teams To Score 2H"}, "SECOND_HALF_BTTS", "audit_only"),
         ({"name": "Total Goals"}, "MATCH_GOALS", "supported"),
         ({"name": "1st Half Total Goals"}, "FIRST_HALF_GOALS", "supported"),
         ({"name": "Home Team Total Goals"}, "TEAM_TOTAL_GOALS", "supported"),
