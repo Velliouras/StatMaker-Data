@@ -41,7 +41,10 @@ jobs:
 
       - name: Run odds integrity regressions
         run: |
-          python -m py_compile scripts/odds_market_integrity.py
+          python -m py_compile \
+            scripts/odds_market_integrity.py \
+            scripts/refresh_domestic_odds_integrity.py \
+            scripts/update_uefa_qualifier_odds_integrity.py
           python -m unittest tests/test_odds_market_integrity.py
 
       - name: Validate current Domestic feed without writing
@@ -59,7 +62,7 @@ jobs:
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-16}"
-          python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
+          python scripts/refresh_domestic_odds_integrity.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
         if: github.event_name != 'push'
@@ -162,11 +165,10 @@ jobs:
           git checkout -B build/uefa-qualifier-feed-20260720 origin/build/uefa-qualifier-feed-20260720
 
       - name: Refresh CL EL and Conference exact odds
-        if: github.event_name != 'push'
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
-        run: python scripts/update_uefa_qualifier_odds_build.py
+        run: python scripts/update_uefa_qualifier_odds_integrity.py
 
       - name: Sanitize UEFA betting feeds
         run: |
