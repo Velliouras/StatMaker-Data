@@ -1,9 +1,7 @@
-name: Update UEFA Qualifier Exact Odds
+name: Manual UEFA Qualifier Exact Odds
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "37 */3 * * *"
 
 permissions:
   contents: write
@@ -84,6 +82,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No UEFA qualifier feed changes."
           else
-            git commit -m "Refresh live UEFA qualifier exact odds"
+            git commit -m "Manual UEFA qualifier exact odds refresh"
             git push origin HEAD:build/uefa-qualifier-feed-20260720
           fi
