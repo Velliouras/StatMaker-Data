@@ -168,7 +168,14 @@ jobs:
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
-        run: python scripts/update_uefa_qualifier_odds_integrity.py
+        run: |
+          PYTHONPATH="$RUNNER_TEMP:scripts" python - <<'PY'
+          import update_uefa_qualifier_odds_build as target
+          from odds_market_integrity import install_parser_guard
+
+          install_parser_guard(target.base.odds)
+          raise SystemExit(target.main())
+          PY
 
       - name: Sanitize UEFA betting feeds
         run: |
