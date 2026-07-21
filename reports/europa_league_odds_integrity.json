@@ -1,18 +1,19 @@
 {
-  "policy": "single bookmaker per match market family; fail closed on invalid line curves",
+  "policy": "single bookmaker per match market family; complete fixed markets; paired Over/Under lines; fail closed on invalid curves",
   "bookmakerPriority": [
     "Bet365",
     "Unibet"
   ],
   "matchesChecked": 9,
-  "mixedBookmakerGroupsResolved": 73,
+  "mixedBookmakerGroupsResolved": 71,
+  "incompleteRowsPruned": 19,
   "groupsDropped": 0,
   "matches": [
     {
       "matchId": "72179162",
       "fixture": "Qarabag FK - PFC CSKA Sofia",
       "before": 93,
-      "after": 51,
+      "after": 54,
       "groups": [
         {
           "market": "1X2",
@@ -24,7 +25,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -36,7 +38,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -48,7 +51,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -59,7 +63,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -73,77 +78,89 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 15,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "PFC CSKA Sofia",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Qarabag FK",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "PFC CSKA Sofia",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Qarabag FK",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
     {
       "matchId": "72179718",
       "fixture": "FC Dynamo Kyiv - PAOK",
-      "before": 73,
-      "after": 38,
+      "before": 71,
+      "after": 40,
       "groups": [
         {
           "market": "1X2",
@@ -155,7 +172,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -167,7 +185,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -179,7 +198,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -190,7 +210,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -204,46 +225,51 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365 (no latency)",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 12,
           "candidateBookmakers": [
             "Bet365",
-            "Bet365 (no latency)",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "FC Dynamo Kyiv",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "PAOK",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -254,7 +280,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -265,15 +292,16 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         }
       ]
     },
     {
       "matchId": "72179696",
       "fixture": "FC Sheriff Tiraspol - Maccabi Tel-Aviv",
-      "before": 86,
-      "after": 44,
+      "before": 67,
+      "after": 48,
       "groups": [
         {
           "market": "1X2",
@@ -285,7 +313,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -297,7 +326,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -309,7 +339,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -320,7 +351,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -334,21 +366,24 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365 (no latency)",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 12,
           "candidateBookmakers": [
             "Bet365",
-            "Bet365 (no latency)",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
@@ -360,7 +395,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
@@ -371,19 +407,20 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "FC Sheriff Tiraspol",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 2,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -392,10 +429,10 @@
           "bookmaker": "Unibet",
           "rows": 2,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         }
       ]
     },
@@ -403,7 +440,7 @@
       "matchId": "72179158",
       "fixture": "Hammarby IF - RSC Anderlecht",
       "before": 87,
-      "after": 63,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -415,7 +452,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -427,7 +465,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -439,7 +478,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -450,7 +490,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -464,45 +505,51 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 15,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Hammarby IF",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "RSC Anderlecht",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -513,7 +560,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -524,7 +572,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         }
       ]
     },
@@ -532,7 +581,7 @@
       "matchId": "72533768",
       "fixture": "Tromsoe IL - FC Hradec Kralove",
       "before": 91,
-      "after": 49,
+      "after": 52,
       "groups": [
         {
           "market": "1X2",
@@ -544,7 +593,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -556,7 +606,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -568,7 +619,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -579,7 +631,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -593,77 +646,89 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 13,
+          "rows": 12,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "FC Hradec Kralove",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Tromsoe IL",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "FC Hradec Kralove",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Tromsoe IL",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
     {
       "matchId": "72179686",
       "fixture": "Besiktas Istanbul - Midtjylland",
-      "before": 112,
-      "after": 65,
+      "before": 109,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -673,10 +738,10 @@
           "rows": 3,
           "candidateBookmakers": [
             "Bet365",
-            "Bet365 (no latency)",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -688,7 +753,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -700,7 +766,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -711,81 +778,94 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 14,
+          "bookmaker": "Bet365",
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 15,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Besiktas Istanbul",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Midtjylland",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Besiktas Istanbul",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Midtjylland",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
@@ -793,7 +873,7 @@
       "matchId": "72179714",
       "fixture": "FC St. Gallen 1879 - SL Benfica",
       "before": 107,
-      "after": 63,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -805,7 +885,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -817,7 +898,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -829,7 +911,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -840,81 +923,94 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 12,
+          "bookmaker": "Bet365",
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 15,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "FC St. Gallen 1879",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "SL Benfica",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 10,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "FC St. Gallen 1879",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
-          "candidateBookmakers": [
-            "Bet365",
-            "Unibet"
-          ],
-          "rejected": {}
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "SL Benfica",
-          "status": "kept",
-          "bookmaker": "Unibet",
+          "bookmaker": "Bet365",
           "rows": 6,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "SL Benfica",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 12,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
@@ -922,7 +1018,7 @@
       "matchId": "72179680",
       "fixture": "FC Twente Enschede - Ferencvarosi Budapest",
       "before": 85,
-      "after": 61,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -934,7 +1030,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -946,7 +1043,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -958,7 +1056,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -969,7 +1068,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -983,45 +1083,51 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 15,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "FC Twente Enschede",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Ferencvarosi Budapest",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -1032,7 +1138,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -1043,15 +1150,16 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         }
       ]
     },
     {
       "matchId": "72179692",
       "fixture": "HNK Hajduk Split - Pafos FC",
-      "before": 93,
-      "after": 38,
+      "before": 91,
+      "after": 52,
       "groups": [
         {
           "market": "1X2",
@@ -1063,7 +1171,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "BTTS",
@@ -1075,7 +1184,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "DOUBLE_CHANCE",
@@ -1087,7 +1197,8 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -1098,7 +1209,8 @@
           "candidateBookmakers": [
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_CORNERS",
@@ -1112,70 +1224,81 @@
           ],
           "rejected": {
             "Bet365": "integrity"
-          }
+          },
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365 (no latency)",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 12,
           "candidateBookmakers": [
             "Bet365",
-            "Bet365 (no latency)",
             "Unibet"
           ],
           "rejected": {
             "Unibet": "integrity"
+          },
+          "prunedIncompleteRows": {
+            "Bet365": 1
           }
         },
         {
           "market": "TEAM_CORNERS",
           "team": "HNK Hajduk Split",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
           "team": "Pafos FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "HNK Hajduk Split",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Pafos FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {}
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     }
