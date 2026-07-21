@@ -1,0 +1,41 @@
+name: Odds Integrity Isolated Validation
+
+on:
+  push:
+    branches:
+      - fix/odds-integrity-20260721
+    paths:
+      - ".github/odds-integrity-trigger"
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout fix branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run integrity regressions
+        run: |
+          python -m py_compile scripts/odds_market_integrity.py
+          python -m unittest tests/test_odds_market_integrity.py
+          python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
+
+      - name: Record validated commit
+        run: |
+          printf '%s\n' "$GITHUB_SHA" > .github/odds-integrity-validation-passed
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/odds-integrity-validation-passed
+          git commit -m "Record odds integrity validation success"
+          git push origin HEAD:fix/odds-integrity-20260721
