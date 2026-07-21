@@ -7,7 +7,7 @@ from scripts.odds_market_integrity import (
 
 
 class OddsMarketIntegrityTest(unittest.TestCase):
-    def test_rejects_inverted_unibet_curve_and_keeps_bet365(self):
+    def test_rejects_incomplete_unibet_curve_and_keeps_bet365(self):
         payload = {
             "bookmakersRequested": ["Bet365", "Unibet"],
             "matches": [{
@@ -16,10 +16,10 @@ class OddsMarketIntegrityTest(unittest.TestCase):
                 "awayTeam": "Heart of Midlothian FC",
                 "markets": [
                     {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.22, "bookmaker": "Bet365", "line": 1.5},
-                    {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.75, "bookmaker": "Bet365", "line": 2.5},
-                    {"market": "MATCH_GOALS", "selection": "Over", "odds": 2.80, "bookmaker": "Bet365", "line": 3.5},
                     {"market": "MATCH_GOALS", "selection": "Under", "odds": 4.00, "bookmaker": "Bet365", "line": 1.5},
+                    {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.75, "bookmaker": "Bet365", "line": 2.5},
                     {"market": "MATCH_GOALS", "selection": "Under", "odds": 2.05, "bookmaker": "Bet365", "line": 2.5},
+                    {"market": "MATCH_GOALS", "selection": "Over", "odds": 2.80, "bookmaker": "Bet365", "line": 3.5},
                     {"market": "MATCH_GOALS", "selection": "Under", "odds": 1.40, "bookmaker": "Bet365", "line": 3.5},
                     {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.96, "bookmaker": "Unibet", "line": 1.5},
                     {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.70, "bookmaker": "Unibet", "line": 2.5},
@@ -29,19 +29,22 @@ class OddsMarketIntegrityTest(unittest.TestCase):
         }
         sanitized, report = sanitize_payload(payload)
         markets = sanitized["matches"][0]["markets"]
-        self.assertTrue(markets)
         self.assertEqual({"Bet365"}, {item["bookmaker"] for item in markets})
-        over_15 = next(item for item in markets if item["selection"] == "Over" and item["line"] == 1.5)
+        over_15 = next(
+            item
+            for item in markets
+            if item["selection"] == "Over" and item["line"] == 1.5
+        )
         self.assertEqual(1.22, over_15["odds"])
         group = report["matches"][0]["groups"][0]
         self.assertEqual("Bet365", group["bookmaker"])
-        self.assertEqual("integrity", group["rejected"]["Unibet"])
+        self.assertEqual("no complete over/under line", group["rejected"]["Unibet"])
 
-    def test_parser_dedupe_preserves_both_bookmakers_for_same_line(self):
+    def test_parser_dedupe_preserves_bookmakers_and_normalizes_alias(self):
         rows = [
             {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.22, "bookmaker": "Bet365", "line": 1.5},
             {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.96, "bookmaker": "Unibet", "line": 1.5},
-            {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.25, "bookmaker": "Bet365", "line": 1.5},
+            {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.25, "bookmaker": "Bet365 (no latency)", "line": 1.5},
         ]
         result = dedupe_markets_by_bookmaker(rows)
         self.assertEqual(2, len(result))
@@ -49,7 +52,7 @@ class OddsMarketIntegrityTest(unittest.TestCase):
         self.assertEqual(1.22, by_book["Bet365"])
         self.assertEqual(1.96, by_book["Unibet"])
 
-    def test_never_mixes_bookmakers_inside_1x2(self):
+    def test_never_mixes_bookmakers_inside_complete_1x2(self):
         payload = {
             "bookmakersRequested": ["Bet365", "Unibet"],
             "matches": [{
@@ -62,19 +65,51 @@ class OddsMarketIntegrityTest(unittest.TestCase):
                 ],
             }],
         }
-        sanitized, _ = sanitize_payload(payload)
+        sanitized, report = sanitize_payload(payload)
         markets = sanitized["matches"][0]["markets"]
         self.assertEqual(3, len(markets))
         self.assertEqual({"Bet365"}, {item["bookmaker"] for item in markets})
+        group = report["matches"][0]["groups"][0]
+        self.assertEqual("incomplete fixed market", group["rejected"]["Unibet"])
+
+    def test_drops_fixed_market_when_no_bookmaker_is_complete(self):
+        payload = {
+            "matches": [{
+                "markets": [
+                    {"market": "DOUBLE_CHANCE", "selection": "1X", "odds": 1.2, "bookmaker": "Bet365"},
+                    {"market": "DOUBLE_CHANCE", "selection": "12", "odds": 1.3, "bookmaker": "Bet365"},
+                    {"market": "DOUBLE_CHANCE", "selection": "X2", "odds": 1.4, "bookmaker": "Unibet"},
+                ],
+            }],
+        }
+        sanitized, report = sanitize_payload(payload)
+        self.assertEqual([], sanitized["matches"][0]["markets"])
+        self.assertEqual(1, report["groupsDropped"])
+
+    def test_prunes_unpaired_line_but_keeps_complete_lines(self):
+        payload = {
+            "matches": [{
+                "markets": [
+                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 4.0, "bookmaker": "Bet365", "line": 1.5},
+                    {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.75, "bookmaker": "Bet365", "line": 2.5},
+                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 2.05, "bookmaker": "Bet365", "line": 2.5},
+                ],
+            }],
+        }
+        sanitized, report = sanitize_payload(payload)
+        markets = sanitized["matches"][0]["markets"]
+        self.assertEqual(2, len(markets))
+        self.assertEqual({2.5}, {item["line"] for item in markets})
+        self.assertEqual(1, report["incompleteRowsPruned"])
 
     def test_drops_line_family_when_all_bookmakers_are_invalid(self):
         payload = {
             "matches": [{
                 "markets": [
                     {"market": "MATCH_GOALS", "selection": "Over", "odds": 2.0, "bookmaker": "Bet365", "line": 1.5},
+                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 1.7, "bookmaker": "Bet365", "line": 1.5},
                     {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.5, "bookmaker": "Bet365", "line": 2.5},
-                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 1.5, "bookmaker": "Unibet", "line": 1.5},
-                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 2.0, "bookmaker": "Unibet", "line": 2.5},
+                    {"market": "MATCH_GOALS", "selection": "Under", "odds": 2.0, "bookmaker": "Bet365", "line": 2.5},
                 ],
             }],
         }
@@ -94,7 +129,11 @@ class OddsMarketIntegrityTest(unittest.TestCase):
             }],
         }
         sanitized, _ = sanitize_payload(payload)
-        yes = next(item for item in sanitized["matches"][0]["markets"] if item["selection"] == "Yes")
+        yes = next(
+            item
+            for item in sanitized["matches"][0]["markets"]
+            if item["selection"] == "Yes"
+        )
         self.assertEqual(1.80, yes["odds"])
 
 
