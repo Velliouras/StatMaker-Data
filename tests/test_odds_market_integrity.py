@@ -1,6 +1,9 @@
 import unittest
 
-from scripts.odds_market_integrity import sanitize_payload
+from scripts.odds_market_integrity import (
+    dedupe_markets_by_bookmaker,
+    sanitize_payload,
+)
 
 
 class OddsMarketIntegrityTest(unittest.TestCase):
@@ -33,6 +36,18 @@ class OddsMarketIntegrityTest(unittest.TestCase):
         group = report["matches"][0]["groups"][0]
         self.assertEqual("Bet365", group["bookmaker"])
         self.assertEqual("integrity", group["rejected"]["Unibet"])
+
+    def test_parser_dedupe_preserves_both_bookmakers_for_same_line(self):
+        rows = [
+            {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.22, "bookmaker": "Bet365", "line": 1.5},
+            {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.96, "bookmaker": "Unibet", "line": 1.5},
+            {"market": "MATCH_GOALS", "selection": "Over", "odds": 1.25, "bookmaker": "Bet365", "line": 1.5},
+        ]
+        result = dedupe_markets_by_bookmaker(rows)
+        self.assertEqual(2, len(result))
+        by_book = {item["bookmaker"]: item["odds"] for item in result}
+        self.assertEqual(1.22, by_book["Bet365"])
+        self.assertEqual(1.96, by_book["Unibet"])
 
     def test_never_mixes_bookmakers_inside_1x2(self):
         payload = {
