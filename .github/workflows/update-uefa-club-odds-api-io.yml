@@ -3,15 +3,7 @@ name: Update UEFA Club Exact Odds
 on:
   workflow_dispatch:
   schedule:
-    - cron: "37 * * * *"
-  push:
-    branches:
-      - main
-    paths:
-      - "config/uefa_club_competitions.json"
-      - "scripts/update_uefa_club_odds_api_io.py"
-      - "tests/test_uefa_club_odds_api_io.py"
-      - ".github/workflows/update-uefa-club-odds-api-io.yml"
+    - cron: "37 */3 * * *"
 
 permissions:
   contents: write
