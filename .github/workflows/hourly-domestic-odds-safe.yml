@@ -1,4 +1,4 @@
-name: Domestic Odds Safe Refresh
+name: Combined Production Odds Refresh
 
 on:
   workflow_dispatch:
@@ -9,21 +9,22 @@ on:
         default: "16"
         type: string
   schedule:
-    - cron: "17 */2 * * *"
+    # 08:17 and 20:17 Greece during EEST (UTC+3).
+    - cron: "17 5,17 * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: domestic-odds-safe
+  group: combined-production-odds
   cancel-in-progress: false
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 40
     steps:
-      - name: Checkout repository
+      - name: Checkout Domestic production data
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -127,10 +128,10 @@ jobs:
           print(f'Preserved {restored} unexpired canonical matches omitted by the rotating refresh.')
           PY
 
-      - name: Enrich team logos from cached API-Football metadata
+      - name: Enrich Domestic team logos from cached API-Football metadata
         run: python scripts/enrich_domestic_odds_team_logos.py
 
-      - name: Validate canonical odds contract
+      - name: Validate Domestic canonical odds contract
         run: |
           python - <<'PY'
           import datetime as dt
@@ -167,7 +168,7 @@ jobs:
           print(f'Validated {len(feed_codes)} Domestic leagues.')
           PY
 
-      - name: Guard generated paths
+      - name: Guard Domestic generated paths
         run: |
           changed="$(git diff --name-only)"
           echo "$changed"
@@ -190,7 +191,7 @@ jobs:
             esac
           done <<< "$changed"
 
-      - name: Commit validated odds artifacts
+      - name: Commit validated Domestic odds artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -209,4 +210,69 @@ jobs:
             git commit -m "Scheduled Domestic exact odds refresh"
             git pull --rebase origin main
             git push origin HEAD:main
+          fi
+
+      - name: Switch to live UEFA feed branch
+        run: |
+          git fetch origin build/uefa-qualifier-feed-20260720
+          git checkout -B build/uefa-qualifier-feed-20260720 origin/build/uefa-qualifier-feed-20260720
+
+      - name: Refresh Champions League Europa League and Conference League odds
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+        run: python scripts/update_uefa_qualifier_odds_build.py
+
+      - name: Validate exact UEFA qualifier feeds
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          paths = [
+              Path('odds/odds_api_io/champions_league_odds.json'),
+              Path('odds/odds_api_io/europa_league_odds.json'),
+              Path('odds/odds_api_io/conference_league_odds.json'),
+          ]
+          total_matches = 0
+          total_markets = 0
+          for path in paths:
+              payload = json.loads(path.read_text(encoding='utf-8'))
+              for match in payload.get('matches', []) or []:
+                  status = match.get('teamMappingStatus')
+                  usable = match.get('usableForStats')
+                  if status not in {'matched', 'provider_identity'}:
+                      raise SystemExit(f'Invalid mapping status {status} in {path}')
+                  if status == 'provider_identity' and usable is not False:
+                      raise SystemExit(f'provider_identity must be stats-closed in {path}')
+                  markets = match.get('markets', []) or []
+                  if not markets:
+                      raise SystemExit(f'Published match without markets in {path}')
+                  for market in markets:
+                      if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
+                          raise SystemExit(f'Non-exact market in {path}')
+                  total_matches += 1
+                  total_markets += len(markets)
+          if total_matches == 0 or total_markets == 0:
+              raise SystemExit('No exact UEFA qualifier odds were published')
+          print(f'Validated {total_matches} matches and {total_markets} exact markets')
+          PY
+
+      - name: Commit refreshed UEFA feeds
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/champions_league_odds.json \
+            odds/odds_api_io/europa_league_odds.json \
+            odds/odds_api_io/conference_league_odds.json \
+            reports/champions_league_odds_debug.json \
+            reports/europa_league_odds_debug.json \
+            reports/conference_league_odds_debug.json \
+            reports/uefa_qualifier_build_refresh.json
+          if git diff --cached --quiet; then
+            echo "No UEFA qualifier feed changes."
+          else
+            git commit -m "Scheduled UEFA qualifier exact odds refresh"
+            git push origin HEAD:build/uefa-qualifier-feed-20260720
           fi
