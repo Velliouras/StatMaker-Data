@@ -184,6 +184,52 @@ def _choose_bookmaker(
     return bookmaker, items, {"rejected": rejected}
 
 
+def dedupe_markets_by_bookmaker(markets: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Preserve bookmaker alternatives until integrity selection.
+
+    The legacy parser keyed canonical rows without bookmaker and retained the
+    numerically highest price. That could discard the configured primary
+    bookmaker before family-level integrity checks. This key includes bookmaker
+    and uses the conservative lower price only for duplicate rows from the same
+    bookmaker.
+    """
+    chosen: Dict[Tuple[str, str, str, str, str], Dict[str, Any]] = {}
+    for raw in markets:
+        if not isinstance(raw, dict):
+            continue
+        item = copy.deepcopy(raw)
+        odds = _float(item.get("odds"))
+        bookmaker = _text(item.get("bookmaker"))
+        if odds is None or not bookmaker:
+            continue
+        line = _line(item.get("line"))
+        key = (
+            _text(item.get("market")),
+            _text(item.get("selection")),
+            "" if line is None else f"{line:g}",
+            _text(item.get("team")),
+            bookmaker,
+        )
+        previous = chosen.get(key)
+        if previous is None or odds < float(previous["odds"]):
+            chosen[key] = item
+    return sorted(
+        chosen.values(),
+        key=lambda item: (
+            _text(item.get("market")),
+            _text(item.get("team")),
+            _text(item.get("bookmaker")),
+            _text(item.get("selection")),
+            _line(item.get("line")) if _line(item.get("line")) is not None else -1,
+        ),
+    )
+
+
+def install_parser_guard(odds_module: Any) -> None:
+    """Install bookmaker-preserving dedupe on the shared Odds-API parser."""
+    odds_module.dedupe_markets = dedupe_markets_by_bookmaker
+
+
 def sanitize_match(
     match: Dict[str, Any],
     bookmaker_priority: Sequence[str],
