@@ -3,9 +3,11 @@
 
 Rules:
 - A market family for one match is sourced from one bookmaker only.
-- Configured bookmaker order is preferred after integrity/completeness checks.
-- Duplicate entries from the same bookmaker use the conservative lower decimal price.
-- Over/Under line curves must be monotonic within the selected bookmaker.
+- Fixed markets must contain their complete selection set.
+- Line markets keep only complete Over/Under pairs for the same line.
+- Over/Under curves must be monotonic within the selected bookmaker.
+- Provider aliases such as ``Bet365 (no latency)`` are normalized.
+- Duplicate entries from the same bookmaker use the conservative lower price.
 - Invalid market groups fail closed and are removed.
 """
 
@@ -59,6 +61,25 @@ def _line(value: Any) -> float | None:
         return None
 
 
+def _canonical_bookmaker(value: Any) -> str:
+    name = _text(value)
+    normalized = name.casefold()
+    if normalized.startswith("bet365"):
+        return "Bet365"
+    if normalized.startswith("unibet"):
+        return "Unibet"
+    return name
+
+
+def _selection_side(item: Dict[str, Any]) -> str:
+    selection = _text(item.get("selection")).casefold()
+    if "over" in selection:
+        return "over"
+    if "under" in selection:
+        return "under"
+    return ""
+
+
 def _selection_key(item: Dict[str, Any]) -> Tuple[str, str, str]:
     line = _line(item.get("line"))
     return (
@@ -76,8 +97,12 @@ def _group_key(item: Dict[str, Any]) -> Tuple[str, str]:
 
 def _priority(payload: Dict[str, Any]) -> List[str]:
     requested = payload.get("bookmakersRequested")
-    values = [_text(value) for value in requested] if isinstance(requested, list) else []
+    values = [
+        _canonical_bookmaker(value)
+        for value in requested
+    ] if isinstance(requested, list) else []
     values = [value for value in values if value]
+    values = list(dict.fromkeys(values))
     for fallback in DEFAULT_BOOKMAKER_PRIORITY:
         if fallback not in values:
             values.append(fallback)
@@ -85,10 +110,11 @@ def _priority(payload: Dict[str, Any]) -> List[str]:
 
 
 def _dedupe_same_bookmaker(items: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Keep a conservative exact price when duplicate canonical rows exist."""
+    """Keep a conservative exact price for duplicate rows of one bookmaker."""
     chosen: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
     for raw in items:
         item = copy.deepcopy(raw)
+        item["bookmaker"] = _canonical_bookmaker(item.get("bookmaker"))
         odds = _float(item.get("odds"))
         if odds is None:
             continue
@@ -99,23 +125,65 @@ def _dedupe_same_bookmaker(items: Iterable[Dict[str, Any]]) -> List[Dict[str, An
     return list(chosen.values())
 
 
+def _prepare_candidate(
+    market: str,
+    raw_items: Sequence[Dict[str, Any]],
+) -> Tuple[List[Dict[str, Any]], str, int]:
+    """Return only complete betting structures for one bookmaker.
+
+    Fixed markets require every expected selection. Line markets retain only
+    lines for which both Over and Under are present. Incomplete rows are never
+    promoted to the app betting feed.
+    """
+    items = _dedupe_same_bookmaker(raw_items)
+    before = len(items)
+
+    expected = FIXED_MARKET_SELECTIONS.get(market)
+    if expected:
+        by_selection = {
+            _text(item.get("selection")): item
+            for item in items
+            if _text(item.get("selection")) in expected
+        }
+        if not expected.issubset(by_selection):
+            return [], "incomplete fixed market", before
+        prepared = [by_selection[selection] for selection in sorted(expected)]
+        return prepared, "", before - len(prepared)
+
+    if market in LINE_MARKETS:
+        by_line: Dict[float, Dict[str, Dict[str, Any]]] = defaultdict(dict)
+        for item in items:
+            line = _line(item.get("line"))
+            side = _selection_side(item)
+            if line is None or not side:
+                continue
+            by_line[line][side] = item
+
+        prepared: List[Dict[str, Any]] = []
+        for line in sorted(by_line):
+            pair = by_line[line]
+            if {"over", "under"}.issubset(pair):
+                prepared.extend([pair["over"], pair["under"]])
+
+        if not prepared:
+            return [], "no complete over/under line", before
+        return prepared, "", before - len(prepared)
+
+    return items, "" if items else "empty market", 0
+
+
 def _line_curve_valid(items: Sequence[Dict[str, Any]]) -> bool:
     sides: Dict[str, List[Tuple[float, float]]] = defaultdict(list)
     for item in items:
-        market = _text(item.get("market"))
-        if market not in LINE_MARKETS:
-            continue
         line = _line(item.get("line"))
         odds = _float(item.get("odds"))
-        selection = _text(item.get("selection")).casefold()
-        if line is None or odds is None:
+        side = _selection_side(item)
+        if line is None or odds is None or not side:
             return False
-        if "over" in selection:
-            sides["over"].append((line, odds))
-        elif "under" in selection:
-            sides["under"].append((line, odds))
-        else:
-            return False
+        sides[side].append((line, odds))
+
+    if not sides["over"] or not sides["under"]:
+        return False
 
     for side, rows in sides.items():
         rows.sort()
@@ -127,20 +195,6 @@ def _line_curve_valid(items: Sequence[Dict[str, Any]]) -> bool:
     return True
 
 
-def _completeness(market: str, items: Sequence[Dict[str, Any]]) -> Tuple[int, int]:
-    expected = FIXED_MARKET_SELECTIONS.get(market)
-    if expected:
-        present = {_text(item.get("selection")) for item in items}
-        return len(present & expected), len(expected)
-    unique_lines = {
-        (_text(item.get("selection")).casefold(), _line(item.get("line")))
-        for item in items
-        if _line(item.get("line")) is not None
-    }
-    lines = {_line(item.get("line")) for item in items if _line(item.get("line")) is not None}
-    return len(unique_lines), max(1, len(lines) * 2)
-
-
 def _candidate_valid(market: str, items: Sequence[Dict[str, Any]]) -> bool:
     if not items:
         return False
@@ -148,7 +202,8 @@ def _candidate_valid(market: str, items: Sequence[Dict[str, Any]]) -> bool:
         return _line_curve_valid(items)
     expected = FIXED_MARKET_SELECTIONS.get(market)
     if expected:
-        return bool({_text(item.get("selection")) for item in items} & expected)
+        present = {_text(item.get("selection")) for item in items}
+        return expected.issubset(present)
     return True
 
 
@@ -157,41 +212,55 @@ def _choose_bookmaker(
     candidates: Dict[str, List[Dict[str, Any]]],
     priority: Sequence[str],
 ) -> Tuple[str | None, List[Dict[str, Any]], Dict[str, Any]]:
-    rank = {name: index for index, name in enumerate(priority)}
-    valid: List[Tuple[int, int, int, str, List[Dict[str, Any]]]] = []
+    rank = {
+        _canonical_bookmaker(name): index
+        for index, name in enumerate(priority)
+    }
+    valid: List[Tuple[int, int, str, List[Dict[str, Any]], int]] = []
     rejected: Dict[str, str] = {}
+    pruned_rows: Dict[str, int] = {}
 
+    normalized_candidates: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for bookmaker, raw_items in candidates.items():
-        items = _dedupe_same_bookmaker(raw_items)
-        if not _candidate_valid(market, items):
-            rejected[bookmaker] = "integrity"
+        normalized_candidates[_canonical_bookmaker(bookmaker)].extend(raw_items)
+
+    for bookmaker, raw_items in normalized_candidates.items():
+        items, reason, pruned = _prepare_candidate(market, raw_items)
+        if pruned:
+            pruned_rows[bookmaker] = pruned
+        if reason or not _candidate_valid(market, items):
+            rejected[bookmaker] = reason or "integrity"
             continue
-        complete, expected = _completeness(market, items)
-        is_complete = 1 if complete >= expected else 0
         valid.append((
-            is_complete,
-            complete,
             -rank.get(bookmaker, len(priority) + 100),
+            len(items),
             bookmaker,
             items,
+            pruned,
         ))
 
     if not valid:
-        return None, [], {"rejected": rejected}
+        return None, [], {
+            "rejected": rejected,
+            "prunedIncompleteRows": pruned_rows,
+        }
 
+    # Bookmaker priority is decisive once a candidate is complete and valid.
     valid.sort(reverse=True)
-    _, _, _, bookmaker, items = valid[0]
-    return bookmaker, items, {"rejected": rejected}
+    _, _, bookmaker, items, _ = valid[0]
+    return bookmaker, items, {
+        "rejected": rejected,
+        "prunedIncompleteRows": pruned_rows,
+    }
 
 
 def dedupe_markets_by_bookmaker(markets: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Preserve bookmaker alternatives until integrity selection.
 
     The legacy parser keyed canonical rows without bookmaker and retained the
-    numerically highest price. That could discard the configured primary
-    bookmaker before family-level integrity checks. This key includes bookmaker
-    and uses the conservative lower price only for duplicate rows from the same
-    bookmaker.
+    numerically highest price. This key includes bookmaker, canonicalizes known
+    bookmaker aliases and uses the conservative lower price only for duplicate
+    rows from the same bookmaker.
     """
     chosen: Dict[Tuple[str, str, str, str, str], Dict[str, Any]] = {}
     for raw in markets:
@@ -199,9 +268,10 @@ def dedupe_markets_by_bookmaker(markets: Iterable[Dict[str, Any]]) -> List[Dict[
             continue
         item = copy.deepcopy(raw)
         odds = _float(item.get("odds"))
-        bookmaker = _text(item.get("bookmaker"))
+        bookmaker = _canonical_bookmaker(item.get("bookmaker"))
         if odds is None or not bookmaker:
             continue
+        item["bookmaker"] = bookmaker
         line = _line(item.get("line"))
         key = (
             _text(item.get("market")),
@@ -234,27 +304,35 @@ def sanitize_match(
     match: Dict[str, Any],
     bookmaker_priority: Sequence[str],
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    groups: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
+    groups: Dict[Tuple[str, str], Dict[str, List[Dict[str, Any]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
     passthrough: List[Dict[str, Any]] = []
 
     for raw in match.get("markets", []) or []:
         if not isinstance(raw, dict):
             continue
         market = _text(raw.get("market"))
-        bookmaker = _text(raw.get("bookmaker"))
+        bookmaker = _canonical_bookmaker(raw.get("bookmaker"))
         if not market or not bookmaker:
             continue
+        item = copy.deepcopy(raw)
+        item["bookmaker"] = bookmaker
         if market not in LINE_MARKETS and market not in FIXED_MARKET_SELECTIONS:
-            passthrough.append(copy.deepcopy(raw))
+            passthrough.append(item)
             continue
-        groups[_group_key(raw)][bookmaker].append(raw)
+        groups[_group_key(item)][bookmaker].append(item)
 
     output = copy.deepcopy(match)
     sanitized: List[Dict[str, Any]] = []
     report_groups: List[Dict[str, Any]] = []
 
     for (market, team), candidates in sorted(groups.items()):
-        bookmaker, items, details = _choose_bookmaker(market, candidates, bookmaker_priority)
+        bookmaker, items, details = _choose_bookmaker(
+            market,
+            candidates,
+            bookmaker_priority,
+        )
         if bookmaker is None:
             report_groups.append({
                 "market": market,
@@ -265,8 +343,8 @@ def sanitize_match(
             })
             continue
         items.sort(key=lambda item: (
-            _text(item.get("selection")),
             _line(item.get("line")) if _line(item.get("line")) is not None else -1,
+            _text(item.get("selection")),
         ))
         sanitized.extend(items)
         report_groups.append({
@@ -319,36 +397,64 @@ def sanitize_payload(payload: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str,
         league["matches"] = new_matches
 
     dropped_groups = sum(
-        1 for report in reports for group in report["groups"] if group["status"] == "dropped"
+        1
+        for report in reports
+        for group in report["groups"]
+        if group["status"] == "dropped"
     )
     mixed_groups_before = sum(
-        1 for report in reports for group in report["groups"]
+        1
+        for report in reports
+        for group in report["groups"]
         if len(group.get("candidateBookmakers", [])) > 1
     )
+    pruned_rows = sum(
+        int(count)
+        for report in reports
+        for group in report["groups"]
+        for count in (group.get("prunedIncompleteRows") or {}).values()
+    )
     integrity = {
-        "policy": "single bookmaker per match market family; fail closed on invalid line curves",
+        "policy": (
+            "single bookmaker per match market family; complete fixed markets; "
+            "paired Over/Under lines; fail closed on invalid curves"
+        ),
         "bookmakerPriority": priority,
         "matchesChecked": len(reports),
         "mixedBookmakerGroupsResolved": mixed_groups_before,
+        "incompleteRowsPruned": pruned_rows,
         "groupsDropped": dropped_groups,
         "matches": reports,
     }
     debug = result.setdefault("debug", {})
     if isinstance(debug, dict):
         debug["marketIntegrity"] = {
-            key: value for key, value in integrity.items() if key != "matches"
+            key: value
+            for key, value in integrity.items()
+            if key != "matches"
         }
     return result, integrity
 
 
-def sanitize_file(path: Path, *, write: bool, report_path: Path | None = None) -> Dict[str, Any]:
+def sanitize_file(
+    path: Path,
+    *,
+    write: bool,
+    report_path: Path | None = None,
+) -> Dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     sanitized, report = sanitize_payload(payload)
     if write:
-        path.write_text(json.dumps(sanitized, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(sanitized, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     if report_path is not None:
         report_path.parent.mkdir(parents=True, exist_ok=True)
-        report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        report_path.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     return report
 
 
@@ -361,12 +467,21 @@ def main() -> int:
 
     summary = []
     for path in args.paths:
-        report_path = args.report_dir / f"{path.stem}_integrity.json" if args.report_dir else None
-        report = sanitize_file(path, write=args.write, report_path=report_path)
+        report_path = (
+            args.report_dir / f"{path.stem}_integrity.json"
+            if args.report_dir
+            else None
+        )
+        report = sanitize_file(
+            path,
+            write=args.write,
+            report_path=report_path,
+        )
         summary.append({
             "path": str(path),
             "matchesChecked": report["matchesChecked"],
             "mixedBookmakerGroupsResolved": report["mixedBookmakerGroupsResolved"],
+            "incompleteRowsPruned": report["incompleteRowsPruned"],
             "groupsDropped": report["groupsDropped"],
         })
     print(json.dumps(summary, ensure_ascii=False, indent=2))
