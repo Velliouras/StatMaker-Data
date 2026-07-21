@@ -11,11 +11,6 @@ on:
   schedule:
     # 08:17 and 20:17 Greece during EEST (UTC+3).
     - cron: "17 5,17 * * *"
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/odds-integrity-trigger"
 
 permissions:
   contents: write
@@ -51,11 +46,9 @@ jobs:
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
 
       - name: Snapshot current Domestic odds
-        if: github.event_name != 'push'
         run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
 
       - name: Refresh rotating Domestic exact odds
-        if: github.event_name != 'push'
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
@@ -65,7 +58,6 @@ jobs:
           python scripts/refresh_domestic_odds_integrity.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
-        if: github.event_name != 'push'
         run: |
           python - <<'PY'
           import datetime as dt
@@ -124,7 +116,6 @@ jobs:
           PY
 
       - name: Enrich Domestic team logos
-        if: github.event_name != 'push'
         run: python scripts/enrich_domestic_odds_team_logos.py
 
       - name: Sanitize Domestic betting feed
