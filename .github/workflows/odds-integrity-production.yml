@@ -1,0 +1,211 @@
+name: Odds Integrity Production Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      cycle_size:
+        description: "Number of Domestic leagues to refresh in this cycle"
+        required: true
+        default: "16"
+        type: string
+  schedule:
+    # 08:17 and 20:17 Greece during EEST (UTC+3).
+    - cron: "17 5,17 * * *"
+  push:
+    branches:
+      - main
+      - fix/odds-integrity-20260721
+    paths:
+      - ".github/odds-integrity-trigger"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: odds-integrity-production
+  cancel-in-progress: false
+
+jobs:
+  validate-and-refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run odds integrity regressions
+        run: |
+          python -m py_compile scripts/odds_market_integrity.py
+          python -m unittest tests/test_odds_market_integrity.py
+
+      - name: Validate current Domestic feed without writing
+        run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
+
+      - name: Stop after isolated branch validation
+        if: github.ref != 'refs/heads/main'
+        run: echo "Integrity code validated on isolated branch; production feeds untouched."
+
+      - name: Snapshot current Domestic odds
+        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
+
+      - name: Refresh rotating Domestic exact odds
+        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
+        run: |
+          cycle_size="${INPUT_CYCLE_SIZE:-16}"
+          python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
+
+      - name: Preserve unexpired Domestic matches omitted by rotation
+        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          from pathlib import Path
+
+          before_path = Path(os.environ["RUNNER_TEMP"]) / "domestic_odds_before.json"
+          feed_path = Path("odds/odds_api_io/domestic_odds.json")
+          before = json.loads(before_path.read_text(encoding="utf-8"))
+          feed = json.loads(feed_path.read_text(encoding="utf-8"))
+          today = dt.datetime.now(dt.timezone.utc).date().isoformat()
+
+          def match_key(match):
+              match_id = str(match.get("id") or match.get("matchId") or "").strip()
+              if match_id:
+                  return ("id", match_id)
+              return (
+                  "fixture",
+                  str(match.get("canonicalHomeTeam") or match.get("homeTeam") or "").strip().casefold(),
+                  str(match.get("canonicalAwayTeam") or match.get("awayTeam") or "").strip().casefold(),
+                  str(match.get("date") or match.get("kickoff") or "")[:10],
+              )
+
+          old_by_code = {
+              str(league.get("leagueCode") or ""): league
+              for league in before.get("leagues", []) or []
+          }
+          fresh_by_code = {
+              str(league.get("leagueCode") or ""): league
+              for league in feed.get("leagues", []) or []
+          }
+          restored = 0
+          for code, old_league in old_by_code.items():
+              new_league = fresh_by_code.get(code)
+              if new_league is None:
+                  feed.setdefault("leagues", []).append(old_league)
+                  restored += len(old_league.get("matches", []) or [])
+                  continue
+              fresh_matches = list(new_league.get("matches", []) or [])
+              seen = {match_key(match) for match in fresh_matches}
+              for old_match in old_league.get("matches", []) or []:
+                  date = str(old_match.get("date") or old_match.get("kickoff") or "")[:10]
+                  if date and date < today:
+                      continue
+                  key = match_key(old_match)
+                  if key not in seen:
+                      fresh_matches.append(old_match)
+                      seen.add(key)
+                      restored += 1
+              new_league["matches"] = fresh_matches
+
+          feed.setdefault("debug", {})["unexpiredMatchesRestoredAfterRotatingRefresh"] = restored
+          feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+          print(f"Preserved {restored} unexpired Domestic matches.")
+          PY
+
+      - name: Enrich Domestic team logos
+        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        run: python scripts/enrich_domestic_odds_team_logos.py
+
+      - name: Sanitize Domestic betting feed
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python scripts/odds_market_integrity.py \
+            odds/odds_api_io/domestic_odds.json \
+            --write \
+            --report-dir reports
+
+      - name: Commit Domestic feed
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            odds/odds_api_io/domestic_provider_markets.json \
+            data/statmaker/domestic_live_july_state.json \
+            reports/domestic_odds_debug.json \
+            reports/domestic_live_july_odds_refresh.json \
+            reports/domestic_corner_archive_rebuild.json \
+            reports/domestic_expanded_market_rebuild.json \
+            reports/domestic_team_logo_enrichment.json \
+            reports/domestic_odds_integrity.json
+          if git diff --cached --quiet; then
+            echo "No Domestic odds changes."
+          else
+            git commit -m "Sanitize Domestic exact odds integrity"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Save integrity script before UEFA checkout
+        if: github.ref == 'refs/heads/main'
+        run: cp scripts/odds_market_integrity.py "$RUNNER_TEMP/odds_market_integrity.py"
+
+      - name: Switch to live UEFA feed branch
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git fetch origin build/uefa-qualifier-feed-20260720
+          git checkout -B build/uefa-qualifier-feed-20260720 origin/build/uefa-qualifier-feed-20260720
+
+      - name: Refresh CL EL and Conference exact odds
+        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+        run: python scripts/update_uefa_qualifier_odds_build.py
+
+      - name: Sanitize UEFA betting feeds
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python "$RUNNER_TEMP/odds_market_integrity.py" \
+            odds/odds_api_io/champions_league_odds.json \
+            odds/odds_api_io/europa_league_odds.json \
+            odds/odds_api_io/conference_league_odds.json \
+            --write \
+            --report-dir reports
+
+      - name: Commit UEFA feeds
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/champions_league_odds.json \
+            odds/odds_api_io/europa_league_odds.json \
+            odds/odds_api_io/conference_league_odds.json \
+            reports/champions_league_odds_debug.json \
+            reports/europa_league_odds_debug.json \
+            reports/conference_league_odds_debug.json \
+            reports/uefa_qualifier_build_refresh.json \
+            reports/champions_league_odds_integrity.json \
+            reports/europa_league_odds_integrity.json \
+            reports/conference_league_odds_integrity.json
+          if git diff --cached --quiet; then
+            echo "No UEFA odds changes."
+          else
+            git commit -m "Sanitize UEFA exact odds integrity"
+            git push origin HEAD:build/uefa-qualifier-feed-20260720
+          fi
