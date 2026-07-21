@@ -10,18 +10,6 @@ on:
         type: string
   schedule:
     - cron: "11 3 * * *"
-  push:
-    branches:
-      - main
-    paths:
-      - "scripts/domestic_live_july_pipeline.py"
-      - "scripts/refresh_domestic_live_july_stats.py"
-      - "scripts/expand_domestic_full_stats.py"
-      - "scripts/finalize_domestic_live_july_artifacts.py"
-      - "scripts/build_domestic_live_july_normalized_stats.py"
-      - "tests/test_domestic_live_july_pipeline.py"
-      - "tests/test_domestic_stats_completeness.py"
-      - ".github/workflows/domestic-live-july-pipeline.yml"
 
 permissions:
   contents: write
