@@ -1,4 +1,4 @@
-name: Hourly Domestic Odds Safe Refresh
+name: Domestic Odds Safe Refresh
 
 on:
   workflow_dispatch:
@@ -6,16 +6,16 @@ on:
       cycle_size:
         description: "Number of Domestic leagues to refresh in this cycle"
         required: true
-        default: "8"
+        default: "16"
         type: string
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 */2 * * *"
 
 permissions:
   contents: write
 
 concurrency:
-  group: hourly-domestic-odds-safe
+  group: domestic-odds-safe
   cancel-in-progress: false
 
 jobs:
@@ -45,9 +45,9 @@ jobs:
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
-          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '8' }}
+          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
-          cycle_size="${INPUT_CYCLE_SIZE:-8}"
+          cycle_size="${INPUT_CYCLE_SIZE:-16}"
           python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired matches omitted by rotating refresh
@@ -206,7 +206,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No validated Domestic odds changes to commit."
           else
-            git commit -m "Hourly safe Domestic exact odds refresh"
+            git commit -m "Scheduled Domestic exact odds refresh"
             git pull --rebase origin main
             git push origin HEAD:main
           fi
