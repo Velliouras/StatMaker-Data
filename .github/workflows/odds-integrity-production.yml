@@ -14,7 +14,6 @@ on:
   push:
     branches:
       - main
-      - fix/odds-integrity-20260721
     paths:
       - ".github/odds-integrity-trigger"
 
@@ -48,16 +47,12 @@ jobs:
       - name: Validate current Domestic feed without writing
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
 
-      - name: Stop after isolated branch validation
-        if: github.ref != 'refs/heads/main'
-        run: echo "Integrity code validated on isolated branch; production feeds untouched."
-
       - name: Snapshot current Domestic odds
-        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        if: github.event_name != 'push'
         run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
 
       - name: Refresh rotating Domestic exact odds
-        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        if: github.event_name != 'push'
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
@@ -67,7 +62,7 @@ jobs:
           python scripts/refresh_domestic_live_july_odds.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
-        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        if: github.event_name != 'push'
         run: |
           python - <<'PY'
           import datetime as dt
@@ -126,11 +121,10 @@ jobs:
           PY
 
       - name: Enrich Domestic team logos
-        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        if: github.event_name != 'push'
         run: python scripts/enrich_domestic_odds_team_logos.py
 
       - name: Sanitize Domestic betting feed
-        if: github.ref == 'refs/heads/main'
         run: |
           python scripts/odds_market_integrity.py \
             odds/odds_api_io/domestic_odds.json \
@@ -138,7 +132,6 @@ jobs:
             --report-dir reports
 
       - name: Commit Domestic feed
-        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -161,24 +154,21 @@ jobs:
           fi
 
       - name: Save integrity script before UEFA checkout
-        if: github.ref == 'refs/heads/main'
         run: cp scripts/odds_market_integrity.py "$RUNNER_TEMP/odds_market_integrity.py"
 
       - name: Switch to live UEFA feed branch
-        if: github.ref == 'refs/heads/main'
         run: |
           git fetch origin build/uefa-qualifier-feed-20260720
           git checkout -B build/uefa-qualifier-feed-20260720 origin/build/uefa-qualifier-feed-20260720
 
       - name: Refresh CL EL and Conference exact odds
-        if: github.ref == 'refs/heads/main' && github.event_name != 'push'
+        if: github.event_name != 'push'
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
         run: python scripts/update_uefa_qualifier_odds_build.py
 
       - name: Sanitize UEFA betting feeds
-        if: github.ref == 'refs/heads/main'
         run: |
           python "$RUNNER_TEMP/odds_market_integrity.py" \
             odds/odds_api_io/champions_league_odds.json \
@@ -188,7 +178,6 @@ jobs:
             --report-dir reports
 
       - name: Commit UEFA feeds
-        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
