@@ -1,9 +1,7 @@
 {
   "competitionId": "champions_league",
   "leagueCode": "CL",
-  "warnings": [
-    "Odds rate-limit guard active after fixture refresh; fixtures published without new odds."
-  ],
+  "warnings": [],
   "apiCalls": [
     {
       "path": "/leagues",
@@ -13,9 +11,9 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 241,
-      "bodyLength": 147704,
-      "rateLimitRemaining": 11,
+      "durationMs": 136,
+      "bodyLength": 148646,
+      "rateLimitRemaining": 37,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 35}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 8}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eve..."
     },
     {
@@ -25,15 +23,67 @@
         "sport": "football",
         "league": "international-clubs-uefa-champions-league-qualification",
         "status": "pending,live",
-        "from": "2026-07-23T08:02:59Z",
-        "to": "2026-09-06T08:02:59Z",
+        "from": "2026-07-23T18:39:10Z",
+        "to": "2026-09-06T18:39:10Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 217,
-      "bodyLength": 11664,
-      "rateLimitRemaining": 10,
+      "durationMs": 173,
+      "bodyLength": 12444,
+      "rateLimitRemaining": 36,
       "sample": "[{\"id\": 72868102, \"home\": \"Kuopion Palloseura\", \"away\": \"Sabah Masazir\", \"homeId\": 2244, \"awayId\": 382568, \"date\": \"2026-07-28T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176706, \"home\": \"Lincoln Red Imps\", \"away\": \"Mjallby AIF\", \"homeId\": 126304, \"awayId\": 1783, \"date\": \"2026-07-28T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176834, \"home\": \"GNK Dinamo Zagreb\", \"away\": \"FC Thun\", \"homeId\": 2032, \"awayId\": 2454, \"date\": \"2026-07-28T18:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176848, \"home\": \"NK Celje\", \"away\": \"KF Egnatia Rrogozhine\", \"homeId\": 2413, \"awayId\": 372056, \"date\": \"2026-07-28T18:15:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - U..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72868102,72176706,72176834,72176848,72177120,72176802,72176812,72176794,72176798,72176808",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 121,
+      "bodyLength": 2,
+      "rateLimitRemaining": 35,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "72176838,72176722,72177116,72176844,73007622,73007626,73007630,73007726,73007788,73007848",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 153,
+      "bodyLength": 2,
+      "rateLimitRemaining": 34,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "73008076,73008136,73008144,73114312,73007624,73007628,73007634,73007728,73007790,73007850",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 153,
+      "bodyLength": 2,
+      "rateLimitRemaining": 33,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "73008078,73008138,73008148,73114320",
+        "bookmakers": "Bet365,Unibet"
+      },
+      "status": 200,
+      "durationMs": 159,
+      "bodyLength": 2,
+      "rateLimitRemaining": 32,
+      "sample": []
     }
   ],
   "providerRawMarketNames": {},
@@ -44,7 +94,7 @@
   "auditOnlyMarketExamples": {},
   "unsupportedMarketCounts": {},
   "unsupportedMarketExamples": {},
-  "rateLimitRemaining": 10,
+  "rateLimitRemaining": 32,
   "providerIdentityTeams": [
     {
       "eventId": "72868102",
@@ -208,6 +258,13 @@
       "awayMapped": null
     },
     {
+      "eventId": "73114312",
+      "providerHomeTeam": "Winner League Path Match 1",
+      "providerAwayTeam": "Winner League Path Match 2",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
       "eventId": "73007624",
       "providerHomeTeam": "NEC Nijmegen",
       "providerAwayTeam": "Olympiacos Piraeus",
@@ -267,6 +324,13 @@
       "eventId": "73008148",
       "providerHomeTeam": "Winner Match 1",
       "providerAwayTeam": "Winner Match 9",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73114320",
+      "providerHomeTeam": "Winner League Path Match 2",
+      "providerAwayTeam": "Winner League Path Match 1",
       "homeMapped": null,
       "awayMapped": null
     }
@@ -411,6 +475,12 @@
       "providerAwayTeam": "Winner Match 1"
     },
     {
+      "eventId": "73114312",
+      "kickoff": "2026-08-04T18:00:00Z",
+      "providerHomeTeam": "Winner League Path Match 1",
+      "providerAwayTeam": "Winner League Path Match 2"
+    },
+    {
       "eventId": "73007624",
       "kickoff": "2026-08-11T18:00:00Z",
       "providerHomeTeam": "NEC Nijmegen",
@@ -463,19 +533,25 @@
       "kickoff": "2026-08-11T18:00:00Z",
       "providerHomeTeam": "Winner Match 1",
       "providerAwayTeam": "Winner Match 9"
+    },
+    {
+      "eventId": "73114320",
+      "kickoff": "2026-08-11T18:00:00Z",
+      "providerHomeTeam": "Winner League Path Match 2",
+      "providerAwayTeam": "Winner League Path Match 1"
     }
   ],
   "providerLeague": {
     "name": "International Clubs - UEFA Champions League, Qualification",
     "slug": "international-clubs-uefa-champions-league-qualification",
     "sport": null,
-    "eventsCount": 32
+    "eventsCount": 34
   },
-  "eventsFetched": 32,
+  "eventsFetched": 34,
   "eventsWithOddsResponse": 0,
-  "matchesEmitted": 32,
+  "matchesEmitted": 34,
   "marketsEmitted": 0,
   "fixtureRefreshAttempted": true,
-  "oddsRefreshSkippedByRateLimit": true,
+  "oddsRefreshSkippedByRateLimit": false,
   "preservedPreviousExactMarketRows": 0
 }
