@@ -2,7 +2,7 @@
   "competitionId": "europa_league",
   "leagueCode": "EL",
   "warnings": [
-    "Rate limit guard active before events fetch; previous future matches preserved."
+    "Odds rate-limit guard active after fixture refresh; fixtures published without new odds."
   ],
   "apiCalls": [
     {
@@ -13,10 +13,44 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 402,
+      "durationMs": 241,
       "bodyLength": 147704,
-      "rateLimitRemaining": 17,
+      "rateLimitRemaining": 11,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 0}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 35}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Angola - Girabola\", \"slug\": \"angola-girabola\", \"eventsCount\": 0}, {\"name\": \"Antigua and Barbuda - Premier Division\", \"slug\": \"antigua-and-barbuda-premier-division\", \"eventsCount\": 0}, {\"name\": \"Argentina - Copa Argentina\", \"slug\": \"argentina-copa-argentina\", \"eventsCount\": 8}, {\"name\": \"Argentina - Copa Proyeccion Final, Reserves\", \"slug\": \"argentina-copa-proyeccion-final-reserves\", \"eve..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "international-clubs-uefa-champions-league-qualification",
+        "status": "pending,live",
+        "from": "2026-07-23T08:02:59Z",
+        "to": "2026-09-06T08:02:59Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 217,
+      "bodyLength": 11664,
+      "rateLimitRemaining": 10,
+      "sample": "[{\"id\": 72868102, \"home\": \"Kuopion Palloseura\", \"away\": \"Sabah Masazir\", \"homeId\": 2244, \"awayId\": 382568, \"date\": \"2026-07-28T15:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176706, \"home\": \"Lincoln Red Imps\", \"away\": \"Mjallby AIF\", \"homeId\": 126304, \"awayId\": 1783, \"date\": \"2026-07-28T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176834, \"home\": \"GNK Dinamo Zagreb\", \"away\": \"FC Thun\", \"homeId\": 2032, \"awayId\": 2454, \"date\": \"2026-07-28T18:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League, Qualification\", \"slug\": \"international-clubs-uefa-champions-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72176848, \"home\": \"NK Celje\", \"away\": \"KF Egnatia Rrogozhine\", \"homeId\": 2413, \"awayId\": 372056, \"date\": \"2026-07-28T18:15:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - U..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "international-clubs-uefa-europa-league-qualification",
+        "status": "pending,live",
+        "from": "2026-07-23T08:02:59Z",
+        "to": "2026-09-06T08:02:59Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 215,
+      "bodyLength": 16505,
+      "rateLimitRemaining": 9,
+      "sample": "[{\"id\": 72179162, \"home\": \"Qarabag FK\", \"away\": \"PFC CSKA Sofia\", \"homeId\": 5962, \"awayId\": 3275, \"date\": \"2026-07-23T16:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72533768, \"home\": \"Tromsoe IL\", \"away\": \"FC Hradec Kralove\", \"homeId\": 660, \"awayId\": 2217, \"date\": \"2026-07-23T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72179158, \"home\": \"Hammarby IF\", \"away\": \"RSC Anderlecht\", \"homeId\": 1758, \"awayId\": 2900, \"date\": \"2026-07-23T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qualification\", \"slug\": \"international-clubs-uefa-europa-league-qualification\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 72179696, \"home\": \"FC Sheriff Tiraspol\", \"away\": \"Maccabi Tel Aviv FC\", \"homeId\": 5173, \"awayId\": 5198, \"date\": \"2026-07-23T17:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League, Qua..."
     }
   ],
   "providerRawMarketNames": {},
@@ -27,5 +61,594 @@
   "auditOnlyMarketExamples": {},
   "unsupportedMarketCounts": {},
   "unsupportedMarketExamples": {},
-  "rateLimitRemaining": 17
+  "rateLimitRemaining": 9,
+  "providerIdentityTeams": [
+    {
+      "eventId": "72179162",
+      "providerHomeTeam": "Qarabag FK",
+      "providerAwayTeam": "PFC CSKA Sofia",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72533768",
+      "providerHomeTeam": "Tromsoe IL",
+      "providerAwayTeam": "FC Hradec Kralove",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179158",
+      "providerHomeTeam": "Hammarby IF",
+      "providerAwayTeam": "RSC Anderlecht",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179696",
+      "providerHomeTeam": "FC Sheriff Tiraspol",
+      "providerAwayTeam": "Maccabi Tel Aviv FC",
+      "homeMapped": null,
+      "awayMapped": "Maccabi Tel-Aviv"
+    },
+    {
+      "eventId": "72179718",
+      "providerHomeTeam": "FC Dynamo Kyiv",
+      "providerAwayTeam": "PAOK Thessaloniki",
+      "homeMapped": null,
+      "awayMapped": "PAOK"
+    },
+    {
+      "eventId": "72179680",
+      "providerHomeTeam": "FC Twente Enschede",
+      "providerAwayTeam": "Ferencvarosi Budapest",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179686",
+      "providerHomeTeam": "Besiktas Istanbul",
+      "providerAwayTeam": "FC Midtjylland",
+      "homeMapped": null,
+      "awayMapped": "Midtjylland"
+    },
+    {
+      "eventId": "72179714",
+      "providerHomeTeam": "FC St. Gallen 1879",
+      "providerAwayTeam": "SL Benfica",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179692",
+      "providerHomeTeam": "HNK Hajduk Split",
+      "providerAwayTeam": "Pafos FC",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179694",
+      "providerHomeTeam": "Maccabi Tel Aviv FC",
+      "providerAwayTeam": "FC Sheriff Tiraspol",
+      "homeMapped": "Maccabi Tel-Aviv",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72533770",
+      "providerHomeTeam": "FC Hradec Kralove",
+      "providerAwayTeam": "Tromsoe IL",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179684",
+      "providerHomeTeam": "FC Midtjylland",
+      "providerAwayTeam": "Besiktas Istanbul",
+      "homeMapped": "Midtjylland",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179690",
+      "providerHomeTeam": "Pafos FC",
+      "providerAwayTeam": "HNK Hajduk Split",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179716",
+      "providerHomeTeam": "PAOK Thessaloniki",
+      "providerAwayTeam": "FC Dynamo Kyiv",
+      "homeMapped": "PAOK",
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179160",
+      "providerHomeTeam": "PFC CSKA Sofia",
+      "providerAwayTeam": "Qarabag FK",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179156",
+      "providerHomeTeam": "RSC Anderlecht",
+      "providerAwayTeam": "Hammarby IF",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179682",
+      "providerHomeTeam": "Ferencvarosi Budapest",
+      "providerAwayTeam": "FC Twente Enschede",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "72179712",
+      "providerHomeTeam": "SL Benfica",
+      "providerAwayTeam": "FC St. Gallen 1879",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008516",
+      "providerHomeTeam": "Jagiellonia Bialystok",
+      "providerAwayTeam": "Glasgow Rangers",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73014456",
+      "providerHomeTeam": "Winner St Gallen / Benfica",
+      "providerAwayTeam": "Loser Sturm Graz / Hearts",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008742",
+      "providerHomeTeam": "Loser Larne / Crvena Zvezda",
+      "providerAwayTeam": "Loser Iberia Tbilisi / Slovan Bratislava",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008748",
+      "providerHomeTeam": "Loser Mjallby / Lincoln Red Imps",
+      "providerAwayTeam": "Loser Omonia / Kairat Almaty",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008752",
+      "providerHomeTeam": "Loser Sabah / KuPS Kuopio",
+      "providerAwayTeam": "Loser Levski Sofia / Universitatea Craiova",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008756",
+      "providerHomeTeam": "Loser Ararat-Armenia / Shamrock Rovers",
+      "providerAwayTeam": "Loser Egnatia / Celje",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008760",
+      "providerHomeTeam": "Loser Aarhus / Lech Poznan",
+      "providerAwayTeam": "Loser Klaksvik / Kauno Zalgiris",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008764",
+      "providerHomeTeam": "Loser Thun / Gnk Dinamo",
+      "providerAwayTeam": "Loser Vikingur Reykjavik / Hapoel Beer Sheva",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008852",
+      "providerHomeTeam": "Winner Tromsoe / Hradec Kralove",
+      "providerAwayTeam": "Winner Besiktas / Midtjylland",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009104",
+      "providerHomeTeam": "Winner Dynamo Kyiv / PAOK",
+      "providerAwayTeam": "Winner Hammarby / Anderlecht",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009108",
+      "providerHomeTeam": "Winner Hajduk Split / Pafos",
+      "providerAwayTeam": "FC Salzburg",
+      "homeMapped": null,
+      "awayMapped": "Salzburg"
+    },
+    {
+      "eventId": "73009196",
+      "providerHomeTeam": "Winner Sheriff Tiraspol / Maccabi Tel Aviv",
+      "providerAwayTeam": "Winner Qarabag / CSKA Sofia",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009200",
+      "providerHomeTeam": "Winner Twente / Ferencvaros",
+      "providerAwayTeam": "Loser Fenerbahce / Gornik Zabrze",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008520",
+      "providerHomeTeam": "Glasgow Rangers",
+      "providerAwayTeam": "Jagiellonia Bialystok",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008746",
+      "providerHomeTeam": "Loser Iberia Tbilisi / Slovan Bratislava",
+      "providerAwayTeam": "Loser Larne / Crvena Zvezda",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008750",
+      "providerHomeTeam": "Loser Omonia / Kairat Almaty",
+      "providerAwayTeam": "Loser Mjallby / Lincoln Red Imps",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008754",
+      "providerHomeTeam": "Loser Levski Sofia / Universitatea Craiova",
+      "providerAwayTeam": "Loser Sabah / KuPS Kuopio",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008758",
+      "providerHomeTeam": "Loser Egnatia / Celje",
+      "providerAwayTeam": "Loser Ararat-Armenia / Shamrock Rovers",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008762",
+      "providerHomeTeam": "Loser Vikingur Reykjavik / Hapoel Beer Sheva",
+      "providerAwayTeam": "Loser Thun / Gnk Dinamo",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008766",
+      "providerHomeTeam": "Winner Besiktas / Midtjylland",
+      "providerAwayTeam": "Winner Tromsoe / Hradec Kralove",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008854",
+      "providerHomeTeam": "Winner Hammarby / Anderlecht",
+      "providerAwayTeam": "Winner Dynamo Kyiv / PAOK",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73008858",
+      "providerHomeTeam": "Loser Klaksvik / Kauno Zalgiris",
+      "providerAwayTeam": "Loser Aarhus / Lech Poznan",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009106",
+      "providerHomeTeam": "FC Salzburg",
+      "providerAwayTeam": "Winner Hajduk Split / Pafos",
+      "homeMapped": "Salzburg",
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009110",
+      "providerHomeTeam": "Loser Sturm Graz / Hearts",
+      "providerAwayTeam": "Winner St Gallen / Benfica",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009198",
+      "providerHomeTeam": "Loser Fenerbahce / Gornik Zabrze",
+      "providerAwayTeam": "Winner Twente / Ferencvaros",
+      "homeMapped": null,
+      "awayMapped": null
+    },
+    {
+      "eventId": "73009202",
+      "providerHomeTeam": "Winner Qarabag / CSKA Sofia",
+      "providerAwayTeam": "Winner Sheriff Tiraspol / Maccabi Tel Aviv",
+      "homeMapped": null,
+      "awayMapped": null
+    }
+  ],
+  "fixturesWithoutExactMarkets": [
+    {
+      "eventId": "72179162",
+      "kickoff": "2026-07-23T16:00:00Z",
+      "providerHomeTeam": "Qarabag FK",
+      "providerAwayTeam": "PFC CSKA Sofia"
+    },
+    {
+      "eventId": "72533768",
+      "kickoff": "2026-07-23T17:00:00Z",
+      "providerHomeTeam": "Tromsoe IL",
+      "providerAwayTeam": "FC Hradec Kralove"
+    },
+    {
+      "eventId": "72179158",
+      "kickoff": "2026-07-23T17:00:00Z",
+      "providerHomeTeam": "Hammarby IF",
+      "providerAwayTeam": "RSC Anderlecht"
+    },
+    {
+      "eventId": "72179696",
+      "kickoff": "2026-07-23T17:00:00Z",
+      "providerHomeTeam": "FC Sheriff Tiraspol",
+      "providerAwayTeam": "Maccabi Tel Aviv FC"
+    },
+    {
+      "eventId": "72179718",
+      "kickoff": "2026-07-23T17:00:00Z",
+      "providerHomeTeam": "FC Dynamo Kyiv",
+      "providerAwayTeam": "PAOK Thessaloniki"
+    },
+    {
+      "eventId": "72179680",
+      "kickoff": "2026-07-23T18:00:00Z",
+      "providerHomeTeam": "FC Twente Enschede",
+      "providerAwayTeam": "Ferencvarosi Budapest"
+    },
+    {
+      "eventId": "72179686",
+      "kickoff": "2026-07-23T18:00:00Z",
+      "providerHomeTeam": "Besiktas Istanbul",
+      "providerAwayTeam": "FC Midtjylland"
+    },
+    {
+      "eventId": "72179714",
+      "kickoff": "2026-07-23T18:00:00Z",
+      "providerHomeTeam": "FC St. Gallen 1879",
+      "providerAwayTeam": "SL Benfica"
+    },
+    {
+      "eventId": "72179692",
+      "kickoff": "2026-07-23T19:00:00Z",
+      "providerHomeTeam": "HNK Hajduk Split",
+      "providerAwayTeam": "Pafos FC"
+    },
+    {
+      "eventId": "72179694",
+      "kickoff": "2026-07-30T16:00:00Z",
+      "providerHomeTeam": "Maccabi Tel Aviv FC",
+      "providerAwayTeam": "FC Sheriff Tiraspol"
+    },
+    {
+      "eventId": "72533770",
+      "kickoff": "2026-07-30T17:00:00Z",
+      "providerHomeTeam": "FC Hradec Kralove",
+      "providerAwayTeam": "Tromsoe IL"
+    },
+    {
+      "eventId": "72179684",
+      "kickoff": "2026-07-30T17:00:00Z",
+      "providerHomeTeam": "FC Midtjylland",
+      "providerAwayTeam": "Besiktas Istanbul"
+    },
+    {
+      "eventId": "72179690",
+      "kickoff": "2026-07-30T17:00:00Z",
+      "providerHomeTeam": "Pafos FC",
+      "providerAwayTeam": "HNK Hajduk Split"
+    },
+    {
+      "eventId": "72179716",
+      "kickoff": "2026-07-30T17:45:00Z",
+      "providerHomeTeam": "PAOK Thessaloniki",
+      "providerAwayTeam": "FC Dynamo Kyiv"
+    },
+    {
+      "eventId": "72179160",
+      "kickoff": "2026-07-30T18:00:00Z",
+      "providerHomeTeam": "PFC CSKA Sofia",
+      "providerAwayTeam": "Qarabag FK"
+    },
+    {
+      "eventId": "72179156",
+      "kickoff": "2026-07-30T18:30:00Z",
+      "providerHomeTeam": "RSC Anderlecht",
+      "providerAwayTeam": "Hammarby IF"
+    },
+    {
+      "eventId": "72179682",
+      "kickoff": "2026-07-30T18:30:00Z",
+      "providerHomeTeam": "Ferencvarosi Budapest",
+      "providerAwayTeam": "FC Twente Enschede"
+    },
+    {
+      "eventId": "72179712",
+      "kickoff": "2026-07-30T19:00:00Z",
+      "providerHomeTeam": "SL Benfica",
+      "providerAwayTeam": "FC St. Gallen 1879"
+    },
+    {
+      "eventId": "73008516",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Jagiellonia Bialystok",
+      "providerAwayTeam": "Glasgow Rangers"
+    },
+    {
+      "eventId": "73014456",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner St Gallen / Benfica",
+      "providerAwayTeam": "Loser Sturm Graz / Hearts"
+    },
+    {
+      "eventId": "73008742",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Larne / Crvena Zvezda",
+      "providerAwayTeam": "Loser Iberia Tbilisi / Slovan Bratislava"
+    },
+    {
+      "eventId": "73008748",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Mjallby / Lincoln Red Imps",
+      "providerAwayTeam": "Loser Omonia / Kairat Almaty"
+    },
+    {
+      "eventId": "73008752",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Sabah / KuPS Kuopio",
+      "providerAwayTeam": "Loser Levski Sofia / Universitatea Craiova"
+    },
+    {
+      "eventId": "73008756",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Ararat-Armenia / Shamrock Rovers",
+      "providerAwayTeam": "Loser Egnatia / Celje"
+    },
+    {
+      "eventId": "73008760",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Aarhus / Lech Poznan",
+      "providerAwayTeam": "Loser Klaksvik / Kauno Zalgiris"
+    },
+    {
+      "eventId": "73008764",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Loser Thun / Gnk Dinamo",
+      "providerAwayTeam": "Loser Vikingur Reykjavik / Hapoel Beer Sheva"
+    },
+    {
+      "eventId": "73008852",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner Tromsoe / Hradec Kralove",
+      "providerAwayTeam": "Winner Besiktas / Midtjylland"
+    },
+    {
+      "eventId": "73009104",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner Dynamo Kyiv / PAOK",
+      "providerAwayTeam": "Winner Hammarby / Anderlecht"
+    },
+    {
+      "eventId": "73009108",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner Hajduk Split / Pafos",
+      "providerAwayTeam": "FC Salzburg"
+    },
+    {
+      "eventId": "73009196",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner Sheriff Tiraspol / Maccabi Tel Aviv",
+      "providerAwayTeam": "Winner Qarabag / CSKA Sofia"
+    },
+    {
+      "eventId": "73009200",
+      "kickoff": "2026-08-06T19:00:00Z",
+      "providerHomeTeam": "Winner Twente / Ferencvaros",
+      "providerAwayTeam": "Loser Fenerbahce / Gornik Zabrze"
+    },
+    {
+      "eventId": "73008520",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Glasgow Rangers",
+      "providerAwayTeam": "Jagiellonia Bialystok"
+    },
+    {
+      "eventId": "73008746",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Iberia Tbilisi / Slovan Bratislava",
+      "providerAwayTeam": "Loser Larne / Crvena Zvezda"
+    },
+    {
+      "eventId": "73008750",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Omonia / Kairat Almaty",
+      "providerAwayTeam": "Loser Mjallby / Lincoln Red Imps"
+    },
+    {
+      "eventId": "73008754",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Levski Sofia / Universitatea Craiova",
+      "providerAwayTeam": "Loser Sabah / KuPS Kuopio"
+    },
+    {
+      "eventId": "73008758",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Egnatia / Celje",
+      "providerAwayTeam": "Loser Ararat-Armenia / Shamrock Rovers"
+    },
+    {
+      "eventId": "73008762",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Vikingur Reykjavik / Hapoel Beer Sheva",
+      "providerAwayTeam": "Loser Thun / Gnk Dinamo"
+    },
+    {
+      "eventId": "73008766",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Winner Besiktas / Midtjylland",
+      "providerAwayTeam": "Winner Tromsoe / Hradec Kralove"
+    },
+    {
+      "eventId": "73008854",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Winner Hammarby / Anderlecht",
+      "providerAwayTeam": "Winner Dynamo Kyiv / PAOK"
+    },
+    {
+      "eventId": "73008858",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Klaksvik / Kauno Zalgiris",
+      "providerAwayTeam": "Loser Aarhus / Lech Poznan"
+    },
+    {
+      "eventId": "73009106",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "FC Salzburg",
+      "providerAwayTeam": "Winner Hajduk Split / Pafos"
+    },
+    {
+      "eventId": "73009110",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Sturm Graz / Hearts",
+      "providerAwayTeam": "Winner St Gallen / Benfica"
+    },
+    {
+      "eventId": "73009198",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Loser Fenerbahce / Gornik Zabrze",
+      "providerAwayTeam": "Winner Twente / Ferencvaros"
+    },
+    {
+      "eventId": "73009202",
+      "kickoff": "2026-08-13T19:00:00Z",
+      "providerHomeTeam": "Winner Qarabag / CSKA Sofia",
+      "providerAwayTeam": "Winner Sheriff Tiraspol / Maccabi Tel Aviv"
+    }
+  ],
+  "providerLeague": {
+    "name": "International Clubs - UEFA Europa League, Qualification",
+    "slug": "international-clubs-uefa-europa-league-qualification",
+    "sport": null,
+    "eventsCount": 44
+  },
+  "eventsFetched": 44,
+  "eventsWithOddsResponse": 0,
+  "matchesEmitted": 44,
+  "marketsEmitted": 484,
+  "fixtureRefreshAttempted": true,
+  "oddsRefreshSkippedByRateLimit": true,
+  "preservedPreviousExactMarketRows": 484
 }
