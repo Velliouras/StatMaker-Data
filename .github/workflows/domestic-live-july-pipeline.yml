@@ -98,6 +98,7 @@ jobs:
           PY
             python scripts/finalize_domestic_live_july_artifacts.py
             python scripts/build_domestic_live_july_normalized_stats.py
+            python scripts/build_uefa_support_history.py
           } > reports/domestic_live_july_rebuild.log 2>&1
           cat reports/domestic_live_july_rebuild.log
 
@@ -116,6 +117,7 @@ jobs:
           odds = json.loads((root / 'odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8'))
           normalized = json.loads((root / 'data/api_football/domestic_normalized_fixture_stats.json').read_text(encoding='utf-8'))
           progress = json.loads((root / 'reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
+          uefa_support = json.loads((root / 'data/statmaker/uefa_support_history.json').read_text(encoding='utf-8'))
 
           registry_codes = {str(item.get('leagueCode') or '') for item in registry.get('leagues', [])}
           index_codes = {str(item.get('league_code') or '') for item in index.get('leagues', [])}
@@ -145,6 +147,17 @@ jobs:
           if progress.get('completenessContract') != 'final score plus at least one non-null normalized API-Football statistic':
               raise SystemExit('Stats refresh used the obsolete dictionary-existence completeness rule')
 
+          support_participants = uefa_support.get('participants', []) or []
+          support_minimum = int(uefa_support.get('minimumMatchesPerParticipant') or 10)
+          if not support_participants:
+              raise SystemExit('UEFA support history is empty')
+          for participant in support_participants:
+              matches = participant.get('matches', []) or []
+              if len(matches) < support_minimum:
+                  raise SystemExit(
+                      f"UEFA support participant below readiness minimum: {participant.get('canonicalTeam')}={len(matches)}"
+                  )
+
           index_rows = {str(item.get('league_code') or ''): item for item in index.get('leagues', [])}
           for code, row in index_rows.items():
               output_path = root / str(row.get('output_path') or '')
@@ -163,7 +176,8 @@ jobs:
 
           print(
               f"Validated {len(registry_codes)} leagues; {len(normalized.get('fixtures', []))} normalized fixtures; "
-              f"{len(normalized.get('fields', []))} stat fields; incomplete leagues={progress.get('incompleteAfter')}"
+              f"{len(normalized.get('fields', []))} stat fields; "
+              f"UEFA support participants={len(support_participants)}; incomplete leagues={progress.get('incompleteAfter')}"
           )
           PY
           cat reports/domestic_live_july_validate.log
@@ -193,6 +207,7 @@ jobs:
               data/statmaker/domestic_enriched \
               data/statmaker/domestic_live_july_registry.json \
               data/statmaker/domestic_live_july_state.json \
+              data/statmaker/uefa_support_history.json \
               reports/api_football_fixture_stats_fetch.json \
               reports/api_football_fixture_stats_fetch.csv \
               reports/api_football_fixture_stats_fetch.md \
