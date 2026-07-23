@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Build-only UEFA qualifier odds feed for CL/EL/Conference.
+"""Build-only UEFA qualifier feed for CL/EL/Conference.
 
-Keeps exact bookmaker odds even when a qualifier participant is not yet in the
-static canonical registry. Unknown teams are emitted as provider_identity with
-usableForStats=false so the Android app can promote them only after verified
-history readiness succeeds.
+All provider fixtures are preserved for schedule/statistics visibility, even when
+Bet365/Unibet exact markets are not currently available. Betting still fails closed:
+only exact bookmaker markets are emitted in ``markets`` and odds-less fixtures carry
+an empty market list. Unknown teams remain provider_identity with usableForStats=false
+until verified historical readiness promotes them in the Android app.
 """
 from __future__ import annotations
 
@@ -91,10 +92,16 @@ def normalize_event(
                 )
             )
     markets = base.odds.dedupe_markets(markets)
-    if not markets:
-        return None
 
     kickoff = base.odds.event_kickoff(event)
+    if not markets:
+        debug.setdefault("fixturesWithoutExactMarkets", []).append({
+            "eventId": base.odds.event_id(event),
+            "kickoff": kickoff,
+            "providerHomeTeam": provider_home,
+            "providerAwayTeam": provider_away,
+        })
+
     return {
         "id": base.odds.event_id(event),
         "date": kickoff[:10],
@@ -143,7 +150,7 @@ def main() -> int:
     reports = [base.refresh_competition(api_key, competition, provider_leagues, shared_debug) for competition in load_competitions()]
     payload = {
         "generatedAt": base.now_utc(),
-        "mode": "build-only qualifier provider identity",
+        "mode": "build-only qualifier fixtures plus exact odds",
         "reports": reports,
         "rateLimitRemaining": shared_debug.get("rateLimitRemaining"),
     }
