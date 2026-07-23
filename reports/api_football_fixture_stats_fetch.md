@@ -1,7 +1,7 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-07-23T06:09:36Z`
-Requests used: `82` / `85`
+Generated at: `2026-07-23T07:19:10Z`
+Requests used: `83` / `85`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
@@ -16,14 +16,13 @@ API-Football is the active domestic historical/stat source. Football-Data CSV is
 | Bulgaria | First League | 2026 | 172 | 7 | 0 | 3 | 4 | 0 | 3 | 4 | league+season:2026 | 182 | data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=7; request cap reached before all fixture statistics were fetched |
 | Slovenia | 1. SNL | 2026 | 373 | 5 | 0 | 3 | 4 | 0 | 3 | 4 | league+season:2026 | 180 | data/api_football/fixture_stats/slovenia/1-snl/2026/fixture_stats.json | league+season:2026 returned=180 completed=5; request cap reached before all fixture statistics were fetched |
 | Austria | 2. Liga | 2025 | 219 | 222 | 1 | 3 | 5 | 0 | 3 | 4 | league+season:2025 | 240 | data/api_football/fixture_stats/austria/2-liga/2025/fixture_stats.json | league+season:2025 returned=240 completed=222; request cap reached before all fixture statistics were fetched |
-| Slovakia | Super Liga | 2025 | 332 | 192 | 9 | 3 | 13 | 0 | 0 | 4 | league+season:2025 | 192 | data/api_football/fixture_stats/slovakia/super-liga/2025/fixture_stats.json | league+season:2025 returned=192 completed=192; request cap reached before all fixture statistics were fetched |
 | Hungary | NB I | 2025 | 271 | 198 | 3 | 3 | 7 | 0 | 3 | 4 | league+season:2025 | 198 | data/api_football/fixture_stats/hungary/nb-i/2025/fixture_stats.json | league+season:2025 returned=198 completed=198; request cap reached before all fixture statistics were fetched |
-| Czech Republic | Czech Liga | 2025 | 345 | 279 | 9 | 3 | 13 | 0 | 0 | 4 | league+season:2025 | 280 | data/api_football/fixture_stats/czech-republic/czech-liga/2025/fixture_stats.json | league+season:2025 returned=280 completed=279; request cap reached before all fixture statistics were fetched |
-| Finland | Veikkausliiga | 2026 | 244 | 96 | 16 | 3 | 20 | 0 | 3 | 4 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=96; request cap reached before all fixture statistics were fetched |
-| Sweden | Superettan | 2026 | 114 | 120 | 5 | 3 | 9 | 0 | 3 | 4 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json | league+season:2026 returned=240 completed=120; request cap reached before all fixture statistics were fetched |
-| Romania | Liga I | 2026 | 283 | 8 | 6 | 2 | 8 | 0 | 0 | 3 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=8 |
+| Slovakia | Super Liga | 2025 | 332 | 192 | 12 | 4 | 17 | 0 | 0 | 5 | league+season:2025 | 192 | data/api_football/fixture_stats/slovakia/super-liga/2025/fixture_stats.json | league+season:2025 returned=192 completed=192; request cap reached before all fixture statistics were fetched |
+| Czech Republic | Czech Liga | 2025 | 345 | 279 | 12 | 4 | 17 | 0 | 0 | 5 | league+season:2025 | 280 | data/api_football/fixture_stats/czech-republic/czech-liga/2025/fixture_stats.json | league+season:2025 returned=280 completed=279; request cap reached before all fixture statistics were fetched |
+| Finland | Veikkausliiga | 2026 | 244 | 96 | 17 | 4 | 22 | 0 | 4 | 5 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=96; request cap reached before all fixture statistics were fetched |
+| Sweden | Superettan | 2026 | 114 | 120 | 5 | 4 | 10 | 0 | 4 | 5 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json | league+season:2026 returned=240 completed=120; request cap reached before all fixture statistics were fetched |
 | Ireland | Premier Division | 2026 | 357 | 121 | 101 | 4 | 106 | 0 | 4 | 5 | league+season:2026 | 180 | data/api_football/fixture_stats/ireland/premier-division/2026/fixture_stats.json | league+season:2026 returned=180 completed=121; request cap reached before all fixture statistics were fetched |
-| Russia | Premier League | 2025 | 235 | 244 | 77 | 4 | 82 | 0 | 0 | 5 | league+season:2025 | 244 | data/api_football/fixture_stats/russia/premier-league/2025/fixture_stats.json | league+season:2025 returned=244 completed=244; request cap reached before all fixture statistics were fetched |
-| Switzerland | Super League | 2025 | 207 | 230 | 80 | 4 | 85 | 0 | 0 | 5 | league+season:2025 | 230 | data/api_football/fixture_stats/switzerland/super-league/2025/fixture_stats.json | league+season:2025 returned=230 completed=230; request cap reached before all fixture statistics were fetched |
-| Scotland | Premiership | 2025 | 179 | 234 | 80 | 4 | 85 | 0 | 0 | 5 | league+season:2025 | 234 | data/api_football/fixture_stats/scotland/premiership/2025/fixture_stats.json | league+season:2025 returned=234 completed=234; request cap reached before all fixture statistics were fetched |
+| Russia | Premier League | 2025 | 235 | 244 | 81 | 4 | 86 | 0 | 0 | 5 | league+season:2025 | 244 | data/api_football/fixture_stats/russia/premier-league/2025/fixture_stats.json | league+season:2025 returned=244 completed=244; request cap reached before all fixture statistics were fetched |
+| Switzerland | Super League | 2025 | 207 | 230 | 84 | 4 | 89 | 0 | 0 | 5 | league+season:2025 | 230 | data/api_football/fixture_stats/switzerland/super-league/2025/fixture_stats.json | league+season:2025 returned=230 completed=230; request cap reached before all fixture statistics were fetched |
+| Scotland | Premiership | 2025 | 179 | 234 | 84 | 4 | 89 | 0 | 0 | 5 | league+season:2025 | 234 | data/api_football/fixture_stats/scotland/premiership/2025/fixture_stats.json | league+season:2025 returned=234 completed=234; request cap reached before all fixture statistics were fetched |
 | Argentina | Liga Profesional Argentina | 2026 | 128 | 255 | 253 | 2 | 255 | 0 | 2 | 3 | league+season:2026 | 495 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | league+season:2026 returned=495 completed=255 |
