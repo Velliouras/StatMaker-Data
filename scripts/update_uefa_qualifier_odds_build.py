@@ -2,10 +2,14 @@
 """Build-only UEFA qualifier feed for CL/EL/Conference.
 
 All provider fixtures are preserved for schedule/statistics visibility, even when
-Bet365/Unibet exact markets are not currently available. Betting still fails closed:
-only exact bookmaker markets are emitted in ``markets`` and odds-less fixtures carry
-an empty market list. Unknown teams remain provider_identity with usableForStats=false
-until verified historical readiness promotes them in the Android app.
+Bet365/Unibet exact markets are not currently available. Fixture discovery is
+attempted for every UEFA competition even when the odds rate-limit guard is active.
+Betting still fails closed: only exact bookmaker markets are emitted in ``markets``.
+When odds refresh is skipped by the guard, previously published exact markets for
+the same still-live fixture are preserved instead of being erased.
+
+Unknown teams remain provider_identity with usableForStats=false until verified
+historical readiness promotes them in the Android app.
 """
 from __future__ import annotations
 
@@ -136,21 +140,153 @@ def load_competitions() -> list[Dict[str, Any]]:
     return competitions
 
 
+def _previous_matches_by_id(previous: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    result: Dict[str, Dict[str, Any]] = {}
+    for match in previous.get("matches", []) or []:
+        if not isinstance(match, dict):
+            continue
+        event_id = str(match.get("id") or "").strip()
+        if event_id:
+            result[event_id] = match
+    return result
+
+
+def refresh_competition_fixture_first(
+    api_key: str,
+    competition: Dict[str, Any],
+    provider_leagues: Sequence[Dict[str, Any]],
+    shared_debug: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Refresh fixtures independently from odds availability.
+
+    The global odds guard may stop expensive odds calls, but it must not suppress
+    the one lightweight events call that keeps the UEFA schedule/team universe
+    current. If odds are skipped, previous exact markets for the same fixture are
+    retained; new fixtures are still published with an empty market list.
+    """
+    output_path = ROOT / str(competition.get("outputPath"))
+    report_path = ROOT / str(competition.get("reportPath"))
+    previous = base.read_json(output_path, {})
+    debug: Dict[str, Any] = {
+        "competitionId": competition.get("competitionId"),
+        "leagueCode": competition.get("leagueCode"),
+        "warnings": [],
+        "apiCalls": shared_debug.setdefault("apiCalls", []),
+        "providerRawMarketNames": {},
+        "providerRawMarketClassifications": {},
+        "providerMarketFamilyCounts": {},
+        "supportedProviderMarketCounts": {},
+        "auditOnlyMarketCounts": {},
+        "auditOnlyMarketExamples": {},
+        "unsupportedMarketCounts": {},
+        "unsupportedMarketExamples": {},
+    }
+    if "rateLimitRemaining" in shared_debug:
+        debug["rateLimitRemaining"] = shared_debug["rateLimitRemaining"]
+
+    provider = provider_match(competition, provider_leagues)
+    fresh_matches: list[Dict[str, Any]] = []
+    odds_refresh_skipped = False
+    preserved_market_rows = 0
+
+    if provider is None:
+        debug["warnings"].append("No strict UEFA provider league match found.")
+    else:
+        slug = str(provider.get("slug") or "")
+        events = base.odds.fetch_events_for_league(
+            api_key,
+            slug,
+            int(base.read_json(CONFIG_PATH, {}).get("horizonDays") or 45),
+            shared_debug,
+        )
+        event_ids = [base.odds.event_id(event) for event in events if base.odds.event_id(event)]
+
+        odds_refresh_skipped = base.odds.should_stop_for_rate_limit(shared_debug)
+        if odds_refresh_skipped:
+            debug["warnings"].append(
+                "Odds rate-limit guard active after fixture refresh; fixtures published without new odds."
+            )
+            odds_by_event: Dict[str, Dict[str, Any]] = {}
+        else:
+            odds_by_event = (
+                base.odds.fetch_odds(api_key, event_ids, base.BOOKMAKERS, shared_debug)
+                if event_ids else {}
+            )
+
+        mapping = base.canonical_map(competition)
+        previous_by_id = _previous_matches_by_id(previous)
+        for event in events:
+            event_id = base.odds.event_id(event)
+            normalized = normalize_event(
+                competition,
+                event,
+                odds_by_event.get(event_id),
+                mapping,
+                debug,
+            )
+            if normalized is None:
+                continue
+
+            if odds_refresh_skipped and not normalized.get("markets"):
+                previous_match = previous_by_id.get(event_id)
+                previous_markets = (
+                    previous_match.get("markets", [])
+                    if isinstance(previous_match, dict)
+                    else []
+                )
+                if isinstance(previous_markets, list) and previous_markets:
+                    normalized["markets"] = previous_markets
+                    preserved_market_rows += len(previous_markets)
+
+            fresh_matches.append(normalized)
+
+        debug.update({
+            "providerLeague": base.odds.provider_league_summary(provider),
+            "eventsFetched": len(events),
+            "eventsWithOddsResponse": len(odds_by_event),
+            "matchesEmitted": len(fresh_matches),
+            "marketsEmitted": sum(len(match.get("markets", [])) for match in fresh_matches),
+            "fixtureRefreshAttempted": True,
+            "oddsRefreshSkippedByRateLimit": odds_refresh_skipped,
+            "preservedPreviousExactMarketRows": preserved_market_rows,
+        })
+
+    debug["rateLimitRemaining"] = shared_debug.get("rateLimitRemaining")
+    debug.update(base.odds.market_audit_report(debug))
+    matches = base.merge_matches(previous.get("matches", []) or [], fresh_matches)
+    output = base.output_contract(competition, provider, matches, debug)
+    base.write_json(output_path, output)
+    base.write_json(report_path, debug)
+    return {
+        "competitionId": competition.get("competitionId"),
+        "leagueCode": competition.get("leagueCode"),
+        "providerLeagueSlug": provider.get("slug") if provider else None,
+        "freshMatches": len(fresh_matches),
+        "publishedMatches": len(matches),
+        "publishedMarkets": sum(len(match.get("markets", [])) for match in matches),
+        "fixtureRefreshAttempted": provider is not None,
+        "oddsRefreshSkippedByRateLimit": odds_refresh_skipped,
+        "preservedPreviousExactMarketRows": preserved_market_rows,
+        "rateLimitRemaining": shared_debug.get("rateLimitRemaining"),
+        "warnings": debug.get("warnings", []),
+    }
+
+
 def main() -> int:
     api_key = os.getenv("ODDS_API_IO_KEY", "").strip()
     if not api_key:
         print("ERROR: ODDS_API_IO_KEY is required", file=sys.stderr)
         return 2
 
-    base.competition_provider_match = provider_match
-    base.normalize_event = normalize_event
-
     shared_debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     provider_leagues = base.odds.discover_provider_leagues(api_key, shared_debug)
-    reports = [base.refresh_competition(api_key, competition, provider_leagues, shared_debug) for competition in load_competitions()]
+    reports = [
+        refresh_competition_fixture_first(api_key, competition, provider_leagues, shared_debug)
+        for competition in load_competitions()
+    ]
     payload = {
         "generatedAt": base.now_utc(),
-        "mode": "build-only qualifier fixtures plus exact odds",
+        "mode": "build-only qualifier fixture-first feed plus exact odds when quota allows",
         "reports": reports,
         "rateLimitRemaining": shared_debug.get("rateLimitRemaining"),
     }
