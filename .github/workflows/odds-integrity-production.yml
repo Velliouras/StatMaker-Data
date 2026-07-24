@@ -39,8 +39,11 @@ jobs:
           python -m py_compile \
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
-            scripts/update_uefa_qualifier_odds_integrity.py
-          python -m unittest tests/test_odds_market_integrity.py
+            scripts/update_uefa_qualifier_odds_integrity.py \
+            scripts/build_domestic_proposal_readiness.py
+          python -m unittest \
+            tests/test_odds_market_integrity.py \
+            tests/test_domestic_proposal_readiness.py
 
       - name: Validate current Domestic feed without writing
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
@@ -125,6 +128,9 @@ jobs:
             --write \
             --report-dir reports
 
+      - name: Build market-specific Domestic proposal readiness
+        run: python scripts/build_domestic_proposal_readiness.py
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
@@ -133,17 +139,19 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             odds/odds_api_io/domestic_provider_markets.json \
             data/statmaker/domestic_live_july_state.json \
+            data/statmaker/domestic_proposal_readiness.json \
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_corner_archive_rebuild.json \
             reports/domestic_expanded_market_rebuild.json \
             reports/domestic_team_logo_enrichment.json \
-            reports/domestic_odds_integrity.json
+            reports/domestic_odds_integrity.json \
+            reports/domestic_proposal_readiness.json
           if git diff --cached --quiet; then
-            echo "No Domestic odds changes."
+            echo "No Domestic odds/readiness changes."
           else
-            git commit -m "Sanitize Domestic exact odds integrity"
-            git pull --rebase origin main
+            git commit -m "Sanitize Domestic exact odds and proposal readiness"
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
           fi
 
