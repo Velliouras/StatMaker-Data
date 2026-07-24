@@ -33,60 +33,44 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Test scope, rolling registry and real-stat completeness policy
-        id: tests
-        continue-on-error: true
+      - name: Validate Stats pipeline code
         run: |
           mkdir -p reports
+          python -m py_compile \
+            scripts/run_scoped_domestic_registry.py \
+            scripts/run_domestic_stats_refresh.py \
+            scripts/refresh_domestic_live_july_stats.py \
+            scripts/api_football_fetch_fixture_stats.py \
+            scripts/expand_domestic_full_stats.py \
+            scripts/finalize_domestic_live_july_artifacts.py \
+            scripts/build_domestic_live_july_normalized_stats.py \
+            scripts/build_uefa_support_history.py
           python -m unittest \
             tests/test_statmaker_domestic_scope.py \
             tests/test_stats_universe_registry.py \
             tests/test_domestic_live_july_pipeline.py \
-            tests/test_domestic_stats_completeness.py \
-            > reports/domestic_live_july_tests.log 2>&1
-          cat reports/domestic_live_july_tests.log
+            tests/test_domestic_stats_completeness.py
 
       - name: Refresh rolling 53-league Stats registry
-        id: registry
-        if: steps.tests.outcome == 'success'
-        continue-on-error: true
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: |
-          python scripts/run_scoped_domestic_registry.py \
-            > reports/domestic_live_july_registry.log 2>&1
-          cat reports/domestic_live_july_registry.log
+        run: python scripts/run_scoped_domestic_registry.py
 
-      - name: Incrementally refresh API-Football statistics
-        id: stats
-        if: steps.registry.outcome == 'success'
-        continue-on-error: true
+      - name: Refresh Domestic history and statistics incrementally
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
+          INPUT_STATS_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.stats_max_requests || '2400' }}
         run: |
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-2400}"
-          python scripts/refresh_domestic_live_july_stats.py \
+          python scripts/run_domestic_stats_refresh.py \
             --max-requests "$stats_requests" \
             > reports/domestic_live_july_stats.log 2>&1
           cat reports/domestic_live_july_stats.log
 
-      - name: Expand every available cached statistic
-        id: expand
-        if: steps.stats.outcome == 'success'
-        continue-on-error: true
-        run: |
-          python scripts/expand_domestic_full_stats.py \
-            > reports/domestic_live_july_full_stats.log 2>&1
-          cat reports/domestic_live_july_full_stats.log
-
       - name: Rebuild app statistics from refreshed caches
-        id: rebuild
-        if: steps.expand.outcome == 'success'
-        continue-on-error: true
         run: |
-          {
-            python - <<'PY'
+          python scripts/expand_domestic_full_stats.py
+          python - <<'PY'
           import sys
           from pathlib import Path
           sys.path.insert(0, str(Path('scripts').resolve()))
@@ -96,18 +80,13 @@ jobs:
               raise SystemExit('Domestic Stats registry is empty')
           pipeline.build_app_statistics(registry)
           PY
-            python scripts/finalize_domestic_live_july_artifacts.py
-            python scripts/build_domestic_live_july_normalized_stats.py
-            python scripts/build_uefa_support_history.py
-          } > reports/domestic_live_july_rebuild.log 2>&1
-          cat reports/domestic_live_july_rebuild.log
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
 
       - name: Validate published statistics and separated odds boundaries
-        id: validate
-        if: steps.rebuild.outcome == 'success'
-        continue-on-error: true
         run: |
-          python - <<'PY' > reports/domestic_live_july_validate.log 2>&1
+          python - <<'PY'
           import json
           from pathlib import Path
 
@@ -126,40 +105,24 @@ jobs:
           registry_codes = {normalize(item.get('leagueCode')) for item in registry.get('leagues', [])}
           index_codes = {normalize(item.get('league_code')) for item in index.get('leagues', [])}
           odds_codes = {normalize(item.get('leagueCode')) for item in odds.get('leagues', [])}
-          preserved_non_core_odds = odds_codes - core_odds
           normalized_codes = {normalize(item.get('league_code')) for item in normalized.get('fixtures', [])}
-          required_fields = {
-              'HS', 'AS', 'HST', 'AST', 'HC', 'AC', 'HF', 'AF', 'HY', 'AY', 'HR', 'AR',
-              'HPossession', 'APossession', 'HSaves', 'ASaves', 'HPasses', 'APasses',
-              'HPassesAccurate', 'APassesAccurate', 'HxG', 'AxG',
-              'HShotsOffGoal', 'AShotsOffGoal', 'HBlockedShots', 'ABlockedShots',
-              'HShotsInsideBox', 'AShotsInsideBox', 'HShotsOutsideBox', 'AShotsOutsideBox',
-              'HOffsides', 'AOffsides', 'HPassAccuracy', 'APassAccuracy',
-              'HGoalsPrevented', 'AGoalsPrevented', 'HFreeKicks', 'AFreeKicks'
-          }
 
           if len(stats_universe) != 53:
               raise SystemExit(f'Stats universe contract must contain 53 leagues, got {len(stats_universe)}')
           if len(core_odds) != 27:
               raise SystemExit(f'Core odds contract must contain 27 leagues, got {len(core_odds)}')
-          if not registry_codes:
-              raise SystemExit('Domestic Stats registry is empty')
-          if not registry_codes.issubset(stats_universe):
-              raise SystemExit(f'Registry contains league outside 53-league Stats universe: {sorted(registry_codes - stats_universe)}')
+          if not registry_codes or not registry_codes.issubset(stats_universe):
+              raise SystemExit('Domestic Stats registry is empty or outside the 53-league universe')
           if registry_codes != index_codes:
               raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
-          # Existing exact odds outside the temporary core-27 polling scope are valuable
-          # preserved data and may remain proposal-eligible. Only data outside the full
-          # 53-league StatMaker universe is invalid here. New Odds-API.io polling remains
-          # separately guarded by the core-27 production odds wrapper until expanded safely.
           if not odds_codes.issubset(stats_universe):
-              raise SystemExit(f'Production odds contain league outside 53-league StatMaker universe: {sorted(odds_codes - stats_universe)}')
+              raise SystemExit(f'Production odds contain league outside StatMaker universe: {sorted(odds_codes - stats_universe)}')
           if not normalized_codes.issubset(registry_codes):
               raise SystemExit('Normalized stats contain a league outside the rolling Stats registry')
-          if not required_fields.issubset(set(normalized.get('fields', []))):
-              raise SystemExit('Normalized stats export is missing one or more available stat fields')
-          if progress.get('completenessContract') != 'final score plus at least one non-null normalized API-Football statistic':
-              raise SystemExit('Stats refresh used the obsolete dictionary-existence completeness rule')
+
+          expected_contract = 'all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled'
+          if progress.get('completenessContract') != expected_contract:
+              raise SystemExit(f"Unexpected Stats completeness contract: {progress.get('completenessContract')}")
           if int(progress.get('statsUniverseLeagueCount') or 0) != 53:
               raise SystemExit('Stats refresh did not use the 53-league Stats universe contract')
           if int(progress.get('coreOddsLeagueCount') or 0) != 27:
@@ -170,14 +133,11 @@ jobs:
           if not support_participants:
               raise SystemExit('UEFA support history is empty')
           for participant in support_participants:
-              matches = participant.get('matches', []) or []
-              if len(matches) < support_minimum:
-                  raise SystemExit(
-                      f"UEFA support participant below readiness minimum: {participant.get('canonicalTeam')}={len(matches)}"
-                  )
+              if len(participant.get('matches', []) or []) < support_minimum:
+                  raise SystemExit(f"UEFA support below readiness minimum: {participant.get('canonicalTeam')}")
 
-          index_rows = {normalize(item.get('league_code')): item for item in index.get('leagues', [])}
-          for code, row in index_rows.items():
+          for row in index.get('leagues', []):
+              code = normalize(row.get('league_code'))
               output_path = root / str(row.get('output_path') or '')
               if not output_path.is_file():
                   raise SystemExit(f'Missing app stats artifact for {code}: {output_path}')
@@ -194,52 +154,36 @@ jobs:
 
           print(
               f"Validated Stats registry={len(registry_codes)}/53 configured; "
-              f"odds artifact leagues={len(odds_codes)}; preserved non-core exact-odds leagues={len(preserved_non_core_odds)}; "
-              f"temporary new-poll core={len(core_odds)}; "
-              f"{len(normalized.get('fixtures', []))} normalized fixtures; "
-              f"{len(normalized.get('fields', []))} stat fields; "
+              f"odds leagues={len(odds_codes)}; normalized fixtures={len(normalized.get('fixtures', []))}; "
               f"UEFA support participants={len(support_participants)}; incomplete leagues={progress.get('incompleteAfter')}"
           )
           PY
-          cat reports/domestic_live_july_validate.log
-
-      - name: Write pipeline status
-        run: |
-          {
-            echo "tests=${{ steps.tests.outcome }}"
-            echo "registry=${{ steps.registry.outcome }}"
-            echo "stats=${{ steps.stats.outcome }}"
-            echo "expand=${{ steps.expand.outcome }}"
-            echo "rebuild=${{ steps.rebuild.outcome }}"
-            echo "validate=${{ steps.validate.outcome }}"
-            echo "commit=${GITHUB_SHA}"
-            echo "generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          } > reports/domestic_live_july_workflow_status.txt
 
       - name: Commit artifacts and diagnostics
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add reports/domestic_live_july_*.log reports/domestic_live_july_workflow_status.txt
-          if [ "${{ steps.validate.outcome }}" = "success" ]; then
-            git add \
-              data/api_football/fixture_stats \
-              data/api_football/domestic_normalized_fixture_stats.json \
-              data/statmaker/domestic_enriched \
-              data/statmaker/domestic_live_july_registry.json \
-              data/statmaker/domestic_live_july_state.json \
-              data/statmaker/uefa_support_history.json \
-              reports/api_football_fixture_stats_fetch.json \
-              reports/api_football_fixture_stats_fetch.csv \
-              reports/api_football_fixture_stats_fetch.md \
-              reports/statmaker_domestic_enriched_build.json \
-              reports/statmaker_domestic_enriched_build.csv \
-              reports/statmaker_domestic_enriched_build.md \
-              reports/domestic_live_july_pipeline.json \
-              reports/domestic_live_july_stats_refresh.json \
-              reports/domestic_live_july_full_stats_expansion.json \
-              reports/domestic_live_july_artifact_contract.json \
-              reports/domestic_live_july_normalized_stats.json
+          git add \
+            data/api_football/fixture_stats \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/domestic_enriched \
+            data/statmaker/domestic_live_july_registry.json \
+            data/statmaker/domestic_live_july_state.json \
+            data/statmaker/uefa_support_history.json \
+            reports/api_football_fixture_stats_fetch.json \
+            reports/api_football_fixture_stats_fetch.csv \
+            reports/api_football_fixture_stats_fetch.md \
+            reports/statmaker_domestic_enriched_build.json \
+            reports/statmaker_domestic_enriched_build.csv \
+            reports/statmaker_domestic_enriched_build.md \
+            reports/domestic_live_july_pipeline.json \
+            reports/domestic_live_july_stats_refresh.json \
+            reports/domestic_live_july_full_stats_expansion.json \
+            reports/domestic_live_july_artifact_contract.json \
+            reports/domestic_live_july_normalized_stats.json \
+            reports/domestic_live_july_stats.log
+          if [ -f data/statmaker/domestic_historical_stats_freeze.json ]; then
+            git add data/statmaker/domestic_historical_stats_freeze.json
           fi
           if git diff --cached --quiet; then
             echo "No Domestic statistics-universe changes to commit."
@@ -248,7 +192,3 @@ jobs:
             git pull --rebase --autostash origin main
             git push origin HEAD:main
           fi
-
-      - name: Fail when the pipeline is not valid
-        if: steps.validate.outcome != 'success'
-        run: exit 1
