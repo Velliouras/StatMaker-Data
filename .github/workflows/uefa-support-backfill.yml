@@ -1,0 +1,101 @@
+name: UEFA Team Support Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Maximum API-Football requests for missing UEFA participants"
+        required: true
+        default: "300"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uefa-team-support-backfill
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout main data repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate support scripts
+        run: |
+          python -m py_compile \
+            scripts/build_uefa_support_history.py \
+            scripts/backfill_uefa_support_history.py
+
+      - name: Rebuild zero-call Domestic support history
+        run: python scripts/build_uefa_support_history.py
+
+      - name: Read current live UEFA qualifier feeds
+        run: |
+          git fetch origin build/uefa-qualifier-feed-20260720
+          mkdir -p "$RUNNER_TEMP/uefa_feeds"
+          for name in champions_league_odds.json europa_league_odds.json conference_league_odds.json; do
+            git show "origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/$name" > "$RUNNER_TEMP/uefa_feeds/$name"
+          done
+
+      - name: Backfill only missing UEFA participant history and logos
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          INPUT_MAX_REQUESTS: ${{ inputs.max_requests }}
+        run: |
+          max_requests="${INPUT_MAX_REQUESTS:-300}"
+          python scripts/backfill_uefa_support_history.py \
+            --feed-dir "$RUNNER_TEMP/uefa_feeds" \
+            --min-matches 10 \
+            --max-matches 12 \
+            --fixture-lookback 30 \
+            --max-requests "$max_requests"
+
+      - name: Validate published support contracts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          base = json.loads(Path('data/statmaker/uefa_support_history.json').read_text(encoding='utf-8'))
+          team = json.loads(Path('data/statmaker/uefa_team_support_history.json').read_text(encoding='utf-8'))
+          logos = json.loads(Path('data/statmaker/uefa_team_logos.json').read_text(encoding='utf-8'))
+          for label, payload in [('base', base), ('team', team)]:
+              minimum = int(payload.get('minimumMatchesPerParticipant') or 10)
+              for participant in payload.get('participants', []) or []:
+                  count = len(participant.get('matches', []) or [])
+                  if count < minimum:
+                      raise SystemExit(f'{label} support below minimum: {participant.get("canonicalTeam")}={count}/{minimum}')
+          if not isinstance(logos, dict):
+              raise SystemExit('UEFA team logo catalog must be a JSON object')
+          print(
+              f"UEFA support validated: base={len(base.get('participants', []) or [])} "
+              f"team_specific={len(team.get('participants', []) or [])} logos={len(logos)}"
+          )
+          PY
+
+      - name: Commit UEFA support artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/statmaker/uefa_support_history.json \
+            data/statmaker/uefa_team_support_history.json \
+            data/statmaker/uefa_team_logos.json \
+            reports/uefa_support_team_backfill.json
+          if git diff --cached --quiet; then
+            echo "No UEFA support changes to commit."
+          else
+            git commit -m "Backfill missing UEFA participant support"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
