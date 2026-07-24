@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authoritative final Domestic scope and runtime guards for StatMaker-Data."""
+"""Authoritative Domestic scope contracts and runtime guards for StatMaker-Data."""
 from __future__ import annotations
 
 import json
@@ -19,14 +19,28 @@ def normalize_code(value: Any) -> str:
     return "ROU" if code == "ROM" else code
 
 
-def included_codes() -> set[str]:
+def _codes(key: str) -> set[str]:
     payload = _load_scope()
-    return {normalize_code(code) for code in payload.get("includedLeagueCodes", []) or []}
+    return {normalize_code(code) for code in payload.get(key, []) or []}
+
+
+def core_odds_codes() -> set[str]:
+    codes = _codes("coreOddsLeagueCodes")
+    return codes or _codes("includedLeagueCodes")
+
+
+def included_codes() -> set[str]:
+    """Backward-compatible alias for the protected core odds scope."""
+    return core_odds_codes()
+
+
+def stats_universe_codes() -> set[str]:
+    codes = _codes("statsUniverseLeagueCodes")
+    return codes or included_codes()
 
 
 def absolute_priority_codes() -> set[str]:
-    payload = _load_scope()
-    return {normalize_code(code) for code in payload.get("absoluteStatsPriorityLeagueCodes", []) or []}
+    return _codes("absoluteStatsPriorityLeagueCodes")
 
 
 def league_code(item: Dict[str, Any]) -> str:
@@ -39,63 +53,131 @@ def league_code(item: Dict[str, Any]) -> str:
 
 
 def is_included(item_or_code: Dict[str, Any] | str) -> bool:
+    """Backward-compatible check for the protected core odds scope."""
     code = league_code(item_or_code) if isinstance(item_or_code, dict) else normalize_code(item_or_code)
     return bool(code) and code in included_codes()
 
 
+def is_stats_included(item_or_code: Dict[str, Any] | str) -> bool:
+    code = league_code(item_or_code) if isinstance(item_or_code, dict) else normalize_code(item_or_code)
+    return bool(code) and code in stats_universe_codes()
+
+
 def filter_leagues(rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Backward-compatible filter for the protected core odds scope."""
     return [row for row in rows if isinstance(row, dict) and is_included(row)]
 
 
-def filter_registry_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+def filter_stats_leagues(rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    return [row for row in rows if isinstance(row, dict) and is_stats_included(row)]
+
+
+def _filter_registry_payload(payload: Dict[str, Any], *, stats: bool) -> Dict[str, Any]:
     result = dict(payload or {})
-    leagues = filter_leagues(result.get("leagues", []) or [])
+    source = result.get("leagues", []) or []
+    leagues = filter_stats_leagues(source) if stats else filter_leagues(source)
     result["leagues"] = leagues
     if "leagueCount" in result:
         result["leagueCount"] = len(leagues)
+    result["domesticScope"] = {
+        "authoritative": True,
+        "scopeType": "stats_universe" if stats else "core_odds",
+        "configuredLeagueCount": len(stats_universe_codes() if stats else included_codes()),
+        "activeRegistryLeagueCount": len(leagues),
+        "apiCallsOutsideScopeAllowed": False,
+    }
+    # Preserve the legacy diagnostic block for older readers.
     result["finalDomesticScope"] = {
         "authoritative": True,
         "includedLeagueCount": len(included_codes()),
+        "statsUniverseLeagueCount": len(stats_universe_codes()),
         "activeRegistryLeagueCount": len(leagues),
         "excludedDomesticApiCallsAllowed": False,
     }
     return result
 
 
-def priority_rank(item: Dict[str, Any]) -> int:
-    return 0 if league_code(item) in absolute_priority_codes() else 1
+def filter_registry_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    return _filter_registry_payload(payload, stats=False)
 
 
-def install_registry_load_guard(pipeline_module) -> None:
-    """Filter every read of the live Domestic registry through the final scope."""
+def filter_stats_registry_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
+    return _filter_registry_payload(payload, stats=True)
+
+
+def priority_rank(item: Dict[str, Any] | str) -> int:
+    """Stats priority: 0 Main5+Greece, 1 core-27, 2 restored Tier-3 leagues."""
+    code = league_code(item) if isinstance(item, dict) else normalize_code(item)
+    if code in absolute_priority_codes():
+        return 0
+    if code in included_codes():
+        return 1
+    if code in stats_universe_codes():
+        return 2
+    return 9
+
+
+def priority_tier_name(item: Dict[str, Any] | str) -> str:
+    rank = priority_rank(item)
+    return {0: "tier1_main5_plus_greece", 1: "tier2_core27", 2: "tier3_restored26"}.get(rank, "outside_scope")
+
+
+def _install_registry_load_guard(pipeline_module, *, stats: bool) -> None:
     original_load_json = pipeline_module.load_json
-    if getattr(original_load_json, "_statmaker_scope_guard", False):
+    marker = "_statmaker_stats_scope_guard" if stats else "_statmaker_core_scope_guard"
+    if getattr(original_load_json, marker, False):
         return
 
     def guarded_load_json(path, default):
         payload = original_load_json(path, default)
         if path == pipeline_module.REGISTRY_PATH and isinstance(payload, dict):
-            return filter_registry_payload(payload)
+            return filter_stats_registry_payload(payload) if stats else filter_registry_payload(payload)
         return payload
 
-    guarded_load_json._statmaker_scope_guard = True
+    setattr(guarded_load_json, marker, True)
     pipeline_module.load_json = guarded_load_json
 
 
-def install_registry_build_guard(pipeline_module) -> None:
-    """Ensure registry generation can publish only final-scope Domestic leagues."""
+def install_registry_load_guard(pipeline_module) -> None:
+    """Backward-compatible core-odds registry read guard."""
+    _install_registry_load_guard(pipeline_module, stats=False)
+
+
+def install_stats_registry_load_guard(pipeline_module) -> None:
+    _install_registry_load_guard(pipeline_module, stats=True)
+
+
+def _install_registry_build_guard(pipeline_module, *, stats: bool) -> None:
     original_build = pipeline_module.build_live_registry
-    if getattr(original_build, "_statmaker_scope_guard", False):
+    marker = "_statmaker_stats_scope_guard" if stats else "_statmaker_core_scope_guard"
+    if getattr(original_build, marker, False):
         return
 
     def guarded_build(*args, **kwargs):
-        return filter_leagues(original_build(*args, **kwargs))
+        rows = original_build(*args, **kwargs)
+        return filter_stats_leagues(rows) if stats else filter_leagues(rows)
 
-    guarded_build._statmaker_scope_guard = True
+    setattr(guarded_build, marker, True)
     pipeline_module.build_live_registry = guarded_build
 
 
+def install_registry_build_guard(pipeline_module) -> None:
+    """Backward-compatible core-odds registry build guard."""
+    _install_registry_build_guard(pipeline_module, stats=False)
+
+
+def install_stats_registry_build_guard(pipeline_module) -> None:
+    _install_registry_build_guard(pipeline_module, stats=True)
+
+
 def assert_final_scope_codes(codes: Sequence[str]) -> None:
+    """Backward-compatible assertion for the protected core odds scope."""
     unexpected = {normalize_code(code) for code in codes} - included_codes()
     if unexpected:
-        raise RuntimeError(f"Domestic scope violation: {sorted(unexpected)}")
+        raise RuntimeError(f"Domestic core odds scope violation: {sorted(unexpected)}")
+
+
+def assert_stats_scope_codes(codes: Sequence[str]) -> None:
+    unexpected = {normalize_code(code) for code in codes} - stats_universe_codes()
+    if unexpected:
+        raise RuntimeError(f"Domestic stats scope violation: {sorted(unexpected)}")
