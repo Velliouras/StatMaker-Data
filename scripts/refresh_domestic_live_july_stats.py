@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""Refresh final-scope API-Football stats within the daily quota.
+"""Incrementally refresh the 53-league StatMaker Domestic statistics universe.
 
-Only the authoritative 27 Domestic leagues are eligible. Main 5 leagues plus
-Greek Super League receive first access to a protected request pool before the
-remaining budget is shared across the rest of the active scope.
+Every active/upcoming registry league is lightly polled for fixture discovery so a
+previously complete cache can discover newly completed matches. API-Football
+statistics are fetched only for completed fixtures that do not already have real
+cached statistics.
+
+Priority tiers:
+  Tier 1: Main 5 + Greek Super League
+  Tier 2: the protected core 27 minus Tier 1
+  Tier 3: the 26 restored Stats-only leagues
 """
 from __future__ import annotations
 
@@ -17,9 +23,12 @@ import api_football_fetch_fixture_stats as stats_fetch
 import domestic_live_july_pipeline as pipeline
 import statmaker_domestic_scope as scope
 
-DEFAULT_MAX_REQUESTS = 85
+# One scheduled run per day. Even at the cap this leaves substantial room inside
+# the user's 7,500/day API-Football PRO quota for other StatMaker workloads.
+DEFAULT_MAX_REQUESTS = 2400
 COMPLETED_STATUSES = {"FT", "AET", "PEN"}
-PROTECTED_PRIORITY_FRACTION = 0.60
+TIER1_CEILING_FRACTION = 0.30
+TIER2_CUMULATIVE_FRACTION = 0.70
 
 
 def has_final_score(item: Dict[str, Any]) -> bool:
@@ -52,6 +61,7 @@ def has_real_normalized_stats(item: Dict[str, Any]) -> bool:
     )
 
 
+# Tighten the generic cache predicate so empty provider responses are retried.
 stats_fetch.has_cached_stats = has_real_normalized_stats
 
 
@@ -69,6 +79,7 @@ def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
     score_coverage = len(with_scores) / denominator if denominator else 0.0
     return {
         "leagueCode": league.get("leagueCode"),
+        "priorityTier": scope.priority_tier_name(league),
         "completed": denominator,
         "withStats": len(with_stats),
         "withScores": len(with_scores),
@@ -84,12 +95,13 @@ def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def incomplete_leagues(registry: Sequence[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
-    rows = [(league, cache_progress(league)) for league in scope.filter_leagues(registry)]
+def ordered_leagues(registry: Sequence[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    rows = [(league, cache_progress(league)) for league in scope.filter_stats_leagues(registry)]
     return sorted(
-        [(league, progress) for league, progress in rows if not progress["complete"]],
+        rows,
         key=lambda item: (
             scope.priority_rank(item[0]),
+            item[1]["complete"],
             item[1]["scoreCoverage"],
             item[1]["coverage"],
             item[1]["completed"] == 0,
@@ -100,20 +112,28 @@ def incomplete_leagues(registry: Sequence[Dict[str, Any]]) -> List[Tuple[Dict[st
     )
 
 
+def incomplete_leagues(registry: Sequence[Dict[str, Any]]) -> List[Tuple[Dict[str, Any], Dict[str, Any]]]:
+    """Compatibility helper retained for diagnostics/tests."""
+    return [(league, progress) for league, progress in ordered_leagues(registry) if not progress["complete"]]
+
+
 def process_group(
     api_key: str,
-    pending: Sequence[Tuple[Dict[str, Any], Dict[str, Any]]],
+    rows: Sequence[Tuple[Dict[str, Any], Dict[str, Any]]],
     request_state: Dict[str, int],
     ceiling: int,
     fetch_rows: List[Dict[str, Any]],
     allocations: List[Dict[str, Any]],
     phase: str,
 ) -> None:
-    for index, (league, before) in enumerate(pending):
+    for index, (league, before) in enumerate(rows):
         remaining_budget = ceiling - request_state["count"]
-        remaining_leagues = len(pending) - index
+        remaining_leagues = len(rows) - index
         if remaining_budget <= 0 or remaining_leagues <= 0:
             break
+
+        # Every league needs at least one fixture-discovery request. Any spare
+        # share is available for missing fixture-stat backfill within that league.
         fair_share = max(1, remaining_budget // remaining_leagues)
         league_limit = min(ceiling, request_state["count"] + fair_share)
         started = request_state["count"]
@@ -122,11 +142,11 @@ def process_group(
         after = cache_progress(league)
         allocations.append({
             "phase": phase,
+            "priorityTier": scope.priority_tier_name(league),
             "leagueCode": league.get("leagueCode"),
             "country": league.get("country"),
             "league": league.get("competition"),
             "lifecycle": league.get("lifecycle"),
-            "absolutePriority": scope.priority_rank(league) == 0,
             "allocatedRequests": fair_share,
             "usedRequests": request_state["count"] - started,
             "before": before,
@@ -134,43 +154,51 @@ def process_group(
         })
 
 
-def refresh_fairly(
+def refresh_incrementally(
     api_key: str,
     registry: Sequence[Dict[str, Any]],
     max_requests: int,
 ) -> Dict[str, Any]:
-    registry = scope.filter_leagues(registry)
-    pending_before = incomplete_leagues(registry)
-    priority_pending = [item for item in pending_before if scope.priority_rank(item[0]) == 0]
+    registry = scope.filter_stats_leagues(registry)
+    ordered = ordered_leagues(registry)
+    groups = {
+        rank: [item for item in ordered if scope.priority_rank(item[0]) == rank]
+        for rank in (0, 1, 2)
+    }
+
     request_state = {"count": 0}
     fetch_rows: List[Dict[str, Any]] = []
     allocations: List[Dict[str, Any]] = []
+    incomplete_before = sum(1 for _, progress in ordered if not progress["complete"])
 
-    if priority_pending:
-        priority_ceiling = min(
+    tier1 = groups[0]
+    if tier1:
+        tier1_ceiling = min(
             max_requests,
-            max(len(priority_pending), int(round(max_requests * PROTECTED_PRIORITY_FRACTION))),
+            max(len(tier1), int(round(max_requests * TIER1_CEILING_FRACTION))),
         )
         process_group(
-            api_key,
-            priority_pending,
-            request_state,
-            priority_ceiling,
-            fetch_rows,
-            allocations,
-            "protected_main5_plus_greece",
+            api_key, tier1, request_state, tier1_ceiling,
+            fetch_rows, allocations, "tier1_main5_plus_greece",
         )
 
-    remaining_pending = incomplete_leagues(registry)
-    if remaining_pending and request_state["count"] < max_requests:
-        process_group(
-            api_key,
-            remaining_pending,
-            request_state,
+    tier2 = groups[1]
+    if tier2 and request_state["count"] < max_requests:
+        tier2_target = int(round(max_requests * TIER2_CUMULATIVE_FRACTION))
+        tier2_ceiling = min(
             max_requests,
-            fetch_rows,
-            allocations,
-            "shared_remaining_budget",
+            max(request_state["count"] + len(tier2), tier2_target),
+        )
+        process_group(
+            api_key, tier2, request_state, tier2_ceiling,
+            fetch_rows, allocations, "tier2_core27",
+        )
+
+    tier3 = groups[2]
+    if tier3 and request_state["count"] < max_requests:
+        process_group(
+            api_key, tier3, request_state, max_requests,
+            fetch_rows, allocations, "tier3_restored26",
         )
 
     stats_fetch.write_reports(fetch_rows, request_state["count"], max_requests)
@@ -178,13 +206,17 @@ def refresh_fairly(
     return {
         "generatedAt": pipeline.now_utc(),
         "completenessContract": "final score plus at least one non-null normalized API-Football statistic",
-        "scopeContract": "final 27 Domestic leagues only",
-        "priorityPolicy": "Main 5 plus Greek Super League receive first access to a protected 60% request pool; unused budget rolls into the shared pool",
+        "incrementalContract": "poll every active Stats league for new completed fixtures; fetch statistics only when real cached stats are missing",
+        "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
+        "priorityPolicy": "Tier 1 Main5+Greece first, Tier 2 core27 next, Tier 3 restored26 last; unused budget rolls forward",
         "absolutePriorityLeagueCodes": sorted(scope.absolute_priority_codes()),
+        "statsUniverseLeagueCount": len(scope.stats_universe_codes()),
+        "coreOddsLeagueCount": len(scope.included_codes()),
         "maxRequests": max_requests,
         "requestsUsed": request_state["count"],
         "registryLeagueCount": len(registry),
-        "incompleteBefore": len(pending_before),
+        "polledLeagueCount": len(fetch_rows),
+        "incompleteBefore": incomplete_before,
         "completeAfter": sum(1 for row in final_progress if row["complete"]),
         "incompleteAfter": sum(1 for row in final_progress if not row["complete"]),
         "allocations": allocations,
@@ -192,8 +224,13 @@ def refresh_fairly(
     }
 
 
+def refresh_fairly(api_key: str, registry: Sequence[Dict[str, Any]], max_requests: int) -> Dict[str, Any]:
+    """Backward-compatible alias used by older callers."""
+    return refresh_incrementally(api_key, registry, max_requests)
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Refresh final-scope Domestic stats with protected priority")
+    parser = argparse.ArgumentParser(description="Incrementally refresh the 53-league Domestic Stats universe")
     parser.add_argument("--max-requests", type=int, default=DEFAULT_MAX_REQUESTS)
     return parser.parse_args()
 
@@ -205,15 +242,15 @@ def main() -> int:
         print("ERROR: API_FOOTBALL_KEY is required.", file=sys.stderr)
         return 2
 
-    scope.install_registry_load_guard(pipeline)
+    scope.install_stats_registry_load_guard(pipeline)
     registry_payload = pipeline.load_json(pipeline.REGISTRY_PATH, {})
     registry = registry_payload.get("leagues", []) if isinstance(registry_payload, dict) else []
-    registry = scope.filter_leagues(registry)
+    registry = scope.filter_stats_leagues(registry)
     if not registry:
-        print("ERROR: final-scope Domestic registry is empty.", file=sys.stderr)
+        print("ERROR: 53-league Domestic Stats registry is empty.", file=sys.stderr)
         return 3
 
-    report = refresh_fairly(api_key, registry, max(1, args.max_requests))
+    report = refresh_incrementally(api_key, registry, max(1, args.max_requests))
     pipeline.write_json(
         pipeline.ROOT / "reports" / "domestic_live_july_stats_refresh.json",
         report,
