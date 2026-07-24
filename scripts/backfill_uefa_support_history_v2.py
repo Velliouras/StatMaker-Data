@@ -16,9 +16,9 @@ GENERIC_LOCATION_TOKENS = {
     "wien", "zagreb", "zhytomyr",
 }
 
-# Keep stable references to the original base implementation before monkey-patching.
-# Without this, feed_team_names_v2() calls base.feed_team_names after replacement and recurses forever.
+# Stable references must be captured before monkey-patching.
 _original_feed_team_names = base.feed_team_names
+_original_api_get = base.api.api_get
 
 
 def is_real_participant_name(value: str) -> bool:
@@ -43,13 +43,12 @@ def key_variants(value: Any) -> set[str]:
     tokens = key.split()
     variants = {key}
     if len(tokens) > 1:
-        # Conservative provider-location cleanup. Only one edge token is removed at a time.
         if tokens[0] in GENERIC_LOCATION_TOKENS:
             variants.add(" ".join(tokens[1:]))
         if tokens[-1] in GENERIC_LOCATION_TOKENS:
             variants.add(" ".join(tokens[:-1]))
-        # Provider names often append one city token even when it is not in the static list.
-        # Keep this safe by accepting it only if exactly one API candidate matches later.
+        # Provider feeds often prepend/append one location or legal-name token.
+        # These variants are only accepted later when exactly one API candidate matches.
         variants.add(" ".join(tokens[:-1]))
         variants.add(" ".join(tokens[1:]))
     return {item for item in variants if item}
@@ -88,8 +87,48 @@ def choose_team_candidate_v2(name: str, rows: Sequence[Mapping[str, Any]]) -> Ma
     return None
 
 
+def fallback_search_query(value: str) -> str:
+    original = str(value or "").strip()
+    normalized = normalize_team_key(original)
+    if not normalized:
+        return ""
+
+    # Prefer the longest cleaned identity first: it removes FC/FK/PFC-style noise and
+    # known provider-only location suffixes without collapsing to an unsafe single token.
+    variants = sorted(key_variants(original), key=lambda item: (-len(item.split()), -len(item), item))
+    for candidate in variants:
+        if candidate.casefold() != original.casefold():
+            return candidate
+    return normalized if normalized.casefold() != original.casefold() else ""
+
+
+def api_get_v2(api_key, endpoint, params, request_state, max_requests):
+    payload = _original_api_get(api_key, endpoint, params, request_state, max_requests)
+    if endpoint != "teams" or not isinstance(params, dict) or not params.get("search"):
+        return payload
+
+    requested_name = str(params.get("search") or "").strip()
+    if choose_team_candidate_v2(requested_name, base.api.response_items(payload)) is not None:
+        return payload
+
+    fallback = fallback_search_query(requested_name)
+    if not fallback:
+        return payload
+
+    # One controlled retry only. This keeps request use bounded while fixing provider labels
+    # such as "Ajax Amsterdam", "Fenerbahce Istanbul", "FC Dila Gori", etc.
+    return _original_api_get(
+        api_key,
+        endpoint,
+        {**params, "search": fallback},
+        request_state,
+        max_requests,
+    )
+
+
 base.feed_team_names = feed_team_names_v2
 base.choose_team_candidate = choose_team_candidate_v2
+base.api.api_get = api_get_v2
 
 if __name__ == "__main__":
     raise SystemExit(base.main())
