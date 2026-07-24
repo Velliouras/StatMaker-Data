@@ -16,6 +16,11 @@ GENERIC_LOCATION_TOKENS = {
     "wien", "zagreb", "zhytomyr",
 }
 
+# Keep stable references to the original base implementation before monkey-patching.
+# Without this, feed_team_names_v2() calls base.feed_team_names after replacement and recurses forever.
+_original_feed_team_names = base.feed_team_names
+
+
 def is_real_participant_name(value: str) -> bool:
     text = str(value or "").strip()
     if not text:
@@ -24,7 +29,7 @@ def is_real_participant_name(value: str) -> bool:
 
 
 def feed_team_names_v2(feed_dir):
-    result = base.feed_team_names(feed_dir)
+    result = _original_feed_team_names(feed_dir)
     return {
         competition: {name for name in names if is_real_participant_name(name)}
         for competition, names in result.items()
