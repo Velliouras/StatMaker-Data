@@ -1,0 +1,40 @@
+name: API-Football Odds Scope Coverage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Probe real final-scope and UEFA odds coverage
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python scripts/probe_api_football_odds_scope_coverage.py
+
+      - name: Commit coverage report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/api_football_odds_scope_coverage.json
+          if git diff --cached --quiet; then
+            echo "No coverage report changes."
+          else
+            git commit -m "Probe API-Football odds scope coverage"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
