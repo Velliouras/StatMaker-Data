@@ -10,6 +10,10 @@ Priority tiers:
   Tier 1: Main 5 + Greek Super League
   Tier 2: the protected core 27 minus Tier 1
   Tier 3: the 26 restored Stats-only leagues
+
+Budget policy is strict and sequential: Tier 1 receives first access to the full
+run budget, Tier 2 uses only what Tier 1 leaves unused, and Tier 3 uses only the
+remaining budget after Tier 2.
 """
 from __future__ import annotations
 
@@ -27,8 +31,6 @@ import statmaker_domestic_scope as scope
 # the user's 7,500/day API-Football PRO quota for other StatMaker workloads.
 DEFAULT_MAX_REQUESTS = 2400
 COMPLETED_STATUSES = {"FT", "AET", "PEN"}
-TIER1_CEILING_FRACTION = 0.30
-TIER2_CUMULATIVE_FRACTION = 0.70
 
 
 def has_final_score(item: Dict[str, Any]) -> bool:
@@ -173,24 +175,15 @@ def refresh_incrementally(
 
     tier1 = groups[0]
     if tier1:
-        tier1_ceiling = min(
-            max_requests,
-            max(len(tier1), int(round(max_requests * TIER1_CEILING_FRACTION))),
-        )
         process_group(
-            api_key, tier1, request_state, tier1_ceiling,
+            api_key, tier1, request_state, max_requests,
             fetch_rows, allocations, "tier1_main5_plus_greece",
         )
 
     tier2 = groups[1]
     if tier2 and request_state["count"] < max_requests:
-        tier2_target = int(round(max_requests * TIER2_CUMULATIVE_FRACTION))
-        tier2_ceiling = min(
-            max_requests,
-            max(request_state["count"] + len(tier2), tier2_target),
-        )
         process_group(
-            api_key, tier2, request_state, tier2_ceiling,
+            api_key, tier2, request_state, max_requests,
             fetch_rows, allocations, "tier2_core27",
         )
 
@@ -208,7 +201,7 @@ def refresh_incrementally(
         "completenessContract": "final score plus at least one non-null normalized API-Football statistic",
         "incrementalContract": "poll every active Stats league for new completed fixtures; fetch statistics only when real cached stats are missing",
         "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
-        "priorityPolicy": "Tier 1 Main5+Greece first, Tier 2 core27 next, Tier 3 restored26 last; unused budget rolls forward",
+        "priorityPolicy": "Strict sequential priority: Tier 1 Main5+Greece may use the full run budget first; Tier 2 and Tier 3 receive only unused remainder",
         "absolutePriorityLeagueCodes": sorted(scope.absolute_priority_codes()),
         "statsUniverseLeagueCount": len(scope.stats_universe_codes()),
         "coreOddsLeagueCount": len(scope.included_codes()),
