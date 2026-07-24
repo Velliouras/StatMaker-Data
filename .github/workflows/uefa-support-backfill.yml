@@ -42,7 +42,8 @@ jobs:
 
       - name: Read current live UEFA qualifier feeds
         run: |
-          git fetch origin build/uefa-qualifier-feed-20260720
+          git fetch origin \
+            build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           mkdir -p "$RUNNER_TEMP/uefa_feeds"
           for name in champions_league_odds.json europa_league_odds.json conference_league_odds.json; do
             git show "origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/$name" > "$RUNNER_TEMP/uefa_feeds/$name"
