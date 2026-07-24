@@ -238,7 +238,7 @@ jobs:
             echo "No Domestic statistics-universe changes to commit."
           else
             git commit -m "Record 53-league Domestic statistics run"
-            git pull --rebase origin main
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
           fi
 
