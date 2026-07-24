@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Quota-aware Domestic Stats orchestration with targeted refresh and historical freeze.
+"""Quota-aware Domestic Stats orchestration with verified historical closure.
 
-Historical support seasons are fetched once, then frozen after every discovered completed
-fixture has a final score and has had its fixture-statistics endpoint attempted at least once.
+Historical seasons are not considered closed merely because the local cache looks complete.
+A historical snapshot is frozen only after an exact API-Football ``league + season`` discovery
+confirms the completed fixture set, every discovered completed fixture is present locally with a
+final score, and every fixture has had its statistics endpoint attempted at least once.
+
+Once verified, the snapshot is frozen and future scheduled runs use zero API calls for it.
 Current seasons remain incremental.
 """
 from __future__ import annotations
@@ -12,7 +16,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, List, Mapping
 
 import refresh_domestic_live_july_stats as target
 import statmaker_domestic_scope as scope
@@ -20,6 +24,11 @@ import statmaker_domestic_scope as scope
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE_PATH = ROOT / "data" / "statmaker" / "domestic_historical_stats_freeze.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_stats_refresh.json"
+FREEZE_SCHEMA_VERSION = 2
+FREEZE_POLICY = (
+    "historical season closes only after exact league+season fixture discovery, complete score cache, "
+    "and one statistics-endpoint attempt per completed fixture"
+)
 
 
 def normalize_code(value: Any) -> str:
@@ -37,7 +46,7 @@ def write_json(path: Path, payload: Any) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def historical_season(league: Dict[str, Any]) -> str:
+def historical_season(league: Mapping[str, Any]) -> str:
     return str(
         league.get("historyApiSeason")
         or league.get("season")
@@ -45,7 +54,7 @@ def historical_season(league: Dict[str, Any]) -> str:
     ).strip()
 
 
-def target_season(league: Dict[str, Any]) -> str:
+def target_season(league: Mapping[str, Any]) -> str:
     return str(
         league.get("targetApiSeason")
         or league.get("target_api_football_season")
@@ -53,18 +62,18 @@ def target_season(league: Dict[str, Any]) -> str:
     ).strip()
 
 
-def is_historical_snapshot(league: Dict[str, Any]) -> bool:
+def is_historical_snapshot(league: Mapping[str, Any]) -> bool:
     history = historical_season(league)
     current = target_season(league)
     return bool(history and current and history != current)
 
 
-def freeze_key(league: Dict[str, Any]) -> str:
+def freeze_key(league: Mapping[str, Any]) -> str:
     return f"{normalize_code(league.get('leagueCode'))}:{historical_season(league)}"
 
 
-def completed_cache_rows(league: Dict[str, Any]) -> List[Dict[str, Any]]:
-    cache = load_json(target.stats_fetch.cache_path_for(league), {})
+def completed_cache_rows(league: Mapping[str, Any]) -> List[Dict[str, Any]]:
+    cache = load_json(target.stats_fetch.cache_path_for(dict(league)), {})
     return [
         item
         for item in cache.get("fixtures", []) or []
@@ -74,19 +83,121 @@ def completed_cache_rows(league: Dict[str, Any]) -> List[Dict[str, Any]]:
     ]
 
 
-def historical_snapshot_ready_to_freeze(league: Dict[str, Any]) -> tuple[bool, Dict[str, int]]:
-    rows = completed_cache_rows(league)
+def migrate_freeze_contract(raw: Any) -> Dict[str, Any]:
+    freeze = raw if isinstance(raw, dict) else {}
+    snapshots = freeze.setdefault("snapshots", {})
+    old_schema = int(freeze.get("schemaVersion") or 0)
+
+    # Schema v1 could freeze a truncated cache (the Panathinaikos 15-match case) because it
+    # validated only the rows already present locally. Invalidate every such legacy freeze once.
+    if old_schema < FREEZE_SCHEMA_VERSION:
+        for row in snapshots.values():
+            if not isinstance(row, dict):
+                continue
+            if row.get("frozen") is True and row.get("fixtureSetVerified") is not True:
+                row["frozen"] = False
+                row["invalidatedReason"] = "legacy freeze lacked exact provider fixture-set verification"
+
+    freeze["schemaVersion"] = FREEZE_SCHEMA_VERSION
+    freeze["policy"] = FREEZE_POLICY
+    return freeze
+
+
+def exact_fixture_discovery(
+    api_key: str,
+    league: Mapping[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> tuple[bool, List[Dict[str, Any]], str]:
+    season = historical_season(league)
+    league_id = league.get("api_football_league_id") or league.get("apiFootballLeagueId")
+    if not season or league_id is None:
+        return False, [], "missing league id or historical season"
+
+    try:
+        payload = target.stats_fetch.api_get(
+            api_key,
+            "fixtures",
+            {"league": int(league_id), "season": int(season)},
+            request_state,
+            max_requests,
+        )
+    except target.stats_fetch.RequestLimitReached:
+        return False, [], "request cap reached before exact fixture verification"
+    except Exception as exc:
+        return False, [], f"exact fixture verification failed: {type(exc).__name__}: {exc}"
+
+    errors = target.stats_fetch.api_errors(payload)
+    if errors:
+        return False, [], f"provider errors during exact fixture verification: {errors}"
+
+    all_rows = target.stats_fetch.response_items(payload)
+    completed = [row for row in all_rows if target.stats_fetch.is_completed_fixture(row)]
+    if not all_rows:
+        return False, [], "exact league+season query returned no fixtures"
+    if not completed:
+        return False, [], "exact league+season query returned no completed fixtures"
+    return True, completed, f"league+season:{season} returned={len(all_rows)} completed={len(completed)}"
+
+
+def verify_historical_snapshot(
+    api_key: str,
+    league: Dict[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> tuple[bool, Dict[str, Any]]:
+    verified, provider_completed, note = exact_fixture_discovery(
+        api_key, league, request_state, max_requests
+    )
+
+    cache_path = target.stats_fetch.cache_path_for(league)
+    cache = load_json(cache_path, {})
+    cached_by_id = target.stats_fetch.cached_fixture_map(cache)
+    provider_ids = {
+        fixture_id
+        for row in provider_completed
+        if (fixture_id := target.stats_fetch.fixture_identity(row)) is not None
+    }
+    cached_ids = set(cached_by_id)
+    missing_ids = sorted(provider_ids - cached_ids)
+    extra_ids = sorted(cached_ids - provider_ids) if verified else []
+
+    # Once exact provider discovery succeeds, historical cache identity becomes the provider's
+    # exact completed fixture set. This removes stale/fallback contamination from prior runs.
+    if verified and not missing_ids:
+        exact_rows = [cached_by_id[fixture_id] for fixture_id in sorted(provider_ids)]
+        target.stats_fetch.write_json(cache_path, target.stats_fetch.cache_payload(league, exact_rows))
+        cached_by_id = {fixture_id: cached_by_id[fixture_id] for fixture_id in provider_ids}
+
+    rows = [
+        row for row in cached_by_id.values()
+        if str(row.get("status") or row.get("status_short") or "").upper() in target.COMPLETED_STATUSES
+    ]
     with_scores = sum(1 for row in rows if target.has_final_score(row))
     stats_attempted = sum(1 for row in rows if "raw_statistics" in row)
     real_stats = sum(1 for row in rows if target.has_real_normalized_stats(row))
-    summary = {
-        "completedFixtures": len(rows),
+
+    summary: Dict[str, Any] = {
+        "fixtureSetVerified": bool(verified and provider_ids and not missing_ids),
+        "verificationQuery": f"league+season:{historical_season(league)}",
+        "verificationNote": note,
+        "providerCompletedFixtures": len(provider_ids),
+        "cachedCompletedFixtures": len(rows),
+        "missingDiscoveredFixtureCount": len(missing_ids),
+        "missingDiscoveredFixtureIds": missing_ids[:50],
+        "extraCachedFixturesPruned": len(extra_ids) if verified and not missing_ids else 0,
         "withScores": with_scores,
         "statsAttempted": stats_attempted,
         "withRealStats": real_stats,
         "providerEmptyStats": max(0, stats_attempted - real_stats),
     }
-    ready = bool(rows) and with_scores == len(rows) and stats_attempted == len(rows)
+
+    ready = (
+        summary["fixtureSetVerified"] is True
+        and len(rows) == len(provider_ids)
+        and with_scores == len(rows)
+        and stats_attempted == len(rows)
+    )
     return ready, summary
 
 
@@ -99,12 +210,17 @@ def parse_codes(raw: str) -> set[str]:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run Domestic Stats refresh with optional targeted league scope")
+    parser = argparse.ArgumentParser(description="Run Domestic Stats refresh with verified historical closure")
     parser.add_argument("--max-requests", type=int, default=target.DEFAULT_MAX_REQUESTS)
     parser.add_argument(
         "--league-codes",
         default=os.getenv("STATMAKER_STATS_LEAGUE_CODES", ""),
         help="Optional comma-separated Domestic league codes, e.g. G1 or E0,G1",
+    )
+    parser.add_argument(
+        "--historical-only",
+        action="store_true",
+        help="Process only configured completed historical snapshots that are not yet verified/frozen",
     )
     return parser.parse_args()
 
@@ -116,6 +232,7 @@ def main() -> int:
         print("ERROR: API_FOOTBALL_KEY is required.", file=sys.stderr)
         return 2
 
+    max_requests = max(1, int(args.max_requests))
     target.scope.install_stats_registry_load_guard(target.pipeline)
     registry_payload = target.pipeline.load_json(target.pipeline.REGISTRY_PATH, {})
     registry = registry_payload.get("leagues", []) if isinstance(registry_payload, dict) else []
@@ -129,48 +246,63 @@ def main() -> int:
         league for league in registry
         if not requested_codes or normalize_code(league.get("leagueCode")) in requested_codes
     ]
+    if args.historical_only:
+        selected = [league for league in selected if is_historical_snapshot(league)]
+
     if requested_codes:
         found = {normalize_code(league.get("leagueCode")) for league in selected}
         missing = sorted(requested_codes - found)
         if missing:
-            print(f"ERROR: requested league codes not present in rolling registry: {missing}", file=sys.stderr)
+            print(f"ERROR: requested league codes not present in selected Stats scope: {missing}", file=sys.stderr)
             return 4
     if not selected:
         print("ERROR: no Domestic Stats leagues selected.", file=sys.stderr)
         return 5
 
-    freeze = load_json(
-        FREEZE_PATH,
-        {
-            "schemaVersion": 1,
-            "policy": "completed historical season: backfill once, then zero future API calls",
-            "snapshots": {},
-        },
-    )
+    freeze = migrate_freeze_contract(load_json(FREEZE_PATH, {}))
     snapshots = freeze.setdefault("snapshots", {})
+
+    all_historical = [league for league in registry if is_historical_snapshot(league)]
+    pending_before = [
+        freeze_key(league)
+        for league in all_historical
+        if not (
+            snapshots.get(freeze_key(league), {}).get("frozen") is True
+            and snapshots.get(freeze_key(league), {}).get("fixtureSetVerified") is True
+        )
+    ]
 
     skipped_frozen: List[str] = []
     active: List[Dict[str, Any]] = []
     for league in selected:
         key = freeze_key(league)
-        if is_historical_snapshot(league) and snapshots.get(key, {}).get("frozen") is True:
+        frozen_row = snapshots.get(key, {})
+        if (
+            is_historical_snapshot(league)
+            and frozen_row.get("frozen") is True
+            and frozen_row.get("fixtureSetVerified") is True
+        ):
             skipped_frozen.append(key)
         else:
             active.append(league)
 
+    historical_active = [league for league in active if is_historical_snapshot(league)]
+    verification_reserve = min(len(historical_active), max(0, max_requests - 1))
+    refresh_budget = max(1, max_requests - verification_reserve)
+
     if active:
-        report = target.refresh_incrementally(api_key, active, max(1, args.max_requests))
+        report = target.refresh_incrementally(api_key, active, refresh_budget)
     else:
         report = {
             "generatedAt": target.pipeline.now_utc(),
             "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
-            "incrementalContract": "current seasons incremental; completed historical snapshots frozen after one complete backfill",
-            "scopeContract": "53 configured Domestic leagues eligible for Stats; targeted mode may refresh a subset",
-            "priorityPolicy": "Frozen historical snapshots use zero API requests",
+            "incrementalContract": "current seasons incremental; historical snapshots close only after exact provider fixture-set verification",
+            "scopeContract": "53 configured Domestic leagues eligible for Stats; targeted/historical-only mode may refresh a subset",
+            "priorityPolicy": "Verified frozen historical snapshots use zero future API requests",
             "absolutePriorityLeagueCodes": sorted(scope.absolute_priority_codes()),
             "statsUniverseLeagueCount": len(scope.stats_universe_codes()),
             "coreOddsLeagueCount": len(scope.core_odds_codes()),
-            "maxRequests": max(1, args.max_requests),
+            "maxRequests": max_requests,
             "requestsUsed": 0,
             "registryLeagueCount": len(selected),
             "polledLeagueCount": 0,
@@ -181,14 +313,15 @@ def main() -> int:
             "progress": [],
         }
 
+    verification_state = {"count": int(report.get("requestsUsed") or 0)}
     newly_frozen: List[str] = []
-    for league in selected:
-        if not is_historical_snapshot(league):
-            continue
+    verification_pending: List[Dict[str, Any]] = []
+
+    for league in historical_active:
         key = freeze_key(league)
-        if snapshots.get(key, {}).get("frozen") is True:
-            continue
-        ready, summary = historical_snapshot_ready_to_freeze(league)
+        ready, summary = verify_historical_snapshot(
+            api_key, league, verification_state, max_requests
+        )
         if ready:
             snapshots[key] = {
                 "frozen": True,
@@ -201,19 +334,50 @@ def main() -> int:
                 **summary,
             }
             newly_frozen.append(key)
+        else:
+            snapshots[key] = {
+                **(snapshots.get(key, {}) if isinstance(snapshots.get(key), dict) else {}),
+                "frozen": False,
+                "leagueCode": normalize_code(league.get("leagueCode")),
+                "country": league.get("country"),
+                "competition": league.get("competition"),
+                "historyApiSeason": historical_season(league),
+                "lastCheckedAt": target.pipeline.now_utc(),
+                **summary,
+            }
+            verification_pending.append({"snapshot": key, **summary})
+
+    pending_after = [
+        freeze_key(league)
+        for league in all_historical
+        if not (
+            snapshots.get(freeze_key(league), {}).get("frozen") is True
+            and snapshots.get(freeze_key(league), {}).get("fixtureSetVerified") is True
+        )
+    ]
 
     freeze["generatedAt"] = target.pipeline.now_utc()
-    freeze["frozenSnapshotCount"] = sum(
-        1 for row in snapshots.values() if isinstance(row, dict) and row.get("frozen") is True
-    )
+    freeze["historicalSnapshotCount"] = len(all_historical)
+    freeze["frozenSnapshotCount"] = len(all_historical) - len(pending_after)
+    freeze["pendingSnapshotCount"] = len(pending_after)
+    freeze["closureComplete"] = len(pending_after) == 0
+    freeze["pendingSnapshots"] = pending_after
     write_json(FREEZE_PATH, freeze)
 
+    report["requestsUsed"] = verification_state["count"]
+    report["maxRequests"] = max_requests
     report["selectedLeagueCodes"] = [normalize_code(league.get("leagueCode")) for league in selected]
     report["targetedMode"] = bool(requested_codes)
-    report["historicalFreezePolicy"] = "backfill once then zero future API calls"
+    report["historicalOnlyMode"] = bool(args.historical_only)
+    report["historicalFreezePolicy"] = FREEZE_POLICY
     report["historicalSkippedFrozen"] = skipped_frozen
     report["historicalNewlyFrozen"] = newly_frozen
+    report["historicalVerificationPending"] = verification_pending
+    report["historicalSnapshotCount"] = len(all_historical)
+    report["historicalPendingBefore"] = pending_before
+    report["historicalPendingAfter"] = pending_after
     report["historicalFrozenSnapshotCount"] = freeze["frozenSnapshotCount"]
+    report["historicalClosureComplete"] = freeze["closureComplete"]
     write_json(REPORT_PATH, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
