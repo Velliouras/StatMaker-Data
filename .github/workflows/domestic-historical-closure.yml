@@ -1,0 +1,154 @@
+name: Domestic Historical Closure
+
+on:
+  workflow_dispatch:
+    inputs:
+      stats_max_requests:
+        description: "Maximum API-Football requests for historical closure"
+        required: true
+        default: "2500"
+        type: string
+  schedule:
+    # Runs before the daily current-season universe refresh.
+    - cron: "20 1 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/domestic-historical-closure.yml"
+      - "scripts/run_domestic_stats_refresh.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-historical-closure
+  cancel-in-progress: false
+
+jobs:
+  close-history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate historical closure code
+        run: |
+          python -m py_compile \
+            scripts/run_domestic_stats_refresh.py \
+            scripts/refresh_domestic_live_july_stats.py \
+            scripts/api_football_fetch_fixture_stats.py \
+            scripts/expand_domestic_full_stats.py \
+            scripts/finalize_domestic_live_july_artifacts.py \
+            scripts/build_domestic_live_july_normalized_stats.py \
+            scripts/build_uefa_support_history.py
+
+      - name: Backfill and verify unfinished historical snapshots
+        id: history
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          INPUT_STATS_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.stats_max_requests || '2500' }}
+        run: |
+          mkdir -p reports
+          stats_requests="${INPUT_STATS_MAX_REQUESTS:-2500}"
+          python scripts/run_domestic_stats_refresh.py \
+            --historical-only \
+            --max-requests "$stats_requests" \
+            > reports/domestic_historical_closure.log 2>&1
+          cat reports/domestic_historical_closure.log
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          report = json.loads(Path('reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
+          print(f"pending_before={len(report.get('historicalPendingBefore', []))}")
+          print(f"pending_after={len(report.get('historicalPendingAfter', []))}")
+          print(f"requests={int(report.get('requestsUsed') or 0)}")
+          print(f"closure_complete={'true' if report.get('historicalClosureComplete') else 'false'}")
+          PY
+
+      - name: Rebuild app-facing historical statistics
+        if: steps.history.outputs.pending_before != '0' || steps.history.outputs.requests != '0'
+        run: |
+          python scripts/expand_domestic_full_stats.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic Stats registry is empty')
+          pipeline.build_app_statistics(registry)
+          PY
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
+
+      - name: Validate historical closure contract
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          freeze = json.loads(Path('data/statmaker/domestic_historical_stats_freeze.json').read_text(encoding='utf-8'))
+          report = json.loads(Path('reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
+          if int(freeze.get('schemaVersion') or 0) != 2:
+              raise SystemExit(f"Unexpected historical freeze schema: {freeze.get('schemaVersion')}")
+
+          bad_frozen = {
+              key: row
+              for key, row in (freeze.get('snapshots') or {}).items()
+              if isinstance(row, dict) and row.get('frozen') is True and row.get('fixtureSetVerified') is not True
+          }
+          if bad_frozen:
+              raise SystemExit(f'Historical snapshots frozen without exact fixture-set verification: {sorted(bad_frozen)}')
+
+          pending = report.get('historicalPendingAfter', []) or []
+          print(
+              f"Historical closure progress: frozen={report.get('historicalFrozenSnapshotCount')}/"
+              f"{report.get('historicalSnapshotCount')} pending={len(pending)} "
+              f"requests={report.get('requestsUsed')}/{report.get('maxRequests')}"
+          )
+          if pending:
+              print('Pending snapshots will continue on the next scheduled closure run:')
+              for key in pending:
+                  print(f' - {key}')
+          else:
+              print('HISTORICAL_CLOSURE_COMPLETE=true')
+          PY
+
+      - name: Commit historical closure progress
+        if: steps.history.outputs.pending_before != '0' || steps.history.outputs.requests != '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/api_football/fixture_stats \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/domestic_enriched \
+            data/statmaker/domestic_historical_stats_freeze.json \
+            data/statmaker/uefa_support_history.json \
+            reports/api_football_fixture_stats_fetch.json \
+            reports/api_football_fixture_stats_fetch.csv \
+            reports/api_football_fixture_stats_fetch.md \
+            reports/domestic_live_july_stats_refresh.json \
+            reports/domestic_live_july_full_stats_expansion.json \
+            reports/statmaker_domestic_enriched_build.json \
+            reports/statmaker_domestic_enriched_build.csv \
+            reports/statmaker_domestic_enriched_build.md \
+            reports/domestic_historical_closure.log
+          if git diff --cached --quiet; then
+            echo "No historical closure changes to commit."
+          else
+            git commit -m "Advance verified Domestic historical closure"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
