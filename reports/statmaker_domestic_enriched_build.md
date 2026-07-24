@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-07-24T10:48:00Z`
+Generated at: `2026-07-24T19:58:54Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -28,7 +28,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | F2 | France | Ligue 2 | 2025-2026 | 2025 | 62 | top_europe | 9 | 8 | 8 | 0.8889 | 0.8889 | False | data/statmaker/domestic_enriched/france_ligue_2_2025.json | not enough completed fixtures: 9 < 15 |
 | D1 | Germany | Bundesliga | 2025-2026 | 2025 | 78 | top_europe | 30 | 29 | 28 | 0.9667 | 0.9333 | True | data/statmaker/domestic_enriched/germany_bundesliga_2025.json | ok |
 | D2 | Germany | Bundesliga 2 | 2025-2026 | 2025 | 79 | top_europe | 9 | 8 | 8 | 0.8889 | 0.8889 | False | data/statmaker/domestic_enriched/germany_bundesliga_2_2025.json | not enough completed fixtures: 9 < 15 |
-| G1 | Greece | Super League | 2025-2026 | 2025 | 197 | southern_europe | 114 | 113 | 111 | 0.9912 | 0.9737 | True | data/statmaker/domestic_enriched/greece_super_league_2025.json | ok |
+| G1 | Greece | Super League | 2025-2026 | 2025 | 197 | southern_europe | 236 | 236 | 230 | 1.0 | 0.9746 | True | data/statmaker/domestic_enriched/greece_super_league_2025.json | ok |
 | HUN | Hungary | NB I | 2026-2027 | 2026 | 271 | central_europe | 0 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/hungary_nb_i_2026.json | not enough completed fixtures: 0 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | ISL | Iceland | Úrvalsdeild | 2026 | 2026 | 164 | scandinavia | 85 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/iceland_urvalsdeild_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | IRL | Ireland | Premier Division | 2026 | 2026 | 357 | western_europe | 121 | 115 | 114 | 0.9504 | 0.9421 | True | data/statmaker/domestic_enriched/ireland_premier_division_2026.json | ok |
