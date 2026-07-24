@@ -37,11 +37,13 @@ jobs:
       - name: Run odds integrity regressions
         run: |
           python -m py_compile \
+            scripts/statmaker_domestic_scope.py \
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
             scripts/build_domestic_proposal_readiness.py
           python -m unittest \
+            tests/test_statmaker_domestic_scope.py \
             tests/test_odds_market_integrity.py \
             tests/test_domestic_proposal_readiness.py
 
@@ -55,6 +57,7 @@ jobs:
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-16}"
