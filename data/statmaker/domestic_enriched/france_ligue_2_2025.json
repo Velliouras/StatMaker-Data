@@ -1,0 +1,832 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-07-24T10:48:00Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/france/ligue-2/2025/fixture_stats.json",
+    "cache_generated_at": "2026-07-24T10:45:22Z",
+    "api_football_season": "2025",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "F2",
+    "country": "France",
+    "league": "Ligue 2",
+    "football_data_code": "F2",
+    "api_football_league_id": 62,
+    "api_football_season": "2025",
+    "season": "2025-2026",
+    "app_season": "2025-2026",
+    "priority_group": "top_europe",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026-2027",
+    "target_season_start": "2026-08-08",
+    "target_season_end": "2027-05-22",
+    "lifecycle": "starts_soon",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 8,
+    "fixtures_with_bb_core_stats": 8,
+    "any_stats_coverage": 0.8889,
+    "bb_core_coverage": 0.8889,
+    "group_counts": {
+      "shots_total": 8,
+      "shots_on_target": 8,
+      "corners": 8,
+      "fouls": 8,
+      "yellow_cards": 8,
+      "red_cards": 4,
+      "possession": 8,
+      "passes": 8,
+      "xg": 0
+    },
+    "group_coverage": {
+      "shots_total": 0.8889,
+      "shots_on_target": 0.8889,
+      "corners": 0.8889,
+      "fouls": 0.8889,
+      "yellow_cards": 0.8889,
+      "red_cards": 0.4444,
+      "possession": 0.8889,
+      "passes": 0.8889,
+      "xg": 0.0
+    },
+    "bb_ready_candidate": false,
+    "notes": [
+      "not enough completed fixtures: 9 < 15"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1389131,
+      "date_utc": "2025-08-09T12:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Guingamp",
+      "away_team": "Le Mans",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 10,
+        "HST": 7,
+        "AST": 3,
+        "HC": 10,
+        "AC": 5,
+        "HF": 16,
+        "AF": 22,
+        "HY": 3,
+        "AY": 3,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 488,
+        "APasses": 303,
+        "HPassesAccurate": 403,
+        "APassesAccurate": 231,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 3,
+      "home_score": 3,
+      "away_score": 3,
+      "fthg": 3,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 3,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389124,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "PAU",
+      "away_team": "Annecy",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 4,
+        "HST": 3,
+        "AST": 1,
+        "HC": 5,
+        "AC": 5,
+        "HF": 20,
+        "AF": 18,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 1,
+        "ASaves": 1,
+        "HPasses": 457,
+        "APasses": 335,
+        "HPassesAccurate": 391,
+        "APassesAccurate": 271,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389125,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Estac Troyes",
+      "away_team": "Grenoble",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 5,
+        "HST": 9,
+        "AST": 5,
+        "HC": 3,
+        "AC": 1,
+        "HF": 12,
+        "AF": 14,
+        "HY": 1,
+        "AY": 1,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 61,
+        "APossession": 39,
+        "HSaves": 4,
+        "ASaves": 7,
+        "HPasses": 531,
+        "APasses": 355,
+        "HPassesAccurate": 477,
+        "APassesAccurate": 281,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389126,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Montpellier",
+      "away_team": "RED Star FC 93",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 7,
+        "HST": 2,
+        "AST": 3,
+        "HC": 1,
+        "AC": 2,
+        "HF": 16,
+        "AF": 10,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 434,
+        "APasses": 410,
+        "HPassesAccurate": 362,
+        "APassesAccurate": 340,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389127,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Laval",
+      "away_team": "Saint Etienne",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 10,
+        "HST": 4,
+        "AST": 6,
+        "HC": 4,
+        "AC": 7,
+        "HF": 11,
+        "AF": 16,
+        "HY": 2,
+        "AY": 0,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 3,
+        "ASaves": 1,
+        "HPasses": 456,
+        "APasses": 533,
+        "HPassesAccurate": 365,
+        "APassesAccurate": 449,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 3,
+      "home_score": 3,
+      "away_score": 3,
+      "fthg": 3,
+      "ftag": 3,
+      "hthg": 2,
+      "htag": 2,
+      "goals": {
+        "home": 3,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389128,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Dunkerque",
+      "away_team": "Clermont Foot",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 6,
+        "HST": 4,
+        "AST": 3,
+        "HC": 9,
+        "AC": 2,
+        "HF": 17,
+        "AF": 9,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 1,
+        "ASaves": 2,
+        "HPasses": 470,
+        "APasses": 360,
+        "HPassesAccurate": 401,
+        "APassesAccurate": 288,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389130,
+      "date_utc": "2025-08-09T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Rodez",
+      "away_team": "Nancy",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 12,
+        "HST": 6,
+        "AST": 2,
+        "HC": 4,
+        "AC": 9,
+        "HF": 14,
+        "AF": 11,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 2,
+        "ASaves": 6,
+        "HPasses": 330,
+        "APasses": 322,
+        "HPassesAccurate": 243,
+        "APassesAccurate": 238,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389129,
+      "date_utc": "2025-08-11T18:45:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 1",
+      "home_team": "Amiens",
+      "away_team": "Reims",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 10,
+        "HST": 3,
+        "AST": 4,
+        "HC": 8,
+        "AC": 7,
+        "HF": 7,
+        "AF": 16,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 37,
+        "APossession": 63,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 325,
+        "APasses": 558,
+        "HPassesAccurate": 252,
+        "APassesAccurate": 489,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1389137,
+      "date_utc": "2025-08-15T18:00:00+00:00",
+      "country": "France",
+      "league": "Ligue 2",
+      "league_code": "F2",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 62,
+      "round": "Regular Season - 2",
+      "home_team": "Clermont Foot",
+      "away_team": "Estac Troyes",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

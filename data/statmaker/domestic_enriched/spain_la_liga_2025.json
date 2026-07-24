@@ -1,0 +1,2596 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-07-24T10:48:00Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/spain/la-liga/2025/fixture_stats.json",
+    "cache_generated_at": "2026-07-24T10:39:45Z",
+    "api_football_season": "2025",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "SP1",
+    "country": "Spain",
+    "league": "La Liga",
+    "football_data_code": "SP1",
+    "api_football_league_id": 140,
+    "api_football_season": "2025",
+    "season": "2025-2026",
+    "app_season": "2025-2026",
+    "priority_group": "top_europe",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026-2027",
+    "target_season_start": "2026-08-15",
+    "target_season_end": "2027-05-30",
+    "lifecycle": "starts_soon",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 30,
+    "fixtures_with_any_stats": 29,
+    "fixtures_with_bb_core_stats": 29,
+    "any_stats_coverage": 0.9667,
+    "bb_core_coverage": 0.9667,
+    "group_counts": {
+      "shots_total": 29,
+      "shots_on_target": 29,
+      "corners": 29,
+      "fouls": 29,
+      "yellow_cards": 29,
+      "red_cards": 6,
+      "possession": 29,
+      "passes": 29,
+      "xg": 29
+    },
+    "group_coverage": {
+      "shots_total": 0.9667,
+      "shots_on_target": 0.9667,
+      "corners": 0.9667,
+      "fouls": 0.9667,
+      "yellow_cards": 0.9667,
+      "red_cards": 0.2,
+      "possession": 0.9667,
+      "passes": 0.9667,
+      "xg": 0.9667
+    },
+    "bb_ready_candidate": true,
+    "notes": [
+      "ok"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1390824,
+      "date_utc": "2025-08-15T17:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Girona",
+      "away_team": "Rayo Vallecano",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 16,
+        "HST": 2,
+        "AST": 5,
+        "HC": 2,
+        "AC": 4,
+        "HF": 8,
+        "AF": 17,
+        "HY": 0,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 382,
+        "APasses": 481,
+        "HPassesAccurate": 296,
+        "APassesAccurate": 415,
+        "HxG": 0.56,
+        "AxG": 3.43
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 3,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 3
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390828,
+      "date_utc": "2025-08-15T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Villarreal",
+      "away_team": "Oviedo",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 25,
+        "AS": 5,
+        "HST": 10,
+        "AST": 4,
+        "HC": 10,
+        "AC": 1,
+        "HF": 10,
+        "AF": 8,
+        "HY": 1,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 68,
+        "APossession": 32,
+        "HSaves": 4,
+        "ASaves": 8,
+        "HPasses": 668,
+        "APasses": 326,
+        "HPassesAccurate": 612,
+        "APassesAccurate": 267,
+        "HxG": 2.44,
+        "AxG": 0.93
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390825,
+      "date_utc": "2025-08-16T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Mallorca",
+      "away_team": "Barcelona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 4,
+        "AS": 24,
+        "HST": 1,
+        "AST": 8,
+        "HC": 3,
+        "AC": 6,
+        "HF": 8,
+        "AF": 17,
+        "HY": 4,
+        "AY": 1,
+        "HR": 2,
+        "AR": 0,
+        "HPossession": 29,
+        "APossession": 71,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 225,
+        "APasses": 569,
+        "HPassesAccurate": 154,
+        "APassesAccurate": 505,
+        "HxG": 0.21,
+        "AxG": 2.13
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390819,
+      "date_utc": "2025-08-16T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Alaves",
+      "away_team": "Levante",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 7,
+        "HST": 4,
+        "AST": 3,
+        "HC": 10,
+        "AC": 1,
+        "HF": 15,
+        "AF": 13,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 471,
+        "APasses": 296,
+        "HPassesAccurate": 382,
+        "APassesAccurate": 199,
+        "HxG": 1.29,
+        "AxG": 0.87
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390827,
+      "date_utc": "2025-08-16T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Valencia",
+      "away_team": "Real Sociedad",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 13,
+        "HST": 2,
+        "AST": 3,
+        "HC": 8,
+        "AC": 7,
+        "HF": 5,
+        "AF": 11,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 54,
+        "APossession": 46,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 395,
+        "APasses": 340,
+        "HPassesAccurate": 341,
+        "APassesAccurate": 294,
+        "HxG": 2.04,
+        "AxG": 0.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390821,
+      "date_utc": "2025-08-17T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Celta Vigo",
+      "away_team": "Getafe",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 10,
+        "HST": 3,
+        "AST": 3,
+        "HC": 9,
+        "AC": 3,
+        "HF": 15,
+        "AF": 17,
+        "HY": 3,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 69,
+        "APossession": 31,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 571,
+        "APasses": 257,
+        "HPassesAccurate": 501,
+        "APassesAccurate": 187,
+        "HxG": 0.73,
+        "AxG": 1.43
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390820,
+      "date_utc": "2025-08-17T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Athletic Club",
+      "away_team": "Sevilla",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 12,
+        "HST": 3,
+        "AST": 6,
+        "HC": 10,
+        "AC": 1,
+        "HF": 8,
+        "AF": 12,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 4,
+        "ASaves": 0,
+        "HPasses": 387,
+        "APasses": 477,
+        "HPassesAccurate": 302,
+        "APassesAccurate": 396,
+        "HxG": 2.89,
+        "AxG": 1.01
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390823,
+      "date_utc": "2025-08-17T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Espanyol",
+      "away_team": "Atletico Madrid",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 15,
+        "HST": 5,
+        "AST": 4,
+        "HC": 1,
+        "AC": 3,
+        "HF": 14,
+        "AF": 11,
+        "HY": 3,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 40,
+        "APossession": 60,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 394,
+        "APasses": 618,
+        "HPassesAccurate": 323,
+        "APassesAccurate": 551,
+        "HxG": 1.26,
+        "AxG": 1.1
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390822,
+      "date_utc": "2025-08-18T19:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Elche",
+      "away_team": "Real Betis",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 12,
+        "HST": 2,
+        "AST": 4,
+        "HC": 1,
+        "AC": 3,
+        "HF": 14,
+        "AF": 13,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 68,
+        "APossession": 32,
+        "HSaves": 3,
+        "ASaves": 1,
+        "HPasses": 683,
+        "APasses": 323,
+        "HPassesAccurate": 617,
+        "APassesAccurate": 262,
+        "HxG": 0.64,
+        "AxG": 1.86
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390826,
+      "date_utc": "2025-08-19T19:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 1",
+      "home_team": "Real Madrid",
+      "away_team": "Osasuna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 2,
+        "HST": 5,
+        "AST": 0,
+        "HC": 7,
+        "AC": 0,
+        "HF": 10,
+        "AF": 12,
+        "HY": 1,
+        "AY": 0,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 71,
+        "APossession": 29,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 721,
+        "APasses": 299,
+        "HPassesAccurate": 659,
+        "APassesAccurate": 228,
+        "HxG": 1.64,
+        "AxG": 0.36
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390831,
+      "date_utc": "2025-08-22T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Real Betis",
+      "away_team": "Alaves",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 11,
+        "HST": 5,
+        "AST": 5,
+        "HC": 5,
+        "AC": 2,
+        "HF": 10,
+        "AF": 17,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 5,
+        "ASaves": 5,
+        "HPasses": 470,
+        "APasses": 485,
+        "HPassesAccurate": 406,
+        "APassesAccurate": 400,
+        "HxG": 1.95,
+        "AxG": 1.12
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390833,
+      "date_utc": "2025-08-23T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Mallorca",
+      "away_team": "Celta Vigo",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 8,
+        "HST": 4,
+        "AST": 2,
+        "HC": 3,
+        "AC": 4,
+        "HF": 12,
+        "AF": 12,
+        "HY": 3,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 433,
+        "APasses": 445,
+        "HPassesAccurate": 372,
+        "APassesAccurate": 385,
+        "HxG": 0.68,
+        "AxG": 0.74
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390830,
+      "date_utc": "2025-08-23T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Atletico Madrid",
+      "away_team": "Elche",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 6,
+        "HST": 6,
+        "AST": 2,
+        "HC": 10,
+        "AC": 2,
+        "HF": 14,
+        "AF": 7,
+        "HY": 0,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 545,
+        "APasses": 413,
+        "HPassesAccurate": 465,
+        "APassesAccurate": 335,
+        "HxG": 1.74,
+        "AxG": 0.57
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390832,
+      "date_utc": "2025-08-23T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Levante",
+      "away_team": "Barcelona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 26,
+        "HST": 5,
+        "AST": 10,
+        "HC": 0,
+        "AC": 11,
+        "HF": 10,
+        "AF": 8,
+        "HY": 3,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 18,
+        "APossession": 82,
+        "HSaves": 9,
+        "ASaves": 3,
+        "HPasses": 160,
+        "APasses": 761,
+        "HPassesAccurate": 93,
+        "APassesAccurate": 699,
+        "HxG": 2.14,
+        "AxG": 1.93
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390834,
+      "date_utc": "2025-08-24T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Osasuna",
+      "away_team": "Valencia",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 4,
+        "HST": 4,
+        "AST": 1,
+        "HC": 3,
+        "AC": 4,
+        "HF": 14,
+        "AF": 13,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 464,
+        "APasses": 370,
+        "HPassesAccurate": 382,
+        "APassesAccurate": 296,
+        "HxG": 0.83,
+        "AxG": 0.41
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390835,
+      "date_utc": "2025-08-24T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Real Sociedad",
+      "away_team": "Espanyol",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 14,
+        "HST": 7,
+        "AST": 3,
+        "HC": 5,
+        "AC": 2,
+        "HF": 16,
+        "AF": 18,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 498,
+        "APasses": 305,
+        "HPassesAccurate": 433,
+        "APassesAccurate": 215,
+        "HxG": 1.09,
+        "AxG": 1.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390838,
+      "date_utc": "2025-08-24T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Villarreal",
+      "away_team": "Girona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 5,
+        "HST": 7,
+        "AST": 2,
+        "HC": 8,
+        "AC": 1,
+        "HF": 8,
+        "AF": 9,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 53,
+        "APossession": 47,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 517,
+        "APasses": 470,
+        "HPassesAccurate": 467,
+        "APassesAccurate": 426,
+        "HxG": 2.3,
+        "AxG": 0.14
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 0,
+      "home_score": 5,
+      "away_score": 0,
+      "fthg": 5,
+      "ftag": 0,
+      "hthg": 4,
+      "htag": 0,
+      "goals": {
+        "home": 5,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 4,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390836,
+      "date_utc": "2025-08-24T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Oviedo",
+      "away_team": "Real Madrid",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 26,
+        "HST": 3,
+        "AST": 10,
+        "HC": 1,
+        "AC": 9,
+        "HF": 8,
+        "AF": 7,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 35,
+        "APossession": 65,
+        "HSaves": 8,
+        "ASaves": 3,
+        "HPasses": 376,
+        "APasses": 699,
+        "HPassesAccurate": 314,
+        "APassesAccurate": 644,
+        "HxG": 0.5,
+        "AxG": 2.68
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390829,
+      "date_utc": "2025-08-25T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Athletic Club",
+      "away_team": "Rayo Vallecano",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 6,
+        "HST": 4,
+        "AST": 1,
+        "HC": 3,
+        "AC": 6,
+        "HF": 13,
+        "AF": 13,
+        "HY": 0,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 334,
+        "APasses": 498,
+        "HPassesAccurate": 253,
+        "APassesAccurate": 413,
+        "HxG": 1.51,
+        "AxG": 0.29
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390837,
+      "date_utc": "2025-08-25T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 2",
+      "home_team": "Sevilla",
+      "away_team": "Getafe",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 9,
+        "HST": 3,
+        "AST": 6,
+        "HC": 5,
+        "AC": 3,
+        "HF": 10,
+        "AF": 24,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 71,
+        "APossession": 29,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 533,
+        "APasses": 221,
+        "HPassesAccurate": 453,
+        "APassesAccurate": 132,
+        "HxG": 0.51,
+        "AxG": 0.71
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390871,
+      "date_utc": "2025-08-27T19:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 6",
+      "home_team": "Celta Vigo",
+      "away_team": "Real Betis",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 7,
+        "HST": 5,
+        "AST": 2,
+        "HC": 10,
+        "AC": 4,
+        "HF": 13,
+        "AF": 11,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 496,
+        "APasses": 568,
+        "HPassesAccurate": 441,
+        "APassesAccurate": 513,
+        "HxG": 0.83,
+        "AxG": 0.33
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390842,
+      "date_utc": "2025-08-29T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Elche",
+      "away_team": "Levante",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 11,
+        "HST": 5,
+        "AST": 1,
+        "HC": 4,
+        "AC": 2,
+        "HF": 14,
+        "AF": 17,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 67,
+        "APossession": 33,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 568,
+        "APasses": 272,
+        "HPassesAccurate": 503,
+        "APassesAccurate": 216,
+        "HxG": 1.11,
+        "AxG": 1.01
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390848,
+      "date_utc": "2025-08-29T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Valencia",
+      "away_team": "Getafe",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 11,
+        "HST": 4,
+        "AST": 1,
+        "HC": 8,
+        "AC": 6,
+        "HF": 18,
+        "AF": 7,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 57,
+        "APossession": 43,
+        "HSaves": 1,
+        "ASaves": 1,
+        "HPasses": 408,
+        "APasses": 296,
+        "HPassesAccurate": 332,
+        "APassesAccurate": 238,
+        "HxG": 1.13,
+        "AxG": 0.66
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390839,
+      "date_utc": "2025-08-30T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Alaves",
+      "away_team": "Atletico Madrid",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 5,
+        "AS": 15,
+        "HST": 2,
+        "AST": 6,
+        "HC": 1,
+        "AC": 6,
+        "HF": 10,
+        "AF": 17,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 40,
+        "APossession": 60,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 377,
+        "APasses": 548,
+        "HPassesAccurate": 301,
+        "APassesAccurate": 464,
+        "HxG": 0.92,
+        "AxG": 1.09
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390847,
+      "date_utc": "2025-08-30T17:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Oviedo",
+      "away_team": "Real Sociedad",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 18,
+        "HST": 1,
+        "AST": 6,
+        "HC": 1,
+        "AC": 10,
+        "HF": 7,
+        "AF": 18,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 43,
+        "APossession": 57,
+        "HSaves": 6,
+        "ASaves": 0,
+        "HPasses": 408,
+        "APasses": 526,
+        "HPassesAccurate": 336,
+        "APassesAccurate": 446,
+        "HxG": 0.45,
+        "AxG": 1.1
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390844,
+      "date_utc": "2025-08-30T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Girona",
+      "away_team": "Sevilla",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 13,
+        "HST": 5,
+        "AST": 4,
+        "HC": 11,
+        "AC": 3,
+        "HF": 5,
+        "AF": 14,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 427,
+        "APasses": 322,
+        "HPassesAccurate": 358,
+        "APassesAccurate": 254,
+        "HxG": 2.12,
+        "AxG": 1.26
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390846,
+      "date_utc": "2025-08-30T19:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Real Madrid",
+      "away_team": "Mallorca",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 9,
+        "HST": 7,
+        "AST": 5,
+        "HC": 4,
+        "AC": 5,
+        "HF": 12,
+        "AF": 7,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 538,
+        "APasses": 382,
+        "HPassesAccurate": 481,
+        "APassesAccurate": 302,
+        "HxG": 1.82,
+        "AxG": 0.72
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390841,
+      "date_utc": "2025-08-31T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Celta Vigo",
+      "away_team": "Villarreal",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 8,
+        "HST": 2,
+        "AST": 3,
+        "HC": 1,
+        "AC": 5,
+        "HF": 11,
+        "AF": 8,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 65,
+        "APossession": 35,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 742,
+        "APasses": 394,
+        "HPassesAccurate": 656,
+        "APassesAccurate": 320,
+        "HxG": 0.96,
+        "AxG": 1.04
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390840,
+      "date_utc": "2025-08-31T17:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Real Betis",
+      "away_team": "Athletic Club",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 15,
+        "HST": 2,
+        "AST": 6,
+        "HC": 4,
+        "AC": 10,
+        "HF": 9,
+        "AF": 16,
+        "HY": 1,
+        "AY": 4,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 454,
+        "APasses": 440,
+        "HPassesAccurate": 373,
+        "APassesAccurate": 376,
+        "HxG": 0.62,
+        "AxG": 1.11
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1390843,
+      "date_utc": "2025-08-31T17:30:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Espanyol",
+      "away_team": "Osasuna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

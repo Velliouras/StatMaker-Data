@@ -1,0 +1,2596 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-07-24T10:48:00Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/italy/serie-a/2025/fixture_stats.json",
+    "cache_generated_at": "2026-07-24T10:40:38Z",
+    "api_football_season": "2025",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "I1",
+    "country": "Italy",
+    "league": "Serie A",
+    "football_data_code": "I1",
+    "api_football_league_id": 135,
+    "api_football_season": "2025",
+    "season": "2025-2026",
+    "app_season": "2025-2026",
+    "priority_group": "top_europe",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026-2027",
+    "target_season_start": "2026-08-22",
+    "target_season_end": "2027-05-30",
+    "lifecycle": "starts_soon",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 30,
+    "fixtures_with_any_stats": 29,
+    "fixtures_with_bb_core_stats": 25,
+    "any_stats_coverage": 0.9667,
+    "bb_core_coverage": 0.8333,
+    "group_counts": {
+      "shots_total": 29,
+      "shots_on_target": 29,
+      "corners": 29,
+      "fouls": 29,
+      "yellow_cards": 25,
+      "red_cards": 2,
+      "possession": 29,
+      "passes": 29,
+      "xg": 29
+    },
+    "group_coverage": {
+      "shots_total": 0.9667,
+      "shots_on_target": 0.9667,
+      "corners": 0.9667,
+      "fouls": 0.9667,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.0667,
+      "possession": 0.9667,
+      "passes": 0.9667,
+      "xg": 0.9667
+    },
+    "bb_ready_candidate": true,
+    "notes": [
+      "ok"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1377867,
+      "date_utc": "2025-08-23T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Genoa",
+      "away_team": "Lecce",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 5,
+        "AS": 7,
+        "HST": 2,
+        "AST": 0,
+        "HC": 3,
+        "AC": 7,
+        "HF": 16,
+        "AF": 13,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 0,
+        "ASaves": 2,
+        "HPasses": 435,
+        "APasses": 294,
+        "HPassesAccurate": 327,
+        "APassesAccurate": 207,
+        "HxG": 0.5,
+        "AxG": 0.37
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377872,
+      "date_utc": "2025-08-23T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Sassuolo",
+      "away_team": "Napoli",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 13,
+        "HST": 2,
+        "AST": 4,
+        "HC": 1,
+        "AC": 2,
+        "HF": 17,
+        "AF": 17,
+        "HY": 3,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 368,
+        "APasses": 606,
+        "HPassesAccurate": 311,
+        "APassesAccurate": 545,
+        "HxG": 0.38,
+        "AxG": 1.19
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377870,
+      "date_utc": "2025-08-23T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "AC Milan",
+      "away_team": "Cremonese",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 24,
+        "AS": 4,
+        "HST": 6,
+        "AST": 3,
+        "HC": 9,
+        "AC": 2,
+        "HF": 10,
+        "AF": 14,
+        "HY": 1,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 608,
+        "APasses": 340,
+        "HPassesAccurate": 551,
+        "APassesAccurate": 278,
+        "HxG": 1.92,
+        "AxG": 0.21
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377871,
+      "date_utc": "2025-08-23T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "AS Roma",
+      "away_team": "Bologna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 10,
+        "HST": 4,
+        "AST": 2,
+        "HC": 2,
+        "AC": 4,
+        "HF": 15,
+        "AF": 13,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 414,
+        "APasses": 388,
+        "HPassesAccurate": 338,
+        "APassesAccurate": 301,
+        "HxG": 1.56,
+        "AxG": 0.58
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377865,
+      "date_utc": "2025-08-24T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Cagliari",
+      "away_team": "Fiorentina",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 4,
+        "HST": 6,
+        "AST": 1,
+        "HC": 3,
+        "AC": 2,
+        "HF": 18,
+        "AF": 14,
+        "HY": 4,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 356,
+        "APasses": 439,
+        "HPassesAccurate": 293,
+        "APassesAccurate": 365,
+        "HxG": 1.13,
+        "AxG": 0.98
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377866,
+      "date_utc": "2025-08-24T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Como",
+      "away_team": "Lazio",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 5,
+        "HST": 6,
+        "AST": 1,
+        "HC": 6,
+        "AC": 0,
+        "HF": 15,
+        "AF": 12,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 63,
+        "APossession": 37,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 537,
+        "APasses": 309,
+        "HPassesAccurate": 484,
+        "APassesAccurate": 260,
+        "HxG": 1.32,
+        "AxG": 0.25
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377864,
+      "date_utc": "2025-08-24T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Atalanta",
+      "away_team": "Pisa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 11,
+        "HST": 6,
+        "AST": 2,
+        "HC": 10,
+        "AC": 4,
+        "HF": 9,
+        "AF": 10,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 66,
+        "APossession": 34,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 552,
+        "APasses": 289,
+        "HPassesAccurate": 477,
+        "APassesAccurate": 218,
+        "HxG": 1.92,
+        "AxG": 0.63
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377869,
+      "date_utc": "2025-08-24T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Juventus",
+      "away_team": "Parma",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 25,
+        "AS": 8,
+        "HST": 8,
+        "AST": 2,
+        "HC": 6,
+        "AC": 6,
+        "HF": 9,
+        "AF": 13,
+        "HY": 1,
+        "AY": 2,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 1,
+        "ASaves": 6,
+        "HPasses": 512,
+        "APasses": 275,
+        "HPassesAccurate": 457,
+        "APassesAccurate": 207,
+        "HxG": 2.35,
+        "AxG": 0.62
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377873,
+      "date_utc": "2025-08-25T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Udinese",
+      "away_team": "Hellas Verona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 9,
+        "HST": 4,
+        "AST": 3,
+        "HC": 5,
+        "AC": 1,
+        "HF": 10,
+        "AF": 14,
+        "HY": 3,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 63,
+        "APossession": 37,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 478,
+        "APasses": 286,
+        "HPassesAccurate": 416,
+        "APassesAccurate": 210,
+        "HxG": 0.73,
+        "AxG": 0.56
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377868,
+      "date_utc": "2025-08-25T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 1",
+      "home_team": "Inter",
+      "away_team": "Torino",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 12,
+        "HST": 9,
+        "AST": 4,
+        "HC": 6,
+        "AC": 5,
+        "HF": 14,
+        "AF": 6,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": 60,
+        "APossession": 40,
+        "HSaves": 4,
+        "ASaves": 4,
+        "HPasses": 577,
+        "APasses": 379,
+        "HPassesAccurate": 530,
+        "APassesAccurate": 328,
+        "HxG": 1.59,
+        "AxG": 0.94
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 0,
+      "home_score": 5,
+      "away_score": 0,
+      "fthg": 5,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 5,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377875,
+      "date_utc": "2025-08-29T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Cremonese",
+      "away_team": "Sassuolo",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 9,
+        "HST": 6,
+        "AST": 6,
+        "HC": 5,
+        "AC": 4,
+        "HF": 12,
+        "AF": 17,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 359,
+        "APasses": 507,
+        "HPassesAccurate": 271,
+        "APassesAccurate": 428,
+        "HxG": 3.32,
+        "AxG": 1.32
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377879,
+      "date_utc": "2025-08-29T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Lecce",
+      "away_team": "AC Milan",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 14,
+        "HST": 2,
+        "AST": 6,
+        "HC": 4,
+        "AC": 5,
+        "HF": 10,
+        "AF": 8,
+        "HY": 1,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 388,
+        "APasses": 482,
+        "HPassesAccurate": 331,
+        "APassesAccurate": 416,
+        "HxG": 0.3,
+        "AxG": 1.85
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377874,
+      "date_utc": "2025-08-30T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Bologna",
+      "away_team": "Como",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 13,
+        "HST": 2,
+        "AST": 2,
+        "HC": 7,
+        "AC": 4,
+        "HF": 13,
+        "AF": 19,
+        "HY": 4,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 242,
+        "APasses": 459,
+        "HPassesAccurate": 169,
+        "APassesAccurate": 379,
+        "HxG": 1.1,
+        "AxG": 0.69
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377881,
+      "date_utc": "2025-08-30T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Parma",
+      "away_team": "Atalanta",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 11,
+        "HST": 3,
+        "AST": 3,
+        "HC": 1,
+        "AC": 2,
+        "HF": 8,
+        "AF": 15,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 345,
+        "APasses": 420,
+        "HPassesAccurate": 269,
+        "APassesAccurate": 334,
+        "HxG": 0.68,
+        "AxG": 0.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377880,
+      "date_utc": "2025-08-30T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Napoli",
+      "away_team": "Cagliari",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 10,
+        "HST": 6,
+        "AST": 1,
+        "HC": 13,
+        "AC": 0,
+        "HF": 16,
+        "AF": 12,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 67,
+        "APossession": 33,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 615,
+        "APasses": 310,
+        "HPassesAccurate": 554,
+        "APassesAccurate": 252,
+        "HxG": 1.58,
+        "AxG": 0.53
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377882,
+      "date_utc": "2025-08-30T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Pisa",
+      "away_team": "AS Roma",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 10,
+        "HST": 3,
+        "AST": 5,
+        "HC": 1,
+        "AC": 7,
+        "HF": 14,
+        "AF": 10,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 31,
+        "APossession": 69,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 266,
+        "APasses": 581,
+        "HPassesAccurate": 178,
+        "APassesAccurate": 486,
+        "HxG": 0.56,
+        "AxG": 0.78
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377876,
+      "date_utc": "2025-08-31T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Genoa",
+      "away_team": "Juventus",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 13,
+        "HST": 1,
+        "AST": 3,
+        "HC": 3,
+        "AC": 4,
+        "HF": 14,
+        "AF": 15,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 350,
+        "APasses": 449,
+        "HPassesAccurate": 264,
+        "APassesAccurate": 358,
+        "HxG": 0.55,
+        "AxG": 1.03
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377883,
+      "date_utc": "2025-08-31T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Torino",
+      "away_team": "Fiorentina",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 16,
+        "HST": 4,
+        "AST": 4,
+        "HC": 7,
+        "AC": 3,
+        "HF": 21,
+        "AF": 13,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 292,
+        "APasses": 369,
+        "HPassesAccurate": 225,
+        "APassesAccurate": 307,
+        "HxG": 1.02,
+        "AxG": 1.74
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377877,
+      "date_utc": "2025-08-31T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Inter",
+      "away_team": "Udinese",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 10,
+        "HST": 4,
+        "AST": 5,
+        "HC": 13,
+        "AC": 2,
+        "HF": 17,
+        "AF": 5,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 68,
+        "APossession": 32,
+        "HSaves": 3,
+        "ASaves": 2,
+        "HPasses": 497,
+        "APasses": 245,
+        "HPassesAccurate": 426,
+        "APassesAccurate": 179,
+        "HxG": 1.97,
+        "AxG": 1.21
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377878,
+      "date_utc": "2025-08-31T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 2",
+      "home_team": "Lazio",
+      "away_team": "Hellas Verona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 12,
+        "HST": 6,
+        "AST": 4,
+        "HC": 8,
+        "AC": 1,
+        "HF": 8,
+        "AF": 19,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": 70,
+        "APossession": 30,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 702,
+        "APasses": 300,
+        "HPassesAccurate": 643,
+        "APassesAccurate": 236,
+        "HxG": 4.13,
+        "AxG": 0.92
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 0,
+      "home_score": 4,
+      "away_score": 0,
+      "fthg": 4,
+      "ftag": 0,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377885,
+      "date_utc": "2025-09-13T13:00:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Cagliari",
+      "away_team": "Parma",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 17,
+        "HST": 5,
+        "AST": 5,
+        "HC": 4,
+        "AC": 5,
+        "HF": 15,
+        "AF": 18,
+        "HY": 3,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 6,
+        "ASaves": 3,
+        "HPasses": 396,
+        "APasses": 375,
+        "HPassesAccurate": 319,
+        "APassesAccurate": 303,
+        "HxG": 1.13,
+        "AxG": 1.96
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377888,
+      "date_utc": "2025-09-13T16:00:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Juventus",
+      "away_team": "Inter",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 18,
+        "HST": 4,
+        "AST": 4,
+        "HC": 5,
+        "AC": 9,
+        "HF": 14,
+        "AF": 10,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": 1,
+        "ASaves": 0,
+        "HPasses": 357,
+        "APasses": 503,
+        "HPassesAccurate": 296,
+        "APassesAccurate": 452,
+        "HxG": 0.68,
+        "AxG": 0.96
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 3,
+      "home_score": 4,
+      "away_score": 3,
+      "fthg": 4,
+      "ftag": 3,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377887,
+      "date_utc": "2025-09-13T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Fiorentina",
+      "away_team": "Napoli",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 14,
+        "HST": 3,
+        "AST": 9,
+        "HC": 8,
+        "AC": 5,
+        "HF": 14,
+        "AF": 14,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": 53,
+        "APossession": 47,
+        "HSaves": 5,
+        "ASaves": 2,
+        "HPasses": 456,
+        "APasses": 419,
+        "HPassesAccurate": 373,
+        "APassesAccurate": 346,
+        "HxG": 1.65,
+        "AxG": 3.29
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377891,
+      "date_utc": "2025-09-14T10:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "AS Roma",
+      "away_team": "Torino",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 8,
+        "HST": 5,
+        "AST": 4,
+        "HC": 7,
+        "AC": 4,
+        "HF": 11,
+        "AF": 17,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 73,
+        "APossession": 27,
+        "HSaves": 3,
+        "ASaves": 5,
+        "HPasses": 590,
+        "APasses": 223,
+        "HPassesAccurate": 530,
+        "APassesAccurate": 155,
+        "HxG": 1.14,
+        "AxG": 0.65
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377884,
+      "date_utc": "2025-09-14T13:00:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Atalanta",
+      "away_team": "Lecce",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 12,
+        "HST": 8,
+        "AST": 3,
+        "HC": 8,
+        "AC": 2,
+        "HF": 12,
+        "AF": 7,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": 57,
+        "APossession": 43,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 456,
+        "APasses": 357,
+        "HPassesAccurate": 390,
+        "APassesAccurate": 284,
+        "HxG": 2.12,
+        "AxG": 0.46
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377890,
+      "date_utc": "2025-09-14T13:00:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Pisa",
+      "away_team": "Udinese",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 13,
+        "HST": 2,
+        "AST": 3,
+        "HC": 8,
+        "AC": 6,
+        "HF": 13,
+        "AF": 15,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 382,
+        "APasses": 375,
+        "HPassesAccurate": 318,
+        "APassesAccurate": 301,
+        "HxG": 0.53,
+        "AxG": 1
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377892,
+      "date_utc": "2025-09-14T16:00:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Sassuolo",
+      "away_team": "Lazio",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 13,
+        "HST": 3,
+        "AST": 3,
+        "HC": 3,
+        "AC": 7,
+        "HF": 15,
+        "AF": 11,
+        "HY": 6,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": 3,
+        "ASaves": 2,
+        "HPasses": 415,
+        "APasses": 590,
+        "HPassesAccurate": 350,
+        "APassesAccurate": 514,
+        "HxG": 1.16,
+        "AxG": 0.76
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377889,
+      "date_utc": "2025-09-14T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "AC Milan",
+      "away_team": "Bologna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 5,
+        "HST": 3,
+        "AST": 0,
+        "HC": 7,
+        "AC": 4,
+        "HF": 17,
+        "AF": 16,
+        "HY": 3,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 0,
+        "ASaves": 2,
+        "HPasses": 336,
+        "APasses": 521,
+        "HPassesAccurate": 286,
+        "APassesAccurate": 453,
+        "HxG": 1,
+        "AxG": 0.17
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377893,
+      "date_utc": "2025-09-15T16:30:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Hellas Verona",
+      "away_team": "Cremonese",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 6,
+        "HST": 9,
+        "AST": 2,
+        "HC": 10,
+        "AC": 1,
+        "HF": 18,
+        "AF": 3,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 3,
+        "ASaves": 9,
+        "HPasses": 412,
+        "APasses": 492,
+        "HPassesAccurate": 332,
+        "APassesAccurate": 401,
+        "HxG": 1.46,
+        "AxG": 0.24
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1377886,
+      "date_utc": "2025-09-15T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Como",
+      "away_team": "Genoa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

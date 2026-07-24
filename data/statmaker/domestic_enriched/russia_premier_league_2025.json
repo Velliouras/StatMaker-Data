@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-24T06:03:46Z",
+  "generated_at": "2026-07-24T10:47:59Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/russia/premier-league/2025/fixture_stats.json",
-    "cache_generated_at": "2026-07-24T06:03:31Z",
+    "cache_generated_at": "2026-07-24T10:43:26Z",
     "api_football_season": "2025",
     "csv_import": "inactive_archive_only"
   },
@@ -32,39 +32,39 @@
     "target_app_season": "2026-2027",
     "target_season_start": "2026-07-25",
     "target_season_end": "2027-05-29",
-    "lifecycle": "starts_in_july",
+    "lifecycle": "starts_soon",
     "stats_visible_without_odds": true,
     "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 90,
-    "fixtures_with_any_stats": 89,
-    "fixtures_with_bb_core_stats": 89,
-    "any_stats_coverage": 0.9889,
-    "bb_core_coverage": 0.9889,
+    "completed_fixtures": 101,
+    "fixtures_with_any_stats": 100,
+    "fixtures_with_bb_core_stats": 100,
+    "any_stats_coverage": 0.9901,
+    "bb_core_coverage": 0.9901,
     "group_counts": {
-      "shots_total": 89,
-      "shots_on_target": 89,
-      "corners": 89,
-      "fouls": 89,
-      "yellow_cards": 89,
-      "red_cards": 20,
-      "possession": 89,
-      "passes": 89,
+      "shots_total": 100,
+      "shots_on_target": 100,
+      "corners": 100,
+      "fouls": 100,
+      "yellow_cards": 100,
+      "red_cards": 21,
+      "possession": 100,
+      "passes": 100,
       "xg": 31
     },
     "group_coverage": {
-      "shots_total": 0.9889,
-      "shots_on_target": 0.9889,
-      "corners": 0.9889,
-      "fouls": 0.9889,
-      "yellow_cards": 0.9889,
-      "red_cards": 0.2222,
-      "possession": 0.9889,
-      "passes": 0.9889,
-      "xg": 0.3444
+      "shots_total": 0.9901,
+      "shots_on_target": 0.9901,
+      "corners": 0.9901,
+      "fouls": 0.9901,
+      "yellow_cards": 0.9901,
+      "red_cards": 0.2079,
+      "possession": 0.9901,
+      "passes": 0.9901,
+      "xg": 0.3069
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -7479,41 +7479,41 @@
       "away_team": "Akron",
       "status": "FT",
       "normalized_stats": {
-        "HS": null,
-        "AS": null,
-        "HST": null,
-        "AST": null,
-        "HC": null,
-        "AC": null,
-        "HF": null,
-        "AF": null,
-        "HY": null,
-        "AY": null,
+        "HS": 25,
+        "AS": 12,
+        "HST": 11,
+        "AST": 1,
+        "HC": 6,
+        "AC": 3,
+        "HF": 12,
+        "AF": 15,
+        "HY": 2,
+        "AY": 2,
         "HR": null,
         "AR": null,
-        "HPossession": null,
-        "APossession": null,
-        "HSaves": null,
-        "ASaves": null,
-        "HPasses": null,
-        "APasses": null,
-        "HPassesAccurate": null,
-        "APassesAccurate": null,
+        "HPossession": 65,
+        "APossession": 35,
+        "HSaves": 0,
+        "ASaves": 11,
+        "HPasses": 484,
+        "APasses": 263,
+        "HPassesAccurate": 388,
+        "APassesAccurate": 178,
         "HxG": null,
         "AxG": null
       },
       "quality": {
-        "has_any_stats": false,
-        "has_bb_core_stats": false,
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
         "groups": {
-          "shots_total": false,
-          "shots_on_target": false,
-          "corners": false,
-          "fouls": false,
-          "yellow_cards": false,
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
           "red_cards": false,
-          "possession": false,
-          "passes": false,
+          "possession": true,
+          "passes": true,
           "xg": false
         }
       },
@@ -7621,6 +7621,930 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400126,
+      "date_utc": "2025-10-18T12:15:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "Spartak Moscow",
+      "away_team": "FC Rostov",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 14,
+        "HST": 3,
+        "AST": 7,
+        "HC": 5,
+        "AC": 3,
+        "HF": 12,
+        "AF": 14,
+        "HY": 2,
+        "AY": 6,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 61,
+        "APossession": 39,
+        "HSaves": 6,
+        "ASaves": 2,
+        "HPasses": 457,
+        "APasses": 289,
+        "HPassesAccurate": 356,
+        "APassesAccurate": 192,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400119,
+      "date_utc": "2025-10-18T14:30:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "Dinamo Makhachkala",
+      "away_team": "FC Krasnodar",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 13,
+        "HST": 1,
+        "AST": 5,
+        "HC": 4,
+        "AC": 5,
+        "HF": 7,
+        "AF": 13,
+        "HY": 3,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 3,
+        "ASaves": 1,
+        "HPasses": 351,
+        "APasses": 440,
+        "HPassesAccurate": 230,
+        "APassesAccurate": 341,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400122,
+      "date_utc": "2025-10-18T16:45:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "Lokomotiv",
+      "away_team": "CSKA Moscow",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 25,
+        "AS": 13,
+        "HST": 7,
+        "AST": 5,
+        "HC": 3,
+        "AC": 8,
+        "HF": 7,
+        "AF": 8,
+        "HY": 3,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 4,
+        "ASaves": 4,
+        "HPasses": 380,
+        "APasses": 491,
+        "HPassesAccurate": 290,
+        "APassesAccurate": 417,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400125,
+      "date_utc": "2025-10-19T11:30:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "FC Sochi",
+      "away_team": "Zenit",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 5,
+        "AS": 13,
+        "HST": 2,
+        "AST": 8,
+        "HC": 2,
+        "AC": 5,
+        "HF": 19,
+        "AF": 8,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 37,
+        "APossession": 63,
+        "HSaves": 5,
+        "ASaves": 2,
+        "HPasses": 317,
+        "APasses": 535,
+        "HPassesAccurate": 256,
+        "APassesAccurate": 472,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400124,
+      "date_utc": "2025-10-19T14:00:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "Rubin",
+      "away_team": "Baltika",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 20,
+        "HST": 2,
+        "AST": 7,
+        "HC": 4,
+        "AC": 3,
+        "HF": 18,
+        "AF": 17,
+        "HY": 2,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 54,
+        "APossession": 46,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 414,
+        "APasses": 361,
+        "HPassesAccurate": 272,
+        "APassesAccurate": 235,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 3,
+      "home_score": 0,
+      "away_score": 3,
+      "fthg": 0,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 0,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400120,
+      "date_utc": "2025-10-19T16:30:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 12",
+      "home_team": "Dynamo",
+      "away_team": "Akhmat",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 14,
+        "HST": 5,
+        "AST": 4,
+        "HC": 2,
+        "AC": 8,
+        "HF": 14,
+        "AF": 8,
+        "HY": 4,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 437,
+        "APasses": 315,
+        "HPassesAccurate": 344,
+        "APassesAccurate": 228,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400289,
+      "date_utc": "2025-10-25T11:00:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 13",
+      "home_team": "Spartak Moscow",
+      "away_team": "FC Orenburg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 6,
+        "HST": 1,
+        "AST": 1,
+        "HC": 5,
+        "AC": 2,
+        "HF": 16,
+        "AF": 15,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 66,
+        "APossession": 34,
+        "HSaves": 1,
+        "ASaves": 0,
+        "HPasses": 450,
+        "APasses": 226,
+        "HPassesAccurate": 352,
+        "APassesAccurate": 117,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400130,
+      "date_utc": "2025-10-25T13:30:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 13",
+      "home_team": "FC Rostov",
+      "away_team": "Dinamo Makhachkala",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 9,
+        "HST": 5,
+        "AST": 3,
+        "HC": 1,
+        "AC": 4,
+        "HF": 18,
+        "AF": 22,
+        "HY": 4,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 54,
+        "APossession": 46,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 405,
+        "APasses": 330,
+        "HPassesAccurate": 270,
+        "APassesAccurate": 208,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400129,
+      "date_utc": "2025-10-25T16:00:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 13",
+      "home_team": "CSKA Moscow",
+      "away_team": "Krylia Sovetov",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 7,
+        "HST": 6,
+        "AST": 2,
+        "HC": 6,
+        "AC": 4,
+        "HF": 11,
+        "AF": 18,
+        "HY": 2,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 510,
+        "APasses": 316,
+        "HPassesAccurate": 451,
+        "APassesAccurate": 242,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400128,
+      "date_utc": "2025-10-26T10:00:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 13",
+      "home_team": "Akron",
+      "away_team": "Lokomotiv",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 3,
+        "AS": 15,
+        "HST": 2,
+        "AST": 3,
+        "HC": 3,
+        "AC": 8,
+        "HF": 17,
+        "AF": 11,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 35,
+        "APossession": 65,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 262,
+        "APasses": 470,
+        "HPassesAccurate": 160,
+        "APassesAccurate": 374,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1400132,
+      "date_utc": "2025-10-26T12:15:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2025-2026",
+      "app_season": "2025-2026",
+      "api_football_season": "2025",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 13",
+      "home_team": "Nizhny Novgorod",
+      "away_team": "Baltika",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,
