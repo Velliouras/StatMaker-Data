@@ -8,6 +8,10 @@ on:
         required: true
         default: "300"
         type: string
+  schedule:
+    # Runs after the first daily production odds refresh has completed.
+    # 09:37 Greece during EEST / 08:37 during EET.
+    - cron: "37 6 * * *"
 
 permissions:
   contents: write
@@ -53,9 +57,9 @@ jobs:
       - name: Backfill only missing UEFA participant history and logos
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_MAX_REQUESTS: ${{ inputs.max_requests }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '200' }}
         run: |
-          max_requests="${INPUT_MAX_REQUESTS:-300}"
+          max_requests="${INPUT_MAX_REQUESTS:-200}"
           python scripts/backfill_uefa_support_history_v2.py \
             --feed-dir "$RUNNER_TEMP/uefa_feeds" \
             --min-matches 10 \
