@@ -13,6 +13,14 @@ on:
         required: true
         default: "500"
         type: string
+  schedule:
+    # Greek historical/current Stats priority pass before the full daily universe refresh.
+    - cron: "20 2 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/domestic-targeted-stats-backfill.yml"
 
 permissions:
   contents: write
@@ -24,7 +32,7 @@ concurrency:
 jobs:
   targeted-backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,12 +51,13 @@ jobs:
             scripts/refresh_domestic_live_july_stats.py \
             scripts/api_football_fetch_fixture_stats.py
 
-      - name: Refresh only requested Domestic leagues
+      - name: Refresh requested Domestic leagues
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
-          INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
+          INPUT_LEAGUE_CODES: ${{ github.event_name == 'workflow_dispatch' && inputs.league_codes || 'G1' }}
+          INPUT_STATS_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.stats_max_requests || '500' }}
         run: |
+          mkdir -p reports
           python scripts/run_domestic_stats_refresh.py \
             --league-codes "$INPUT_LEAGUE_CODES" \
             --max-requests "$INPUT_STATS_MAX_REQUESTS" \
@@ -72,21 +81,47 @@ jobs:
           python scripts/build_domestic_live_july_normalized_stats.py
           python scripts/build_uefa_support_history.py
 
-      - name: Validate targeted result
+      - name: Validate targeted result and Greek 2025-26 completeness
         env:
-          INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
+          INPUT_LEAGUE_CODES: ${{ github.event_name == 'workflow_dispatch' && inputs.league_codes || 'G1' }}
         run: |
           python - <<'PY'
           import json, os
+          from collections import Counter
           from pathlib import Path
+
           report = json.loads(Path('reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
           requested = {x.strip().upper() for x in os.environ['INPUT_LEAGUE_CODES'].replace(';', ',').split(',') if x.strip()}
           selected = {str(x).upper() for x in report.get('selectedLeagueCodes', [])}
           if requested != selected:
               raise SystemExit(f'Targeted selection mismatch: requested={sorted(requested)} selected={sorted(selected)}')
+
           contract = report.get('completenessContract')
-          if contract != 'all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled':
+          expected = 'all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled'
+          if contract != expected:
               raise SystemExit(f'Unexpected stats contract: {contract}')
+
+          if 'G1' in selected:
+              artifact = json.loads(Path('data/statmaker/domestic_enriched/greece_super_league_2025.json').read_text(encoding='utf-8'))
+              matches = [m for m in artifact.get('matches', []) if str(m.get('status') or '').upper() in {'FT','AET','PEN'}]
+              appearances = Counter()
+              for match in matches:
+                  home = str(match.get('home_team') or '').strip()
+                  away = str(match.get('away_team') or '').strip()
+                  if home:
+                      appearances[home] += 1
+                  if away:
+                      appearances[away] += 1
+              if len(matches) < 180:
+                  raise SystemExit(f'G1 2025-26 historical fixture set is still incomplete: {len(matches)} completed fixtures')
+              under_26 = {team: count for team, count in appearances.items() if count < 26}
+              if under_26:
+                  raise SystemExit(f'G1 2025-26 teams below 26 league appearances: {under_26}')
+              panathinaikos = max((count for team, count in appearances.items() if 'panathina' in team.lower()), default=0)
+              if panathinaikos < 26:
+                  raise SystemExit(f'Panathinaikos 2025-26 remains incomplete: {panathinaikos} matches')
+              print(f'G1 completeness validated: fixtures={len(matches)} Panathinaikos={panathinaikos}')
+
           print(
               f"Targeted Stats validated leagues={sorted(selected)} "
               f"requests={report.get('requestsUsed')}/{report.get('maxRequests')} "
@@ -103,7 +138,6 @@ jobs:
             data/api_football/fixture_stats \
             data/api_football/domestic_normalized_fixture_stats.json \
             data/statmaker/domestic_enriched \
-            data/statmaker/domestic_historical_stats_freeze.json \
             data/statmaker/uefa_support_history.json \
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
@@ -114,6 +148,9 @@ jobs:
             reports/statmaker_domestic_enriched_build.csv \
             reports/statmaker_domestic_enriched_build.md \
             reports/domestic_targeted_stats_backfill.log
+          if [ -f data/statmaker/domestic_historical_stats_freeze.json ]; then
+            git add data/statmaker/domestic_historical_stats_freeze.json
+          fi
           if git diff --cached --quiet; then
             echo "No targeted Domestic Stats changes to commit."
           else
