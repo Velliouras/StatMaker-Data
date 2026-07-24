@@ -63,8 +63,128 @@ def has_real_normalized_stats(item: Dict[str, Any]) -> bool:
     )
 
 
-# Tighten the generic cache predicate so empty provider responses are retried.
+def fetch_league_preserving_fixture_metadata(
+    api_key: str,
+    league: Dict[str, Any],
+    request_state: Dict[str, int],
+    max_requests: int,
+) -> Dict[str, Any]:
+    """Discover the full completed fixture set first, then backfill advanced stats.
+
+    Score-only consumers such as Totals and Score Finder must not be artificially
+    truncated by the fixture-statistics request budget. One fixtures discovery call
+    can provide all completed scores; those rows are persisted before any per-fixture
+    statistics calls consume the remaining budget.
+    """
+    cache_path = stats_fetch.cache_path_for(league)
+    existing_cache = stats_fetch.load_json(cache_path, {})
+    existing_by_id = stats_fetch.cached_fixture_map(existing_cache)
+
+    requests_before = request_state["count"]
+    completed_count = 0
+    already_cached = 0
+    newly_fetched = 0
+    metadata_refreshed = 0
+    missing_scores = 0
+    missing_stats = 0
+    fixtures_returned = 0
+    fixture_query_used = "none"
+    notes: List[str] = []
+
+    try:
+        all_fixtures, fixtures, fixture_query_used, query_notes = stats_fetch.fetch_fixtures_with_fallback(
+            api_key, league, request_state, max_requests
+        )
+        fixtures_returned = len(all_fixtures)
+        completed_count = len(fixtures)
+        notes.extend(query_notes)
+
+        if not all_fixtures:
+            notes.append("no fixtures returned after fallback queries")
+        elif not fixtures:
+            statuses = sorted({stats_fetch.fixture_status_short(fixture) or "UNKNOWN" for fixture in all_fixtures})
+            notes.append(
+                f"fixtures returned={len(all_fixtures)} but no completed fixtures with status FT/AET/PEN; "
+                f"statuses={','.join(statuses)}"
+            )
+    except stats_fetch.RequestLimitReached:
+        notes.append("request cap reached before fixtures request")
+        stats_fetch.write_json(cache_path, stats_fetch.cache_payload(league, existing_by_id.values()))
+        return stats_fetch.report_row(
+            league, cache_path, completed_count, already_cached, newly_fetched,
+            missing_stats, metadata_refreshed, missing_scores, requests_before,
+            request_state["count"], fixture_query_used, fixtures_returned, "; ".join(notes)
+        )
+
+    # Persist score/fixture metadata for every discovered completed fixture before
+    # spending any additional request budget on per-fixture statistics.
+    for fixture in fixtures:
+        fixture_id = stats_fetch.fixture_identity(fixture)
+        if fixture_id is None:
+            continue
+        existing = existing_by_id.get(fixture_id, {})
+        merged = stats_fetch.merge_cached_fixture(existing, fixture, fixture_query_used)
+        existing_by_id[fixture_id] = merged
+        metadata_refreshed += 1
+        if merged.get("home_goals") is None or merged.get("away_goals") is None:
+            missing_scores += 1
+
+    # Advanced statistics remain incremental and quota-aware.
+    for fixture in fixtures:
+        fixture_id = stats_fetch.fixture_identity(fixture)
+        if fixture_id is None:
+            continue
+
+        merged = existing_by_id.get(fixture_id, {})
+        if stats_fetch.has_cached_stats(merged):
+            already_cached += 1
+            continue
+
+        if request_state["count"] >= max_requests:
+            notes.append("request cap reached before all fixture statistics were fetched")
+            break
+
+        try:
+            stats_payload = stats_fetch.api_get(
+                api_key,
+                "fixtures/statistics",
+                {"fixture": fixture_id},
+                request_state,
+                max_requests,
+            )
+        except stats_fetch.RequestLimitReached:
+            notes.append("request cap reached before statistics request")
+            break
+        except (stats_fetch.HTTPError, stats_fetch.URLError) as exc:
+            missing_stats += 1
+            notes.append(f"statistics request failed for fixture {fixture_id}: {exc}")
+            continue
+
+        raw_statistics = stats_fetch.response_items(stats_payload)
+        if not raw_statistics:
+            missing_stats += 1
+
+        merged["raw_statistics"] = raw_statistics
+        merged["normalized_stats"] = stats_fetch.normalize_statistics(raw_statistics, fixture)
+        existing_by_id[fixture_id] = merged
+        newly_fetched += 1
+
+    stats_fetch.write_json(cache_path, stats_fetch.cache_payload(league, existing_by_id.values()))
+
+    if not notes:
+        notes.append("ok")
+    return stats_fetch.report_row(
+        league, cache_path, completed_count, already_cached, newly_fetched,
+        missing_stats, metadata_refreshed, missing_scores, requests_before,
+        request_state["count"], fixture_query_used, fixtures_returned, "; ".join(notes)
+    )
+
+
+# Tighten the generic cache predicate so empty provider responses are retried, and
+# use the production fetcher that preserves complete score metadata independently
+# from advanced-statistics backfill progress.
 stats_fetch.has_cached_stats = has_real_normalized_stats
+stats_fetch.fetch_league = fetch_league_preserving_fixture_metadata
 
 
 def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
@@ -198,8 +318,8 @@ def refresh_incrementally(
     final_progress = [cache_progress(league) for league in registry]
     return {
         "generatedAt": pipeline.now_utc(),
-        "completenessContract": "final score plus at least one non-null normalized API-Football statistic",
-        "incrementalContract": "poll every active Stats league for new completed fixtures; fetch statistics only when real cached stats are missing",
+        "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
+        "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
         "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
         "priorityPolicy": "Strict sequential priority: Tier 1 Main5+Greece may use the full run budget first; Tier 2 and Tier 3 receive only unused remainder",
         "absolutePriorityLeagueCodes": sorted(scope.absolute_priority_codes()),
