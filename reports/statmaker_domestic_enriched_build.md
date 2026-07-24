@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-07-24T19:58:54Z`
+Generated at: `2026-07-24T20:44:18Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -50,7 +50,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SRB | Serbia | Super Liga | 2026-2027 | 2026 | 286 | eastern_europe | 7 | 7 | 7 | 1.0 | 1.0 | False | data/statmaker/domestic_enriched/serbia_super_liga_2026.json | not enough completed fixtures: 7 < 15 |
 | SVK | Slovakia | Super Liga | 2025-2026 | 2025 | 332 | central_europe | 192 | 29 | 27 | 0.151 | 0.1406 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2025.json | low any-stats coverage: 0.151 < 0.65; low BB-core coverage: 0.1406 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SVN | Slovenia | 1. SNL | 2026-2027 | 2026 | 373 | central_europe | 5 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2026.json | not enough completed fixtures: 5 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 30 | 29 | 29 | 0.9667 | 0.9667 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
+| SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 300 | 298 | 0.7895 | 0.7842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 10 | 9 | 9 | 0.9 | 0.9 | False | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | not enough completed fixtures: 10 < 15 |
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 94 | 93 | 93 | 0.9894 | 0.9894 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
 | SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 105 | 61 | 59 | 0.581 | 0.5619 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.581 < 0.65; low BB-core coverage: 0.5619 < 0.65; required BB groups below threshold; no shot group reaches threshold |
