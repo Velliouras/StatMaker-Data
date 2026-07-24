@@ -9,8 +9,7 @@ on:
         default: "300"
         type: string
   schedule:
-    # Runs after the first daily production odds refresh has completed.
-    # 09:37 Greece during EEST / 08:37 during EET.
+    # Runs after the first production odds refresh, using the live main-branch UEFA feeds.
     - cron: "37 6 * * *"
 
 permissions:
@@ -23,7 +22,7 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout main data repository
         uses: actions/checkout@v4
@@ -45,13 +44,16 @@ jobs:
       - name: Rebuild zero-call Domestic support history
         run: python scripts/build_uefa_support_history.py
 
-      - name: Read current live UEFA qualifier feeds
+      - name: Prepare current live UEFA feeds
         run: |
-          git fetch origin \
-            build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           mkdir -p "$RUNNER_TEMP/uefa_feeds"
           for name in champions_league_odds.json europa_league_odds.json conference_league_odds.json; do
-            git show "origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/$name" > "$RUNNER_TEMP/uefa_feeds/$name"
+            source="odds/odds_api_io/$name"
+            if [ ! -s "$source" ]; then
+              echo "Missing live UEFA feed: $source"
+              exit 1
+            fi
+            cp "$source" "$RUNNER_TEMP/uefa_feeds/$name"
           done
 
       - name: Backfill only missing UEFA participant history and logos
@@ -72,20 +74,29 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
+
           base = json.loads(Path('data/statmaker/uefa_support_history.json').read_text(encoding='utf-8'))
           team = json.loads(Path('data/statmaker/uefa_team_support_history.json').read_text(encoding='utf-8'))
           logos = json.loads(Path('data/statmaker/uefa_team_logos.json').read_text(encoding='utf-8'))
+          report = json.loads(Path('reports/uefa_support_team_backfill.json').read_text(encoding='utf-8'))
+
           for label, payload in [('base', base), ('team', team)]:
               minimum = int(payload.get('minimumMatchesPerParticipant') or 10)
               for participant in payload.get('participants', []) or []:
                   count = len(participant.get('matches', []) or [])
                   if count < minimum:
                       raise SystemExit(f'{label} support below minimum: {participant.get("canonicalTeam")}={count}/{minimum}')
+
           if not isinstance(logos, dict):
               raise SystemExit('UEFA team logo catalog must be a JSON object')
+          if int(report.get('apiRequestsUsed') or 0) > int(report.get('apiRequestCap') or 0):
+              raise SystemExit('UEFA support backfill exceeded its API request cap')
+
           print(
               f"UEFA support validated: base={len(base.get('participants', []) or [])} "
-              f"team_specific={len(team.get('participants', []) or [])} logos={len(logos)}"
+              f"team_specific={len(team.get('participants', []) or [])} logos={len(logos)} "
+              f"still_missing={len(report.get('stillMissing', []) or [])} "
+              f"requests={report.get('apiRequestsUsed')}/{report.get('apiRequestCap')}"
           )
           PY
 
