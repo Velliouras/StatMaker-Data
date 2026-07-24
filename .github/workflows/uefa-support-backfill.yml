@@ -35,7 +35,8 @@ jobs:
         run: |
           python -m py_compile \
             scripts/build_uefa_support_history.py \
-            scripts/backfill_uefa_support_history.py
+            scripts/backfill_uefa_support_history.py \
+            scripts/backfill_uefa_support_history_v2.py
 
       - name: Rebuild zero-call Domestic support history
         run: python scripts/build_uefa_support_history.py
@@ -55,7 +56,7 @@ jobs:
           INPUT_MAX_REQUESTS: ${{ inputs.max_requests }}
         run: |
           max_requests="${INPUT_MAX_REQUESTS:-300}"
-          python scripts/backfill_uefa_support_history.py \
+          python scripts/backfill_uefa_support_history_v2.py \
             --feed-dir "$RUNNER_TEMP/uefa_feeds" \
             --min-matches 10 \
             --max-matches 12 \
