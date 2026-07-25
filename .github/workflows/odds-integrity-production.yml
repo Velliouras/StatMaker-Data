@@ -9,9 +9,9 @@ on:
         default: "16"
         type: string
   schedule:
-    # Every 8 hours. Greece: 08:17, 16:17, 00:17 during EEST;
-    # 07:17, 15:17, 23:17 during EET. Cron itself is always UTC.
-    - cron: "17 5,13,21 * * *"
+    # Every 4 hours. Greece: 04:17, 08:17, 12:17, 16:17, 20:17, 00:17 during EEST;
+    # 03:17, 07:17, 11:17, 15:17, 19:17, 23:17 during EET. Cron itself is always UTC.
+    - cron: "17 1,5,9,13,17,21 * * *"
 
 permissions:
   contents: write
