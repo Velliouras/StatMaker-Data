@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-25T05:09:23Z",
+  "generated_at": "2026-07-25T06:23:46Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/mexico/liga-mx/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-24T10:44:46Z",
+    "cache_generated_at": "2026-07-25T06:09:16Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 11,
-    "fixtures_with_any_stats": 11,
-    "fixtures_with_bb_core_stats": 9,
+    "completed_fixtures": 13,
+    "fixtures_with_any_stats": 13,
+    "fixtures_with_bb_core_stats": 11,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8182,
+    "bb_core_coverage": 0.8462,
     "group_counts": {
-      "shots_total": 11,
-      "shots_on_target": 11,
-      "corners": 11,
-      "fouls": 11,
-      "yellow_cards": 9,
+      "shots_total": 13,
+      "shots_on_target": 13,
+      "corners": 13,
+      "fouls": 13,
+      "yellow_cards": 11,
       "red_cards": 4,
-      "possession": 11,
-      "passes": 11,
-      "xg": 11
+      "possession": 13,
+      "passes": 13,
+      "xg": 13
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.8182,
-      "red_cards": 0.3636,
+      "yellow_cards": 0.8462,
+      "red_cards": 0.3077,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 11 < 15"
+      "not enough completed fixtures: 13 < 15"
     ]
   },
   "matches": [
@@ -985,6 +985,174 @@
         "fulltime": {
           "home": 1,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550906,
+      "date_utc": "2026-07-25T03:00:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 2",
+      "home_team": "Club Tijuana",
+      "away_team": "Leon",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 11,
+        "HST": 3,
+        "AST": 2,
+        "HC": 3,
+        "AC": 10,
+        "HF": 12,
+        "AF": 13,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 360,
+        "APasses": 550,
+        "HPassesAccurate": 287,
+        "APassesAccurate": 485,
+        "HxG": 1.93,
+        "AxG": 0.87
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550907,
+      "date_utc": "2026-07-25T03:00:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 2",
+      "home_team": "Atlante FC",
+      "away_team": "Club America",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 20,
+        "HST": 4,
+        "AST": 8,
+        "HC": 2,
+        "AC": 9,
+        "HF": 17,
+        "AF": 14,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 7,
+        "ASaves": 3,
+        "HPasses": 313,
+        "APasses": 508,
+        "HPassesAccurate": 216,
+        "APassesAccurate": 419,
+        "HxG": 0.74,
+        "AxG": 1.57
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
         },
         "extratime": {
           "home": null,
