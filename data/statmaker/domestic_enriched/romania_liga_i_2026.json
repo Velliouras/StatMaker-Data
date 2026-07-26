@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-26T05:25:03Z",
+  "generated_at": "2026-07-26T06:31:20Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-25T06:09:19Z",
+    "cache_generated_at": "2026-07-26T06:13:57Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,20 +39,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 10,
-    "fixtures_with_any_stats": 10,
-    "fixtures_with_bb_core_stats": 8,
+    "completed_fixtures": 12,
+    "fixtures_with_any_stats": 12,
+    "fixtures_with_bb_core_stats": 10,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 10,
-      "shots_on_target": 10,
-      "corners": 10,
-      "fouls": 10,
-      "yellow_cards": 8,
-      "red_cards": 3,
-      "possession": 10,
-      "passes": 10,
+      "shots_total": 12,
+      "shots_on_target": 12,
+      "corners": 12,
+      "fouls": 12,
+      "yellow_cards": 10,
+      "red_cards": 5,
+      "possession": 12,
+      "passes": 12,
       "xg": 6
     },
     "group_coverage": {
@@ -60,15 +60,15 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.8,
-      "red_cards": 0.3,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.4167,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.6
+      "xg": 0.5
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 10 < 15"
+      "not enough completed fixtures: 12 < 15"
     ]
   },
   "matches": [
@@ -901,6 +901,174 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1565194,
+      "date_utc": "2026-07-25T14:30:00+00:00",
+      "country": "Romania",
+      "league": "Liga I",
+      "league_code": "ROM",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 283,
+      "round": "Regular Season - 2",
+      "home_team": "Farul Constanta",
+      "away_team": "Corvinul Hunedoara",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 8,
+        "HST": 10,
+        "AST": 1,
+        "HC": 6,
+        "AC": 4,
+        "HF": 9,
+        "AF": 11,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 1,
+        "ASaves": 8,
+        "HPasses": 526,
+        "APasses": 296,
+        "HPassesAccurate": 475,
+        "APassesAccurate": 231,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1565193,
+      "date_utc": "2026-07-25T17:30:00+00:00",
+      "country": "Romania",
+      "league": "Liga I",
+      "league_code": "ROM",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 283,
+      "round": "Regular Season - 2",
+      "home_team": "Dinamo Bucuresti",
+      "away_team": "Universitatea Craiova",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 9,
+        "HST": 7,
+        "AST": 5,
+        "HC": 8,
+        "AC": 1,
+        "HF": 12,
+        "AF": 9,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 369,
+        "APasses": 425,
+        "HPassesAccurate": 312,
+        "APassesAccurate": 369,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 1,
+      "home_score": 5,
+      "away_score": 1,
+      "fthg": 5,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 5,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 1
         },
         "extratime": {
           "home": null,

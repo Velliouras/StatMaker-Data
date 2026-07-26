@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-26T05:25:03Z",
+  "generated_at": "2026-07-26T06:31:20Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/czech-republic/czech-liga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-25T06:09:22Z",
+    "cache_generated_at": "2026-07-26T06:14:11Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,41 +39,374 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 0,
-    "fixtures_with_any_stats": 0,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.0,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 4,
+    "fixtures_with_any_stats": 4,
+    "fixtures_with_bb_core_stats": 3,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 0.75,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
-      "fouls": 0,
-      "yellow_cards": 0,
+      "shots_total": 4,
+      "shots_on_target": 4,
+      "corners": 4,
+      "fouls": 4,
+      "yellow_cards": 3,
       "red_cards": 0,
-      "possession": 0,
-      "passes": 0,
-      "xg": 0
+      "possession": 4,
+      "passes": 4,
+      "xg": 4
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
-      "fouls": 0.0,
-      "yellow_cards": 0.0,
+      "shots_total": 1.0,
+      "shots_on_target": 1.0,
+      "corners": 1.0,
+      "fouls": 1.0,
+      "yellow_cards": 0.75,
       "red_cards": 0.0,
-      "possession": 0.0,
-      "passes": 0.0,
-      "xg": 0.0
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 0 < 15",
-      "low any-stats coverage: 0.0 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 4 < 15"
     ]
   },
-  "matches": []
+  "matches": [
+    {
+      "fixture_id": 1559965,
+      "date_utc": "2026-07-25T15:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 1",
+      "home_team": "Plzen",
+      "away_team": "Slovan Liberec",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 21,
+        "HST": 1,
+        "AST": 10,
+        "HC": 5,
+        "AC": 4,
+        "HF": 12,
+        "AF": 17,
+        "HY": 2,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 8,
+        "ASaves": 0,
+        "HPasses": 366,
+        "APasses": 262,
+        "HPassesAccurate": 301,
+        "APassesAccurate": 195,
+        "HxG": 1.07,
+        "AxG": 2.42
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1559967,
+      "date_utc": "2026-07-25T15:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 1",
+      "home_team": "Teplice",
+      "away_team": "Bohemians 1905",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 15,
+        "HST": 5,
+        "AST": 3,
+        "HC": 10,
+        "AC": 4,
+        "HF": 9,
+        "AF": 11,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 348,
+        "APasses": 314,
+        "HPassesAccurate": 275,
+        "APassesAccurate": 251,
+        "HxG": 2.43,
+        "AxG": 0.73
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1559968,
+      "date_utc": "2026-07-25T15:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 1",
+      "home_team": "Zlin",
+      "away_team": "Baník Ostrava",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 13,
+        "HST": 1,
+        "AST": 3,
+        "HC": 3,
+        "AC": 5,
+        "HF": 22,
+        "AF": 18,
+        "HY": 3,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 1,
+        "ASaves": 1,
+        "HPasses": 314,
+        "APasses": 360,
+        "HPassesAccurate": 235,
+        "APassesAccurate": 291,
+        "HxG": 0.81,
+        "AxG": 1.01
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1559961,
+      "date_utc": "2026-07-25T18:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 1",
+      "home_team": "Zbrojovka Brno",
+      "away_team": "Sparta Praha",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 14,
+        "HST": 6,
+        "AST": 6,
+        "HC": 7,
+        "AC": 8,
+        "HF": 11,
+        "AF": 6,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 5,
+        "ASaves": 3,
+        "HPasses": 256,
+        "APasses": 463,
+        "HPassesAccurate": 166,
+        "APassesAccurate": 398,
+        "HxG": 2.21,
+        "AxG": 1.35
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
 }
