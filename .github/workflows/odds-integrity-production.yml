@@ -42,11 +42,13 @@ jobs:
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
-            scripts/build_domestic_proposal_readiness.py
+            scripts/build_domestic_proposal_readiness.py \
+            scripts/build_statmaker_update_manifest.py
           python -m unittest \
             tests/test_statmaker_domestic_scope.py \
             tests/test_odds_market_integrity.py \
-            tests/test_domestic_proposal_readiness.py
+            tests/test_domestic_proposal_readiness.py \
+            tests/test_statmaker_update_manifest.py
 
       - name: Validate current Domestic feed without writing
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
@@ -135,6 +137,13 @@ jobs:
       - name: Build market-specific Domestic proposal readiness
         run: python scripts/build_domestic_proposal_readiness.py
 
+      - name: Build Domestic update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
@@ -144,6 +153,7 @@ jobs:
             odds/odds_api_io/domestic_provider_markets.json \
             data/statmaker/domestic_live_july_state.json \
             data/statmaker/domestic_proposal_readiness.json \
+            data/statmaker/update_manifest.json \
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_corner_archive_rebuild.json \
@@ -159,8 +169,10 @@ jobs:
             git push origin HEAD:main
           fi
 
-      - name: Save integrity script before UEFA checkout
-        run: cp scripts/odds_market_integrity.py "$RUNNER_TEMP/odds_market_integrity.py"
+      - name: Save shared scripts before UEFA checkout
+        run: |
+          cp scripts/odds_market_integrity.py "$RUNNER_TEMP/odds_market_integrity.py"
+          cp scripts/build_statmaker_update_manifest.py "$RUNNER_TEMP/build_statmaker_update_manifest.py"
 
       - name: Switch to live UEFA feed branch
         run: |
@@ -189,6 +201,13 @@ jobs:
             --write \
             --report-dir reports
 
+      - name: Build UEFA update manifest
+        run: |
+          python "$RUNNER_TEMP/build_statmaker_update_manifest.py" \
+            --profile uefa \
+            --branch build/uefa-qualifier-feed-20260720 \
+            --output data/statmaker/uefa_update_manifest.json
+
       - name: Commit UEFA feeds
         run: |
           git config user.name "github-actions[bot]"
@@ -197,6 +216,7 @@ jobs:
             odds/odds_api_io/champions_league_odds.json \
             odds/odds_api_io/europa_league_odds.json \
             odds/odds_api_io/conference_league_odds.json \
+            data/statmaker/uefa_update_manifest.json \
             reports/champions_league_odds_debug.json \
             reports/europa_league_odds_debug.json \
             reports/conference_league_odds_debug.json \
