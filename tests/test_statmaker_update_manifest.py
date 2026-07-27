@@ -24,9 +24,11 @@ class StatMakerUpdateManifestTest(unittest.TestCase):
         self.temp.cleanup()
 
     def test_manifest_is_deterministic_and_content_addressed(self):
-        first = build_manifest(self.root, "main", specs=self.specs)
-        second = build_manifest(self.root, "main", specs=self.specs)
+        first = build_manifest(self.root, "main", specs=self.specs, profile="main")
+        second = build_manifest(self.root, "main", specs=self.specs, profile="main")
         self.assertEqual(first, second)
+        self.assertEqual(first["schemaVersion"], 2)
+        self.assertEqual(first["profile"], "main")
         self.assertEqual(first["artifactCount"], 1)
         self.assertEqual(first["generatedAt"], "2026-07-27T10:00:00Z")
 
@@ -38,9 +40,14 @@ class StatMakerUpdateManifestTest(unittest.TestCase):
             json.dumps({"generatedAt": "2026-07-27T11:00:00Z", "matches": [1, 2]}),
             encoding="utf-8",
         )
-        changed = build_manifest(self.root, "main", specs=self.specs)
+        changed = build_manifest(self.root, "main", specs=self.specs, profile="main")
         self.assertNotEqual(first["contentVersion"], changed["contentVersion"])
         self.assertEqual(changed["generatedAt"], "2026-07-27T11:00:00Z")
+
+    def test_branch_is_reflected_in_artifact_url(self):
+        manifest = build_manifest(self.root, "build/live", specs=self.specs, profile="uefa")
+        self.assertEqual(manifest["profile"], "uefa")
+        self.assertIn("/build/live/odds/domestic.json", manifest["artifacts"][0]["url"])
 
     def test_missing_optional_artifact_is_omitted(self):
         manifest = build_manifest(self.root, "main", specs=self.specs)
