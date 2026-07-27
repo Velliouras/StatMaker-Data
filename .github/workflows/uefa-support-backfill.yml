@@ -39,7 +39,8 @@ jobs:
           python -m py_compile \
             scripts/build_uefa_support_history.py \
             scripts/backfill_uefa_support_history.py \
-            scripts/backfill_uefa_support_history_v2.py
+            scripts/backfill_uefa_support_history_v2.py \
+            scripts/build_statmaker_update_manifest.py
 
       - name: Rebuild zero-call Domestic support history
         run: python scripts/build_uefa_support_history.py
@@ -100,6 +101,13 @@ jobs:
           )
           PY
 
+      - name: Rebuild main update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
       - name: Commit UEFA support artifacts
         run: |
           git config user.name "github-actions[bot]"
@@ -108,6 +116,7 @@ jobs:
             data/statmaker/uefa_support_history.json \
             data/statmaker/uefa_team_support_history.json \
             data/statmaker/uefa_team_logos.json \
+            data/statmaker/update_manifest.json \
             reports/uefa_support_team_backfill.json
           if git diff --cached --quiet; then
             echo "No UEFA support changes to commit."
