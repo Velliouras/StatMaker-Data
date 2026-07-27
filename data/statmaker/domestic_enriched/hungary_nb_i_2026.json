@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-27T05:05:07Z",
+  "generated_at": "2026-07-27T06:51:22Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-26T06:23:48Z",
+    "cache_generated_at": "2026-07-27T06:50:02Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,40 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 2,
-    "fixtures_with_any_stats": 1,
-    "fixtures_with_bb_core_stats": 1,
-    "any_stats_coverage": 0.5,
-    "bb_core_coverage": 0.5,
+    "completed_fixtures": 5,
+    "fixtures_with_any_stats": 4,
+    "fixtures_with_bb_core_stats": 4,
+    "any_stats_coverage": 0.8,
+    "bb_core_coverage": 0.8,
     "group_counts": {
-      "shots_total": 1,
-      "shots_on_target": 1,
-      "corners": 1,
-      "fouls": 1,
-      "yellow_cards": 1,
-      "red_cards": 0,
-      "possession": 1,
-      "passes": 1,
+      "shots_total": 4,
+      "shots_on_target": 4,
+      "corners": 4,
+      "fouls": 4,
+      "yellow_cards": 4,
+      "red_cards": 2,
+      "possession": 4,
+      "passes": 4,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.5,
-      "shots_on_target": 0.5,
-      "corners": 0.5,
-      "fouls": 0.5,
-      "yellow_cards": 0.5,
-      "red_cards": 0.0,
-      "possession": 0.5,
-      "passes": 0.5,
+      "shots_total": 0.8,
+      "shots_on_target": 0.8,
+      "corners": 0.8,
+      "fouls": 0.8,
+      "yellow_cards": 0.8,
+      "red_cards": 0.4,
+      "possession": 0.8,
+      "passes": 0.8,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 2 < 15",
-      "low any-stats coverage: 0.5 < 0.65",
-      "low BB-core coverage: 0.5 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 5 < 15"
     ]
   },
   "matches": [
@@ -233,6 +229,258 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560206,
+      "date_utc": "2026-07-26T13:45:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 1",
+      "home_team": "Vasas",
+      "away_team": "Gyori ETO FC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 12,
+        "HST": 2,
+        "AST": 3,
+        "HC": 2,
+        "AC": 3,
+        "HF": 14,
+        "AF": 7,
+        "HY": 0,
+        "AY": 4,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 240,
+        "APasses": 392,
+        "HPassesAccurate": 202,
+        "APassesAccurate": 338,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560201,
+      "date_utc": "2026-07-26T16:00:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 1",
+      "home_team": "Debreceni VSC",
+      "away_team": "Puskas Academy",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 10,
+        "HST": 4,
+        "AST": 4,
+        "HC": 7,
+        "AC": 4,
+        "HF": 11,
+        "AF": 11,
+        "HY": 2,
+        "AY": 4,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 60,
+        "APossession": 40,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 441,
+        "APasses": 301,
+        "HPassesAccurate": 356,
+        "APassesAccurate": 209,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560205,
+      "date_utc": "2026-07-26T18:00:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 1",
+      "home_team": "Paks",
+      "away_team": "Ferencvarosi TC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 12,
+        "HST": 7,
+        "AST": 5,
+        "HC": 7,
+        "AC": 2,
+        "HF": 18,
+        "AF": 17,
+        "HY": 3,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 291,
+        "APasses": 468,
+        "HPassesAccurate": 191,
+        "APassesAccurate": 352,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 2,
+      "home_score": 4,
+      "away_score": 2,
+      "fthg": 4,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 2,
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
         },
         "extratime": {
           "home": null,
