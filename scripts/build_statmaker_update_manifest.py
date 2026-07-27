@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Build a deterministic StatMaker data update manifest.
+"""Build deterministic StatMaker update manifests without extra API calls.
 
-The manifest is content-addressed: if none of the tracked artifacts changes, the
-output is byte-for-byte identical. This lets existing GitHub Actions workflows
-commit only real data changes and lets the Android app download only changed
-artifacts.
+Two profiles match the two live data branches:
+- main: Domestic odds, history, readiness, support, aliases and logos.
+- uefa: Champions League, Europa League and Conference League odds.
+
+The output changes only when tracked file content changes, so existing scheduled
+workflows can commit it without generating noisy revisions or additional runs.
 """
 from __future__ import annotations
 
@@ -26,11 +28,8 @@ class ArtifactSpec:
     required: bool = False
 
 
-ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
-    ArtifactSpec("domestic_odds", "odds/odds_api_io/domestic_odds.json", "odds"),
-    ArtifactSpec("champions_league_odds", "odds/odds_api_io/champions_league_odds.json", "odds"),
-    ArtifactSpec("europa_league_odds", "odds/odds_api_io/europa_league_odds.json", "odds"),
-    ArtifactSpec("conference_league_odds", "odds/odds_api_io/conference_league_odds.json", "odds"),
+MAIN_ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
+    ArtifactSpec("domestic_odds", "odds/odds_api_io/domestic_odds.json", "odds", required=True),
     ArtifactSpec("domestic_enriched_index", "data/statmaker/domestic_enriched/index.json", "history"),
     ArtifactSpec(
         "domestic_normalized_fixture_stats",
@@ -43,6 +42,17 @@ ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
     ArtifactSpec("uefa_team_logos", "data/statmaker/uefa_team_logos.json", "visual"),
     ArtifactSpec("domestic_team_aliases", "mappings/domestic_team_aliases.json", "identity"),
 )
+
+UEFA_ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
+    ArtifactSpec("champions_league_odds", "odds/odds_api_io/champions_league_odds.json", "odds", required=True),
+    ArtifactSpec("europa_league_odds", "odds/odds_api_io/europa_league_odds.json", "odds", required=True),
+    ArtifactSpec("conference_league_odds", "odds/odds_api_io/conference_league_odds.json", "odds", required=True),
+)
+
+PROFILES = {
+    "main": MAIN_ARTIFACT_SPECS,
+    "uefa": UEFA_ARTIFACT_SPECS,
+}
 
 _TIMESTAMP_KEYS = (
     "generatedAt",
@@ -90,7 +100,8 @@ def build_manifest(
     root: Path,
     branch: str,
     repository: str = DEFAULT_REPOSITORY,
-    specs: Iterable[ArtifactSpec] = ARTIFACT_SPECS,
+    specs: Iterable[ArtifactSpec] = MAIN_ARTIFACT_SPECS,
+    profile: str = "main",
 ) -> dict[str, Any]:
     artifacts: list[dict[str, Any]] = []
     missing_required: list[str] = []
@@ -139,7 +150,8 @@ def build_manifest(
     )
 
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
+        "profile": profile,
         "repository": repository,
         "branch": branch,
         "contentVersion": content_version,
@@ -163,6 +175,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
     parser.add_argument("--branch", required=True)
+    parser.add_argument("--profile", choices=sorted(PROFILES), default="main")
     parser.add_argument("--repository", default=DEFAULT_REPOSITORY)
     parser.add_argument("--output", default="data/statmaker/update_manifest.json")
     return parser.parse_args()
@@ -172,10 +185,17 @@ def main() -> int:
     args = parse_args()
     root = Path(args.root).resolve()
     output = root / args.output
-    manifest = build_manifest(root=root, branch=args.branch, repository=args.repository)
+    specs = PROFILES[args.profile]
+    manifest = build_manifest(
+        root=root,
+        branch=args.branch,
+        repository=args.repository,
+        specs=specs,
+        profile=args.profile,
+    )
     changed = write_manifest(output, manifest)
     print(
-        f"StatMaker update manifest {'updated' if changed else 'unchanged'}: "
+        f"StatMaker {args.profile} update manifest {'updated' if changed else 'unchanged'}: "
         f"{manifest['artifactCount']} artifacts, version={manifest['contentVersion'][:12]}"
     )
     return 0
