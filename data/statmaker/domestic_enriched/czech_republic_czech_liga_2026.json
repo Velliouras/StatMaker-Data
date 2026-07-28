@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-27T06:51:22Z",
+  "generated_at": "2026-07-28T06:13:35Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/czech-republic/czech-liga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-27T06:51:18Z",
+    "cache_generated_at": "2026-07-28T06:13:31Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 7,
-    "fixtures_with_any_stats": 7,
-    "fixtures_with_bb_core_stats": 6,
+    "completed_fixtures": 8,
+    "fixtures_with_any_stats": 8,
+    "fixtures_with_bb_core_stats": 7,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8571,
+    "bb_core_coverage": 0.875,
     "group_counts": {
-      "shots_total": 7,
-      "shots_on_target": 7,
-      "corners": 7,
-      "fouls": 7,
-      "yellow_cards": 6,
-      "red_cards": 1,
-      "possession": 7,
-      "passes": 7,
-      "xg": 7
+      "shots_total": 8,
+      "shots_on_target": 8,
+      "corners": 8,
+      "fouls": 8,
+      "yellow_cards": 7,
+      "red_cards": 2,
+      "possession": 8,
+      "passes": 8,
+      "xg": 8
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.8571,
-      "red_cards": 0.1429,
+      "yellow_cards": 0.875,
+      "red_cards": 0.25,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 7 < 15"
+      "not enough completed fixtures: 8 < 15"
     ]
   },
   "matches": [
@@ -649,6 +649,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1559964,
+      "date_utc": "2026-07-27T16:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 1",
+      "home_team": "Artis",
+      "away_team": "Mlada Boleslav",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 17,
+        "HST": 4,
+        "AST": 9,
+        "HC": 2,
+        "AC": 6,
+        "HF": 12,
+        "AF": 10,
+        "HY": 0,
+        "AY": 3,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 5,
+        "ASaves": 2,
+        "HPasses": 295,
+        "APasses": 403,
+        "HPassesAccurate": 233,
+        "APassesAccurate": 336,
+        "HxG": 1.57,
+        "AxG": 2.17
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 4,
+      "home_score": 2,
+      "away_score": 4,
+      "fthg": 2,
+      "ftag": 4,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 4
         },
         "extratime": {
           "home": null,

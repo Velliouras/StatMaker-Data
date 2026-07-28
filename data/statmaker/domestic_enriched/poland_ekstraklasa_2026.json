@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-27T06:51:22Z",
+  "generated_at": "2026-07-28T06:13:35Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-27T06:39:18Z",
+    "cache_generated_at": "2026-07-28T06:02:19Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,21 +39,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 8,
-    "fixtures_with_any_stats": 8,
-    "fixtures_with_bb_core_stats": 8,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 9,
+    "fixtures_with_bb_core_stats": 9,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 8,
-      "shots_on_target": 8,
-      "corners": 8,
-      "fouls": 8,
-      "yellow_cards": 8,
+      "shots_total": 9,
+      "shots_on_target": 9,
+      "corners": 9,
+      "fouls": 9,
+      "yellow_cards": 9,
       "red_cards": 1,
-      "possession": 8,
-      "passes": 8,
-      "xg": 8
+      "possession": 9,
+      "passes": 9,
+      "xg": 9
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -61,14 +61,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.125,
+      "red_cards": 0.1111,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 8 < 15"
+      "not enough completed fixtures: 9 < 15"
     ]
   },
   "matches": [
@@ -733,6 +733,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1553109,
+      "date_utc": "2026-07-27T17:00:00+00:00",
+      "country": "Poland",
+      "league": "Ekstraklasa",
+      "league_code": "POL",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 106,
+      "round": "Regular Season - 1",
+      "home_team": "Zaglebie Lubin",
+      "away_team": "Piast Gliwice",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 18,
+        "HST": 2,
+        "AST": 2,
+        "HC": 5,
+        "AC": 11,
+        "HF": 18,
+        "AF": 13,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 35,
+        "APossession": 65,
+        "HSaves": 2,
+        "ASaves": 0,
+        "HPasses": 244,
+        "APasses": 432,
+        "HPassesAccurate": 165,
+        "APassesAccurate": 357,
+        "HxG": 1.09,
+        "AxG": 0.75
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
         },
         "extratime": {
           "home": null,

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-27T06:51:22Z",
+  "generated_at": "2026-07-28T06:13:35Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-27T06:50:02Z",
+    "cache_generated_at": "2026-07-28T06:13:18Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 5,
-    "fixtures_with_any_stats": 4,
-    "fixtures_with_bb_core_stats": 4,
-    "any_stats_coverage": 0.8,
-    "bb_core_coverage": 0.8,
+    "completed_fixtures": 6,
+    "fixtures_with_any_stats": 5,
+    "fixtures_with_bb_core_stats": 5,
+    "any_stats_coverage": 0.8333,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 4,
-      "shots_on_target": 4,
-      "corners": 4,
-      "fouls": 4,
-      "yellow_cards": 4,
+      "shots_total": 5,
+      "shots_on_target": 5,
+      "corners": 5,
+      "fouls": 5,
+      "yellow_cards": 5,
       "red_cards": 2,
-      "possession": 4,
-      "passes": 4,
+      "possession": 5,
+      "passes": 5,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.8,
-      "shots_on_target": 0.8,
-      "corners": 0.8,
-      "fouls": 0.8,
-      "yellow_cards": 0.8,
-      "red_cards": 0.4,
-      "possession": 0.8,
-      "passes": 0.8,
+      "shots_total": 0.8333,
+      "shots_on_target": 0.8333,
+      "corners": 0.8333,
+      "fouls": 0.8333,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.3333,
+      "possession": 0.8333,
+      "passes": 0.8333,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 5 < 15"
+      "not enough completed fixtures: 6 < 15"
     ]
   },
   "matches": [
@@ -481,6 +481,90 @@
         "fulltime": {
           "home": 4,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560203,
+      "date_utc": "2026-07-27T17:30:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 1",
+      "home_team": "MTK Budapest",
+      "away_team": "Zalaegerszegi TE",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 12,
+        "HST": 6,
+        "AST": 4,
+        "HC": 1,
+        "AC": 5,
+        "HF": 10,
+        "AF": 17,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 517,
+        "APasses": 578,
+        "HPassesAccurate": 459,
+        "APassesAccurate": 514,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
         },
         "extratime": {
           "home": null,
