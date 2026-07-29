@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-29T07:52:38Z",
+  "generatedAt": "2026-07-29T11:33:43Z",
   "contract": {
     "statsUniverseLeagueCount": 53,
     "hardVisibilityHistorySample": 1,
@@ -19,12 +19,12 @@
       "BTTS": 122,
       "DOUBLE_CHANCE": 122,
       "FIRST_HALF_GOALS": 93,
-      "MATCH_CORNERS": 80,
+      "MATCH_CORNERS": 79,
       "MATCH_GOALS": 122,
-      "MATCH_SHOTS_ON_TARGET": 19,
+      "MATCH_SHOTS_ON_TARGET": 21,
       "TEAM_CORNERS": 88,
-      "TEAM_SHOTS_ON_TARGET": 19,
-      "TEAM_TOTAL_GOALS": 114
+      "TEAM_SHOTS_ON_TARGET": 21,
+      "TEAM_TOTAL_GOALS": 115
     }
   },
   "leagues": [
@@ -1748,7 +1748,6 @@
         "BTTS",
         "DOUBLE_CHANCE",
         "FIRST_HALF_GOALS",
-        "MATCH_CORNERS",
         "MATCH_GOALS",
         "TEAM_CORNERS",
         "TEAM_TOTAL_GOALS"
@@ -1765,7 +1764,6 @@
             "BTTS",
             "DOUBLE_CHANCE",
             "FIRST_HALF_GOALS",
-            "MATCH_CORNERS",
             "MATCH_GOALS",
             "TEAM_CORNERS",
             "TEAM_TOTAL_GOALS"
@@ -1775,7 +1773,6 @@
             "BTTS",
             "DOUBLE_CHANCE",
             "FIRST_HALF_GOALS",
-            "MATCH_CORNERS",
             "MATCH_GOALS",
             "TEAM_CORNERS",
             "TEAM_TOTAL_GOALS"
@@ -1826,17 +1823,6 @@
               "exactSelectionCount": 4,
               "proposalReadyForEvaluation": true
             },
-            "MATCH_CORNERS": {
-              "historicalRequirement": "corners",
-              "scope": "match",
-              "homeSample": 46,
-              "awaySample": 48,
-              "bestTeamSample": 48,
-              "hardHistoryValid": true,
-              "qualitySampleReady": true,
-              "exactSelectionCount": 9,
-              "proposalReadyForEvaluation": true
-            },
             "MATCH_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
@@ -1867,7 +1853,7 @@
               "bestTeamSample": 48,
               "hardHistoryValid": true,
               "qualitySampleReady": true,
-              "exactSelectionCount": 4,
+              "exactSelectionCount": 12,
               "proposalReadyForEvaluation": true
             }
           }
@@ -2097,7 +2083,7 @@
               "bestTeamSample": 48,
               "hardHistoryValid": true,
               "qualitySampleReady": true,
-              "exactSelectionCount": 4,
+              "exactSelectionCount": 12,
               "proposalReadyForEvaluation": true
             }
           }
@@ -2202,7 +2188,7 @@
               "bestTeamSample": 46,
               "hardHistoryValid": true,
               "qualitySampleReady": true,
-              "exactSelectionCount": 12,
+              "exactSelectionCount": 4,
               "proposalReadyForEvaluation": true
             }
           }
@@ -2380,13 +2366,15 @@
             "1X2",
             "BTTS",
             "DOUBLE_CHANCE",
-            "MATCH_GOALS"
+            "MATCH_GOALS",
+            "TEAM_TOTAL_GOALS"
           ],
           "readyMarketIds": [
             "1X2",
             "BTTS",
             "DOUBLE_CHANCE",
-            "MATCH_GOALS"
+            "MATCH_GOALS",
+            "TEAM_TOTAL_GOALS"
           ],
           "proposalReadyForEvaluation": true,
           "marketReadiness": {
@@ -2432,6 +2420,17 @@
               "hardHistoryValid": true,
               "qualitySampleReady": true,
               "exactSelectionCount": 10,
+              "proposalReadyForEvaluation": true
+            },
+            "TEAM_TOTAL_GOALS": {
+              "historicalRequirement": "scores",
+              "scope": "team",
+              "homeSample": 46,
+              "awaySample": 46,
+              "bestTeamSample": 46,
+              "hardHistoryValid": true,
+              "qualitySampleReady": true,
+              "exactSelectionCount": 13,
               "proposalReadyForEvaluation": true
             }
           }
@@ -6877,7 +6876,7 @@
               "bestTeamSample": 34,
               "hardHistoryValid": true,
               "qualitySampleReady": true,
-              "exactSelectionCount": 10,
+              "exactSelectionCount": 8,
               "proposalReadyForEvaluation": true
             },
             "TEAM_CORNERS": {
@@ -7198,7 +7197,7 @@
               "bestTeamSample": 36,
               "hardHistoryValid": true,
               "qualitySampleReady": true,
-              "exactSelectionCount": 10,
+              "exactSelectionCount": 13,
               "proposalReadyForEvaluation": true
             }
           }
@@ -9406,7 +9405,9 @@
         "FIRST_HALF_GOALS",
         "MATCH_CORNERS",
         "MATCH_GOALS",
+        "MATCH_SHOTS_ON_TARGET",
         "TEAM_CORNERS",
+        "TEAM_SHOTS_ON_TARGET",
         "TEAM_TOTAL_GOALS"
       ],
       "fixtures": [
@@ -9423,7 +9424,9 @@
             "FIRST_HALF_GOALS",
             "MATCH_CORNERS",
             "MATCH_GOALS",
+            "MATCH_SHOTS_ON_TARGET",
             "TEAM_CORNERS",
+            "TEAM_SHOTS_ON_TARGET",
             "TEAM_TOTAL_GOALS"
           ],
           "readyMarketIds": [
@@ -9433,7 +9436,9 @@
             "FIRST_HALF_GOALS",
             "MATCH_CORNERS",
             "MATCH_GOALS",
+            "MATCH_SHOTS_ON_TARGET",
             "TEAM_CORNERS",
+            "TEAM_SHOTS_ON_TARGET",
             "TEAM_TOTAL_GOALS"
           ],
           "proposalReadyForEvaluation": true,
@@ -9504,6 +9509,17 @@
               "exactSelectionCount": 10,
               "proposalReadyForEvaluation": true
             },
+            "MATCH_SHOTS_ON_TARGET": {
+              "historicalRequirement": "shots_on_target",
+              "scope": "match",
+              "homeSample": 38,
+              "awaySample": 38,
+              "bestTeamSample": 38,
+              "hardHistoryValid": true,
+              "qualitySampleReady": true,
+              "exactSelectionCount": 8,
+              "proposalReadyForEvaluation": true
+            },
             "TEAM_CORNERS": {
               "historicalRequirement": "corners",
               "scope": "team",
@@ -9513,6 +9529,17 @@
               "hardHistoryValid": true,
               "qualitySampleReady": true,
               "exactSelectionCount": 4,
+              "proposalReadyForEvaluation": true
+            },
+            "TEAM_SHOTS_ON_TARGET": {
+              "historicalRequirement": "shots_on_target",
+              "scope": "team",
+              "homeSample": 38,
+              "awaySample": 38,
+              "bestTeamSample": 38,
+              "hardHistoryValid": true,
+              "qualitySampleReady": true,
+              "exactSelectionCount": 12,
               "proposalReadyForEvaluation": true
             },
             "TEAM_TOTAL_GOALS": {
@@ -9541,7 +9568,9 @@
             "FIRST_HALF_GOALS",
             "MATCH_CORNERS",
             "MATCH_GOALS",
+            "MATCH_SHOTS_ON_TARGET",
             "TEAM_CORNERS",
+            "TEAM_SHOTS_ON_TARGET",
             "TEAM_TOTAL_GOALS"
           ],
           "readyMarketIds": [
@@ -9551,7 +9580,9 @@
             "FIRST_HALF_GOALS",
             "MATCH_CORNERS",
             "MATCH_GOALS",
+            "MATCH_SHOTS_ON_TARGET",
             "TEAM_CORNERS",
+            "TEAM_SHOTS_ON_TARGET",
             "TEAM_TOTAL_GOALS"
           ],
           "proposalReadyForEvaluation": true,
@@ -9622,6 +9653,17 @@
               "exactSelectionCount": 10,
               "proposalReadyForEvaluation": true
             },
+            "MATCH_SHOTS_ON_TARGET": {
+              "historicalRequirement": "shots_on_target",
+              "scope": "match",
+              "homeSample": 38,
+              "awaySample": 38,
+              "bestTeamSample": 38,
+              "hardHistoryValid": true,
+              "qualitySampleReady": true,
+              "exactSelectionCount": 8,
+              "proposalReadyForEvaluation": true
+            },
             "TEAM_CORNERS": {
               "historicalRequirement": "corners",
               "scope": "team",
@@ -9631,6 +9673,17 @@
               "hardHistoryValid": true,
               "qualitySampleReady": true,
               "exactSelectionCount": 4,
+              "proposalReadyForEvaluation": true
+            },
+            "TEAM_SHOTS_ON_TARGET": {
+              "historicalRequirement": "shots_on_target",
+              "scope": "team",
+              "homeSample": 38,
+              "awaySample": 38,
+              "bestTeamSample": 38,
+              "hardHistoryValid": true,
+              "qualitySampleReady": true,
+              "exactSelectionCount": 12,
               "proposalReadyForEvaluation": true
             },
             "TEAM_TOTAL_GOALS": {
@@ -9803,6 +9856,7 @@
             "1X2",
             "BTTS",
             "DOUBLE_CHANCE",
+            "MATCH_CORNERS",
             "MATCH_GOALS",
             "TEAM_TOTAL_GOALS"
           ],
@@ -9847,6 +9901,17 @@
               "qualitySampleReady": false,
               "exactSelectionCount": 3,
               "proposalReadyForEvaluation": true
+            },
+            "MATCH_CORNERS": {
+              "historicalRequirement": "corners",
+              "scope": "match",
+              "homeSample": 0,
+              "awaySample": 0,
+              "bestTeamSample": 0,
+              "hardHistoryValid": false,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 4,
+              "proposalReadyForEvaluation": false
             },
             "MATCH_GOALS": {
               "historicalRequirement": "scores",
