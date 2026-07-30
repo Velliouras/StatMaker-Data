@@ -1,16 +1,16 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-07-29T06:18:30Z`
+Generated at: `2026-07-30T06:03:28Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
 | Code | Country | League | App season | API season | API league ID | Group | Completed | Any stats | BB-core stats | Any coverage | BB-core coverage | BB-ready candidate | Output | Notes |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
-| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 274 | 272 | 271 | 0.9927 | 0.9891 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
+| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 278 | 276 | 275 | 0.9928 | 0.9892 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
 | AUT2 | Austria | 2. Liga | 2025-2026 | 2025 | 219 | central_europe | 222 | 1 | 1 | 0.0045 | 0.0045 | False | data/statmaker/domestic_enriched/austria_2_liga_2025.json | low any-stats coverage: 0.0045 < 0.65; low BB-core coverage: 0.0045 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | AUT | Austria | Bundesliga | 2025-2026 | 2025 | 218 | central_europe | 195 | 195 | 187 | 1.0 | 0.959 | True | data/statmaker/domestic_enriched/austria_bundesliga_2025.json | ok |
 | B1 | Belgium | Jupiler Pro League | 2025-2026 | 2025 | 144 | western_europe | 321 | 321 | 314 | 1.0 | 0.9782 | True | data/statmaker/domestic_enriched/belgium_jupiler_pro_league_2025.json | ok |
-| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 199 | 198 | 192 | 0.995 | 0.9648 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
+| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 203 | 202 | 196 | 0.9951 | 0.9655 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
 | BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 200 | 200 | 196 | 1.0 | 0.98 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
 | BGR | Bulgaria | First League | 2026-2027 | 2026 | 172 | eastern_europe | 14 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/bulgaria_first_league_2026.json | not enough completed fixtures: 14 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | CHN | China | Super League | 2026 | 2026 | 169 | asia | 156 | 156 | 154 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
