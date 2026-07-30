@@ -1,0 +1,256 @@
+name: StatMaker App-Ready Artifact Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      statmaker_ref:
+        description: "Private StatMaker branch, tag, or commit to build"
+        required: true
+        default: "main"
+        type: string
+      force:
+        description: "Generate even when source manifest versions are unchanged"
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    # Runs after the six daily odds-refresh windows. Cron is UTC.
+    - cron: "5 2,6,10,14,18,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    steps:
+      - name: Checkout public StatMaker-Data repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Decide whether generation is required
+        id: preflight
+        shell: bash
+        env:
+          FORCE_GENERATION: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          main_path = Path("data/statmaker/update_manifest.json")
+          app_ready_path = Path("data/statmaker/app_ready/update_manifest.json")
+          if not main_path.is_file():
+              raise SystemExit("Missing Domestic update manifest")
+
+          main = json.loads(main_path.read_text(encoding="utf-8"))
+          uefa_raw = subprocess.check_output(
+              [
+                  "git", "show",
+                  "origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json",
+              ],
+              text=True,
+          )
+          uefa = json.loads(uefa_raw)
+          existing = (
+              json.loads(app_ready_path.read_text(encoding="utf-8"))
+              if app_ready_path.is_file() else None
+          )
+          metadata = (existing or {}).get("metadata", {})
+          source_changed = (
+              metadata.get("mainContentVersion") != main.get("contentVersion")
+              or metadata.get("uefaContentVersion") != uefa.get("contentVersion")
+          )
+          force = os.environ.get("FORCE_GENERATION", "false").lower() == "true"
+          generate = force or existing is None or source_changed
+
+          output = Path(os.environ["GITHUB_OUTPUT"])
+          with output.open("a", encoding="utf-8") as handle:
+              handle.write(f"generate={'true' if generate else 'false'}\n")
+              handle.write(f"main_version={main.get('contentVersion', '')}\n")
+              handle.write(f"uefa_version={uefa.get('contentVersion', '')}\n")
+          print(
+              "generation required" if generate
+              else "source versions unchanged; keeping current app-ready artifacts"
+          )
+          PY
+
+      - name: Require private read token
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        env:
+          PRIVATE_READ_TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_READ_TOKEN" || {
+            echo "Missing repository secret STATMAKER_PRIVATE_READ_TOKEN" >&2
+            exit 1
+          }
+
+      - name: Checkout private StatMaker engine
+        if: steps.preflight.outputs.generate == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        if: steps.preflight.outputs.generate == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        if: steps.preflight.outputs.generate == 'true'
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        if: steps.preflight.outputs.generate == 'true'
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build private producer and export read models
+        if: steps.preflight.outputs.generate == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            set -euo pipefail
+            cd statmaker-private
+            chmod +x ./gradlew
+            ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.statmaker.app/.AppReadyArtifactExportActivity
+
+            export_dir="/sdcard/Android/data/com.statmaker.app/files/app_ready_export"
+            complete=0
+            for attempt in $(seq 1 240); do
+              if adb shell test -f "$export_dir/SUCCESS"; then
+                complete=1
+                break
+              fi
+              if adb shell test -f "$export_dir/ERROR.txt"; then
+                adb shell cat "$export_dir/ERROR.txt"
+                exit 1
+              fi
+              sleep 10
+            done
+            test "$complete" = "1"
+            rm -rf ../app-ready-export
+            mkdir -p ../app-ready-export
+            adb pull "$export_dir/." ../app-ready-export/
+
+      - name: Validate exported manifest and bundle files
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("app-ready-export")
+          manifest_path = root / "export_manifest.json"
+          if not manifest_path.is_file():
+              raise SystemExit("Missing export_manifest.json")
+          manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+          if manifest.get("schemaVersion") != 1:
+              raise SystemExit("Unsupported app-ready manifest schema")
+          artifacts = {item["id"]: item for item in manifest.get("artifacts", [])}
+          required = {"app_ready_stats_bundle", "app_ready_betting_bundle"}
+          if not required.issubset(artifacts):
+              raise SystemExit(f"Missing artifacts: {sorted(required - artifacts.keys())}")
+          for artifact_id in sorted(required):
+              item = artifacts[artifact_id]
+              path = root / Path(item["path"]).name
+              if not path.is_file():
+                  raise SystemExit(f"Missing {artifact_id}: {path}")
+              if path.stat().st_size != int(item["bytes"]):
+                  raise SystemExit(f"Size mismatch for {artifact_id}")
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              if digest != item["sha256"]:
+                  raise SystemExit(f"SHA-256 mismatch for {artifact_id}")
+              if not path.name.endswith(f"-{digest}.zip"):
+                  raise SystemExit(f"Artifact is not content-addressed: {path.name}")
+          print("App-ready artifacts validated")
+          PY
+
+      - name: Publish immutable bundles and manifest
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import shutil
+          from pathlib import Path
+
+          source = Path("app-ready-export")
+          target = Path("data/statmaker/app_ready")
+          target.mkdir(parents=True, exist_ok=True)
+          incoming_path = source / "export_manifest.json"
+          incoming = json.loads(incoming_path.read_text(encoding="utf-8"))
+          existing_path = target / "update_manifest.json"
+          existing = (
+              json.loads(existing_path.read_text(encoding="utf-8"))
+              if existing_path.is_file() else None
+          )
+
+          if existing and existing.get("contentVersion") == incoming.get("contentVersion"):
+              print("Generated content is identical; preserving existing manifest and bundles")
+              raise SystemExit(0)
+
+          def artifact_names(manifest):
+              if not manifest:
+                  return set()
+              return {Path(item["path"]).name for item in manifest.get("artifacts", [])}
+
+          current_names = artifact_names(incoming)
+          previous_names = artifact_names(existing)
+          for name in current_names:
+              shutil.copy2(source / name, target / name)
+
+          keep = current_names | previous_names | {"update_manifest.json"}
+          for artifact in target.glob("app_ready_*_bundle-*.zip"):
+              if artifact.name not in keep:
+                  artifact.unlink()
+          for legacy_name in ("app_ready_stats_bundle.zip", "app_ready_betting_bundle.zip"):
+              legacy = target / legacy_name
+              if legacy.is_file():
+                  legacy.unlink()
+
+          shutil.copy2(incoming_path, existing_path)
+          PY
+
+          if git diff --quiet -- data/statmaker/app_ready; then
+            echo "No app-ready artifact changes"
+            exit 0
+          fi
+          git config user.name "StatMaker Artifact Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/statmaker/app_ready
+          git commit -m "Publish app-ready StatMaker read models"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
