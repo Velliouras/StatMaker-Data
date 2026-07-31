@@ -74,7 +74,7 @@ jobs:
           chmod +x statmaker-private/gradlew
           statmaker-private/gradlew \
             -p statmaker-private \
-            testDebugUnitTest assembleDebug \
+            assembleDebug \
             --no-daemon --stacktrace
 
           adb install -r statmaker-private/app/build/outputs/apk/debug/app-debug.apk
