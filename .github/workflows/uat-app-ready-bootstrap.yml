@@ -64,6 +64,44 @@ jobs:
             exit 1
           fi
 
+      - name: Prepare artifact export command
+        shell: bash
+        run: |
+          cat > run-app-ready-export.sh <<'SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          chmod +x statmaker-private/gradlew
+          statmaker-private/gradlew \
+            -p statmaker-private \
+            testDebugUnitTest assembleDebug \
+            --no-daemon --stacktrace
+
+          adb install -r statmaker-private/app/build/outputs/apk/debug/app-debug.apk
+          adb shell am start -W -n com.statmaker.app/.AppReadyArtifactExportActivity
+
+          export_dir="/sdcard/Android/data/com.statmaker.app/files/app_ready_export"
+          complete=0
+          for attempt in $(seq 1 240); do
+            if adb shell test -f "$export_dir/SUCCESS"; then
+              complete=1
+              break
+            fi
+            if adb shell test -f "$export_dir/ERROR.txt"; then
+              adb shell cat "$export_dir/ERROR.txt"
+              exit 1
+            fi
+            sleep 5
+          done
+
+          test "$complete" = "1"
+          rm -rf app-ready-export
+          mkdir -p app-ready-export
+          adb pull "$export_dir/." app-ready-export/
+          test -s app-ready-export/export_manifest.json
+          SCRIPT
+          chmod +x run-app-ready-export.sh
+
       - name: Build and export immutable read models
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -74,32 +112,7 @@ jobs:
           disable-animations: true
           emulator-boot-timeout: 360
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot -no-metrics
-          script: |
-            set -eu
-            cd statmaker-private
-            chmod +x ./gradlew
-            ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb shell am start -W -n com.statmaker.app/.AppReadyArtifactExportActivity
-
-            export_dir="/sdcard/Android/data/com.statmaker.app/files/app_ready_export"
-            complete=0
-            for attempt in $(seq 1 240); do
-              if adb shell test -f "$export_dir/SUCCESS"; then
-                complete=1
-                break
-              fi
-              if adb shell test -f "$export_dir/ERROR.txt"; then
-                adb shell cat "$export_dir/ERROR.txt"
-                exit 1
-              fi
-              sleep 5
-            done
-            test "$complete" = "1"
-            rm -rf ../app-ready-export
-            mkdir -p ../app-ready-export
-            adb pull "$export_dir/." ../app-ready-export/
-            test -s ../app-ready-export/export_manifest.json
+          script: ./run-app-ready-export.sh
 
       - name: Validate and publish to UAT data branch
         shell: bash
