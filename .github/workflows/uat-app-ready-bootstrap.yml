@@ -1,14 +1,165 @@
 name: Bootstrap UAT App-Ready Bundles
 
 on:
-  workflow_dispatch:
+  pull_request:
+    branches: [uat-artifact-ci-base]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  archived-bootstrap:
+  publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 70
     steps:
-      - name: Artifact producer status
-        run: echo "UAT app-ready bundles are already published; use the dedicated publisher for regeneration."
+      - name: Checkout StatMaker-Data UAT
+        uses: actions/checkout@v4
+        with:
+          ref: uat
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Require private read token
+        shell: bash
+        env:
+          PRIVATE_READ_TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_READ_TOKEN" || {
+            echo "Missing repository secret STATMAKER_PRIVATE_READ_TOKEN" >&2
+            exit 1
+          }
+
+      - name: Checkout private artifact producer
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: feat/welcome-artifact-activation-20260730
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and export immutable read models
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          script: |
+            set -eu
+            cd statmaker-private
+            chmod +x ./gradlew
+            ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell am start -W -n com.statmaker.app/.AppReadyArtifactExportActivity
+
+            export_dir="/sdcard/Android/data/com.statmaker.app/files/app_ready_export"
+            complete=0
+            for attempt in $(seq 1 240); do
+              if adb shell test -f "$export_dir/SUCCESS"; then
+                complete=1
+                break
+              fi
+              if adb shell test -f "$export_dir/ERROR.txt"; then
+                adb shell cat "$export_dir/ERROR.txt"
+                exit 1
+              fi
+              sleep 10
+            done
+            test "$complete" = "1"
+            rm -rf ../app-ready-export
+            mkdir -p ../app-ready-export
+            adb pull "$export_dir/." ../app-ready-export/
+
+      - name: Validate and publish to UAT data branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import shutil
+          from pathlib import Path
+
+          source = Path("app-ready-export")
+          incoming_path = source / "export_manifest.json"
+          if not incoming_path.is_file():
+              raise SystemExit("Missing export_manifest.json")
+          incoming = json.loads(incoming_path.read_text(encoding="utf-8"))
+          if incoming.get("schemaVersion") != 1:
+              raise SystemExit("Unsupported app-ready schema")
+
+          artifacts = {item["id"]: item for item in incoming.get("artifacts", [])}
+          required = {"app_ready_stats_bundle", "app_ready_betting_bundle"}
+          if not required.issubset(artifacts):
+              raise SystemExit(f"Missing artifacts: {sorted(required - artifacts.keys())}")
+
+          target = Path("data/statmaker/app_ready")
+          target.mkdir(parents=True, exist_ok=True)
+          current_names = set()
+          for artifact_id in sorted(required):
+              item = artifacts[artifact_id]
+              source_file = source / Path(item["path"]).name
+              if not source_file.is_file():
+                  raise SystemExit(f"Missing bundle {source_file}")
+              digest = hashlib.sha256(source_file.read_bytes()).hexdigest()
+              if digest != item["sha256"]:
+                  raise SystemExit(f"SHA mismatch for {artifact_id}")
+              if source_file.stat().st_size != int(item["bytes"]):
+                  raise SystemExit(f"Size mismatch for {artifact_id}")
+              expected_name = f"{artifact_id}-{digest}.zip"
+              if source_file.name != expected_name:
+                  raise SystemExit(f"Non-addressed bundle {source_file.name}")
+              current_names.add(expected_name)
+              shutil.copy2(source_file, target / expected_name)
+              item["path"] = f"data/statmaker/app_ready/{expected_name}"
+              item["url"] = (
+                  "https://raw.githubusercontent.com/Velliouras/"
+                  f"StatMaker-Data/uat/data/statmaker/app_ready/{expected_name}"
+              )
+
+          existing_path = target / "update_manifest.json"
+          previous_names = set()
+          if existing_path.is_file():
+              existing = json.loads(existing_path.read_text(encoding="utf-8"))
+              previous_names = {
+                  Path(item["path"]).name for item in existing.get("artifacts", [])
+              }
+          keep = current_names | previous_names
+          for bundle in target.glob("app_ready_*_bundle-*.zip"):
+              if bundle.name not in keep:
+                  bundle.unlink()
+
+          existing_path.write_text(
+              json.dumps(incoming, ensure_ascii=False, separators=(",", ":")),
+              encoding="utf-8",
+          )
+          print("UAT app-ready bundles validated and staged")
+          PY
+
+          git config user.name "StatMaker UAT Artifact Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/statmaker/app_ready
+          if git diff --cached --quiet; then
+            echo "No UAT artifact changes"
+            exit 0
+          fi
+          git commit -m "Publish UAT app-ready read models"
+          git pull --rebase --autostash origin uat
+          git push origin HEAD:uat
