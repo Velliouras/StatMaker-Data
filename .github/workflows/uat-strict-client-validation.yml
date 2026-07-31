@@ -20,6 +20,25 @@ jobs:
           set -euo pipefail
           test -n "$PRIVATE_READ_TOKEN"
 
+      - name: Load current published UAT manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest_url="https://raw.githubusercontent.com/Velliouras/StatMaker-Data/uat/data/statmaker/app_ready/update_manifest.json?ts=$(date +%s%N)"
+          curl --fail --silent --show-error --location "$manifest_url" -o /tmp/uat-app-ready-manifest.json
+          python - <<'PY' >> "$GITHUB_ENV"
+          import json
+          from pathlib import Path
+
+          manifest = json.loads(Path('/tmp/uat-app-ready-manifest.json').read_text(encoding='utf-8'))
+          assert manifest['schemaVersion'] == 1
+          assert manifest['branch'] == 'uat'
+          artifacts = {item['id']: item for item in manifest['artifacts']}
+          print(f"EXPECTED_VERSION={manifest['contentVersion']}")
+          print(f"EXPECTED_STATS={artifacts['app_ready_stats_bundle']['sha256']}")
+          print(f"EXPECTED_BETTING={artifacts['app_ready_betting_bundle']['sha256']}")
+          PY
+
       - name: Checkout isolated UAT client
         uses: actions/checkout@v4
         with:
@@ -55,13 +74,14 @@ jobs:
           #!/usr/bin/env bash
           set -euo pipefail
 
+          : "${EXPECTED_VERSION:?}"
+          : "${EXPECTED_STATS:?}"
+          : "${EXPECTED_BETTING:?}"
+
           package="com.statmaker.app.uat"
           activity="$package/com.statmaker.app.StatMakerUatWelcomeActivity"
           diagnostics="shared_prefs/statmaker_uat_update_diagnostics.xml"
           app_ready="shared_prefs/statmaker_app_ready_artifacts.xml"
-          expected_version="c2823fecd4bc648c65d098b999c48533bf8c4e5a2c2aaaadc69510b21f2b9373"
-          expected_stats="d6466159fb28f82a122983682ab5ec7c0c0ed6bee8b8a9f783d584480dcf8271"
-          expected_betting="a63a71e02efc281900d8d9a33f1697b6a8eb7bdfecd7459cd367864e82bbfeb4"
 
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
@@ -72,42 +92,47 @@ jobs:
             adb shell run-as "$package" cat "$1" 2>/dev/null | tr -d '\r' || true
           }
 
+          fail_with_diagnostics() {
+            local message="$1"
+            echo "$message"
+            echo "--- diagnostics ---"
+            read_file "$diagnostics"
+            echo "--- app-ready prefs ---"
+            read_file "$app_ready"
+            exit 1
+          }
+
           wait_for_result() {
             local label="$1"
             local deadline=$(( $(date +%s%3N) + 15000 ))
             while (( $(date +%s%3N) < deadline )); do
-              local xml
+              local xml elapsed
               xml="$(read_file "$diagnostics")"
               if grep -q '>failure<' <<<"$xml"; then
-                echo "$label failed"
-                echo "$xml"
-                exit 1
+                fail_with_diagnostics "$label failed"
               fi
               if grep -q '>success<' <<<"$xml"; then
-                local elapsed
-                elapsed="$(sed -n 's/.*name="elapsed_ms" value="\([0-9][0-9]*\)".*/\1/p' <<<"$xml" | head -1)"
-                test -n "$elapsed"
-                if (( elapsed > 10000 )); then
-                  echo "$label exceeded 10 seconds: ${elapsed}ms"
-                  exit 1
-                fi
-                grep -q "$expected_version" <<<"$xml"
-                echo "$label=${elapsed}ms"
+                elapsed="$(sed -n 's/.*name="elapsed_ms" value="\([0-9][0-9]*\)".*/\1/p' <<<"$xml" | head -1 || true)"
+                [[ -n "$elapsed" ]] || fail_with_diagnostics "$label has no elapsed_ms"
+                (( elapsed <= 10000 )) || fail_with_diagnostics "$label exceeded 10 seconds: ${elapsed}ms"
+                grep -q "$EXPECTED_VERSION" <<<"$xml" || \
+                  fail_with_diagnostics "$label activated a different content version"
+                echo "$label=${elapsed}ms version=$EXPECTED_VERSION"
                 return
               fi
               sleep 0.20
             done
-            echo "$label produced no result"
-            read_file "$diagnostics"
-            exit 1
+            fail_with_diagnostics "$label produced no result"
           }
 
           adb shell am start -W -n "$activity"
           wait_for_result "cold_update"
 
           app_xml="$(read_file "$app_ready")"
-          grep -q "$expected_stats" <<<"$app_xml"
-          grep -q "$expected_betting" <<<"$app_xml"
+          grep -q "$EXPECTED_STATS" <<<"$app_xml" || \
+            fail_with_diagnostics "Cold update did not activate current stats hash"
+          grep -q "$EXPECTED_BETTING" <<<"$app_xml" || \
+            fail_with_diagnostics "Cold update did not activate current betting hash"
 
           for path in \
             databases/statmaker.db \
@@ -116,7 +141,8 @@ jobs:
             files/app_ready_odds/champions_league.json \
             files/app_ready_odds/europa_league.json \
             files/app_ready_odds/conference_league.json; do
-            adb shell run-as "$package" test -s "$path"
+            adb shell run-as "$package" test -s "$path" || \
+              fail_with_diagnostics "Missing installed file: $path"
           done
 
           adb shell am force-stop "$package"
