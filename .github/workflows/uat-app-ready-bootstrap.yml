@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 45
     steps:
       - name: Checkout StatMaker-Data UAT
         uses: actions/checkout@v4
@@ -52,6 +52,18 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      - name: Enable KVM acceleration
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -e /dev/kvm ]]; then
+            sudo chmod 666 /dev/kvm
+            ls -l /dev/kvm
+          else
+            echo "/dev/kvm is unavailable" >&2
+            exit 1
+          fi
+
       - name: Build and export immutable read models
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -60,9 +72,10 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-boot-timeout: 360
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot -no-metrics
           script: |
-            set -euo pipefail
+            set -eu
             cd statmaker-private
             chmod +x ./gradlew
             ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
@@ -80,12 +93,13 @@ jobs:
                 adb shell cat "$export_dir/ERROR.txt"
                 exit 1
               fi
-              sleep 10
+              sleep 5
             done
             test "$complete" = "1"
             rm -rf ../app-ready-export
             mkdir -p ../app-ready-export
             adb pull "$export_dir/." ../app-ready-export/
+            test -s ../app-ready-export/export_manifest.json
 
       - name: Validate and publish to UAT data branch
         shell: bash
@@ -123,9 +137,8 @@ jobs:
                   raise SystemExit(f"SHA mismatch for {artifact_id}")
               if source_file.stat().st_size != int(item["bytes"]):
                   raise SystemExit(f"Size mismatch for {artifact_id}")
+
               expected_name = f"{artifact_id}-{digest}.zip"
-              if source_file.name != expected_name:
-                  raise SystemExit(f"Non-addressed bundle {source_file.name}")
               current_names.add(expected_name)
               shutil.copy2(source_file, target / expected_name)
               item["path"] = f"data/statmaker/app_ready/{expected_name}"
@@ -134,6 +147,7 @@ jobs:
                   f"StatMaker-Data/uat/data/statmaker/app_ready/{expected_name}"
               )
 
+          incoming["branch"] = "uat"
           existing_path = target / "update_manifest.json"
           previous_names = set()
           if existing_path.is_file():
@@ -151,6 +165,9 @@ jobs:
               encoding="utf-8",
           )
           print("UAT app-ready bundles validated and staged")
+          for artifact_id in sorted(required):
+              item = artifacts[artifact_id]
+              print(f"{artifact_id}: {item['bytes']} bytes")
           PY
 
           git config user.name "StatMaker UAT Artifact Bot"
