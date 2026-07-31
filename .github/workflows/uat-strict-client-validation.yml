@@ -1,0 +1,138 @@
+name: Validate UAT Strict Update Client
+
+on:
+  pull_request:
+    branches: [uat-artifact-ci-base]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Require private read token
+        shell: bash
+        env:
+          PRIVATE_READ_TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$PRIVATE_READ_TOKEN"
+
+      - name: Checkout isolated UAT client
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: fix/uat-strict-performance-20260731
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Enable KVM acceleration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm
+          sudo chmod 666 /dev/kvm
+
+      - name: Prepare runtime validation
+        shell: bash
+        run: |
+          cat > validate-uat-update.sh <<'SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          package="com.statmaker.app.uat"
+          activity="$package/com.statmaker.app.StatMakerUatWelcomeActivity"
+          diagnostics="shared_prefs/statmaker_uat_update_diagnostics.xml"
+          app_ready="shared_prefs/statmaker_app_ready_artifacts.xml"
+          expected_version="c2823fecd4bc648c65d098b999c48533bf8c4e5a2c2aaaadc69510b21f2b9373"
+          expected_stats="d6466159fb28f82a122983682ab5ec7c0c0ed6bee8b8a9f783d584480dcf8271"
+          expected_betting="a63a71e02efc281900d8d9a33f1697b6a8eb7bdfecd7459cd367864e82bbfeb4"
+
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+          adb install -r app/build/outputs/apk/debug/app-debug.apk
+          adb shell pm clear "$package"
+
+          read_file() {
+            adb shell run-as "$package" cat "$1" 2>/dev/null | tr -d '\r' || true
+          }
+
+          wait_for_result() {
+            local label="$1"
+            local deadline=$(( $(date +%s%3N) + 15000 ))
+            while (( $(date +%s%3N) < deadline )); do
+              local xml
+              xml="$(read_file "$diagnostics")"
+              if grep -q '>failure<' <<<"$xml"; then
+                echo "$label failed"
+                echo "$xml"
+                exit 1
+              fi
+              if grep -q '>success<' <<<"$xml"; then
+                local elapsed
+                elapsed="$(sed -n 's/.*name="elapsed_ms" value="\([0-9][0-9]*\)".*/\1/p' <<<"$xml" | head -1)"
+                test -n "$elapsed"
+                if (( elapsed > 10000 )); then
+                  echo "$label exceeded 10 seconds: ${elapsed}ms"
+                  exit 1
+                fi
+                grep -q "$expected_version" <<<"$xml"
+                echo "$label=${elapsed}ms"
+                return
+              fi
+              sleep 0.20
+            done
+            echo "$label produced no result"
+            read_file "$diagnostics"
+            exit 1
+          }
+
+          adb shell am start -W -n "$activity"
+          wait_for_result "cold_update"
+
+          app_xml="$(read_file "$app_ready")"
+          grep -q "$expected_stats" <<<"$app_xml"
+          grep -q "$expected_betting" <<<"$app_xml"
+
+          for path in \
+            databases/statmaker.db \
+            databases/statmaker_prepared_betting.db \
+            files/app_ready_odds/domestic.json \
+            files/app_ready_odds/champions_league.json \
+            files/app_ready_odds/europa_league.json \
+            files/app_ready_odds/conference_league.json; do
+            adb shell run-as "$package" test -s "$path"
+          done
+
+          adb shell am force-stop "$package"
+          adb shell am start -W -n "$activity"
+          wait_for_result "current_version_update"
+          SCRIPT
+          chmod +x validate-uat-update.sh
+
+      - name: Build, install and measure strict update
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-boot-timeout: 360
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot -no-metrics
+          script: ./validate-uat-update.sh
