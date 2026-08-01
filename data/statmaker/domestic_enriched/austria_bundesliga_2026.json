@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-31T06:33:22Z",
+  "generated_at": "2026-08-01T06:20:18Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-31T06:20:55Z",
+    "cache_generated_at": "2026-08-01T06:06:27Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,41 +39,122 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 0,
-    "fixtures_with_any_stats": 0,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.0,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 1,
+    "fixtures_with_any_stats": 1,
+    "fixtures_with_bb_core_stats": 1,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
-      "fouls": 0,
-      "yellow_cards": 0,
+      "shots_total": 1,
+      "shots_on_target": 1,
+      "corners": 1,
+      "fouls": 1,
+      "yellow_cards": 1,
       "red_cards": 0,
-      "possession": 0,
-      "passes": 0,
-      "xg": 0
+      "possession": 1,
+      "passes": 1,
+      "xg": 1
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
-      "fouls": 0.0,
-      "yellow_cards": 0.0,
+      "shots_total": 1.0,
+      "shots_on_target": 1.0,
+      "corners": 1.0,
+      "fouls": 1.0,
+      "yellow_cards": 1.0,
       "red_cards": 0.0,
-      "possession": 0.0,
-      "passes": 0.0,
-      "xg": 0.0
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 0 < 15",
-      "low any-stats coverage: 0.0 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 1 < 15"
     ]
   },
-  "matches": []
+  "matches": [
+    {
+      "fixture_id": 1561894,
+      "date_utc": "2026-07-31T17:30:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 1",
+      "home_team": "Lask Linz",
+      "away_team": "Grazer AK",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 23,
+        "AS": 3,
+        "HST": 9,
+        "AST": 1,
+        "HC": 6,
+        "AC": 2,
+        "HF": 12,
+        "AF": 13,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 1,
+        "ASaves": 6,
+        "HPasses": 548,
+        "APasses": 387,
+        "HPassesAccurate": 481,
+        "APassesAccurate": 304,
+        "HxG": 2.46,
+        "AxG": 0.95
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
 }

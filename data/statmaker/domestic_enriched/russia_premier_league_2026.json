@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-31T06:33:22Z",
+  "generated_at": "2026-08-01T06:20:18Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/russia/premier-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-31T06:21:57Z",
+    "cache_generated_at": "2026-08-01T06:07:40Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,20 +39,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 8,
-    "fixtures_with_any_stats": 8,
-    "fixtures_with_bb_core_stats": 7,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 9,
+    "fixtures_with_bb_core_stats": 8,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.875,
+    "bb_core_coverage": 0.8889,
     "group_counts": {
-      "shots_total": 8,
-      "shots_on_target": 8,
-      "corners": 8,
-      "fouls": 8,
-      "yellow_cards": 7,
+      "shots_total": 9,
+      "shots_on_target": 9,
+      "corners": 9,
+      "fouls": 9,
+      "yellow_cards": 8,
       "red_cards": 2,
-      "possession": 8,
-      "passes": 8,
+      "possession": 9,
+      "passes": 9,
       "xg": 0
     },
     "group_coverage": {
@@ -60,15 +60,15 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.875,
-      "red_cards": 0.25,
+      "yellow_cards": 0.8889,
+      "red_cards": 0.2222,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 8 < 15"
+      "not enough completed fixtures: 9 < 15"
     ]
   },
   "matches": [
@@ -733,6 +733,90 @@
         "fulltime": {
           "home": 1,
           "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561346,
+      "date_utc": "2026-07-31T17:00:00+00:00",
+      "country": "Russia",
+      "league": "Premier League",
+      "league_code": "RUS",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 235,
+      "round": "Regular Season - 2",
+      "home_team": "Rodina Moskva",
+      "away_team": "FC Rostov",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 22,
+        "HST": 2,
+        "AST": 9,
+        "HC": 2,
+        "AC": 9,
+        "HF": 17,
+        "AF": 18,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 7,
+        "ASaves": 1,
+        "HPasses": 318,
+        "APasses": 323,
+        "HPassesAccurate": 204,
+        "APassesAccurate": 222,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 4,
+      "home_score": 2,
+      "away_score": 4,
+      "fthg": 2,
+      "ftag": 4,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 4
         },
         "extratime": {
           "home": null,

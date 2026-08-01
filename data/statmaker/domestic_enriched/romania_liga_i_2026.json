@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-07-31T06:33:22Z",
+  "generated_at": "2026-08-01T06:20:18Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-07-31T06:21:54Z",
+    "cache_generated_at": "2026-08-01T06:07:34Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,20 +39,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 16,
-    "fixtures_with_any_stats": 16,
-    "fixtures_with_bb_core_stats": 14,
+    "completed_fixtures": 18,
+    "fixtures_with_any_stats": 18,
+    "fixtures_with_bb_core_stats": 16,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.875,
+    "bb_core_coverage": 0.8889,
     "group_counts": {
-      "shots_total": 16,
-      "shots_on_target": 16,
-      "corners": 16,
-      "fouls": 16,
-      "yellow_cards": 14,
+      "shots_total": 18,
+      "shots_on_target": 18,
+      "corners": 18,
+      "fouls": 18,
+      "yellow_cards": 16,
       "red_cards": 7,
-      "possession": 16,
-      "passes": 16,
+      "possession": 18,
+      "passes": 18,
       "xg": 6
     },
     "group_coverage": {
@@ -60,11 +60,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.875,
-      "red_cards": 0.4375,
+      "yellow_cards": 0.8889,
+      "red_cards": 0.3889,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.375
+      "xg": 0.3333
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -1380,6 +1380,174 @@
           "fouls": true,
           "yellow_cards": true,
           "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1565200,
+      "date_utc": "2026-07-31T15:30:00+00:00",
+      "country": "Romania",
+      "league": "Liga I",
+      "league_code": "ROM",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 283,
+      "round": "Regular Season - 3",
+      "home_team": "Arges Pitesti",
+      "away_team": "Csikszereda",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 1,
+        "HST": 6,
+        "AST": 1,
+        "HC": 3,
+        "AC": 2,
+        "HF": 12,
+        "AF": 15,
+        "HY": 2,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 356,
+        "APasses": 378,
+        "HPassesAccurate": 264,
+        "APassesAccurate": 281,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1565204,
+      "date_utc": "2026-07-31T18:30:00+00:00",
+      "country": "Romania",
+      "league": "Liga I",
+      "league_code": "ROM",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 283,
+      "round": "Regular Season - 3",
+      "home_team": "Oţelul",
+      "away_team": "Dinamo Bucuresti",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 12,
+        "HST": 3,
+        "AST": 4,
+        "HC": 3,
+        "AC": 4,
+        "HF": 12,
+        "AF": 16,
+        "HY": 0,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 3,
+        "ASaves": 2,
+        "HPasses": 431,
+        "APasses": 441,
+        "HPassesAccurate": 353,
+        "APassesAccurate": 377,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
           "possession": true,
           "passes": true,
           "xg": false
