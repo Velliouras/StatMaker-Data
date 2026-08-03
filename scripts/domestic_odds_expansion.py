@@ -40,6 +40,27 @@ VERIFIED_PROVIDER_SLUGS = {
     "SC0": "scotland-premiership",
 }
 
+# Provider names that are stable but differ from the API-Football canonical
+# names used by StatMaker history. Keep these explicit and league-scoped so a
+# valid exact-odds fixture is never discarded merely because the two providers
+# use different city/suffix labels.
+VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    "SC0": {
+        "Celtic": ("Celtic Glasgow", "Celtic FC"),
+        "Dundee": ("Dundee FC",),
+        "Dundee Utd": ("Dundee United", "Dundee United FC"),
+        "Rangers": ("Glasgow Rangers", "Rangers FC"),
+        "ST Mirren": ("St Mirren FC", "St. Mirren FC"),
+        "Heart Of Midlothian": ("Heart of Midlothian FC", "Hearts"),
+        "ST Johnstone": ("St Johnstone FC", "St. Johnstone FC"),
+        "Aberdeen": ("Aberdeen FC",),
+        "Falkirk": ("Falkirk FC",),
+        "Hibernian": ("Hibernian FC",),
+        "Kilmarnock": ("Kilmarnock FC",),
+        "Motherwell": ("Motherwell FC",),
+    },
+}
+
 
 def simplified_team_name(odds_module: Any, value: Any) -> str:
     words = odds_module.normalize_text(value, drop_suffixes=True).split()
@@ -64,6 +85,18 @@ def canonical_team_info(
         if candidate and candidate in league_aliases:
             canonical = league_aliases[candidate]
             return canonical, canonical
+
+    for canonical, provider_names in VERIFIED_TEAM_ALIASES.get(league_code, {}).items():
+        verified_variants = {
+            odds_module.normalize_text(candidate, drop_suffixes=True)
+            for candidate in (canonical, *provider_names)
+        } | {
+            simplified_team_name(odds_module, candidate)
+            for candidate in (canonical, *provider_names)
+        }
+        if normalized in verified_variants or simplified in verified_variants:
+            return canonical, canonical
+
     odds_module.record_unmatched_team(debug, league_code, str(name or "").strip(), normalized)
     provider_name = str(name or "").strip()
     return provider_name, None
@@ -76,6 +109,18 @@ def generated_aliases(
     registry: Sequence[Dict[str, Any]],
 ) -> Dict[str, Dict[str, str]]:
     aliases = odds_module.load_aliases()
+
+    for league_code, teams in VERIFIED_TEAM_ALIASES.items():
+        bucket = aliases.setdefault(league_code, {})
+        for canonical, provider_names in teams.items():
+            for candidate in (canonical, *provider_names):
+                for variant in {
+                    odds_module.normalize_text(candidate, drop_suffixes=True),
+                    simplified_team_name(odds_module, candidate),
+                }:
+                    if variant:
+                        bucket[variant] = canonical
+
     for league in registry:
         code = str(league.get("leagueCode") or "")
         bucket = aliases.setdefault(code, {})
