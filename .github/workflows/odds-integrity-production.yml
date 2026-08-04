@@ -49,6 +49,7 @@ jobs:
           python -m unittest \
             tests/test_statmaker_domestic_scope.py \
             tests/test_odds_market_integrity.py \
+            tests/test_refresh_domestic_odds_integrity.py \
             tests/test_domestic_proposal_readiness.py \
             tests/test_statmaker_update_manifest.py
 
@@ -63,6 +64,8 @@ jobs:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
           ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
+          ODDS_API_IO_RATE_LIMIT_WAIT_MAX_SECONDS: "420"
+          ODDS_API_IO_RATE_LIMIT_WAIT_BUFFER_SECONDS: "2"
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-16}"
