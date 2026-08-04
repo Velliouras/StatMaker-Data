@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import datetime as dt, json, os, re, sys
+import datetime as dt, json, math, os, re, sys
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -53,15 +53,37 @@ def fid(r): return str((r.get('fixture') or {}).get('id',''))
 def kickoff(r): return str((r.get('fixture') or {}).get('date',''))
 def team(r,s): return ((r.get('teams') or {}).get(s) or {})
 def value(v):
-    if v is None:return None
-    try:return float(str(v).replace('%',''))
-    except:return None
+    """Convert an API-Football stat value to a finite float without raising."""
+    if v is None or isinstance(v, bool):
+        return None
+    if isinstance(v, (int, float)):
+        result = float(v)
+        return result if math.isfinite(result) else None
+    if not isinstance(v, str):
+        return None
+    text = v.strip().replace('%', '').replace(',', '.')
+    if not text or text.casefold() in {'-', 'n/a', 'na', 'null', 'none'}:
+        return None
+    try:
+        result = float(text)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    return result if math.isfinite(result) else None
 
 def normalized(raw,home,away):
     data={}
-    for r in raw:
+    for r in raw if isinstance(raw, list) else []:
+        if not isinstance(r, dict):
+            continue
         i=num((r.get('team') or {}).get('id'))
-        data[i]={str(x.get('type','')).casefold():x.get('value') for x in r.get('statistics',[]) if isinstance(x,dict)}
+        if i is None:
+            continue
+        stats=r.get('statistics') if isinstance(r.get('statistics'),list) else []
+        data[i]={
+            str(x.get('type','')).casefold():x.get('value')
+            for x in stats
+            if isinstance(x,dict) and str(x.get('type','')).strip()
+        }
     def g(i,k): return value(data.get(i,{}).get(k))
     return {'HC':g(home,'corner kicks'),'AC':g(away,'corner kicks'),'HY':g(home,'yellow cards'),'AY':g(away,'yellow cards'),'HR':g(home,'red cards'),'AR':g(away,'red cards'),'HS':g(home,'total shots'),'AS':g(away,'total shots'),'HST':g(home,'shots on goal'),'AST':g(away,'shots on goal')}
 
@@ -76,9 +98,19 @@ def refresh_history(client,league_id,year,fixtures,stat_cap):
     for k in sorted(rows,key=lambda z:(rows[z].get('date',''),z)):
         if any(v is not None for v in (rows[k].get('normalized_stats') or {}).values()):continue
         if fetched>=stat_cap:break
-        try: raw=items(client.get('fixtures/statistics',{'fixture':k}))
-        except Exception: continue
-        rows[k]['raw_statistics']=raw; rows[k]['normalized_stats']=normalized(raw,rows[k]['home_team_id'],rows[k]['away_team_id']); fetched+=1
+        if client.used >= client.cap - 1:
+            break
+        try:
+            raw=items(client.get('fixtures/statistics',{'fixture':k}))
+        except Exception:
+            continue
+        rows[k]['raw_statistics']=raw
+        try:
+            rows[k]['normalized_stats']=normalized(raw,rows[k]['home_team_id'],rows[k]['away_team_id'])
+        except Exception as exc:
+            rows[k]['normalized_stats']={}
+            rows[k]['statistics_normalization_error']=f'{type(exc).__name__}: {exc}'[:300]
+        fetched+=1
     out=sorted(rows.values(),key=lambda x:(x.get('date',''),x.get('fixture_id','')))
     write(CACHE,{'schema_version':1,'generated_at':now(),'source':'api-football','country':COUNTRY,'competition':NAME,'league_code':CODE,'api_football_league_id':league_id,'season':str(year),'fixtures':out})
     return out,fetched
