@@ -153,7 +153,7 @@ def main():
     token=os.getenv('API_FOOTBALL_KEY','').strip()
     if not token:return 2
     stat_cap=max(0,int(os.getenv('G2_STATS_REQUEST_CAP','45'))); horizon=max(1,int(os.getenv('G2_SCHEDULE_HORIZON_DAYS','120'))); c=Client(token,stat_cap+4)
-    catalog=resolve(items(c.get('leagues',{'country':COUNTRY,'search':NAME}))); league_id=num((catalog.get('league') or {}).get('id')); hs,ts=seasons(catalog); hy,ty=num(hs['year']),num(ts['year'])
+    catalog=resolve(items(c.get('leagues',{'search':NAME}))); league_id=num((catalog.get('league') or {}).get('id')); hs,ts=seasons(catalog); hy,ty=num(hs['year']),num(ts['year'])
     rows,fetched=refresh_history(c,league_id,hy,items(c.get('fixtures',{'league':league_id,'season':hy})),stat_cap); idx=publish_stats(league_id,hy,ty,rows,catalog)
     upcoming=future(items(c.get('fixtures',{'league':league_id,'season':ty})),dt.datetime.now(dt.timezone.utc).date(),horizon); hist={slug(r.get(k)) for r in rows for k in ('home_team','away_team') if slug(r.get(k))}; league=publish_schedule(league_id,ty,upcoming,hist)
     report={'generatedAt':now(),'leagueCode':CODE,'apiFootballLeagueId':league_id,'historySeason':hy,'targetSeason':ty,'requestsUsed':c.used,'historicalFixtures':len(rows),'statisticsFetchedThisRun':fetched,'scheduleFixtureCount':len(upcoming),'publishedScheduleMatchCount':len(league.get('matches',[])),'indexRow':idx,'bettingEnabled':False,'syntheticStats':False,'syntheticOdds':False}; write(REPORT,report); print(json.dumps(report,ensure_ascii=False,indent=2)); return 0
