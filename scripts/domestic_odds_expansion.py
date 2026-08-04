@@ -38,6 +38,7 @@ VERIFIED_PROVIDER_SLUGS = {
     "AUT": "austria-bundesliga",
     "AUT2": "austria-2-liga",
     "SC0": "scotland-premiership",
+    "G1": "greece-super-league",
 }
 
 # Provider names that are stable but differ from the API-Football canonical
@@ -58,6 +59,19 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
         "Hibernian": ("Hibernian FC",),
         "Kilmarnock": ("Kilmarnock FC",),
         "Motherwell": ("Motherwell FC",),
+    },
+    "G1": {
+        "AEK Athens FC": ("AEK Athens",),
+        "Aris Thessalonikis": ("Aris Thessaloniki", "Aris Salonika"),
+        "Atromitos": ("Atromitos Athinon",),
+        "OFI": ("OFI Crete",),
+        "Volos NFC": ("Volos NPS",),
+        "Levadiakos": ("APO Levadiakos FC", "APO Levadiakos"),
+        "Kifisia": ("AE Kifisia FC", "AE Kifisia"),
+        "Panetolikos": ("Panaitolikos Agrinio", "Panaitolikos"),
+        "Olympiakos Piraeus": ("Olympiacos Piraeus",),
+        "PAOK": ("PAOK Thessaloniki",),
+        "Panathinaikos": ("Panathinaikos FC",),
     },
 }
 
