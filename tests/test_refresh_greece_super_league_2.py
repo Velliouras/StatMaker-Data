@@ -15,6 +15,19 @@ class TestG2(unittest.TestCase):
  def test_normalized_stats(self):
   raw=[{'team':{'id':10},'statistics':[{'type':'Corner Kicks','value':7},{'type':'Shots on Goal','value':5}]},{'team':{'id':20},'statistics':[{'type':'Corner Kicks','value':4},{'type':'Shots on Goal','value':3}]}]
   x=g2.normalized(raw,10,20); self.assertEqual((7.0,4.0,5.0,3.0),(x['HC'],x['AC'],x['HST'],x['AST']))
+ def test_value_parser_never_raises_on_provider_shapes(self):
+  self.assertEqual(55.0,g2.value('55%'))
+  self.assertEqual(3.5,g2.value('3,5'))
+  self.assertIsNone(g2.value({'unexpected':1}))
+  self.assertIsNone(g2.value([1,2]))
+  self.assertIsNone(g2.value(float('nan')))
+  self.assertIsNone(g2.value(True))
+ def test_normalized_stats_ignores_malformed_provider_rows(self):
+  raw=[None,{'team':{'id':10},'statistics':None},{'team':{'id':20},'statistics':[{'type':'Corner Kicks','value':{'bad':1}},{'type':'Shots on Goal','value':'4%'}]}]
+  x=g2.normalized(raw,10,20)
+  self.assertIsNone(x['HC'])
+  self.assertIsNone(x['AC'])
+  self.assertEqual(4.0,x['AST'])
  def test_future_filter(self):
   rows=[fixture('1','2026-08-10T18:00:00+00:00'),fixture('2','2026-08-11T18:00:00+00:00','FT'),fixture('3','2027-01-10T18:00:00+00:00')]
   self.assertEqual(['1'],[g2.fid(x) for x in g2.future(rows,dt.date(2026,8,4),120)])
