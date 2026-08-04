@@ -41,6 +41,8 @@ jobs:
             scripts/statmaker_domestic_scope.py \
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
+            scripts/domestic_odds_expansion.py \
+            scripts/enrich_domestic_odds_team_logos.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
             scripts/build_domestic_proposal_readiness.py \
             scripts/build_statmaker_update_manifest.py
@@ -125,6 +127,8 @@ jobs:
           PY
 
       - name: Enrich Domestic team logos
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python scripts/enrich_domestic_odds_team_logos.py
 
       - name: Sanitize Domestic betting feed
