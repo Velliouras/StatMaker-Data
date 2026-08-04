@@ -5,7 +5,7 @@ import re
 from typing import Any, Mapping, Sequence
 
 import backfill_uefa_support_history as base
-from build_uefa_support_history import normalize_team_key
+from build_uefa_support_history import normalize_team_key as _base_normalize_team_key
 
 PLACEHOLDER_RE = re.compile(r"^(winner|loser|tbd|to be determined|match\s+\d+)", re.IGNORECASE)
 GENERIC_LOCATION_TOKENS = {
@@ -15,10 +15,19 @@ GENERIC_LOCATION_TOKENS = {
     "skopje", "sofia", "split", "streda", "tbilisi", "tel", "aviv", "thessaloniki", "vienna",
     "wien", "zagreb", "zhytomyr",
 }
+TEAM_TOKEN_EQUIVALENTS = {
+    "olympiakos": "olympiacos",
+}
 
 # Stable references must be captured before monkey-patching.
 _original_feed_team_names = base.feed_team_names
 _original_api_get = base.api.api_get
+
+
+def normalize_team_key(value: Any) -> str:
+    """Normalize stable provider spelling variants before all support indexing/matching."""
+    key = _base_normalize_team_key(value)
+    return " ".join(TEAM_TOKEN_EQUIVALENTS.get(token, token) for token in key.split())
 
 
 def is_real_participant_name(value: str) -> bool:
@@ -128,6 +137,7 @@ def api_get_v2(api_key, endpoint, params, request_state, max_requests):
 
 base.feed_team_names = feed_team_names_v2
 base.choose_team_candidate = choose_team_candidate_v2
+base.normalize_team_key = normalize_team_key
 base.api.api_get = api_get_v2
 
 if __name__ == "__main__":
