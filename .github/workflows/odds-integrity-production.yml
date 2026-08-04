@@ -1,6 +1,13 @@
 name: Odds Integrity Production Refresh
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/domestic_odds_expansion.py"
+      - "scripts/enrich_domestic_odds_team_logos.py"
+      - ".github/workflows/odds-integrity-production.yml"
   workflow_dispatch:
     inputs:
       cycle_size:
