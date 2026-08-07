@@ -1,0 +1,90 @@
+name: Domestic Lineup Watch
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Maximum API-Football requests for confirmed lineups"
+        required: true
+        default: "3"
+        type: string
+  schedule:
+    # Rolling pre-match watcher. Offset from the 4-hour full context workflow at :05.
+    - cron: "20,50 * * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/domestic-lineup-watch.yml"
+      - "scripts/refresh_domestic_lineups.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-match-context
+  cancel-in-progress: false
+
+jobs:
+  lineups:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate rolling lineup watcher
+        run: python -m py_compile scripts/refresh_domestic_lineups.py
+
+      - name: Refresh confirmed lineups and formations
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          DOMESTIC_LINEUP_API_REQUEST_CAP: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '3' }}
+        run: python scripts/refresh_domestic_lineups.py
+
+      - name: Rebuild app update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Validate hard request cap
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('reports/domestic_lineup_watch.json').read_text(encoding='utf-8'))
+          used = int(report.get('requestsUsed') or 0)
+          cap = int(report.get('requestCap') or 0)
+          if used > cap:
+              raise SystemExit(f'Lineup request cap exceeded: {used}/{cap}')
+          print(
+              f"Lineup watch: calls={used}/{cap} eligible={report.get('eligibleFixtures')} "
+              f"confirmed={report.get('confirmedLineupsAdded')} formations={report.get('confirmedFormationPairsAdded')}"
+          )
+          PY
+
+      - name: Commit lineup context artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            data/statmaker/domestic_match_context_cache.json \
+            data/statmaker/update_manifest.json \
+            reports/domestic_lineup_watch.json
+          if git diff --cached --quiet; then
+            echo "No Domestic lineup-context changes."
+          else
+            git commit -m "Refresh Domestic confirmed lineups"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
