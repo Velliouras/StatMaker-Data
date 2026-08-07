@@ -44,6 +44,7 @@ jobs:
             scripts/domestic_odds_expansion.py \
             scripts/enrich_domestic_odds_team_logos.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
+            scripts/annotate_domestic_odds_movement.py \
             scripts/build_domestic_proposal_readiness.py \
             scripts/build_statmaker_update_manifest.py
           python -m unittest \
@@ -140,6 +141,12 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             --write \
             --report-dir reports
+
+      - name: Annotate Domestic odds movement
+        run: |
+          python scripts/annotate_domestic_odds_movement.py \
+            "$RUNNER_TEMP/domestic_odds_before.json" \
+            odds/odds_api_io/domestic_odds.json
 
       - name: Build market-specific Domestic proposal readiness
         run: python scripts/build_domestic_proposal_readiness.py
