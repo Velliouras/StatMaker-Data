@@ -11,6 +11,12 @@ on:
   schedule:
     # Runs 48 minutes after the existing 4-hour Domestic odds refresh window.
     - cron: "5 2,6,10,14,18,22 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/domestic-match-context.yml"
+      - "scripts/enrich_domestic_match_context.py"
 
 permissions:
   contents: write
