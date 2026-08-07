@@ -20,6 +20,7 @@ from enrich_domestic_match_context import (
     CACHE_PATH,
     ODDS_PATH,
     REGISTRY_PATH,
+    ROOT,
     build_alias_lookup,
     candidate_matches,
     fixture_record,
@@ -33,7 +34,7 @@ from enrich_domestic_match_context import (
     now_utc,
 )
 
-REPORT_PATH = ODDS_PATH.parents[1] / "reports" / "domestic_lineup_mapping_watch.json"
+REPORT_PATH = ROOT / "reports" / "domestic_lineup_mapping_watch.json"
 LINEUP_LOOKAHEAD_MINUTES = 150
 LINEUP_PAST_GRACE_MINUTES = 20
 RETRY_MINUTES = 30
