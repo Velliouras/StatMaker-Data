@@ -1,0 +1,68 @@
+name: Domestic Match Context
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Maximum API-Football requests for match context"
+        required: true
+        default: "10"
+        type: string
+  schedule:
+    # Runs 48 minutes after the existing 4-hour Domestic odds refresh window.
+    - cron: "5 2,6,10,14,18,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-match-context
+  cancel-in-progress: true
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate context enrichment
+        run: python -m py_compile scripts/enrich_domestic_match_context.py
+
+      - name: Enrich injuries suspensions and confirmed lineups
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          DOMESTIC_CONTEXT_API_REQUEST_CAP: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '10' }}
+        run: python scripts/enrich_domestic_match_context.py
+
+      - name: Rebuild app update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Commit context artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            data/statmaker/domestic_match_context_cache.json \
+            data/statmaker/update_manifest.json \
+            reports/domestic_match_context_enrichment.json
+          if git diff --cached --quiet; then
+            echo "No Domestic match-context changes."
+          else
+            git commit -m "Refresh Domestic match context"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
