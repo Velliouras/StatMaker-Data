@@ -18,13 +18,14 @@ on:
       - ".github/workflows/domestic-match-context.yml"
       - "scripts/enrich_domestic_match_context.py"
       - "scripts/refresh_domestic_lineups.py"
+      - "scripts/refresh_domestic_squads.py"
 
 permissions:
   contents: write
 
 concurrency:
   group: domestic-match-context
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   enrich:
@@ -45,7 +46,8 @@ jobs:
         run: |
           python -m py_compile \
             scripts/enrich_domestic_match_context.py \
-            scripts/refresh_domestic_lineups.py
+            scripts/refresh_domestic_lineups.py \
+            scripts/refresh_domestic_squads.py
 
       - name: Enrich injuries suspensions and confirmed lineups
         env:
@@ -57,6 +59,11 @@ jobs:
         # Zero API calls. The 4-hour enrichment rebuilds squadContext, so restore any
         # confirmed formations already captured by the rolling lineup watcher.
         run: python scripts/refresh_domestic_lineups.py --attach-only
+
+      - name: Re-attach cached squad continuity
+        # Zero API calls. Preserve the low-frequency /players/squads snapshot across the
+        # full context rebuild without coupling squad refresh frequency to the 4-hour job.
+        run: python scripts/refresh_domestic_squads.py --attach-only
 
       - name: Rebuild app update manifest
         run: |
@@ -74,11 +81,19 @@ jobs:
             data/statmaker/domestic_match_context_cache.json \
             data/statmaker/update_manifest.json \
             reports/domestic_match_context_enrichment.json \
-            reports/domestic_lineup_watch.json
+            reports/domestic_lineup_watch.json \
+            reports/domestic_squad_context.json
           if git diff --cached --quiet; then
             echo "No Domestic match-context changes."
           else
             git commit -m "Refresh Domestic match context"
-            git pull --rebase --autostash origin main
-            git push origin HEAD:main
+            if ! git pull --rebase --autostash origin main; then
+              git rebase --abort || true
+              echo "Concurrent Domestic writer detected; deferring context artifact commit to the next run."
+              exit 0
+            fi
+            if ! git push origin HEAD:main; then
+              echo "Concurrent Domestic writer advanced main after rebase; deferring to the next run."
+              exit 0
+            fi
           fi
