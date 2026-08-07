@@ -1,0 +1,98 @@
+name: Domestic Squad Context
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Maximum API-Football current-squad requests"
+        required: true
+        default: "40"
+        type: string
+  schedule:
+    # Twice daily. Fresh squad snapshots are cached for six days, so normal runs use few or zero calls.
+    - cron: "40 0,12 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/domestic-squad-context.yml"
+      - "scripts/refresh_domestic_squads.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-match-context
+  cancel-in-progress: false
+
+jobs:
+  squads:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate squad context enrichment
+        run: python -m py_compile scripts/refresh_domestic_squads.py
+
+      - name: Refresh cached current squads
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          DOMESTIC_SQUAD_API_REQUEST_CAP: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '40' }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
+        run: python scripts/refresh_domestic_squads.py
+
+      - name: Rebuild app update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Validate squad quota guard
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('reports/domestic_squad_context.json').read_text(encoding='utf-8'))
+          used = int(report.get('requestsUsed') or 0)
+          cap = int(report.get('requestCap') or 0)
+          if used > cap:
+              raise SystemExit(f'Squad request cap exceeded: {used}/{cap}')
+          print(
+              f"Squad context: calls={used}/{cap} refreshed={report.get('squadsRefreshed')} "
+              f"cached={report.get('cachedSquads')} remaining={report.get('dailyQuotaRemaining')}"
+          )
+          PY
+
+      - name: Commit squad context artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            data/statmaker/domestic_match_context_cache.json \
+            data/statmaker/update_manifest.json \
+            reports/domestic_squad_context.json
+          if git diff --cached --quiet; then
+            echo "No Domestic squad-context changes."
+          else
+            git commit -m "Refresh Domestic current-squad context"
+            if ! git pull --rebase --autostash origin main; then
+              git rebase --abort || true
+              echo "Concurrent Domestic writer detected; deferring squad artifact commit to the next run."
+              exit 0
+            fi
+            if ! git push origin HEAD:main; then
+              echo "Concurrent Domestic writer advanced main after rebase; deferring to the next run."
+              exit 0
+            fi
+          fi
