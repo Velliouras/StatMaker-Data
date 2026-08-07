@@ -16,8 +16,10 @@ on:
 permissions:
   contents: write
 
+# All workflows that can rewrite domestic_odds.json share this non-cancelling lock.
+# This prevents an odds refresh from racing the context/lineup/squad writers.
 concurrency:
-  group: odds-integrity-production
+  group: domestic-match-context
   cancel-in-progress: false
 
 jobs:
@@ -46,7 +48,11 @@ jobs:
             scripts/update_uefa_qualifier_odds_integrity.py \
             scripts/annotate_domestic_odds_movement.py \
             scripts/build_domestic_proposal_readiness.py \
-            scripts/build_statmaker_update_manifest.py
+            scripts/build_statmaker_update_manifest.py \
+            scripts/enrich_domestic_match_context.py \
+            scripts/reattach_domestic_match_context.py \
+            scripts/refresh_domestic_lineups.py \
+            scripts/refresh_domestic_squads.py
           python -m unittest \
             tests/test_statmaker_domestic_scope.py \
             tests/test_odds_market_integrity.py \
@@ -148,6 +154,14 @@ jobs:
             "$RUNNER_TEMP/domestic_odds_before.json" \
             odds/odds_api_io/domestic_odds.json
 
+      - name: Restore cached Domestic match context
+        # Zero provider calls. A rotating odds rebuild may replace match objects, so restore
+        # cached injuries/availability, confirmed formations and current-squad continuity.
+        run: |
+          python scripts/reattach_domestic_match_context.py
+          python scripts/refresh_domestic_lineups.py --attach-only
+          python scripts/refresh_domestic_squads.py --attach-only
+
       - name: Build market-specific Domestic proposal readiness
         run: python scripts/build_domestic_proposal_readiness.py
 
@@ -167,6 +181,7 @@ jobs:
             odds/odds_api_io/domestic_provider_markets.json \
             data/statmaker/domestic_live_july_state.json \
             data/statmaker/domestic_proposal_readiness.json \
+            data/statmaker/domestic_match_context_cache.json \
             data/statmaker/update_manifest.json \
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
@@ -174,7 +189,9 @@ jobs:
             reports/domestic_expanded_market_rebuild.json \
             reports/domestic_team_logo_enrichment.json \
             reports/domestic_odds_integrity.json \
-            reports/domestic_proposal_readiness.json
+            reports/domestic_proposal_readiness.json \
+            reports/domestic_lineup_watch.json \
+            reports/domestic_squad_context.json
           if git diff --cached --quiet; then
             echo "No Domestic odds/readiness changes."
           else
