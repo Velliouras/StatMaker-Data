@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - ".github/workflows/domestic-lineup-watch.yml"
+      - "scripts/refresh_domestic_lineup_mappings.py"
       - "scripts/refresh_domestic_lineups.py"
 
 permissions:
@@ -41,7 +42,16 @@ jobs:
           python-version: "3.11"
 
       - name: Validate rolling lineup watcher
-        run: python -m py_compile scripts/refresh_domestic_lineups.py
+        run: |
+          python -m py_compile \
+            scripts/refresh_domestic_lineup_mappings.py \
+            scripts/refresh_domestic_lineups.py
+
+      - name: Refresh missing near-kickoff fixture mappings
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          DOMESTIC_LINEUP_MAPPING_API_REQUEST_CAP: "1"
+        run: python scripts/refresh_domestic_lineup_mappings.py
 
       - name: Refresh confirmed lineups and formations
         env:
@@ -56,19 +66,29 @@ jobs:
             --branch main \
             --output data/statmaker/update_manifest.json
 
-      - name: Validate hard request cap
+      - name: Validate hard request caps
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          report = json.loads(Path('reports/domestic_lineup_watch.json').read_text(encoding='utf-8'))
-          used = int(report.get('requestsUsed') or 0)
-          cap = int(report.get('requestCap') or 0)
-          if used > cap:
-              raise SystemExit(f'Lineup request cap exceeded: {used}/{cap}')
+
+          mapping = json.loads(Path('reports/domestic_lineup_mapping_watch.json').read_text(encoding='utf-8'))
+          lineup = json.loads(Path('reports/domestic_lineup_watch.json').read_text(encoding='utf-8'))
+          mapping_used = int(mapping.get('requestsUsed') or 0)
+          mapping_cap = int(mapping.get('requestCap') or 0)
+          lineup_used = int(lineup.get('requestsUsed') or 0)
+          lineup_cap = int(lineup.get('requestCap') or 0)
+          if mapping_used > mapping_cap:
+              raise SystemExit(f'Lineup mapping request cap exceeded: {mapping_used}/{mapping_cap}')
+          if lineup_used > lineup_cap:
+              raise SystemExit(f'Lineup request cap exceeded: {lineup_used}/{lineup_cap}')
           print(
-              f"Lineup watch: calls={used}/{cap} eligible={report.get('eligibleFixtures')} "
-              f"confirmed={report.get('confirmedLineupsAdded')} formations={report.get('confirmedFormationPairsAdded')}"
+              f"Lineup mapping: calls={mapping_used}/{mapping_cap} "
+              f"unmapped={mapping.get('nearKickoffUnmapped')} added={mapping.get('fixtureMappingsAdded')}"
+          )
+          print(
+              f"Lineup watch: calls={lineup_used}/{lineup_cap} eligible={lineup.get('eligibleFixtures')} "
+              f"confirmed={lineup.get('confirmedLineupsAdded')} formations={lineup.get('confirmedFormationPairsAdded')}"
           )
           PY
 
@@ -80,6 +100,7 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             data/statmaker/domestic_match_context_cache.json \
             data/statmaker/update_manifest.json \
+            reports/domestic_lineup_mapping_watch.json \
             reports/domestic_lineup_watch.json
           if git diff --cached --quiet; then
             echo "No Domestic lineup-context changes."
