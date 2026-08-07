@@ -17,6 +17,7 @@ on:
     paths:
       - ".github/workflows/domestic-match-context.yml"
       - "scripts/enrich_domestic_match_context.py"
+      - "scripts/refresh_domestic_lineups.py"
 
 permissions:
   contents: write
@@ -41,13 +42,21 @@ jobs:
           python-version: "3.11"
 
       - name: Validate context enrichment
-        run: python -m py_compile scripts/enrich_domestic_match_context.py
+        run: |
+          python -m py_compile \
+            scripts/enrich_domestic_match_context.py \
+            scripts/refresh_domestic_lineups.py
 
       - name: Enrich injuries suspensions and confirmed lineups
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           DOMESTIC_CONTEXT_API_REQUEST_CAP: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '10' }}
         run: python scripts/enrich_domestic_match_context.py
+
+      - name: Re-attach cached formation context
+        # Zero API calls. The 4-hour enrichment rebuilds squadContext, so restore any
+        # confirmed formations already captured by the rolling lineup watcher.
+        run: python scripts/refresh_domestic_lineups.py --attach-only
 
       - name: Rebuild app update manifest
         run: |
@@ -64,7 +73,8 @@ jobs:
             odds/odds_api_io/domestic_odds.json \
             data/statmaker/domestic_match_context_cache.json \
             data/statmaker/update_manifest.json \
-            reports/domestic_match_context_enrichment.json
+            reports/domestic_match_context_enrichment.json \
+            reports/domestic_lineup_watch.json
           if git diff --cached --quiet; then
             echo "No Domestic match-context changes."
           else
