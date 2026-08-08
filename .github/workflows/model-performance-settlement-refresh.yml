@@ -13,6 +13,11 @@ on:
     # afternoon/evening football windows without duplicating the heavy daily
     # 53-league statistics universe workflow.
     - cron: "20 14,17,20,23 * * *"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/model-performance-settlement-refresh.yml"
 
 permissions:
   contents: write
