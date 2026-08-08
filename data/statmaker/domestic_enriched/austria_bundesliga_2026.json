@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-08T17:52:41Z",
+  "generated_at": "2026-08-08T20:54:32Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-08T17:51:34Z",
+    "cache_generated_at": "2026-08-08T20:53:15Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 8,
-    "fixtures_with_any_stats": 8,
-    "fixtures_with_bb_core_stats": 7,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 9,
+    "fixtures_with_bb_core_stats": 8,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.875,
+    "bb_core_coverage": 0.8889,
     "group_counts": {
-      "shots_total": 8,
-      "shots_on_target": 8,
-      "corners": 8,
-      "fouls": 8,
-      "yellow_cards": 7,
-      "red_cards": 0,
-      "possession": 8,
-      "passes": 8,
-      "xg": 8
+      "shots_total": 9,
+      "shots_on_target": 9,
+      "corners": 9,
+      "fouls": 9,
+      "yellow_cards": 8,
+      "red_cards": 1,
+      "possession": 9,
+      "passes": 9,
+      "xg": 9
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.875,
-      "red_cards": 0.0,
+      "yellow_cards": 0.8889,
+      "red_cards": 0.1111,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 8 < 15"
+      "not enough completed fixtures: 9 < 15"
     ]
   },
   "matches": [
@@ -733,6 +733,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561902,
+      "date_utc": "2026-08-08T17:30:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 2",
+      "home_team": "TSV Hartberg",
+      "away_team": "Sturm Graz",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 20,
+        "HST": 2,
+        "AST": 5,
+        "HC": 3,
+        "AC": 9,
+        "HF": 15,
+        "AF": 10,
+        "HY": 2,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 334,
+        "APasses": 378,
+        "HPassesAccurate": 246,
+        "APassesAccurate": 301,
+        "HxG": 0.28,
+        "AxG": 1.48
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
         },
         "extratime": {
           "home": null,
