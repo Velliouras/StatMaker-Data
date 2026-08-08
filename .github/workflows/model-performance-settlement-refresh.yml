@@ -1,0 +1,149 @@
+name: Model Performance Settlement Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Safe API-Football request cap for this settlement run"
+        required: true
+        default: "120"
+        type: string
+  schedule:
+    # Lightweight same-day settlement refresh. Four runs/day cover the main
+    # afternoon/evening football windows without duplicating the heavy daily
+    # 53-league statistics universe workflow.
+    - cron: "20 14,17,20,23 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: model-performance-settlement-refresh
+  cancel-in-progress: true
+
+jobs:
+  refresh-settlement-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Resolve recently finished Domestic league scope
+        id: scope
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          odds_path = Path('odds/odds_api_io/domestic_odds.json')
+          if not odds_path.is_file():
+              print('league_codes=')
+              print('candidate_matches=0')
+              raise SystemExit(0)
+
+          payload = json.loads(odds_path.read_text(encoding='utf-8'))
+          now = datetime.now(timezone.utc)
+          # A football match should be settled by 140 minutes after scheduled kickoff.
+          # Keep a 12-hour lookback so a delayed workflow run can still close matches.
+          settled_before = now - timedelta(minutes=140)
+          window_start = now - timedelta(hours=12)
+
+          codes = set()
+          candidate_matches = 0
+          for league in payload.get('leagues', []) or []:
+              code = str(league.get('leagueCode') or '').strip().upper()
+              if not code:
+                  continue
+              for match in league.get('matches', []) or []:
+                  raw = str(match.get('kickoff') or '').strip()
+                  if not raw:
+                      continue
+                  try:
+                      kickoff = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                      if kickoff.tzinfo is None:
+                          kickoff = kickoff.replace(tzinfo=timezone.utc)
+                      kickoff = kickoff.astimezone(timezone.utc)
+                  except ValueError:
+                      continue
+                  if window_start <= kickoff <= settled_before:
+                      codes.add(code)
+                      candidate_matches += 1
+
+          print(f"league_codes={','.join(sorted(codes))}")
+          print(f"candidate_matches={candidate_matches}")
+          PY
+
+      - name: Refresh only leagues with recently finished matches
+        if: steps.scope.outputs.league_codes != ''
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '120' }}
+        run: |
+          python scripts/run_domestic_stats_refresh.py \
+            --league-codes "${{ steps.scope.outputs.league_codes }}" \
+            --max-requests "${INPUT_MAX_REQUESTS:-120}" \
+            > reports/model_performance_settlement_refresh.log 2>&1
+          cat reports/model_performance_settlement_refresh.log
+
+      - name: Rebuild app-facing settlement artifacts
+        if: steps.scope.outputs.league_codes != ''
+        run: |
+          python scripts/expand_domestic_full_stats.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic Stats registry is empty')
+          pipeline.build_app_statistics(registry)
+          PY
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Commit settlement artifacts
+        if: steps.scope.outputs.league_codes != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/api_football/fixture_stats \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/domestic_enriched \
+            data/statmaker/domestic_live_july_state.json \
+            data/statmaker/uefa_support_history.json \
+            data/statmaker/update_manifest.json \
+            reports/api_football_fixture_stats_fetch.json \
+            reports/api_football_fixture_stats_fetch.csv \
+            reports/api_football_fixture_stats_fetch.md \
+            reports/statmaker_domestic_enriched_build.json \
+            reports/statmaker_domestic_enriched_build.csv \
+            reports/statmaker_domestic_enriched_build.md \
+            reports/domestic_live_july_pipeline.json \
+            reports/domestic_live_july_stats_refresh.json \
+            reports/domestic_live_july_full_stats_expansion.json \
+            reports/domestic_live_july_artifact_contract.json \
+            reports/domestic_live_july_normalized_stats.json \
+            reports/model_performance_settlement_refresh.log
+          if git diff --cached --quiet; then
+            echo "No settlement data changes to commit."
+          else
+            git commit -m "Refresh same-day model settlement data"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
