@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-08T20:54:33Z`
+Generated at: `2026-08-08T23:50:29Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -57,4 +57,4 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 141 | 69 | 67 | 0.4894 | 0.4752 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4894 < 0.65; low BB-core coverage: 0.4752 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2026-2027 | 2026 | 207 | central_europe | 12 | 12 | 11 | 1.0 | 0.9167 | False | data/statmaker/domestic_enriched/switzerland_super_league_2026.json | not enough completed fixtures: 12 < 15 |
 | T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
-| USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 268 | 266 | 261 | 0.9925 | 0.9739 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
+| USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 269 | 267 | 262 | 0.9926 | 0.974 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
