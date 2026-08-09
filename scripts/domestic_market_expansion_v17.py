@@ -82,6 +82,11 @@ def install(odds_module: Any, pipeline_module: Any = None) -> None:
     if getattr(odds_module, "_statmaker_market_v17_installed", False):
         return
 
+    # The archive rebuild module keys its replaceable families from v15.NEW_MARKETS.
+    # Add Asian Handicap there as well so already-cached exact provider Spread rows can
+    # be re-normalized without any extra Odds-API.io request.
+    base.NEW_MARKETS.add(ASIAN_HANDICAP)
+
     # Preserve every existing v16 market, including the legacy European Handicap
     # while Production still runs the pre-Asian app. The UAT app explicitly rejects
     # European Handicap rows, so this gives a safe staged migration with no Prod gap.
