@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Dict, List
@@ -13,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
 OUTPUT_PATH = ROOT / "data" / "api_football" / "domestic_normalized_fixture_stats.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_normalized_stats.json"
+TRANSITION_PATH = ROOT / ".git" / "statmaker_normalized_stats_transition.json"
 
 FIELDS = (
     "HS", "AS", "HST", "AST", "HC", "AC", "HF", "AF", "HY", "AY", "HR", "AR",
@@ -34,6 +36,14 @@ def load_json(path: Path, default: Any) -> Any:
 def write_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def normalize_stats(item: Dict[str, Any]) -> Dict[str, Any]:
@@ -62,11 +72,61 @@ def export_fixture(league: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, An
     }
 
 
+def fixture_identity(item: Dict[str, Any]) -> str:
+    league_id = str(item.get("league_id") or "").strip()
+    fixture_id = str(item.get("fixture_id") or "").strip()
+    if league_id and fixture_id:
+        return f"api:{league_id}:{fixture_id}"
+    return "fallback:" + "|".join(
+        str(item.get(key) or "").strip().lower()
+        for key in ("league_code", "date", "home_team", "away_team")
+    )
+
+
+def build_transition(previous: Dict[str, Any], current: Dict[str, Any]) -> Dict[str, Any]:
+    old_rows = {
+        fixture_identity(item): item
+        for item in previous.get("fixtures", []) or []
+        if isinstance(item, dict)
+    }
+    new_rows = {
+        fixture_identity(item): item
+        for item in current.get("fixtures", []) or []
+        if isinstance(item, dict)
+    }
+    changed = sorted(
+        key for key in old_rows.keys() | new_rows.keys()
+        if old_rows.get(key) != new_rows.get(key)
+    )
+    return {
+        "removedFixtures": [old_rows[key] for key in changed if key in old_rows],
+        "upserts": [new_rows[key] for key in changed if key in new_rows],
+    }
+
+
+def write_transition(previous_payload: Dict[str, Any], previous_sha: str, current_payload: Dict[str, Any], current_sha: str) -> None:
+    if not previous_sha or previous_sha == current_sha or not previous_payload.get("fixtures"):
+        TRANSITION_PATH.unlink(missing_ok=True)
+        return
+    delta = build_transition(previous_payload, current_payload)
+    transition = {
+        "schemaVersion": 1,
+        "fromSha256": previous_sha,
+        "toSha256": current_sha,
+        "removedFixtures": delta["removedFixtures"],
+        "upserts": delta["upserts"],
+    }
+    write_json(TRANSITION_PATH, transition)
+
+
 def main() -> int:
     registry = load_json(REGISTRY_PATH, {})
     leagues = registry.get("leagues", []) if isinstance(registry, dict) else []
     if not leagues:
         raise SystemExit("Domestic live/July registry is empty")
+
+    previous_payload = load_json(OUTPUT_PATH, {})
+    previous_sha = sha256_file(OUTPUT_PATH) if OUTPUT_PATH.is_file() else ""
 
     fixtures: List[Dict[str, Any]] = []
     league_reports: List[Dict[str, Any]] = []
@@ -117,6 +177,8 @@ def main() -> int:
         "leagues": league_reports,
     }
     write_json(OUTPUT_PATH, output)
+    current_sha = sha256_file(OUTPUT_PATH)
+    write_transition(previous_payload, previous_sha, output, current_sha)
     write_json(REPORT_PATH, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
