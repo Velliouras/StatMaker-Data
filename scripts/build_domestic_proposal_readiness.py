@@ -40,6 +40,15 @@ MARKET_REQUIREMENTS: Dict[str, Tuple[str, str]] = {
     "MATCH_SHOTS_ON_TARGET": ("shots_on_target", "match"),
     "TEAM_SHOTS_ON_TARGET": ("shots_on_target", "team"),
     "DOUBLE_CHANCE": ("scores", "match"),
+    # Asian families are separate app/filter markets, but their readiness comes
+    # from the same exact historical observations used by their conventional
+    # counterparts. Quarter-line settlement is handled by the Android engine.
+    "ASIAN_HANDICAP": ("scores", "match"),
+    "ASIAN_HANDICAP_1H": ("half_scores", "match"),
+    "ASIAN_GOALS": ("scores", "match"),
+    "ASIAN_GOALS_1H": ("half_scores", "match"),
+    "ASIAN_CORNERS": ("corners", "match"),
+    "ASIAN_CORNER_HANDICAP": ("corners", "match"),
 }
 
 STAT_FIELDS = {
