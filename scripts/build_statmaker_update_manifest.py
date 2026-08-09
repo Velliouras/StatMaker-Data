@@ -5,8 +5,9 @@ Two profiles match the two live data branches:
 - main: Domestic odds, history, readiness, support, aliases and logos.
 - uefa: Champions League, Europa League and Conference League odds.
 
-The output changes only when tracked file content changes, so existing scheduled
-workflows can commit it without generating noisy revisions or additional runs.
+For the large normalized Domestic statistics artifact, the main manifest also carries
+an optional bounded old-hash -> new-hash delta chain. Existing installs can update
+their compact local snapshot without downloading/parsing the full multi-megabyte JSON.
 """
 from __future__ import annotations
 
@@ -18,6 +19,10 @@ from pathlib import Path
 from typing import Any, Iterable
 
 DEFAULT_REPOSITORY = "Velliouras/StatMaker-Data"
+NORMALIZED_STATS_ARTIFACT_ID = "domestic_normalized_fixture_stats"
+NORMALIZED_STATS_TRANSITION_RELATIVE_PATH = ".git/statmaker_normalized_stats_transition.json"
+MAX_NORMALIZED_STATS_TRANSITIONS = 8
+MAX_NORMALIZED_STATS_DELTA_BYTES = 1_500_000
 
 
 @dataclass(frozen=True)
@@ -32,7 +37,7 @@ MAIN_ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
     ArtifactSpec("domestic_odds", "odds/odds_api_io/domestic_odds.json", "odds", required=True),
     ArtifactSpec("domestic_enriched_index", "data/statmaker/domestic_enriched/index.json", "history"),
     ArtifactSpec(
-        "domestic_normalized_fixture_stats",
+        NORMALIZED_STATS_ARTIFACT_ID,
         "data/api_football/domestic_normalized_fixture_stats.json",
         "history",
     ),
@@ -161,6 +166,105 @@ def build_manifest(
     }
 
 
+def _artifact_hash(manifest: dict[str, Any], artifact_id: str) -> str:
+    for item in manifest.get("artifacts", []) or []:
+        if isinstance(item, dict) and item.get("id") == artifact_id:
+            return str(item.get("sha256") or "").strip()
+    return ""
+
+
+def _valid_transition(value: Any) -> dict[str, Any] | None:
+    if not isinstance(value, dict):
+        return None
+    from_hash = str(value.get("fromSha256") or "").strip()
+    to_hash = str(value.get("toSha256") or "").strip()
+    if not from_hash or not to_hash or from_hash == to_hash:
+        return None
+    removed = value.get("removedFixtures")
+    upserts = value.get("upserts")
+    if not isinstance(removed, list) or not isinstance(upserts, list):
+        return None
+    return {
+        "fromSha256": from_hash,
+        "toSha256": to_hash,
+        "removedFixtures": removed,
+        "upserts": upserts,
+    }
+
+
+def _previous_transitions(previous_manifest: Any) -> list[dict[str, Any]]:
+    if not isinstance(previous_manifest, dict):
+        return []
+    root = previous_manifest.get("normalizedStatsDelta")
+    if not isinstance(root, dict):
+        return []
+    if root.get("targetArtifactId") != NORMALIZED_STATS_ARTIFACT_ID:
+        return []
+    return [
+        valid for value in (root.get("transitions") or [])
+        if (valid := _valid_transition(value)) is not None
+    ]
+
+
+def _connected_suffix(transitions: list[dict[str, Any]], target_hash: str) -> list[dict[str, Any]]:
+    if not target_hash:
+        return []
+    by_to: dict[str, dict[str, Any]] = {}
+    for transition in transitions:
+        by_to[transition["toSha256"]] = transition
+    result: list[dict[str, Any]] = []
+    current = target_hash
+    seen: set[str] = set()
+    while current not in seen and current in by_to:
+        seen.add(current)
+        transition = by_to[current]
+        result.append(transition)
+        current = transition["fromSha256"]
+    result.reverse()
+    return result[-MAX_NORMALIZED_STATS_TRANSITIONS:]
+
+
+def _bounded_transitions(transitions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    bounded = list(transitions[-MAX_NORMALIZED_STATS_TRANSITIONS:])
+    while bounded:
+        payload = json.dumps(bounded, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        if len(payload) <= MAX_NORMALIZED_STATS_DELTA_BYTES:
+            return bounded
+        bounded.pop(0)
+    return []
+
+
+def attach_normalized_stats_delta(
+    root: Path,
+    manifest: dict[str, Any],
+    previous_manifest: Any,
+) -> None:
+    if manifest.get("profile") != "main":
+        return
+    target_hash = _artifact_hash(manifest, NORMALIZED_STATS_ARTIFACT_ID)
+    if not target_hash:
+        return
+
+    candidates = _previous_transitions(previous_manifest)
+    transition_path = root / NORMALIZED_STATS_TRANSITION_RELATIVE_PATH
+    if transition_path.is_file():
+        try:
+            current = _valid_transition(_read_json(transition_path))
+        except (OSError, ValueError, json.JSONDecodeError):
+            current = None
+        if current is not None and current["toSha256"] == target_hash:
+            candidates.append(current)
+
+    chain = _bounded_transitions(_connected_suffix(candidates, target_hash))
+    if chain:
+        manifest["normalizedStatsDelta"] = {
+            "schemaVersion": 1,
+            "targetArtifactId": NORMALIZED_STATS_ARTIFACT_ID,
+            "targetSha256": target_hash,
+            "transitions": chain,
+        }
+
+
 def write_manifest(path: Path, manifest: dict[str, Any]) -> bool:
     rendered = json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=False) + "\n"
     previous = path.read_text(encoding="utf-8") if path.is_file() else None
@@ -185,6 +289,7 @@ def main() -> int:
     args = parse_args()
     root = Path(args.root).resolve()
     output = root / args.output
+    previous_manifest = _read_json(output) if output.is_file() else {}
     specs = PROFILES[args.profile]
     manifest = build_manifest(
         root=root,
@@ -193,7 +298,10 @@ def main() -> int:
         specs=specs,
         profile=args.profile,
     )
+    attach_normalized_stats_delta(root, manifest, previous_manifest)
     changed = write_manifest(output, manifest)
+    transition_path = root / NORMALIZED_STATS_TRANSITION_RELATIVE_PATH
+    transition_path.unlink(missing_ok=True)
     print(
         f"StatMaker {args.profile} update manifest {'updated' if changed else 'unchanged'}: "
         f"{manifest['artifactCount']} artifacts, version={manifest['contentVersion'][:12]}"
