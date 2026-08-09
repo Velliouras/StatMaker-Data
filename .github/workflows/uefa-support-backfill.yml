@@ -48,14 +48,21 @@ jobs:
       - name: Prepare current live UEFA feeds
         run: |
           mkdir -p "$RUNNER_TEMP/uefa_feeds"
+          copied=0
           for name in champions_league_odds.json europa_league_odds.json conference_league_odds.json; do
             source="odds/odds_api_io/$name"
             if [ ! -s "$source" ]; then
-              echo "Missing live UEFA feed: $source"
-              exit 1
+              echo "UEFA feed is currently inactive or absent; skipping: $source"
+              continue
             fi
             cp "$source" "$RUNNER_TEMP/uefa_feeds/$name"
+            copied=$((copied + 1))
           done
+          if [ "$copied" -eq 0 ]; then
+            echo "No live UEFA feeds are available; refusing to run participant backfill."
+            exit 1
+          fi
+          echo "Prepared $copied live UEFA feed(s)."
 
       - name: Backfill only missing UEFA participant history and logos
         env:
