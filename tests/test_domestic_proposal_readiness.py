@@ -49,12 +49,24 @@ class DomesticProposalReadinessTest(unittest.TestCase):
         self.assertTrue(readiness.market_support(support, "Alpha", "Beta", "MATCH_CORNERS")["hardHistoryValid"])
         self.assertFalse(readiness.market_support(support, "Alpha", "Beta", "MATCH_SHOTS")["hardHistoryValid"])
 
+    def test_asian_families_use_their_exact_historical_requirements(self):
+        support = readiness.historical_support(self.matches)
+        for market in ("ASIAN_HANDICAP", "ASIAN_GOALS"):
+            self.assertTrue(readiness.market_support(support, "Alpha", "Beta", market)["hardHistoryValid"])
+        for market in ("ASIAN_HANDICAP_1H", "ASIAN_GOALS_1H"):
+            self.assertTrue(readiness.market_support(support, "Alpha", "Beta", market)["hardHistoryValid"])
+        for market in ("ASIAN_CORNERS", "ASIAN_CORNER_HANDICAP"):
+            self.assertTrue(readiness.market_support(support, "Alpha", "Beta", market)["hardHistoryValid"])
+
     def test_exact_visible_market_requires_bookmaker_exact_flag_and_minimum_odd(self):
         base = {"market": "MATCH_CORNERS", "bookmaker": "Bet365", "exactBookmakerOdds": True}
         self.assertTrue(readiness.valid_exact_market({**base, "odds": 1.20}))
         self.assertFalse(readiness.valid_exact_market({**base, "odds": 1.19}))
         self.assertFalse(readiness.valid_exact_market({**base, "odds": 1.50, "exactBookmakerOdds": False}))
         self.assertFalse(readiness.valid_exact_market({**base, "odds": 1.50, "bookmaker": ""}))
+
+        asian = {"market": "ASIAN_GOALS", "bookmaker": "Bet365", "exactBookmakerOdds": True}
+        self.assertTrue(readiness.valid_exact_market({**asian, "odds": 1.91}))
 
     def test_restored_non_core_league_can_be_proposal_ready(self):
         # CZE is intentionally outside the temporary core-27 odds polling scope,
