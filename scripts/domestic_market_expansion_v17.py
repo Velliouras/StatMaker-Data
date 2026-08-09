@@ -52,6 +52,8 @@ def normalize_asian_handicap(
         home_line = base._line(odds, market, row)
         if home_line is None or not _is_settlement_safe_line(home_line):
             continue
+        home_line = 0.0 if abs(home_line) < 1e-9 else home_line
+        away_line = 0.0 if home_line == 0.0 else -home_line
 
         home_price = odds.row_side_price(row, "home")
         away_price = odds.row_side_price(row, "away")
@@ -72,7 +74,7 @@ def normalize_asian_handicap(
             "Away",
             away_price,
             bookmaker,
-            line=-home_line,
+            line=away_line,
             team=away,
         )
     return base._dedupe(out)
