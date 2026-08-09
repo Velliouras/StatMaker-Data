@@ -8,6 +8,7 @@ import os
 import time
 from typing import Any, Callable, MutableMapping, Optional
 
+import domestic_market_expansion_v17
 import refresh_domestic_live_july_odds as target
 import statmaker_domestic_scope as scope
 from odds_market_integrity import install_parser_guard
@@ -157,6 +158,11 @@ def install_rate_limit_wait_guard(
 def main() -> int:
     install_parser_guard(target.odds_fetch)
     scope.install_odds_registry_load_guard(target.pipeline)
+
+    # Install in the same order as target.main(), then add the Asian wrapper last.
+    # target.main() sees the installer guards and therefore keeps this exact order.
+    target.domestic_odds_expansion.install(target.odds_fetch, target.pipeline)
+    domestic_market_expansion_v17.install(target.odds_fetch, target.pipeline)
 
     # Domestic and UEFA refreshes share the same Odds-API.io key in one workflow.
     # Preserve a meaningful provider reset-window reserve for the UEFA stage.
