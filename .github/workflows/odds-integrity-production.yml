@@ -43,6 +43,7 @@ jobs:
             scripts/statmaker_domestic_scope.py \
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
+            scripts/refresh_domestic_odds_schedule_priority.py \
             scripts/domestic_odds_expansion.py \
             scripts/enrich_domestic_odds_team_logos.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
@@ -66,17 +67,19 @@ jobs:
       - name: Snapshot current Domestic odds
         run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
 
-      - name: Refresh rotating Domestic exact odds
+      - name: Refresh imminent schedule and rotating Domestic exact odds
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
           ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
           ODDS_API_IO_RATE_LIMIT_WAIT_MAX_SECONDS: "420"
           ODDS_API_IO_RATE_LIMIT_WAIT_BUFFER_SECONDS: "2"
+          STATMAKER_DOMESTIC_SCHEDULE_HORIZON_DAYS: "3"
+          STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS: "7"
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
           cycle_size="${INPUT_CYCLE_SIZE:-16}"
-          python scripts/refresh_domestic_odds_integrity.py --cycle-size "$cycle_size"
+          python scripts/refresh_domestic_odds_schedule_priority.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
         run: |
