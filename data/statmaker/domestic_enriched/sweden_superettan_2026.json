@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-10T18:07:52Z",
+  "generated_at": "2026-08-10T21:07:47Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-09T23:53:47Z",
+    "cache_generated_at": "2026-08-10T21:07:43Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,11 +39,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 142,
+    "completed_fixtures": 143,
     "fixtures_with_any_stats": 69,
     "fixtures_with_bb_core_stats": 67,
-    "any_stats_coverage": 0.4859,
-    "bb_core_coverage": 0.4718,
+    "any_stats_coverage": 0.4825,
+    "bb_core_coverage": 0.4685,
     "group_counts": {
       "shots_total": 39,
       "shots_on_target": 67,
@@ -56,20 +56,20 @@
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.2746,
-      "shots_on_target": 0.4718,
-      "corners": 0.4718,
-      "fouls": 0.1901,
-      "yellow_cards": 0.4859,
-      "red_cards": 0.4859,
-      "possession": 0.4718,
-      "passes": 0.1831,
-      "xg": 0.1831
+      "shots_total": 0.2727,
+      "shots_on_target": 0.4685,
+      "corners": 0.4685,
+      "fouls": 0.1888,
+      "yellow_cards": 0.4825,
+      "red_cards": 0.4825,
+      "possession": 0.4685,
+      "passes": 0.1818,
+      "xg": 0.1818
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.4859 < 0.65",
-      "low BB-core coverage: 0.4718 < 0.65",
+      "low any-stats coverage: 0.4825 < 0.65",
+      "low BB-core coverage: 0.4685 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -11991,6 +11991,90 @@
         },
         "fulltime": {
           "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497652,
+      "date_utc": "2026-08-10T17:00:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "league_code": "SWE2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
+      "round": "Regular Season - 18",
+      "home_team": "Norrby IF",
+      "away_team": "Orebro SK",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
           "away": 1
         },
         "extratime": {
