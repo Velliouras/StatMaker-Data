@@ -83,7 +83,11 @@ jobs:
           STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS: "7"
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
-          cycle_size="${INPUT_CYCLE_SIZE:-16}"
+          if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            cycle_size="1"
+          else
+            cycle_size="${INPUT_CYCLE_SIZE:-16}"
+          fi
           python scripts/refresh_domestic_odds_schedule_priority.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
