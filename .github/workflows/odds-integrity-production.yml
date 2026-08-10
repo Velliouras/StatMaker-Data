@@ -8,6 +8,11 @@ on:
         required: true
         default: "16"
         type: string
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/domestic-odds-refresh-request"
   schedule:
     # Every 4 hours. Greece: 04:17, 08:17, 12:17, 16:17, 20:17, 00:17 during EEST;
     # 03:17, 07:17, 11:17, 15:17, 19:17, 23:17 during EET. Cron itself is always UTC.
