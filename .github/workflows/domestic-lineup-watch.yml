@@ -59,6 +59,29 @@ jobs:
           DOMESTIC_LINEUP_API_REQUEST_CAP: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '3' }}
         run: python scripts/refresh_domestic_lineups.py
 
+      - name: Ignore timestamp-only odds rewrites
+        shell: bash
+        run: |
+          set -euo pipefail
+          odds="odds/odds_api_io/domestic_odds.json"
+          if git diff --quiet -- "$odds"; then
+            echo "Domestic odds unchanged."
+            exit 0
+          fi
+
+          substantive="$({
+            git diff --unified=0 -- "$odds" \
+              | grep -E '^[+-]' \
+              | grep -Ev '^(---|\+\+\+)' \
+              | grep -v '"generatedAt"[[:space:]]*:'
+          } || true)"
+          if [ -z "$substantive" ]; then
+            echo "Only volatile generatedAt values changed; restoring canonical odds artifact."
+            git checkout -- "$odds"
+          else
+            echo "Substantive Domestic odds/context changes detected; keeping artifact update."
+          fi
+
       - name: Rebuild app update manifest
         run: |
           python scripts/build_statmaker_update_manifest.py \
@@ -79,9 +102,9 @@ jobs:
           lineup_used = int(lineup.get('requestsUsed') or 0)
           lineup_cap = int(lineup.get('requestCap') or 0)
           if mapping_used > mapping_cap:
-              raise SystemExit(f'Lineup mapping request cap exceeded: {mapping_used}/{mapping_cap}')
+            raise SystemExit(f'Lineup mapping request cap exceeded: {mapping_used}/{mapping_cap}')
           if lineup_used > lineup_cap:
-              raise SystemExit(f'Lineup request cap exceeded: {lineup_used}/{lineup_cap}')
+            raise SystemExit(f'Lineup request cap exceeded: {lineup_used}/{lineup_cap}')
           print(
               f"Lineup mapping: calls={mapping_used}/{mapping_cap} "
               f"unmapped={mapping.get('nearKickoffUnmapped')} added={mapping.get('fixtureMappingsAdded')}"
