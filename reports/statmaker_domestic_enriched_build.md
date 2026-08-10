@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-09T23:53:59Z`
+Generated at: `2026-08-10T18:07:53Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -43,7 +43,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | NOR2 | Norway | OBOS-ligaen | 2026 | 2026 | 104 | scandinavia | 128 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/norway_obos_ligaen_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | POL | Poland | Ekstraklasa | 2026-2027 | 2026 | 106 | central_europe | 24 | 24 | 23 | 1.0 | 0.9583 | True | data/statmaker/domestic_enriched/poland_ekstraklasa_2026.json | ok |
 | P1 | Portugal | Liga Portugal | 2025-2026 | 2025 | 94 | western_europe | 308 | 308 | 304 | 1.0 | 0.987 | True | data/statmaker/domestic_enriched/portugal_liga_portugal_2025.json | ok |
-| ROM | Romania | Liga I | 2026-2027 | 2026 | 283 | central_europe | 27 | 27 | 25 | 1.0 | 0.9259 | True | data/statmaker/domestic_enriched/romania_liga_i_2026.json | ok |
+| ROM | Romania | Liga I | 2026-2027 | 2026 | 283 | central_europe | 30 | 30 | 28 | 1.0 | 0.9333 | True | data/statmaker/domestic_enriched/romania_liga_i_2026.json | ok |
 | RUS | Russia | Premier League | 2026-2027 | 2026 | 235 | eastern_europe | 16 | 16 | 15 | 1.0 | 0.9375 | True | data/statmaker/domestic_enriched/russia_premier_league_2026.json | ok |
 | SC1 | Scotland | Championship | 2026-2027 | 2026 | 180 | scotland | 5 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_championship_2026.json | not enough completed fixtures: 5 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC3 | Scotland | League Two | 2025-2026 | 2025 | 182 | scotland | 121 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
