@@ -198,7 +198,6 @@ jobs:
             data/statmaker/domestic_live_july_registry.json \
             data/statmaker/domestic_live_july_state.json \
             data/statmaker/uefa_support_history.json \
-            data/statmaker/update_manifest.json \
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
             reports/api_football_fixture_stats_fetch.md \
@@ -218,6 +217,18 @@ jobs:
             echo "No Domestic statistics-universe changes to commit."
           else
             git commit -m "Record 53-league Domestic statistics run"
+            # The manifest is shared by several producers. Do not carry a stale,
+            # pre-rebase manifest through rebase because it can conflict with a
+            # newer manifest written by another workflow.
+            git restore -- data/statmaker/update_manifest.json
             git pull --rebase --autostash origin main
+            python scripts/build_statmaker_update_manifest.py \
+              --profile main \
+              --branch main \
+              --output data/statmaker/update_manifest.json
+            git add data/statmaker/update_manifest.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Rebuild main update manifest after Domestic stats refresh"
+            fi
             git push origin HEAD:main
           fi
