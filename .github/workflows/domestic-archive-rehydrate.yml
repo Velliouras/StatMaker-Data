@@ -1,0 +1,96 @@
+name: Domestic Archive Betting Rehydrate
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/domestic-archive-rehydrate-request"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-match-context
+  cancel-in-progress: false
+
+jobs:
+  rehydrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate offline rehydration code
+        run: |
+          python -m py_compile \
+            scripts/rehydrate_domestic_betting_from_archive.py \
+            scripts/odds_market_integrity.py \
+            scripts/build_domestic_proposal_readiness.py \
+            scripts/build_statmaker_update_manifest.py \
+            scripts/reattach_domestic_match_context.py \
+            scripts/refresh_domestic_lineups.py \
+            scripts/refresh_domestic_squads.py
+          python -m unittest \
+            tests/test_odds_market_integrity.py \
+            tests/test_domestic_proposal_readiness.py \
+            tests/test_statmaker_update_manifest.py
+
+      - name: Validate current Domestic feed
+        run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
+
+      - name: Rehydrate exact archived betting markets
+        run: python scripts/rehydrate_domestic_betting_from_archive.py
+
+      - name: Sanitize exact Domestic betting markets
+        run: |
+          python scripts/odds_market_integrity.py \
+            odds/odds_api_io/domestic_odds.json \
+            --write \
+            --report-dir reports
+
+      - name: Restore cached match context
+        run: |
+          python scripts/reattach_domestic_match_context.py
+          python scripts/refresh_domestic_lineups.py --attach-only
+          python scripts/refresh_domestic_squads.py --attach-only
+
+      - name: Build market-specific proposal readiness
+        run: python scripts/build_domestic_proposal_readiness.py
+
+      - name: Commit offline Domestic feed changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            odds/odds_api_io/domestic_odds.json \
+            data/statmaker/domestic_proposal_readiness.json \
+            data/statmaker/domestic_match_context_cache.json \
+            reports/domestic_archive_betting_rehydrate.json \
+            reports/domestic_odds_integrity.json \
+            reports/domestic_proposal_readiness.json \
+            reports/domestic_lineup_watch.json \
+            reports/domestic_squad_context.json
+          if git diff --cached --quiet; then
+            echo "No archive betting rehydration changes."
+          else
+            git commit -m "Rehydrate Domestic betting from exact provider archive"
+            git pull --rebase --autostash origin main
+            python scripts/build_statmaker_update_manifest.py \
+              --profile main \
+              --branch main \
+              --output data/statmaker/update_manifest.json
+            git add data/statmaker/update_manifest.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Rebuild main manifest after archive betting rehydrate"
+            fi
+            git push origin HEAD:main
+          fi
