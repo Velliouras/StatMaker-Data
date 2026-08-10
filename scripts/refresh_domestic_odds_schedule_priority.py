@@ -198,6 +198,47 @@ def _install_conservative_team_mapping() -> None:
     target.odds_fetch.canonical_team_info = canonical_team_info
 
 
+def _install_schedule_only_validation() -> None:
+    """Align the odds refresh validator with the existing G2 schedule-only contract."""
+    original = target.validate_feed
+
+    def validate(feed: Dict[str, Any], registry: Sequence[Dict[str, Any]], today: dt.date) -> Dict[str, Any]:
+        expected = {str(row.get("leagueCode") or "") for row in registry}
+        in_scope: List[Dict[str, Any]] = []
+        schedule_only_external: List[str] = []
+
+        for league in feed.get("leagues", []) or []:
+            if not isinstance(league, dict):
+                continue
+            code = str(league.get("leagueCode") or "")
+            if code in expected:
+                in_scope.append(league)
+                continue
+
+            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]
+            explicit_schedule_source = (
+                str(league.get("providerLeagueSlug") or "").strip() == "api-football-schedule-only"
+            )
+            safe_schedule_only = explicit_schedule_source and all(
+                row.get("scheduleOnly") is True and not (row.get("markets") or [])
+                for row in matches
+            )
+            if not safe_schedule_only:
+                raise RuntimeError(
+                    f"Unexpected out-of-registry betting league in Domestic feed: {code}"
+                )
+            schedule_only_external.append(code)
+
+        scoped = dict(feed)
+        scoped["leagues"] = in_scope
+        result = original(scoped, registry, today)
+        result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)
+        result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)
+        return result
+
+    target.validate_feed = validate
+
+
 def _match_key(match: Dict[str, Any]) -> tuple[str, ...]:
     match_id = str(match.get("id") or match.get("matchId") or "").strip()
     if match_id:
@@ -348,6 +389,7 @@ def main() -> int:
     _install_priority_rotation(priority_codes)
     _install_near_term_event_horizon(odds_days)
     _install_conservative_team_mapping()
+    _install_schedule_only_validation()
 
     result = guarded.main()
     if result != 0:
