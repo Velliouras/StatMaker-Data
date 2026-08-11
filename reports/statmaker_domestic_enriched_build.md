@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-11T04:53:49Z`
+Generated at: `2026-08-11T21:09:30Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -54,7 +54,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 468 | 468 | 462 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | ok |
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 127 | 127 | 127 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
-| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 143 | 69 | 67 | 0.4825 | 0.4685 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4825 < 0.65; low BB-core coverage: 0.4685 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 144 | 69 | 67 | 0.4792 | 0.4653 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4792 < 0.65; low BB-core coverage: 0.4653 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2026-2027 | 2026 | 207 | central_europe | 18 | 18 | 17 | 1.0 | 0.9444 | True | data/statmaker/domestic_enriched/switzerland_super_league_2026.json | ok |
 | T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
 | USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 269 | 267 | 262 | 0.9926 | 0.974 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |

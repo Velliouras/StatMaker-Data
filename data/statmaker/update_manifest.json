@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "d9ff11a6aeec4900b4e1c762c17cae1c09fa58f990e79c2cb3d6899078234e6e",
-  "generatedAt": "2026-08-11T20:23:55Z",
+  "contentVersion": "aa2fabf71cce822cd22fe0e9bba15ebfd40bd6f42381c7f4d9f711ad51d3a4b0",
+  "generatedAt": "2026-08-11T21:09:33.065318Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "9226418bdc54895c31bb7a4f632031c869321cefc1068b8cf4aec9d03bdfd6af",
-      "bytes": 52838,
-      "generatedAt": "2026-08-11T20:23:55Z"
+      "sha256": "11eef687c892777b72aa6aab7f15e1e117ae4705a085f46b02ff2cafcd803f8c",
+      "bytes": 51847,
+      "generatedAt": "2026-08-11T21:09:30Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "e4053eafaa0bb8678d9b5060417ca3083edfba8238487a6b995d2c825bf33221",
-      "bytes": 9842137,
+      "sha256": "1a9b80cb9eb22c2241a6cd50b89ff4a4dd15030042ba19800f6b25ef99d91baa",
+      "bytes": 9843472,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "6d998c8bf97a3e5e8cebd72424a4b8b3c8a6580275f00a4ad46f295c0c207de8",
-      "bytes": 6142592,
-      "generatedAt": "2026-08-11T07:48:04.847507Z"
+      "sha256": "6304135cce5baafd38094cc5ceea08a48e8e0173b7f0f7f6b7597f1115dff067",
+      "bytes": 6142591,
+      "generatedAt": "2026-08-11T21:09:33.065318Z"
     },
     {
       "id": "uefa_team_logos",
@@ -79,5 +79,71 @@
       "bytes": 293700,
       "generatedAt": ""
     }
-  ]
+  ],
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "1a9b80cb9eb22c2241a6cd50b89ff4a4dd15030042ba19800f6b25ef99d91baa",
+    "transitions": [
+      {
+        "fromSha256": "e4053eafaa0bb8678d9b5060417ca3083edfba8238487a6b995d2c825bf33221",
+        "toSha256": "1a9b80cb9eb22c2241a6cd50b89ff4a4dd15030042ba19800f6b25ef99d91baa",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1497650,
+            "league_id": 114,
+            "league_code": "SWE2",
+            "country": "Sweden",
+            "league": "Superettan",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-08-11",
+            "home_team": "Helsingborg",
+            "away_team": "IFK Varnamo",
+            "stats": {
+              "HS": null,
+              "AS": null,
+              "HST": null,
+              "AST": null,
+              "HC": null,
+              "AC": null,
+              "HF": null,
+              "AF": null,
+              "HY": null,
+              "AY": null,
+              "HR": null,
+              "AR": null,
+              "HPossession": null,
+              "APossession": null,
+              "HSaves": null,
+              "ASaves": null,
+              "HPasses": null,
+              "APasses": null,
+              "HPassesAccurate": null,
+              "APassesAccurate": null,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": null,
+              "AShotsOffGoal": null,
+              "HBlockedShots": null,
+              "ABlockedShots": null,
+              "HShotsInsideBox": null,
+              "AShotsInsideBox": null,
+              "HShotsOutsideBox": null,
+              "AShotsOutsideBox": null,
+              "HOffsides": null,
+              "AOffsides": null,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      }
+    ]
+  }
 }
