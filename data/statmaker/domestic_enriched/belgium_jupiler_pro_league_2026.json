@@ -1,0 +1,832 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-08-11T04:53:48Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/belgium/jupiler-pro-league/2026/fixture_stats.json",
+    "cache_generated_at": "2026-08-11T04:36:24Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "B1",
+    "country": "Belgium",
+    "league": "Jupiler Pro League",
+    "football_data_code": "B1",
+    "api_football_league_id": 144,
+    "api_football_season": "2026",
+    "season": "2026-2027",
+    "app_season": "2026-2027",
+    "priority_group": "western_europe",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026-2027",
+    "target_season_start": "2026-08-07",
+    "target_season_end": "2027-05-22",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 9,
+    "fixtures_with_bb_core_stats": 9,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 1.0,
+    "group_counts": {
+      "shots_total": 9,
+      "shots_on_target": 9,
+      "corners": 9,
+      "fouls": 9,
+      "yellow_cards": 9,
+      "red_cards": 2,
+      "possession": 9,
+      "passes": 9,
+      "xg": 9
+    },
+    "group_coverage": {
+      "shots_total": 1.0,
+      "shots_on_target": 1.0,
+      "corners": 1.0,
+      "fouls": 1.0,
+      "yellow_cards": 1.0,
+      "red_cards": 0.2222,
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 1.0
+    },
+    "bb_ready_candidate": false,
+    "notes": [
+      "not enough completed fixtures: 9 < 15"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1558581,
+      "date_utc": "2026-08-07T18:45:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Club Brugge KV",
+      "away_team": "Kortrijk",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 9,
+        "HST": 8,
+        "AST": 3,
+        "HC": 6,
+        "AC": 1,
+        "HF": 6,
+        "AF": 10,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 74,
+        "APossession": 26,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 774,
+        "APasses": 271,
+        "HPassesAccurate": 700,
+        "APassesAccurate": 187,
+        "HxG": 3.49,
+        "AxG": 1.02
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558583,
+      "date_utc": "2026-08-08T16:15:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Standard Liege",
+      "away_team": "Cercle Brugge",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 18,
+        "HST": 6,
+        "AST": 2,
+        "HC": 7,
+        "AC": 11,
+        "HF": 9,
+        "AF": 13,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 0,
+        "ASaves": 2,
+        "HPasses": 487,
+        "APasses": 368,
+        "HPassesAccurate": 386,
+        "APassesAccurate": 290,
+        "HxG": 2.6,
+        "AxG": 1.47
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558584,
+      "date_utc": "2026-08-08T18:45:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "St. Truiden",
+      "away_team": "Lommel United",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 32,
+        "AS": 9,
+        "HST": 4,
+        "AST": 2,
+        "HC": 6,
+        "AC": 2,
+        "HF": 13,
+        "AF": 7,
+        "HY": 1,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 66,
+        "APossession": 34,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 638,
+        "APasses": 340,
+        "HPassesAccurate": 570,
+        "APassesAccurate": 262,
+        "HxG": 1.98,
+        "AxG": 1.49
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558585,
+      "date_utc": "2026-08-08T18:45:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "KVC Westerlo",
+      "away_team": "Union St. Gilloise",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 19,
+        "HST": 3,
+        "AST": 10,
+        "HC": 4,
+        "AC": 5,
+        "HF": 12,
+        "AF": 8,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 55,
+        "APossession": 45,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 532,
+        "APasses": 435,
+        "HPassesAccurate": 438,
+        "APassesAccurate": 343,
+        "HxG": 0.76,
+        "AxG": 1.79
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 5,
+      "home_score": 1,
+      "away_score": 5,
+      "fthg": 1,
+      "ftag": 5,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 5
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 5
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558586,
+      "date_utc": "2026-08-09T11:30:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Gent",
+      "away_team": "KV Mechelen",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 5,
+        "HST": 8,
+        "AST": 2,
+        "HC": 4,
+        "AC": 1,
+        "HF": 11,
+        "AF": 11,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 53,
+        "APossession": 47,
+        "HSaves": 2,
+        "ASaves": 6,
+        "HPasses": 514,
+        "APasses": 460,
+        "HPassesAccurate": 437,
+        "APassesAccurate": 381,
+        "HxG": 1.16,
+        "AxG": 0.34
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558582,
+      "date_utc": "2026-08-09T14:00:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Charleroi",
+      "away_team": "OH Leuven",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 24,
+        "AS": 12,
+        "HST": 10,
+        "AST": 3,
+        "HC": 6,
+        "AC": 2,
+        "HF": 7,
+        "AF": 13,
+        "HY": 1,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 2,
+        "ASaves": 6,
+        "HPasses": 496,
+        "APasses": 341,
+        "HPassesAccurate": 419,
+        "APassesAccurate": 267,
+        "HxG": 3.15,
+        "AxG": 1.3
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558587,
+      "date_utc": "2026-08-09T14:00:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Zulte Waregem",
+      "away_team": "Genk",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 10,
+        "HST": 5,
+        "AST": 3,
+        "HC": 6,
+        "AC": 3,
+        "HF": 13,
+        "AF": 16,
+        "HY": 1,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 351,
+        "APasses": 595,
+        "HPassesAccurate": 286,
+        "APassesAccurate": 533,
+        "HxG": 0.51,
+        "AxG": 0.54
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558588,
+      "date_utc": "2026-08-09T16:30:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Anderlecht",
+      "away_team": "RAAL La Louvière",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 33,
+        "AS": 5,
+        "HST": 7,
+        "AST": 2,
+        "HC": 10,
+        "AC": 1,
+        "HF": 12,
+        "AF": 12,
+        "HY": 2,
+        "AY": 3,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 74,
+        "APossession": 26,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 686,
+        "APasses": 239,
+        "HPassesAccurate": 605,
+        "APassesAccurate": 158,
+        "HxG": 3.07,
+        "AxG": 0.74
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558589,
+      "date_utc": "2026-08-09T17:15:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 1",
+      "home_team": "Antwerp",
+      "away_team": "SK Beveren",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 10,
+        "HST": 7,
+        "AST": 4,
+        "HC": 5,
+        "AC": 3,
+        "HF": 15,
+        "AF": 7,
+        "HY": 1,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 3,
+        "ASaves": 5,
+        "HPasses": 472,
+        "APasses": 482,
+        "HPassesAccurate": 379,
+        "APassesAccurate": 376,
+        "HxG": 2.2,
+        "AxG": 0.95
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-10T23:56:37Z",
+  "generated_at": "2026-08-11T04:53:48Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-08T23:49:21Z",
+    "cache_generated_at": "2026-08-11T04:38:35Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 9,
-    "fixtures_with_any_stats": 9,
-    "fixtures_with_bb_core_stats": 8,
+    "completed_fixtures": 12,
+    "fixtures_with_any_stats": 12,
+    "fixtures_with_bb_core_stats": 11,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8889,
+    "bb_core_coverage": 0.9167,
     "group_counts": {
-      "shots_total": 9,
-      "shots_on_target": 9,
-      "corners": 9,
-      "fouls": 9,
-      "yellow_cards": 8,
-      "red_cards": 1,
-      "possession": 9,
-      "passes": 9,
-      "xg": 9
+      "shots_total": 12,
+      "shots_on_target": 12,
+      "corners": 12,
+      "fouls": 12,
+      "yellow_cards": 11,
+      "red_cards": 2,
+      "possession": 12,
+      "passes": 12,
+      "xg": 12
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.8889,
-      "red_cards": 0.1111,
+      "yellow_cards": 0.9167,
+      "red_cards": 0.1667,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 9 < 15"
+      "not enough completed fixtures: 12 < 15"
     ]
   },
   "matches": [
@@ -781,6 +781,258 @@
         "APassesAccurate": 301,
         "HxG": 0.28,
         "AxG": 1.48
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561903,
+      "date_utc": "2026-08-09T15:00:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 2",
+      "home_team": "Ried",
+      "away_team": "Rapid Vienna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 12,
+        "HST": 9,
+        "AST": 3,
+        "HC": 3,
+        "AC": 4,
+        "HF": 11,
+        "AF": 5,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 1,
+        "ASaves": 8,
+        "HPasses": 431,
+        "APasses": 508,
+        "HPassesAccurate": 365,
+        "APassesAccurate": 434,
+        "HxG": 1.3,
+        "AxG": 1.63
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561904,
+      "date_utc": "2026-08-09T15:00:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 2",
+      "home_team": "Wolfsberger AC",
+      "away_team": "Red Bull Salzburg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 18,
+        "HST": 1,
+        "AST": 10,
+        "HC": 4,
+        "AC": 8,
+        "HF": 19,
+        "AF": 2,
+        "HY": 5,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 33,
+        "APossession": 67,
+        "HSaves": 9,
+        "ASaves": 0,
+        "HPasses": 245,
+        "APasses": 524,
+        "HPassesAccurate": 180,
+        "APassesAccurate": 463,
+        "HxG": 0.93,
+        "AxG": 3.52
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561905,
+      "date_utc": "2026-08-09T17:00:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 2",
+      "home_team": "Austria Vienna",
+      "away_team": "Lask Linz",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 21,
+        "HST": 1,
+        "AST": 6,
+        "HC": 2,
+        "AC": 11,
+        "HF": 13,
+        "AF": 10,
+        "HY": 2,
+        "AY": 2,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 43,
+        "APossession": 57,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 358,
+        "APasses": 468,
+        "HPassesAccurate": 268,
+        "APassesAccurate": 396,
+        "HxG": 0.3,
+        "AxG": 3.52
       },
       "quality": {
         "has_any_stats": true,

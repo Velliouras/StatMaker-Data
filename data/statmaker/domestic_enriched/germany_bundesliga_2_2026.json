@@ -1,0 +1,832 @@
+{
+  "schema_version": 3,
+  "generated_at": "2026-08-11T04:53:48Z",
+  "data_contract": {
+    "consumer": "StatMaker Android app",
+    "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
+    "rule": "The app reads repository JSON artifacts and must not call API-Football directly.",
+    "empty_state": "If readiness or market validation fails, show only: Δεν βρέθηκαν αγορές",
+    "stats_visibility": "published independently of odds availability",
+    "betting_gate": "exact bookmaker odds plus valid historical support",
+    "score_contract": "full-time and half-time scores copied from API-Football cache"
+  },
+  "source": {
+    "provider": "api-football",
+    "cache_path": "data/api_football/fixture_stats/germany/bundesliga-2/2026/fixture_stats.json",
+    "cache_generated_at": "2026-08-11T04:38:46Z",
+    "api_football_season": "2026",
+    "csv_import": "inactive_archive_only"
+  },
+  "competition": {
+    "league_code": "D2",
+    "country": "Germany",
+    "league": "Bundesliga 2",
+    "football_data_code": "D2",
+    "api_football_league_id": 79,
+    "api_football_season": "2026",
+    "season": "2026-2027",
+    "app_season": "2026-2027",
+    "priority_group": "top_europe",
+    "data_level": "fixture_statistics_enriched",
+    "target_api_football_season": "2026",
+    "target_app_season": "2026-2027",
+    "target_season_start": "2026-08-07",
+    "target_season_end": "2027-05-23",
+    "lifecycle": "active",
+    "stats_visible_without_odds": true,
+    "betting_requires_exact_odds": true
+  },
+  "readiness": {
+    "min_fixtures": 15,
+    "min_coverage": 0.65,
+    "completed_fixtures": 9,
+    "fixtures_with_any_stats": 9,
+    "fixtures_with_bb_core_stats": 9,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 1.0,
+    "group_counts": {
+      "shots_total": 9,
+      "shots_on_target": 9,
+      "corners": 9,
+      "fouls": 9,
+      "yellow_cards": 9,
+      "red_cards": 1,
+      "possession": 9,
+      "passes": 9,
+      "xg": 9
+    },
+    "group_coverage": {
+      "shots_total": 1.0,
+      "shots_on_target": 1.0,
+      "corners": 1.0,
+      "fouls": 1.0,
+      "yellow_cards": 1.0,
+      "red_cards": 0.1111,
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 1.0
+    },
+    "bb_ready_candidate": false,
+    "notes": [
+      "not enough completed fixtures: 9 < 15"
+    ]
+  },
+  "matches": [
+    {
+      "fixture_id": 1576134,
+      "date_utc": "2026-08-07T18:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "VfL Bochum",
+      "away_team": "Hertha BSC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 11,
+        "HST": 3,
+        "AST": 2,
+        "HC": 5,
+        "AC": 2,
+        "HF": 18,
+        "AF": 13,
+        "HY": 2,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 443,
+        "APasses": 341,
+        "HPassesAccurate": 347,
+        "APassesAccurate": 253,
+        "HxG": 1.04,
+        "AxG": 0.64
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576136,
+      "date_utc": "2026-08-08T11:00:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "SV Darmstadt 98",
+      "away_team": "Holstein Kiel",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 11,
+        "HST": 3,
+        "AST": 6,
+        "HC": 8,
+        "AC": 4,
+        "HF": 15,
+        "AF": 16,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 4,
+        "ASaves": 1,
+        "HPasses": 435,
+        "APasses": 439,
+        "HPassesAccurate": 358,
+        "APassesAccurate": 370,
+        "HxG": 0.71,
+        "AxG": 1.38
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576137,
+      "date_utc": "2026-08-08T11:00:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "1. FC Heidenheim",
+      "away_team": "VfL Osnabrück",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 26,
+        "HST": 6,
+        "AST": 6,
+        "HC": 4,
+        "AC": 6,
+        "HF": 6,
+        "AF": 6,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 53,
+        "APossession": 47,
+        "HSaves": 3,
+        "ASaves": 2,
+        "HPasses": 474,
+        "APasses": 409,
+        "HPassesAccurate": 382,
+        "APassesAccurate": 286,
+        "HxG": 2.59,
+        "AxG": 1.93
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 3,
+      "home_score": 4,
+      "away_score": 3,
+      "fthg": 4,
+      "ftag": 3,
+      "hthg": 3,
+      "htag": 2,
+      "goals": {
+        "home": 4,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576138,
+      "date_utc": "2026-08-08T11:00:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "Karlsruher SC",
+      "away_team": "Arminia Bielefeld",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 12,
+        "HST": 7,
+        "AST": 5,
+        "HC": 6,
+        "AC": 6,
+        "HF": 15,
+        "AF": 12,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 4,
+        "ASaves": 5,
+        "HPasses": 463,
+        "APasses": 345,
+        "HPassesAccurate": 378,
+        "APassesAccurate": 258,
+        "HxG": 1.42,
+        "AxG": 1.17
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576139,
+      "date_utc": "2026-08-08T11:00:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "1. FC Magdeburg",
+      "away_team": "Eintracht Braunschweig",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 24,
+        "HST": 3,
+        "AST": 13,
+        "HC": 5,
+        "AC": 5,
+        "HF": 13,
+        "AF": 8,
+        "HY": 4,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 8,
+        "ASaves": 2,
+        "HPasses": 442,
+        "APasses": 507,
+        "HPassesAccurate": 366,
+        "APassesAccurate": 434,
+        "HxG": 1.24,
+        "AxG": 3.43
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 6,
+      "home_score": 1,
+      "away_score": 6,
+      "fthg": 1,
+      "ftag": 6,
+      "hthg": 0,
+      "htag": 4,
+      "goals": {
+        "home": 1,
+        "away": 6
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 4
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 6
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576142,
+      "date_utc": "2026-08-08T18:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "VfL Wolfsburg",
+      "away_team": "1. FC Kaiserslautern",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 8,
+        "HST": 5,
+        "AST": 3,
+        "HC": 9,
+        "AC": 2,
+        "HF": 17,
+        "AF": 10,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 63,
+        "APossession": 37,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 566,
+        "APasses": 329,
+        "HPassesAccurate": 481,
+        "APassesAccurate": 247,
+        "HxG": 1.26,
+        "AxG": 0.86
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576135,
+      "date_utc": "2026-08-09T11:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "Energie Cottbus",
+      "away_team": "Hannover 96",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 26,
+        "HST": 4,
+        "AST": 10,
+        "HC": 2,
+        "AC": 6,
+        "HF": 11,
+        "AF": 11,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 8,
+        "ASaves": 1,
+        "HPasses": 366,
+        "APasses": 426,
+        "HPassesAccurate": 274,
+        "APassesAccurate": 353,
+        "HxG": 1.41,
+        "AxG": 2.73
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576140,
+      "date_utc": "2026-08-09T11:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "1. FC Nürnberg",
+      "away_team": "Dynamo Dresden",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 9,
+        "HST": 7,
+        "AST": 1,
+        "HC": 5,
+        "AC": 5,
+        "HF": 6,
+        "AF": 11,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 494,
+        "APasses": 377,
+        "HPassesAccurate": 415,
+        "APassesAccurate": 310,
+        "HxG": 2.14,
+        "AxG": 1.23
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576141,
+      "date_utc": "2026-08-09T11:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 1",
+      "home_team": "FC St. Pauli",
+      "away_team": "SpVgg Greuther Fürth",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 15,
+        "HST": 6,
+        "AST": 7,
+        "HC": 9,
+        "AC": 2,
+        "HF": 4,
+        "AF": 5,
+        "HY": 1,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 6,
+        "ASaves": 5,
+        "HPasses": 516,
+        "APasses": 392,
+        "HPassesAccurate": 446,
+        "APassesAccurate": 327,
+        "HxG": 1.91,
+        "AxG": 1.55
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
+}
