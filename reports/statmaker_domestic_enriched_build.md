@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-11T21:09:30Z`
+Generated at: `2026-08-12T00:04:29Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
