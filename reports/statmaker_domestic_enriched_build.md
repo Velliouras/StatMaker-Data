@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-12T05:11:36Z`
+Generated at: `2026-08-13T05:14:02Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -46,7 +46,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | ROM | Romania | Liga I | 2026-2027 | 2026 | 283 | central_europe | 31 | 31 | 29 | 1.0 | 0.9355 | True | data/statmaker/domestic_enriched/romania_liga_i_2026.json | ok |
 | RUS | Russia | Premier League | 2026-2027 | 2026 | 235 | eastern_europe | 24 | 24 | 23 | 1.0 | 0.9583 | True | data/statmaker/domestic_enriched/russia_premier_league_2026.json | ok |
 | SC1 | Scotland | Championship | 2026-2027 | 2026 | 180 | scotland | 10 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_championship_2026.json | not enough completed fixtures: 10 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| SC3 | Scotland | League Two | 2026 | 2026 | 182 | scotland | 19 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| SC3 | Scotland | League Two | 2026 | 2026 | 182 | scotland | 20 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC0 | Scotland | Premiership | 2026-2027 | 2026 | 179 | scotland | 12 | 12 | 12 | 1.0 | 1.0 | False | data/statmaker/domestic_enriched/scotland_premiership_2026.json | not enough completed fixtures: 12 < 15 |
 | SRB | Serbia | Super Liga | 2026-2027 | 2026 | 286 | eastern_europe | 25 | 25 | 25 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/serbia_super_liga_2026.json | ok |
 | SVK | Slovakia | Super Liga | 2026-2027 | 2026 | 332 | central_europe | 16 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
