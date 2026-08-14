@@ -1,0 +1,142 @@
+name: Temporary Domestic Provider Audit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/temp-domestic-provider-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Audit provider league coverage and ARG/T1 mapping
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+        run: |
+          PYTHONPATH=scripts python - <<'PY'
+          import json
+          from pathlib import Path
+          import update_domestic_odds_api_io as odds
+          import audit_domestic_mapping as audit
+
+          root = Path('.')
+          config = json.loads((root / 'config/domestic_leagues.json').read_text(encoding='utf-8-sig'))
+          live = json.loads((root / 'data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8-sig'))
+          configured = [x for x in config.get('leagues', []) if bool(x.get('enabled', True))]
+          live_codes = {str(x.get('leagueCode') or '') for x in live.get('leagues', [])}
+          configured_codes = {str(x.get('leagueCode') or '') for x in configured}
+
+          debug = {'warnings': [], 'apiCalls': []}
+          providers = odds.discover_provider_leagues(__import__('os').environ['ODDS_API_IO_KEY'], debug)
+
+          rows = []
+          chosen_slugs = set()
+          for row in configured:
+              candidates = audit.provider_candidates(row, providers)
+              best = candidates[0] if candidates else None
+              if best and best.get('slug'):
+                  chosen_slugs.add(str(best['slug']))
+              rows.append({
+                  'leagueCode': row.get('leagueCode'),
+                  'country': row.get('country'),
+                  'competition': row.get('competition'),
+                  'inLiveRegistry': str(row.get('leagueCode') or '') in live_codes,
+                  'configuredSlug': row.get('providerLeagueSlug'),
+                  'bestCandidate': best,
+                  'candidates': candidates,
+              })
+
+          covered_countries = {audit.norm(x.get('country')) for x in configured}
+          extra = []
+          for item in providers:
+              name = str(item.get('name') or '')
+              slug = str(item.get('slug') or '')
+              if not slug or slug in chosen_slugs:
+                  continue
+              hay = audit.norm(f'{name} {slug}')
+              if any(q in hay for q in audit.BAD_QUALIFIERS):
+                  continue
+              matched_country = None
+              for row in configured:
+                  terms = [audit.norm(x) for x in audit.country_terms(row.get('country'))]
+                  if any(t and t in hay for t in terms):
+                      matched_country = row.get('country')
+                      break
+              if not matched_country:
+                  continue
+              extra.append({
+                  'country': matched_country,
+                  'name': name,
+                  'slug': slug,
+                  'eventsCount': item.get('eventsCount'),
+              })
+          extra.sort(key=lambda x: (str(x['country']), -int(x.get('eventsCount') or 0), str(x['name'])))
+
+          aliases = audit.generated_aliases(config)
+          canonicals = audit.canonical_teams(config)
+          targeted = []
+          by_code = {str(x.get('leagueCode') or ''): x for x in configured}
+          for code in ('ARG', 'T1'):
+              row = by_code[code]
+              candidates = audit.provider_candidates(row, providers)
+              chosen = candidates[0] if candidates else None
+              result = {
+                  'leagueCode': code,
+                  'bestCandidate': chosen,
+                  'events': [],
+                  'teamMappings': [],
+              }
+              if chosen and chosen.get('slug'):
+                  events = odds.fetch_events_for_league(
+                      __import__('os').environ['ODDS_API_IO_KEY'],
+                      str(chosen['slug']),
+                      7,
+                      debug,
+                  )
+                  result['events'] = [
+                      {
+                          'id': odds.event_id(e),
+                          'home': odds.event_home(e),
+                          'away': odds.event_away(e),
+                          'kickoff': odds.event_kickoff(e),
+                      }
+                      for e in events
+                  ]
+                  for team in audit.event_teams(events):
+                      canonical, status, suggestions = audit.map_team(team, code, aliases, canonicals)
+                      result['teamMappings'].append({
+                          'providerTeam': team,
+                          'canonicalTeam': canonical,
+                          'status': status,
+                          'suggestions': suggestions,
+                      })
+              targeted.append(result)
+
+          payload = {
+              'providerLeagueCount': len(providers),
+              'configuredLeagueCount': len(configured_codes),
+              'liveRegistryLeagueCount': len(live_codes),
+              'configuredMissingFromLiveRegistry': sorted(configured_codes - live_codes),
+              'configuredLeagueMappings': rows,
+              'unconfiguredProviderLeaguesInCoveredCountries': extra,
+              'targeted': targeted,
+              'rateLimitRemaining': debug.get('rateLimitRemaining'),
+              'apiCallCount': len(debug.get('apiCalls', [])),
+              'warnings': debug.get('warnings', []),
+          }
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+          PY
