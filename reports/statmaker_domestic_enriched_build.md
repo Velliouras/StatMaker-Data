@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-14T05:12:38Z`
+Generated at: `2026-08-14T15:10:51Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -13,7 +13,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 215 | 214 | 208 | 0.9953 | 0.9674 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
 | BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 210 | 210 | 206 | 1.0 | 0.981 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
 | BGR | Bulgaria | First League | 2026-2027 | 2026 | 172 | eastern_europe | 28 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/bulgaria_first_league_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| CHN | China | Super League | 2026 | 2026 | 169 | asia | 171 | 171 | 169 | 1.0 | 0.9883 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
+| CHN | China | Super League | 2026 | 2026 | 169 | asia | 174 | 171 | 169 | 0.9828 | 0.9713 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
 | CZE | Czech Republic | Czech Liga | 2026-2027 | 2026 | 345 | central_europe | 24 | 24 | 23 | 1.0 | 0.9583 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2026.json | ok |
 | DNK | Denmark | Superliga | 2026-2027 | 2026 | 119 | scandinavia | 16 | 16 | 16 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/denmark_superliga_2026.json | ok |
 | E1 | England | Championship | 2026-2027 | 2026 | 40 | england | 0 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/england_championship_2026.json | not enough completed fixtures: 0 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
