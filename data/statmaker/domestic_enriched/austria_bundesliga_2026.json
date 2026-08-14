@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-14T18:11:55Z",
+  "generated_at": "2026-08-14T20:52:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-14T04:59:19Z",
+    "cache_generated_at": "2026-08-14T20:50:54Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 12,
-    "fixtures_with_any_stats": 12,
-    "fixtures_with_bb_core_stats": 11,
+    "completed_fixtures": 13,
+    "fixtures_with_any_stats": 13,
+    "fixtures_with_bb_core_stats": 12,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9167,
+    "bb_core_coverage": 0.9231,
     "group_counts": {
-      "shots_total": 12,
-      "shots_on_target": 12,
-      "corners": 12,
-      "fouls": 12,
-      "yellow_cards": 11,
-      "red_cards": 2,
-      "possession": 12,
-      "passes": 12,
-      "xg": 12
+      "shots_total": 13,
+      "shots_on_target": 13,
+      "corners": 13,
+      "fouls": 13,
+      "yellow_cards": 12,
+      "red_cards": 3,
+      "possession": 13,
+      "passes": 13,
+      "xg": 13
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9167,
-      "red_cards": 0.1667,
+      "yellow_cards": 0.9231,
+      "red_cards": 0.2308,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 12 < 15"
+      "not enough completed fixtures: 13 < 15"
     ]
   },
   "matches": [
@@ -1069,6 +1069,90 @@
         "fulltime": {
           "home": 0,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561906,
+      "date_utc": "2026-08-14T17:30:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 3",
+      "home_team": "Lask Linz",
+      "away_team": "Ried",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 6,
+        "HST": 8,
+        "AST": 2,
+        "HC": 6,
+        "AC": 0,
+        "HF": 6,
+        "AF": 14,
+        "HY": 0,
+        "AY": 3,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 50,
+        "APossession": 50,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 399,
+        "APasses": 395,
+        "HPassesAccurate": 331,
+        "APassesAccurate": 322,
+        "HxG": 2.12,
+        "AxG": 0.8
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 3,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
         },
         "extratime": {
           "home": null,

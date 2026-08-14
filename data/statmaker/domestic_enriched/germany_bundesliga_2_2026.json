@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-14T18:11:55Z",
+  "generated_at": "2026-08-14T20:52:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/germany/bundesliga-2/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-14T05:12:32Z",
+    "cache_generated_at": "2026-08-14T20:52:03Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,21 +39,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 9,
-    "fixtures_with_any_stats": 9,
-    "fixtures_with_bb_core_stats": 9,
+    "completed_fixtures": 11,
+    "fixtures_with_any_stats": 11,
+    "fixtures_with_bb_core_stats": 11,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 9,
-      "shots_on_target": 9,
-      "corners": 9,
-      "fouls": 9,
-      "yellow_cards": 9,
+      "shots_total": 11,
+      "shots_on_target": 11,
+      "corners": 11,
+      "fouls": 11,
+      "yellow_cards": 11,
       "red_cards": 1,
-      "possession": 9,
-      "passes": 9,
-      "xg": 9
+      "possession": 11,
+      "passes": 11,
+      "xg": 11
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -61,14 +61,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.1111,
+      "red_cards": 0.0909,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 9 < 15"
+      "not enough completed fixtures: 11 < 15"
     ]
   },
   "matches": [
@@ -817,6 +817,174 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576144,
+      "date_utc": "2026-08-14T16:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 2",
+      "home_team": "Eintracht Braunschweig",
+      "away_team": "VfL Bochum",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 13,
+        "HST": 3,
+        "AST": 4,
+        "HC": 5,
+        "AC": 6,
+        "HF": 11,
+        "AF": 13,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 55,
+        "APossession": 45,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 490,
+        "APasses": 402,
+        "HPassesAccurate": 402,
+        "APassesAccurate": 297,
+        "HxG": 1.51,
+        "AxG": 1.23
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576148,
+      "date_utc": "2026-08-14T16:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 2",
+      "home_team": "Holstein Kiel",
+      "away_team": "FC St. Pauli",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 13,
+        "HST": 6,
+        "AST": 6,
+        "HC": 5,
+        "AC": 5,
+        "HF": 14,
+        "AF": 19,
+        "HY": 3,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 4,
+        "ASaves": 4,
+        "HPasses": 548,
+        "APasses": 295,
+        "HPassesAccurate": 470,
+        "APassesAccurate": 199,
+        "HxG": 2.09,
+        "AxG": 2.56
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
         },
         "extratime": {
           "home": null,
