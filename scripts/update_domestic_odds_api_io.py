@@ -82,6 +82,11 @@ EMITTED_MARKET_COUNT_KEYS = [
     "DOUBLE_CHANCE",
 ]
 COMMON_SUFFIXES = {"fc", "fk", "cf", "sc", "ac", "afc", "bk", "if"}
+PROVIDER_EXCLUSION_QUALIFIERS = {
+    "simulated", "reality", "srl", "virtual", "women", "reserves", "reserve",
+    "u23", "u21", "u20", "u19", "youth", "friendly", "cup",
+}
+
 COUNTRY_ALIASES = {
     "usa": ["usa", "united states", "mls"],
     "england": ["england", "english"],
@@ -398,11 +403,26 @@ def provider_country_matches(config_league: Dict[str, Any], provider_item: Dict[
     return any(alias and alias in haystack for alias in aliases)
 
 
+def provider_has_unrequested_qualifier(config_league: Dict[str, Any], provider_item: Dict[str, Any]) -> bool:
+    requested = normalize_text(
+        f"{config_league.get('competition', '')} {' '.join(config_league.get('searchTerms', []) or [])}"
+    )
+    haystack = normalize_text(f"{provider_item.get('name', '')} {provider_item.get('slug', '')}")
+    return any(
+        qualifier in haystack and qualifier not in requested
+        for qualifier in PROVIDER_EXCLUSION_QUALIFIERS
+    )
+
+
 def match_provider_league(config_league: Dict[str, Any], provider_leagues: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     configured_slug = str(config_league.get("providerLeagueSlug") or "").strip()
     if configured_slug:
         for item in provider_leagues:
-            if str(item.get("slug") or "") == configured_slug and provider_country_matches(config_league, item):
+            if (
+                str(item.get("slug") or "") == configured_slug
+                and provider_country_matches(config_league, item)
+                and not provider_has_unrequested_qualifier(config_league, item)
+            ):
                 return item
         return None
 
@@ -410,6 +430,8 @@ def match_provider_league(config_league: Dict[str, Any], provider_leagues: Seque
     best: Tuple[int, Optional[Dict[str, Any]]] = (0, None)
     for item in provider_leagues:
         if not provider_country_matches(config_league, item):
+            continue
+        if provider_has_unrequested_qualifier(config_league, item):
             continue
         haystack = normalize_text(f"{item.get('name', '')} {item.get('slug', '')}")
         score = 0
