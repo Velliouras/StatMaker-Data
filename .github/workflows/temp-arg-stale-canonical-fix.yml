@@ -1,0 +1,67 @@
+name: Temporary ARG Stale Canonical Fix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/temp-arg-stale-canonical-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Patch stale canonical remapping
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('scripts/refresh_domestic_live_july_odds.py')
+          source = path.read_text(encoding='utf-8')
+
+          marker = '''def validate_feed(feed, registry, today):\n'''
+          helper = '''def recanonicalize_stale_team_mappings(feed, aliases):\n    \"\"\"Repair only previously unmatched/partial rows using current explicit aliases.\n\n    This never uses fuzzy matching and never changes verified schedule-only rows.\n    Rows that still cannot resolve both provider team names remain untouched so the\n    existing strict validator continues to fail closed.\n    \"\"\"\n    repaired = 0\n    for league in feed.get("leagues", []) or []:\n        if not isinstance(league, dict):\n            continue\n        code = str(league.get("leagueCode") or "")\n        for match in league.get("matches", []) or []:\n            if not isinstance(match, dict):\n                continue\n            if str(match.get("teamMappingStatus") or "") not in {"unmatched", "partial"}:\n                continue\n            home_raw = str(match.get("providerHomeTeam") or "").strip()\n            away_raw = str(match.get("providerAwayTeam") or "").strip()\n            if not home_raw or not away_raw:\n                continue\n            local_debug = {}\n            home, canonical_home = odds_fetch.canonical_team_info(home_raw, code, aliases, local_debug)\n            away, canonical_away = odds_fetch.canonical_team_info(away_raw, code, aliases, local_debug)\n            if canonical_home is None or canonical_away is None:\n                continue\n            match.update({\n                "homeTeam": home,\n                "awayTeam": away,\n                "canonicalHomeTeam": canonical_home,\n                "canonicalAwayTeam": canonical_away,\n                "teamMappingStatus": "matched",\n                "usableForStats": True,\n            })\n            repaired += 1\n    return repaired\n\n\n'''
+          if 'def recanonicalize_stale_team_mappings(' not in source:
+              if marker not in source:
+                  raise SystemExit('validate_feed marker not found')
+              source = source.replace(marker, helper + marker, 1)
+
+          old = '''    previous = pipeline.load_json(pipeline.ODDS_PATH, {})\n    previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})\n\n    if completed:\n'''
+          new = '''    previous = pipeline.load_json(pipeline.ODDS_PATH, {})\n    previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})\n    recanonicalized_previous_matches = recanonicalize_stale_team_mappings(previous, aliases)\n\n    if completed:\n'''
+          if old not in source:
+              raise SystemExit('previous feed load block not found')
+          source = source.replace(old, new, 1)
+
+          old_report = '''        "providerArchiveLeaguesWithMatches": sum(\n'''
+          new_report = '''        "recanonicalizedPreviousMatches": recanonicalized_previous_matches,\n        "providerArchiveLeaguesWithMatches": sum(\n'''
+          if old_report not in source:
+              raise SystemExit('report insertion marker not found')
+          source = source.replace(old_report, new_report, 1)
+          path.write_text(source, encoding='utf-8')
+
+          test = Path('tests/test_recanonicalize_stale_domestic_mappings.py')
+          test.write_text('''import sys\nimport unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[1]\nSCRIPTS = ROOT / "scripts"\nif str(SCRIPTS) not in sys.path:\n    sys.path.insert(0, str(SCRIPTS))\n\nimport domestic_live_july_pipeline as pipeline\nimport refresh_domestic_live_july_odds as target\n\n\nclass RecanonicalizeStaleMappingsTest(unittest.TestCase):\n    def aliases(self):\n        registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])\n        return pipeline.generated_aliases(registry)\n\n    def test_repairs_verified_arg_stale_mapping(self):\n        feed = {"leagues": [{\n            "leagueCode": "ARG",\n            "matches": [{\n                "id": "73265188",\n                "providerHomeTeam": "Racing Club Avellaneda",\n                "providerAwayTeam": "CA Banfield",\n                "homeTeam": "Racing Club Avellaneda",\n                "awayTeam": "CA Banfield",\n                "canonicalHomeTeam": None,\n                "canonicalAwayTeam": None,\n                "teamMappingStatus": "unmatched",\n                "usableForStats": False,\n                "markets": [],\n            }],\n        }]}\n        repaired = target.recanonicalize_stale_team_mappings(feed, self.aliases())\n        match = feed["leagues"][0]["matches"][0]\n        self.assertEqual(1, repaired)\n        self.assertEqual("Racing Club", match["homeTeam"])\n        self.assertEqual("Banfield", match["awayTeam"])\n        self.assertEqual("matched", match["teamMappingStatus"])\n        self.assertTrue(match["usableForStats"])\n\n    def test_fails_closed_when_alias_is_not_verified(self):\n        feed = {"leagues": [{\n            "leagueCode": "ARG",\n            "matches": [{\n                "providerHomeTeam": "Unknown Argentina Club",\n                "providerAwayTeam": "CA Banfield",\n                "teamMappingStatus": "partial",\n                "usableForStats": False,\n                "markets": [],\n            }],\n        }]}\n        repaired = target.recanonicalize_stale_team_mappings(feed, self.aliases())\n        match = feed["leagues"][0]["matches"][0]\n        self.assertEqual(0, repaired)\n        self.assertEqual("partial", match["teamMappingStatus"])\n        self.assertFalse(match["usableForStats"])\n\n    def test_does_not_touch_verified_api_schedule_only_rows(self):\n        feed = {"leagues": [{\n            "leagueCode": "T1",\n            "matches": [{\n                "providerHomeTeam": "Galatasaray",\n                "providerAwayTeam": "Fenerbahce",\n                "teamMappingStatus": "schedule_only_api_football",\n                "usableForStats": False,\n                "scheduleOnly": True,\n                "scheduleVerified": True,\n                "markets": [],\n            }],\n        }]}\n        repaired = target.recanonicalize_stale_team_mappings(feed, self.aliases())\n        match = feed["leagues"][0]["matches"][0]\n        self.assertEqual(0, repaired)\n        self.assertEqual("schedule_only_api_football", match["teamMappingStatus"])\n        self.assertFalse(match["usableForStats"])\n\n\nif __name__ == "__main__":\n    unittest.main()\n''', encoding='utf-8')
+          PY
+      - name: Run regressions
+        run: |
+          python -m py_compile scripts/refresh_domestic_live_july_odds.py
+          python -m unittest tests/test_recanonicalize_stale_domestic_mappings.py
+          python -m unittest tests/test_arg_provider_aliases.py
+          python -m unittest tests/test_domestic_live_july_pipeline.py
+      - name: Commit durable fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/refresh_domestic_live_july_odds.py tests/test_recanonicalize_stale_domestic_mappings.py
+          git commit -m "Recanonicalize stale Domestic team mappings before merge"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
