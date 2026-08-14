@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-13T05:14:02Z`
+Generated at: `2026-08-14T05:12:38Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -16,7 +16,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | CHN | China | Super League | 2026 | 2026 | 169 | asia | 171 | 171 | 169 | 1.0 | 0.9883 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
 | CZE | Czech Republic | Czech Liga | 2026-2027 | 2026 | 345 | central_europe | 24 | 24 | 23 | 1.0 | 0.9583 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2026.json | ok |
 | DNK | Denmark | Superliga | 2026-2027 | 2026 | 119 | scandinavia | 16 | 16 | 16 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/denmark_superliga_2026.json | ok |
-| E1 | England | Championship | 2025-2026 | 2025 | 40 | england | 557 | 557 | 534 | 1.0 | 0.9587 | True | data/statmaker/domestic_enriched/england_championship_2025.json | ok |
+| E1 | England | Championship | 2026-2027 | 2026 | 40 | england | 0 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/england_championship_2026.json | not enough completed fixtures: 0 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | E2 | England | League One | 2025-2026 | 2025 | 41 | england | 557 | 557 | 543 | 1.0 | 0.9749 | True | data/statmaker/domestic_enriched/england_league_one_2025.json | ok |
 | E3 | England | League Two | 2025-2026 | 2025 | 42 | england | 557 | 557 | 540 | 1.0 | 0.9695 | True | data/statmaker/domestic_enriched/england_league_two_2025.json | ok |
 | EC | England | National League | 2026-2027 | 2026 | 43 | england | 12 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/england_national_league_2026.json | not enough completed fixtures: 12 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
@@ -56,5 +56,5 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 127 | 127 | 127 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
 | SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 144 | 69 | 67 | 0.4792 | 0.4653 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4792 < 0.65; low BB-core coverage: 0.4653 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2026-2027 | 2026 | 207 | central_europe | 18 | 18 | 17 | 1.0 | 0.9444 | True | data/statmaker/domestic_enriched/switzerland_super_league_2026.json | ok |
-| T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
+| T1 | Turkey | Süper Lig | 2026-2027 | 2026 | 203 | southern_europe | 0 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/turkey_super_lig_2026.json | not enough completed fixtures: 0 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 269 | 267 | 262 | 0.9926 | 0.974 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |

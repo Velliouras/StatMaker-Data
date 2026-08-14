@@ -1,12 +1,14 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-08-13T05:13:58Z`
+Generated at: `2026-08-14T05:12:34Z`
 Requests used: `908` / `2400`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| England | Championship | 2026 | 40 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | league+season:2026 | 552 | data/api_football/fixture_stats/england/championship/2026/fixture_stats.json | league+season:2026 returned=552 completed=0; fixtures returned=552 but no completed fixtures with status FT/AET/PEN; statuses=NS |
+| Turkey | Süper Lig | 2026 | 203 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json | league+season:2026 returned=306 completed=0; fixtures returned=306 but no completed fixtures with status FT/AET/PEN; statuses=NS |
 | Finland | Veikkausliiga | 2026 | 244 | 114 | 56 | 58 | 114 | 0 | 58 | 59 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=114 |
 | Argentina | Liga Profesional Argentina | 2026 | 128 | 315 | 313 | 2 | 315 | 0 | 2 | 3 | league+season:2026 | 495 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | league+season:2026 returned=495 completed=315 |
 | Brazil | Serie A | 2026 | 71 | 215 | 214 | 1 | 215 | 0 | 1 | 2 | league+season:2026 | 380 | data/api_football/fixture_stats/brazil/serie-a/2026/fixture_stats.json | league+season:2026 returned=380 completed=215 |
@@ -25,8 +27,8 @@ API-Football is the active domestic historical/stat source. Football-Data CSV is
 | Netherlands | Eredivisie | 2026 | 88 | 9 | 9 | 0 | 9 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/netherlands/eredivisie/2026/fixture_stats.json | league+season:2026 returned=306 completed=9 |
 | Portugal | Liga Portugal | 2026 | 94 | 9 | 9 | 0 | 9 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json | league+season:2026 returned=306 completed=9 |
 | Lithuania | A Lyga | 2026 | 362 | 116 | 0 | 99 | 116 | 0 | 99 | 100 | league+season:2026 | 180 | data/api_football/fixture_stats/lithuania/a-lyga/2026/fixture_stats.json | league+season:2026 returned=180 completed=116; request cap reached before all fixture statistics were fetched |
-| Estonia | Meistriliiga | 2026 | 329 | 106 | 0 | 100 | 106 | 0 | 100 | 101 | league+season:2026 | 180 | data/api_football/fixture_stats/estonia/meistriliiga/2026/fixture_stats.json | league+season:2026 returned=180 completed=106; request cap reached before all fixture statistics were fetched |
-| Latvia | Virsliga | 2026 | 365 | 126 | 0 | 100 | 126 | 0 | 100 | 101 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=126; request cap reached before all fixture statistics were fetched |
+| Estonia | Meistriliiga | 2026 | 329 | 106 | 0 | 99 | 106 | 0 | 99 | 100 | league+season:2026 | 180 | data/api_football/fixture_stats/estonia/meistriliiga/2026/fixture_stats.json | league+season:2026 returned=180 completed=106; request cap reached before all fixture statistics were fetched |
+| Latvia | Virsliga | 2026 | 365 | 126 | 0 | 99 | 126 | 0 | 99 | 100 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=126; request cap reached before all fixture statistics were fetched |
 | Finland | Ykkösliiga | 2026 | 245 | 114 | 0 | 100 | 114 | 0 | 100 | 101 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=114; request cap reached before all fixture statistics were fetched |
 | Norway | OBOS-ligaen | 2026 | 104 | 136 | 0 | 100 | 136 | 0 | 100 | 101 | league+season:2026 | 240 | data/api_football/fixture_stats/norway/obos-ligaen/2026/fixture_stats.json | league+season:2026 returned=240 completed=136; request cap reached before all fixture statistics were fetched |
 | Iceland | Úrvalsdeild | 2026 | 164 | 108 | 0 | 100 | 108 | 0 | 100 | 101 | league+season:2026 | 132 | data/api_football/fixture_stats/iceland/urvalsdeild/2026/fixture_stats.json | league+season:2026 returned=132 completed=108; request cap reached before all fixture statistics were fetched |
