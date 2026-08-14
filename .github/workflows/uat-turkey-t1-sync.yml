@@ -1,0 +1,148 @@
+name: UAT Turkey T1 season sync
+
+on:
+  push:
+    branches:
+      - uat
+    paths:
+      - .github/uat-turkey-t1-sync-request
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uat-turkey-t1-season-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout UAT
+        uses: actions/checkout@v4
+        with:
+          ref: uat
+          fetch-depth: 0
+
+      - name: Fetch production reference
+        run: git fetch origin main --no-tags
+
+      - name: Apply only Turkey T1 current-season artifacts
+        run: |
+          python - <<'PY'
+          import copy
+          import datetime as dt
+          import json
+          import subprocess
+          from pathlib import Path
+
+          REGISTRY = Path('data/statmaker/domestic_live_july_registry.json')
+          INDEX = Path('data/statmaker/domestic_enriched/index.json')
+          ARTIFACT = Path('data/statmaker/domestic_enriched/turkey_super_lig_2026.json')
+          CACHE = Path('data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json')
+
+          def load(path: Path):
+              return json.loads(path.read_text(encoding='utf-8-sig'))
+
+          def load_main(path: Path):
+              raw = subprocess.check_output(['git', 'show', f'origin/main:{path.as_posix()}'])
+              return json.loads(raw.decode('utf-8-sig'))
+
+          def raw_main(path: Path) -> bytes:
+              return subprocess.check_output(['git', 'show', f'origin/main:{path.as_posix()}'])
+
+          def dump(path: Path, payload):
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+          uat_registry = load(REGISTRY)
+          main_registry = load_main(REGISTRY)
+          before_registry_non_t1 = [copy.deepcopy(x) for x in uat_registry.get('leagues', []) if x.get('leagueCode') != 'T1']
+          main_t1 = next(x for x in main_registry.get('leagues', []) if x.get('leagueCode') == 'T1')
+
+          expected = {
+              'apiFootballLeagueId': 203,
+              'season': '2026',
+              'historyApiSeason': '2026',
+              'targetApiSeason': '2026',
+              'targetSeasonStart': '2026-08-14',
+              'lifecycle': 'active',
+          }
+          for key, value in expected.items():
+              if main_t1.get(key) != value:
+                  raise SystemExit(f'Unexpected main T1 {key}: {main_t1.get(key)!r} != {value!r}')
+
+          replaced = False
+          new_registry = []
+          for row in uat_registry.get('leagues', []):
+              if row.get('leagueCode') == 'T1':
+                  new_registry.append(copy.deepcopy(main_t1))
+                  replaced = True
+              else:
+                  new_registry.append(row)
+          if not replaced:
+              raise SystemExit('T1 missing from UAT registry')
+          uat_registry['leagues'] = new_registry
+          uat_registry['leagueCount'] = len(new_registry)
+          uat_registry['generatedAt'] = dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00', 'Z')
+          uat_registry['asOfDate'] = '2026-08-14'
+          dump(REGISTRY, uat_registry)
+
+          uat_index = load(INDEX)
+          main_index = load_main(INDEX)
+          before_index_non_t1 = [copy.deepcopy(x) for x in uat_index.get('leagues', []) if x.get('league_code') != 'T1']
+          main_index_t1 = next(x for x in main_index.get('leagues', []) if x.get('league_code') == 'T1')
+          if main_index_t1.get('api_football_season') != '2026' or main_index_t1.get('api_football_league_id') != 203:
+              raise SystemExit('Unexpected main T1 index identity/season')
+
+          replaced = False
+          new_index_rows = []
+          for row in uat_index.get('leagues', []):
+              if row.get('league_code') == 'T1':
+                  new_index_rows.append(copy.deepcopy(main_index_t1))
+                  replaced = True
+              else:
+                  new_index_rows.append(row)
+          if not replaced:
+              raise SystemExit('T1 missing from UAT enriched index')
+          uat_index['leagues'] = new_index_rows
+          uat_index['league_count'] = len(new_index_rows)
+          uat_index['generated_at'] = dt.datetime.now(dt.timezone.utc).isoformat().replace('+00:00', 'Z')
+          dump(INDEX, uat_index)
+
+          ARTIFACT.parent.mkdir(parents=True, exist_ok=True)
+          ARTIFACT.write_bytes(raw_main(ARTIFACT))
+          CACHE.parent.mkdir(parents=True, exist_ok=True)
+          CACHE.write_bytes(raw_main(CACHE))
+
+          after_registry_non_t1 = [x for x in load(REGISTRY).get('leagues', []) if x.get('leagueCode') != 'T1']
+          after_index_non_t1 = [x for x in load(INDEX).get('leagues', []) if x.get('league_code') != 'T1']
+          if before_registry_non_t1 != after_registry_non_t1:
+              raise SystemExit('Non-T1 registry rows changed')
+          if before_index_non_t1 != after_index_non_t1:
+              raise SystemExit('Non-T1 index rows changed')
+
+          artifact = load(ARTIFACT)
+          comp = artifact.get('competition', {})
+          if comp.get('league_code') != 'T1' or comp.get('api_football_league_id') != 203 or comp.get('api_football_season') != '2026':
+              raise SystemExit('Turkey 2026 enriched artifact validation failed')
+
+          print('UAT_TURKEY_T1_SYNC_OK season=2026 start=2026-08-14 league_id=203')
+          PY
+
+      - name: Commit Turkey-only UAT changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/statmaker/domestic_live_july_registry.json \
+            data/statmaker/domestic_enriched/index.json \
+            data/statmaker/domestic_enriched/turkey_super_lig_2026.json \
+            data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json
+          if git diff --cached --quiet; then
+            echo "No Turkey T1 UAT changes needed."
+          else
+            git commit -m "UAT: activate Turkey Super Lig 2026 season"
+            git push origin HEAD:uat
+          fi
