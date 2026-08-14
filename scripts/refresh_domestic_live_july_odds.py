@@ -156,6 +156,44 @@ def merge_refresh_payloads(
     return feed, archive, corner_report
 
 
+def recanonicalize_stale_team_mappings(feed, aliases):
+    """Repair only previously unmatched/partial rows using current explicit aliases.
+
+    This never uses fuzzy matching and never changes verified schedule-only rows.
+    Rows that still cannot resolve both provider team names remain untouched so the
+    existing strict validator continues to fail closed.
+    """
+    repaired = 0
+    for league in feed.get("leagues", []) or []:
+        if not isinstance(league, dict):
+            continue
+        code = str(league.get("leagueCode") or "")
+        for match in league.get("matches", []) or []:
+            if not isinstance(match, dict):
+                continue
+            if str(match.get("teamMappingStatus") or "") not in {"unmatched", "partial"}:
+                continue
+            home_raw = str(match.get("providerHomeTeam") or "").strip()
+            away_raw = str(match.get("providerAwayTeam") or "").strip()
+            if not home_raw or not away_raw:
+                continue
+            local_debug = {}
+            home, canonical_home = odds_fetch.canonical_team_info(home_raw, code, aliases, local_debug)
+            away, canonical_away = odds_fetch.canonical_team_info(away_raw, code, aliases, local_debug)
+            if canonical_home is None or canonical_away is None:
+                continue
+            match.update({
+                "homeTeam": home,
+                "awayTeam": away,
+                "canonicalHomeTeam": canonical_home,
+                "canonicalAwayTeam": canonical_away,
+                "teamMappingStatus": "matched",
+                "usableForStats": True,
+            })
+            repaired += 1
+    return repaired
+
+
 def validate_feed(feed, registry, today):
     expected = {str(row.get("leagueCode") or "") for row in registry}
     actual = {str(row.get("leagueCode") or "") for row in feed.get("leagues", []) or []}
@@ -274,6 +312,7 @@ def main() -> int:
     today = pipeline.today_utc()
     previous = pipeline.load_json(pipeline.ODDS_PATH, {})
     previous_archive = pipeline.load_json(PROVIDER_ARCHIVE_PATH, {})
+    recanonicalized_previous_matches = recanonicalize_stale_team_mappings(previous, aliases)
 
     if completed:
         fresh_archive = fresh.pop("providerMarketsArchive", {})
@@ -327,6 +366,7 @@ def main() -> int:
         "oddsLeaguesWithMatches": sum(
             1 for row in feed.get("leagues", []) or [] if row.get("matches")
         ),
+        "recanonicalizedPreviousMatches": recanonicalized_previous_matches,
         "providerArchiveLeaguesWithMatches": sum(
             1 for row in archive.get("leagues", []) or [] if row.get("matches")
         ),
