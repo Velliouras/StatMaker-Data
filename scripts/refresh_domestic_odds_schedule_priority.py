@@ -207,15 +207,30 @@ def _install_schedule_only_validation() -> None:
         in_scope: List[Dict[str, Any]] = []
         schedule_only_external: List[str] = []
 
+        schedule_only_in_registry = 0
         for league in feed.get("leagues", []) or []:
             if not isinstance(league, dict):
                 continue
             code = str(league.get("leagueCode") or "")
+            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]
             if code in expected:
-                in_scope.append(league)
+                scoped_league = dict(league)
+                betting_matches = []
+                for row in matches:
+                    safe_api_schedule_only = (
+                        row.get("scheduleOnly") is True
+                        and row.get("scheduleVerified") is True
+                        and str(row.get("scheduleSource") or "").strip() == "api-football"
+                        and not (row.get("markets") or [])
+                    )
+                    if safe_api_schedule_only:
+                        schedule_only_in_registry += 1
+                    else:
+                        betting_matches.append(row)
+                scoped_league["matches"] = betting_matches
+                in_scope.append(scoped_league)
                 continue
 
-            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]
             explicit_schedule_source = (
                 str(league.get("providerLeagueSlug") or "").strip() == "api-football-schedule-only"
             )
@@ -234,6 +249,7 @@ def _install_schedule_only_validation() -> None:
         result = original(scoped, registry, today)
         result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)
         result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)
+        result["scheduleOnlyInRegistryMatchCount"] = schedule_only_in_registry
         return result
 
     target.validate_feed = validate
