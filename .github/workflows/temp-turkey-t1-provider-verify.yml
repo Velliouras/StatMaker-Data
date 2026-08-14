@@ -1,0 +1,142 @@
+name: Temporary Turkey T1 Provider Verify
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/temp-turkey-t1-provider-verify.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify Turkey T1 provider mapping and sample odds
+        env:
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
+        run: |
+          PYTHONPATH=scripts python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import update_domestic_odds_api_io as odds
+          import audit_domestic_mapping as audit
+
+          root = Path('.')
+          config = json.loads((root / 'config/domestic_leagues.json').read_text(encoding='utf-8-sig'))
+          t1 = next(x for x in config.get('leagues', []) if str(x.get('leagueCode')) == 'T1')
+          debug = {'warnings': [], 'apiCalls': []}
+          key = os.environ['ODDS_API_IO_KEY']
+
+          providers = odds.discover_provider_leagues(key, debug)
+          country_matches = [
+              odds.provider_league_summary(x)
+              for x in providers
+              if odds.provider_country_matches(t1, x)
+          ]
+          country_matches.sort(key=lambda x: (-int(x.get('eventsCount') or 0), str(x.get('name') or '')))
+
+          candidates = audit.provider_candidates(t1, providers)
+          chosen = candidates[0] if candidates else None
+          matched = odds.match_provider_league(t1, providers)
+          matched_summary = odds.provider_league_summary(matched) if matched else None
+          if chosen and matched and str(chosen.get('slug')) != str(matched.get('slug')):
+              raise SystemExit(f'Candidate disagreement: audit={chosen.get("slug")} production={matched.get("slug")}')
+
+          events = []
+          mappings = []
+          sample_odds = None
+          if matched and matched.get('slug'):
+              events = odds.fetch_events_for_league(key, str(matched['slug']), 14, debug)
+              aliases = audit.generated_aliases(config)
+              canonicals = audit.canonical_teams(config)
+              for team in audit.event_teams(events):
+                  canonical, status, suggestions = audit.map_team(team, 'T1', aliases, canonicals)
+                  mappings.append({
+                      'providerTeam': team,
+                      'canonicalTeam': canonical,
+                      'status': status,
+                      'suggestions': suggestions,
+                  })
+
+              ids = [odds.event_id(e) for e in events if odds.event_id(e)]
+              if ids and not odds.should_stop_for_rate_limit(debug):
+                  fetched = odds.fetch_odds(key, ids[:1], odds.DEFAULT_BOOKMAKERS, debug)
+                  first_id = ids[0]
+                  row = fetched.get(first_id)
+                  if row:
+                      blocks = odds.bookmaker_blocks(row)
+                      sample_odds = {
+                          'eventId': first_id,
+                          'bookmakers': [name for name, _ in blocks if name],
+                          'marketCount': sum(len(markets) for _, markets in blocks),
+                      }
+
+          event_rows = [
+              {
+                  'id': odds.event_id(e),
+                  'home': odds.event_home(e),
+                  'away': odds.event_away(e),
+                  'kickoff': odds.event_kickoff(e),
+              }
+              for e in events
+          ]
+
+          ambiguous = False
+          if len(candidates) > 1 and chosen:
+              top_score = int(chosen.get('score') or 0)
+              same_top = [x for x in candidates if int(x.get('score') or 0) == top_score]
+              ambiguous = len(same_top) > 1
+
+          mapping_statuses = sorted({str(x.get('status') or '') for x in mappings})
+          payload = {
+              'leagueCode': 'T1',
+              'country': 'Turkey',
+              'competition': 'Süper Lig',
+              'apiFootballLeagueId': 203,
+              'configuredSlugBefore': t1.get('providerLeagueSlug'),
+              'productionMatchedProvider': matched_summary,
+              'bestCandidate': chosen,
+              'candidateCount': len(candidates),
+              'countryProviderMatches': country_matches,
+              'ambiguousTopCandidate': ambiguous,
+              'eventCount14Days': len(events),
+              'events': event_rows,
+              'teamMappings': mappings,
+              'teamMappingStatuses': mapping_statuses,
+              'sampleOdds': sample_odds,
+              'apiCallCount': len(debug.get('apiCalls', [])),
+              'rateLimitRemaining': debug.get('rateLimitRemaining'),
+              'warnings': debug.get('warnings', []),
+          }
+          out = root / 'reports/turkey_t1_provider_verify.json'
+          out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(payload, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Commit verification report only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/turkey_t1_provider_verify.json
+          if git diff --cached --quiet; then
+            echo "No Turkey verification report changes."
+          else
+            git commit -m "Audit Turkey T1 provider mapping"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
