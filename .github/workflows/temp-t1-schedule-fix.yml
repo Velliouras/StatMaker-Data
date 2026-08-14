@@ -1,0 +1,491 @@
+name: Temporary T1 Schedule Fix
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/temp-t1-schedule-fix.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: domestic-t1-schedule-fix
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Add T1 official schedule publisher and safe validator
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          script = Path('scripts/refresh_turkey_super_lig_schedule.py')
+          script.write_text(r'''#!/usr/bin/env python3
+from __future__ import annotations
+
+import datetime as dt
+import json
+import os
+from pathlib import Path
+from typing import Any, Dict, List, Sequence
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+
+ROOT = Path(__file__).resolve().parents[1]
+REGISTRY = ROOT / "data/statmaker/domestic_live_july_registry.json"
+ODDS = ROOT / "odds/odds_api_io/domestic_odds.json"
+REPORT = ROOT / "reports/turkey_super_lig_schedule_sync.json"
+API_BASE = "https://v3.football.api-sports.io"
+CODE = "T1"
+COUNTRY = "Turkey"
+COMPETITION = "Süper Lig"
+LEAGUE_ID = 203
+SEASON = 2026
+FINAL_STATUSES = {"FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO"}
+
+
+def read_json(path: Path, default: Any) -> Any:
+    if not path.is_file():
+        return default
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def write_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def now_utc() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def validate_registry(payload: Dict[str, Any]) -> Dict[str, Any]:
+    matches = [
+        row for row in payload.get("leagues", []) or []
+        if isinstance(row, dict) and str(row.get("leagueCode") or "") == CODE
+    ]
+    if len(matches) != 1:
+        raise RuntimeError(f"Expected exactly one {CODE} registry row, found {len(matches)}")
+    row = matches[0]
+    if int(row.get("apiFootballLeagueId") or row.get("api_football_league_id") or 0) != LEAGUE_ID:
+        raise RuntimeError("T1 API-Football league id changed; refusing schedule publication")
+    if str(row.get("targetApiSeason") or row.get("season") or "") != str(SEASON):
+        raise RuntimeError("T1 target season changed; refusing schedule publication")
+    if str(row.get("providerLeagueSlug") or "").strip():
+        raise RuntimeError("T1 unexpectedly has a provider slug; review exact-odds integration before schedule sync")
+    return row
+
+
+class ApiFootballClient:
+    def __init__(self, key: str) -> None:
+        self.key = key
+        self.requests_used = 0
+
+    def get(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        self.requests_used += 1
+        query = urlencode(params)
+        request = Request(
+            f"{API_BASE}/{endpoint}?{query}",
+            headers={
+                "x-apisports-key": self.key,
+                "Accept": "application/json",
+                "User-Agent": "StatMaker T1 schedule sync",
+            },
+        )
+        with urlopen(request, timeout=45) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        errors = payload.get("errors")
+        if errors not in (None, {}, [], ""):
+            raise RuntimeError(f"API-Football {endpoint}: {errors}")
+        return payload
+
+
+def response_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
+    return [row for row in payload.get("response", []) or [] if isinstance(row, dict)]
+
+
+def fixture_status(row: Dict[str, Any]) -> str:
+    return str(((row.get("fixture") or {}).get("status") or {}).get("short") or "").upper()
+
+
+def fixture_id(row: Dict[str, Any]) -> str:
+    return str((row.get("fixture") or {}).get("id") or "").strip()
+
+
+def kickoff(row: Dict[str, Any]) -> str:
+    return str((row.get("fixture") or {}).get("date") or "").strip()
+
+
+def schedule_row(row: Dict[str, Any]) -> Dict[str, Any]:
+    home = ((row.get("teams") or {}).get("home") or {})
+    away = ((row.get("teams") or {}).get("away") or {})
+    home_name = str(home.get("name") or "").strip()
+    away_name = str(away.get("name") or "").strip()
+    when = kickoff(row)
+    if not fixture_id(row) or not home_name or not away_name or not when:
+        raise RuntimeError("Incomplete official T1 fixture returned by API-Football")
+    return {
+        "id": fixture_id(row),
+        "date": when[:10],
+        "kickoff": when,
+        "providerHomeTeam": home_name,
+        "providerAwayTeam": away_name,
+        "homeTeam": home_name,
+        "awayTeam": away_name,
+        "canonicalHomeTeam": home_name,
+        "canonicalAwayTeam": away_name,
+        "homeTeamLogo": home.get("logo"),
+        "awayTeamLogo": away.get("logo"),
+        "teamMappingStatus": "schedule_only_api_football",
+        "usableForStats": False,
+        "scheduleOnly": True,
+        "scheduleSource": "api-football",
+        "scheduleVerified": True,
+        "markets": [],
+    }
+
+
+def match_key(match: Dict[str, Any]) -> tuple[str, ...]:
+    match_id = str(match.get("id") or match.get("matchId") or "").strip()
+    if match_id:
+        return ("id", match_id)
+    return (
+        "fixture",
+        str(match.get("homeTeam") or "").strip().casefold(),
+        str(match.get("awayTeam") or "").strip().casefold(),
+        str(match.get("date") or match.get("kickoff") or "")[:10],
+    )
+
+
+def merge_schedule(
+    feed: Dict[str, Any],
+    official_fixtures: Sequence[Dict[str, Any]],
+    registry_row: Dict[str, Any],
+    generated_at: str,
+) -> tuple[Dict[str, Any], Dict[str, int]]:
+    result = json.loads(json.dumps(feed))
+    leagues = [row for row in result.get("leagues", []) or [] if isinstance(row, dict)]
+    league = next((row for row in leagues if str(row.get("leagueCode") or "") == CODE), None)
+    if league is None:
+        league = {
+            "leagueCode": CODE,
+            "country": COUNTRY,
+            "competition": COMPETITION,
+            "season": registry_row.get("targetAppSeason") or "2026-2027",
+            "apiFootballLeagueId": LEAGUE_ID,
+            "enabledForStats": True,
+            "enabledForOdds": bool(registry_row.get("enabledForOdds", True)),
+            "enabledForBetting": bool(registry_row.get("enabledForBetting", True)),
+            "providerLeagueSlug": None,
+            "matches": [],
+        }
+        leagues.append(league)
+
+    if str(league.get("providerLeagueSlug") or "").strip():
+        raise RuntimeError("Refusing to overwrite a verified T1 provider slug")
+
+    kept = [
+        dict(match) for match in league.get("matches", []) or []
+        if isinstance(match, dict)
+        and not (
+            match.get("scheduleOnly") is True
+            and str(match.get("scheduleSource") or "") == "api-football"
+            and not (match.get("markets") or [])
+        )
+    ]
+    by_key = {match_key(match): match for match in kept}
+    added = updated = preserved_bettable = 0
+
+    for fixture in official_fixtures:
+        fresh = schedule_row(fixture)
+        key = match_key(fresh)
+        current = by_key.get(key)
+        if current is None:
+            by_key[key] = fresh
+            added += 1
+            continue
+        merged = {**fresh, **current}
+        merged["date"] = fresh["date"]
+        merged["kickoff"] = fresh["kickoff"]
+        merged["homeTeamLogo"] = fresh.get("homeTeamLogo") or current.get("homeTeamLogo")
+        merged["awayTeamLogo"] = fresh.get("awayTeamLogo") or current.get("awayTeamLogo")
+        merged["scheduleVerified"] = True
+        if current.get("markets"):
+            merged["scheduleOnly"] = False
+            preserved_bettable += 1
+        else:
+            merged.update({
+                "teamMappingStatus": "schedule_only_api_football",
+                "usableForStats": False,
+                "scheduleOnly": True,
+                "scheduleSource": "api-football",
+                "markets": [],
+            })
+        by_key[key] = merged
+        updated += 1
+
+    league.update({
+        "country": COUNTRY,
+        "competition": COMPETITION,
+        "season": registry_row.get("targetAppSeason") or "2026-2027",
+        "apiFootballLeagueId": LEAGUE_ID,
+        "matches": sorted(
+            by_key.values(),
+            key=lambda row: (str(row.get("kickoff") or row.get("date") or ""), str(row.get("homeTeam") or "")),
+        ),
+    })
+    league["providerLeagueSlug"] = None
+    result["leagues"] = leagues
+    result["generatedAt"] = generated_at
+    result.setdefault("debug", {})["turkeySuperLigSchedule"] = {
+        "source": "api-football",
+        "leagueId": LEAGUE_ID,
+        "season": SEASON,
+        "scheduleOnly": True,
+        "syntheticOdds": False,
+        "officialFixtures": len(official_fixtures),
+        "added": added,
+        "updated": updated,
+        "preservedBettable": preserved_bettable,
+    }
+    return result, {
+        "officialFixtures": len(official_fixtures),
+        "added": added,
+        "updated": updated,
+        "preservedBettable": preserved_bettable,
+        "publishedMatches": len(league.get("matches", [])),
+    }
+
+
+def main() -> int:
+    key = os.getenv("API_FOOTBALL_KEY", "").strip()
+    if not key:
+        print("ERROR: API_FOOTBALL_KEY is required.")
+        return 2
+
+    registry_payload = read_json(REGISTRY, {})
+    registry_row = validate_registry(registry_payload)
+    today = dt.datetime.now(dt.timezone.utc).date()
+    horizon = max(1, min(45, int(os.getenv("T1_SCHEDULE_HORIZON_DAYS", "21"))))
+    end = today + dt.timedelta(days=horizon)
+
+    client = ApiFootballClient(key)
+    payload = client.get("fixtures", {
+        "league": LEAGUE_ID,
+        "season": SEASON,
+        "from": today.isoformat(),
+        "to": end.isoformat(),
+        "timezone": "UTC",
+    })
+    fixtures = [
+        row for row in response_rows(payload)
+        if fixture_status(row) not in FINAL_STATUSES
+        and today.isoformat() <= kickoff(row)[:10] <= end.isoformat()
+    ]
+    fixtures.sort(key=lambda row: (kickoff(row), fixture_id(row)))
+
+    generated_at = now_utc()
+    feed = read_json(ODDS, {"schemaVersion": 3, "source": "odds-api-io", "leagues": []})
+    merged, metrics = merge_schedule(feed, fixtures, registry_row, generated_at)
+    write_json(ODDS, merged)
+
+    report = {
+        "generatedAt": generated_at,
+        "leagueCode": CODE,
+        "country": COUNTRY,
+        "competition": COMPETITION,
+        "apiFootballLeagueId": LEAGUE_ID,
+        "targetSeason": SEASON,
+        "from": today.isoformat(),
+        "to": end.isoformat(),
+        "requestsUsed": client.requests_used,
+        "providerLeagueSlug": registry_row.get("providerLeagueSlug"),
+        "scheduleSource": "api-football",
+        "scheduleVerified": True,
+        "syntheticOdds": False,
+        **metrics,
+    }
+    write_json(REPORT, report)
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''', encoding='utf-8')
+
+          test = Path('tests/test_refresh_turkey_super_lig_schedule.py')
+          test.write_text(r'''import datetime as dt
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+import refresh_domestic_odds_schedule_priority as schedule_priority
+import refresh_turkey_super_lig_schedule as target
+
+
+class TurkeySuperLigScheduleTest(unittest.TestCase):
+    def fixture(self, fixture_id="9001"):
+        return {
+            "fixture": {
+                "id": int(fixture_id),
+                "date": "2026-08-15T18:00:00+00:00",
+                "status": {"short": "NS"},
+            },
+            "teams": {
+                "home": {"name": "Home SK", "logo": "home.png"},
+                "away": {"name": "Away SK", "logo": "away.png"},
+            },
+        }
+
+    def registry_row(self):
+        return {
+            "leagueCode": "T1",
+            "apiFootballLeagueId": 203,
+            "targetApiSeason": "2026",
+            "targetAppSeason": "2026-2027",
+            "providerLeagueSlug": None,
+            "enabledForOdds": True,
+            "enabledForBetting": True,
+        }
+
+    def test_registry_identity_is_locked(self):
+        row = target.validate_registry({"leagues": [self.registry_row()]})
+        self.assertEqual(203, row["apiFootballLeagueId"])
+        self.assertEqual("2026", row["targetApiSeason"])
+        self.assertIsNone(row["providerLeagueSlug"])
+
+    def test_schedule_only_row_has_no_synthetic_markets(self):
+        row = target.schedule_row(self.fixture())
+        self.assertTrue(row["scheduleOnly"])
+        self.assertTrue(row["scheduleVerified"])
+        self.assertEqual("api-football", row["scheduleSource"])
+        self.assertEqual([], row["markets"])
+
+    def test_merge_preserves_existing_exact_markets_and_no_slug(self):
+        feed = {
+            "leagues": [{
+                "leagueCode": "T1",
+                "providerLeagueSlug": None,
+                "matches": [{
+                    "id": "9001",
+                    "date": "2026-08-15",
+                    "kickoff": "2026-08-15T18:00:00Z",
+                    "homeTeam": "Home SK",
+                    "awayTeam": "Away SK",
+                    "teamMappingStatus": "matched",
+                    "usableForStats": True,
+                    "markets": [{"market": "1X2", "bookmaker": "Bet365", "odds": 2.0}],
+                }],
+            }],
+        }
+        merged, metrics = target.merge_schedule(
+            feed, [self.fixture()], self.registry_row(), "2026-08-14T16:00:00Z"
+        )
+        league = merged["leagues"][0]
+        self.assertIsNone(league["providerLeagueSlug"])
+        self.assertEqual(1, len(league["matches"]))
+        self.assertEqual(1, len(league["matches"][0]["markets"]))
+        self.assertFalse(league["matches"][0]["scheduleOnly"])
+        self.assertEqual(1, metrics["preservedBettable"])
+
+    def test_validator_accepts_verified_api_schedule_only_but_not_betting_rows(self):
+        original = schedule_priority.target.validate_feed
+        try:
+            schedule_priority._install_schedule_only_validation()
+            safe_feed = {"leagues": [{
+                "leagueCode": "T1",
+                "matches": [{
+                    "id": "9001",
+                    "date": "2026-08-15",
+                    "teamMappingStatus": "schedule_only_api_football",
+                    "usableForStats": False,
+                    "scheduleOnly": True,
+                    "scheduleSource": "api-football",
+                    "scheduleVerified": True,
+                    "markets": [],
+                }],
+            }]}
+            result = schedule_priority.target.validate_feed(
+                safe_feed, [{"leagueCode": "T1"}], dt.date(2026, 8, 14)
+            )
+            self.assertEqual(1, result["scheduleOnlyInRegistryMatchCount"])
+
+            unsafe = {"leagues": [{
+                "leagueCode": "T1",
+                "matches": [{
+                    "id": "9002",
+                    "date": "2026-08-15",
+                    "teamMappingStatus": "schedule_only_api_football",
+                    "usableForStats": False,
+                    "scheduleOnly": True,
+                    "scheduleSource": "api-football",
+                    "scheduleVerified": True,
+                    "markets": [{"market": "1X2", "bookmaker": "Bet365", "odds": 2.0}],
+                }],
+            }]}
+            with self.assertRaises(RuntimeError):
+                schedule_priority.target.validate_feed(
+                    unsafe, [{"leagueCode": "T1"}], dt.date(2026, 8, 14)
+                )
+        finally:
+            schedule_priority.target.validate_feed = original
+
+
+if __name__ == "__main__":
+    unittest.main()
+''', encoding='utf-8')
+
+          path = Path('scripts/refresh_domestic_odds_schedule_priority.py')
+          source = path.read_text(encoding='utf-8')
+          old = '''        for league in feed.get("leagues", []) or []:\n            if not isinstance(league, dict):\n                continue\n            code = str(league.get("leagueCode") or "")\n            if code in expected:\n                in_scope.append(league)\n                continue\n\n            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]\n'''
+          new = '''        schedule_only_in_registry = 0\n        for league in feed.get("leagues", []) or []:\n            if not isinstance(league, dict):\n                continue\n            code = str(league.get("leagueCode") or "")\n            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]\n            if code in expected:\n                scoped_league = dict(league)\n                betting_matches = []\n                for row in matches:\n                    safe_api_schedule_only = (\n                        row.get("scheduleOnly") is True\n                        and row.get("scheduleVerified") is True\n                        and str(row.get("scheduleSource") or "").strip() == "api-football"\n                        and not (row.get("markets") or [])\n                    )\n                    if safe_api_schedule_only:\n                        schedule_only_in_registry += 1\n                    else:\n                        betting_matches.append(row)\n                scoped_league["matches"] = betting_matches\n                in_scope.append(scoped_league)\n                continue\n\n'''
+          if old not in source:
+              raise SystemExit('Could not locate schedule-only validation block')
+          source = source.replace(old, new, 1)
+          old_result = '''        result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)\n        result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)\n        return result\n'''
+          new_result = '''        result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)\n        result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)\n        result["scheduleOnlyInRegistryMatchCount"] = schedule_only_in_registry\n        return result\n'''
+          if old_result not in source:
+              raise SystemExit('Could not locate schedule-only validation result block')
+          path.write_text(source.replace(old_result, new_result, 1), encoding='utf-8')
+          PY
+
+      - name: Run T1 and Domestic regressions
+        run: |
+          python -m py_compile \
+            scripts/refresh_turkey_super_lig_schedule.py \
+            scripts/refresh_domestic_odds_schedule_priority.py
+          python -m unittest tests/test_refresh_turkey_super_lig_schedule.py
+          python -m unittest tests/test_domestic_live_july_pipeline.py
+
+      - name: Commit T1 source fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            scripts/refresh_turkey_super_lig_schedule.py \
+            scripts/refresh_domestic_odds_schedule_priority.py \
+            tests/test_refresh_turkey_super_lig_schedule.py
+          git commit -m "Add Turkey Super Lig official schedule sync"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
