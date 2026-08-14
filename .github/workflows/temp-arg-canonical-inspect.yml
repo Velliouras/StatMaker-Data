@@ -1,0 +1,64 @@
+name: Temporary ARG Canonical Inspect
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/temp-arg-canonical-inspect.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Inspect canonical ARG without provider calls
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          feed = json.loads(Path('odds/odds_api_io/domestic_odds.json').read_text(encoding='utf-8-sig'))
+          league = next((x for x in feed.get('leagues', []) if x.get('leagueCode') == 'ARG'), None)
+          if league is None:
+              raise SystemExit('ARG missing from canonical feed')
+          matches = [m for m in league.get('matches', []) if isinstance(m, dict)]
+          report = {
+              'providerLeagueSlug': league.get('providerLeagueSlug'),
+              'matchCount': len(matches),
+              'statuses': {},
+              'nonMatched': [],
+          }
+          for m in matches:
+              status = str(m.get('teamMappingStatus') or '')
+              report['statuses'][status] = report['statuses'].get(status, 0) + 1
+              if status != 'matched' or m.get('usableForStats') is not True:
+                  report['nonMatched'].append({
+                      'id': m.get('id') or m.get('matchId'),
+                      'date': m.get('date'),
+                      'providerHomeTeam': m.get('providerHomeTeam'),
+                      'providerAwayTeam': m.get('providerAwayTeam'),
+                      'homeTeam': m.get('homeTeam'),
+                      'awayTeam': m.get('awayTeam'),
+                      'canonicalHomeTeam': m.get('canonicalHomeTeam'),
+                      'canonicalAwayTeam': m.get('canonicalAwayTeam'),
+                      'teamMappingStatus': m.get('teamMappingStatus'),
+                      'usableForStats': m.get('usableForStats'),
+                      'marketCount': len(m.get('markets') or []),
+                  })
+          out = Path('reports/temp_arg_canonical_inspect.json')
+          out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/temp_arg_canonical_inspect.json
+          git commit -m "Inspect canonical ARG mapping state"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
