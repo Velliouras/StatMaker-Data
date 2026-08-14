@@ -1,0 +1,51 @@
+name: Temporary T1 Validator Patch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/temp-t1-validator-patch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Patch validator
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('scripts/refresh_domestic_odds_schedule_priority.py')
+          source = path.read_text(encoding='utf-8')
+          old = '''        for league in feed.get("leagues", []) or []:\n            if not isinstance(league, dict):\n                continue\n            code = str(league.get("leagueCode") or "")\n            if code in expected:\n                in_scope.append(league)\n                continue\n\n            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]\n'''
+          new = '''        schedule_only_in_registry = 0\n        for league in feed.get("leagues", []) or []:\n            if not isinstance(league, dict):\n                continue\n            code = str(league.get("leagueCode") or "")\n            matches = [row for row in league.get("matches", []) or [] if isinstance(row, dict)]\n            if code in expected:\n                scoped_league = dict(league)\n                betting_matches = []\n                for row in matches:\n                    safe_api_schedule_only = (\n                        row.get("scheduleOnly") is True\n                        and row.get("scheduleVerified") is True\n                        and str(row.get("scheduleSource") or "").strip() == "api-football"\n                        and not (row.get("markets") or [])\n                    )\n                    if safe_api_schedule_only:\n                        schedule_only_in_registry += 1\n                    else:\n                        betting_matches.append(row)\n                scoped_league["matches"] = betting_matches\n                in_scope.append(scoped_league)\n                continue\n\n'''
+          if old not in source:
+              raise SystemExit('validator block not found')
+          source = source.replace(old, new, 1)
+          old_result = '''        result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)\n        result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)\n        return result\n'''
+          new_result = '''        result["scheduleOnlyExternalLeagueCount"] = len(schedule_only_external)\n        result["scheduleOnlyExternalLeagueCodes"] = sorted(schedule_only_external)\n        result["scheduleOnlyInRegistryMatchCount"] = schedule_only_in_registry\n        return result\n'''
+          if old_result not in source:
+              raise SystemExit('validator result block not found')
+          path.write_text(source.replace(old_result, new_result, 1), encoding='utf-8')
+          PY
+      - name: Test
+        run: |
+          python -m py_compile scripts/refresh_domestic_odds_schedule_priority.py scripts/refresh_turkey_super_lig_schedule.py
+          python -m unittest tests/test_refresh_turkey_super_lig_schedule.py
+          python -m unittest tests/test_domestic_live_july_pipeline.py
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/refresh_domestic_odds_schedule_priority.py
+          git commit -m "Allow verified API-Football schedule-only Domestic fixtures"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
