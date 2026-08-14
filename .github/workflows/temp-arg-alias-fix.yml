@@ -71,18 +71,7 @@ jobs:
               payload['version'] = max(int(payload.get('version') or 0) + 1, 8)
           mapping_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
-          test_path = Path('tests/test_arg_provider_aliases.py')
-          test_path.write_text('''import sys\nimport unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[1]\nSCRIPTS = ROOT / "scripts"\nif str(SCRIPTS) not in sys.path:\n    sys.path.insert(0, str(SCRIPTS))\n\nimport domestic_live_july_pipeline as pipeline\nimport refresh_domestic_odds_schedule_priority as schedule_priority\n\n\nclass ArgentinaProviderAliasTest(unittest.TestCase):\n    def test_current_arg_provider_names_map_deterministically(self):\n        registry_payload = pipeline.load_json(pipeline.REGISTRY_PATH, {})\n        registry = registry_payload.get("leagues", [])\n        aliases = pipeline.generated_aliases(registry)\n        schedule_priority._install_conservative_team_mapping()\n        cases = {\n            "Argentinos Juniors": "Argentinos JRS",\n            "CA Central Cordoba SE": "Central Cordoba de Santiago",\n            "Estudiantes de La Plata": "Estudiantes L.P.",\n            "Gimnasia y Esgrima La Plata": "Gimnasia L.P.",\n            "Gimnasia y Esgrima Mendoza": "Gimnasia M.",\n            "Independiente Rivadavia": "Independ. Rivadavia",\n            "Racing Club Avellaneda": "Racing Club",\n        }\n        for provider_team, expected in cases.items():\n            with self.subTest(provider_team=provider_team):\n                mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(\n                    provider_team, "ARG", aliases, {}\n                )\n                self.assertEqual(expected, mapped)\n                self.assertEqual(expected, canonical)\n\n\nif __name__ == "__main__":\n    unittest.main()\n''', encoding='utf-8')
-
-          workflow_path = Path('.github/workflows/odds-integrity-production.yml')
-          workflow = workflow_path.read_text(encoding='utf-8')
-          needle = '            tests/test_refresh_domestic_odds_integrity.py \\\n'
-          addition = '            tests/test_arg_provider_aliases.py \\\n'
-          if addition not in workflow:
-              if needle not in workflow:
-                  raise SystemExit('Could not locate Domestic odds regression test list')
-              workflow = workflow.replace(needle, needle + addition, 1)
-              workflow_path.write_text(workflow, encoding='utf-8')
+          Path('tests/test_arg_provider_aliases.py').write_text('''import sys\nimport unittest\nfrom pathlib import Path\n\nROOT = Path(__file__).resolve().parents[1]\nSCRIPTS = ROOT / "scripts"\nif str(SCRIPTS) not in sys.path:\n    sys.path.insert(0, str(SCRIPTS))\n\nimport domestic_live_july_pipeline as pipeline\nimport refresh_domestic_odds_schedule_priority as schedule_priority\n\n\nclass ArgentinaProviderAliasTest(unittest.TestCase):\n    def test_current_arg_provider_names_map_deterministically(self):\n        registry_payload = pipeline.load_json(pipeline.REGISTRY_PATH, {})\n        registry = registry_payload.get("leagues", [])\n        aliases = pipeline.generated_aliases(registry)\n        schedule_priority._install_conservative_team_mapping()\n        cases = {\n            "Argentinos Juniors": "Argentinos JRS",\n            "CA Central Cordoba SE": "Central Cordoba de Santiago",\n            "Estudiantes de La Plata": "Estudiantes L.P.",\n            "Gimnasia y Esgrima La Plata": "Gimnasia L.P.",\n            "Gimnasia y Esgrima Mendoza": "Gimnasia M.",\n            "Independiente Rivadavia": "Independ. Rivadavia",\n            "Racing Club Avellaneda": "Racing Club",\n        }\n        for provider_team, expected in cases.items():\n            with self.subTest(provider_team=provider_team):\n                mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(\n                    provider_team, "ARG", aliases, {}\n                )\n                self.assertEqual(expected, mapped)\n                self.assertEqual(expected, canonical)\n\n\nif __name__ == "__main__":\n    unittest.main()\n''', encoding='utf-8')
           PY
 
       - name: Validate ARG mapping regression
@@ -96,8 +85,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             mappings/domestic_team_aliases.json \
-            tests/test_arg_provider_aliases.py \
-            .github/workflows/odds-integrity-production.yml
-          git commit -m "Fix Argentina provider team aliases"
-          git pull --rebase --autostash origin main
-          git push origin HEAD:main
+            tests/test_arg_provider_aliases.py
+          if git diff --cached --quiet; then
+            echo "ARG aliases already applied."
+          else
+            git commit -m "Fix Argentina provider team aliases"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
