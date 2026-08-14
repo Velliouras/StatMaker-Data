@@ -217,13 +217,14 @@ def _install_schedule_only_validation() -> None:
                 scoped_league = dict(league)
                 betting_matches = []
                 for row in matches:
-                    safe_api_schedule_only = (
+                    safe_verified_schedule_only = (
                         row.get("scheduleOnly") is True
                         and row.get("scheduleVerified") is True
-                        and str(row.get("scheduleSource") or "").strip() == "api-football"
+                        and str(row.get("scheduleSource") or "").strip()
+                        in {"api-football", "odds-api-io-events"}
                         and not (row.get("markets") or [])
                     )
-                    if safe_api_schedule_only:
+                    if safe_verified_schedule_only:
                         schedule_only_in_registry += 1
                     else:
                         betting_matches.append(row)
