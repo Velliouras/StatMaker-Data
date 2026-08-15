@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-15T04:05:11Z",
+  "generated_at": "2026-08-15T14:44:41Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/championship/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-15T03:51:57Z",
+    "cache_generated_at": "2026-08-15T14:43:45Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,21 +39,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 1,
-    "fixtures_with_any_stats": 1,
-    "fixtures_with_bb_core_stats": 1,
+    "completed_fixtures": 2,
+    "fixtures_with_any_stats": 2,
+    "fixtures_with_bb_core_stats": 2,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 1,
-      "shots_on_target": 1,
-      "corners": 1,
-      "fouls": 1,
-      "yellow_cards": 1,
+      "shots_total": 2,
+      "shots_on_target": 2,
+      "corners": 2,
+      "fouls": 2,
+      "yellow_cards": 2,
       "red_cards": 0,
-      "possession": 1,
-      "passes": 1,
-      "xg": 1
+      "possession": 2,
+      "passes": 2,
+      "xg": 2
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -68,7 +68,7 @@
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 1 < 15"
+      "not enough completed fixtures: 2 < 15"
     ]
   },
   "matches": [
@@ -145,6 +145,90 @@
         "fulltime": {
           "home": 2,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563084,
+      "date_utc": "2026-08-15T11:30:00+00:00",
+      "country": "England",
+      "league": "Championship",
+      "league_code": "E1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 40,
+      "round": "Regular Season - 1",
+      "home_team": "Bolton",
+      "away_team": "Preston",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 9,
+        "HST": 6,
+        "AST": 3,
+        "HC": 5,
+        "AC": 2,
+        "HF": 12,
+        "AF": 11,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 55,
+        "APossession": 45,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 405,
+        "APasses": 330,
+        "HPassesAccurate": 313,
+        "APassesAccurate": 232,
+        "HxG": 1.1,
+        "AxG": 0.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,
