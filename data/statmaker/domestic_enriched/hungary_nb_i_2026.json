@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-15T14:44:41Z",
+  "generated_at": "2026-08-15T17:42:54Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-15T04:04:50Z",
+    "cache_generated_at": "2026-08-15T17:42:47Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,11 +39,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 18,
+    "completed_fixtures": 20,
     "fixtures_with_any_stats": 12,
     "fixtures_with_bb_core_stats": 12,
-    "any_stats_coverage": 0.6667,
-    "bb_core_coverage": 0.6667,
+    "any_stats_coverage": 0.6,
+    "bb_core_coverage": 0.6,
     "group_counts": {
       "shots_total": 12,
       "shots_on_target": 12,
@@ -56,19 +56,22 @@
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.6667,
-      "shots_on_target": 0.6667,
-      "corners": 0.6667,
-      "fouls": 0.6667,
-      "yellow_cards": 0.6667,
-      "red_cards": 0.2222,
-      "possession": 0.6667,
-      "passes": 0.6667,
+      "shots_total": 0.6,
+      "shots_on_target": 0.6,
+      "corners": 0.6,
+      "fouls": 0.6,
+      "yellow_cards": 0.6,
+      "red_cards": 0.2,
+      "possession": 0.6,
+      "passes": 0.6,
       "xg": 0.0
     },
-    "bb_ready_candidate": true,
+    "bb_ready_candidate": false,
     "notes": [
-      "ok"
+      "low any-stats coverage: 0.6 < 0.65",
+      "low BB-core coverage: 0.6 < 0.65",
+      "required BB groups below threshold",
+      "no shot group reaches threshold"
     ]
   },
   "matches": [
@@ -1573,6 +1576,174 @@
         "fulltime": {
           "home": 1,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560223,
+      "date_utc": "2026-08-15T14:30:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 4",
+      "home_team": "Ujpest",
+      "away_team": "MTK Budapest",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560221,
+      "date_utc": "2026-08-15T15:30:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 4",
+      "home_team": "Nyiregyhaza",
+      "away_team": "Kisvarda FC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,
