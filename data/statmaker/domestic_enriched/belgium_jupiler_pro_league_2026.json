@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-14T23:44:03Z",
+  "generated_at": "2026-08-15T04:05:11Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/belgium/jupiler-pro-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-14T04:59:21Z",
+    "cache_generated_at": "2026-08-15T03:51:54Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,21 +39,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 9,
-    "fixtures_with_any_stats": 9,
-    "fixtures_with_bb_core_stats": 9,
+    "completed_fixtures": 10,
+    "fixtures_with_any_stats": 10,
+    "fixtures_with_bb_core_stats": 10,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 9,
-      "shots_on_target": 9,
-      "corners": 9,
-      "fouls": 9,
-      "yellow_cards": 9,
+      "shots_total": 10,
+      "shots_on_target": 10,
+      "corners": 10,
+      "fouls": 10,
+      "yellow_cards": 10,
       "red_cards": 2,
-      "possession": 9,
-      "passes": 9,
-      "xg": 9
+      "possession": 10,
+      "passes": 10,
+      "xg": 10
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -61,14 +61,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.2222,
+      "red_cards": 0.2,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 9 < 15"
+      "not enough completed fixtures: 10 < 15"
     ]
   },
   "matches": [
@@ -817,6 +817,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558590,
+      "date_utc": "2026-08-14T18:45:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 2",
+      "home_team": "Cercle Brugge",
+      "away_team": "St. Truiden",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 26,
+        "AS": 13,
+        "HST": 8,
+        "AST": 7,
+        "HC": 10,
+        "AC": 3,
+        "HF": 7,
+        "AF": 9,
+        "HY": 0,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 55,
+        "APossession": 45,
+        "HSaves": 3,
+        "ASaves": 6,
+        "HPasses": 473,
+        "APasses": 401,
+        "HPassesAccurate": 390,
+        "APassesAccurate": 321,
+        "HxG": 4.15,
+        "AxG": 2.04
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 3,
+      "home_score": 3,
+      "away_score": 3,
+      "fthg": 3,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 3,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 3
         },
         "extratime": {
           "home": null,
