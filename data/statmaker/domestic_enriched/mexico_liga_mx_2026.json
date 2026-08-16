@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-16T04:12:46Z",
+  "generated_at": "2026-08-16T14:46:11Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/mexico/liga-mx/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-16T03:58:05Z",
+    "cache_generated_at": "2026-08-16T14:44:54Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,32 +39,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 29,
-    "fixtures_with_any_stats": 27,
-    "fixtures_with_bb_core_stats": 24,
-    "any_stats_coverage": 0.931,
-    "bb_core_coverage": 0.8276,
+    "completed_fixtures": 30,
+    "fixtures_with_any_stats": 29,
+    "fixtures_with_bb_core_stats": 25,
+    "any_stats_coverage": 0.9667,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 27,
-      "shots_on_target": 27,
-      "corners": 27,
-      "fouls": 27,
-      "yellow_cards": 24,
-      "red_cards": 8,
-      "possession": 27,
-      "passes": 27,
-      "xg": 27
+      "shots_total": 29,
+      "shots_on_target": 29,
+      "corners": 29,
+      "fouls": 29,
+      "yellow_cards": 25,
+      "red_cards": 9,
+      "possession": 29,
+      "passes": 29,
+      "xg": 29
     },
     "group_coverage": {
-      "shots_total": 0.931,
-      "shots_on_target": 0.931,
-      "corners": 0.931,
-      "fouls": 0.931,
-      "yellow_cards": 0.8276,
-      "red_cards": 0.2759,
-      "possession": 0.931,
-      "passes": 0.931,
-      "xg": 0.931
+      "shots_total": 0.9667,
+      "shots_on_target": 0.9667,
+      "corners": 0.9667,
+      "fouls": 0.9667,
+      "yellow_cards": 0.8333,
+      "red_cards": 0.3,
+      "possession": 0.9667,
+      "passes": 0.9667,
+      "xg": 0.9667
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2439,42 +2439,42 @@
       "away_team": "FC Juarez",
       "status": "FT",
       "normalized_stats": {
-        "HS": null,
-        "AS": null,
-        "HST": null,
-        "AST": null,
-        "HC": null,
-        "AC": null,
-        "HF": null,
-        "AF": null,
+        "HS": 28,
+        "AS": 4,
+        "HST": 10,
+        "AST": 1,
+        "HC": 10,
+        "AC": 0,
+        "HF": 11,
+        "AF": 7,
         "HY": null,
         "AY": null,
         "HR": null,
         "AR": null,
-        "HPossession": null,
-        "APossession": null,
-        "HSaves": null,
-        "ASaves": null,
-        "HPasses": null,
-        "APasses": null,
-        "HPassesAccurate": null,
-        "APassesAccurate": null,
-        "HxG": null,
-        "AxG": null
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 542,
+        "APasses": 339,
+        "HPassesAccurate": 465,
+        "APassesAccurate": 273,
+        "HxG": 2.49,
+        "AxG": 0.33
       },
       "quality": {
-        "has_any_stats": false,
+        "has_any_stats": true,
         "has_bb_core_stats": false,
         "groups": {
-          "shots_total": false,
-          "shots_on_target": false,
-          "corners": false,
-          "fouls": false,
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
           "yellow_cards": false,
           "red_cards": false,
-          "possession": false,
-          "passes": false,
-          "xg": false
+          "possession": true,
+          "passes": true,
+          "xg": true
         }
       },
       "home_goals": 6,
@@ -2496,6 +2496,90 @@
         },
         "fulltime": {
           "home": 6,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550923,
+      "date_utc": "2026-08-16T03:10:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 4",
+      "home_team": "Atlas",
+      "away_team": "Tigres UANL",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 25,
+        "HST": 3,
+        "AST": 7,
+        "HC": 2,
+        "AC": 16,
+        "HF": 15,
+        "AF": 11,
+        "HY": 2,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 6,
+        "ASaves": 1,
+        "HPasses": 342,
+        "APasses": 387,
+        "HPassesAccurate": 265,
+        "APassesAccurate": 312,
+        "HxG": 0.66,
+        "AxG": 2.7
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
           "away": 1
         },
         "extratime": {
