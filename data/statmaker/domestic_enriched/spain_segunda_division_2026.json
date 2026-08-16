@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-16T14:46:11Z",
+  "generated_at": "2026-08-16T17:41:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/spain/segunda-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-16T03:58:25Z",
+    "cache_generated_at": "2026-08-16T17:41:17Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 5,
-    "fixtures_with_any_stats": 4,
-    "fixtures_with_bb_core_stats": 4,
-    "any_stats_coverage": 0.8,
-    "bb_core_coverage": 0.8,
+    "completed_fixtures": 6,
+    "fixtures_with_any_stats": 5,
+    "fixtures_with_bb_core_stats": 5,
+    "any_stats_coverage": 0.8333,
+    "bb_core_coverage": 0.8333,
     "group_counts": {
-      "shots_total": 4,
-      "shots_on_target": 4,
-      "corners": 4,
-      "fouls": 4,
-      "yellow_cards": 4,
+      "shots_total": 5,
+      "shots_on_target": 5,
+      "corners": 5,
+      "fouls": 5,
+      "yellow_cards": 5,
       "red_cards": 0,
-      "possession": 4,
-      "passes": 4,
+      "possession": 5,
+      "passes": 5,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.8,
-      "shots_on_target": 0.8,
-      "corners": 0.8,
-      "fouls": 0.8,
-      "yellow_cards": 0.8,
+      "shots_total": 0.8333,
+      "shots_on_target": 0.8333,
+      "corners": 0.8333,
+      "fouls": 0.8333,
+      "yellow_cards": 0.8333,
       "red_cards": 0.0,
-      "possession": 0.8,
-      "passes": 0.8,
+      "possession": 0.8333,
+      "passes": 0.8333,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 5 < 15"
+      "not enough completed fixtures: 6 < 15"
     ]
   },
   "matches": [
@@ -481,6 +481,90 @@
         "fulltime": {
           "home": 2,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569875,
+      "date_utc": "2026-08-16T15:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 1",
+      "home_team": "Eibar",
+      "away_team": "Tenerife",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 7,
+        "HST": 5,
+        "AST": 4,
+        "HC": 7,
+        "AC": 3,
+        "HF": 12,
+        "AF": 14,
+        "HY": 0,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 65,
+        "APossession": 35,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 576,
+        "APasses": 312,
+        "HPassesAccurate": 501,
+        "APassesAccurate": 219,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
         },
         "extratime": {
           "home": null,

@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-16T14:46:11Z",
+  "generated_at": "2026-08-16T17:41:28Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-16T03:58:17Z",
+    "cache_generated_at": "2026-08-16T17:40:32Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 13,
-    "fixtures_with_any_stats": 13,
-    "fixtures_with_bb_core_stats": 12,
+    "completed_fixtures": 14,
+    "fixtures_with_any_stats": 14,
+    "fixtures_with_bb_core_stats": 13,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9231,
+    "bb_core_coverage": 0.9286,
     "group_counts": {
-      "shots_total": 13,
-      "shots_on_target": 13,
-      "corners": 13,
-      "fouls": 13,
-      "yellow_cards": 12,
-      "red_cards": 3,
-      "possession": 13,
-      "passes": 13,
-      "xg": 13
+      "shots_total": 14,
+      "shots_on_target": 14,
+      "corners": 14,
+      "fouls": 14,
+      "yellow_cards": 13,
+      "red_cards": 4,
+      "possession": 14,
+      "passes": 14,
+      "xg": 14
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9231,
-      "red_cards": 0.2308,
+      "yellow_cards": 0.9286,
+      "red_cards": 0.2857,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 13 < 15"
+      "not enough completed fixtures: 14 < 15"
     ]
   },
   "matches": [
@@ -1153,6 +1153,90 @@
         "fulltime": {
           "home": 0,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575461,
+      "date_utc": "2026-08-16T14:30:00+00:00",
+      "country": "Portugal",
+      "league": "Liga Portugal",
+      "league_code": "P1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 94,
+      "round": "Regular Season - 2",
+      "home_team": "Nacional",
+      "away_team": "Estoril",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 9,
+        "HST": 3,
+        "AST": 5,
+        "HC": 7,
+        "AC": 4,
+        "HF": 13,
+        "AF": 13,
+        "HY": 2,
+        "AY": 4,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 453,
+        "APasses": 315,
+        "HPassesAccurate": 390,
+        "APassesAccurate": 251,
+        "HxG": 2.08,
+        "AxG": 0.82
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
         },
         "extratime": {
           "home": null,
