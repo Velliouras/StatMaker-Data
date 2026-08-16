@@ -1,17 +1,17 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-16T20:45:26Z`
+Generated at: `2026-08-16T23:41:49Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
 | Code | Country | League | App season | API season | API league ID | Group | Completed | Any stats | BB-core stats | Any coverage | BB-core coverage | BB-ready candidate | Output | Notes |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
-| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 323 | 320 | 316 | 0.9907 | 0.9783 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
+| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 324 | 321 | 317 | 0.9907 | 0.9784 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
 | AUT2 | Austria | 2. Liga | 2026-2027 | 2026 | 219 | central_europe | 24 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/austria_2_liga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | AUT | Austria | Bundesliga | 2026-2027 | 2026 | 218 | central_europe | 18 | 18 | 17 | 1.0 | 0.9444 | True | data/statmaker/domestic_enriched/austria_bundesliga_2026.json | ok |
 | B1 | Belgium | Jupiler Pro League | 2026-2027 | 2026 | 144 | western_europe | 14 | 10 | 10 | 0.7143 | 0.7143 | False | data/statmaker/domestic_enriched/belgium_jupiler_pro_league_2026.json | not enough completed fixtures: 14 < 15 |
-| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 219 | 217 | 210 | 0.9909 | 0.9589 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
-| BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 218 | 218 | 214 | 1.0 | 0.9817 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
+| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 223 | 221 | 214 | 0.991 | 0.9596 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
+| BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 220 | 220 | 216 | 1.0 | 0.9818 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
 | BGR | Bulgaria | First League | 2026-2027 | 2026 | 172 | eastern_europe | 32 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/bulgaria_first_league_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | CHN | China | Super League | 2026 | 2026 | 169 | asia | 179 | 179 | 177 | 1.0 | 0.9888 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
 | CZE | Czech Republic | Czech Liga | 2026-2027 | 2026 | 345 | central_europe | 30 | 26 | 25 | 0.8667 | 0.8333 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2026.json | ok |
@@ -42,17 +42,17 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | NOR | Norway | Eliteserien | 2026 | 2026 | 103 | scandinavia | 136 | 136 | 129 | 1.0 | 0.9485 | True | data/statmaker/domestic_enriched/norway_eliteserien_2026.json | ok |
 | NOR2 | Norway | OBOS-ligaen | 2026 | 2026 | 104 | scandinavia | 139 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/norway_obos_ligaen_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | POL | Poland | Ekstraklasa | 2026-2027 | 2026 | 106 | central_europe | 31 | 28 | 27 | 0.9032 | 0.871 | True | data/statmaker/domestic_enriched/poland_ekstraklasa_2026.json | ok |
-| P1 | Portugal | Liga Portugal | 2026-2027 | 2026 | 94 | western_europe | 15 | 15 | 14 | 1.0 | 0.9333 | True | data/statmaker/domestic_enriched/portugal_liga_portugal_2026.json | ok |
+| P1 | Portugal | Liga Portugal | 2026-2027 | 2026 | 94 | western_europe | 16 | 16 | 15 | 1.0 | 0.9375 | True | data/statmaker/domestic_enriched/portugal_liga_portugal_2026.json | ok |
 | ROM | Romania | Liga I | 2026-2027 | 2026 | 283 | central_europe | 37 | 35 | 33 | 0.9459 | 0.8919 | True | data/statmaker/domestic_enriched/romania_liga_i_2026.json | ok |
 | RUS | Russia | Premier League | 2026-2027 | 2026 | 235 | eastern_europe | 32 | 32 | 31 | 1.0 | 0.9688 | True | data/statmaker/domestic_enriched/russia_premier_league_2026.json | ok |
 | SC1 | Scotland | Championship | 2026-2027 | 2026 | 180 | scotland | 10 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_championship_2026.json | not enough completed fixtures: 10 < 15; low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC3 | Scotland | League Two | 2026 | 2026 | 182 | scotland | 20 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC0 | Scotland | Premiership | 2026-2027 | 2026 | 179 | scotland | 12 | 12 | 12 | 1.0 | 1.0 | False | data/statmaker/domestic_enriched/scotland_premiership_2026.json | not enough completed fixtures: 12 < 15 |
-| SRB | Serbia | Super Liga | 2026-2027 | 2026 | 286 | eastern_europe | 28 | 26 | 26 | 0.9286 | 0.9286 | True | data/statmaker/domestic_enriched/serbia_super_liga_2026.json | ok |
+| SRB | Serbia | Super Liga | 2026-2027 | 2026 | 286 | eastern_europe | 30 | 28 | 28 | 0.9333 | 0.9333 | True | data/statmaker/domestic_enriched/serbia_super_liga_2026.json | ok |
 | SVK | Slovakia | Super Liga | 2026-2027 | 2026 | 332 | central_europe | 22 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SVN | Slovenia | 1. SNL | 2026-2027 | 2026 | 373 | central_europe | 24 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SP1 | Spain | La Liga | 2026-2027 | 2026 | 140 | top_europe | 4 | 4 | 4 | 1.0 | 1.0 | False | data/statmaker/domestic_enriched/spain_la_liga_2026.json | not enough completed fixtures: 4 < 15 |
-| SP2 | Spain | Segunda División | 2026-2027 | 2026 | 141 | top_europe | 8 | 7 | 7 | 0.875 | 0.875 | False | data/statmaker/domestic_enriched/spain_segunda_division_2026.json | not enough completed fixtures: 8 < 15 |
+| SP2 | Spain | Segunda División | 2026-2027 | 2026 | 141 | top_europe | 9 | 8 | 8 | 0.8889 | 0.8889 | False | data/statmaker/domestic_enriched/spain_segunda_division_2026.json | not enough completed fixtures: 9 < 15 |
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 134 | 134 | 134 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
 | SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 152 | 69 | 67 | 0.4539 | 0.4408 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4539 < 0.65; low BB-core coverage: 0.4408 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2026-2027 | 2026 | 207 | central_europe | 18 | 18 | 17 | 1.0 | 0.9444 | True | data/statmaker/domestic_enriched/switzerland_super_league_2026.json | ok |

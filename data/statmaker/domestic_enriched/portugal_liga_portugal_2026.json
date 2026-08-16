@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-16T20:45:25Z",
+  "generated_at": "2026-08-16T23:41:49Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-16T20:44:23Z",
+    "cache_generated_at": "2026-08-16T23:40:49Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,29 +39,29 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 15,
-    "fixtures_with_any_stats": 15,
-    "fixtures_with_bb_core_stats": 14,
+    "completed_fixtures": 16,
+    "fixtures_with_any_stats": 16,
+    "fixtures_with_bb_core_stats": 15,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9333,
+    "bb_core_coverage": 0.9375,
     "group_counts": {
-      "shots_total": 15,
-      "shots_on_target": 15,
-      "corners": 15,
-      "fouls": 15,
-      "yellow_cards": 14,
+      "shots_total": 16,
+      "shots_on_target": 16,
+      "corners": 16,
+      "fouls": 16,
+      "yellow_cards": 15,
       "red_cards": 4,
-      "possession": 15,
-      "passes": 15,
-      "xg": 15
+      "possession": 16,
+      "passes": 16,
+      "xg": 16
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9333,
-      "red_cards": 0.2667,
+      "yellow_cards": 0.9375,
+      "red_cards": 0.25,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
@@ -1321,6 +1321,90 @@
         "fulltime": {
           "home": 4,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575460,
+      "date_utc": "2026-08-16T19:30:00+00:00",
+      "country": "Portugal",
+      "league": "Liga Portugal",
+      "league_code": "P1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 94,
+      "round": "Regular Season - 2",
+      "home_team": "Famalicao",
+      "away_team": "Maritimo",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 9,
+        "HST": 4,
+        "AST": 4,
+        "HC": 5,
+        "AC": 1,
+        "HF": 11,
+        "AF": 16,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 67,
+        "APossession": 33,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 617,
+        "APasses": 303,
+        "HPassesAccurate": 550,
+        "APassesAccurate": 228,
+        "HxG": 0.58,
+        "AxG": 1.61
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
