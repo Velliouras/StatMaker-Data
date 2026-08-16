@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-16T17:41:28Z",
+  "generated_at": "2026-08-16T20:45:25Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-16T17:40:09Z",
+    "cache_generated_at": "2026-08-16T20:43:56Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,32 +39,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 30,
-    "fixtures_with_any_stats": 27,
-    "fixtures_with_bb_core_stats": 26,
-    "any_stats_coverage": 0.9,
-    "bb_core_coverage": 0.8667,
+    "completed_fixtures": 31,
+    "fixtures_with_any_stats": 28,
+    "fixtures_with_bb_core_stats": 27,
+    "any_stats_coverage": 0.9032,
+    "bb_core_coverage": 0.871,
     "group_counts": {
-      "shots_total": 27,
-      "shots_on_target": 27,
-      "corners": 27,
-      "fouls": 27,
-      "yellow_cards": 26,
-      "red_cards": 2,
-      "possession": 27,
-      "passes": 27,
-      "xg": 27
+      "shots_total": 28,
+      "shots_on_target": 28,
+      "corners": 28,
+      "fouls": 28,
+      "yellow_cards": 27,
+      "red_cards": 3,
+      "possession": 28,
+      "passes": 28,
+      "xg": 28
     },
     "group_coverage": {
-      "shots_total": 0.9,
-      "shots_on_target": 0.9,
-      "corners": 0.9,
-      "fouls": 0.9,
-      "yellow_cards": 0.8667,
-      "red_cards": 0.0667,
-      "possession": 0.9,
-      "passes": 0.9,
-      "xg": 0.9
+      "shots_total": 0.9032,
+      "shots_on_target": 0.9032,
+      "corners": 0.9032,
+      "fouls": 0.9032,
+      "yellow_cards": 0.871,
+      "red_cards": 0.0968,
+      "possession": 0.9032,
+      "passes": 0.9032,
+      "xg": 0.9032
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2577,6 +2577,90 @@
         "halftime": {
           "home": 0,
           "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1553129,
+      "date_utc": "2026-08-16T18:15:00+00:00",
+      "country": "Poland",
+      "league": "Ekstraklasa",
+      "league_code": "POL",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 106,
+      "round": "Regular Season - 4",
+      "home_team": "Gornik Zabrze",
+      "away_team": "Wisla Krakow",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 16,
+        "HST": 5,
+        "AST": 5,
+        "HC": 6,
+        "AC": 3,
+        "HF": 16,
+        "AF": 17,
+        "HY": 3,
+        "AY": 4,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 284,
+        "APasses": 509,
+        "HPassesAccurate": 222,
+        "APassesAccurate": 436,
+        "HxG": 0.6,
+        "AxG": 1.69
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
         },
         "fulltime": {
           "home": 2,
