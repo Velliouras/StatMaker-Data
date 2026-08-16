@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-15T23:41:58Z",
+  "generated_at": "2026-08-16T04:12:46Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/brazil/serie-a/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-15T23:40:52Z",
+    "cache_generated_at": "2026-08-16T03:57:59Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,11 +39,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 217,
+    "completed_fixtures": 218,
     "fixtures_with_any_stats": 216,
     "fixtures_with_bb_core_stats": 209,
-    "any_stats_coverage": 0.9954,
-    "bb_core_coverage": 0.9631,
+    "any_stats_coverage": 0.9908,
+    "bb_core_coverage": 0.9587,
     "group_counts": {
       "shots_total": 216,
       "shots_on_target": 216,
@@ -56,15 +56,15 @@
       "xg": 214
     },
     "group_coverage": {
-      "shots_total": 0.9954,
-      "shots_on_target": 0.9954,
-      "corners": 0.9954,
-      "fouls": 0.9954,
-      "yellow_cards": 0.9631,
-      "red_cards": 0.2442,
-      "possession": 0.9954,
-      "passes": 0.9954,
-      "xg": 0.9862
+      "shots_total": 0.9908,
+      "shots_on_target": 0.9908,
+      "corners": 0.9908,
+      "fouls": 0.9908,
+      "yellow_cards": 0.9587,
+      "red_cards": 0.2431,
+      "possession": 0.9908,
+      "passes": 0.9908,
+      "xg": 0.9817
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -18284,6 +18284,90 @@
       "score": {
         "halftime": {
           "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1492337,
+      "date_utc": "2026-08-16T00:00:00+00:00",
+      "country": "Brazil",
+      "league": "Serie A",
+      "league_code": "BRA",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 71,
+      "round": "Regular Season - 23",
+      "home_team": "Sao Paulo",
+      "away_team": "Coritiba",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
           "away": 0
         },
         "fulltime": {
