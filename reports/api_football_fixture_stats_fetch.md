@@ -1,13 +1,20 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-08-17T17:52:38Z`
-Requests used: `102` / `120`
+Generated at: `2026-08-17T20:51:23Z`
+Requests used: `84` / `120`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Finland | Veikkausliiga | 2026 | 244 | 120 | 56 | 59 | 120 | 0 | 59 | 60 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=120; request cap reached before all fixture statistics were fetched |
-| Romania | Liga I | 2026 | 283 | 38 | 35 | 3 | 38 | 0 | 2 | 4 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=38 |
-| Lithuania | A Lyga | 2026 | 362 | 120 | 0 | 27 | 120 | 0 | 27 | 28 | league+season:2026 | 180 | data/api_football/fixture_stats/lithuania/a-lyga/2026/fixture_stats.json | league+season:2026 returned=180 completed=120; request cap reached before all fixture statistics were fetched |
-| Hungary | NB I | 2026 | 271 | 23 | 14 | 9 | 23 | 0 | 8 | 10 | league+season:2026 | 198 | data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json | league+season:2026 returned=198 completed=23 |
+| Finland | Veikkausliiga | 2026 | 244 | 120 | 28 | 19 | 120 | 0 | 19 | 20 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=120; request cap reached before all fixture statistics were fetched |
+| Romania | Liga I | 2026 | 283 | 39 | 36 | 3 | 39 | 0 | 2 | 4 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=39 |
+| Argentina | Liga Profesional Argentina | 2026 | 128 | 327 | 323 | 4 | 327 | 0 | 3 | 5 | league+season:2026 | 495 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | league+season:2026 returned=495 completed=327 |
+| Sweden | Allsvenskan | 2026 | 113 | 135 | 134 | 1 | 135 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/allsvenskan/2026/fixture_stats.json | league+season:2026 returned=240 completed=135 |
+| Denmark | Superliga | 2026 | 119 | 22 | 21 | 1 | 22 | 0 | 0 | 2 | league+season:2026 | 132 | data/api_football/fixture_stats/denmark/superliga/2026/fixture_stats.json | league+season:2026 returned=132 completed=22 |
+| Turkey | Süper Lig | 2026 | 203 | 9 | 8 | 1 | 9 | 0 | 0 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json | league+season:2026 returned=306 completed=9 |
+| Lithuania | A Lyga | 2026 | 362 | 120 | 0 | 16 | 120 | 0 | 16 | 17 | league+season:2026 | 180 | data/api_football/fixture_stats/lithuania/a-lyga/2026/fixture_stats.json | league+season:2026 returned=180 completed=120; request cap reached before all fixture statistics were fetched |
+| Bulgaria | First League | 2026 | 172 | 34 | 0 | 16 | 34 | 0 | 16 | 17 | league+season:2026 | 182 | data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=34; request cap reached before all fixture statistics were fetched |
+| Hungary | NB I | 2026 | 271 | 23 | 15 | 8 | 23 | 0 | 8 | 9 | league+season:2026 | 198 | data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json | league+season:2026 returned=198 completed=23 |
+| Serbia | Super Liga | 2026 | 286 | 31 | 28 | 3 | 31 | 0 | 0 | 4 | league+season:2026 | 182 | data/api_football/fixture_stats/serbia/super-liga/2026/fixture_stats.json | league+season:2026 returned=182 completed=31 |
+| Spain | Segunda División | 2026 | 141 | 10 | 9 | 1 | 10 | 0 | 0 | 2 | league+season:2026 | 462 | data/api_football/fixture_stats/spain/segunda-division/2026/fixture_stats.json | league+season:2026 returned=462 completed=10 |
