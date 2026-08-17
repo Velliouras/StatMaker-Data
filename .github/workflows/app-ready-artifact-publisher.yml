@@ -1,0 +1,139 @@
+name: StatMaker App-Ready Artifact Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      statmaker_ref:
+        description: "Private StatMaker ref"
+        required: true
+        default: "uat"
+        type: string
+      force:
+        description: "Force generation"
+        required: true
+        default: false
+        type: boolean
+  schedule:
+    - cron: "20 2,6,10,14,18,22 * * *"
+
+permissions:
+  contents: write
+concurrency:
+  group: statmaker-app-ready-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+
+      - name: Check source versions
+        id: preflight
+        shell: bash
+        env:
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+          main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
+          uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
+          p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
+          m=old.get('metadata',{}); changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
+          generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"generate={'true' if generate else 'false'}\n")
+          PY
+
+      - name: Require private read token
+        if: steps.preflight.outputs.generate == 'true'
+        env: {TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"}
+        run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
+
+      - name: Checkout current StatMaker UAT
+        if: steps.preflight.outputs.generate == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat' }}
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        if: steps.preflight.outputs.generate == 'true'
+        with: {distribution: temurin, java-version: '17'}
+      - uses: android-actions/setup-android@v3
+        if: steps.preflight.outputs.generate == 'true'
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.preflight.outputs.generate == 'true'
+
+      - name: Produce indexed read models off-device
+        if: steps.preflight.outputs.generate == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        env: {APP_ID: com.statmaker.app.uat.local}
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            set -euo pipefail
+            cd statmaker-private
+            chmod +x gradlew
+            ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb logcat -c
+            adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+            ok=0
+            for i in $(seq 1 240); do
+              adb logcat -d -s StatMakerWelcomePerf:I '*:S' | grep -q 'total=' && { ok=1; break; }
+              sleep 5
+            done
+            test "$ok" = 1 || { adb logcat -d | tail -400; exit 1; }
+            adb shell am force-stop "$APP_ID"; sleep 2
+            cd ..
+            r=app-ready-export/raw; rm -rf app-ready-export; mkdir -p "$r/databases" "$r/files/statmaker_stats_snapshots" "$r/shared_prefs"
+            adb exec-out run-as "$APP_ID" cat databases/statmaker.db > "$r/databases/statmaker.db"
+            adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$r/databases/statmaker_prepared_betting.db"
+            adb exec-out run-as "$APP_ID" cat files/domestic_normalized_stats_v2.bin > "$r/files/domestic_normalized_stats_v2.bin"
+            for c in champions_league europa_league conference_league; do adb exec-out run-as "$APP_ID" cat "files/statmaker_stats_snapshots/$c.bin" > "$r/files/statmaker_stats_snapshots/$c.bin"; done
+            for p in statmaker_odds_feeds statmaker_data_manifests statmaker_prepared_data_versions; do adb exec-out run-as "$APP_ID" cat "shared_prefs/$p.xml" > "$r/shared_prefs/$p.xml"; done
+
+      - name: Build immutable bundles
+        if: steps.preflight.outputs.generate == 'true'
+        run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out
+
+      - name: Publish current and previous generations
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, shutil
+          from pathlib import Path
+          src=Path('app-ready-export/out'); dst=Path('data/statmaker/app_ready'); dst.mkdir(parents=True,exist_ok=True)
+          incoming=json.loads((src/'update_manifest.json').read_text()); mp=dst/'update_manifest.json'; old=json.loads(mp.read_text()) if mp.is_file() else None
+          if old and old.get('contentVersion')==incoming.get('contentVersion'): raise SystemExit(0)
+          names=lambda m:{Path(x['path']).name for x in m.get('artifacts',[])} if m else set()
+          current, previous=names(incoming), names(old)
+          for n in current: shutil.copy2(src/n,dst/n)
+          keep=current|previous|{'update_manifest.json'}
+          for f in dst.glob('app_ready_*_bundle-*.zip'):
+              if f.name not in keep: f.unlink()
+          shutil.copy2(src/'update_manifest.json',mp)
+          PY
+          git diff --quiet -- data/statmaker/app_ready && exit 0
+          git config user.name "StatMaker Artifact Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/statmaker/app_ready
+          git commit -m "Publish app-ready StatMaker read models"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
