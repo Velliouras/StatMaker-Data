@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-17T04:14:47Z`
+Generated at: `2026-08-17T14:50:55Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -37,7 +37,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | JPN | Japan | J1 League | 2026-2027 | 2027 | 98 | asia | 20 | 20 | 19 | 1.0 | 0.95 | True | data/statmaker/domestic_enriched/japan_j1_league_2027.json | ok |
 | LVA | Latvia | Virsliga | 2026 | 2026 | 365 | baltics | 126 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/latvia_virsliga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | LTU | Lithuania | A Lyga | 2026 | 2026 | 362 | baltics | 118 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/lithuania_a_lyga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| MEX | Mexico | Liga MX | 2026 | 2026 | 262 | americas | 33 | 32 | 27 | 0.9697 | 0.8182 | True | data/statmaker/domestic_enriched/mexico_liga_mx_2026.json | ok |
+| MEX | Mexico | Liga MX | 2026 | 2026 | 262 | americas | 34 | 34 | 29 | 1.0 | 0.8529 | True | data/statmaker/domestic_enriched/mexico_liga_mx_2026.json | ok |
 | N1 | Netherlands | Eredivisie | 2026-2027 | 2026 | 88 | western_europe | 18 | 18 | 15 | 1.0 | 0.8333 | True | data/statmaker/domestic_enriched/netherlands_eredivisie_2026.json | ok |
 | NOR | Norway | Eliteserien | 2026 | 2026 | 103 | scandinavia | 136 | 136 | 129 | 1.0 | 0.9485 | True | data/statmaker/domestic_enriched/norway_eliteserien_2026.json | ok |
 | NOR2 | Norway | OBOS-ligaen | 2026 | 2026 | 104 | scandinavia | 144 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/norway_obos_ligaen_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
