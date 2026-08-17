@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-17T14:50:55Z",
+  "generated_at": "2026-08-17T17:52:40Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-17T04:14:10Z",
+    "cache_generated_at": "2026-08-17T17:52:38Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,39 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 22,
-    "fixtures_with_any_stats": 14,
-    "fixtures_with_bb_core_stats": 14,
-    "any_stats_coverage": 0.6364,
-    "bb_core_coverage": 0.6364,
+    "completed_fixtures": 23,
+    "fixtures_with_any_stats": 15,
+    "fixtures_with_bb_core_stats": 15,
+    "any_stats_coverage": 0.6522,
+    "bb_core_coverage": 0.6522,
     "group_counts": {
-      "shots_total": 14,
-      "shots_on_target": 14,
-      "corners": 14,
-      "fouls": 14,
-      "yellow_cards": 14,
+      "shots_total": 15,
+      "shots_on_target": 15,
+      "corners": 15,
+      "fouls": 15,
+      "yellow_cards": 15,
       "red_cards": 4,
-      "possession": 14,
-      "passes": 14,
+      "possession": 15,
+      "passes": 15,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.6364,
-      "shots_on_target": 0.6364,
-      "corners": 0.6364,
-      "fouls": 0.6364,
-      "yellow_cards": 0.6364,
-      "red_cards": 0.1818,
-      "possession": 0.6364,
-      "passes": 0.6364,
+      "shots_total": 0.6522,
+      "shots_on_target": 0.6522,
+      "corners": 0.6522,
+      "fouls": 0.6522,
+      "yellow_cards": 0.6522,
+      "red_cards": 0.1739,
+      "possession": 0.6522,
+      "passes": 0.6522,
       "xg": 0.0
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "low any-stats coverage: 0.6364 < 0.65",
-      "low BB-core coverage: 0.6364 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "ok"
     ]
   },
   "matches": [
@@ -1912,6 +1909,90 @@
         "fulltime": {
           "home": 3,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560224,
+      "date_utc": "2026-08-17T15:30:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 4",
+      "home_team": "Zalaegerszegi TE",
+      "away_team": "Ferencvarosi TC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 12,
+        "HST": 5,
+        "AST": 4,
+        "HC": 2,
+        "AC": 1,
+        "HF": 12,
+        "AF": 12,
+        "HY": 2,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 3,
+        "ASaves": 5,
+        "HPasses": 442,
+        "APasses": 421,
+        "HPassesAccurate": 370,
+        "APassesAccurate": 346,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
         },
         "extratime": {
           "home": null,
