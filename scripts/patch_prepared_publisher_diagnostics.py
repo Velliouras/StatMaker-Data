@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 SOURCE = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
@@ -92,6 +95,9 @@ def main() -> None:
 
     SOURCE.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_DIAGNOSTICS_OK")
+
+    bulk_patch = Path(os.environ["GITHUB_WORKSPACE"]) / "scripts/patch_prepared_publisher_bulk.py"
+    subprocess.run([sys.executable, str(bulk_patch)], check=True)
 
 
 if __name__ == "__main__":
