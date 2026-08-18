@@ -78,7 +78,14 @@ def validate_source(path, artifact, label):
         raise SystemExit(f"Invalid canonical {label} root")
 
 
-def validate_generated_stats(domestic_fp):
+def validate_fingerprint(value, label):
+    value = value.strip()
+    if not value or value in {"0", "0|0|0"}:
+        raise SystemExit(f"Refusing app-ready publish: empty {label} fingerprint {value!r}")
+    return value
+
+
+def validate_generated_stats():
     db_path = root / "databases" / "statmaker.db"
     if not db_path.is_file() or db_path.stat().st_size <= 0:
         raise SystemExit(f"Missing/empty generated stats DB: {db_path}")
@@ -92,18 +99,48 @@ def validate_generated_stats(domestic_fp):
         raise SystemExit(f"Invalid generated stats DB {db_path}: {exc}") from exc
     if match_count <= 0:
         raise SystemExit("Refusing app-ready publish: generated stats DB contains 0 matches")
+    return match_count
 
-    parts = domestic_fp.split("|")
+
+def validate_generated_betting():
+    db_path = root / "databases" / "statmaker_prepared_betting.db"
+    if not db_path.is_file() or db_path.stat().st_size <= 0:
+        raise SystemExit(f"Missing/empty generated prepared betting DB: {db_path}")
+    required = {"domestic", "champions_league", "europa_league", "conference_league"}
     try:
-        fingerprint_count = int(parts[-1]) if len(parts) >= 3 else 0
-    except ValueError as exc:
-        raise SystemExit(f"Invalid domestic history fingerprint: {domestic_fp}") from exc
-    if fingerprint_count <= 0 or domestic_fp == "0|0|0":
-        raise SystemExit(f"Refusing app-ready publish: empty domestic history fingerprint {domestic_fp}")
-    if fingerprint_count != match_count:
+        connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        try:
+            rows = connection.execute(
+                "SELECT competition_id, state, match_count, selection_count FROM prepared_snapshot_meta"
+            ).fetchall()
+        finally:
+            connection.close()
+    except sqlite3.Error as exc:
+        raise SystemExit(f"Invalid generated prepared betting DB {db_path}: {exc}") from exc
+
+    ready = {
+        str(competition_id): (int(match_count), int(selection_count))
+        for competition_id, state, match_count, selection_count in rows
+        if state == "ready"
+    }
+    missing = sorted(required - ready.keys())
+    if missing:
         raise SystemExit(
-            f"Domestic fingerprint/DB mismatch: fingerprint={fingerprint_count}, db={match_count}"
+            "Refusing app-ready publish: prepared betting DB missing READY snapshots: "
+            + ", ".join(missing)
         )
+    invalid = {
+        competition_id: ready[competition_id]
+        for competition_id in required
+        if ready[competition_id][0] <= 0 or ready[competition_id][1] <= 0
+    }
+    if invalid:
+        detail = ", ".join(
+            f"{competition_id}(matches={counts[0]}, selections={counts[1]})"
+            for competition_id, counts in sorted(invalid.items())
+        )
+        raise SystemExit(f"Refusing app-ready publish: empty prepared betting snapshots: {detail}")
+    return {competition_id: ready[competition_id] for competition_id in sorted(required)}
 
 
 def bundle(artifact_id, kind, sources):
@@ -156,42 +193,33 @@ def bundle(artifact_id, kind, sources):
     }
 
 
-# The emulator is responsible only for the expensive generated read models and the two
-# fingerprints that describe them. Canonical manifests/odds already live in StatMaker-Data;
-# reading those from Android SharedPreferences adds no value and made the publisher dependent on
-# incidental preference-file persistence. Use repository inputs directly and verify their hashes.
 main_raw, main = read_json(source / "main_manifest.json", "main manifest")
 uefa_raw, uefa = read_json(source / "uefa_manifest.json", "UEFA manifest")
 if main.get("schemaVersion", 0) < 2 or uefa.get("schemaVersion", 0) < 2:
     raise SystemExit("Unsupported source manifest schema")
 
 canonical_odds = {
-    "domestic": (
-        source / "domestic.json",
-        artifact_by_id(main, "domestic_odds"),
-    ),
-    "champions_league": (
-        source / "champions_league.json",
-        artifact_by_id(uefa, "champions_league_odds"),
-    ),
-    "europa_league": (
-        source / "europa_league.json",
-        artifact_by_id(uefa, "europa_league_odds"),
-    ),
-    "conference_league": (
-        source / "conference_league.json",
-        artifact_by_id(uefa, "conference_league_odds"),
-    ),
+    "domestic": (source / "domestic.json", artifact_by_id(main, "domestic_odds")),
+    "champions_league": (source / "champions_league.json", artifact_by_id(uefa, "champions_league_odds")),
+    "europa_league": (source / "europa_league.json", artifact_by_id(uefa, "europa_league_odds")),
+    "conference_league": (source / "conference_league.json", artifact_by_id(uefa, "conference_league_odds")),
 }
 for name, (path, artifact) in canonical_odds.items():
     validate_source(path, artifact, f"{name} odds")
 
 versions = prefs("statmaker_prepared_data_versions")
-domestic_fp = versions.get("domestic_history_fingerprint", "").strip()
-support_fp = versions.get("uefa_support_fingerprint", "").strip()
-if not domestic_fp or not support_fp:
-    raise SystemExit("Missing prepared fingerprints")
-validate_generated_stats(domestic_fp)
+domestic_fp = validate_fingerprint(versions.get("domestic_history_fingerprint", ""), "domestic history")
+support_fp = validate_fingerprint(versions.get("uefa_support_fingerprint", ""), "UEFA support")
+stats_match_count = validate_generated_stats()
+prepared_counts = validate_generated_betting()
+print(
+    "APP_READY_VALIDATION_OK",
+    f"stats_matches={stats_match_count}",
+    "prepared=" + ",".join(
+        f"{competition_id}:{counts[0]}/{counts[1]}"
+        for competition_id, counts in prepared_counts.items()
+    ),
+)
 
 stats = bundle(
     "app_ready_stats_bundle",
@@ -209,10 +237,7 @@ betting = bundle(
     "betting",
     {
         "databases/statmaker_prepared_betting.db": root / "databases/statmaker_prepared_betting.db",
-        **{
-            f"files/app_ready_odds/{name}.json": path
-            for name, (path, _) in canonical_odds.items()
-        },
+        **{f"files/app_ready_odds/{name}.json": path for name, (path, _) in canonical_odds.items()},
     },
 )
 
