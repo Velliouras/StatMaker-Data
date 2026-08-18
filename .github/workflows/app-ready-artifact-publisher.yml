@@ -81,6 +81,7 @@ jobs:
           git show "$LEGACY_BUILDER_REF:app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt" \
             > app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt
           python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"
+          python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
 
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true'
@@ -119,6 +120,9 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
+          cores: 4
+          ram-size: 4096M
+          heap-size: 1024M
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
