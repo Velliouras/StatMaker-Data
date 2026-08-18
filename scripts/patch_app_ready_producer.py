@@ -7,8 +7,8 @@ from pathlib import Path
 
 MAIN_RAW = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main"
 UEFA_RAW = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/build/uefa-qualifier-feed-20260720"
-LOCAL_MAIN = "http://10.0.2.2:8765"
-LOCAL_UEFA = "http://10.0.2.2:8765/__uefa__"
+LOCAL_MAIN = "http://127.0.0.1:8765"
+LOCAL_UEFA = "http://127.0.0.1:8765/__uefa__"
 
 
 def replace_repository_urls() -> None:
