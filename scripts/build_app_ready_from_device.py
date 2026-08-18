@@ -2,6 +2,7 @@
 import hashlib
 import json
 import shutil
+import sqlite3
 import sys
 import xml.etree.ElementTree as ET
 import zipfile
@@ -75,6 +76,34 @@ def validate_source(path, artifact, label):
         raise SystemExit(f"Invalid canonical {label}: {exc}") from exc
     if not isinstance(payload, dict):
         raise SystemExit(f"Invalid canonical {label} root")
+
+
+def validate_generated_stats(domestic_fp):
+    db_path = root / "databases" / "statmaker.db"
+    if not db_path.is_file() or db_path.stat().st_size <= 0:
+        raise SystemExit(f"Missing/empty generated stats DB: {db_path}")
+    try:
+        connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+        try:
+            match_count = int(connection.execute("SELECT COUNT(*) FROM matches").fetchone()[0])
+        finally:
+            connection.close()
+    except (sqlite3.Error, TypeError, ValueError) as exc:
+        raise SystemExit(f"Invalid generated stats DB {db_path}: {exc}") from exc
+    if match_count <= 0:
+        raise SystemExit("Refusing app-ready publish: generated stats DB contains 0 matches")
+
+    parts = domestic_fp.split("|")
+    try:
+        fingerprint_count = int(parts[-1]) if len(parts) >= 3 else 0
+    except ValueError as exc:
+        raise SystemExit(f"Invalid domestic history fingerprint: {domestic_fp}") from exc
+    if fingerprint_count <= 0 or domestic_fp == "0|0|0":
+        raise SystemExit(f"Refusing app-ready publish: empty domestic history fingerprint {domestic_fp}")
+    if fingerprint_count != match_count:
+        raise SystemExit(
+            f"Domestic fingerprint/DB mismatch: fingerprint={fingerprint_count}, db={match_count}"
+        )
 
 
 def bundle(artifact_id, kind, sources):
@@ -162,6 +191,7 @@ domestic_fp = versions.get("domestic_history_fingerprint", "").strip()
 support_fp = versions.get("uefa_support_fingerprint", "").strip()
 if not domestic_fp or not support_fp:
     raise SystemExit("Missing prepared fingerprints")
+validate_generated_stats(domestic_fp)
 
 stats = bundle(
     "app_ready_stats_bundle",
