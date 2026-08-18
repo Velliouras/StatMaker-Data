@@ -207,7 +207,7 @@ jobs:
           }
           (dst/'publish_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
-          git diff --quiet -- data/statmaker/app_ready && exit 0
+          if [ -z "$(git status --porcelain -- data/statmaker/app_ready)" ]; then exit 0; fi
           git config user.name "StatMaker Artifact Bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/statmaker/app_ready
@@ -228,8 +228,10 @@ jobs:
           from pathlib import Path
           status=json.loads(Path('data/statmaker/app_ready/publish_status.json').read_text())
           manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          artifacts=manifest.get('artifacts',[])
           assert status.get('status') == 'READY'
           assert status.get('contentVersion') == manifest.get('contentVersion')
-          assert status.get('artifactCount') == manifest.get('artifactCount') == 2
+          assert status.get('artifactCount') == len(artifacts) == 2
+          assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           print('APP_READY_PUBLISH_OK', status['contentVersion'], status['generatedAt'])
           PY
