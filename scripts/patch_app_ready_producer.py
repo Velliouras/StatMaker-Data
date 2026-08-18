@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+import os
 import re
+import subprocess
+import sys
 from pathlib import Path
 
 MAIN_RAW = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main"
@@ -24,9 +27,7 @@ def replace_repository_urls() -> None:
         raise SystemExit("Expected at least one StatMaker-Data main URL in producer sources")
     if uefa_replacements == 0:
         raise SystemExit("Expected at least one StatMaker-Data UEFA URL in producer sources")
-    print(
-        f"APP_READY_LOCAL_URLS_OK main={main_replacements} uefa={uefa_replacements}"
-    )
+    print(f"APP_READY_LOCAL_URLS_OK main={main_replacements} uefa={uefa_replacements}")
 
 
 def tune_runner_manifest() -> None:
@@ -46,6 +47,52 @@ def tune_runner_manifest() -> None:
     print("APP_READY_RUNNER_MANIFEST_OK")
 
 
+def bundle_normalized_snapshot() -> None:
+    workspace = Path(os.environ["GITHUB_WORKSPACE"])
+    source = workspace / "data/api_football/domestic_normalized_fixture_stats.json"
+    builder = workspace / "scripts/build_domestic_normalized_snapshot.py"
+    target = Path("app/src/main/assets/app_ready/domestic_normalized_stats_v2.bin")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run([sys.executable, str(builder), str(source), str(target)], check=True)
+    if not target.is_file() or target.stat().st_size <= 12:
+        raise SystemExit("Prebuilt Domestic normalized snapshot is missing/empty")
+    print(f"APP_READY_NORMALIZED_ASSET_OK bytes={target.stat().st_size}")
+
+
+def patch_normalized_repository() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/DomesticNormalizedStatsRepository.kt")
+    text = source.read_text(encoding="utf-8")
+    marker = '''        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val storedHash = prefs.getString(HASH_KEY, "").orEmpty()
+'''
+    replacement = '''        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!target.isFile || target.length() <= 12L) {
+            target.parentFile?.mkdirs()
+            context.applicationContext.assets.open("app_ready/domestic_normalized_stats_v2.bin").use { input ->
+                target.outputStream().buffered().use { output -> input.copyTo(output) }
+            }
+            check(prefs.edit().putString(HASH_KEY, expectedHash).commit()) {
+                "Could not persist prebuilt Domestic normalized stats hash"
+            }
+        }
+        val storedHash = prefs.getString(HASH_KEY, "").orEmpty()
+'''
+    if text.count(marker) != 1:
+        raise SystemExit("Could not locate normalized-stats preferences block")
+    text = text.replace(marker, replacement, 1)
+    old_fast_path = '''        if (!force && target.isFile && target.length() > 12L &&
+            (expectedHash.isBlank() || expectedHash == storedHash)
+'''
+    new_fast_path = '''        if (target.isFile && target.length() > 12L &&
+            (expectedHash.isBlank() || expectedHash == storedHash)
+'''
+    if text.count(old_fast_path) != 1:
+        raise SystemExit("Could not locate normalized-stats fast path")
+    text = text.replace(old_fast_path, new_fast_path, 1)
+    source.write_text(text, encoding="utf-8")
+    print("APP_READY_NORMALIZED_REPOSITORY_OK")
+
+
 def harden_download(path: str, label: str) -> None:
     source = Path(path)
     text = source.read_text(encoding="utf-8")
@@ -55,10 +102,7 @@ def harden_download(path: str, label: str) -> None:
     )
     matches = list(pattern.finditer(text))
     if len(matches) != 1:
-        raise SystemExit(
-            f"Expected exactly one downloadText block in {source}; found {len(matches)}"
-        )
-
+        raise SystemExit(f"Expected exactly one downloadText block in {source}; found {len(matches)}")
     replacement = '''    private fun downloadText(urlString: String): String {
         var lastFailure: Throwable? = null
         repeat(3) { attempt ->
@@ -84,31 +128,15 @@ def harden_download(path: str, label: str) -> None:
         throw IllegalStateException("Failed to download __LABEL__ after 3 attempts: $urlString", lastFailure)
     }
 '''.replace("__LABEL__", label)
-
     source.write_text(pattern.sub(replacement, text, count=1), encoding="utf-8")
     print(f"APP_READY_PRODUCER_PATCH_OK {source}")
-
-
-def use_preseeded_normalized_snapshot() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
-    text = source.read_text(encoding="utf-8")
-    old = "                    force = normalizedStatsChanged\n"
-    new = "                    force = normalizedStatsChanged && !DomesticNormalizedStatsRepository.hasLocalSnapshot(appContext)\n"
-    if text.count(old) != 1:
-        raise SystemExit("Could not locate normalized-stats force argument")
-    source.write_text(text.replace(old, new, 1), encoding="utf-8")
-    print("APP_READY_NORMALIZED_PRESEED_OK")
 
 
 def add_producer_diagnostics() -> None:
     source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
     text = source.read_text(encoding="utf-8")
     if "import android.util.Log" not in text:
-        text = text.replace(
-            "import android.content.Context\n",
-            "import android.content.Context\nimport android.util.Log\n",
-            1,
-        )
+        text = text.replace("import android.content.Context\n", "import android.content.Context\nimport android.util.Log\n", 1)
     old = '                result.error?.let { warnings += "${result.label}: ${it.message.orEmpty()}" }\n'
     new = '''                result.error?.let {
                     Log.e("StatMakerAppReady", "${result.label}: ${it.message.orEmpty()}", it)
@@ -118,58 +146,17 @@ def add_producer_diagnostics() -> None:
     if text.count(old) != 1:
         raise SystemExit("Could not locate Welcome task error handler")
     text = text.replace(old, new, 1)
-
     replacements = [
-        (
-            "            val domestic = resolve(domesticFuture)\n",
-            "            val domestic = resolve(domesticFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=domestic_resolved matches=${db.totalMatchCount()} ok=${domestic != null}")\n',
-        ),
-        (
-            "            val normalizedResult = resolve(normalizedFuture)\n",
-            "            val normalizedResult = resolve(normalizedFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=normalized_resolved refreshed=${normalizedResult?.refreshed == true}")\n',
-        ),
-        (
-            "            val domesticOdds = resolve(domesticOddsFuture)\n",
-            "            val domesticOdds = resolve(domesticOddsFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=domestic_odds_resolved matches=${domesticOdds?.matches?.size ?: 0}")\n',
-        ),
-        (
-            "            val champions = resolve(championsFuture)\n",
-            "            val champions = resolve(championsFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=champions_odds_resolved matches=${champions?.matches?.size ?: 0}")\n',
-        ),
-        (
-            "            val europa = resolve(europaFuture)\n",
-            "            val europa = resolve(europaFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=europa_odds_resolved matches=${europa?.matches?.size ?: 0}")\n',
-        ),
-        (
-            "            val conference = resolve(conferenceFuture)\n",
-            "            val conference = resolve(conferenceFuture)\n"
-            '            Log.i("StatMakerAppReady", "stage=conference_odds_resolved matches=${conference?.matches?.size ?: 0}")\n',
-        ),
-        (
-            "            val supportResults = supportFutures.map(::resolve)\n",
-            "            val supportResults = supportFutures.map(::resolve)\n"
-            '            Log.i("StatMakerAppReady", "stage=support_resolved ready=${supportResults.count { it != null }}")\n',
-        ),
-        (
-            "            val logosUpdated = resolve(logosFuture) == true\n",
-            "            val logosUpdated = resolve(logosFuture) == true\n"
-            '            Log.i("StatMakerAppReady", "stage=all_futures_resolved")\n',
-        ),
-        (
-            '            val prepared = trace.measure("prepared_coordinator") {\n',
-            '            Log.i("StatMakerAppReady", "stage=prepared_begin")\n'
-            '            val prepared = trace.measure("prepared_coordinator") {\n',
-        ),
-        (
-            "            warnings += prepared.warnings\n",
-            '            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")\n'
-            "            warnings += prepared.warnings\n",
-        ),
+        ("            val domestic = resolve(domesticFuture)\n", "            val domestic = resolve(domesticFuture)\n" + '            Log.i("StatMakerAppReady", "stage=domestic_resolved matches=${db.totalMatchCount()} ok=${domestic != null}")\n'),
+        ("            val normalizedResult = resolve(normalizedFuture)\n", "            val normalizedResult = resolve(normalizedFuture)\n" + '            Log.i("StatMakerAppReady", "stage=normalized_resolved refreshed=${normalizedResult?.refreshed == true}")\n'),
+        ("            val domesticOdds = resolve(domesticOddsFuture)\n", "            val domesticOdds = resolve(domesticOddsFuture)\n" + '            Log.i("StatMakerAppReady", "stage=domestic_odds_resolved matches=${domesticOdds?.matches?.size ?: 0}")\n'),
+        ("            val champions = resolve(championsFuture)\n", "            val champions = resolve(championsFuture)\n" + '            Log.i("StatMakerAppReady", "stage=champions_odds_resolved matches=${champions?.matches?.size ?: 0}")\n'),
+        ("            val europa = resolve(europaFuture)\n", "            val europa = resolve(europaFuture)\n" + '            Log.i("StatMakerAppReady", "stage=europa_odds_resolved matches=${europa?.matches?.size ?: 0}")\n'),
+        ("            val conference = resolve(conferenceFuture)\n", "            val conference = resolve(conferenceFuture)\n" + '            Log.i("StatMakerAppReady", "stage=conference_odds_resolved matches=${conference?.matches?.size ?: 0}")\n'),
+        ("            val supportResults = supportFutures.map(::resolve)\n", "            val supportResults = supportFutures.map(::resolve)\n" + '            Log.i("StatMakerAppReady", "stage=support_resolved ready=${supportResults.count { it != null }}")\n'),
+        ("            val logosUpdated = resolve(logosFuture) == true\n", "            val logosUpdated = resolve(logosFuture) == true\n" + '            Log.i("StatMakerAppReady", "stage=all_futures_resolved")\n'),
+        ('            val prepared = trace.measure("prepared_coordinator") {\n', '            Log.i("StatMakerAppReady", "stage=prepared_begin")\n            val prepared = trace.measure("prepared_coordinator") {\n'),
+        ("            warnings += prepared.warnings\n", '            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")\n            warnings += prepared.warnings\n'),
     ]
     for old_marker, new_marker in replacements:
         if text.count(old_marker) != 1:
@@ -181,13 +168,8 @@ def add_producer_diagnostics() -> None:
 
 replace_repository_urls()
 tune_runner_manifest()
-harden_download(
-    "app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt",
-    "Domestic API artifact",
-)
-harden_download(
-    "app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt",
-    "Domestic API registry",
-)
-use_preseeded_normalized_snapshot()
+bundle_normalized_snapshot()
+patch_normalized_repository()
+harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt", "Domestic API artifact")
+harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "Domestic API registry")
 add_producer_diagnostics()
