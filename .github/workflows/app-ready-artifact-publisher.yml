@@ -92,6 +92,17 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         if: steps.preflight.outputs.generate == 'true'
 
+      # Compile before paying the emulator cold-boot cost. If UAT or the staged legacy
+      # orchestration is incompatible, fail here without burning emulator minutes.
+      - name: Compile and test off-device builder
+        if: steps.preflight.outputs.generate == 'true'
+        working-directory: statmaker-private
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
+
       - name: Produce indexed read models off-device
         if: steps.preflight.outputs.generate == 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -103,28 +114,29 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
-          script: |
-            set -eu
-            cd statmaker-private
-            chmod +x gradlew
-            ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            adb logcat -c
-            adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
-            ok=0
-            for i in $(seq 1 240); do
-              adb logcat -d -s StatMakerWelcomePerf:I '*:S' | grep -q 'total=' && { ok=1; break; }
-              sleep 5
-            done
-            test "$ok" = 1 || { adb logcat -d | tail -400; exit 1; }
-            adb shell am force-stop "$APP_ID"; sleep 2
-            cd ..
-            r=app-ready-export/raw; rm -rf app-ready-export; mkdir -p "$r/databases" "$r/files/statmaker_stats_snapshots" "$r/shared_prefs"
-            adb exec-out run-as "$APP_ID" cat databases/statmaker.db > "$r/databases/statmaker.db"
-            adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$r/databases/statmaker_prepared_betting.db"
-            adb exec-out run-as "$APP_ID" cat files/domestic_normalized_stats_v2.bin > "$r/files/domestic_normalized_stats_v2.bin"
-            for c in champions_league europa_league conference_league; do adb exec-out run-as "$APP_ID" cat "files/statmaker_stats_snapshots/$c.bin" > "$r/files/statmaker_stats_snapshots/$c.bin"; done
-            for p in statmaker_odds_feeds statmaker_data_manifests statmaker_prepared_data_versions; do adb exec-out run-as "$APP_ID" cat "shared_prefs/$p.xml" > "$r/shared_prefs/$p.xml"; done
+          # android-emulator-runner executes newline-separated script entries as separate shells.
+          # Keep the complete stateful sequence in one bash invocation: cwd, variables and loops
+          # must survive for the whole export transaction.
+          script: >-
+            bash -lc 'set -euo pipefail;
+            APK="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug/app-debug.apk";
+            test -s "$APK";
+            adb install -r "$APK";
+            adb logcat -c;
+            adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity";
+            ok=0;
+            for i in $(seq 1 240); do if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then ok=1; break; fi; sleep 5; done;
+            if [ "$ok" -ne 1 ]; then adb logcat -d | tail -400; exit 1; fi;
+            adb shell am force-stop "$APP_ID";
+            sleep 2;
+            r="$GITHUB_WORKSPACE/app-ready-export/raw";
+            rm -rf "$GITHUB_WORKSPACE/app-ready-export";
+            mkdir -p "$r/databases" "$r/files/statmaker_stats_snapshots" "$r/shared_prefs";
+            adb exec-out run-as "$APP_ID" cat databases/statmaker.db > "$r/databases/statmaker.db";
+            adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$r/databases/statmaker_prepared_betting.db";
+            adb exec-out run-as "$APP_ID" cat files/domestic_normalized_stats_v2.bin > "$r/files/domestic_normalized_stats_v2.bin";
+            for c in champions_league europa_league conference_league; do adb exec-out run-as "$APP_ID" cat "files/statmaker_stats_snapshots/$c.bin" > "$r/files/statmaker_stats_snapshots/$c.bin"; done;
+            for p in statmaker_odds_feeds statmaker_data_manifests statmaker_prepared_data_versions; do adb exec-out run-as "$APP_ID" cat "shared_prefs/$p.xml" > "$r/shared_prefs/$p.xml"; done'
 
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true'
