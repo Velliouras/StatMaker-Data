@@ -158,18 +158,6 @@ def main() -> None:
         "post-commit reindex",
     )
 
-    text = replace_once(
-        text,
-        '''        return PreparedSnapshotWriteResult(
-            competitionId = competitionId,
-''',
-        '''        Log.i("StatMakerAppReady", "stage=store_${competitionId}_replace_complete selections=${uniqueSelections.size}")
-        return PreparedSnapshotWriteResult(
-            competitionId = competitionId,
-''',
-        "replace completion marker",
-    )
-
     SOURCE.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_BULK_OK")
 
