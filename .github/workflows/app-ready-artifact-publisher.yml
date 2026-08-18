@@ -30,10 +30,10 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with: {fetch-depth: 1}
 
       - name: Check source versions
         id: preflight
@@ -42,7 +42,7 @@ jobs:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
         run: |
           set -euo pipefail
-          git fetch --no-tags origin build/uefa-qualifier-feed-20260720
+          git fetch --no-tags --depth=1 origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
@@ -141,9 +141,15 @@ jobs:
             adb logcat -c;
             adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity" || true;
             ok=0;
-            for i in $(seq 1 240); do if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then ok=1; break; fi; sleep 5; done;
+            last_stage="";
+            for i in $(seq 1 96); do
+              if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then ok=1; break; fi;
+              stage="$(adb logcat -d -s StatMakerAppReady:I "*:S" | grep "stage=" | tail -1 || true)";
+              if [ -n "$stage" ] && [ "$stage" != "$last_stage" ]; then echo "$stage"; last_stage="$stage"; fi;
+              sleep 5;
+            done;
             adb logcat -d "StatMakerAppReady:V" "*:S" || true;
-            if [ "$ok" -ne 1 ]; then adb logcat -d | tail -400; exit 1; fi;
+            if [ "$ok" -ne 1 ]; then echo "App-ready producer did not complete within 8 minutes" >&2; adb logcat -d | tail -400; exit 1; fi;
             adb shell am force-stop "$APP_ID";
             sleep 2;
             r="$GITHUB_WORKSPACE/app-ready-export/raw";
