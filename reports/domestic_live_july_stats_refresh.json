@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-18T14:58:47Z",
+  "generatedAt": "2026-08-18T17:51:03Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,12 +15,12 @@
   "statsUniverseLeagueCount": 53,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 4,
-  "registryLeagueCount": 2,
-  "polledLeagueCount": 2,
-  "incompleteBefore": 0,
+  "requestsUsed": 2,
+  "registryLeagueCount": 1,
+  "polledLeagueCount": 1,
+  "incompleteBefore": 1,
   "completeAfter": 1,
-  "incompleteAfter": 1,
+  "incompleteAfter": 0,
   "allocations": [
     {
       "phase": "tier2_core27",
@@ -29,21 +29,9 @@
       "country": "China",
       "league": "Super League",
       "lifecycle": "active",
-      "allocatedRequests": 60,
+      "allocatedRequests": 120,
       "usedRequests": 2,
       "before": {
-        "leagueCode": "CHN",
-        "priorityTier": "tier2_core27",
-        "completed": 179,
-        "withStats": 179,
-        "withScores": 179,
-        "missingStats": 0,
-        "missingScores": 0,
-        "coverage": 1.0,
-        "scoreCoverage": 1.0,
-        "complete": true
-      },
-      "after": {
         "leagueCode": "CHN",
         "priorityTier": "tier2_core27",
         "completed": 180,
@@ -54,35 +42,13 @@
         "coverage": 0.994444,
         "scoreCoverage": 1.0,
         "complete": false
-      }
-    },
-    {
-      "phase": "tier2_core27",
-      "priorityTier": "tier2_core27",
-      "leagueCode": "MEX",
-      "country": "Mexico",
-      "league": "Liga MX",
-      "lifecycle": "active",
-      "allocatedRequests": 118,
-      "usedRequests": 2,
-      "before": {
-        "leagueCode": "MEX",
-        "priorityTier": "tier2_core27",
-        "completed": 35,
-        "withStats": 35,
-        "withScores": 35,
-        "missingStats": 0,
-        "missingScores": 0,
-        "coverage": 1.0,
-        "scoreCoverage": 1.0,
-        "complete": true
       },
       "after": {
-        "leagueCode": "MEX",
+        "leagueCode": "CHN",
         "priorityTier": "tier2_core27",
-        "completed": 36,
-        "withStats": 36,
-        "withScores": 36,
+        "completed": 180,
+        "withStats": 180,
+        "withScores": 180,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -96,20 +62,8 @@
       "leagueCode": "CHN",
       "priorityTier": "tier2_core27",
       "completed": 180,
-      "withStats": 179,
+      "withStats": 180,
       "withScores": 180,
-      "missingStats": 1,
-      "missingScores": 0,
-      "coverage": 0.994444,
-      "scoreCoverage": 1.0,
-      "complete": false
-    },
-    {
-      "leagueCode": "MEX",
-      "priorityTier": "tier2_core27",
-      "completed": 36,
-      "withStats": 36,
-      "withScores": 36,
       "missingStats": 0,
       "missingScores": 0,
       "coverage": 1.0,
@@ -118,8 +72,7 @@
     }
   ],
   "selectedLeagueCodes": [
-    "CHN",
-    "MEX"
+    "CHN"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
