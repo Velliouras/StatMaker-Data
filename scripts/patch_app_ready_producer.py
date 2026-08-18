@@ -29,20 +29,21 @@ def replace_repository_urls() -> None:
     )
 
 
-def allow_runner_cleartext() -> None:
+def tune_runner_manifest() -> None:
     manifest = Path("app/src/main/AndroidManifest.xml")
     text = manifest.read_text(encoding="utf-8")
+    needle = '        android:allowBackup="true"\n'
+    additions = []
     if 'android:usesCleartextTraffic="true"' not in text:
-        needle = '        android:allowBackup="true"\n'
+        additions.append('        android:usesCleartextTraffic="true"\n')
+    if 'android:largeHeap="true"' not in text:
+        additions.append('        android:largeHeap="true"\n')
+    if additions:
         if text.count(needle) != 1:
             raise SystemExit("Could not locate Android application allowBackup attribute")
-        text = text.replace(
-            needle,
-            needle + '        android:usesCleartextTraffic="true"\n',
-            1,
-        )
+        text = text.replace(needle, needle + "".join(additions), 1)
         manifest.write_text(text, encoding="utf-8")
-    print("APP_READY_CLEARTEXT_OK")
+    print("APP_READY_RUNNER_MANIFEST_OK")
 
 
 def harden_download(path: str, label: str) -> None:
@@ -88,6 +89,17 @@ def harden_download(path: str, label: str) -> None:
     print(f"APP_READY_PRODUCER_PATCH_OK {source}")
 
 
+def use_preseeded_normalized_snapshot() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
+    text = source.read_text(encoding="utf-8")
+    old = "                    force = normalizedStatsChanged\n"
+    new = "                    force = normalizedStatsChanged && !DomesticNormalizedStatsRepository.hasLocalSnapshot(appContext)\n"
+    if text.count(old) != 1:
+        raise SystemExit("Could not locate normalized-stats force argument")
+    source.write_text(text.replace(old, new, 1), encoding="utf-8")
+    print("APP_READY_NORMALIZED_PRESEED_OK")
+
+
 def add_producer_diagnostics() -> None:
     source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
     text = source.read_text(encoding="utf-8")
@@ -106,21 +118,69 @@ def add_producer_diagnostics() -> None:
     if text.count(old) != 1:
         raise SystemExit("Could not locate Welcome task error handler")
     text = text.replace(old, new, 1)
-    marker = "            val domestic = resolve(domesticFuture)\n"
-    if text.count(marker) != 1:
-        raise SystemExit("Could not locate domestic producer resolution")
-    text = text.replace(
-        marker,
-        marker
-        + '            Log.i("StatMakerAppReady", "domestic_matches=${db.totalMatchCount()} domestic_ok=${domestic != null}")\n',
-        1,
-    )
+
+    replacements = [
+        (
+            "            val domestic = resolve(domesticFuture)\n",
+            "            val domestic = resolve(domesticFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=domestic_resolved matches=${db.totalMatchCount()} ok=${domestic != null}")\n',
+        ),
+        (
+            "            val normalizedResult = resolve(normalizedFuture)\n",
+            "            val normalizedResult = resolve(normalizedFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=normalized_resolved refreshed=${normalizedResult?.refreshed == true}")\n',
+        ),
+        (
+            "            val domesticOdds = resolve(domesticOddsFuture)\n",
+            "            val domesticOdds = resolve(domesticOddsFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=domestic_odds_resolved matches=${domesticOdds?.matches?.size ?: 0}")\n',
+        ),
+        (
+            "            val champions = resolve(championsFuture)\n",
+            "            val champions = resolve(championsFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=champions_odds_resolved matches=${champions?.matches?.size ?: 0}")\n',
+        ),
+        (
+            "            val europa = resolve(europaFuture)\n",
+            "            val europa = resolve(europaFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=europa_odds_resolved matches=${europa?.matches?.size ?: 0}")\n',
+        ),
+        (
+            "            val conference = resolve(conferenceFuture)\n",
+            "            val conference = resolve(conferenceFuture)\n"
+            '            Log.i("StatMakerAppReady", "stage=conference_odds_resolved matches=${conference?.matches?.size ?: 0}")\n',
+        ),
+        (
+            "            val supportResults = supportFutures.map(::resolve)\n",
+            "            val supportResults = supportFutures.map(::resolve)\n"
+            '            Log.i("StatMakerAppReady", "stage=support_resolved ready=${supportResults.count { it != null }}")\n',
+        ),
+        (
+            "            val logosUpdated = resolve(logosFuture) == true\n",
+            "            val logosUpdated = resolve(logosFuture) == true\n"
+            '            Log.i("StatMakerAppReady", "stage=all_futures_resolved")\n',
+        ),
+        (
+            '            val prepared = trace.measure("prepared_coordinator") {\n',
+            '            Log.i("StatMakerAppReady", "stage=prepared_begin")\n'
+            '            val prepared = trace.measure("prepared_coordinator") {\n',
+        ),
+        (
+            "            warnings += prepared.warnings\n",
+            '            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")\n'
+            "            warnings += prepared.warnings\n",
+        ),
+    ]
+    for old_marker, new_marker in replacements:
+        if text.count(old_marker) != 1:
+            raise SystemExit(f"Could not locate producer diagnostic marker: {old_marker.strip()}")
+        text = text.replace(old_marker, new_marker, 1)
     source.write_text(text, encoding="utf-8")
     print("APP_READY_DIAGNOSTICS_OK")
 
 
 replace_repository_urls()
-allow_runner_cleartext()
+tune_runner_manifest()
 harden_download(
     "app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt",
     "Domestic API artifact",
@@ -129,4 +189,5 @@ harden_download(
     "app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt",
     "Domestic API registry",
 )
+use_preseeded_normalized_snapshot()
 add_producer_diagnostics()
