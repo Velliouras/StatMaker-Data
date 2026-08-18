@@ -104,6 +104,19 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
+      # GitHub-hosted Linux runners expose /dev/kvm, but the runner user needs permission before
+      # android-emulator-runner can use VM acceleration. Without KVM the API-35 emulator takes
+      # ~16 minutes to cold boot and Android system services become unstable under software emulation.
+      - name: Enable KVM group perms
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          test -r /dev/kvm && test -w /dev/kvm
+
       - name: Produce indexed read models off-device
         if: steps.preflight.outputs.generate == 'true'
         uses: reactivecircus/android-emulator-runner@v2
