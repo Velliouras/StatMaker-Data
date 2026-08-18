@@ -38,7 +38,11 @@ adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity" ||
 
 ok=0
 last_stage=""
-for _ in $(seq 1 96); do
+# This is an off-device artifact build, not an interactive phone update. The previous 8-minute
+# watchdog killed a healthy 25k+ selection generation while it was still persisting the immutable
+# read model. Give the producer a bounded but realistic 25-minute window; the workflow itself has
+# a separate hard timeout.
+for _ in $(seq 1 300); do
   if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then
     ok=1
     break
@@ -53,8 +57,8 @@ done
 
 adb logcat -d "StatMakerAppReady:V" "*:S" || true
 if [[ "$ok" -ne 1 ]]; then
-  echo "App-ready producer did not complete within 8 minutes" >&2
-  adb logcat -d | tail -400
+  echo "App-ready producer did not complete within 25 minutes" >&2
+  adb logcat -d | tail -600
   exit 1
 fi
 
