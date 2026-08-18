@@ -99,6 +99,16 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
+      - name: Enable KVM acceleration
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm || (echo '/dev/kvm is unavailable on this runner' >&2; exit 1)
+          sudo chown "$USER" /dev/kvm
+          sudo chmod 600 /dev/kvm
+          test -r /dev/kvm -a -w /dev/kvm
+
       - name: Produce indexed read models off-device
         if: steps.preflight.outputs.generate == 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -108,7 +118,6 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          disable-linux-hw-accel: true
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: >-
