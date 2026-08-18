@@ -18,6 +18,11 @@ on:
       - main
     paths:
       - '.github/workflows/app-ready-artifact-publisher.yml'
+      - 'scripts/patch_app_ready_producer.py'
+      - 'scripts/patch_prepared_publisher_diagnostics.py'
+      - 'scripts/patch_prepared_publisher_bulk.py'
+      - 'scripts/run_app_ready_emulator.sh'
+      - 'scripts/build_app_ready_from_device.py'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -30,7 +35,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
