@@ -13,6 +13,11 @@ on:
         required: true
         default: false
         type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/app-ready-artifact-publisher.yml'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -62,8 +67,22 @@ jobs:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Stage off-device legacy builder
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd statmaker-private
+          # The installed app uses the instant app-ready updater. The publisher must instead run
+          # the last full on-device builder orchestration, while keeping every underlying current
+          # UAT repository/model class from HEAD. This replacement exists only inside this runner.
+          LEGACY_BUILDER_REF=66b69f574e931da5e2188befe957704622ff300b
+          git cat-file -e "$LEGACY_BUILDER_REF^{commit}"
+          git show "$LEGACY_BUILDER_REF:app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt" \
+            > app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt
 
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true'
@@ -83,9 +102,9 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: |
-            set -euo pipefail
+            set -eu
             cd statmaker-private
             chmod +x gradlew
             ./gradlew testDebugUnitTest assembleDebug --no-daemon --stacktrace
@@ -117,23 +136,72 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json, shutil
+          import hashlib, json, shutil, subprocess
+          from datetime import datetime, timezone
           from pathlib import Path
+
+          def sha256(path):
+              h=hashlib.sha256()
+              with Path(path).open('rb') as f:
+                  for block in iter(lambda:f.read(1024*1024),b''): h.update(block)
+              return h.hexdigest()
+
           src=Path('app-ready-export/out'); dst=Path('data/statmaker/app_ready'); dst.mkdir(parents=True,exist_ok=True)
-          incoming=json.loads((src/'update_manifest.json').read_text()); mp=dst/'update_manifest.json'; old=json.loads(mp.read_text()) if mp.is_file() else None
-          if old and old.get('contentVersion')==incoming.get('contentVersion'): raise SystemExit(0)
+          incoming=json.loads((src/'update_manifest.json').read_text())
+          artifacts=incoming.get('artifacts',[])
+          if incoming.get('schemaVersion') != 1 or len(artifacts) != 2:
+              raise SystemExit('Invalid app-ready manifest contract')
+          for item in artifacts:
+              f=src/Path(item['path']).name
+              if not f.is_file(): raise SystemExit(f'Missing built artifact {f.name}')
+              if f.stat().st_size != int(item['bytes']): raise SystemExit(f'Artifact size mismatch {f.name}')
+              if sha256(f) != item['sha256']: raise SystemExit(f'Artifact SHA256 mismatch {f.name}')
+
+          mp=dst/'update_manifest.json'; old=json.loads(mp.read_text()) if mp.is_file() else None
           names=lambda m:{Path(x['path']).name for x in m.get('artifacts',[])} if m else set()
           current, previous=names(incoming), names(old)
           for n in current: shutil.copy2(src/n,dst/n)
-          keep=current|previous|{'update_manifest.json'}
+          keep=current|previous|{'update_manifest.json','publish_status.json'}
           for f in dst.glob('app_ready_*_bundle-*.zip'):
               if f.name not in keep: f.unlink()
           shutil.copy2(src/'update_manifest.json',mp)
+
+          status={
+              'schemaVersion':1,
+              'status':'READY',
+              'contentVersion':incoming.get('contentVersion',''),
+              'generatedAt':incoming.get('generatedAt',''),
+              'verifiedAt':datetime.now(timezone.utc).isoformat().replace('+00:00','Z'),
+              'artifactCount':len(artifacts),
+              'mainContentVersion':incoming.get('metadata',{}).get('mainContentVersion',''),
+              'uefaContentVersion':incoming.get('metadata',{}).get('uefaContentVersion',''),
+              'statmakerCommit':subprocess.check_output(['git','-C','statmaker-private','rev-parse','HEAD'],text=True).strip(),
+          }
+          (dst/'publish_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
           git diff --quiet -- data/statmaker/app_ready && exit 0
           git config user.name "StatMaker Artifact Bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/statmaker/app_ready
-          git commit -m "Publish app-ready StatMaker read models"
+          git commit -m "Publish verified app-ready StatMaker read models"
           git pull --rebase --autostash origin main
           git push origin HEAD:main
+
+      - name: Verify published generation
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          local_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          test "$local_sha" = "$remote_sha"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          status=json.loads(Path('data/statmaker/app_ready/publish_status.json').read_text())
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          assert status.get('status') == 'READY'
+          assert status.get('contentVersion') == manifest.get('contentVersion')
+          assert status.get('artifactCount') == manifest.get('artifactCount') == 2
+          print('APP_READY_PUBLISH_OK', status['contentVersion'], status['generatedAt'])
+          PY
