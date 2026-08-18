@@ -25,7 +25,7 @@ permissions:
   contents: write
 concurrency:
   group: statmaker-app-ready-publisher
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -76,9 +76,6 @@ jobs:
         run: |
           set -euo pipefail
           cd statmaker-private
-          # The installed app uses the instant app-ready updater. The publisher must instead run
-          # the last full on-device builder orchestration, while keeping every underlying current
-          # UAT repository/model class from HEAD. This replacement exists only inside this runner.
           LEGACY_BUILDER_REF=66b69f574e931da5e2188befe957704622ff300b
           git cat-file -e "$LEGACY_BUILDER_REF^{commit}"
           git show "$LEGACY_BUILDER_REF:app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt" \
@@ -92,9 +89,6 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         if: steps.preflight.outputs.generate == 'true'
 
-      # Compile the actual publisher APK before paying the emulator cold-boot cost. The repository
-      # currently contains unrelated stale unit tests; those do not participate in artifact
-      # generation and must not block a valid app-ready publisher build.
       - name: Compile off-device builder
         if: steps.preflight.outputs.generate == 'true'
         working-directory: statmaker-private
@@ -104,9 +98,6 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      # GitHub-hosted Linux runners expose /dev/kvm, but the runner user needs permission before
-      # android-emulator-runner can use VM acceleration. Without KVM the API-35 emulator takes
-      # ~16 minutes to cold boot and Android system services become unstable under software emulation.
       - name: Enable KVM group perms
         if: steps.preflight.outputs.generate == 'true'
         shell: bash
@@ -128,16 +119,13 @@ jobs:
           profile: pixel_6
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
-          # android-emulator-runner executes newline-separated script entries as separate shells.
-          # Keep the complete stateful sequence in one bash invocation: cwd, variables and loops
-          # must survive for the whole export transaction.
           script: >-
             bash -lc 'set -euo pipefail;
             APK="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug/app-debug.apk";
             test -s "$APK";
             adb install -r "$APK";
             adb logcat -c;
-            adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity";
+            adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity" || true;
             ok=0;
             for i in $(seq 1 240); do if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then ok=1; break; fi; sleep 5; done;
             if [ "$ok" -ne 1 ]; then adb logcat -d | tail -400; exit 1; fi;
@@ -150,11 +138,34 @@ jobs:
             adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$r/databases/statmaker_prepared_betting.db";
             adb exec-out run-as "$APP_ID" cat files/domestic_normalized_stats_v2.bin > "$r/files/domestic_normalized_stats_v2.bin";
             for c in champions_league europa_league conference_league; do adb exec-out run-as "$APP_ID" cat "files/statmaker_stats_snapshots/$c.bin" > "$r/files/statmaker_stats_snapshots/$c.bin"; done;
-            for p in statmaker_odds_feeds statmaker_data_manifests statmaker_prepared_data_versions; do adb exec-out run-as "$APP_ID" cat "shared_prefs/$p.xml" > "$r/shared_prefs/$p.xml"; done'
+            adb exec-out run-as "$APP_ID" cat shared_prefs/statmaker_prepared_data_versions.xml > "$r/shared_prefs/statmaker_prepared_data_versions.xml";
+            test -s "$r/shared_prefs/statmaker_prepared_data_versions.xml";
+            grep -q "domestic_history_fingerprint" "$r/shared_prefs/statmaker_prepared_data_versions.xml";
+            grep -q "uefa_support_fingerprint" "$r/shared_prefs/statmaker_prepared_data_versions.xml"'
+
+      - name: Stage canonical repository inputs
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          s="app-ready-export/source"
+          mkdir -p "$s"
+          cp data/statmaker/update_manifest.json "$s/main_manifest.json"
+          cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
+          git show origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
+          test -s "$s/main_manifest.json"
+          test -s "$s/uefa_manifest.json"
+          test -s "$s/domestic.json"
+          test -s "$s/champions_league.json"
+          test -s "$s/europa_league.json"
+          test -s "$s/conference_league.json"
 
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true'
-        run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out
+        run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
       - name: Publish current and previous generations
         if: steps.preflight.outputs.generate == 'true'
