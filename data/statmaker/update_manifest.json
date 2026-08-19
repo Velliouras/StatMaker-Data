@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "cd379e3fa511fc3d5fa90cddf3fa27c6af81d2abff600a2eb8fe6bacfed2c985",
-  "generatedAt": "2026-08-19T14:20:37Z",
+  "contentVersion": "1938e6c1eec6eb2c5550bad67f1df5b2c9e82a79f8916dbb2f9dd89fe6326f79",
+  "generatedAt": "2026-08-19T15:00:49.831637Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "f0644d125d989f73aa3683167d055fb29236636b8710f4d24fd50e69074e3aa0",
-      "bytes": 52835,
-      "generatedAt": "2026-08-19T14:20:37Z"
+      "sha256": "bbfc043c679dc3a2be2e785681a56169e6b2b3205d0017a1ed5b39817f4f23b7",
+      "bytes": 51847,
+      "generatedAt": "2026-08-19T15:00:47Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "51ae9e461967832985da573cf948a128411faa27632b040c89a2f8f39722e8c0",
-      "bytes": 6738174,
+      "sha256": "c4d504c25e5fb837e8583aa0481f85f1a3fbba1e8a20bcc40e03fe5a30cf11de",
+      "bytes": 6739514,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "d24664266b7c28fb5a40812dc7cc7bde2324ec2b6a02cc2405687a0aa3464286",
-      "bytes": 6134642,
-      "generatedAt": "2026-08-19T07:25:06.741829Z"
+      "sha256": "1c427006b04403fa2377e72a1b705e0457afa4e738a2f5b355348c6454924d8e",
+      "bytes": 6133961,
+      "generatedAt": "2026-08-19T15:00:49.831637Z"
     },
     {
       "id": "uefa_team_logos",
@@ -83,7 +83,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "51ae9e461967832985da573cf948a128411faa27632b040c89a2f8f39722e8c0",
+    "targetSha256": "c4d504c25e5fb837e8583aa0481f85f1a3fbba1e8a20bcc40e03fe5a30cf11de",
     "transitions": [
       {
         "fromSha256": "4da12be5d01173e260ddcf562576cfabde6c6ad8e5cf1ea8413af14aa01dd667",
@@ -300,6 +300,65 @@
               "AOffsides": 2,
               "HPassAccuracy": 80,
               "APassAccuracy": 79,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "51ae9e461967832985da573cf948a128411faa27632b040c89a2f8f39722e8c0",
+        "toSha256": "c4d504c25e5fb837e8583aa0481f85f1a3fbba1e8a20bcc40e03fe5a30cf11de",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1523202,
+            "league_id": 169,
+            "league_code": "CHN",
+            "country": "China",
+            "league": "Super League",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-08-19",
+            "home_team": "SHANGHAI SIPG",
+            "away_team": "Dalian Zhixing",
+            "stats": {
+              "HS": null,
+              "AS": null,
+              "HST": null,
+              "AST": null,
+              "HC": null,
+              "AC": null,
+              "HF": null,
+              "AF": null,
+              "HY": null,
+              "AY": null,
+              "HR": null,
+              "AR": null,
+              "HPossession": null,
+              "APossession": null,
+              "HSaves": null,
+              "ASaves": null,
+              "HPasses": null,
+              "APasses": null,
+              "HPassesAccurate": null,
+              "APassesAccurate": null,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": null,
+              "AShotsOffGoal": null,
+              "HBlockedShots": null,
+              "ABlockedShots": null,
+              "HShotsInsideBox": null,
+              "AShotsInsideBox": null,
+              "HShotsOutsideBox": null,
+              "AShotsOutsideBox": null,
+              "HOffsides": null,
+              "AOffsides": null,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
               "HGoalsPrevented": null,
               "AGoalsPrevented": null,
               "HFreeKicks": null,
