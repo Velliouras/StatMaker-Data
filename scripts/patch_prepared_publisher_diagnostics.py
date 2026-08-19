@@ -6,6 +6,7 @@ from pathlib import Path
 
 SOURCE = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
 WELCOME_SOURCE = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
+GRADLE_PROPERTIES = Path("gradle.properties")
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -13,6 +14,27 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     if count != 1:
         raise SystemExit(f"Could not locate {label}; found {count} matches")
     return text.replace(old, new, 1)
+
+
+def configure_compiler_memory() -> None:
+    managed = {
+        "org.gradle.jvmargs": "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8",
+        "kotlin.compiler.execution.strategy": "in-process",
+        "org.gradle.workers.max": "1",
+        "kotlin.incremental": "false",
+    }
+    lines = GRADLE_PROPERTIES.read_text(encoding="utf-8").splitlines() if GRADLE_PROPERTIES.is_file() else []
+    keys = set(managed)
+    kept = [
+        line for line in lines
+        if not any(line.lstrip().startswith(f"{key}=") for key in keys)
+    ]
+    if kept and kept[-1].strip():
+        kept.append("")
+    kept.append("# App-ready publisher compile guardrails (staged checkout only)")
+    kept.extend(f"{key}={value}" for key, value in managed.items())
+    GRADLE_PROPERTIES.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    print("APP_READY_GRADLE_MEMORY_OK heap=4g workers=1 kotlin=in-process incremental=false")
 
 
 def patch_legacy_welcome_contract() -> None:
@@ -53,6 +75,7 @@ def patch_legacy_welcome_contract() -> None:
 
 
 def main() -> None:
+    configure_compiler_memory()
     patch_legacy_welcome_contract()
 
     text = SOURCE.read_text(encoding="utf-8")
