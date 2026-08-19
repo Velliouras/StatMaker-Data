@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "aa6c837073d0486d8058e808881b156f0bfecd86ddb23bd702a7156986557dfc",
-  "generatedAt": "2026-08-19T21:42:37Z",
+  "contentVersion": "e599a6aced59c10cfcbbe574fb66d7e6fa09055b2e76d383899370c528fe2acf",
+  "generatedAt": "2026-08-19T23:42:05.170408Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "6b51ef3608ee915b513024752a9124026d7db606c1636974c33cf08e5679406c",
+      "sha256": "fcdaf0d10a8de4868fddb9ef6cbf59d508a6bb9d3dff6c05f701bdd30350842f",
       "bytes": 51843,
-      "generatedAt": "2026-08-19T20:52:28Z"
+      "generatedAt": "2026-08-19T23:42:03Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "a5a57f10d3c3a286bf775ded68d7ebe226cc16a278e1fec5a7f1a6b7e97d3877",
-      "bytes": 6739433,
+      "sha256": "9defa3dfe2308fef6ad2ab00906785f204bcb46ec4fceb36b08b85fe29704719",
+      "bytes": 6740692,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "16498187282037fe738eefbc45d763dd75b5e3709e9ec3d2fb5a7e61b12129d7",
+      "sha256": "390a6de85863137bf3b8643ccda07965385ffd08df8be1c9774496bf26e3d556",
       "bytes": 6134701,
-      "generatedAt": "2026-08-19T20:52:30.637720Z"
+      "generatedAt": "2026-08-19T23:42:05.170408Z"
     },
     {
       "id": "uefa_team_logos",
@@ -83,7 +83,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "a5a57f10d3c3a286bf775ded68d7ebe226cc16a278e1fec5a7f1a6b7e97d3877",
+    "targetSha256": "9defa3dfe2308fef6ad2ab00906785f204bcb46ec4fceb36b08b85fe29704719",
     "transitions": [
       {
         "fromSha256": "4da12be5d01173e260ddcf562576cfabde6c6ad8e5cf1ea8413af14aa01dd667",
@@ -473,6 +473,65 @@
               "APassAccuracy": 67,
               "HGoalsPrevented": null,
               "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "a5a57f10d3c3a286bf775ded68d7ebe226cc16a278e1fec5a7f1a6b7e97d3877",
+        "toSha256": "9defa3dfe2308fef6ad2ab00906785f204bcb46ec4fceb36b08b85fe29704719",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1570334,
+            "league_id": 140,
+            "league_code": "SP1",
+            "country": "Spain",
+            "league": "La Liga",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-08-19",
+            "home_team": "Atletico Madrid",
+            "away_team": "Malaga",
+            "stats": {
+              "HS": 15,
+              "AS": 5,
+              "HST": 6,
+              "AST": 1,
+              "HC": 6,
+              "AC": 1,
+              "HF": 17,
+              "AF": 11,
+              "HY": 2,
+              "AY": 3,
+              "HR": null,
+              "AR": null,
+              "HPossession": 53,
+              "APossession": 47,
+              "HSaves": 1,
+              "ASaves": 4,
+              "HPasses": 521,
+              "APasses": 466,
+              "HPassesAccurate": 457,
+              "APassesAccurate": 394,
+              "HxG": 0.82,
+              "AxG": 0.15,
+              "HShotsOffGoal": 5,
+              "AShotsOffGoal": 2,
+              "HBlockedShots": 4,
+              "ABlockedShots": 2,
+              "HShotsInsideBox": 8,
+              "AShotsInsideBox": 4,
+              "HShotsOutsideBox": 7,
+              "AShotsOutsideBox": 1,
+              "HOffsides": 2,
+              "AOffsides": 2,
+              "HPassAccuracy": 88,
+              "APassAccuracy": 85,
+              "HGoalsPrevented": 0.44,
+              "AGoalsPrevented": 0.44,
               "HFreeKicks": null,
               "AFreeKicks": null
             }
