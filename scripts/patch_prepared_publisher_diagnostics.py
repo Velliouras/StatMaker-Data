@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 SOURCE = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
+WELCOME_SOURCE = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -14,7 +15,46 @@ def replace_once(text: str, old: str, new: str, label: str) -> str:
     return text.replace(old, new, 1)
 
 
+def patch_legacy_welcome_contract() -> None:
+    text = WELCOME_SOURCE.read_text(encoding="utf-8")
+    callback_contract = "onBackgroundPrefetch: (AppReadyPrefetchResult) -> Unit"
+    if callback_contract in text:
+        print("APP_READY_WELCOME_CONTRACT_OK current")
+        return
+
+    legacy_signature = '''    fun refreshAll(
+        context: Context,
+        onProgress: (percent: Int, label: String) -> Unit
+    ): WelcomeUpdateReport {
+'''
+    compatible_signature = '''    @Suppress("UNUSED_PARAMETER")
+    fun refreshAll(
+        context: Context,
+        onProgress: (percent: Int, label: String) -> Unit,
+        onBackgroundPrefetch: (AppReadyPrefetchResult) -> Unit
+    ): WelcomeUpdateReport = refreshAll(
+        context = context,
+        onProgress = onProgress
+    )
+
+    fun refreshAll(
+        context: Context,
+        onProgress: (percent: Int, label: String) -> Unit
+    ): WelcomeUpdateReport {
+'''
+    text = replace_once(
+        text,
+        legacy_signature,
+        compatible_signature,
+        "legacy Welcome refreshAll contract",
+    )
+    WELCOME_SOURCE.write_text(text, encoding="utf-8")
+    print("APP_READY_WELCOME_CONTRACT_OK legacy-adapter")
+
+
 def main() -> None:
+    patch_legacy_welcome_contract()
+
     text = SOURCE.read_text(encoding="utf-8")
 
     if "import android.util.Log" not in text:
