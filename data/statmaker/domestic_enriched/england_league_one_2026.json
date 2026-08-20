@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-20T20:53:37Z",
+  "generated_at": "2026-08-20T23:46:45Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/league-one/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-20T03:56:00Z",
+    "cache_generated_at": "2026-08-20T23:44:58Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,36 +39,36 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 12,
-    "fixtures_with_any_stats": 12,
-    "fixtures_with_bb_core_stats": 11,
+    "completed_fixtures": 13,
+    "fixtures_with_any_stats": 13,
+    "fixtures_with_bb_core_stats": 12,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9167,
+    "bb_core_coverage": 0.9231,
     "group_counts": {
-      "shots_total": 12,
-      "shots_on_target": 12,
-      "corners": 12,
-      "fouls": 12,
-      "yellow_cards": 11,
+      "shots_total": 13,
+      "shots_on_target": 13,
+      "corners": 13,
+      "fouls": 13,
+      "yellow_cards": 12,
       "red_cards": 2,
-      "possession": 12,
-      "passes": 12,
-      "xg": 12
+      "possession": 13,
+      "passes": 13,
+      "xg": 13
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9167,
-      "red_cards": 0.1667,
+      "yellow_cards": 0.9231,
+      "red_cards": 0.1538,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 12 < 15"
+      "not enough completed fixtures: 13 < 15"
     ]
   },
   "matches": [
@@ -1069,6 +1069,90 @@
         "fulltime": {
           "home": 1,
           "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1564254,
+      "date_utc": "2026-08-20T19:00:00+00:00",
+      "country": "England",
+      "league": "League One",
+      "league_code": "E2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 41,
+      "round": "Regular Season - 2",
+      "home_team": "Sheffield Wednesday",
+      "away_team": "Bradford",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 10,
+        "HST": 3,
+        "AST": 4,
+        "HC": 8,
+        "AC": 9,
+        "HF": 13,
+        "AF": 10,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 60,
+        "APossession": 40,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 389,
+        "APasses": 252,
+        "HPassesAccurate": 290,
+        "APassesAccurate": 154,
+        "HxG": 1.36,
+        "AxG": 0.62
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
         },
         "extratime": {
           "home": null,

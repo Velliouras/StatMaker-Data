@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "92a4120daa09514978dd9118118eab3d2900e31f32434bbcdee247cb7497b548",
-  "generatedAt": "2026-08-20T21:42:51Z",
+  "contentVersion": "0fc75bc8cd7bd3fab33df6226803a636a3a019e4781e9ee09e325ca9cd48d5b6",
+  "generatedAt": "2026-08-20T23:46:48.030698Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "a526373399d1dbd41f30e36f2e8a7a7c88e31fe27aa8f34e138280e300019dee",
+      "sha256": "88cd91efb086d0485028a537d15359aa6505284ab4dfcc4ab794bb79bbb50438",
       "bytes": 51698,
-      "generatedAt": "2026-08-20T20:53:37Z"
+      "generatedAt": "2026-08-20T23:46:45Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "d6b642b9811b33a13470417241e004df205785c7a4d8daa0681f757a01ab5d82",
-      "bytes": 6765197,
+      "sha256": "6365976812362260635b57745acc5ddc00c288549cc9736d20d44b4b741b4a1c",
+      "bytes": 6767725,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "6478c8e34bbad119aaf0a122a00927c1bc74924c305fc705e819b23da983e8d0",
+      "sha256": "1c681f647536f559482b25886fdd47fa1e0a2cbbc94200c7457248ab5115f5af",
       "bytes": 6134631,
-      "generatedAt": "2026-08-20T20:53:39.574361Z"
+      "generatedAt": "2026-08-20T23:46:48.030698Z"
     },
     {
       "id": "uefa_team_logos",
@@ -79,5 +79,123 @@
       "bytes": 293700,
       "generatedAt": ""
     }
-  ]
+  ],
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "6365976812362260635b57745acc5ddc00c288549cc9736d20d44b4b741b4a1c",
+    "transitions": [
+      {
+        "fromSha256": "d6b642b9811b33a13470417241e004df205785c7a4d8daa0681f757a01ab5d82",
+        "toSha256": "6365976812362260635b57745acc5ddc00c288549cc9736d20d44b4b741b4a1c",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1570351,
+            "league_id": 140,
+            "league_code": "SP1",
+            "country": "Spain",
+            "league": "La Liga",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-08-20",
+            "home_team": "Rayo Vallecano",
+            "away_team": "Alaves",
+            "stats": {
+              "HS": 8,
+              "AS": 15,
+              "HST": 3,
+              "AST": 3,
+              "HC": 9,
+              "AC": 7,
+              "HF": 14,
+              "AF": 13,
+              "HY": 1,
+              "AY": 2,
+              "HR": null,
+              "AR": null,
+              "HPossession": 48,
+              "APossession": 52,
+              "HSaves": 2,
+              "ASaves": 2,
+              "HPasses": 324,
+              "APasses": 345,
+              "HPassesAccurate": 256,
+              "APassesAccurate": 278,
+              "HxG": 0.43,
+              "AxG": 1.92,
+              "HShotsOffGoal": 4,
+              "AShotsOffGoal": 9,
+              "HBlockedShots": 1,
+              "ABlockedShots": 3,
+              "HShotsInsideBox": 5,
+              "AShotsInsideBox": 10,
+              "HShotsOutsideBox": 3,
+              "AShotsOutsideBox": 5,
+              "HOffsides": 1,
+              "AOffsides": 0,
+              "HPassAccuracy": 79,
+              "APassAccuracy": 81,
+              "HGoalsPrevented": 0.19,
+              "AGoalsPrevented": 0.19,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          },
+          {
+            "fixture_id": 1564254,
+            "league_id": 41,
+            "league_code": "E2",
+            "country": "England",
+            "league": "League One",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-08-20",
+            "home_team": "Sheffield Wednesday",
+            "away_team": "Bradford",
+            "stats": {
+              "HS": 13,
+              "AS": 10,
+              "HST": 3,
+              "AST": 4,
+              "HC": 8,
+              "AC": 9,
+              "HF": 13,
+              "AF": 10,
+              "HY": 1,
+              "AY": 1,
+              "HR": null,
+              "AR": null,
+              "HPossession": 60,
+              "APossession": 40,
+              "HSaves": 4,
+              "ASaves": 3,
+              "HPasses": 389,
+              "APasses": 252,
+              "HPassesAccurate": 290,
+              "APassesAccurate": 154,
+              "HxG": 1.36,
+              "AxG": 0.62,
+              "HShotsOffGoal": 6,
+              "AShotsOffGoal": 3,
+              "HBlockedShots": 4,
+              "ABlockedShots": 3,
+              "HShotsInsideBox": 9,
+              "AShotsInsideBox": 5,
+              "HShotsOutsideBox": 4,
+              "AShotsOutsideBox": 5,
+              "HOffsides": 3,
+              "AOffsides": 1,
+              "HPassAccuracy": 75,
+              "APassAccuracy": 61,
+              "HGoalsPrevented": 0.82,
+              "AGoalsPrevented": 0.82,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      }
+    ]
+  }
 }

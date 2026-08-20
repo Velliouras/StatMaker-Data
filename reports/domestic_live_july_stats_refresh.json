@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-20T20:53:34Z",
+  "generatedAt": "2026-08-20T23:46:43Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -16,12 +16,80 @@
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
   "requestsUsed": 120,
-  "registryLeagueCount": 1,
-  "polledLeagueCount": 1,
+  "registryLeagueCount": 3,
+  "polledLeagueCount": 3,
   "incompleteBefore": 1,
-  "completeAfter": 0,
+  "completeAfter": 2,
   "incompleteAfter": 1,
   "allocations": [
+    {
+      "phase": "tier1_main5_plus_greece",
+      "priorityTier": "tier1_main5_plus_greece",
+      "leagueCode": "SP1",
+      "country": "Spain",
+      "league": "La Liga",
+      "lifecycle": "active",
+      "allocatedRequests": 120,
+      "usedRequests": 2,
+      "before": {
+        "leagueCode": "SP1",
+        "priorityTier": "tier1_main5_plus_greece",
+        "completed": 6,
+        "withStats": 6,
+        "withScores": 6,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      },
+      "after": {
+        "leagueCode": "SP1",
+        "priorityTier": "tier1_main5_plus_greece",
+        "completed": 7,
+        "withStats": 7,
+        "withScores": 7,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      }
+    },
+    {
+      "phase": "tier2_core27",
+      "priorityTier": "tier2_core27",
+      "leagueCode": "E2",
+      "country": "England",
+      "league": "League One",
+      "lifecycle": "active",
+      "allocatedRequests": 118,
+      "usedRequests": 2,
+      "before": {
+        "leagueCode": "E2",
+        "priorityTier": "tier2_core27",
+        "completed": 12,
+        "withStats": 12,
+        "withScores": 12,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      },
+      "after": {
+        "leagueCode": "E2",
+        "priorityTier": "tier2_core27",
+        "completed": 13,
+        "withStats": 13,
+        "withScores": 13,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      }
+    },
     {
       "phase": "tier3_restored26",
       "priorityTier": "tier3_restored26",
@@ -29,8 +97,8 @@
       "country": "Finland",
       "league": "Ykkösliiga",
       "lifecycle": "active",
-      "allocatedRequests": 120,
-      "usedRequests": 120,
+      "allocatedRequests": 116,
+      "usedRequests": 116,
       "before": {
         "leagueCode": "FIN2",
         "priorityTier": "tier3_restored26",
@@ -69,10 +137,36 @@
       "coverage": 0.0,
       "scoreCoverage": 1.0,
       "complete": false
+    },
+    {
+      "leagueCode": "E2",
+      "priorityTier": "tier2_core27",
+      "completed": 13,
+      "withStats": 13,
+      "withScores": 13,
+      "missingStats": 0,
+      "missingScores": 0,
+      "coverage": 1.0,
+      "scoreCoverage": 1.0,
+      "complete": true
+    },
+    {
+      "leagueCode": "SP1",
+      "priorityTier": "tier1_main5_plus_greece",
+      "completed": 7,
+      "withStats": 7,
+      "withScores": 7,
+      "missingStats": 0,
+      "missingScores": 0,
+      "coverage": 1.0,
+      "scoreCoverage": 1.0,
+      "complete": true
     }
   ],
   "selectedLeagueCodes": [
-    "FIN2"
+    "FIN2",
+    "E2",
+    "SP1"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
