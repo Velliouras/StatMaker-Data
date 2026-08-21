@@ -76,6 +76,26 @@ def validate_source(path, artifact, label):
         raise SystemExit(f"Invalid canonical {label}: {exc}") from exc
     if not isinstance(payload, dict):
         raise SystemExit(f"Invalid canonical {label} root")
+    return payload
+
+
+def exact_market_count(payload, label):
+    matches = payload.get("matches", []) or []
+    if not isinstance(matches, list):
+        raise SystemExit(f"Invalid canonical {label} matches")
+    total = 0
+    for match in matches:
+        if not isinstance(match, dict):
+            raise SystemExit(f"Invalid canonical {label} match row")
+        markets = match.get("markets", []) or []
+        if not isinstance(markets, list):
+            raise SystemExit(f"Invalid canonical {label} markets")
+        for market in markets:
+            if not isinstance(market, dict):
+                raise SystemExit(f"Invalid canonical {label} market row")
+            if market.get("exactBookmakerOdds") is True and str(market.get("bookmaker") or "").strip():
+                total += 1
+    return total
 
 
 def validate_fingerprint(value, label):
@@ -102,11 +122,12 @@ def validate_generated_stats():
     return match_count
 
 
-def validate_generated_betting():
+def validate_generated_betting(source_exact_markets):
     db_path = root / "databases" / "statmaker_prepared_betting.db"
     if not db_path.is_file() or db_path.stat().st_size <= 0:
         raise SystemExit(f"Missing/empty generated prepared betting DB: {db_path}")
     required = {"domestic", "champions_league", "europa_league", "conference_league"}
+    uefa = {"champions_league", "europa_league", "conference_league"}
     try:
         connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         try:
@@ -129,17 +150,42 @@ def validate_generated_betting():
             "Refusing app-ready publish: prepared betting DB missing READY snapshots: "
             + ", ".join(missing)
         )
-    invalid = {
-        competition_id: ready[competition_id]
-        for competition_id in required
-        if ready[competition_id][0] <= 0 or ready[competition_id][1] <= 0
-    }
-    if invalid:
-        detail = ", ".join(
-            f"{competition_id}(matches={counts[0]}, selections={counts[1]})"
-            for competition_id, counts in sorted(invalid.items())
+
+    domestic_counts = ready["domestic"]
+    if domestic_counts[0] <= 0 or domestic_counts[1] <= 0:
+        raise SystemExit(
+            "Refusing app-ready publish: empty Domestic prepared betting snapshot: "
+            f"matches={domestic_counts[0]}, selections={domestic_counts[1]}"
         )
-        raise SystemExit(f"Refusing app-ready publish: empty prepared betting snapshots: {detail}")
+
+    invalid_uefa = {}
+    valid_empty_uefa = []
+    for competition_id in sorted(uefa):
+        counts = ready[competition_id]
+        exact_markets = int(source_exact_markets.get(competition_id, 0) or 0)
+        if exact_markets > 0 and (counts[0] <= 0 or counts[1] <= 0):
+            invalid_uefa[competition_id] = (counts, exact_markets)
+        elif exact_markets == 0 and counts[1] <= 0:
+            valid_empty_uefa.append(competition_id)
+
+    if invalid_uefa:
+        detail = ", ".join(
+            f"{competition_id}(source_exact_markets={exact_markets}, "
+            f"matches={counts[0]}, selections={counts[1]})"
+            for competition_id, (counts, exact_markets) in sorted(invalid_uefa.items())
+        )
+        raise SystemExit(
+            "Refusing app-ready publish: UEFA source has exact bookmaker markets "
+            f"but prepared snapshot is empty: {detail}"
+        )
+
+    if valid_empty_uefa:
+        print(
+            "APP_READY_VALID_EMPTY_UEFA",
+            ",".join(valid_empty_uefa),
+            "source_exact_markets=0",
+        )
+
     return {competition_id: ready[competition_id] for competition_id in sorted(required)}
 
 
@@ -204,17 +250,27 @@ canonical_odds = {
     "europa_league": (source / "europa_league.json", artifact_by_id(uefa, "europa_league_odds")),
     "conference_league": (source / "conference_league.json", artifact_by_id(uefa, "conference_league_odds")),
 }
+canonical_payloads = {}
 for name, (path, artifact) in canonical_odds.items():
-    validate_source(path, artifact, f"{name} odds")
+    canonical_payloads[name] = validate_source(path, artifact, f"{name} odds")
+
+source_exact_markets = {
+    competition_id: exact_market_count(canonical_payloads[competition_id], f"{competition_id} odds")
+    for competition_id in ("champions_league", "europa_league", "conference_league")
+}
 
 versions = prefs("statmaker_prepared_data_versions")
 domestic_fp = validate_fingerprint(versions.get("domestic_history_fingerprint", ""), "domestic history")
 support_fp = validate_fingerprint(versions.get("uefa_support_fingerprint", ""), "UEFA support")
 stats_match_count = validate_generated_stats()
-prepared_counts = validate_generated_betting()
+prepared_counts = validate_generated_betting(source_exact_markets)
 print(
     "APP_READY_VALIDATION_OK",
     f"stats_matches={stats_match_count}",
+    "source_exact_markets=" + ",".join(
+        f"{competition_id}:{count}"
+        for competition_id, count in sorted(source_exact_markets.items())
+    ),
     "prepared=" + ",".join(
         f"{competition_id}:{counts[0]}/{counts[1]}"
         for competition_id, counts in prepared_counts.items()
