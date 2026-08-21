@@ -1,13 +1,21 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-08-21T17:52:08Z`
-Requests used: `96` / `120`
+Generated at: `2026-08-21T20:46:28Z`
+Requests used: `111` / `120`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Latvia | Virsliga | 2026 | 365 | 128 | 0 | 29 | 128 | 0 | 29 | 30 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=128; request cap reached before all fixture statistics were fetched |
-| Finland | Ykkösliiga | 2026 | 245 | 122 | 0 | 29 | 122 | 0 | 29 | 30 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=122; request cap reached before all fixture statistics were fetched |
-| Slovenia | 1. SNL | 2026 | 373 | 25 | 0 | 25 | 25 | 0 | 25 | 26 | league+season:2026 | 180 | data/api_football/fixture_stats/slovenia/1-snl/2026/fixture_stats.json | league+season:2026 returned=180 completed=25 |
-| Hungary | NB I | 2026 | 271 | 24 | 15 | 9 | 24 | 0 | 8 | 10 | league+season:2026 | 198 | data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json | league+season:2026 returned=198 completed=24 |
+| Finland | Veikkausliiga | 2026 | 244 | 121 | 29 | 23 | 121 | 0 | 23 | 24 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=121; request cap reached before all fixture statistics were fetched |
+| Romania | Liga I | 2026 | 283 | 40 | 37 | 3 | 40 | 0 | 2 | 4 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=40 |
+| Argentina | Liga Profesional Argentina | 2026 | 128 | 331 | 327 | 4 | 331 | 0 | 3 | 5 | league+season:2026 | 495 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | league+season:2026 returned=495 completed=331 |
+| Sweden | Allsvenskan | 2026 | 113 | 136 | 135 | 1 | 136 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/allsvenskan/2026/fixture_stats.json | league+season:2026 returned=240 completed=136 |
+| Austria | Bundesliga | 2026 | 218 | 19 | 18 | 1 | 19 | 0 | 0 | 2 | league+season:2026 | 132 | data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json | league+season:2026 returned=132 completed=19 |
+| Latvia | Virsliga | 2026 | 365 | 128 | 0 | 10 | 128 | 0 | 10 | 11 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=128; request cap reached before all fixture statistics were fetched |
+| Finland | Ykkösliiga | 2026 | 245 | 122 | 0 | 11 | 122 | 0 | 11 | 12 | league+season:2026 | 132 | data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json | league+season:2026 returned=132 completed=122; request cap reached before all fixture statistics were fetched |
+| Slovenia | 1. SNL | 2026 | 373 | 26 | 0 | 11 | 26 | 0 | 11 | 12 | league+season:2026 | 180 | data/api_football/fixture_stats/slovenia/1-snl/2026/fixture_stats.json | league+season:2026 returned=180 completed=26; request cap reached before all fixture statistics were fetched |
+| Austria | 2. Liga | 2026 | 219 | 29 | 0 | 11 | 29 | 0 | 11 | 12 | league+season:2026 | 240 | data/api_football/fixture_stats/austria/2-liga/2026/fixture_stats.json | league+season:2026 returned=240 completed=29; request cap reached before all fixture statistics were fetched |
+| Bulgaria | First League | 2026 | 172 | 35 | 0 | 11 | 35 | 0 | 11 | 12 | league+season:2026 | 182 | data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=35; request cap reached before all fixture statistics were fetched |
+| Hungary | NB I | 2026 | 271 | 24 | 16 | 8 | 24 | 0 | 8 | 9 | league+season:2026 | 198 | data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json | league+season:2026 returned=198 completed=24 |
+| France | Ligue 2 | 2026 | 62 | 23 | 18 | 5 | 23 | 0 | 0 | 6 | league+season:2026 | 306 | data/api_football/fixture_stats/france/ligue-2/2026/fixture_stats.json | league+season:2026 returned=306 completed=23 |
