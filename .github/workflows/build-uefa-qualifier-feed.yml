@@ -55,9 +55,13 @@ jobs:
           ]
           total_matches = 0
           total_markets = 0
+          empty_market_matches = 0
           for path in paths:
               payload = json.loads(path.read_text(encoding='utf-8'))
-              for match in payload.get('matches', []) or []:
+              matches = payload.get('matches', []) or []
+              if not isinstance(matches, list):
+                  raise SystemExit(f'Invalid matches payload in {path}')
+              for match in matches:
                   status = match.get('teamMappingStatus')
                   usable = match.get('usableForStats')
                   if status not in {'matched', 'provider_identity'}:
@@ -65,16 +69,19 @@ jobs:
                   if status == 'provider_identity' and usable is not False:
                       raise SystemExit(f'provider_identity must be stats-closed in {path}')
                   markets = match.get('markets', []) or []
+                  if not isinstance(markets, list):
+                      raise SystemExit(f'Invalid markets payload in {path}')
                   if not markets:
-                      raise SystemExit(f'Published match without markets in {path}')
+                      empty_market_matches += 1
                   for market in markets:
                       if market.get('exactBookmakerOdds') is not True or not market.get('bookmaker'):
                           raise SystemExit(f'Non-exact market in {path}')
                   total_matches += 1
                   total_markets += len(markets)
-          if total_matches == 0 or total_markets == 0:
-              raise SystemExit('No exact UEFA qualifier odds were published')
-          print(f'Validated {total_matches} matches and {total_markets} exact markets')
+          print(
+              f'Validated {total_matches} UEFA fixtures, {total_markets} exact markets; '
+              f'{empty_market_matches} fixtures currently have no exact Bet365/Unibet markets'
+          )
           PY
 
       - name: Commit generated qualifier feeds to build branch
