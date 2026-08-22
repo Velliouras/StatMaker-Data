@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-22T15:49:04Z",
+  "generated_at": "2026-08-22T17:43:33Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-22T15:48:59Z",
+    "cache_generated_at": "2026-08-22T17:42:01Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -39,11 +39,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 121,
+    "completed_fixtures": 123,
     "fixtures_with_any_stats": 56,
     "fixtures_with_bb_core_stats": 55,
-    "any_stats_coverage": 0.4628,
-    "bb_core_coverage": 0.4545,
+    "any_stats_coverage": 0.4553,
+    "bb_core_coverage": 0.4472,
     "group_counts": {
       "shots_total": 56,
       "shots_on_target": 56,
@@ -56,20 +56,20 @@
       "xg": 33
     },
     "group_coverage": {
-      "shots_total": 0.4628,
-      "shots_on_target": 0.4628,
-      "corners": 0.4545,
-      "fouls": 0.4628,
-      "yellow_cards": 0.4628,
-      "red_cards": 0.4628,
-      "possession": 0.4628,
-      "passes": 0.3967,
-      "xg": 0.2727
+      "shots_total": 0.4553,
+      "shots_on_target": 0.4553,
+      "corners": 0.4472,
+      "fouls": 0.4553,
+      "yellow_cards": 0.4553,
+      "red_cards": 0.4553,
+      "possession": 0.4553,
+      "passes": 0.3902,
+      "xg": 0.2683
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.4628 < 0.65",
-      "low BB-core coverage: 0.4545 < 0.65",
+      "low any-stats coverage: 0.4553 < 0.65",
+      "low BB-core coverage: 0.4472 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -10228,6 +10228,174 @@
         "fulltime": {
           "home": 1,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1495765,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "Finland",
+      "league": "Veikkausliiga",
+      "league_code": "FIN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
+      "round": "Regular Season - 21",
+      "home_team": "Ilves",
+      "away_team": "VPS",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1495766,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "Finland",
+      "league": "Veikkausliiga",
+      "league_code": "FIN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
+      "round": "Regular Season - 21",
+      "home_team": "FF Jaro",
+      "away_team": "AC Oulu",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
         },
         "extratime": {
           "home": null,
