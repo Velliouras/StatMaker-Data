@@ -47,16 +47,31 @@ class StatsUniverseRegistryTest(unittest.TestCase):
         )
         self.assertIsNone(result)
 
-    def test_new_cross_year_active_season_keeps_previous_history(self):
-        previous = self.season(2025, "2025-08-15", "2026-05-24")
-        target = self.season(2026, "2026-08-14", "2027-05-23")
-        chosen = registry.select_history_season_rolling(
-            [previous, target],
-            target,
-            "active",
-            dt.date(2026, 8, 22),
-        )
-        self.assertIs(previous, chosen)
+    def test_current_major_league_rollovers_keep_2025_history(self):
+        cases = {
+            "E0": ("2026-08-21", "2027-05-30"),
+            "F1": ("2026-08-21", "2027-05-29"),
+            "I1": ("2026-08-22", "2027-05-30"),
+            "SP1": ("2026-08-14", "2027-05-23"),
+            "G1": ("2026-08-22", "2027-03-20"),
+        }
+        for code, (target_start, target_end) in cases.items():
+            with self.subTest(league_code=code):
+                start = dt.date.fromisoformat(target_start)
+                end = dt.date.fromisoformat(target_end)
+                previous = self.season(
+                    2025,
+                    start.replace(year=2025).isoformat(),
+                    end.replace(year=2026).isoformat(),
+                )
+                target = self.season(2026, target_start, target_end)
+                chosen = registry.select_history_season_rolling(
+                    [previous, target],
+                    target,
+                    "active",
+                    dt.date(2026, 8, 22),
+                )
+                self.assertIs(previous, chosen)
 
     def test_calendar_year_active_season_keeps_current_history(self):
         previous = self.season(2025, "2025-03-15", "2025-11-30")
