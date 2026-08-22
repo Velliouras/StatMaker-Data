@@ -46,6 +46,24 @@ def select_target_season_rolling(
     return None
 
 
+def previous_completed_season(
+    seasons: Sequence[Dict[str, Any]],
+    target: Dict[str, Any],
+) -> Dict[str, Any]:
+    """Return the most recent season completed before target starts."""
+    target_start, _ = pipeline.season_bounds(target)
+    if target_start is None:
+        return target
+
+    previous = []
+    for season in seasons:
+        start, end = pipeline.season_bounds(season)
+        if start is None or end is None or end >= target_start:
+            continue
+        previous.append((end, season))
+    return max(previous, key=lambda item: item[0])[1] if previous else target
+
+
 def select_history_season_rolling(
     seasons: Sequence[Dict[str, Any]],
     target: Dict[str, Any],
@@ -62,7 +80,7 @@ def select_history_season_rolling(
     Calendar-year leagues (for example Norway 2026) are never rolled back.
     """
     if lifecycle != "active":
-        return pipeline.select_history_season(seasons, target, lifecycle)
+        return previous_completed_season(seasons, target)
 
     target_start, target_end = pipeline.season_bounds(target)
     if target_start is None or target_end is None:
@@ -77,13 +95,7 @@ def select_history_season_rolling(
     if age_days < 0 or age_days >= max(0, grace_days):
         return target
 
-    previous = []
-    for season in seasons:
-        start, end = pipeline.season_bounds(season)
-        if start is None or end is None or end >= target_start:
-            continue
-        previous.append((end, season))
-    return max(previous, key=lambda item: item[0])[1] if previous else target
+    return previous_completed_season(seasons, target)
 
 
 def main() -> int:
