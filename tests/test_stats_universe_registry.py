@@ -106,6 +106,26 @@ class StatsUniverseRegistryTest(unittest.TestCase):
         )
         self.assertIs(previous, chosen)
 
+    def test_runtime_history_patch_does_not_recurse_for_upcoming(self):
+        previous = self.season(2025, "2025-08-15", "2026-05-24")
+        target = self.season(2026, "2026-08-14", "2027-05-23")
+        original_selector = registry.pipeline.select_history_season
+        registry.pipeline.select_history_season = lambda seasons, selected, lifecycle: registry.select_history_season_rolling(
+            seasons,
+            selected,
+            lifecycle,
+            dt.date(2026, 8, 1),
+        )
+        try:
+            chosen = registry.pipeline.select_history_season(
+                [previous, target],
+                target,
+                "starts_soon",
+            )
+        finally:
+            registry.pipeline.select_history_season = original_selector
+        self.assertIs(previous, chosen)
+
 
 if __name__ == "__main__":
     unittest.main()
