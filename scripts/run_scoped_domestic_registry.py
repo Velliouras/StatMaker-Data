@@ -4,6 +4,8 @@
 Selection is rolling rather than July-specific: a league is selected when its
 season is active today or when the next season starts within 45 days. Upcoming
 seasons use the immediately preceding completed season as historical support.
+Recently-started cross-year seasons keep that completed-season history during
+the opening rounds while schedule and odds stay on the current target season.
 """
 from __future__ import annotations
 
@@ -16,6 +18,7 @@ import domestic_live_july_pipeline as pipeline
 import statmaker_domestic_scope as scope
 
 START_HORIZON_DAYS = 45
+ROLLOVER_HISTORY_GRACE_DAYS = 70
 
 
 def select_target_season_rolling(
@@ -43,6 +46,46 @@ def select_target_season_rolling(
     return None
 
 
+def select_history_season_rolling(
+    seasons: Sequence[Dict[str, Any]],
+    target: Dict[str, Any],
+    lifecycle: str,
+    today: dt.date,
+    grace_days: int = ROLLOVER_HISTORY_GRACE_DAYS,
+) -> Dict[str, Any]:
+    """Preserve prior-season evidence only during a new cross-year season rollover.
+
+    The target season always remains current for fixtures and odds. For a newly
+    started season that spans two calendar years, historical evidence stays on
+    the immediately preceding completed season during the opening rounds. This
+    prevents the evidence sample from collapsing to 0-8 matches at rollover.
+    Calendar-year leagues (for example Norway 2026) are never rolled back.
+    """
+    if lifecycle != "active":
+        return pipeline.select_history_season(seasons, target, lifecycle)
+
+    target_start, target_end = pipeline.season_bounds(target)
+    if target_start is None or target_end is None:
+        return target
+
+    # Only European-style split-year seasons need rollover continuity.
+    # Calendar-year competitions keep their current-season history unchanged.
+    if target_start.year == target_end.year:
+        return target
+
+    age_days = (today - target_start).days
+    if age_days < 0 or age_days >= max(0, grace_days):
+        return target
+
+    previous = []
+    for season in seasons:
+        start, end = pipeline.season_bounds(season)
+        if start is None or end is None or end >= target_start:
+            continue
+        previous.append((end, season))
+    return max(previous, key=lambda item: item[0])[1] if previous else target
+
+
 def main() -> int:
     api_key = os.getenv("API_FOOTBALL_KEY", "").strip()
     if not api_key:
@@ -53,8 +96,15 @@ def main() -> int:
     domestic_config = pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
     enrichment_config = pipeline.load_json(pipeline.ENRICHMENT_CONFIG, {})
 
-    original_selector = pipeline.select_target_season
+    original_target_selector = pipeline.select_target_season
+    original_history_selector = pipeline.select_history_season
     pipeline.select_target_season = select_target_season_rolling
+    pipeline.select_history_season = lambda seasons, target, lifecycle: select_history_season_rolling(
+        seasons,
+        target,
+        lifecycle,
+        today,
+    )
     try:
         registry = pipeline.build_live_registry(
             domestic_config,
@@ -63,7 +113,8 @@ def main() -> int:
             today,
         )
     finally:
-        pipeline.select_target_season = original_selector
+        pipeline.select_target_season = original_target_selector
+        pipeline.select_history_season = original_history_selector
 
     registry = scope.filter_stats_leagues(registry)
     if not registry:
@@ -76,6 +127,7 @@ def main() -> int:
         "asOfDate": today.isoformat(),
         "selectionPolicy": f"configured Stats-universe leagues active now or starting within {START_HORIZON_DAYS} days",
         "startHorizonDays": START_HORIZON_DAYS,
+        "rolloverHistoryGraceDays": ROLLOVER_HISTORY_GRACE_DAYS,
         "statsUniverseConfiguredLeagueCount": len(scope.stats_universe_codes()),
         "coreOddsConfiguredLeagueCount": len(scope.included_codes()),
         "statsVisibility": "selected Stats leagues remain visible independently of odds",
@@ -86,7 +138,8 @@ def main() -> int:
 
     print(
         f"Domestic Stats registry written leagues={len(registry)} "
-        f"stats_universe={len(scope.stats_universe_codes())} horizon_days={START_HORIZON_DAYS}"
+        f"stats_universe={len(scope.stats_universe_codes())} horizon_days={START_HORIZON_DAYS} "
+        f"rollover_history_grace_days={ROLLOVER_HISTORY_GRACE_DAYS}"
     )
     return 0
 
