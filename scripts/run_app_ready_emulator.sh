@@ -4,6 +4,21 @@ set -euo pipefail
 : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
 : "${APP_ID:?APP_ID is required}"
 
+# Keep the publisher aligned with the applicationId that was actually compiled from StatMaker UAT.
+# The workflow's APP_ID is only an expectation; stale hard-coding must not make adb target a package
+# that is not present in the freshly built APK.
+BUILD_GRADLE="$GITHUB_WORKSPACE/statmaker-private/app/build.gradle.kts"
+test -s "$BUILD_GRADLE"
+COMPILED_APP_ID="$(sed -nE 's/^[[:space:]]*applicationId[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' "$BUILD_GRADLE" | head -1)"
+if [[ -z "$COMPILED_APP_ID" ]]; then
+  echo "Could not resolve StatMaker applicationId from $BUILD_GRADLE" >&2
+  exit 1
+fi
+if [[ "$APP_ID" != "$COMPILED_APP_ID" ]]; then
+  echo "APP_READY_APP_ID_NORMALIZED workflow=$APP_ID compiled=$COMPILED_APP_ID"
+fi
+APP_ID="$COMPILED_APP_ID"
+
 UEFA_REF=origin/build/uefa-qualifier-feed-20260720
 u="$GITHUB_WORKSPACE/__uefa__"
 rm -rf "$u"
@@ -61,7 +76,7 @@ fi
 echo "APP_READY_ADB_REVERSE_OK"
 
 adb logcat -c
-adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity" || true
+adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
 
 ok=0
 last_stage=""
