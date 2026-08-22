@@ -18,7 +18,8 @@ on:
       - main
     paths:
       - '.github/workflows/app-ready-artifact-publisher.yml'
-      - 'data/statmaker/update_manifest.json'
+      - 'data/statmaker/domestic_enriched/**'
+      - 'data/api_football/domestic_normalized_fixture_stats.json'
       - 'scripts/patch_app_ready_producer.py'
       - 'scripts/patch_prepared_publisher_diagnostics.py'
       - 'scripts/patch_prepared_publisher_bulk.py'
