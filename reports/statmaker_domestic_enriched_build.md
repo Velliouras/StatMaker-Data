@@ -1,17 +1,17 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-23T20:45:37Z`
+Generated at: `2026-08-23T23:42:14Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
 | Code | Country | League | App season | API season | API league ID | Group | Completed | Any stats | BB-core stats | Any coverage | BB-core coverage | BB-ready candidate | Output | Notes |
 | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
-| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 339 | 333 | 327 | 0.9823 | 0.9646 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
+| ARG | Argentina | Liga Profesional Argentina | 2026 | 2026 | 128 | americas | 340 | 334 | 328 | 0.9824 | 0.9647 | True | data/statmaker/domestic_enriched/argentina_liga_profesional_argentina_2026.json | ok |
 | AUT2 | Austria | 2. Liga | 2025-2026 | 2025 | 219 | central_europe | 222 | 1 | 1 | 0.0045 | 0.0045 | False | data/statmaker/domestic_enriched/austria_2_liga_2025.json | low any-stats coverage: 0.0045 < 0.65; low BB-core coverage: 0.0045 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | AUT | Austria | Bundesliga | 2025-2026 | 2025 | 218 | central_europe | 195 | 195 | 187 | 1.0 | 0.959 | True | data/statmaker/domestic_enriched/austria_bundesliga_2025.json | ok |
 | B1 | Belgium | Jupiler Pro League | 2025-2026 | 2025 | 144 | western_europe | 321 | 321 | 314 | 1.0 | 0.9782 | True | data/statmaker/domestic_enriched/belgium_jupiler_pro_league_2025.json | ok |
-| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 228 | 224 | 217 | 0.9825 | 0.9518 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
-| BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 232 | 230 | 226 | 0.9914 | 0.9741 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
+| BRA | Brazil | Serie A | 2026 | 2026 | 71 | americas | 233 | 229 | 222 | 0.9828 | 0.9528 | True | data/statmaker/domestic_enriched/brazil_serie_a_2026.json | ok |
+| BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 236 | 234 | 230 | 0.9915 | 0.9746 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
 | BGR | Bulgaria | First League | 2025-2026 | 2025 | 172 | eastern_europe | 293 | 119 | 119 | 0.4061 | 0.4061 | False | data/statmaker/domestic_enriched/bulgaria_first_league_2025.json | low any-stats coverage: 0.4061 < 0.65; low BB-core coverage: 0.4061 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | CHN | China | Super League | 2026 | 2026 | 169 | asia | 189 | 189 | 186 | 1.0 | 0.9841 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
 | CZE | Czech Republic | Czech Liga | 2025-2026 | 2025 | 345 | central_europe | 279 | 279 | 267 | 1.0 | 0.957 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2025.json | ok |
@@ -48,7 +48,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SC1 | Scotland | Championship | 2025-2026 | 2025 | 180 | scotland | 186 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_championship_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC3 | Scotland | League Two | 2026 | 2026 | 182 | scotland | 20 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC0 | Scotland | Premiership | 2025-2026 | 2025 | 179 | scotland | 234 | 232 | 226 | 0.9915 | 0.9658 | True | data/statmaker/domestic_enriched/scotland_premiership_2025.json | ok |
-| SRB | Serbia | Super Liga | 2025-2026 | 2025 | 286 | eastern_europe | 296 | 210 | 204 | 0.7095 | 0.6892 | True | data/statmaker/domestic_enriched/serbia_super_liga_2025.json | ok |
+| SRB | Serbia | Super Liga | 2025-2026 | 2025 | 286 | eastern_europe | 296 | 215 | 208 | 0.7264 | 0.7027 | True | data/statmaker/domestic_enriched/serbia_super_liga_2025.json | ok |
 | SVK | Slovakia | Super Liga | 2025-2026 | 2025 | 332 | central_europe | 192 | 113 | 106 | 0.5885 | 0.5521 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2025.json | low any-stats coverage: 0.5885 < 0.65; low BB-core coverage: 0.5521 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SVN | Slovenia | 1. SNL | 2025-2026 | 2025 | 373 | central_europe | 163 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
@@ -57,4 +57,4 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 155 | 69 | 67 | 0.4452 | 0.4323 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4452 < 0.65; low BB-core coverage: 0.4323 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2025-2026 | 2025 | 207 | central_europe | 230 | 230 | 230 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/switzerland_super_league_2025.json | ok |
 | T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
-| USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 309 | 297 | 292 | 0.9612 | 0.945 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
+| USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 313 | 301 | 296 | 0.9617 | 0.9457 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
