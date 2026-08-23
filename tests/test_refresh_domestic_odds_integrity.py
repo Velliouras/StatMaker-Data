@@ -1,3 +1,4 @@
+import copy
 import datetime as dt
 import importlib.util
 import os
@@ -24,6 +25,9 @@ def load_subject():
     integrity = types.ModuleType("odds_market_integrity")
     integrity.install_parser_guard = lambda _odds: None
 
+    expansion = types.ModuleType("domestic_market_expansion_v18")
+    expansion.install = lambda _odds, _pipeline: None
+
     spec = importlib.util.spec_from_file_location("refresh_domestic_odds_integrity_test_subject", SCRIPT_PATH)
     module = importlib.util.module_from_spec(spec)
     with patch.dict(
@@ -32,6 +36,7 @@ def load_subject():
             "refresh_domestic_live_july_odds": target,
             "statmaker_domestic_scope": scope,
             "odds_market_integrity": integrity,
+            "domestic_market_expansion_v18": expansion,
         },
     ):
         assert spec.loader is not None
@@ -58,6 +63,70 @@ class FakeOddsModule:
     def should_stop_for_rate_limit(debug):
         remaining = debug.get("rateLimitRemaining")
         return isinstance(remaining, int) and remaining < FakeOddsModule.RATE_LIMIT_STOP_BELOW
+
+
+class FakeStaleOddsModule:
+    def __init__(self):
+        self.normalize_event_match = self._normalize_event_match
+        self.output_debug = self._output_debug
+
+    @staticmethod
+    def event_id(event):
+        return str(event.get("id") or "")
+
+    @staticmethod
+    def event_kickoff(event):
+        return str(event.get("date") or "")
+
+    @staticmethod
+    def bookmaker_blocks(event_odds):
+        raw = event_odds.get("bookmakers") or {}
+        if isinstance(raw, dict):
+            return [
+                (name, [market for market in markets if isinstance(market, dict)])
+                for name, markets in raw.items()
+                if isinstance(markets, list)
+            ]
+        return []
+
+    @staticmethod
+    def _normalize_event_match(config_league, event, event_odds, aliases, debug):
+        return {
+            "id": str(event.get("id") or ""),
+            "date": str(event.get("date") or "")[:10],
+            "kickoff": str(event.get("date") or ""),
+            "homeTeam": str(event.get("home") or ""),
+            "awayTeam": str(event.get("away") or ""),
+            "providerHomeTeam": str(event.get("home") or ""),
+            "providerAwayTeam": str(event.get("away") or ""),
+            "teamMappingStatus": "matched",
+            "usableForStats": True,
+            "markets": [
+                {
+                    "market": "TEAM_CORNERS",
+                    "selection": "FC Lugano Corners Under 5.5",
+                    "odds": 1.83,
+                    "bookmaker": "Bet365",
+                    "exactBookmakerOdds": True,
+                }
+            ],
+        }
+
+    @staticmethod
+    def _output_debug(generated_at, debug):
+        return {
+            "generatedAt": generated_at,
+            "warnings": list(debug.get("warnings", [])),
+        }
+
+
+class FakeRefreshModule:
+    def __init__(self):
+        self.safe_merge_odds_feed = self._safe_merge
+
+    @staticmethod
+    def _safe_merge(previous, fresh, registry, today):
+        return copy.deepcopy(previous)
 
 
 class DomesticRateLimitWaitGuardTest(unittest.TestCase):
@@ -170,6 +239,150 @@ class DomesticRateLimitWaitGuardTest(unittest.TestCase):
 
         self.assertEqual(iso, epoch)
         self.assertEqual(iso, milliseconds)
+
+
+class DomesticStaleImminentOddsGuardTest(unittest.TestCase):
+    def setUp(self):
+        self.subject = load_subject()
+        self.now = dt.datetime(2026, 8, 23, 13, 45, 0, tzinfo=UTC)
+        self.event = {
+            "id": 72176896,
+            "home": "FC Lugano",
+            "away": "FC St. Gallen 1879",
+            "date": "2026-08-23T14:30:00Z",
+        }
+
+    def odds_payload(self, updated_at):
+        market = {
+            "name": "Team Corners",
+            "odds": [{"hdp": 5.5, "over": "1.90", "under": "1.83"}],
+        }
+        if updated_at is not None:
+            market["updatedAt"] = updated_at
+        return {"bookmakers": {"Bet365": [market]}}
+
+    def install(self):
+        odds = FakeStaleOddsModule()
+        refresh = FakeRefreshModule()
+        self.subject.install_stale_imminent_odds_guard(
+            odds,
+            refresh,
+            now_fn=lambda: self.now,
+        )
+        return odds, refresh
+
+    def test_lugano_shape_is_suppressed_when_newest_odds_are_four_days_old(self):
+        odds, refresh = self.install()
+        debug = {"warnings": []}
+        payload = self.odds_payload("2026-08-19T15:26:50.399Z")
+
+        match = odds.normalize_event_match(
+            {"leagueCode": "SWZ"},
+            self.event,
+            payload,
+            {},
+            debug,
+        )
+
+        self.assertEqual([], match["markets"])
+        self.assertTrue(match["bettingSuppressed"])
+        self.assertEqual("stale_imminent_provider_odds", match["bettingSuppressionReason"])
+        self.assertGreater(match["oddsFreshness"]["oddsAgeHours"], 72)
+        self.assertEqual("72176896", debug["staleImminentOddsEvents"][0]["id"])
+
+        fresh = {
+            "debug": odds.output_debug("2026-08-23T13:45:00Z", debug),
+        }
+        previous = {
+            "leagues": [
+                {
+                    "leagueCode": "SWZ",
+                    "matches": [
+                        {
+                            "id": "72176896",
+                            "homeTeam": "FC Lugano",
+                            "awayTeam": "FC ST. Gallen",
+                            "markets": [{"odds": 1.83}],
+                        },
+                        {
+                            "id": "keep-me",
+                            "homeTeam": "FC Zurich",
+                            "awayTeam": "FC Basel",
+                            "markets": [{"odds": 1.91}],
+                        },
+                    ],
+                }
+            ],
+            "debug": {},
+        }
+
+        merged = refresh.safe_merge_odds_feed(previous, fresh, [], self.now.date())
+        ids = [match["id"] for match in merged["leagues"][0]["matches"]]
+        self.assertEqual(["keep-me"], ids)
+        self.assertEqual(1, merged["debug"]["staleImminentOddsPurgedAfterMerge"])
+        self.assertEqual(["72176896"], merged["debug"]["staleImminentOddsRejectedIds"])
+
+    def test_recent_odds_are_not_suppressed(self):
+        odds, _refresh = self.install()
+        debug = {"warnings": []}
+        payload = self.odds_payload("2026-08-23T12:45:00Z")
+
+        match = odds.normalize_event_match(
+            {"leagueCode": "SWZ"},
+            self.event,
+            payload,
+            {},
+            debug,
+        )
+
+        self.assertTrue(match["markets"])
+        self.assertNotIn("bettingSuppressed", match)
+        self.assertNotIn("staleImminentOddsEvents", debug)
+
+    def test_old_odds_are_not_suppressed_outside_imminent_window(self):
+        odds, _refresh = self.install()
+        debug = {"warnings": []}
+        event = dict(self.event)
+        event["date"] = "2026-08-25T14:30:00Z"
+        payload = self.odds_payload("2026-08-19T15:26:50.399Z")
+
+        match = odds.normalize_event_match(
+            {"leagueCode": "SWZ"},
+            event,
+            payload,
+            {},
+            debug,
+        )
+
+        self.assertTrue(match["markets"])
+        self.assertNotIn("bettingSuppressed", match)
+
+    def test_missing_provider_timestamps_fail_open_for_freshness_only(self):
+        odds, _refresh = self.install()
+        debug = {"warnings": []}
+
+        match = odds.normalize_event_match(
+            {"leagueCode": "SWZ"},
+            self.event,
+            self.odds_payload(None),
+            {},
+            debug,
+        )
+
+        self.assertTrue(match["markets"])
+        self.assertNotIn("bettingSuppressed", match)
+
+    def test_stale_guard_is_idempotent(self):
+        odds = FakeStaleOddsModule()
+        refresh = FakeRefreshModule()
+        self.subject.install_stale_imminent_odds_guard(odds, refresh, now_fn=lambda: self.now)
+        first_normalize = odds.normalize_event_match
+        first_merge = refresh.safe_merge_odds_feed
+
+        self.subject.install_stale_imminent_odds_guard(odds, refresh, now_fn=lambda: self.now)
+
+        self.assertIs(first_normalize, odds.normalize_event_match)
+        self.assertIs(first_merge, refresh.safe_merge_odds_feed)
 
 
 if __name__ == "__main__":
