@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-23T14:46:42Z`
+Generated at: `2026-08-23T17:42:07Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -14,7 +14,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | BRA2 | Brazil | Serie B | 2026 | 2026 | 72 | americas | 232 | 230 | 226 | 0.9914 | 0.9741 | True | data/statmaker/domestic_enriched/brazil_serie_b_2026.json | ok |
 | BGR | Bulgaria | First League | 2025-2026 | 2025 | 172 | eastern_europe | 293 | 119 | 119 | 0.4061 | 0.4061 | False | data/statmaker/domestic_enriched/bulgaria_first_league_2025.json | low any-stats coverage: 0.4061 < 0.65; low BB-core coverage: 0.4061 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | CHN | China | Super League | 2026 | 2026 | 169 | asia | 189 | 189 | 186 | 1.0 | 0.9841 | True | data/statmaker/domestic_enriched/china_super_league_2026.json | ok |
-| CZE | Czech Republic | Czech Liga | 2025-2026 | 2025 | 345 | central_europe | 279 | 269 | 258 | 0.9642 | 0.9247 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2025.json | ok |
+| CZE | Czech Republic | Czech Liga | 2025-2026 | 2025 | 345 | central_europe | 279 | 279 | 267 | 1.0 | 0.957 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2025.json | ok |
 | DNK | Denmark | Superliga | 2025-2026 | 2025 | 119 | scandinavia | 193 | 193 | 186 | 1.0 | 0.9637 | True | data/statmaker/domestic_enriched/denmark_superliga_2025.json | ok |
 | E1 | England | Championship | 2025-2026 | 2025 | 40 | england | 557 | 557 | 534 | 1.0 | 0.9587 | True | data/statmaker/domestic_enriched/england_championship_2025.json | ok |
 | E2 | England | League One | 2025-2026 | 2025 | 41 | england | 557 | 557 | 543 | 1.0 | 0.9749 | True | data/statmaker/domestic_enriched/england_league_one_2025.json | ok |
@@ -22,7 +22,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | EC | England | National League | 2025-2026 | 2025 | 43 | england | 556 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/england_national_league_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | E0 | England | Premier League | 2025-2026 | 2025 | 39 | england | 380 | 380 | 366 | 1.0 | 0.9632 | True | data/statmaker/domestic_enriched/england_premier_league_2025.json | ok |
 | EST | Estonia | Meistriliiga | 2026 | 2026 | 329 | baltics | 114 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/estonia_meistriliiga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| FIN | Finland | Veikkausliiga | 2026 | 2026 | 244 | scandinavia | 125 | 56 | 55 | 0.448 | 0.44 | False | data/statmaker/domestic_enriched/finland_veikkausliiga_2026.json | low any-stats coverage: 0.448 < 0.65; low BB-core coverage: 0.44 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| FIN | Finland | Veikkausliiga | 2026 | 2026 | 244 | scandinavia | 126 | 56 | 55 | 0.4444 | 0.4365 | False | data/statmaker/domestic_enriched/finland_veikkausliiga_2026.json | low any-stats coverage: 0.4444 < 0.65; low BB-core coverage: 0.4365 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | FIN2 | Finland | Ykkösliiga | 2026 | 2026 | 245 | scandinavia | 125 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/finland_ykkosliiga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | F1 | France | Ligue 1 | 2025-2026 | 2025 | 61 | top_europe | 309 | 309 | 302 | 1.0 | 0.9773 | True | data/statmaker/domestic_enriched/france_ligue_1_2025.json | ok |
 | F2 | France | Ligue 2 | 2025-2026 | 2025 | 62 | top_europe | 307 | 307 | 300 | 1.0 | 0.9772 | True | data/statmaker/domestic_enriched/france_ligue_2_2025.json | ok |
@@ -53,8 +53,8 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SVN | Slovenia | 1. SNL | 2025-2026 | 2025 | 373 | central_europe | 163 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 468 | 468 | 462 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | ok |
-| SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 139 | 139 | 139 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
-| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 153 | 69 | 67 | 0.451 | 0.4379 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.451 < 0.65; low BB-core coverage: 0.4379 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 141 | 141 | 141 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
+| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 155 | 69 | 67 | 0.4452 | 0.4323 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4452 < 0.65; low BB-core coverage: 0.4323 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2025-2026 | 2025 | 207 | central_europe | 230 | 230 | 230 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/switzerland_super_league_2025.json | ok |
 | T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
 | USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 309 | 297 | 292 | 0.9612 | 0.945 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
