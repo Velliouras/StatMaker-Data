@@ -49,16 +49,23 @@ def patch_legacy_welcome_contract() -> None:
         onProgress: (percent: Int, label: String) -> Unit
     ): WelcomeUpdateReport {
 '''
-    compatible_signature = '''    @Suppress("UNUSED_PARAMETER")
+    compatible_signature = '''    private var appReadyPublisherResult: WelcomeUpdateReport? = null
+
+    @Suppress("UNUSED_PARAMETER")
+    @Synchronized
     fun refreshAll(
         context: Context,
         onProgress: (percent: Int, label: String) -> Unit,
         onBackgroundPrefetch: (AppReadyPrefetchResult) -> Unit
-    ): WelcomeUpdateReport = refreshAll(
-        context = context,
-        onProgress = onProgress
-    )
+    ): WelcomeUpdateReport {
+        appReadyPublisherResult?.let { return it }
+        return refreshAll(
+            context = context,
+            onProgress = onProgress
+        ).also { appReadyPublisherResult = it }
+    }
 
+    @Synchronized
     fun refreshAll(
         context: Context,
         onProgress: (percent: Int, label: String) -> Unit
@@ -71,7 +78,7 @@ def patch_legacy_welcome_contract() -> None:
         "legacy Welcome refreshAll contract",
     )
     WELCOME_SOURCE.write_text(text, encoding="utf-8")
-    print("APP_READY_WELCOME_CONTRACT_OK legacy-adapter")
+    print("APP_READY_WELCOME_CONTRACT_OK legacy-adapter single-flight")
 
 
 def main() -> None:
