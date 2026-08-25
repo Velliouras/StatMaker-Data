@@ -1,0 +1,42 @@
+name: Validate 69-League Expansion Final
+
+on:
+  push:
+    branches:
+      - statmaker-69-league-expansion-v2
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile expansion pipeline code
+        run: |
+          python -m py_compile \
+            scripts/statmaker_top_flight_expansion.py \
+            scripts/api_football_daily_quota_guard.py \
+            scripts/run_scoped_domestic_registry.py \
+            scripts/run_domestic_stats_refresh.py \
+            scripts/domestic_odds_expansion.py
+
+      - name: Run expansion regression tests
+        run: |
+          python -m unittest \
+            tests/test_top_flight_expansion.py \
+            tests/test_statmaker_domestic_scope.py \
+            tests/test_stats_universe_registry.py \
+            tests/test_domestic_provider_league_guard.py
+
+      - name: Validate expansion contract
+        run: python scripts/statmaker_top_flight_expansion.py
