@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T20:54:22Z",
+  "generatedAt": "2026-08-25T23:45:37Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -34,10 +34,10 @@
       "before": {
         "leagueCode": "LVA",
         "priorityTier": "tier3_restored26",
-        "completed": 131,
+        "completed": 132,
         "withStats": 0,
-        "withScores": 131,
-        "missingStats": 131,
+        "withScores": 132,
+        "missingStats": 132,
         "missingScores": 0,
         "coverage": 0.0,
         "scoreCoverage": 1.0,
@@ -68,12 +68,12 @@
       "before": {
         "leagueCode": "SWE2",
         "priorityTier": "tier3_restored26",
-        "completed": 158,
+        "completed": 160,
         "withStats": 69,
-        "withScores": 158,
-        "missingStats": 89,
+        "withScores": 160,
+        "missingStats": 91,
         "missingScores": 0,
-        "coverage": 0.436709,
+        "coverage": 0.43125,
         "scoreCoverage": 1.0,
         "complete": false
       },
@@ -119,12 +119,15 @@
   ],
   "selectedLeagueCodes": [
     "LVA",
-    "SWE2"
+    "SWE2",
+    "SP1"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
   "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
-  "historicalSkippedFrozen": [],
+  "historicalSkippedFrozen": [
+    "SP1:2025"
+  ],
   "historicalNewlyFrozen": [],
   "historicalVerificationPending": [],
   "historicalSnapshotCount": 34,
@@ -134,7 +137,7 @@
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 6207,
+    "dailyRemaining": 6055,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
