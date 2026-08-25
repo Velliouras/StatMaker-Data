@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
+import api_football_daily_quota_guard as quota_guard
 import refresh_domestic_live_july_stats as target
 import statmaker_domestic_scope as scope
 
@@ -123,7 +124,7 @@ def exact_fixture_discovery(
             max_requests,
         )
     except target.stats_fetch.RequestLimitReached:
-        return False, [], "request cap reached before exact fixture verification"
+        return False, [], "request cap or daily reserve reached before exact fixture verification"
     except Exception as exc:
         return False, [], f"exact fixture verification failed: {type(exc).__name__}: {exc}"
 
@@ -232,6 +233,7 @@ def main() -> int:
         print("ERROR: API_FOOTBALL_KEY is required.", file=sys.stderr)
         return 2
 
+    quota_guard.install(target.stats_fetch)
     max_requests = max(1, int(args.max_requests))
     target.scope.install_stats_registry_load_guard(target.pipeline)
     registry_payload = target.pipeline.load_json(target.pipeline.REGISTRY_PATH, {})
@@ -297,7 +299,7 @@ def main() -> int:
             "generatedAt": target.pipeline.now_utc(),
             "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
             "incrementalContract": "current seasons incremental; historical snapshots close only after exact provider fixture-set verification",
-            "scopeContract": "53 configured Domestic leagues eligible for Stats; targeted/historical-only mode may refresh a subset",
+            "scopeContract": "69 configured Domestic leagues eligible for Stats; targeted/historical-only mode may refresh a subset",
             "priorityPolicy": "Verified frozen historical snapshots use zero future API requests",
             "absolutePriorityLeagueCodes": sorted(scope.absolute_priority_codes()),
             "statsUniverseLeagueCount": len(scope.stats_universe_codes()),
@@ -378,6 +380,7 @@ def main() -> int:
     report["historicalPendingAfter"] = pending_after
     report["historicalFrozenSnapshotCount"] = freeze["frozenSnapshotCount"]
     report["historicalClosureComplete"] = freeze["closureComplete"]
+    report["apiFootballQuotaGuard"] = quota_guard.status()
     write_json(REPORT_PATH, report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
     return 0
