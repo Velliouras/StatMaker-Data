@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the StatMaker Domestic Stats registry for the 53-league universe.
+"""Build the StatMaker Domestic Stats registry for the 69-league universe.
 
 Selection is rolling rather than July-specific: a league is selected when its
 season is active today or when the next season starts within 45 days. Upcoming
@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional, Sequence, Tuple
 
 import domestic_live_july_pipeline as pipeline
 import statmaker_domestic_scope as scope
+import statmaker_top_flight_expansion as expansion
 
 START_HORIZON_DAYS = 45
 ROLLOVER_HISTORY_GRACE_DAYS = 70
@@ -105,8 +106,13 @@ def main() -> int:
         return 2
 
     today = pipeline.today_utc()
-    domestic_config = pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
-    enrichment_config = pipeline.load_json(pipeline.ENRICHMENT_CONFIG, {})
+    expansion.validate_contract()
+    domestic_config = expansion.merge_domestic_config(
+        pipeline.load_json(pipeline.DOMESTIC_CONFIG, {})
+    )
+    enrichment_config = expansion.merge_enrichment_config(
+        pipeline.load_json(pipeline.ENRICHMENT_CONFIG, {})
+    )
 
     original_target_selector = pipeline.select_target_season
     original_history_selector = pipeline.select_history_season
@@ -130,7 +136,7 @@ def main() -> int:
 
     registry = scope.filter_stats_leagues(registry)
     if not registry:
-        print("ERROR: rolling 53-league Domestic Stats registry is empty.", file=sys.stderr)
+        print("ERROR: rolling 69-league Domestic Stats registry is empty.", file=sys.stderr)
         return 3
 
     pipeline.write_json(pipeline.REGISTRY_PATH, {
@@ -142,6 +148,8 @@ def main() -> int:
         "rolloverHistoryGraceDays": ROLLOVER_HISTORY_GRACE_DAYS,
         "statsUniverseConfiguredLeagueCount": len(scope.stats_universe_codes()),
         "coreOddsConfiguredLeagueCount": len(scope.included_codes()),
+        "runtimeExpansionLeagueCount": len(expansion.expansion_codes()),
+        "runtimeExpansionLeagueCodes": sorted(expansion.expansion_codes()),
         "statsVisibility": "selected Stats leagues remain visible independently of odds",
         "bettingGate": "matching exact bookmaker odds plus valid historical support",
         "leagueCount": len(registry),

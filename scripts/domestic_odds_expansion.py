@@ -39,6 +39,13 @@ VERIFIED_PROVIDER_SLUGS = {
     "AUT2": "austria-2-liga",
     "SC0": "scotland-premiership",
     "G1": "greece-super-league",
+    "ISR": "israel-premier-league",
+    "KOR": "republic-of-korea-k-league-1",
+    "RSA": "south-africa-premiership",
+}
+
+VERIFIED_PROVIDER_COUNTRY_ALIASES: Dict[str, Sequence[str]] = {
+    "KOR": ("republic of korea",),
 }
 
 # Provider names that are stable but differ from the API-Football canonical
@@ -169,11 +176,24 @@ def strict_provider_league_match(
     code = str(config_league.get("leagueCode") or "").upper()
     verified_slug = VERIFIED_PROVIDER_SLUGS.get(code)
     if verified_slug:
+        country_aliases = tuple(
+            odds_module.normalize_text(value)
+            for value in VERIFIED_PROVIDER_COUNTRY_ALIASES.get(code, ())
+            if odds_module.normalize_text(value)
+        )
         return next(
             (
                 item for item in provider_leagues
                 if str(item.get("slug") or "") == verified_slug
-                and odds_module.provider_country_matches(config_league, item)
+                and (
+                    odds_module.provider_country_matches(config_league, item)
+                    or any(
+                        alias in odds_module.normalize_text(
+                            f"{item.get('name', '')} {item.get('slug', '')}"
+                        )
+                        for alias in country_aliases
+                    )
+                )
             ),
             None,
         )
