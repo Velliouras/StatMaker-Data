@@ -1,0 +1,74 @@
+name: Validate 69-League Expansion
+
+on:
+  push:
+    branches:
+      - statmaker-69-league-expansion-v2
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile changed pipeline code
+        run: |
+          python -m py_compile \
+            scripts/statmaker_top_flight_expansion.py \
+            scripts/api_football_daily_quota_guard.py \
+            scripts/run_scoped_domestic_registry.py \
+            scripts/run_domestic_stats_refresh.py
+
+      - name: Run offline regression tests
+        run: |
+          python -m unittest \
+            tests/test_statmaker_domestic_scope.py \
+            tests/test_top_flight_expansion.py \
+            tests/test_stats_universe_registry.py
+
+      - name: Validate merged registry inputs without API calls
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          root = Path('.')
+          sys.path.insert(0, str((root / 'scripts').resolve()))
+          import statmaker_top_flight_expansion as expansion
+          import statmaker_domestic_scope as scope
+
+          domestic = json.loads((root / 'config/domestic_leagues.json').read_text(encoding='utf-8-sig'))
+          enrichment = json.loads((root / 'config/api_football_enrichment_leagues.json').read_text(encoding='utf-8-sig'))
+          merged_domestic = expansion.merge_domestic_config(domestic)
+          merged_enrichment = expansion.merge_enrichment_config(enrichment)
+
+          domestic_codes = {str(row.get('leagueCode') or '').upper() for row in merged_domestic.get('leagues', [])}
+          enrichment_codes = {str(row.get('leagueCode') or '').upper() for row in merged_enrichment.get('leagues', [])}
+          expansion_codes = expansion.expansion_codes()
+
+          assert len(scope.stats_universe_codes()) == 69
+          assert len(scope.odds_universe_codes()) == 69
+          assert len(scope.core_odds_codes()) == 27
+          assert len(expansion_codes) == 16
+          assert expansion_codes.issubset(domestic_codes)
+          assert expansion_codes.issubset(enrichment_codes)
+          assert scope.core_odds_codes().isdisjoint(expansion_codes)
+          assert expansion_codes.issubset(scope.stats_universe_codes())
+          assert expansion_codes.issubset(scope.odds_universe_codes())
+          print(
+              f'OFFLINE_EXPANSION_OK stats={len(scope.stats_universe_codes())} '
+              f'core={len(scope.core_odds_codes())} expansion={len(expansion_codes)} '
+              f'domestic={len(domestic_codes)} enrichment={len(enrichment_codes)}'
+          )
+          PY
