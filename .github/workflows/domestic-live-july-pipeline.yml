@@ -1,4 +1,4 @@
-name: Domestic 53-League Statistics Universe
+name: Domestic Statistics Universe
 
 on:
   workflow_dispatch:
@@ -41,6 +41,8 @@ jobs:
             scripts/run_domestic_stats_refresh.py \
             scripts/refresh_domestic_live_july_stats.py \
             scripts/api_football_fetch_fixture_stats.py \
+            scripts/api_football_daily_quota_guard.py \
+            scripts/statmaker_top_flight_expansion.py \
             scripts/expand_domestic_full_stats.py \
             scripts/finalize_domestic_live_july_artifacts.py \
             scripts/build_domestic_live_july_normalized_stats.py \
@@ -48,12 +50,13 @@ jobs:
             scripts/build_statmaker_update_manifest.py
           python -m unittest \
             tests/test_statmaker_domestic_scope.py \
+            tests/test_top_flight_expansion.py \
             tests/test_stats_universe_registry.py \
             tests/test_domestic_live_july_pipeline.py \
             tests/test_domestic_stats_completeness.py \
             tests/test_statmaker_update_manifest.py
 
-      - name: Refresh rolling 53-league Stats registry
+      - name: Refresh rolling Domestic Stats registry
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python scripts/run_scoped_domestic_registry.py
@@ -61,6 +64,7 @@ jobs:
       - name: Refresh Domestic history and statistics incrementally
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
           INPUT_STATS_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.stats_max_requests || '2400' }}
         run: |
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-2400}"
@@ -104,23 +108,26 @@ jobs:
           normalize = lambda code: 'ROU' if str(code or '').strip().upper() == 'ROM' else str(code or '').strip().upper()
           stats_universe = {normalize(code) for code in scope_contract.get('statsUniverseLeagueCodes', [])}
           core_odds = {normalize(code) for code in scope_contract.get('coreOddsLeagueCodes', [])}
+          expansion = {normalize(code) for code in scope_contract.get('expansionLeagueCodes', [])}
           registry_codes = {normalize(item.get('leagueCode')) for item in registry.get('leagues', [])}
           index_codes = {normalize(item.get('league_code')) for item in index.get('leagues', [])}
           odds_codes = {normalize(item.get('leagueCode')) for item in odds.get('leagues', [])}
           normalized_codes = {normalize(item.get('league_code')) for item in normalized.get('fixtures', [])}
 
-          if len(stats_universe) != 53:
-              raise SystemExit(f'Stats universe contract must contain 53 leagues, got {len(stats_universe)}')
+          if len(stats_universe) != 69:
+              raise SystemExit(f'Stats universe contract must contain 69 leagues, got {len(stats_universe)}')
+          if len(expansion) != 16 or not expansion.issubset(stats_universe):
+              raise SystemExit(f'Top-flight expansion contract must contain 16 in-scope leagues, got {len(expansion)}')
           if len(core_odds) != 27:
               raise SystemExit(f'Core odds contract must contain 27 leagues, got {len(core_odds)}')
           if not registry_codes or not registry_codes.issubset(stats_universe):
-              raise SystemExit('Domestic Stats registry is empty or outside the 53-league universe')
+              raise SystemExit('Domestic Stats registry is empty or outside the configured Stats universe')
           if registry_codes != index_codes:
               raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
 
           # domestic_odds.json also carries explicitly schedule-only competitions such as G2.
-          # They are allowed outside the 53-league Stats universe only when the producer marks
-          # the league as API-Football schedule-only and every fixture has no betting markets.
+          # They are allowed outside the Stats universe only when the producer marks the league
+          # as API-Football schedule-only and every fixture has no betting markets.
           out_of_universe_violations = []
           for league in odds.get('leagues', []) or []:
               code = normalize(league.get('leagueCode'))
@@ -144,10 +151,18 @@ jobs:
           expected_contract = 'all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled'
           if progress.get('completenessContract') != expected_contract:
               raise SystemExit(f"Unexpected Stats completeness contract: {progress.get('completenessContract')}")
-          if int(progress.get('statsUniverseLeagueCount') or 0) != 53:
-              raise SystemExit('Stats refresh did not use the 53-league Stats universe contract')
+          if int(progress.get('statsUniverseLeagueCount') or 0) != len(stats_universe):
+              raise SystemExit('Stats refresh did not use the configured Stats universe contract')
           if int(progress.get('coreOddsLeagueCount') or 0) != 27:
               raise SystemExit('Stats refresh did not preserve the 27-league core odds polling boundary')
+
+          quota_guard = progress.get('apiFootballQuotaGuard') or {}
+          reserve = int(quota_guard.get('reserve') or 0)
+          remaining = quota_guard.get('dailyRemaining')
+          if reserve < 1500:
+              raise SystemExit(f'API-Football daily reserve unexpectedly low: {reserve}')
+          if isinstance(remaining, int) and remaining < reserve:
+              raise SystemExit(f'API-Football reserve breached: remaining={remaining} reserve={reserve}')
 
           support_participants = uefa_support.get('participants', []) or []
           support_minimum = int(uefa_support.get('minimumMatchesPerParticipant') or 10)
@@ -174,7 +189,7 @@ jobs:
                           raise SystemExit('Non-exact market found in production Domestic odds artifact')
 
           print(
-              f"Validated Stats registry={len(registry_codes)}/53 configured; "
+              f"Validated Stats registry={len(registry_codes)}/{len(stats_universe)} configured; "
               f"odds leagues={len(odds_codes)}; normalized fixtures={len(normalized.get('fixtures', []))}; "
               f"UEFA support participants={len(support_participants)}; incomplete leagues={progress.get('incompleteAfter')}"
           )
@@ -216,7 +231,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No Domestic statistics-universe changes to commit."
           else
-            git commit -m "Record 53-league Domestic statistics run"
+            git commit -m "Record Domestic statistics universe run"
             # The manifest is shared by several producers. Do not carry a stale,
             # pre-rebase manifest through rebase because it can conflict with a
             # newer manifest written by another workflow.
