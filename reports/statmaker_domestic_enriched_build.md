@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-25T04:10:45Z`
+Generated at: `2026-08-25T20:54:28Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -35,7 +35,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | I1 | Italy | Serie A | 2025-2026 | 2025 | 135 | top_europe | 380 | 380 | 369 | 1.0 | 0.9711 | True | data/statmaker/domestic_enriched/italy_serie_a_2025.json | ok |
 | I2 | Italy | Serie B | 2025-2026 | 2025 | 136 | top_europe | 390 | 390 | 385 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/italy_serie_b_2025.json | ok |
 | JPN | Japan | J1 League | 2026 | 2026 | 98 | asia | 200 | 200 | 182 | 1.0 | 0.91 | True | data/statmaker/domestic_enriched/japan_j1_league_2026.json | ok |
-| LVA | Latvia | Virsliga | 2026 | 2026 | 365 | baltics | 131 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/latvia_virsliga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| LVA | Latvia | Virsliga | 2026 | 2026 | 365 | baltics | 132 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/latvia_virsliga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | LTU | Lithuania | A Lyga | 2026 | 2026 | 362 | baltics | 124 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/lithuania_a_lyga_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | MEX | Mexico | Liga MX | 2026 | 2026 | 262 | americas | 45 | 45 | 38 | 1.0 | 0.8444 | True | data/statmaker/domestic_enriched/mexico_liga_mx_2026.json | ok |
 | N1 | Netherlands | Eredivisie | 2025-2026 | 2025 | 88 | western_europe | 309 | 309 | 293 | 1.0 | 0.9482 | True | data/statmaker/domestic_enriched/netherlands_eredivisie_2025.json | ok |
@@ -54,7 +54,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 468 | 468 | 462 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | ok |
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 142 | 142 | 142 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
-| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 158 | 69 | 67 | 0.4367 | 0.4241 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4367 < 0.65; low BB-core coverage: 0.4241 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| SWE2 | Sweden | Superettan | 2026 | 2026 | 114 | scandinavia | 160 | 69 | 67 | 0.4313 | 0.4188 | False | data/statmaker/domestic_enriched/sweden_superettan_2026.json | low any-stats coverage: 0.4313 < 0.65; low BB-core coverage: 0.4188 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SWZ | Switzerland | Super League | 2025-2026 | 2025 | 207 | central_europe | 230 | 230 | 230 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/switzerland_super_league_2025.json | ok |
 | T1 | Turkey | Süper Lig | 2025-2026 | 2025 | 203 | southern_europe | 306 | 306 | 300 | 1.0 | 0.9804 | True | data/statmaker/domestic_enriched/turkey_super_lig_2025.json | ok |
 | USA | USA | Major League Soccer | 2026 | 2026 | 253 | americas | 314 | 312 | 307 | 0.9936 | 0.9777 | True | data/statmaker/domestic_enriched/usa_major_league_soccer_2026.json | ok |
