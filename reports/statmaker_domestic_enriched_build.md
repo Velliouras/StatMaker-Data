@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-26T19:26:14Z`
+Generated at: `2026-08-26T23:47:30Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -21,7 +21,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | CZE | Czech Republic | Czech Liga | 2025-2026 | 2025 | 345 | central_europe | 279 | 279 | 267 | 1.0 | 0.957 | True | data/statmaker/domestic_enriched/czech_republic_czech_liga_2025.json | ok |
 | DNK | Denmark | Superliga | 2025-2026 | 2025 | 119 | scandinavia | 193 | 193 | 186 | 1.0 | 0.9637 | True | data/statmaker/domestic_enriched/denmark_superliga_2025.json | ok |
 | ECU | Ecuador | Liga Pro | 2026 | 2026 | 242 | top_flight_expansion | 208 | 91 | 88 | 0.4375 | 0.4231 | False | data/statmaker/domestic_enriched/ecuador_liga_pro_2026.json | low any-stats coverage: 0.4375 < 0.65; low BB-core coverage: 0.4231 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| EGY | Egypt | Premier League | 2025-2026 | 2025 | 233 | top_flight_expansion | 322 | 121 | 119 | 0.3758 | 0.3696 | False | data/statmaker/domestic_enriched/egypt_premier_league_2025.json | low any-stats coverage: 0.3758 < 0.65; low BB-core coverage: 0.3696 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| EGY | Egypt | Premier League | 2025-2026 | 2025 | 233 | top_flight_expansion | 322 | 152 | 150 | 0.472 | 0.4658 | False | data/statmaker/domestic_enriched/egypt_premier_league_2025.json | low any-stats coverage: 0.472 < 0.65; low BB-core coverage: 0.4658 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | E1 | England | Championship | 2025-2026 | 2025 | 40 | england | 557 | 557 | 534 | 1.0 | 0.9587 | True | data/statmaker/domestic_enriched/england_championship_2025.json | ok |
 | E2 | England | League One | 2025-2026 | 2025 | 41 | england | 557 | 557 | 543 | 1.0 | 0.9749 | True | data/statmaker/domestic_enriched/england_league_one_2025.json | ok |
 | E3 | England | League Two | 2025-2026 | 2025 | 42 | england | 557 | 557 | 540 | 1.0 | 0.9695 | True | data/statmaker/domestic_enriched/england_league_two_2025.json | ok |
@@ -53,14 +53,14 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | P1 | Portugal | Liga Portugal | 2025-2026 | 2025 | 94 | western_europe | 308 | 308 | 304 | 1.0 | 0.987 | True | data/statmaker/domestic_enriched/portugal_liga_portugal_2025.json | ok |
 | ROM | Romania | Liga I | 2025-2026 | 2025 | 283 | central_europe | 321 | 320 | 313 | 0.9969 | 0.9751 | True | data/statmaker/domestic_enriched/romania_liga_i_2025.json | ok |
 | RUS | Russia | Premier League | 2025-2026 | 2025 | 235 | eastern_europe | 244 | 243 | 242 | 0.9959 | 0.9918 | True | data/statmaker/domestic_enriched/russia_premier_league_2025.json | ok |
-| SAU | Saudi Arabia | Pro League | 2025-2026 | 2025 | 307 | top_flight_expansion | 306 | 127 | 123 | 0.415 | 0.402 | False | data/statmaker/domestic_enriched/saudi_arabia_pro_league_2025.json | low any-stats coverage: 0.415 < 0.65; low BB-core coverage: 0.402 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| SAU | Saudi Arabia | Pro League | 2025-2026 | 2025 | 307 | top_flight_expansion | 306 | 164 | 160 | 0.5359 | 0.5229 | False | data/statmaker/domestic_enriched/saudi_arabia_pro_league_2025.json | low any-stats coverage: 0.5359 < 0.65; low BB-core coverage: 0.5229 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC1 | Scotland | Championship | 2025-2026 | 2025 | 180 | scotland | 186 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_championship_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC3 | Scotland | League Two | 2026 | 2026 | 182 | scotland | 39 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/scotland_league_two_2026.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SC0 | Scotland | Premiership | 2025-2026 | 2025 | 179 | scotland | 234 | 232 | 226 | 0.9915 | 0.9658 | True | data/statmaker/domestic_enriched/scotland_premiership_2025.json | ok |
 | SRB | Serbia | Super Liga | 2025-2026 | 2025 | 286 | eastern_europe | 296 | 295 | 286 | 0.9966 | 0.9662 | True | data/statmaker/domestic_enriched/serbia_super_liga_2025.json | ok |
 | SVK | Slovakia | Super Liga | 2025-2026 | 2025 | 332 | central_europe | 192 | 113 | 106 | 0.5885 | 0.5521 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2025.json | low any-stats coverage: 0.5885 < 0.65; low BB-core coverage: 0.5521 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SVN | Slovenia | 1. SNL | 2025-2026 | 2025 | 373 | central_europe | 163 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| RSA | South Africa | Premier Soccer League | 2025-2026 | 2025 | 288 | top_flight_expansion | 246 | 91 | 87 | 0.3699 | 0.3537 | False | data/statmaker/domestic_enriched/south_africa_premier_soccer_league_2025.json | low any-stats coverage: 0.3699 < 0.65; low BB-core coverage: 0.3537 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| RSA | South Africa | Premier Soccer League | 2025-2026 | 2025 | 288 | top_flight_expansion | 246 | 129 | 123 | 0.5244 | 0.5 | False | data/statmaker/domestic_enriched/south_africa_premier_soccer_league_2025.json | low any-stats coverage: 0.5244 < 0.65; low BB-core coverage: 0.5 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | KOR | South Korea | K League 1 | 2026 | 2026 | 292 | top_flight_expansion | 149 | 58 | 58 | 0.3893 | 0.3893 | False | data/statmaker/domestic_enriched/south_korea_k_league_1_2026.json | low any-stats coverage: 0.3893 < 0.65; low BB-core coverage: 0.3893 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 468 | 468 | 462 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | ok |
