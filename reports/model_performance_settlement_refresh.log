@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-26T15:57:21Z",
+  "generatedAt": "2026-08-26T19:26:05Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,13 +15,81 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 106,
-  "registryLeagueCount": 1,
-  "polledLeagueCount": 1,
-  "incompleteBefore": 1,
+  "requestsUsed": 120,
+  "registryLeagueCount": 3,
+  "polledLeagueCount": 3,
+  "incompleteBefore": 3,
   "completeAfter": 0,
-  "incompleteAfter": 1,
+  "incompleteAfter": 3,
   "allocations": [
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "EGY",
+      "country": "Egypt",
+      "league": "Premier League",
+      "lifecycle": "active",
+      "allocatedRequests": 39,
+      "usedRequests": 39,
+      "before": {
+        "leagueCode": "EGY",
+        "priorityTier": "tier3_restored26",
+        "completed": 322,
+        "withStats": 90,
+        "withScores": 322,
+        "missingStats": 232,
+        "missingScores": 0,
+        "coverage": 0.279503,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "EGY",
+        "priorityTier": "tier3_restored26",
+        "completed": 322,
+        "withStats": 121,
+        "withScores": 322,
+        "missingStats": 201,
+        "missingScores": 0,
+        "coverage": 0.375776,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "SAU",
+      "country": "Saudi Arabia",
+      "league": "Pro League",
+      "lifecycle": "active",
+      "allocatedRequests": 39,
+      "usedRequests": 39,
+      "before": {
+        "leagueCode": "SAU",
+        "priorityTier": "tier3_restored26",
+        "completed": 306,
+        "withStats": 90,
+        "withScores": 306,
+        "missingStats": 216,
+        "missingScores": 0,
+        "coverage": 0.294118,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "SAU",
+        "priorityTier": "tier3_restored26",
+        "completed": 306,
+        "withStats": 127,
+        "withScores": 306,
+        "missingStats": 179,
+        "missingScores": 0,
+        "coverage": 0.415033,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
     {
       "phase": "tier3_restored26",
       "priorityTier": "tier3_restored26",
@@ -29,17 +97,17 @@
       "country": "South Korea",
       "league": "K League 1",
       "lifecycle": "active",
-      "allocatedRequests": 120,
-      "usedRequests": 106,
+      "allocatedRequests": 40,
+      "usedRequests": 40,
       "before": {
         "leagueCode": "KOR",
         "priorityTier": "tier3_restored26",
-        "completed": 146,
-        "withStats": 44,
-        "withScores": 146,
-        "missingStats": 102,
+        "completed": 149,
+        "withStats": 58,
+        "withScores": 149,
+        "missingStats": 91,
         "missingScores": 0,
-        "coverage": 0.30137,
+        "coverage": 0.389262,
         "scoreCoverage": 1.0,
         "complete": false
       },
@@ -69,17 +137,74 @@
       "coverage": 0.389262,
       "scoreCoverage": 1.0,
       "complete": false
+    },
+    {
+      "leagueCode": "SAU",
+      "priorityTier": "tier3_restored26",
+      "completed": 306,
+      "withStats": 127,
+      "withScores": 306,
+      "missingStats": 179,
+      "missingScores": 0,
+      "coverage": 0.415033,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
+    {
+      "leagueCode": "EGY",
+      "priorityTier": "tier3_restored26",
+      "completed": 322,
+      "withStats": 121,
+      "withScores": 322,
+      "missingStats": 201,
+      "missingScores": 0,
+      "coverage": 0.375776,
+      "scoreCoverage": 1.0,
+      "complete": false
     }
   ],
   "selectedLeagueCodes": [
-    "KOR"
+    "KOR",
+    "SAU",
+    "EGY"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
   "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
   "historicalSkippedFrozen": [],
   "historicalNewlyFrozen": [],
-  "historicalVerificationPending": [],
+  "historicalVerificationPending": [
+    {
+      "snapshot": "SAU:2025",
+      "fixtureSetVerified": true,
+      "verificationQuery": "league+season:2025",
+      "verificationNote": "league+season:2025 returned=306 completed=306",
+      "providerCompletedFixtures": 306,
+      "cachedCompletedFixtures": 306,
+      "missingDiscoveredFixtureCount": 0,
+      "missingDiscoveredFixtureIds": [],
+      "extraCachedFixturesPruned": 0,
+      "withScores": 306,
+      "statsAttempted": 128,
+      "withRealStats": 127,
+      "providerEmptyStats": 1
+    },
+    {
+      "snapshot": "EGY:2025",
+      "fixtureSetVerified": true,
+      "verificationQuery": "league+season:2025",
+      "verificationNote": "league+season:2025 returned=322 completed=322",
+      "providerCompletedFixtures": 322,
+      "cachedCompletedFixtures": 322,
+      "missingDiscoveredFixtureCount": 0,
+      "missingDiscoveredFixtureIds": [],
+      "extraCachedFixturesPruned": 0,
+      "withScores": 322,
+      "statsAttempted": 128,
+      "withRealStats": 121,
+      "providerEmptyStats": 7
+    }
+  ],
   "historicalSnapshotCount": 41,
   "historicalPendingBefore": [
     "CRO:2025",
@@ -103,7 +228,7 @@
   "historicalClosureComplete": false,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 5104,
+    "dailyRemaining": 5002,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
