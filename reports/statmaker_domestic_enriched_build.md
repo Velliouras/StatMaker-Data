@@ -1,6 +1,6 @@
 # StatMaker domestic enriched build
 
-Generated at: `2026-08-26T04:33:00Z`
+Generated at: `2026-08-26T15:57:28Z`
 
 Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 
@@ -61,7 +61,7 @@ Active source: `API-Football`. Football-Data CSV: `inactive archive only`.
 | SVK | Slovakia | Super Liga | 2025-2026 | 2025 | 332 | central_europe | 192 | 113 | 106 | 0.5885 | 0.5521 | False | data/statmaker/domestic_enriched/slovakia_super_liga_2025.json | low any-stats coverage: 0.5885 < 0.65; low BB-core coverage: 0.5521 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SVN | Slovenia | 1. SNL | 2025-2026 | 2025 | 373 | central_europe | 163 | 0 | 0 | 0.0 | 0.0 | False | data/statmaker/domestic_enriched/slovenia_1_snl_2025.json | low any-stats coverage: 0.0 < 0.65; low BB-core coverage: 0.0 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | RSA | South Africa | Premier Soccer League | 2025-2026 | 2025 | 288 | top_flight_expansion | 246 | 91 | 87 | 0.3699 | 0.3537 | False | data/statmaker/domestic_enriched/south_africa_premier_soccer_league_2025.json | low any-stats coverage: 0.3699 < 0.65; low BB-core coverage: 0.3537 < 0.65; required BB groups below threshold; no shot group reaches threshold |
-| KOR | South Korea | K League 1 | 2026 | 2026 | 292 | top_flight_expansion | 146 | 44 | 44 | 0.3014 | 0.3014 | False | data/statmaker/domestic_enriched/south_korea_k_league_1_2026.json | low any-stats coverage: 0.3014 < 0.65; low BB-core coverage: 0.3014 < 0.65; required BB groups below threshold; no shot group reaches threshold |
+| KOR | South Korea | K League 1 | 2026 | 2026 | 292 | top_flight_expansion | 149 | 58 | 58 | 0.3893 | 0.3893 | False | data/statmaker/domestic_enriched/south_korea_k_league_1_2026.json | low any-stats coverage: 0.3893 < 0.65; low BB-core coverage: 0.3893 < 0.65; required BB groups below threshold; no shot group reaches threshold |
 | SP1 | Spain | La Liga | 2025-2026 | 2025 | 140 | top_europe | 380 | 380 | 374 | 1.0 | 0.9842 | True | data/statmaker/domestic_enriched/spain_la_liga_2025.json | ok |
 | SP2 | Spain | Segunda División | 2025-2026 | 2025 | 141 | top_europe | 468 | 468 | 462 | 1.0 | 0.9872 | True | data/statmaker/domestic_enriched/spain_segunda_division_2025.json | ok |
 | SWE | Sweden | Allsvenskan | 2026 | 2026 | 113 | scandinavia | 142 | 142 | 142 | 1.0 | 1.0 | True | data/statmaker/domestic_enriched/sweden_allsvenskan_2026.json | ok |
