@@ -336,7 +336,29 @@ def cached_fixture_map(cache: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     return result
 
 
-def cache_payload(league: Dict[str, Any], fixtures: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+def roster_from_fixtures(fixtures: Iterable[Dict[str, Any]]) -> List[str]:
+    names: set[str] = set()
+    for fixture in fixtures:
+        if not isinstance(fixture, dict):
+            continue
+        teams = fixture.get("teams") or {}
+        if not isinstance(teams, dict):
+            continue
+        for side in ("home", "away"):
+            team = teams.get(side) or {}
+            if not isinstance(team, dict):
+                continue
+            name = str(team.get("name") or "").strip()
+            if name:
+                names.add(name)
+    return sorted(names, key=str.casefold)
+
+
+def cache_payload(
+    league: Dict[str, Any],
+    fixtures: Iterable[Dict[str, Any]],
+    roster: Optional[Iterable[str]] = None,
+) -> Dict[str, Any]:
     ordered = sorted(fixtures, key=lambda item: (str(item.get("date") or ""), int(item.get("fixture_id") or 0)))
     return {
         "provider": "api-football",
@@ -346,6 +368,10 @@ def cache_payload(league: Dict[str, Any], fixtures: Iterable[Dict[str, Any]]) ->
         "country": league.get("country"),
         "season": str(league.get("season")),
         "generated_at": now_utc(),
+        "roster": sorted(
+            {str(name).strip() for name in (roster or []) if str(name).strip()},
+            key=str.casefold,
+        ),
         "fixtures": ordered,
     }
 
@@ -494,6 +520,12 @@ def fetch_league(
     cache_path = cache_path_for(league)
     existing_cache = load_json(cache_path, {})
     existing_by_id = cached_fixture_map(existing_cache)
+    existing_roster = [
+        str(name).strip()
+        for name in (existing_cache.get("roster", []) if isinstance(existing_cache, dict) else [])
+        if str(name).strip()
+    ]
+    roster = existing_roster
 
     requests_before = request_state["count"]
     completed_count = 0
@@ -514,6 +546,13 @@ def fetch_league(
         completed_count = len(fixtures)
         notes.extend(query_notes)
 
+        requested_season = parse_season(league.get("season"))
+        exact_query = f"league+season:{requested_season}" if requested_season is not None else ""
+        if all_fixtures and fixture_query_used == exact_query:
+            discovered_roster = roster_from_fixtures(all_fixtures)
+            if discovered_roster:
+                roster = discovered_roster
+
         if not all_fixtures:
             notes.append("no fixtures returned after fallback queries")
         elif not fixtures:
@@ -524,7 +563,7 @@ def fetch_league(
             )
     except RequestLimitReached:
         notes.append("request cap reached before fixtures request")
-        write_json(cache_path, cache_payload(league, existing_by_id.values()))
+        write_json(cache_path, cache_payload(league, existing_by_id.values(), roster))
         return report_row(
             league, cache_path, completed_count, already_cached, newly_fetched,
             missing_stats, metadata_refreshed, missing_scores, requests_before,
@@ -574,7 +613,7 @@ def fetch_league(
         existing_by_id[fixture_id] = merged
         newly_fetched += 1
 
-    write_json(cache_path, cache_payload(league, existing_by_id.values()))
+    write_json(cache_path, cache_payload(league, existing_by_id.values(), roster))
 
     if not notes:
         notes.append("ok")
