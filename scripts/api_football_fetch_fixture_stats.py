@@ -336,6 +336,28 @@ def cached_fixture_map(cache: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     return result
 
 
+def cache_identity_mismatch_reason(
+    league: Dict[str, Any],
+    cache: Dict[str, Any],
+) -> Optional[str]:
+    """Return why an existing cache belongs to a different provider scope."""
+    if not isinstance(cache, dict) or not cache:
+        return None
+    expected_id = league.get("api_football_league_id")
+    actual_id = cache.get("league_id")
+    if expected_id is not None and actual_id is not None:
+        try:
+            if int(expected_id) != int(actual_id):
+                return f"provider league id changed: cache={actual_id} configured={expected_id}"
+        except (TypeError, ValueError):
+            return f"invalid provider league id identity: cache={actual_id!r} configured={expected_id!r}"
+    expected_season = str(league.get("season") or "").strip()
+    actual_season = str(cache.get("season") or "").strip()
+    if expected_season and actual_season and expected_season != actual_season:
+        return f"provider season changed: cache={actual_season} configured={expected_season}"
+    return None
+
+
 def roster_from_fixtures(fixtures: Iterable[Dict[str, Any]]) -> List[str]:
     names: set[str] = set()
     for fixture in fixtures:
@@ -519,6 +541,11 @@ def fetch_league(
 ) -> Dict[str, Any]:
     cache_path = cache_path_for(league)
     existing_cache = load_json(cache_path, {})
+    identity_note = cache_identity_mismatch_reason(league, existing_cache)
+    if identity_note:
+        # The app-facing cache path survives provider-id corrections. Never merge
+        # fixtures from the previous competition into the corrected provider scope.
+        existing_cache = {}
     existing_by_id = cached_fixture_map(existing_cache)
     existing_roster = [
         str(name).strip()
@@ -537,6 +564,8 @@ def fetch_league(
     fixtures_returned = 0
     fixture_query_used = "none"
     notes: List[str] = []
+    if identity_note:
+        notes.append(f"stale cache discarded: {identity_note}")
 
     try:
         all_fixtures, fixtures, fixture_query_used, query_notes = fetch_fixtures_with_fallback(

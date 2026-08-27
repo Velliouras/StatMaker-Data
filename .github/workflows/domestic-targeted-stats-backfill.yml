@@ -13,6 +13,11 @@ on:
         required: true
         default: "500"
         type: string
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/triggers/domestic-targeted-stats-backfill'
 
 permissions:
   contents: write
@@ -36,10 +41,35 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Resolve targeted request
+        id: request
+        shell: bash
+        env:
+          DISPATCH_CODES: ${{ inputs.league_codes }}
+          DISPATCH_MAX: ${{ inputs.stats_max_requests }}
+        run: |
+          set -euo pipefail
+          codes="${DISPATCH_CODES:-}"
+          max_requests="${DISPATCH_MAX:-}"
+          if [[ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]]; then
+            IFS='|' read -r codes max_requests < .github/triggers/domestic-targeted-stats-backfill
+          fi
+          codes="$(echo "${codes}" | tr -d ' ')"
+          [[ -n "${codes}" ]] || { echo "Missing targeted league codes" >&2; exit 1; }
+          [[ "${max_requests}" =~ ^[0-9]+$ ]] || { echo "Invalid targeted request cap" >&2; exit 1; }
+          (( max_requests >= 1 && max_requests <= 750 )) || {
+            echo "Targeted request cap must stay between 1 and 750" >&2
+            exit 1
+          }
+          echo "league_codes=${codes}" >> "${GITHUB_OUTPUT}"
+          echo "max_requests=${max_requests}" >> "${GITHUB_OUTPUT}"
+          echo "Targeted request resolved: leagues=${codes} cap=${max_requests}"
+
       - name: Validate targeted backfill scripts
         run: |
           python -m py_compile \
             scripts/run_domestic_stats_refresh.py \
+            scripts/run_scoped_domestic_registry.py \
             scripts/refresh_domestic_live_july_stats.py \
             scripts/api_football_fetch_fixture_stats.py \
             scripts/domestic_live_july_pipeline.py \
@@ -49,11 +79,16 @@ jobs:
             scripts/build_statmaker_domestic_enriched.py \
             scripts/build_statmaker_update_manifest.py
 
+      - name: Refresh rolling Domestic registry
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python scripts/run_scoped_domestic_registry.py
+
       - name: Refresh requested Domestic leagues
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
-          INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
+          INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
+          INPUT_STATS_MAX_REQUESTS: ${{ steps.request.outputs.max_requests }}
         run: |
           mkdir -p reports
           python scripts/run_domestic_stats_refresh.py \
@@ -88,7 +123,7 @@ jobs:
 
       - name: Validate targeted result
         env:
-          INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
+          INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
         run: |
           python - <<'PY'
           import json, os

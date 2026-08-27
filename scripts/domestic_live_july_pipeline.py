@@ -115,6 +115,18 @@ def api_football_catalog(api_key: str) -> List[Dict[str, Any]]:
     return [row for row in rows if isinstance(row, dict)] if isinstance(rows, list) else []
 
 
+def catalog_rows_by_league_id(catalog: Sequence[Dict[str, Any]]) -> Dict[int, Dict[str, Any]]:
+    result: Dict[int, Dict[str, Any]] = {}
+    for row in catalog:
+        league = row.get("league") or {}
+        try:
+            league_id = int(league.get("id"))
+        except (TypeError, ValueError):
+            continue
+        result[league_id] = row
+    return result
+
+
 def seasons_by_league_id(catalog: Sequence[Dict[str, Any]]) -> Dict[int, List[Dict[str, Any]]]:
     result: Dict[int, List[Dict[str, Any]]] = {}
     for row in catalog:
@@ -196,8 +208,10 @@ def build_live_registry(
     today: dt.date,
 ) -> List[Dict[str, Any]]:
     seasons_map = seasons_by_league_id(catalog)
+    catalog_by_id = catalog_rows_by_league_id(catalog)
     enrichment_by_id = by_api_id(enrichment_config.get("leagues", []), "api_football_league_id")
     selected: List[Dict[str, Any]] = []
+    provider_identity_errors: List[str] = []
 
     for domestic in domestic_config.get("leagues", []) or []:
         if not bool(domestic.get("enabled", True)) or not bool(domestic.get("enabledForStats", True)):
@@ -206,6 +220,23 @@ def build_live_registry(
             league_id = int(domestic.get("apiFootballLeagueId"))
         except (TypeError, ValueError):
             continue
+        provider_row = catalog_by_id.get(league_id, {})
+        provider_league = provider_row.get("league") or {}
+        provider_country = provider_row.get("country") or {}
+        provider_type = str(provider_league.get("type") or "").strip().casefold()
+        configured_country = str(domestic.get("country") or "").strip()
+        actual_country = str(provider_country.get("name") or "").strip()
+        if provider_row and (
+            provider_type != "league"
+            or (configured_country and actual_country and configured_country.casefold() != actual_country.casefold())
+        ):
+            provider_identity_errors.append(
+                f"{domestic.get('leagueCode')} configured API-Football id {league_id} "
+                f"resolved to {actual_country or '?'} / {provider_league.get('name') or '?'} "
+                f"(type={provider_league.get('type') or '?'})"
+            )
+            continue
+
         all_seasons = seasons_map.get(league_id, [])
         target_choice = select_target_season(all_seasons, today)
         if target_choice is None:
@@ -253,6 +284,12 @@ def build_live_registry(
             "providerLeagueSlug": domestic.get("providerLeagueSlug"),
             "searchTerms": domestic.get("searchTerms", []),
         })
+
+    if provider_identity_errors:
+        raise RuntimeError(
+            "Domestic API-Football provider identity mismatch:\n - "
+            + "\n - ".join(sorted(provider_identity_errors))
+        )
 
     lifecycle_order = {"active": 0, "starts_in_july": 1}
     return sorted(
