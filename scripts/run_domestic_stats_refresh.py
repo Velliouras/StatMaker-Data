@@ -25,6 +25,7 @@ import statmaker_domestic_scope as scope
 ROOT = Path(__file__).resolve().parents[1]
 FREEZE_PATH = ROOT / "data" / "statmaker" / "domestic_historical_stats_freeze.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_stats_refresh.json"
+ROSTER_PATH = ROOT / "data" / "statmaker" / "domestic_rosters.json"
 FREEZE_SCHEMA_VERSION = 2
 FREEZE_POLICY = (
     "historical season closes only after exact league+season fixture discovery, complete score cache, "
@@ -82,6 +83,113 @@ def completed_cache_rows(league: Mapping[str, Any]) -> List[Dict[str, Any]]:
         and str(item.get("status") or item.get("status_short") or "").upper()
         in target.COMPLETED_STATUSES
     ]
+
+
+def target_app_season(league: Mapping[str, Any]) -> str:
+    return str(
+        league.get("targetAppSeason")
+        or league.get("target_app_season")
+        or ""
+    ).strip()
+
+
+def roster_catalog_entries(raw: Any) -> Dict[tuple[str, str], Dict[str, Any]]:
+    payload = raw if isinstance(raw, dict) else {}
+    rows = payload.get("leagues", [])
+    result: Dict[tuple[str, str], Dict[str, Any]] = {}
+    for item in rows if isinstance(rows, list) else []:
+        if not isinstance(item, dict):
+            continue
+        code = normalize_code(item.get("leagueCode"))
+        season = str(item.get("appSeason") or "").strip()
+        teams = [str(name).strip() for name in item.get("teams", []) if str(name).strip()]
+        if code and season and teams:
+            result[(code, season)] = dict(item)
+    return result
+
+
+def discover_missing_target_rosters(
+    api_key: str,
+    leagues: List[Dict[str, Any]],
+    max_requests: int,
+) -> int:
+    catalog = load_json(ROSTER_PATH, {})
+    entries = roster_catalog_entries(catalog)
+    missing = [
+        league for league in leagues
+        if target_season(league)
+        and target_app_season(league)
+        and (normalize_code(league.get("leagueCode")), target_app_season(league)) not in entries
+        and target_season(league) != historical_season(league)
+    ]
+    missing.sort(
+        key=lambda league: (
+            scope.priority_rank(league),
+            str(league.get("targetSeasonStart") or ""),
+            normalize_code(league.get("leagueCode")),
+        )
+    )
+    if not missing or max_requests <= 1:
+        return 0
+
+    # Stay inside the caller's existing request ceiling. At the normal 2400-request run
+    # this is enough to discover every rollover roster in one pass; small targeted runs
+    # reserve almost all of their budget for the historical/statistics work they requested.
+    roster_request_cap = min(len(missing), max(1, max_requests // 20))
+    request_state = {"count": 0}
+
+    for league in missing[:roster_request_cap]:
+        if request_state["count"] >= roster_request_cap:
+            break
+        try:
+            league_id = int(league.get("apiFootballLeagueId") or league.get("api_football_league_id"))
+            season = int(target_season(league))
+        except (TypeError, ValueError):
+            continue
+        try:
+            payload = target.stats_fetch.api_get(
+                api_key,
+                "fixtures",
+                {"league": league_id, "season": season},
+                request_state,
+                roster_request_cap,
+            )
+        except target.stats_fetch.RequestLimitReached:
+            break
+        except Exception:
+            continue
+
+        fixtures = target.stats_fetch.response_items(payload)
+        teams = target.stats_fetch.roster_from_fixtures(fixtures)
+        if not teams:
+            continue
+        code = normalize_code(league.get("leagueCode"))
+        app_season = target_app_season(league)
+        entries[(code, app_season)] = {
+            "leagueCode": code,
+            "country": league.get("country"),
+            "competition": league.get("competition"),
+            "appSeason": app_season,
+            "apiFootballSeason": str(season),
+            "source": "api-football exact target league+season fixture discovery",
+            "teams": teams,
+        }
+
+    write_json(ROSTER_PATH, {
+        "schemaVersion": 1,
+        "generatedAt": target.pipeline.now_utc(),
+        "source": "api-football",
+        "contract": (
+            "league rosters discovered from exact league+season fixture responses; "
+            "target-roster discovery stays inside the existing Domestic Stats request ceiling"
+        ),
+        "leagueCount": len(entries),
+        "leagues": [
+            entries[key]
+            for key in sorted(entries, key=lambda item: (item[0], item[1]))
+        ],
+    })
+    return request_state["count"]
 
 
 def migrate_freeze_contract(raw: Any) -> Dict[str, Any]:
@@ -288,9 +396,11 @@ def main() -> int:
         else:
             active.append(league)
 
+    roster_requests = discover_missing_target_rosters(api_key, selected, max_requests)
     historical_active = [league for league in active if is_historical_snapshot(league)]
-    verification_reserve = min(len(historical_active), max(0, max_requests - 1))
-    refresh_budget = max(1, max_requests - verification_reserve)
+    remaining_after_rosters = max(1, max_requests - roster_requests)
+    verification_reserve = min(len(historical_active), max(0, remaining_after_rosters - 1))
+    refresh_budget = max(1, remaining_after_rosters - verification_reserve)
 
     if active:
         report = target.refresh_incrementally(api_key, active, refresh_budget)
@@ -315,7 +425,7 @@ def main() -> int:
             "progress": [],
         }
 
-    verification_state = {"count": int(report.get("requestsUsed") or 0)}
+    verification_state = {"count": roster_requests + int(report.get("requestsUsed") or 0)}
     newly_frozen: List[str] = []
     verification_pending: List[Dict[str, Any]] = []
 
@@ -366,6 +476,7 @@ def main() -> int:
     freeze["pendingSnapshots"] = pending_after
     write_json(FREEZE_PATH, freeze)
 
+    report["rosterDiscoveryRequests"] = roster_requests
     report["requestsUsed"] = verification_state["count"]
     report["maxRequests"] = max_requests
     report["selectedLeagueCodes"] = [normalize_code(league.get("leagueCode")) for league in selected]
