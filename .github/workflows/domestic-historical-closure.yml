@@ -11,12 +11,6 @@ on:
   schedule:
     # Runs before the daily current-season universe refresh.
     - cron: "20 1 * * *"
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/domestic-historical-closure.yml"
-      - "scripts/run_domestic_stats_refresh.py"
 
 permissions:
   contents: write
