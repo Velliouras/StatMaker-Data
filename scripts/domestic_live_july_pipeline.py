@@ -30,6 +30,7 @@ ENRICHMENT_CONFIG = ROOT / "config" / "api_football_enrichment_leagues.json"
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
 STATE_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_state.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_pipeline.json"
+ROSTER_PATH = ROOT / "data" / "statmaker" / "domestic_rosters.json"
 ODDS_PATH = ROOT / "odds" / "odds_api_io" / "domestic_odds.json"
 API_FOOTBALL_BASE = "https://v3.football.api-sports.io"
 DEFAULT_STATS_REQUESTS = 85
@@ -362,6 +363,58 @@ def generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str,
                 bucket.setdefault(variant, next(iter(candidates)))
     return aliases
 
+def build_roster_catalog(registry: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    previous = load_json(ROSTER_PATH, {})
+    previous_entries = previous.get("leagues", []) if isinstance(previous, dict) else []
+    by_key: Dict[Tuple[str, str], Dict[str, Any]] = {}
+
+    for item in previous_entries if isinstance(previous_entries, list) else []:
+        if not isinstance(item, dict):
+            continue
+        code = str(item.get("leagueCode") or "").strip().upper()
+        season = str(item.get("appSeason") or "").strip()
+        teams = [str(name).strip() for name in item.get("teams", []) if str(name).strip()]
+        if code and season and teams:
+            by_key[(code, season)] = dict(item)
+
+    for league in registry:
+        code = str(league.get("leagueCode") or "").strip().upper()
+        app_season = str(league.get("app_season") or "").strip()
+        if not code or not app_season:
+            continue
+        cache = load_json(stats_fetch.cache_path_for(dict(league)), {})
+        roster = [
+            str(name).strip()
+            for name in (cache.get("roster", []) if isinstance(cache, dict) else [])
+            if str(name).strip()
+        ]
+        if not roster:
+            continue
+        by_key[(code, app_season)] = {
+            "leagueCode": code,
+            "country": league.get("country"),
+            "competition": league.get("competition"),
+            "appSeason": app_season,
+            "apiFootballSeason": str(league.get("season") or ""),
+            "source": "api-football exact league+season fixture discovery",
+            "teams": sorted(set(roster), key=str.casefold),
+        }
+
+    payload = {
+        "schemaVersion": 1,
+        "generatedAt": now_utc(),
+        "source": "api-football",
+        "contract": "current and historical league rosters discovered from the same exact league+season fixture responses already used by the Domestic Stats pipeline; no additional provider calls",
+        "leagueCount": len(by_key),
+        "leagues": [
+            by_key[key]
+            for key in sorted(by_key, key=lambda item: (item[0], item[1]))
+        ],
+    }
+    write_json(ROSTER_PATH, payload)
+    return payload
+
+
 def odds_league_view(league: Dict[str, Any]) -> Dict[str, Any]:
     result = dict(league)
     result["season"] = league.get("targetAppSeason")
@@ -521,6 +574,7 @@ def main() -> int:
     stats_rows: List[Dict[str, Any]] = []
     if not args.skip_stats_fetch:
         stats_rows = fetch_stats_cycle(api_football_key, registry, state, args.stats_max_requests)
+    roster_catalog = build_roster_catalog(registry)
     index_rows = build_app_statistics(registry)
 
     odds_feed: Dict[str, Any] = load_json(ODDS_PATH, {})
@@ -551,6 +605,7 @@ def main() -> int:
         "julyStartLeagueCount": sum(1 for league in registry if league.get("lifecycle") == "starts_in_july"),
         "statsFetchRows": stats_rows,
         "appStatsLeagueCount": len(index_rows),
+        "rosterLeagueSeasonCount": int(roster_catalog.get("leagueCount") or 0),
         "oddsLeagueCount": len(odds_feed.get("leagues", []) or []),
         "oddsLeaguesWithMatches": sum(
             1 for league in odds_feed.get("leagues", []) or [] if league.get("matches")
