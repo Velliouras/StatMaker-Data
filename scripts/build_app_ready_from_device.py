@@ -105,22 +105,113 @@ def validate_fingerprint(value, label):
     return value
 
 
-def validate_generated_stats():
+def normalize_league_code(value):
+    code = str(value or "").strip().upper()
+    return "ROU" if code == "ROM" else code
+
+
+def app_season_to_db_season(value):
+    season = str(value or "").strip()
+    aliases = {
+        "2025-2026": "2526",
+        "2025 - 2026": "2526",
+        "25/26": "2526",
+        "2024-2025": "2425",
+        "2024 - 2025": "2425",
+        "24/25": "2425",
+        "2023-2024": "2324",
+        "2023 - 2024": "2324",
+        "23/24": "2324",
+    }
+    return aliases.get(season, season or "2526")
+
+
+def validate_generated_stats(domestic_index):
     db_path = root / "databases" / "statmaker.db"
     if not db_path.is_file() or db_path.stat().st_size <= 0:
         raise SystemExit(f"Missing/empty generated stats DB: {db_path}")
+
+    leagues = domestic_index.get("leagues", []) or []
+    if not isinstance(leagues, list) or not leagues:
+        raise SystemExit("Invalid/empty canonical Domestic enriched index")
+
+    expected = {}
+    for row in leagues:
+        if not isinstance(row, dict):
+            raise SystemExit("Invalid Domestic enriched index league row")
+        completed = int(row.get("completed_fixtures", 0) or 0)
+        if completed <= 0:
+            continue
+        code = normalize_league_code(
+            row.get("league_code") or row.get("leagueCode") or row.get("code")
+        )
+        season = app_season_to_db_season(
+            row.get("app_season") or row.get("appSeason") or row.get("season")
+        )
+        if not code or not season:
+            raise SystemExit(f"Invalid expected Domestic stats scope: code={code!r} season={season!r}")
+        key = (season, code)
+        if key in expected:
+            raise SystemExit(f"Duplicate expected Domestic stats scope: {code} {season}")
+        expected[key] = completed
+
     try:
         connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         try:
             match_count = int(connection.execute("SELECT COUNT(*) FROM matches").fetchone()[0])
+            actual_rows = connection.execute(
+                "SELECT season, division, COUNT(*) FROM matches GROUP BY season, division"
+            ).fetchall()
         finally:
             connection.close()
     except (sqlite3.Error, TypeError, ValueError) as exc:
         raise SystemExit(f"Invalid generated stats DB {db_path}: {exc}") from exc
+
     if match_count <= 0:
         raise SystemExit("Refusing app-ready publish: generated stats DB contains 0 matches")
-    return match_count
 
+    actual = {
+        (str(season), normalize_league_code(division)): int(count)
+        for season, division, count in actual_rows
+    }
+    missing = sorted(key for key in expected if key not in actual)
+    unexpected = sorted(key for key in actual if key not in expected)
+    mismatched = sorted(
+        (key, expected[key], actual.get(key))
+        for key in expected
+        if key in actual and actual[key] != expected[key]
+    )
+    if missing or unexpected or mismatched:
+        details = []
+        if missing:
+            details.append("missing=" + ",".join(f"{code}@{season}" for season, code in missing[:20]))
+        if unexpected:
+            details.append("unexpected=" + ",".join(f"{code}@{season}" for season, code in unexpected[:20]))
+        if mismatched:
+            details.append(
+                "count_mismatch=" + ",".join(
+                    f"{code}@{season}:{expected_count}!={actual_count}"
+                    for (season, code), expected_count, actual_count in mismatched[:20]
+                )
+            )
+        raise SystemExit(
+            "Refusing app-ready publish: generated stats DB does not match canonical "
+            "league+season scopes: " + " ".join(details)
+        )
+
+    expected_total = sum(expected.values())
+    if match_count != expected_total:
+        raise SystemExit(
+            "Refusing app-ready publish: generated stats DB total does not match canonical "
+            f"completed fixtures: db={match_count} expected={expected_total}"
+        )
+
+    print(
+        "APP_READY_STATS_SCOPE_VALIDATION_OK",
+        f"scopes={len(expected)}",
+        f"matches={match_count}",
+    )
+    return match_count
 
 def validate_generated_betting(source_exact_markets):
     db_path = root / "databases" / "statmaker_prepared_betting.db"
@@ -246,6 +337,12 @@ uefa_raw, uefa = read_json(source / "uefa_manifest.json", "UEFA manifest")
 if main.get("schemaVersion", 0) < 2 or uefa.get("schemaVersion", 0) < 2:
     raise SystemExit("Unsupported source manifest schema")
 
+domestic_index = validate_source(
+    source / "domestic_enriched_index.json",
+    artifact_by_id(main, "domestic_enriched_index"),
+    "Domestic enriched index",
+)
+
 canonical_odds = {
     "domestic": (source / "domestic.json", artifact_by_id(main, "domestic_odds")),
     "champions_league": (source / "champions_league.json", artifact_by_id(uefa, "champions_league_odds")),
@@ -264,7 +361,7 @@ source_exact_markets = {
 versions = prefs("statmaker_prepared_data_versions")
 domestic_fp = validate_fingerprint(versions.get("domestic_history_fingerprint", ""), "domestic history")
 support_fp = validate_fingerprint(versions.get("uefa_support_fingerprint", ""), "UEFA support")
-stats_match_count = validate_generated_stats()
+stats_match_count = validate_generated_stats(domestic_index)
 prepared_counts = validate_generated_betting(source_exact_markets)
 print(
     "APP_READY_VALIDATION_OK",

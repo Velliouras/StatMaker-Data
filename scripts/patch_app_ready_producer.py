@@ -153,10 +153,14 @@ def patch_domestic_multi_season_index() -> None:
             errors += "Duplicate Domestic league code+season rows: ${duplicateScopes.joinToString(", ")}"
         }
 '''
-    if text.count(old) != 1:
-        raise SystemExit("Could not locate Domestic registry duplicate-code validation")
-    source.write_text(text.replace(old, new, 1), encoding="utf-8")
-    print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK")
+    if text.count(old) == 1:
+        source.write_text(text.replace(old, new, 1), encoding="utf-8")
+        print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK patched")
+        return
+    if "Duplicate Domestic league code+season rows:" in text:
+        print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK source-already-multi-season")
+        return
+    raise SystemExit("Could not locate a supported Domestic registry duplicate validation contract")
 
 
 def patch_empty_uefa_ready_snapshots() -> None:

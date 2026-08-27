@@ -43,7 +43,8 @@ jobs:
             scripts/expand_domestic_full_stats.py \
             scripts/finalize_domestic_live_july_artifacts.py \
             scripts/build_domestic_live_july_normalized_stats.py \
-            scripts/build_uefa_support_history.py
+            scripts/build_uefa_support_history.py \
+            scripts/build_statmaker_update_manifest.py
 
       - name: Backfill and verify unfinished historical snapshots
         id: history
@@ -89,6 +90,10 @@ jobs:
           python scripts/finalize_domestic_live_july_artifacts.py
           python scripts/build_domestic_live_july_normalized_stats.py
           python scripts/build_uefa_support_history.py
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
 
       - name: Validate historical closure contract
         run: |
@@ -134,6 +139,7 @@ jobs:
             data/statmaker/domestic_enriched \
             data/statmaker/domestic_historical_stats_freeze.json \
             data/statmaker/uefa_support_history.json \
+            data/statmaker/update_manifest.json \
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
             reports/api_football_fixture_stats_fetch.md \

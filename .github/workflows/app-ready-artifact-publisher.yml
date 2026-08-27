@@ -14,11 +14,30 @@ on:
         required: true
         default: false
         type: boolean
+  workflow_run:
+    # GitHub suppresses ordinary push-triggered workflow recursion for commits made
+    # with GITHUB_TOKEN. Chain the heavyweight publisher only from canonical producers
+    # whose changes must reach the immutable phone read-model promptly.
+    workflows:
+      - "Domestic Statistics Universe"
+      - "Domestic Targeted Stats Backfill"
+      - "Odds Integrity Production Refresh"
+      - "Build StatMaker Domestic Enriched"
+      - "Greece Super League 2 Sync"
+      - "Domestic Archive Betting Rehydrate"
+    types: [completed]
+    branches: [main]
   push:
     branches:
       - main
     paths:
       - '.github/workflows/app-ready-artifact-publisher.yml'
+      - 'data/statmaker/update_manifest.json'
+      - 'odds/odds_api_io/domestic_odds.json'
+      - 'data/statmaker/uefa_support_history.json'
+      - 'data/statmaker/uefa_team_support_history.json'
+      - 'data/statmaker/domestic_proposal_readiness.json'
+      - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - 'scripts/patch_app_ready_producer.py'
@@ -37,6 +56,7 @@ concurrency:
 
 jobs:
   publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -157,12 +177,14 @@ jobs:
           s="app-ready-export/source"
           mkdir -p "$s"
           cp data/statmaker/update_manifest.json "$s/main_manifest.json"
+          cp data/statmaker/domestic_enriched/index.json "$s/domestic_enriched_index.json"
           cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
           git show origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
           git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
           git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
           git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
           test -s "$s/main_manifest.json"
+          test -s "$s/domestic_enriched_index.json"
           test -s "$s/uefa_manifest.json"
           test -s "$s/domestic.json"
           test -s "$s/champions_league.json"
@@ -173,8 +195,49 @@ jobs:
         if: steps.preflight.outputs.generate == 'true'
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
-      - name: Publish current and previous generations
+      - name: Revalidate canonical source versions
+        id: source_guard
         if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
+          git fetch --no-tags --depth=1 origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json, os, subprocess
+          from pathlib import Path
+
+          incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
+          metadata=incoming.get('metadata',{})
+          expected_main=str(metadata.get('mainContentVersion') or '')
+          expected_uefa=str(metadata.get('uefaContentVersion') or '')
+          current_main=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
+              text=True,
+          ))
+          current_uefa=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],
+              text=True,
+          ))
+          actual_main=str(current_main.get('contentVersion') or '')
+          actual_uefa=str(current_uefa.get('contentVersion') or '')
+          current=expected_main == actual_main and expected_uefa == actual_uefa
+          if not current:
+              print(
+                  'APP_READY_STALE_SOURCE_SKIP',
+                  f'main={expected_main[:12]}->{actual_main[:12]}',
+                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}',
+              )
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write(f"current={'true' if current else 'false'}\n")
+          PY
+
+      - name: Report stale generation skip
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current != 'true'
+        run: echo "Canonical source changed while app-ready was building; stale generation was intentionally not published."
+
+      - name: Publish current and previous generations
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -227,11 +290,41 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/statmaker/app_ready
           git commit -m "Publish verified app-ready StatMaker read models"
-          git pull --rebase --autostash origin main
+
+          # Never rebase a bundle built from source version A onto a newer canonical
+          # source version B. Rebase is allowed only when the canonical manifests
+          # still match the versions embedded in the generated app-ready manifest.
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          git fetch --no-tags origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
+          metadata=incoming.get('metadata',{})
+          expected_main=str(metadata.get('mainContentVersion') or '')
+          expected_uefa=str(metadata.get('uefaContentVersion') or '')
+          current_main=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
+              text=True,
+          ))
+          current_uefa=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],
+              text=True,
+          ))
+          actual_main=str(current_main.get('contentVersion') or '')
+          actual_uefa=str(current_uefa.get('contentVersion') or '')
+          if expected_main != actual_main or expected_uefa != actual_uefa:
+              raise SystemExit(
+                  'Refusing stale app-ready publish after concurrent canonical update: '
+                  f'main={expected_main[:12]}->{actual_main[:12]} '
+                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}'
+              )
+          PY
+          git rebase refs/remotes/origin/main
           git push origin HEAD:main
 
       - name: Verify published generation
-        if: steps.preflight.outputs.generate == 'true'
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         run: |
           set -euo pipefail

@@ -207,11 +207,18 @@ jobs:
           report_md.write_text('\n'.join(['# StatMaker domestic score patch', '', *[f"- `{row['artifact']}` patched={row['patched']} missing={row['missing']}" for row in rows]]) + '\n', encoding='utf-8')
           PY
 
+      - name: Rebuild main update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
       - name: Commit domestic enriched JSON
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/statmaker/domestic_enriched reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md reports/statmaker_domestic_score_patch.json reports/statmaker_domestic_score_patch.md
+          git add data/statmaker/domestic_enriched data/statmaker/update_manifest.json reports/statmaker_domestic_enriched_build.json reports/statmaker_domestic_enriched_build.csv reports/statmaker_domestic_enriched_build.md reports/statmaker_domestic_score_patch.json reports/statmaker_domestic_score_patch.md
           if git diff --cached --quiet; then
             echo "No domestic enriched changes to commit."
           else
