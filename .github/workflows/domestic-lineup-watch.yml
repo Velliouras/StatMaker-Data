@@ -23,7 +23,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: domestic-match-context
+  # Serialize every workflow that writes canonical StatMaker main data.
+  # One running writer at a time prevents manifest/data rebase collisions.
+  group: statmaker-canonical-main-writer
   cancel-in-progress: false
 
 jobs:
