@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-27T11:01:16Z",
+  "generated_at": "2026-08-27T14:31:03Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/league-two/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-21T03:58:58Z",
+    "cache_generated_at": "2026-08-27T14:10:11Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,21 +40,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 12,
-    "fixtures_with_any_stats": 12,
-    "fixtures_with_bb_core_stats": 12,
+    "completed_fixtures": 24,
+    "fixtures_with_any_stats": 24,
+    "fixtures_with_bb_core_stats": 24,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 12,
-      "shots_on_target": 12,
-      "corners": 12,
-      "fouls": 12,
-      "yellow_cards": 12,
-      "red_cards": 2,
-      "possession": 12,
-      "passes": 12,
-      "xg": 11
+      "shots_total": 24,
+      "shots_on_target": 24,
+      "corners": 24,
+      "fouls": 24,
+      "yellow_cards": 24,
+      "red_cards": 3,
+      "possession": 24,
+      "passes": 24,
+      "xg": 15
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -62,14 +62,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.1667,
+      "red_cards": 0.125,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.9167
+      "xg": 0.625
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "not enough completed fixtures: 12 < 15"
+      "ok"
     ]
   },
   "matches": [
@@ -1070,6 +1070,1014 @@
         "fulltime": {
           "home": 3,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563695,
+      "date_utc": "2026-08-22T11:30:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Bristol Rovers",
+      "away_team": "Newport County",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 26,
+        "AS": 8,
+        "HST": 9,
+        "AST": 3,
+        "HC": 11,
+        "AC": 1,
+        "HF": 6,
+        "AF": 8,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 0,
+        "ASaves": 5,
+        "HPasses": 367,
+        "APasses": 216,
+        "HPassesAccurate": 242,
+        "APassesAccurate": 102,
+        "HxG": 3.25,
+        "AxG": 0.71
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 3,
+      "home_score": 5,
+      "away_score": 3,
+      "fthg": 5,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 5,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563703,
+      "date_utc": "2026-08-22T11:30:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Salford City",
+      "away_team": "Chesterfield",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 14,
+        "HST": 3,
+        "AST": 3,
+        "HC": 5,
+        "AC": 1,
+        "HF": 12,
+        "AF": 17,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 566,
+        "APasses": 317,
+        "HPassesAccurate": 480,
+        "APassesAccurate": 235,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563706,
+      "date_utc": "2026-08-22T11:30:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Walsall",
+      "away_team": "Grimsby",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 13,
+        "HST": 2,
+        "AST": 1,
+        "HC": 8,
+        "AC": 7,
+        "HF": 12,
+        "AF": 15,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 1,
+        "ASaves": 2,
+        "HPasses": 370,
+        "APasses": 341,
+        "HPassesAccurate": 293,
+        "APassesAccurate": 265,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563696,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Colchester",
+      "away_team": "Oldham",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 6,
+        "HST": 5,
+        "AST": 2,
+        "HC": 8,
+        "AC": 2,
+        "HF": 14,
+        "AF": 17,
+        "HY": 2,
+        "AY": 5,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 65,
+        "APossession": 35,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 490,
+        "APasses": 277,
+        "HPassesAccurate": 389,
+        "APassesAccurate": 171,
+        "HxG": 2.31,
+        "AxG": 0.54
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563697,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Crewe",
+      "away_team": "Northampton",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 6,
+        "AS": 15,
+        "HST": 3,
+        "AST": 6,
+        "HC": 7,
+        "AC": 6,
+        "HF": 14,
+        "AF": 12,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 6,
+        "ASaves": 2,
+        "HPasses": 444,
+        "APasses": 455,
+        "HPassesAccurate": 352,
+        "APassesAccurate": 376,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563698,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Exeter City",
+      "away_team": "Accrington ST",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 14,
+        "HST": 5,
+        "AST": 2,
+        "HC": 9,
+        "AC": 1,
+        "HF": 13,
+        "AF": 12,
+        "HY": 3,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 232,
+        "APasses": 421,
+        "HPassesAccurate": 125,
+        "APassesAccurate": 301,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563699,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Fleetwood Town",
+      "away_team": "Gillingham",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 9,
+        "HST": 0,
+        "AST": 3,
+        "HC": 10,
+        "AC": 2,
+        "HF": 13,
+        "AF": 15,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 3,
+        "ASaves": 0,
+        "HPasses": 419,
+        "APasses": 251,
+        "HPassesAccurate": 324,
+        "APassesAccurate": 154,
+        "HxG": 1.4,
+        "AxG": 1.02
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563700,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Port Vale",
+      "away_team": "Tranmere",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 6,
+        "HST": 4,
+        "AST": 4,
+        "HC": 4,
+        "AC": 3,
+        "HF": 19,
+        "AF": 17,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 333,
+        "APasses": 317,
+        "HPassesAccurate": 232,
+        "APassesAccurate": 201,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563701,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Rochdale",
+      "away_team": "Crawley Town",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 12,
+        "HST": 3,
+        "AST": 2,
+        "HC": 5,
+        "AC": 3,
+        "HF": 12,
+        "AF": 14,
+        "HY": 4,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 54,
+        "APossession": 46,
+        "HSaves": 0,
+        "ASaves": 2,
+        "HPasses": 389,
+        "APasses": 338,
+        "HPassesAccurate": 330,
+        "APassesAccurate": 266,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563702,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Rotherham",
+      "away_team": "York",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 17,
+        "HST": 2,
+        "AST": 5,
+        "HC": 5,
+        "AC": 9,
+        "HF": 11,
+        "AF": 5,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 318,
+        "APasses": 467,
+        "HPassesAccurate": 218,
+        "APassesAccurate": 366,
+        "HxG": 0.83,
+        "AxG": 2.23
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563704,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Shrewsbury",
+      "away_team": "Barnet",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 15,
+        "HST": 1,
+        "AST": 3,
+        "HC": 7,
+        "AC": 9,
+        "HF": 14,
+        "AF": 14,
+        "HY": 1,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": 250,
+        "APasses": 331,
+        "HPassesAccurate": 145,
+        "APassesAccurate": 221,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563705,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "League Two",
+      "league_code": "E3",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 42,
+      "round": "Regular Season - 2",
+      "home_team": "Swindon Town",
+      "away_team": "Cheltenham",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 5,
+        "AS": 14,
+        "HST": 3,
+        "AST": 6,
+        "HC": 2,
+        "AC": 5,
+        "HF": 7,
+        "AF": 12,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 342,
+        "APasses": 464,
+        "HPassesAccurate": 232,
+        "APassesAccurate": 347,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,

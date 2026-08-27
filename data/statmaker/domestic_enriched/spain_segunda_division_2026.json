@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-27T11:01:16Z",
+  "generated_at": "2026-08-27T14:31:03Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/spain/segunda-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-21T04:12:55Z",
+    "cache_generated_at": "2026-08-27T14:30:55Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,21 +40,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 11,
-    "fixtures_with_any_stats": 11,
-    "fixtures_with_bb_core_stats": 11,
+    "completed_fixtures": 22,
+    "fixtures_with_any_stats": 22,
+    "fixtures_with_bb_core_stats": 22,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 11,
-      "shots_on_target": 11,
-      "corners": 11,
-      "fouls": 11,
-      "yellow_cards": 11,
-      "red_cards": 0,
-      "possession": 11,
-      "passes": 11,
-      "xg": 1
+      "shots_total": 22,
+      "shots_on_target": 22,
+      "corners": 22,
+      "fouls": 22,
+      "yellow_cards": 22,
+      "red_cards": 1,
+      "possession": 22,
+      "passes": 22,
+      "xg": 8
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -62,14 +62,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.0,
+      "red_cards": 0.0455,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.0909
+      "xg": 0.3636
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "not enough completed fixtures: 11 < 15"
+      "ok"
     ]
   },
   "matches": [
@@ -985,6 +985,930 @@
         },
         "fulltime": {
           "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569886,
+      "date_utc": "2026-08-21T19:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Cordoba",
+      "away_team": "Girona",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 10,
+        "HST": 3,
+        "AST": 3,
+        "HC": 2,
+        "AC": 3,
+        "HF": 23,
+        "AF": 10,
+        "HY": 4,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 376,
+        "APasses": 469,
+        "HPassesAccurate": 309,
+        "APassesAccurate": 407,
+        "HxG": 1.35,
+        "AxG": 0.79
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569891,
+      "date_utc": "2026-08-22T15:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Oviedo",
+      "away_team": "Leganes",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 24,
+        "AS": 5,
+        "HST": 5,
+        "AST": 2,
+        "HC": 9,
+        "AC": 2,
+        "HF": 16,
+        "AF": 7,
+        "HY": 3,
+        "AY": 0,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 70,
+        "APossession": 30,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 573,
+        "APasses": 260,
+        "HPassesAccurate": 484,
+        "APassesAccurate": 144,
+        "HxG": 2.85,
+        "AxG": 0.24
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569882,
+      "date_utc": "2026-08-22T17:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Albacete",
+      "away_team": "Real Sociedad II",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 12,
+        "HST": 7,
+        "AST": 6,
+        "HC": 5,
+        "AC": 6,
+        "HF": 7,
+        "AF": 11,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 4,
+        "ASaves": 6,
+        "HPasses": 542,
+        "APasses": 322,
+        "HPassesAccurate": 442,
+        "APassesAccurate": 220,
+        "HxG": 2.36,
+        "AxG": 1.92
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569885,
+      "date_utc": "2026-08-22T17:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "AD Ceuta FC",
+      "away_team": "Las Palmas",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 9,
+        "HST": 4,
+        "AST": 4,
+        "HC": 6,
+        "AC": 4,
+        "HF": 18,
+        "AF": 15,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 419,
+        "APasses": 399,
+        "HPassesAccurate": 363,
+        "APassesAccurate": 340,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569888,
+      "date_utc": "2026-08-22T19:30:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Eldense",
+      "away_team": "Cadiz",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 8,
+        "HST": 6,
+        "AST": 6,
+        "HC": 7,
+        "AC": 3,
+        "HF": 11,
+        "AF": 16,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 48,
+        "APossession": 52,
+        "HSaves": 4,
+        "ASaves": 4,
+        "HPasses": 396,
+        "APasses": 434,
+        "HPassesAccurate": 315,
+        "APassesAccurate": 372,
+        "HxG": 0.45,
+        "AxG": 1.74
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569887,
+      "date_utc": "2026-08-23T15:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Eibar",
+      "away_team": "Valladolid",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 11,
+        "HST": 3,
+        "AST": 4,
+        "HC": 5,
+        "AC": 5,
+        "HF": 8,
+        "AF": 13,
+        "HY": 3,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 4,
+        "ASaves": 2,
+        "HPasses": 426,
+        "APasses": 571,
+        "HPassesAccurate": 365,
+        "APassesAccurate": 485,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569883,
+      "date_utc": "2026-08-23T17:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Castellón",
+      "away_team": "Sabadell",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 11,
+        "HST": 1,
+        "AST": 1,
+        "HC": 5,
+        "AC": 3,
+        "HF": 9,
+        "AF": 13,
+        "HY": 2,
+        "AY": 5,
+        "HR": null,
+        "AR": null,
+        "HPossession": 70,
+        "APossession": 30,
+        "HSaves": 0,
+        "ASaves": 1,
+        "HPasses": 600,
+        "APasses": 254,
+        "HPassesAccurate": 499,
+        "APassesAccurate": 158,
+        "HxG": 0.65,
+        "AxG": 1.83
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569889,
+      "date_utc": "2026-08-23T17:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Sporting Gijon",
+      "away_team": "Burgos",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 7,
+        "HST": 5,
+        "AST": 1,
+        "HC": 4,
+        "AC": 4,
+        "HF": 15,
+        "AF": 12,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 423,
+        "APasses": 554,
+        "HPassesAccurate": 354,
+        "APassesAccurate": 457,
+        "HxG": 0.67,
+        "AxG": 0.67
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569892,
+      "date_utc": "2026-08-23T19:30:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Tenerife",
+      "away_team": "Almeria",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 9,
+        "HST": 2,
+        "AST": 1,
+        "HC": 5,
+        "AC": 7,
+        "HF": 14,
+        "AF": 8,
+        "HY": 2,
+        "AY": 0,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 1,
+        "ASaves": 1,
+        "HPasses": 343,
+        "APasses": 544,
+        "HPassesAccurate": 267,
+        "APassesAccurate": 474,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569884,
+      "date_utc": "2026-08-24T17:00:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Celta de Vigo II",
+      "away_team": "FC Andorra",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 17,
+        "HST": 7,
+        "AST": 5,
+        "HC": 4,
+        "AC": 4,
+        "HF": 13,
+        "AF": 18,
+        "HY": 4,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 36,
+        "APossession": 64,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 310,
+        "APasses": 562,
+        "HPassesAccurate": 219,
+        "APassesAccurate": 464,
+        "HxG": 2.53,
+        "AxG": 3.72
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 2,
+      "home_score": 4,
+      "away_score": 2,
+      "fthg": 4,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1569890,
+      "date_utc": "2026-08-24T19:30:00+00:00",
+      "country": "Spain",
+      "league": "Segunda División",
+      "league_code": "SP2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 141,
+      "round": "Regular Season - 2",
+      "home_team": "Granada CF",
+      "away_team": "Mallorca",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 18,
+        "HST": 6,
+        "AST": 4,
+        "HC": 7,
+        "AC": 1,
+        "HF": 8,
+        "AF": 14,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 4,
+        "ASaves": 5,
+        "HPasses": 297,
+        "APasses": 483,
+        "HPassesAccurate": 224,
+        "APassesAccurate": 417,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
           "away": 0
         },
         "extratime": {
