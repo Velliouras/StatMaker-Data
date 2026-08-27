@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import api_football_fetch_fixture_stats as stats_fetch
+import domestic_live_july_pipeline as pipeline
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
@@ -130,25 +131,27 @@ def main() -> int:
 
     fixtures: List[Dict[str, Any]] = []
     league_reports: List[Dict[str, Any]] = []
-    for league in leagues:
-        if not isinstance(league, dict):
+    for base_league in leagues:
+        if not isinstance(base_league, dict):
             continue
-        cache_path = stats_fetch.cache_path_for(league)
-        cache = load_json(cache_path, {})
-        rows = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
-        exported = [export_fixture(league, item) for item in rows]
-        fixtures.extend(exported)
-        league_reports.append({
-            "leagueCode": normalize_code(league.get("leagueCode")),
-            "country": league.get("country"),
-            "league": league.get("competition"),
-            "season": league.get("app_season"),
-            "cachePath": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
-            "fixtures": len(exported),
-            "fixturesWithAnyStats": sum(
-                1 for fixture in exported if any(value is not None for value in fixture["stats"].values())
-            ),
-        })
+        for league in pipeline.stats_artifact_variants(base_league):
+            cache_path = stats_fetch.cache_path_for(league)
+            cache = load_json(cache_path, {})
+            rows = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
+            exported = [export_fixture(league, item) for item in rows]
+            fixtures.extend(exported)
+            league_reports.append({
+                "leagueCode": normalize_code(league.get("leagueCode")),
+                "country": league.get("country"),
+                "league": league.get("competition"),
+                "season": league.get("app_season"),
+                "statsRole": league.get("statsRole") or "historical_support",
+                "cachePath": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
+                "fixtures": len(exported),
+                "fixturesWithAnyStats": sum(
+                    1 for fixture in exported if any(value is not None for value in fixture["stats"].values())
+                ),
+            })
 
     fixtures.sort(key=lambda item: (
         str(item.get("date") or ""),
