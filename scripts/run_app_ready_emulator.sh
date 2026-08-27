@@ -120,7 +120,8 @@ if [[ "$ok" -ne 1 ]]; then
 fi
 
 # A Welcome trace completion alone is not a valid app-ready generation. Require every data stage
-# and all four prepared competitions before exporting anything from the emulator.
+# and require the producer to prepare exactly the competitions it requested. Some competitions can
+# legitimately have zero pending/live fixtures, so the requested count is dynamic.
 required_stages=(
   domestic_resolved
   normalized_resolved
@@ -138,8 +139,15 @@ for stage_name in "${required_stages[@]}"; do
     exit 1
   fi
 done
-if ! grep -q "stage=prepared_complete ready=4 requested=4" <<<"$appready_logs"; then
-  echo "App-ready producer did not prepare all four competitions" >&2
+prepared_complete_line="$(grep "stage=prepared_complete ready=" <<<"$appready_logs" | tail -1 || true)"
+if [[ ! "$prepared_complete_line" =~ stage=prepared_complete[[:space:]]ready=([0-9]+)[[:space:]]requested=([0-9]+) ]]; then
+  echo "App-ready producer missing valid prepared_complete summary" >&2
+  exit 1
+fi
+prepared_ready="${BASH_REMATCH[1]}"
+prepared_requested="${BASH_REMATCH[2]}"
+if (( prepared_requested <= 0 || prepared_ready != prepared_requested )); then
+  echo "App-ready producer prepared ${prepared_ready}/${prepared_requested} requested competitions" >&2
   exit 1
 fi
 if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then
