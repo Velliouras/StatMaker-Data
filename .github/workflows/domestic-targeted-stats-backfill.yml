@@ -41,7 +41,8 @@ jobs:
           python -m py_compile \
             scripts/run_domestic_stats_refresh.py \
             scripts/refresh_domestic_live_july_stats.py \
-            scripts/api_football_fetch_fixture_stats.py
+            scripts/api_football_fetch_fixture_stats.py \
+            scripts/build_statmaker_update_manifest.py
 
       - name: Refresh requested Domestic leagues
         env:
@@ -72,6 +73,13 @@ jobs:
           python scripts/finalize_domestic_live_july_artifacts.py
           python scripts/build_domestic_live_july_normalized_stats.py
           python scripts/build_uefa_support_history.py
+
+      - name: Rebuild main update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
 
       - name: Validate targeted result
         env:
@@ -124,6 +132,7 @@ jobs:
             data/api_football/fixture_stats \
             data/api_football/domestic_normalized_fixture_stats.json \
             data/statmaker/domestic_enriched \
+            data/statmaker/update_manifest.json \
             data/statmaker/uefa_support_history.json \
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
