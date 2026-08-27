@@ -84,6 +84,7 @@ jobs:
           registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
           if not registry:
               raise SystemExit('Domestic Stats registry is empty')
+          pipeline.build_roster_catalog(registry)
           pipeline.build_app_statistics(registry)
           PY
           python scripts/finalize_domestic_live_july_artifacts.py
