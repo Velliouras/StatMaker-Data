@@ -127,35 +127,38 @@ def main() -> int:
     fixtures_scanned = 0
     fixtures_with_raw = 0
 
-    for league in leagues:
-        cache_path = stats_fetch.cache_path_for(league)
-        cache = pipeline.load_json(cache_path, {})
-        fixtures = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
-        expanded: List[Dict[str, Any]] = []
-        league_counts = {field: 0 for field in EXTRA_FIELDS}
-        for item in fixtures:
-            fixtures_scanned += 1
-            if item.get("raw_statistics"):
-                fixtures_with_raw += 1
-            migrated, counts = expand_fixture(item)
-            expanded.append(migrated)
-            for field, count in counts.items():
-                league_counts[field] += count
-                totals[field] += count
-        cache["fixtures"] = expanded
-        cache["full_stats_contract"] = {
-            "source": "API-Football raw fixture statistics",
-            "extraFields": list(EXTRA_FIELDS),
-            "noEstimatedValues": True,
-        }
-        pipeline.write_json(cache_path, cache)
-        reports.append({
-            "leagueCode": league.get("leagueCode"),
-            "country": league.get("country"),
-            "league": league.get("competition"),
-            "fixtures": len(fixtures),
-            "fieldNonNullCounts": league_counts,
-        })
+    for base_league in leagues:
+        for league in pipeline.stats_artifact_variants(base_league):
+            cache_path = stats_fetch.cache_path_for(league)
+            cache = pipeline.load_json(cache_path, {})
+            fixtures = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
+            expanded: List[Dict[str, Any]] = []
+            league_counts = {field: 0 for field in EXTRA_FIELDS}
+            for item in fixtures:
+                fixtures_scanned += 1
+                if item.get("raw_statistics"):
+                    fixtures_with_raw += 1
+                migrated, counts = expand_fixture(item)
+                expanded.append(migrated)
+                for field, count in counts.items():
+                    league_counts[field] += count
+                    totals[field] += count
+            cache["fixtures"] = expanded
+            cache["full_stats_contract"] = {
+                "source": "API-Football raw fixture statistics",
+                "extraFields": list(EXTRA_FIELDS),
+                "noEstimatedValues": True,
+            }
+            pipeline.write_json(cache_path, cache)
+            reports.append({
+                "leagueCode": league.get("leagueCode"),
+                "country": league.get("country"),
+                "league": league.get("competition"),
+                "season": league.get("app_season"),
+                "statsRole": league.get("statsRole") or "historical_support",
+                "fixtures": len(fixtures),
+                "fieldNonNullCounts": league_counts,
+            })
 
     report = {
         "generatedAt": pipeline.now_utc(),
