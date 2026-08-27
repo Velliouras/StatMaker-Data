@@ -72,6 +72,33 @@ def app_season_label(start: dt.date, end: dt.date) -> str:
     return str(start.year) if start.year == end.year else f"{start.year}-{end.year}"
 
 
+def current_target_stats_variant(league: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Create the exact current-season artifact row during rollover continuity.
+
+    The registry may intentionally point season/app_season at the previous completed season
+    for historical evidence. App-facing data must also contain completed matches from the
+    target season under their real current app season.
+    """
+    history = str(league.get("historyApiSeason") or league.get("season") or "").strip()
+    target = str(league.get("targetApiSeason") or "").strip()
+    target_app = str(league.get("targetAppSeason") or "").strip()
+    if not target or not target_app or target == history:
+        return None
+    row = dict(league)
+    row["season"] = target
+    row["historyApiSeason"] = target
+    row["app_season"] = target_app
+    row["targetApiSeason"] = target
+    row["targetAppSeason"] = target_app
+    row["statsRole"] = "current_target"
+    return row
+
+
+def stats_artifact_variants(league: Dict[str, Any]) -> List[Dict[str, Any]]:
+    current = current_target_stats_variant(league)
+    return [dict(league)] + ([current] if current is not None else [])
+
+
 def api_football_catalog(api_key: str) -> List[Dict[str, Any]]:
     request = Request(
         f"{API_FOOTBALL_BASE}/leagues",
@@ -289,79 +316,61 @@ def fetch_stats_cycle(
 
 def build_app_statistics(registry: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
-    for league in registry:
-        artifact, row = enriched_build.build_league_artifact(
-            league,
-            min_fixtures=STRICT_READINESS_MIN_FIXTURES,
-            min_coverage=STRICT_READINESS_MIN_COVERAGE,
-        )
-        artifact.setdefault("competition", {}).update({
-            "target_api_football_season": league.get("targetApiSeason"),
-            "target_app_season": league.get("targetAppSeason"),
-            "target_season_start": league.get("targetSeasonStart"),
-            "target_season_end": league.get("targetSeasonEnd"),
-            "lifecycle": league.get("lifecycle"),
-            "stats_visible_without_odds": True,
-            "betting_requires_exact_odds": True,
-        })
-        artifact.setdefault("data_contract", {}).update({
-            "stats_visibility": "published independently of odds availability",
-            "betting_gate": "exact bookmaker odds plus valid historical support",
-        })
-        enriched_build.write_json(enriched_build.output_path_for(league), artifact)
-        row.update({
-            "target_api_football_season": league.get("targetApiSeason"),
-            "target_app_season": league.get("targetAppSeason"),
-            "target_season_start": league.get("targetSeasonStart"),
-            "target_season_end": league.get("targetSeasonEnd"),
-            "lifecycle": league.get("lifecycle"),
-            "stats_visible_without_odds": True,
-            "betting_requires_exact_odds": True,
-        })
-        rows.append(row)
+    for base_league in registry:
+        for league in stats_artifact_variants(base_league):
+            artifact, row = enriched_build.build_league_artifact(
+                league,
+                min_fixtures=STRICT_READINESS_MIN_FIXTURES,
+                min_coverage=STRICT_READINESS_MIN_COVERAGE,
+            )
+            artifact.setdefault("competition", {}).update({
+                "target_api_football_season": base_league.get("targetApiSeason"),
+                "target_app_season": base_league.get("targetAppSeason"),
+                "target_season_start": base_league.get("targetSeasonStart"),
+                "target_season_end": base_league.get("targetSeasonEnd"),
+                "lifecycle": base_league.get("lifecycle"),
+                "stats_role": league.get("statsRole") or "historical_support",
+                "stats_visible_without_odds": True,
+                "betting_requires_exact_odds": True,
+            })
+            artifact.setdefault("data_contract", {}).update({
+                "stats_visibility": "published independently of odds availability",
+                "betting_gate": "exact bookmaker odds plus valid historical support",
+            })
+            enriched_build.write_json(enriched_build.output_path_for(league), artifact)
+            row.update({
+                "target_api_football_season": base_league.get("targetApiSeason"),
+                "target_app_season": base_league.get("targetAppSeason"),
+                "target_season_start": base_league.get("targetSeasonStart"),
+                "target_season_end": base_league.get("targetSeasonEnd"),
+                "lifecycle": base_league.get("lifecycle"),
+                "stats_role": league.get("statsRole") or "historical_support",
+                "stats_visible_without_odds": True,
+                "betting_requires_exact_odds": True,
+            })
+            rows.append(row)
 
-    rows = sorted(rows, key=lambda row: (str(row.get("country")), str(row.get("league"))))
+    rows = sorted(
+        rows,
+        key=lambda row: (
+            str(row.get("country")),
+            str(row.get("league")),
+            str(row.get("league_code")),
+            str(row.get("app_season")),
+        ),
+    )
     enriched_build.write_index(rows)
     index_path = enriched_build.OUTPUT_ROOT / "index.json"
     index = load_json(index_path, {})
     index.update({
-        "selection_policy": "all configured leagues active now or starting on any July date",
+        "selection_policy": "all configured leagues active now or starting within the rolling horizon; rollover leagues publish historical support and exact current target season",
         "stats_visibility": "independent_of_odds",
         "betting_gate": "exact_odds_required",
         "strict_readiness_min_fixtures": STRICT_READINESS_MIN_FIXTURES,
         "strict_readiness_min_coverage": STRICT_READINESS_MIN_COVERAGE,
     })
     write_json(index_path, index)
-    enriched_build.write_reports(rows)
     return rows
-
-
-def generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
-    aliases = odds_fetch.load_aliases()
-    for league in registry:
-        code = str(league.get("leagueCode") or "")
-        bucket = aliases.setdefault(code, {})
-        cache = load_json(stats_fetch.cache_path_for(league), {})
-        canonical_names = {
-            str(fixture.get(key) or "").strip()
-            for fixture in cache.get("fixtures", []) or []
-            if isinstance(fixture, dict)
-            for key in ("home_team", "away_team")
-            if str(fixture.get(key) or "").strip()
-        }
-        owners: Dict[str, set[str]] = {}
-        for canonical in canonical_names:
-            variants = {
-                odds_fetch.normalize_text(canonical, drop_suffixes=True),
-                odds_fetch.simplified_team_name(canonical),
-            }
-            for variant in variants:
-                if variant:
-                    owners.setdefault(variant, set()).add(canonical)
-        for variant, candidates in owners.items():
-            if len(candidates) == 1:
-                bucket.setdefault(variant, next(iter(candidates)))
-    return aliases
 
 def build_roster_catalog(registry: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     previous = load_json(ROSTER_PATH, {})
