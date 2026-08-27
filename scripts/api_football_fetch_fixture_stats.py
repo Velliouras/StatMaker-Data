@@ -340,23 +340,58 @@ def cache_identity_mismatch_reason(
     league: Dict[str, Any],
     cache: Dict[str, Any],
 ) -> Optional[str]:
-    """Return why an existing cache belongs to a different provider scope."""
+    """Return why an existing cache belongs to a different provider scope.
+
+    Cache paths are app-facing and survive provider-id corrections. Both cache
+    metadata and every explicit fixture source id must agree with the configured
+    provider id; otherwise old competition rows can silently survive a remap.
+    """
     if not isinstance(cache, dict) or not cache:
         return None
-    expected_id = league.get("api_football_league_id")
-    actual_id = cache.get("league_id")
-    if expected_id is not None and actual_id is not None:
+
+    expected_raw = league.get("api_football_league_id")
+    if expected_raw is None:
+        expected_raw = league.get("apiFootballLeagueId")
+    try:
+        expected_id = int(expected_raw) if expected_raw is not None else None
+    except (TypeError, ValueError):
+        return f"invalid configured provider league id: {expected_raw!r}"
+
+    actual_raw = cache.get("league_id")
+    if expected_id is not None and actual_raw is not None:
         try:
-            if int(expected_id) != int(actual_id):
-                return f"provider league id changed: cache={actual_id} configured={expected_id}"
+            actual_id = int(actual_raw)
         except (TypeError, ValueError):
-            return f"invalid provider league id identity: cache={actual_id!r} configured={expected_id!r}"
+            return f"invalid cached provider league id: {actual_raw!r}"
+        if actual_id != expected_id:
+            return f"provider league id changed: cache={actual_id} configured={expected_id}"
+
+    if expected_id is not None:
+        wrong_source_ids: set[int] = set()
+        for fixture in cache.get("fixtures", []) or []:
+            if not isinstance(fixture, dict):
+                continue
+            source = fixture.get("source_league")
+            if not isinstance(source, dict) or source.get("id") is None:
+                continue
+            try:
+                source_id = int(source.get("id"))
+            except (TypeError, ValueError):
+                continue
+            if source_id != expected_id:
+                wrong_source_ids.add(source_id)
+        if wrong_source_ids:
+            return (
+                f"fixture source league ids {sorted(wrong_source_ids)} "
+                f"do not match configured={expected_id}"
+            )
+
     expected_season = str(league.get("season") or "").strip()
     actual_season = str(cache.get("season") or "").strip()
     if expected_season and actual_season and expected_season != actual_season:
         return f"provider season changed: cache={actual_season} configured={expected_season}"
-    return None
 
+    return None
 
 def roster_from_fixtures(fixtures: Iterable[Dict[str, Any]]) -> List[str]:
     names: set[str] = set()

@@ -109,6 +109,46 @@ def completed_cache_rows(league: Mapping[str, Any]) -> List[Dict[str, Any]]:
     ]
 
 
+def frozen_snapshot_validation_error(
+    league: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+) -> str | None:
+    if snapshot.get("frozen") is not True or snapshot.get("fixtureSetVerified") is not True:
+        return "snapshot is not verified/frozen"
+
+    cache_path = target.stats_fetch.cache_path_for(dict(league))
+    if not cache_path.is_file():
+        return f"verified cache missing: {cache_path.relative_to(ROOT)}"
+    cache = load_json(cache_path, {})
+    identity_error = target.stats_fetch.cache_identity_mismatch_reason(dict(league), cache)
+    if identity_error:
+        return identity_error
+
+    completed = [
+        item
+        for item in cache.get("fixtures", []) or []
+        if isinstance(item, dict)
+        and str(item.get("status") or item.get("status_short") or "").upper()
+        in target.COMPLETED_STATUSES
+    ]
+    try:
+        expected_count = int(snapshot.get("providerCompletedFixtures") or 0)
+    except (TypeError, ValueError):
+        expected_count = 0
+    if expected_count > 0 and len(completed) != expected_count:
+        return f"verified fixture count changed: cache={len(completed)} frozen={expected_count}"
+    if not completed:
+        return "verified cache contains no completed fixtures"
+    return None
+
+
+def frozen_snapshot_is_valid(
+    league: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+) -> bool:
+    return frozen_snapshot_validation_error(league, snapshot) is None
+
+
 def target_app_season(league: Mapping[str, Any]) -> str:
     return str(
         league.get("targetAppSeason")
@@ -405,9 +445,11 @@ def main() -> int:
     pending_before = [
         freeze_key(league)
         for league in all_historical
-        if not (
-            snapshots.get(freeze_key(league), {}).get("frozen") is True
-            and snapshots.get(freeze_key(league), {}).get("fixtureSetVerified") is True
+        if not frozen_snapshot_is_valid(
+            league,
+            snapshots.get(freeze_key(league), {})
+            if isinstance(snapshots.get(freeze_key(league)), dict)
+            else {},
         )
     ]
 
@@ -416,14 +458,21 @@ def main() -> int:
     for league in selected:
         key = freeze_key(league)
         frozen_row = snapshots.get(key, {})
-        if (
-            is_historical_snapshot(league)
-            and frozen_row.get("frozen") is True
-            and frozen_row.get("fixtureSetVerified") is True
-        ):
-            skipped_frozen.append(key)
-        else:
-            active.append(league)
+        frozen_row = frozen_row if isinstance(frozen_row, dict) else {}
+        if is_historical_snapshot(league):
+            validation_error = frozen_snapshot_validation_error(league, frozen_row)
+            if validation_error is None:
+                skipped_frozen.append(key)
+                continue
+            if frozen_row.get("frozen") is True or frozen_row.get("fixtureSetVerified") is True:
+                snapshots[key] = {
+                    **frozen_row,
+                    "frozen": False,
+                    "fixtureSetVerified": False,
+                    "invalidatedAt": target.pipeline.now_utc(),
+                    "invalidatedReason": validation_error,
+                }
+        active.append(league)
 
     roster_requests = (
         0
@@ -493,6 +542,7 @@ def main() -> int:
                 "country": league.get("country"),
                 "competition": league.get("competition"),
                 "historyApiSeason": historical_season(league),
+                "apiFootballLeagueId": league.get("api_football_league_id") or league.get("apiFootballLeagueId"),
                 "targetApiSeasonAtFreeze": target_season(league),
                 "frozenAt": target.pipeline.now_utc(),
                 **summary,
@@ -506,6 +556,7 @@ def main() -> int:
                 "country": league.get("country"),
                 "competition": league.get("competition"),
                 "historyApiSeason": historical_season(league),
+                "apiFootballLeagueId": league.get("api_football_league_id") or league.get("apiFootballLeagueId"),
                 "lastCheckedAt": target.pipeline.now_utc(),
                 **summary,
             }
@@ -514,9 +565,11 @@ def main() -> int:
     pending_after = [
         freeze_key(league)
         for league in all_historical
-        if not (
-            snapshots.get(freeze_key(league), {}).get("frozen") is True
-            and snapshots.get(freeze_key(league), {}).get("fixtureSetVerified") is True
+        if not frozen_snapshot_is_valid(
+            league,
+            snapshots.get(freeze_key(league), {})
+            if isinstance(snapshots.get(freeze_key(league)), dict)
+            else {},
         )
     ]
 

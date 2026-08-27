@@ -131,6 +131,12 @@ def main() -> int:
         for league in pipeline.stats_artifact_variants(base_league):
             cache_path = stats_fetch.cache_path_for(league)
             cache = pipeline.load_json(cache_path, {})
+            identity_error = stats_fetch.cache_identity_mismatch_reason(league, cache)
+            if identity_error:
+                raise SystemExit(
+                    f"Refusing full-stats migration for {league.get('leagueCode')} "
+                    f"{league.get('app_season')}: {identity_error}"
+                )
             fixtures = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
             expanded: List[Dict[str, Any]] = []
             league_counts = {field: 0 for field in EXTRA_FIELDS}

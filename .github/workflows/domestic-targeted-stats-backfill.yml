@@ -79,7 +79,8 @@ jobs:
             scripts/finalize_domestic_live_july_artifacts.py \
             scripts/build_domestic_live_july_normalized_stats.py \
             scripts/build_statmaker_domestic_enriched.py \
-            scripts/build_statmaker_update_manifest.py
+            scripts/build_statmaker_update_manifest.py \
+            scripts/validate_domestic_cache_provider_identity.py
 
       - name: Refresh rolling Domestic registry
         env:
@@ -98,6 +99,9 @@ jobs:
             --max-requests "$INPUT_STATS_MAX_REQUESTS" \
             > reports/domestic_targeted_stats_backfill.log 2>&1
           cat reports/domestic_targeted_stats_backfill.log
+
+      - name: Validate targeted provider identity
+        run: python scripts/validate_domestic_cache_provider_identity.py
 
       - name: Rebuild app-facing statistics
         run: |
@@ -173,6 +177,8 @@ jobs:
           git add \
             data/api_football/fixture_stats \
             data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/domestic_live_july_registry.json \
+            data/statmaker/domestic_rosters.json \
             data/statmaker/domestic_enriched \
             data/statmaker/update_manifest.json \
             data/statmaker/uefa_support_history.json \

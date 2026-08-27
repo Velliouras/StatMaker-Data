@@ -20,6 +20,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import api_football_fetch_fixture_stats as stats_fetch
+
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "api_football_enrichment_leagues.json"
 CACHE_ROOT = ROOT / "data" / "api_football" / "fixture_stats"
@@ -245,6 +247,12 @@ def build_match(cache_item: Dict[str, Any], league: Dict[str, Any]) -> Dict[str,
 def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverage: float) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     cache_path = cache_path_for(league)
     cache = load_json(cache_path, {})
+    identity_error = stats_fetch.cache_identity_mismatch_reason(league, cache)
+    if identity_error:
+        raise SystemExit(
+            f"Refusing enriched build for {league_code(league)} {app_season(league)}: "
+            f"{identity_error}"
+        )
     cache_fixtures = cache.get("fixtures") if isinstance(cache, dict) else []
     cache_fixtures = cache_fixtures if isinstance(cache_fixtures, list) else []
 

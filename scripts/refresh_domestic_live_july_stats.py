@@ -78,6 +78,11 @@ def fetch_league_preserving_fixture_metadata(
     """
     cache_path = stats_fetch.cache_path_for(league)
     existing_cache = stats_fetch.load_json(cache_path, {})
+    identity_note = stats_fetch.cache_identity_mismatch_reason(league, existing_cache)
+    if identity_note:
+        # Production refresh monkey-patches the base fetcher, so enforce provider
+        # identity here as well. Never merge rows from a previous competition.
+        existing_cache = {}
     existing_by_id = stats_fetch.cached_fixture_map(existing_cache)
 
     requests_before = request_state["count"]
@@ -90,6 +95,8 @@ def fetch_league_preserving_fixture_metadata(
     fixtures_returned = 0
     fixture_query_used = "none"
     notes: List[str] = []
+    if identity_note:
+        notes.append(f"stale cache discarded: {identity_note}")
 
     try:
         all_fixtures, fixtures, fixture_query_used, query_notes = stats_fetch.fetch_fixtures_with_fallback(
@@ -189,6 +196,8 @@ stats_fetch.fetch_league = fetch_league_preserving_fixture_metadata
 
 def cache_progress(league: Dict[str, Any]) -> Dict[str, Any]:
     cache = pipeline.load_json(stats_fetch.cache_path_for(league), {})
+    if stats_fetch.cache_identity_mismatch_reason(league, cache):
+        cache = {}
     fixtures = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
     completed = [
         item for item in fixtures
