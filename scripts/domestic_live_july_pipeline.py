@@ -191,6 +191,10 @@ def select_history_season(
     return max(previous, key=lambda item: item[0])[1] if previous else target
 
 
+def normalize_identity_text(value: Any) -> str:
+    return "".join(ch for ch in str(value or "").casefold() if ch.isalnum())
+
+
 def by_api_id(items: Iterable[Dict[str, Any]], key: str) -> Dict[int, Dict[str, Any]]:
     result: Dict[int, Dict[str, Any]] = {}
     for item in items:
@@ -228,7 +232,11 @@ def build_live_registry(
         actual_country = str(provider_country.get("name") or "").strip()
         if provider_row and (
             provider_type != "league"
-            or (configured_country and actual_country and configured_country.casefold() != actual_country.casefold())
+            or (
+                configured_country
+                and actual_country
+                and normalize_identity_text(configured_country) != normalize_identity_text(actual_country)
+            )
         ):
             provider_identity_errors.append(
                 f"{domestic.get('leagueCode')} configured API-Football id {league_id} "
