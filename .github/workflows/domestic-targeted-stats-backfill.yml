@@ -156,5 +156,15 @@ jobs:
           else
             git commit -m "Backfill targeted Domestic statistics"
             git pull --rebase --autostash origin main
+            # The producer may have rebased over another canonical writer. Rebuild the
+            # deterministic manifest now so it describes the exact tree being pushed.
+            python scripts/build_statmaker_update_manifest.py \
+              --profile main \
+              --branch main \
+              --output data/statmaker/update_manifest.json
+            git add data/statmaker/update_manifest.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Rebuild main manifest after producer rebase"
+            fi
             git push origin HEAD:main
           fi

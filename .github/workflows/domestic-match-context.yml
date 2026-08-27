@@ -92,6 +92,16 @@ jobs:
               echo "Concurrent Domestic writer detected; deferring context artifact commit to the next run."
               exit 0
             fi
+            # The producer may have rebased over another canonical writer. Rebuild the
+            # deterministic manifest now so it describes the exact tree being pushed.
+            python scripts/build_statmaker_update_manifest.py \
+              --profile main \
+              --branch main \
+              --output data/statmaker/update_manifest.json
+            git add data/statmaker/update_manifest.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Rebuild main manifest after producer rebase"
+            fi
             if ! git push origin HEAD:main; then
               echo "Concurrent Domestic writer advanced main after rebase; deferring to the next run."
               exit 0
