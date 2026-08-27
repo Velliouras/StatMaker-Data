@@ -70,6 +70,30 @@ def is_historical_snapshot(league: Mapping[str, Any]) -> bool:
     return bool(history and current and history != current)
 
 
+def current_target_variant(league: Mapping[str, Any]) -> Dict[str, Any] | None:
+    """Return a current-season Stats row while preserving the historical support row.
+
+    During the rollover grace period the registry deliberately keeps season on the
+    previous completed season for evidence continuity. Current completed fixtures must
+    nevertheless be discovered and cached under the exact target season, otherwise the
+    app-facing DB never sees opening-round results (for example 2026-27 E0/G1).
+    """
+    history = historical_season(league)
+    current = target_season(league)
+    app_season = target_app_season(league)
+    if not current or not app_season or current == history:
+        return None
+
+    row = dict(league)
+    row["season"] = current
+    row["historyApiSeason"] = current
+    row["app_season"] = app_season
+    row["targetApiSeason"] = current
+    row["targetAppSeason"] = app_season
+    row["statsRole"] = "current_target"
+    return row
+
+
 def freeze_key(league: Mapping[str, Any]) -> str:
     return f"{normalize_code(league.get('leagueCode'))}:{historical_season(league)}"
 
@@ -407,12 +431,31 @@ def main() -> int:
         else discover_missing_target_rosters(api_key, selected, max_requests)
     )
     historical_active = [league for league in active if is_historical_snapshot(league)]
+    refresh_rows = list(active)
+    if not args.historical_only:
+        for league in selected:
+            current_row = current_target_variant(league)
+            if current_row is not None:
+                refresh_rows.append(current_row)
+
+    # Preserve both support history and the exact current target season. Only exact
+    # code+API-season duplicates are collapsed.
+    deduped_refresh_rows: List[Dict[str, Any]] = []
+    seen_refresh_rows: set[tuple[str, str]] = set()
+    for league in refresh_rows:
+        key = (normalize_code(league.get("leagueCode")), historical_season(league))
+        if key in seen_refresh_rows:
+            continue
+        seen_refresh_rows.add(key)
+        deduped_refresh_rows.append(league)
+    refresh_rows = deduped_refresh_rows
+
     remaining_after_rosters = max(1, max_requests - roster_requests)
     verification_reserve = min(len(historical_active), max(0, remaining_after_rosters - 1))
     refresh_budget = max(1, remaining_after_rosters - verification_reserve)
 
-    if active:
-        report = target.refresh_incrementally(api_key, active, refresh_budget)
+    if refresh_rows:
+        report = target.refresh_incrementally(api_key, refresh_rows, refresh_budget)
     else:
         report = {
             "generatedAt": target.pipeline.now_utc(),
