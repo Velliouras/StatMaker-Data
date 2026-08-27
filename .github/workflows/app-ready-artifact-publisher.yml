@@ -65,6 +65,9 @@ jobs:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
 
+      - name: Validate canonical Domestic provider identity
+        run: python scripts/validate_domestic_cache_provider_identity.py
+
       - name: Check source versions
         id: preflight
         shell: bash
