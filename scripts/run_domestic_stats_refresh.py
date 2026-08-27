@@ -331,6 +331,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Process only configured completed historical snapshots that are not yet verified/frozen",
     )
+    parser.add_argument(
+        "--skip-roster-discovery",
+        action="store_true",
+        help="Do not discover current target-season rosters in this run",
+    )
     return parser.parse_args()
 
 
@@ -396,7 +401,11 @@ def main() -> int:
         else:
             active.append(league)
 
-    roster_requests = discover_missing_target_rosters(api_key, selected, max_requests)
+    roster_requests = (
+        0
+        if args.skip_roster_discovery
+        else discover_missing_target_rosters(api_key, selected, max_requests)
+    )
     historical_active = [league for league in active if is_historical_snapshot(league)]
     remaining_after_rosters = max(1, max_requests - roster_requests)
     verification_reserve = min(len(historical_active), max(0, remaining_after_rosters - 1))
