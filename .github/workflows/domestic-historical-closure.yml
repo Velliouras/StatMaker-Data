@@ -59,8 +59,12 @@ jobs:
         run: |
           mkdir -p reports
           stats_requests="${INPUT_STATS_MAX_REQUESTS:-2500}"
+          if [[ "${GITHUB_EVENT_NAME:-}" == "push" ]]; then
+            stats_requests="1"
+          fi
           python scripts/run_domestic_stats_refresh.py \
             --historical-only \
+            --skip-roster-discovery \
             --max-requests "$stats_requests" \
             > reports/domestic_historical_closure.log 2>&1
           cat reports/domestic_historical_closure.log
