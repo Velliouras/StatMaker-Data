@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-21T20:46:30Z",
+  "generated_at": "2026-08-27T11:01:16Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/premier-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-21T03:57:25Z",
+    "cache_generated_at": "2026-08-27T11:01:03Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -33,47 +33,885 @@
     "target_season_start": "2026-08-21",
     "target_season_end": "2027-05-30",
     "lifecycle": "active",
+    "stats_role": "current_target",
     "stats_visible_without_odds": true,
     "betting_requires_exact_odds": true
   },
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 0,
-    "fixtures_with_any_stats": 0,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.0,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 10,
+    "fixtures_with_any_stats": 10,
+    "fixtures_with_bb_core_stats": 10,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
-      "fouls": 0,
-      "yellow_cards": 0,
-      "red_cards": 0,
-      "possession": 0,
-      "passes": 0,
-      "xg": 0
+      "shots_total": 10,
+      "shots_on_target": 10,
+      "corners": 10,
+      "fouls": 10,
+      "yellow_cards": 10,
+      "red_cards": 4,
+      "possession": 10,
+      "passes": 10,
+      "xg": 7
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
-      "fouls": 0.0,
-      "yellow_cards": 0.0,
-      "red_cards": 0.0,
-      "possession": 0.0,
-      "passes": 0.0,
-      "xg": 0.0
+      "shots_total": 1.0,
+      "shots_on_target": 1.0,
+      "corners": 1.0,
+      "fouls": 1.0,
+      "yellow_cards": 1.0,
+      "red_cards": 0.4,
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 0.7
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 0 < 15",
-      "low any-stats coverage: 0.0 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
-      "required BB groups below threshold",
-      "no shot group reaches threshold"
+      "not enough completed fixtures: 10 < 15"
     ]
   },
-  "matches": []
+  "matches": [
+    {
+      "fixture_id": 1557367,
+      "date_utc": "2026-08-21T19:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Arsenal",
+      "away_team": "Coventry",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 20,
+        "AS": 4,
+        "HST": 6,
+        "AST": 1,
+        "HC": 8,
+        "AC": 2,
+        "HF": 10,
+        "AF": 13,
+        "HY": 1,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 1,
+        "ASaves": 2,
+        "HPasses": 616,
+        "APasses": 347,
+        "HPassesAccurate": 565,
+        "APassesAccurate": 271,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557368,
+      "date_utc": "2026-08-22T11:30:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Hull City",
+      "away_team": "Manchester United",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 21,
+        "HST": 4,
+        "AST": 5,
+        "HC": 1,
+        "AC": 6,
+        "HF": 10,
+        "AF": 9,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 28,
+        "APossession": 72,
+        "HSaves": 5,
+        "ASaves": 2,
+        "HPasses": 257,
+        "APasses": 669,
+        "HPassesAccurate": 180,
+        "APassesAccurate": 588,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557369,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Everton",
+      "away_team": "Crystal Palace",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 11,
+        "HST": 5,
+        "AST": 4,
+        "HC": 4,
+        "AC": 0,
+        "HF": 5,
+        "AF": 15,
+        "HY": 0,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 417,
+        "APasses": 581,
+        "HPassesAccurate": 343,
+        "APassesAccurate": 505,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557370,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Ipswich",
+      "away_team": "Sunderland",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 11,
+        "HST": 3,
+        "AST": 4,
+        "HC": 3,
+        "AC": 5,
+        "HF": 12,
+        "AF": 14,
+        "HY": 0,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 333,
+        "APasses": 557,
+        "HPassesAccurate": 262,
+        "APassesAccurate": 489,
+        "HxG": 1.8,
+        "AxG": 0.66
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557371,
+      "date_utc": "2026-08-22T14:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Nottingham Forest",
+      "away_team": "Leeds",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 11,
+        "HST": 2,
+        "AST": 3,
+        "HC": 3,
+        "AC": 2,
+        "HF": 15,
+        "AF": 14,
+        "HY": 2,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 2,
+        "ASaves": 3,
+        "HPasses": 411,
+        "APasses": 326,
+        "HPassesAccurate": 321,
+        "APassesAccurate": 232,
+        "HxG": 0.66,
+        "AxG": 0.47
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557372,
+      "date_utc": "2026-08-22T16:30:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Brentford",
+      "away_team": "Tottenham",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 26,
+        "AS": 9,
+        "HST": 8,
+        "AST": 4,
+        "HC": 7,
+        "AC": 3,
+        "HF": 17,
+        "AF": 14,
+        "HY": 1,
+        "AY": 1,
+        "HR": null,
+        "AR": null,
+        "HPossession": 40,
+        "APossession": 60,
+        "HSaves": 4,
+        "ASaves": 5,
+        "HPasses": 360,
+        "APasses": 549,
+        "HPassesAccurate": 296,
+        "APassesAccurate": 482,
+        "HxG": 3.87,
+        "AxG": 0.57
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557373,
+      "date_utc": "2026-08-23T13:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Brighton",
+      "away_team": "Aston Villa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 6,
+        "HST": 6,
+        "AST": 0,
+        "HC": 5,
+        "AC": 2,
+        "HF": 12,
+        "AF": 11,
+        "HY": 2,
+        "AY": 3,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 73,
+        "APossession": 27,
+        "HSaves": 0,
+        "ASaves": 3,
+        "HPasses": 647,
+        "APasses": 242,
+        "HPassesAccurate": 601,
+        "APassesAccurate": 185,
+        "HxG": 3.77,
+        "AxG": 0.29
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 0,
+      "home_score": 4,
+      "away_score": 0,
+      "fthg": 4,
+      "ftag": 0,
+      "hthg": 4,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 4,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557374,
+      "date_utc": "2026-08-23T13:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Manchester City",
+      "away_team": "Bournemouth",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 5,
+        "HST": 6,
+        "AST": 4,
+        "HC": 8,
+        "AC": 3,
+        "HF": 11,
+        "AF": 11,
+        "HY": 1,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 66,
+        "APossession": 34,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 658,
+        "APasses": 344,
+        "HPassesAccurate": 584,
+        "APassesAccurate": 270,
+        "HxG": 2.25,
+        "AxG": 0.65
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557375,
+      "date_utc": "2026-08-23T15:30:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Newcastle",
+      "away_team": "Liverpool",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 27,
+        "HST": 4,
+        "AST": 7,
+        "HC": 2,
+        "AC": 6,
+        "HF": 16,
+        "AF": 15,
+        "HY": 5,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 39,
+        "APossession": 61,
+        "HSaves": 5,
+        "ASaves": 3,
+        "HPasses": 296,
+        "APasses": 445,
+        "HPassesAccurate": 224,
+        "APassesAccurate": 375,
+        "HxG": 1.58,
+        "AxG": 2.98
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1557376,
+      "date_utc": "2026-08-24T19:00:00+00:00",
+      "country": "England",
+      "league": "Premier League",
+      "league_code": "E0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 39,
+      "round": "Regular Season - 1",
+      "home_team": "Fulham",
+      "away_team": "Chelsea",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 18,
+        "HST": 6,
+        "AST": 6,
+        "HC": 6,
+        "AC": 4,
+        "HF": 12,
+        "AF": 7,
+        "HY": 2,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 639,
+        "APasses": 394,
+        "HPassesAccurate": 553,
+        "APassesAccurate": 322,
+        "HxG": 1.33,
+        "AxG": 2.24
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    }
+  ]
 }

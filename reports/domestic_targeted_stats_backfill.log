@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-24T19:58:52Z",
+  "generatedAt": "2026-08-27T11:01:09Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -12,43 +12,77 @@
     "I1",
     "SP1"
   ],
-  "statsUniverseLeagueCount": 53,
+  "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
-  "maxRequests": 500,
-  "requestsUsed": 124,
-  "registryLeagueCount": 1,
-  "polledLeagueCount": 1,
-  "incompleteBefore": 1,
-  "completeAfter": 1,
+  "maxRequests": 30,
+  "requestsUsed": 18,
+  "registryLeagueCount": 2,
+  "polledLeagueCount": 2,
+  "incompleteBefore": 2,
+  "completeAfter": 2,
   "incompleteAfter": 0,
   "allocations": [
+    {
+      "phase": "tier1_main5_plus_greece",
+      "priorityTier": "tier1_main5_plus_greece",
+      "leagueCode": "E0",
+      "country": "England",
+      "league": "Premier League",
+      "lifecycle": "active",
+      "allocatedRequests": 15,
+      "usedRequests": 11,
+      "before": {
+        "leagueCode": "E0",
+        "priorityTier": "tier1_main5_plus_greece",
+        "completed": 0,
+        "withStats": 0,
+        "withScores": 0,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 0.0,
+        "scoreCoverage": 0.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "E0",
+        "priorityTier": "tier1_main5_plus_greece",
+        "completed": 10,
+        "withStats": 10,
+        "withScores": 10,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      }
+    },
     {
       "phase": "tier1_main5_plus_greece",
       "priorityTier": "tier1_main5_plus_greece",
       "leagueCode": "G1",
       "country": "Greece",
       "league": "Super League",
-      "lifecycle": "starts_soon",
-      "allocatedRequests": 500,
-      "usedRequests": 124,
+      "lifecycle": "active",
+      "allocatedRequests": 19,
+      "usedRequests": 7,
       "before": {
         "leagueCode": "G1",
         "priorityTier": "tier1_main5_plus_greece",
-        "completed": 114,
-        "withStats": 113,
-        "withScores": 114,
-        "missingStats": 1,
+        "completed": 0,
+        "withStats": 0,
+        "withScores": 0,
+        "missingStats": 0,
         "missingScores": 0,
-        "coverage": 0.991228,
-        "scoreCoverage": 1.0,
+        "coverage": 0.0,
+        "scoreCoverage": 0.0,
         "complete": false
       },
       "after": {
         "leagueCode": "G1",
         "priorityTier": "tier1_main5_plus_greece",
-        "completed": 236,
-        "withStats": 236,
-        "withScores": 236,
+        "completed": 6,
+        "withStats": 6,
+        "withScores": 6,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -59,11 +93,23 @@
   ],
   "progress": [
     {
+      "leagueCode": "E0",
+      "priorityTier": "tier1_main5_plus_greece",
+      "completed": 10,
+      "withStats": 10,
+      "withScores": 10,
+      "missingStats": 0,
+      "missingScores": 0,
+      "coverage": 1.0,
+      "scoreCoverage": 1.0,
+      "complete": true
+    },
+    {
       "leagueCode": "G1",
       "priorityTier": "tier1_main5_plus_greece",
-      "completed": 236,
-      "withStats": 236,
-      "withScores": 236,
+      "completed": 6,
+      "withStats": 6,
+      "withScores": 6,
       "missingStats": 0,
       "missingScores": 0,
       "coverage": 1.0,
@@ -71,14 +117,29 @@
       "complete": true
     }
   ],
+  "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
+    "E0",
     "G1"
   ],
   "targetedMode": true,
-  "historicalFreezePolicy": "backfill once then zero future API calls",
-  "historicalSkippedFrozen": [],
-  "historicalNewlyFrozen": [
+  "historicalOnlyMode": false,
+  "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
+  "historicalSkippedFrozen": [
+    "E0:2025",
     "G1:2025"
   ],
-  "historicalFrozenSnapshotCount": 1
+  "historicalNewlyFrozen": [],
+  "historicalVerificationPending": [],
+  "historicalSnapshotCount": 41,
+  "historicalPendingBefore": [],
+  "historicalPendingAfter": [],
+  "historicalFrozenSnapshotCount": 41,
+  "historicalClosureComplete": true,
+  "apiFootballQuotaGuard": {
+    "dailyLimit": 7500,
+    "dailyRemaining": 6251,
+    "reserve": 1500,
+    "stoppedAtReserve": false
+  }
 }
