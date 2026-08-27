@@ -14,6 +14,7 @@ from typing import Any, Dict
 
 import api_football_fetch_fixture_stats as stats_fetch
 import build_statmaker_domestic_enriched as enriched_build
+import domestic_live_july_pipeline as pipeline
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
@@ -127,7 +128,12 @@ def main() -> int:
     leagues = registry.get("leagues", []) if isinstance(registry, dict) else []
     if not leagues:
         raise SystemExit("Domestic live/July registry is empty")
-    reports = [finalize_league(league) for league in leagues if isinstance(league, dict)]
+    reports = [
+        finalize_league(league)
+        for base_league in leagues
+        if isinstance(base_league, dict)
+        for league in pipeline.stats_artifact_variants(base_league)
+    ]
     payload = {
         "leagueCount": len(reports),
         "matches": sum(int(row.get("matches") or 0) for row in reports),
