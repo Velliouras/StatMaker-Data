@@ -132,6 +132,47 @@ def harden_download(path: str, label: str) -> None:
     print(f"APP_READY_PRODUCER_PATCH_OK {source}")
 
 
+def patch_domestic_multi_season_index() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt")
+    text = source.read_text(encoding="utf-8")
+    old = '''        val duplicateCodes = index.leagues
+            .groupBy { it.leagueCode }
+            .filterValues { it.size > 1 }
+            .keys
+            .sorted()
+        if (duplicateCodes.isNotEmpty()) {
+            errors += "Duplicate Domestic league codes: ${duplicateCodes.joinToString(", ")}"
+        }
+'''
+    new = '''        val duplicateScopes = index.leagues
+            .groupBy { "${it.leagueCode}|${it.appSeason}" }
+            .filterValues { it.size > 1 }
+            .keys
+            .sorted()
+        if (duplicateScopes.isNotEmpty()) {
+            errors += "Duplicate Domestic league code+season rows: ${duplicateScopes.joinToString(", ")}"
+        }
+'''
+    if text.count(old) != 1:
+        raise SystemExit("Could not locate Domestic registry duplicate-code validation")
+    source.write_text(text.replace(old, new, 1), encoding="utf-8")
+    print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK")
+
+
+def patch_empty_uefa_ready_snapshots() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
+    text = source.read_text(encoding="utf-8")
+    old = '                val availableFeed = feed?.takeIf { it.matches.isNotEmpty() } ?: return\n'
+    new = '''                // Production requires a READY snapshot for every UEFA competition.
+                // An empty canonical feed is still a valid immutable 0/0 snapshot.
+                val availableFeed = feed ?: return
+'''
+    if text.count(old) != 1:
+        raise SystemExit("Could not locate UEFA empty-feed skip")
+    source.write_text(text.replace(old, new, 1), encoding="utf-8")
+    print("APP_READY_EMPTY_UEFA_READY_OK")
+
+
 def add_producer_diagnostics() -> None:
     source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
     text = source.read_text(encoding="utf-8")
@@ -172,4 +213,6 @@ bundle_normalized_snapshot()
 patch_normalized_repository()
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt", "Domestic API artifact")
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "Domestic API registry")
+patch_domestic_multi_season_index()
+patch_empty_uefa_ready_snapshots()
 add_producer_diagnostics()

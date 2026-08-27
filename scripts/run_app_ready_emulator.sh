@@ -146,8 +146,8 @@ if [[ ! "$prepared_complete_line" =~ stage=prepared_complete[[:space:]]ready=([0
 fi
 prepared_ready="${BASH_REMATCH[1]}"
 prepared_requested="${BASH_REMATCH[2]}"
-if (( prepared_requested <= 0 || prepared_ready != prepared_requested )); then
-  echo "App-ready producer prepared ${prepared_ready}/${prepared_requested} requested competitions" >&2
+if (( prepared_requested != 4 || prepared_ready != 4 )); then
+  echo "App-ready producer must prepare production-compatible 4/4 snapshots; got ${prepared_ready}/${prepared_requested}" >&2
   exit 1
 fi
 if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then

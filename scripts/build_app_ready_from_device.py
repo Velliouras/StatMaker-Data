@@ -127,11 +127,9 @@ def validate_generated_betting(source_exact_markets):
     if not db_path.is_file() or db_path.stat().st_size <= 0:
         raise SystemExit(f"Missing/empty generated prepared betting DB: {db_path}")
     uefa = {"champions_league", "europa_league", "conference_league"}
-    required = {"domestic"} | {
-        competition_id
-        for competition_id in uefa
-        if int(source_exact_markets.get(competition_id, 0) or 0) > 0
-    }
+    # Production clients require all four competition metadata rows even when a UEFA
+    # competition has zero exact markets. Empty 0/0 READY snapshots are valid; absence is not.
+    required = {"domestic", "champions_league", "europa_league", "conference_league"}
     try:
         connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         try:
