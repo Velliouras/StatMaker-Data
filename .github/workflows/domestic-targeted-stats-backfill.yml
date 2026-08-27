@@ -14,6 +14,12 @@ on:
         default: "500"
         type: string
 
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/triggers/domestic-current-e0-g1'
+
 permissions:
   contents: write
 
@@ -54,11 +60,22 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
           INPUT_STATS_MAX_REQUESTS: ${{ inputs.stats_max_requests }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           mkdir -p reports
+          if [ "$EVENT_NAME" = "push" ]; then
+            league_codes="E0,G1"
+            max_requests="30"
+            extra_flags="--skip-roster-discovery"
+          else
+            league_codes="$INPUT_LEAGUE_CODES"
+            max_requests="$INPUT_STATS_MAX_REQUESTS"
+            extra_flags=""
+          fi
           python scripts/run_domestic_stats_refresh.py \
-            --league-codes "$INPUT_LEAGUE_CODES" \
-            --max-requests "$INPUT_STATS_MAX_REQUESTS" \
+            --league-codes "$league_codes" \
+            --max-requests "$max_requests" \
+            $extra_flags \
             > reports/domestic_targeted_stats_backfill.log 2>&1
           cat reports/domestic_targeted_stats_backfill.log
 
@@ -89,6 +106,7 @@ jobs:
       - name: Validate targeted result
         env:
           INPUT_LEAGUE_CODES: ${{ inputs.league_codes }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python - <<'PY'
           import json, os
@@ -96,7 +114,8 @@ jobs:
           from pathlib import Path
 
           report = json.loads(Path('reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
-          requested = {x.strip().upper() for x in os.environ['INPUT_LEAGUE_CODES'].replace(';', ',').split(',') if x.strip()}
+          requested_raw = 'E0,G1' if os.environ.get('EVENT_NAME') == 'push' else os.environ['INPUT_LEAGUE_CODES']
+          requested = {x.strip().upper() for x in requested_raw.replace(';', ',').split(',') if x.strip()}
           selected = {str(x).upper() for x in report.get('selectedLeagueCodes', [])}
           if requested != selected:
               raise SystemExit(f'Targeted selection mismatch: requested={sorted(requested)} selected={sorted(selected)}')
@@ -120,6 +139,35 @@ jobs:
               if panathinaikos < 26:
                   raise SystemExit(f'Panathinaikos 2025-26 remains incomplete: {panathinaikos} matches')
               print(f'G1 targeted validation: fixtures={len(matches)} Panathinaikos={panathinaikos}')
+
+          if os.environ.get('EVENT_NAME') == 'push':
+              current_artifacts = {
+                  'E0': Path('data/statmaker/domestic_enriched/england_premier_league_2026.json'),
+                  'G1': Path('data/statmaker/domestic_enriched/greece_super_league_2026.json'),
+              }
+              expected_pairs = {
+                  'E0': ('hull', 'manchester united'),
+                  'G1': ('kalamata', 'aris'),
+              }
+              for code, artifact_path in current_artifacts.items():
+                  if not artifact_path.is_file():
+                      raise SystemExit(f'Missing current-season artifact for {code}: {artifact_path}')
+                  payload = json.loads(artifact_path.read_text(encoding='utf-8'))
+                  matches = [
+                      m for m in payload.get('matches', [])
+                      if str(m.get('status') or '').upper() in {'FT','AET','PEN'}
+                  ]
+                  if not matches:
+                      raise SystemExit(f'No completed 2026-27 matches published for {code}')
+                  a, b = expected_pairs[code]
+                  pair_found = any(
+                      a in str(m.get('home_team') or '').lower() + ' ' + str(m.get('away_team') or '').lower()
+                      and b in str(m.get('home_team') or '').lower() + ' ' + str(m.get('away_team') or '').lower()
+                      for m in matches
+                  )
+                  if not pair_found:
+                      raise SystemExit(f'Expected completed pair not found in {code} current artifact: {a}/{b}')
+                  print(f'{code} current-season validation: completed={len(matches)} expectedPair=OK')
 
           print(
               f"Targeted Stats validated leagues={sorted(selected)} "
