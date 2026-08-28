@@ -27,7 +27,7 @@ REPORT_PATH = ROOT / "reports" / "domestic_archive_betting_rehydrate.json"
 _GENERIC_TEAM_TOKENS = {
     "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if", "sk", "sv",
     "pfc", "kks", "wks", "acs", "asc", "mfk", "nk", "vfl", "vfb", "tsg",
-    "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
+    "bsc", "rc", "sfc", "ssc", "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
 }
 
 
@@ -121,10 +121,9 @@ def _is_current_roster_member(name: str, roster_variants: set[str]) -> bool:
 
 def _core_tokens(text: Any) -> set[str]:
     normalized = odds.normalize_text(text or "", drop_suffixes=True)
-    simplified = odds.simplified_team_name(normalized)
     return {
         token
-        for token in simplified.split()
+        for token in normalized.split()
         if token not in _GENERIC_TEAM_TOKENS and len(token) >= 2
     }
 
