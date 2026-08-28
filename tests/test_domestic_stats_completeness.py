@@ -74,11 +74,15 @@ class DomesticRosterDiscoveryTest(unittest.TestCase):
         }
         written = {}
 
+        def fake_api_get(_key, _endpoint, _params, request_state, _max_requests):
+            request_state["count"] += 1
+            return fixture_payload
+
         with (
             mock.patch.object(orchestrator, "load_json", return_value={}),
             mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
             mock.patch.object(orchestrator, "cached_target_roster", return_value=[]),
-            mock.patch.object(orchestrator.target.stats_fetch, "api_get", return_value=fixture_payload) as api_get,
+            mock.patch.object(orchestrator.target.stats_fetch, "api_get", side_effect=fake_api_get) as api_get,
         ):
             used = orchestrator.discover_missing_target_rosters("key", [league], 20)
 
