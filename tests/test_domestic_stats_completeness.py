@@ -122,6 +122,20 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
         self.assertIn("Ykkönen", reason)
         self.assertIn("Ykkösliiga", reason)
 
+    def test_verified_provider_competition_aliases_are_compatible(self):
+        self.assertTrue(
+            stats_fetch.provider_league_name_compatible(
+                "OBOS-ligaen",
+                "1. Division",
+            )
+        )
+        self.assertTrue(
+            stats_fetch.provider_league_name_compatible(
+                "Liga Portugal",
+                "Primeira Liga",
+            )
+        )
+
     def test_provider_competition_token_order_difference_is_compatible(self):
         self.assertTrue(
             stats_fetch.provider_league_name_compatible(
