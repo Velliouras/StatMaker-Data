@@ -80,6 +80,56 @@ class EnglandCurrentMembershipProviderAliasTest(unittest.TestCase):
                     self.assertFalse(debug.get("unmatchedTeams"))
 
 
+class ConservativeSemanticProviderAliasTest(unittest.TestCase):
+    def setUp(self):
+        schedule_priority.target.domestic_odds_expansion.install(
+            schedule_priority.target.odds_fetch,
+            schedule_priority.target.pipeline,
+        )
+
+    def test_ingestion_maps_club_prefix_variant_uniquely(self):
+        aliases = {
+            "TST": {
+                "rapid vienna": "Rapid Vienna",
+                "sturm graz": "Sturm Graz",
+            }
+        }
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "SK Rapid", "TST", aliases, debug
+        )
+        self.assertEqual("Rapid Vienna", mapped)
+        self.assertEqual("Rapid Vienna", canonical)
+        self.assertEqual(
+            "unique semantic token match",
+            debug["conservativeTeamMappings"][0]["policy"],
+        )
+
+    def test_ingestion_maps_contained_short_name_uniquely(self):
+        aliases = {"TST": {"ktp": "KTP"}}
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "FC KTP Kotka", "TST", aliases, debug
+        )
+        self.assertEqual("KTP", mapped)
+        self.assertEqual("KTP", canonical)
+
+    def test_ingestion_does_not_guess_ambiguous_semantic_name(self):
+        aliases = {
+            "TST": {
+                "austria vienna": "Austria Vienna",
+                "austria lustenau": "Austria Lustenau",
+            }
+        }
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "FK Austria", "TST", aliases, debug
+        )
+        self.assertEqual("FK Austria", mapped)
+        self.assertIsNone(canonical)
+        self.assertTrue(debug.get("unmatchedTeams"))
+
+
 class ArgentinaProviderAliasTest(unittest.TestCase):
     def test_all_observed_imminent_provider_names_map_exactly(self):
         registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
