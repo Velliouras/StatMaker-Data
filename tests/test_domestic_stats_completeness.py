@@ -48,6 +48,55 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
         self.assertTrue(refresh.has_final_score(fixture))
         self.assertFalse(refresh.has_real_normalized_stats(fixture))
 
+    def test_fetch_refuses_wrong_provider_competition_before_cache_write(self):
+        league = {
+            "leagueCode": "FIN2",
+            "country": "Finland",
+            "competition": "Ykkösliiga",
+            "display_name": "Ykkösliiga",
+            "apiFootballLeagueId": 245,
+            "api_football_league_id": 245,
+            "season": "2026",
+        }
+        wrong_fixture = {
+            "league": {
+                "id": 245,
+                "name": "Ykkönen",
+                "country": "Finland",
+                "season": 2026,
+            },
+            "fixture": {
+                "id": 1,
+                "date": "2026-08-29T12:00:00+00:00",
+                "status": {"short": "NS"},
+            },
+            "teams": {
+                "home": {"id": 1, "name": "Wrong A"},
+                "away": {"id": 2, "name": "Wrong B"},
+            },
+        }
+        request_state = {"count": 1}
+
+        with (
+            mock.patch.object(refresh.stats_fetch, "cache_path_for", return_value=Path("fake-cache.json")),
+            mock.patch.object(refresh.stats_fetch, "load_json", return_value={}),
+            mock.patch.object(
+                refresh.stats_fetch,
+                "fetch_fixtures_with_fallback",
+                return_value=([wrong_fixture], [], "league+season:2026", []),
+            ),
+            mock.patch.object(refresh.stats_fetch, "write_json") as write_json,
+        ):
+            row = refresh.fetch_league_preserving_fixture_metadata(
+                "key", league, request_state, 10
+            )
+
+        self.assertEqual(0, row["completed"])
+        self.assertIn("provider competition mismatch", row["notes"])
+        write_json.assert_called_once()
+        written_payload = write_json.call_args.args[1]
+        self.assertEqual([], written_payload["fixtures"])
+
     def test_wrong_provider_competition_name_invalidates_cache(self):
         league = {
             "apiFootballLeagueId": 245,
