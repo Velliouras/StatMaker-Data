@@ -1,33 +1,30 @@
 {
-  "generatedAt": "2026-08-28T06:54:07Z",
+  "generatedAt": "2026-08-28T07:04:53Z",
   "source": "API-Football exact league catalog identity",
   "oddsApiCalls": 0,
-  "apiFootballRequestsUsed": 4,
+  "apiFootballRequestsUsed": 1,
   "apiFootballMaxRequests": 10,
   "unresolvedLeagueCodesInspected": [
-    "AUT2",
-    "D1",
-    "FIN2",
-    "SAU"
+    "AUT2"
   ],
-  "repairCount": 1,
-  "repairs": [
+  "repairCount": 0,
+  "repairs": [],
+  "staleStatsCacheCount": 3,
+  "staleStatsCaches": [
     {
       "leagueCode": "FIN2",
-      "country": "Finland",
-      "competition": "Ykkösliiga",
-      "season": "2026",
-      "configuredId": 245,
-      "exactCatalogMatch": {
-        "id": 1087,
-        "name": "Ykkösliiga",
-        "country": "Finland"
-      },
-      "newId": 1087,
-      "configFieldsChanged": 3,
-      "registryFieldsChanged": 2,
-      "staleRosterEntriesRemoved": 1,
-      "policy": "unique exact API-Football country+season+competition catalog identity"
+      "cachePath": "data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json",
+      "reason": "provider league id changed: cache=245 configured=1087"
+    },
+    {
+      "leagueCode": "NOR2",
+      "cachePath": "data/api_football/fixture_stats/norway/obos-ligaen/2026/fixture_stats.json",
+      "reason": "fixture source league names ['1. Division'] do not match configured competition ['OBOS-ligaen', 'OBOS-ligaen']"
+    },
+    {
+      "leagueCode": "P1",
+      "cachePath": "data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json",
+      "reason": "fixture source league names ['Primeira Liga'] do not match configured competition ['Liga Portugal', 'Liga Portugal']"
     }
   ],
   "inspected": [
@@ -42,43 +39,11 @@
         "name": "2. Liga",
         "country": "Austria"
       }
-    },
-    {
-      "leagueCode": "D1",
-      "country": "Germany",
-      "competition": "Bundesliga",
-      "season": "2026",
-      "configuredId": 78,
-      "exactCatalogMatch": {
-        "id": 78,
-        "name": "Bundesliga",
-        "country": "Germany"
-      }
-    },
-    {
-      "leagueCode": "FIN2",
-      "country": "Finland",
-      "competition": "Ykkösliiga",
-      "season": "2026",
-      "configuredId": 245,
-      "exactCatalogMatch": {
-        "id": 1087,
-        "name": "Ykkösliiga",
-        "country": "Finland"
-      }
-    },
-    {
-      "leagueCode": "SAU",
-      "country": "Saudi Arabia",
-      "competition": "Pro League",
-      "season": "2026",
-      "configuredId": 307,
-      "exactCatalogMatch": null
     }
   ],
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 7393,
+    "dailyRemaining": 7387,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
