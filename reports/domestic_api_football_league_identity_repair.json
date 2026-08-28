@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T07:04:53Z",
+  "generatedAt": "2026-08-28T07:10:56Z",
   "source": "API-Football exact league catalog identity",
   "oddsApiCalls": 0,
   "apiFootballRequestsUsed": 1,
@@ -9,23 +9,23 @@
   ],
   "repairCount": 0,
   "repairs": [],
-  "staleStatsCacheCount": 3,
-  "staleStatsCaches": [
-    {
-      "leagueCode": "FIN2",
-      "cachePath": "data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json",
-      "reason": "provider league id changed: cache=245 configured=1087"
-    },
+  "staleStatsCacheCount": 0,
+  "staleStatsCaches": [],
+  "carryForwardStatsRebuild": [
     {
       "leagueCode": "NOR2",
       "cachePath": "data/api_football/fixture_stats/norway/obos-ligaen/2026/fixture_stats.json",
-      "reason": "fixture source league names ['1. Division'] do not match configured competition ['OBOS-ligaen', 'OBOS-ligaen']"
+      "reason": "cache has no fixtures"
     },
     {
       "leagueCode": "P1",
       "cachePath": "data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json",
-      "reason": "fixture source league names ['Primeira Liga'] do not match configured competition ['Liga Portugal', 'Liga Portugal']"
+      "reason": "cache has no fixtures"
     }
+  ],
+  "statsRebuildCodes": [
+    "NOR2",
+    "P1"
   ],
   "inspected": [
     {
@@ -43,7 +43,7 @@
   ],
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 7387,
+    "dailyRemaining": 7280,
     "reserve": 1500,
     "stoppedAtReserve": false
   }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-28T07:07:07Z",
+  "generatedAt": "2026-08-28T07:15:43Z",
   "contract": {
     "statsUniverseLeagueCount": 69,
     "hardVisibilityHistorySample": 1,
@@ -13,27 +13,27 @@
     "activeStatsLeagueCount": 67,
     "oddsArtifactLeagueCount": 67,
     "oddsFixtureCount": 472,
-    "proposalReadyFixtureCount": 302,
+    "proposalReadyFixtureCount": 312,
     "readyMarketFixtureCounts": {
-      "1X2": 176,
+      "1X2": 180,
       "ASIAN_CORNERS": 52,
-      "ASIAN_CORNER_HANDICAP": 199,
-      "ASIAN_GOALS": 221,
-      "ASIAN_GOALS_1H": 225,
-      "ASIAN_HANDICAP": 244,
-      "ASIAN_HANDICAP_1H": 192,
-      "BTTS": 178,
-      "DOUBLE_CHANCE": 186,
-      "FIRST_HALF_GOALS": 202,
-      "MATCH_CORNERS": 171,
-      "MATCH_GOALS": 198,
+      "ASIAN_CORNER_HANDICAP": 200,
+      "ASIAN_GOALS": 228,
+      "ASIAN_GOALS_1H": 232,
+      "ASIAN_HANDICAP": 251,
+      "ASIAN_HANDICAP_1H": 196,
+      "BTTS": 181,
+      "DOUBLE_CHANCE": 189,
+      "FIRST_HALF_GOALS": 205,
+      "MATCH_CORNERS": 172,
+      "MATCH_GOALS": 202,
       "MATCH_SHOTS": 19,
       "MATCH_SHOTS_ON_TARGET": 43,
       "TEAM_CARDS": 22,
-      "TEAM_CORNERS": 172,
+      "TEAM_CORNERS": 173,
       "TEAM_SHOTS": 19,
       "TEAM_SHOTS_ON_TARGET": 43,
-      "TEAM_TOTAL_GOALS": 189
+      "TEAM_TOTAL_GOALS": 191
     }
   },
   "leagues": [
@@ -177,7 +177,7 @@
       "statsArtifactPresent": true,
       "historicalMatchCount": 32,
       "oddsFixtureCount": 8,
-      "proposalReadyFixtureCount": 7,
+      "proposalReadyFixtureCount": 8,
       "readyMarketIds": [
         "1X2",
         "ASIAN_GOALS",
@@ -847,12 +847,93 @@
           "id": "72440640",
           "date": "2026-08-29",
           "kickoff": "2026-08-29T16:30:00Z",
-          "homeTeam": "Young Violets Wien",
-          "awayTeam": "Schwarz-Weiss Bregenz",
-          "exactMarketIds": [],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
-          "marketReadiness": {}
+          "homeTeam": "Austria Vienna (Am)",
+          "awayTeam": "Schwarz-Weiß Bregenz",
+          "exactMarketIds": [
+            "1X2",
+            "BTTS",
+            "DOUBLE_CHANCE",
+            "FIRST_HALF_GOALS",
+            "MATCH_GOALS",
+            "TEAM_TOTAL_GOALS"
+          ],
+          "readyMarketIds": [
+            "1X2",
+            "BTTS",
+            "DOUBLE_CHANCE",
+            "FIRST_HALF_GOALS",
+            "MATCH_GOALS",
+            "TEAM_TOTAL_GOALS"
+          ],
+          "proposalReadyForEvaluation": true,
+          "marketReadiness": {
+            "1X2": {
+              "historicalRequirement": "scores",
+              "scope": "match",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 3,
+              "proposalReadyForEvaluation": true
+            },
+            "BTTS": {
+              "historicalRequirement": "scores",
+              "scope": "match",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 2,
+              "proposalReadyForEvaluation": true
+            },
+            "DOUBLE_CHANCE": {
+              "historicalRequirement": "scores",
+              "scope": "match",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 3,
+              "proposalReadyForEvaluation": true
+            },
+            "FIRST_HALF_GOALS": {
+              "historicalRequirement": "half_scores",
+              "scope": "match",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 6,
+              "proposalReadyForEvaluation": true
+            },
+            "MATCH_GOALS": {
+              "historicalRequirement": "scores",
+              "scope": "match",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 10,
+              "proposalReadyForEvaluation": true
+            },
+            "TEAM_TOTAL_GOALS": {
+              "historicalRequirement": "scores",
+              "scope": "team",
+              "homeSample": 4,
+              "awaySample": 4,
+              "bestTeamSample": 4,
+              "hardHistoryValid": true,
+              "qualitySampleReady": false,
+              "exactSelectionCount": 15,
+              "proposalReadyForEvaluation": true
+            }
+          }
         },
         {
           "id": "72440646",
@@ -30618,7 +30699,7 @@
       "country": "Norway",
       "competition": "OBOS-ligaen",
       "statsArtifactPresent": true,
-      "historicalMatchCount": 0,
+      "historicalMatchCount": 152,
       "oddsFixtureCount": 0,
       "proposalReadyFixtureCount": 0,
       "readyMarketIds": [],
@@ -32225,10 +32306,24 @@
       "country": "Portugal",
       "competition": "Liga Portugal",
       "statsArtifactPresent": true,
-      "historicalMatchCount": 0,
+      "historicalMatchCount": 24,
       "oddsFixtureCount": 9,
-      "proposalReadyFixtureCount": 0,
-      "readyMarketIds": [],
+      "proposalReadyFixtureCount": 9,
+      "readyMarketIds": [
+        "1X2",
+        "ASIAN_CORNER_HANDICAP",
+        "ASIAN_GOALS",
+        "ASIAN_GOALS_1H",
+        "ASIAN_HANDICAP",
+        "ASIAN_HANDICAP_1H",
+        "BTTS",
+        "DOUBLE_CHANCE",
+        "FIRST_HALF_GOALS",
+        "MATCH_CORNERS",
+        "MATCH_GOALS",
+        "TEAM_CORNERS",
+        "TEAM_TOTAL_GOALS"
+      ],
       "fixtures": [
         {
           "id": "72530888",
@@ -32251,151 +32346,165 @@
             "TEAM_CORNERS",
             "TEAM_TOTAL_GOALS"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "1X2",
+            "ASIAN_CORNER_HANDICAP",
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP",
+            "ASIAN_HANDICAP_1H",
+            "BTTS",
+            "DOUBLE_CHANCE",
+            "FIRST_HALF_GOALS",
+            "MATCH_CORNERS",
+            "MATCH_GOALS",
+            "TEAM_CORNERS",
+            "TEAM_TOTAL_GOALS"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "1X2": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 3,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_CORNER_HANDICAP": {
               "historicalRequirement": "corners",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 1,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 28,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 6,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 42,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 8,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "BTTS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "DOUBLE_CHANCE": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 1,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "FIRST_HALF_GOALS": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 6,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "MATCH_CORNERS": {
               "historicalRequirement": "corners",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 13,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "MATCH_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 10,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "TEAM_CORNERS": {
               "historicalRequirement": "corners",
               "scope": "team",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 14,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "TEAM_TOTAL_GOALS": {
               "historicalRequirement": "scores",
               "scope": "team",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 14,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32411,52 +32520,57 @@
             "ASIAN_HANDICAP",
             "ASIAN_HANDICAP_1H"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP",
+            "ASIAN_HANDICAP_1H"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 16,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 19,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32471,41 +32585,45 @@
             "ASIAN_GOALS_1H",
             "ASIAN_HANDICAP"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 18,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 23,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32520,41 +32638,45 @@
             "ASIAN_GOALS_1H",
             "ASIAN_HANDICAP"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 20,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 28,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32570,52 +32692,57 @@
             "ASIAN_HANDICAP",
             "ASIAN_HANDICAP_1H"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP",
+            "ASIAN_HANDICAP_1H"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 17,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 24,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32630,41 +32757,45 @@
             "ASIAN_GOALS_1H",
             "ASIAN_HANDICAP"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 4,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 4,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32680,52 +32811,57 @@
             "ASIAN_HANDICAP",
             "ASIAN_HANDICAP_1H"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "ASIAN_GOALS",
+            "ASIAN_GOALS_1H",
+            "ASIAN_HANDICAP",
+            "ASIAN_HANDICAP_1H"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "ASIAN_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_GOALS_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "ASIAN_HANDICAP_1H": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 3,
+              "awaySample": 2,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32742,63 +32878,69 @@
             "FIRST_HALF_GOALS",
             "MATCH_GOALS"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "1X2",
+            "BTTS",
+            "DOUBLE_CHANCE",
+            "FIRST_HALF_GOALS",
+            "MATCH_GOALS"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "1X2": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 1,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 3,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "BTTS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 1,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "DOUBLE_CHANCE": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 1,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "FIRST_HALF_GOALS": {
               "historicalRequirement": "half_scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 1,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 6,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "MATCH_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 1,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 9,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         },
@@ -32812,30 +32954,33 @@
             "1X2",
             "MATCH_GOALS"
           ],
-          "readyMarketIds": [],
-          "proposalReadyForEvaluation": false,
+          "readyMarketIds": [
+            "1X2",
+            "MATCH_GOALS"
+          ],
+          "proposalReadyForEvaluation": true,
           "marketReadiness": {
             "1X2": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 2,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             },
             "MATCH_GOALS": {
               "historicalRequirement": "scores",
               "scope": "match",
-              "homeSample": 0,
-              "awaySample": 0,
-              "bestTeamSample": 0,
-              "hardHistoryValid": false,
+              "homeSample": 2,
+              "awaySample": 3,
+              "bestTeamSample": 3,
+              "hardHistoryValid": true,
               "qualitySampleReady": false,
               "exactSelectionCount": 2,
-              "proposalReadyForEvaluation": false
+              "proposalReadyForEvaluation": true
             }
           }
         }
