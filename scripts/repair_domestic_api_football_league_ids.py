@@ -32,6 +32,7 @@ CONFIG_PATHS = [
     ROOT / "config" / "domestic_leagues.json",
     ROOT / "config" / "api_football_enrichment_leagues.json",
     ROOT / "config" / "nordic_extra_leagues.json",
+    ROOT / "config" / "july_extra_leagues_2026.json",
 ]
 DEFAULT_MAX_REQUESTS = 10
 
