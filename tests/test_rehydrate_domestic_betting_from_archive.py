@@ -176,6 +176,17 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
         self.assertEqual(1, len(report["unresolvedHistoricalTeams"]))
 
 
+    def test_shared_team_normalization_treats_sharp_s_as_ss(self):
+        left = target.odds.normalize_text(
+            "Schwarz-Weiß Bregenz",
+            drop_suffixes=True,
+        )
+        right = target.odds.normalize_text(
+            "Schwarz-Weiss Bregenz",
+            drop_suffixes=True,
+        )
+        self.assertEqual(left, right)
+
     def test_archive_fixture_outside_authoritative_current_roster_is_rejected(self):
         feed = {"leagues": [{"leagueCode": "TST", "matches": []}]}
         archive = {"leagues": [{"leagueCode": "TST", "matches": [dict(self.archive_match)]}]}
