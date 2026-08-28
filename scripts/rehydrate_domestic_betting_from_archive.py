@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Rehydrate eligible Domestic betting matches from the exact provider archive.
 
-This script performs zero provider/API calls. It only promotes a schedule-only or
-unmapped canonical fixture to betting-ready when both provider team names resolve
-uniquely to teams that exist in StatMaker historical support. Markets are rebuilt
-from exact archived Odds-API.io payloads; no price is estimated or synthesized.
+This script performs zero provider/API calls. It can repair an existing schedule-only
+or unmapped canonical fixture and can also recreate a fixture that was dropped from
+the canonical feed entirely when both provider team names resolve uniquely against
+the authoritative current roster / StatMaker support aliases. Markets are rebuilt
+only from exact archived Odds-API.io payloads; no price is estimated or synthesized.
 """
 from __future__ import annotations
 
@@ -82,6 +83,41 @@ def _historical_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[st
     return aliases
 
 
+def _current_roster_variants(registry: Sequence[Dict[str, Any]]) -> Dict[str, set[str]]:
+    """Return normalized authoritative target-season roster membership by league."""
+    target_season_by_code = {
+        str(row.get("leagueCode") or "").strip().upper(): str(
+            row.get("targetAppSeason")
+            or row.get("app_season")
+            or ""
+        ).strip()
+        for row in registry
+        if isinstance(row, dict) and str(row.get("leagueCode") or "").strip()
+    }
+    roster_payload = load(pipeline.ROSTER_PATH, {})
+    result: Dict[str, set[str]] = {}
+    for row in roster_payload.get("leagues", []) or []:
+        if not isinstance(row, dict):
+            continue
+        code = str(row.get("leagueCode") or "").strip().upper()
+        if not code:
+            continue
+        target_season = target_season_by_code.get(code, "")
+        roster_season = str(row.get("appSeason") or "").strip()
+        if target_season and roster_season and roster_season != target_season:
+            continue
+        variants = result.setdefault(code, set())
+        for team in row.get("teams", []) or []:
+            variants.update(_variants(team))
+    return result
+
+
+def _is_current_roster_member(name: str, roster_variants: set[str]) -> bool:
+    if not roster_variants:
+        return True
+    return bool(_variants(name).intersection(roster_variants))
+
+
 def _meaningful(text: str) -> set[str]:
     return {
         token for token in text.split()
@@ -156,22 +192,32 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
     domestic_odds_expansion.install(odds, pipeline)
     domestic_market_expansion_v15.install(odds, pipeline)
     aliases = _historical_aliases(registry)
+    current_rosters = _current_roster_variants(registry)
     archive_leagues = {
         str(league.get("leagueCode") or ""): league
         for league in archive.get("leagues", []) or []
         if isinstance(league, dict)
     }
+    today = pipeline.today_utc().isoformat()
     debug: Dict[str, Any] = {"warnings": []}
     report: Dict[str, Any] = {
         "generatedAt": pipeline.now_utc(),
         "source": "exact Odds-API.io provider archive",
         "providerCalls": 0,
         "syntheticOdds": False,
+        "leaguesVisited": 0,
+        "archiveMatchesVisited": 0,
         "matchesConsidered": 0,
         "matchesWithArchive": 0,
         "matchesRehydrated": 0,
+        "matchesCreatedFromArchive": 0,
+        "matchesRepairedExisting": 0,
+        "healthyMatchesPreserved": 0,
+        "expiredArchiveMatchesSkipped": 0,
+        "archiveMatchesWithoutCanonicalMarkets": 0,
         "marketsRehydrated": 0,
         "unresolvedHistoricalTeams": [],
+        "rejectedOutsideCurrentRoster": [],
         "rehydratedMatches": [],
     }
 
@@ -182,28 +228,83 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
         archive_league = archive_leagues.get(code)
         if not code or not archive_league:
             continue
-        by_id, by_key = _archive_maps(archive_league)
+        report["leaguesVisited"] += 1
 
-        for match in league.get("matches", []) or []:
-            if not isinstance(match, dict):
+        existing_matches = [
+            row for row in league.get("matches", []) or []
+            if isinstance(row, dict)
+        ]
+        league["matches"] = existing_matches
+        existing_by_id = {
+            str(row.get("id") or ""): row
+            for row in existing_matches
+            if str(row.get("id") or "")
+        }
+        existing_by_provider_key = {
+            _match_key(row): row
+            for row in existing_matches
+        }
+        existing_by_canonical_key = {
+            (
+                str(row.get("date") or row.get("kickoff") or "")[:10],
+                odds.normalize_text(
+                    row.get("canonicalHomeTeam") or row.get("homeTeam"),
+                    drop_suffixes=True,
+                ),
+                odds.normalize_text(
+                    row.get("canonicalAwayTeam") or row.get("awayTeam"),
+                    drop_suffixes=True,
+                ),
+            ): row
+            for row in existing_matches
+        }
+
+        archive_matches = [
+            row for row in archive_league.get("matches", []) or []
+            if isinstance(row, dict)
+        ]
+        for archive_match in archive_matches:
+            report["archiveMatchesVisited"] += 1
+            date = str(
+                archive_match.get("date")
+                or archive_match.get("kickoff")
+                or ""
+            )[:10]
+            if date and date < today:
+                report["expiredArchiveMatchesSkipped"] += 1
                 continue
-            # Never rewrite a healthy betting-ready fixture.
-            if match.get("usableForStats") is True and bool(match.get("markets") or []):
+
+            archive_id = str(archive_match.get("id") or "")
+            existing = (
+                existing_by_id.get(archive_id)
+                or existing_by_provider_key.get(_match_key(archive_match))
+            )
+            if (
+                existing is not None
+                and existing.get("usableForStats") is True
+                and bool(existing.get("markets") or [])
+            ):
+                report["healthyMatchesPreserved"] += 1
                 continue
+
             report["matchesConsidered"] += 1
-            archive_match = by_id.get(str(match.get("id") or "")) or by_key.get(_match_key(match))
-            if not archive_match:
-                continue
             report["matchesWithArchive"] += 1
-
-            provider_home = archive_match.get("providerHomeTeam") or match.get("providerHomeTeam") or match.get("homeTeam")
-            provider_away = archive_match.get("providerAwayTeam") or match.get("providerAwayTeam") or match.get("awayTeam")
+            provider_home = (
+                archive_match.get("providerHomeTeam")
+                or (existing or {}).get("providerHomeTeam")
+                or (existing or {}).get("homeTeam")
+            )
+            provider_away = (
+                archive_match.get("providerAwayTeam")
+                or (existing or {}).get("providerAwayTeam")
+                or (existing or {}).get("awayTeam")
+            )
             home, home_policy = _resolve_team(provider_home, code, aliases)
             away, away_policy = _resolve_team(provider_away, code, aliases)
             if not home or not away:
                 report["unresolvedHistoricalTeams"].append({
                     "leagueCode": code,
-                    "matchId": str(match.get("id") or ""),
+                    "matchId": archive_id,
                     "providerHomeTeam": provider_home,
                     "providerAwayTeam": provider_away,
                     "homeResolved": home,
@@ -211,11 +312,47 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
                 })
                 continue
 
-            markets = _normalize_archived_markets(archive_match, home, away, debug)
-            if not markets:
+            roster_variants = current_rosters.get(code, set())
+            if roster_variants and (
+                not _is_current_roster_member(home, roster_variants)
+                or not _is_current_roster_member(away, roster_variants)
+            ):
+                report["rejectedOutsideCurrentRoster"].append({
+                    "leagueCode": code,
+                    "matchId": archive_id,
+                    "providerHomeTeam": provider_home,
+                    "providerAwayTeam": provider_away,
+                    "homeResolved": home,
+                    "awayResolved": away,
+                })
                 continue
 
-            match.update({
+            canonical_key = (
+                date,
+                odds.normalize_text(home, drop_suffixes=True),
+                odds.normalize_text(away, drop_suffixes=True),
+            )
+            if existing is None:
+                existing = existing_by_canonical_key.get(canonical_key)
+                if (
+                    existing is not None
+                    and existing.get("usableForStats") is True
+                    and bool(existing.get("markets") or [])
+                ):
+                    report["healthyMatchesPreserved"] += 1
+                    continue
+
+            markets = _normalize_archived_markets(
+                archive_match,
+                home,
+                away,
+                debug,
+            )
+            if not markets:
+                report["archiveMatchesWithoutCanonicalMarkets"] += 1
+                continue
+
+            payload = {
                 "providerHomeTeam": str(provider_home or "").strip(),
                 "providerAwayTeam": str(provider_away or "").strip(),
                 "homeTeam": home,
@@ -228,28 +365,56 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
                 "scheduleOnly": False,
                 "scheduleVerified": True,
                 "bettingRehydratedFromArchive": True,
-            })
+            }
+
+            created = existing is None
+            if created:
+                existing = {
+                    "id": archive_match.get("id"),
+                    "date": archive_match.get("date") or date,
+                    "kickoff": archive_match.get("kickoff"),
+                    **payload,
+                }
+                existing_matches.append(existing)
+                if archive_id:
+                    existing_by_id[archive_id] = existing
+                existing_by_provider_key[_match_key(archive_match)] = existing
+                existing_by_canonical_key[canonical_key] = existing
+                report["matchesCreatedFromArchive"] += 1
+            else:
+                existing.update(payload)
+                report["matchesRepairedExisting"] += 1
+
             report["matchesRehydrated"] += 1
             report["marketsRehydrated"] += len(markets)
             report["rehydratedMatches"].append({
                 "leagueCode": code,
-                "matchId": str(match.get("id") or ""),
+                "matchId": archive_id,
                 "homeTeam": home,
                 "awayTeam": away,
                 "homeMappingPolicy": home_policy,
                 "awayMappingPolicy": away_policy,
                 "marketCount": len(markets),
+                "createdFromArchive": created,
             })
+
+        existing_matches.sort(
+            key=lambda row: (
+                str(row.get("kickoff") or row.get("date") or ""),
+                str(row.get("id") or ""),
+            )
+        )
 
     # Keep diagnostics compact and deterministic.
     report["unresolvedHistoricalTeams"] = report["unresolvedHistoricalTeams"][:100]
+    report["rejectedOutsideCurrentRoster"] = report["rejectedOutsideCurrentRoster"][:100]
     report["normalizationWarnings"] = debug.get("warnings", [])[:100]
-    feed["generatedAt"] = report["generatedAt"]
+    if report["matchesRehydrated"]:
+        feed["generatedAt"] = report["generatedAt"]
     feed.setdefault("debug", {})["archiveBettingRehydrate"] = report
     if hasattr(odds, "emitted_market_counts"):
         feed.setdefault("debug", {})["emittedMarketCounts"] = odds.emitted_market_counts(feed)
     return report
-
 
 def main() -> int:
     if not FEED_PATH.exists() or not ARCHIVE_PATH.exists():
