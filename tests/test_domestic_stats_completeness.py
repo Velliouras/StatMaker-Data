@@ -78,7 +78,7 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
         request_state = {"count": 1}
 
         with (
-            mock.patch.object(refresh.stats_fetch, "cache_path_for", return_value=Path("fake-cache.json")),
+            mock.patch.object(refresh.stats_fetch, "cache_path_for", return_value=ROOT / "fake-cache.json"),
             mock.patch.object(refresh.stats_fetch, "load_json", return_value={}),
             mock.patch.object(
                 refresh.stats_fetch,
