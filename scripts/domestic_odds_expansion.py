@@ -128,6 +128,7 @@ def generated_aliases(
     stats_fetch_module: Any,
     load_json: Any,
     registry: Sequence[Dict[str, Any]],
+    roster_payload: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Dict[str, str]]:
     aliases = odds_module.load_aliases()
 
@@ -142,10 +143,33 @@ def generated_aliases(
                     if variant:
                         bucket[variant] = canonical
 
+    roster_rows = (
+        roster_payload.get("leagues", [])
+        if isinstance(roster_payload, dict)
+        else []
+    )
+    roster_by_key = {
+        (
+            str(row.get("leagueCode") or "").strip().upper(),
+            str(row.get("appSeason") or "").strip(),
+        ): [
+            str(name).strip()
+            for name in row.get("teams", []) or []
+            if str(name).strip()
+        ]
+        for row in roster_rows
+        if isinstance(row, dict)
+    }
+
     for league in registry:
-        code = str(league.get("leagueCode") or "")
+        code = str(league.get("leagueCode") or "").strip().upper()
         bucket = aliases.setdefault(code, {})
         cache = load_json(stats_fetch_module.cache_path_for(league), {})
+
+        # Historical cache remains useful for continuity aliases, but current target
+        # membership must come from the authoritative roster artifact. Rollover
+        # registry rows intentionally point "season" at historical support, so using
+        # only that cache makes promoted/relegated/current teams impossible to map.
         canonical_names: Set[str] = {
             str(fixture.get(key) or "").strip()
             for fixture in cache.get("fixtures", []) or []
@@ -153,6 +177,15 @@ def generated_aliases(
             for key in ("home_team", "away_team")
             if str(fixture.get(key) or "").strip()
         }
+        target_app_season = str(
+            league.get("targetAppSeason")
+            or league.get("app_season")
+            or ""
+        ).strip()
+        canonical_names.update(
+            roster_by_key.get((code, target_app_season), [])
+        )
+
         owners: Dict[str, Set[str]] = {}
         for canonical in canonical_names:
             for variant in {
@@ -447,6 +480,27 @@ def expanded_build_output(
 
 def install(odds_module: Any, pipeline_module: Any) -> None:
     """Install the shared extension once into Domestic odds ingestion."""
+
+    def expanded_generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
+        roster_path = getattr(pipeline_module, "ROSTER_PATH", None)
+        roster_payload = (
+            pipeline_module.load_json(roster_path, {})
+            if roster_path is not None
+            else {}
+        )
+        return generated_aliases(
+            odds_module,
+            pipeline_module.stats_fetch,
+            pipeline_module.load_json,
+            registry,
+            roster_payload=roster_payload,
+        )
+
+    # generated_aliases belongs to the pipeline module, not odds_module. Re-attach it
+    # on every install call even when the odds hooks themselves are already installed.
+    # This removes test/import-order and wrapper-order dependence.
+    pipeline_module.generated_aliases = expanded_generated_aliases
+
     if getattr(odds_module, "_statmaker_domestic_expansion_installed", False):
         return
     original_normalize_market = odds_module.normalize_market
@@ -471,9 +525,6 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
         debug: Dict[str, Any],
     ) -> Tuple[str, Optional[str]]:
         return canonical_team_info(odds_module, name, league_code, aliases, debug)
-
-    def expanded_generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
-        return generated_aliases(odds_module, pipeline_module.stats_fetch, pipeline_module.load_json, registry)
 
     def expanded_match_provider_league(
         config_league: Dict[str, Any],
