@@ -80,10 +80,14 @@ adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
 
 ok=0
 last_stage=""
-# This is an off-device artifact build, not an interactive phone update. Keep a bounded window,
-# but fail immediately if transport or producer semantics become invalid instead of exporting a
-# corrupt/empty generation and discovering it in a later workflow step.
-for _ in $(seq 1 300); do
+start_epoch="$(date +%s)"
+last_progress_epoch="$start_epoch"
+max_total_seconds=2700
+max_idle_seconds=1200
+# This is an off-device artifact build, not an interactive phone update. Use a progress-aware
+# watchdog rather than a fixed 25-minute wall clock: real producer stage changes extend the run,
+# while transport/data errors still fail immediately and a genuinely stalled producer is bounded.
+for _ in $(seq 1 540); do
   if ! server_healthy; then
     echo "App-ready HTTP server became unhealthy while producer was running" >&2
     cat "$HTTP_LOG" >&2 || true
@@ -102,6 +106,20 @@ for _ in $(seq 1 300); do
   if [[ -n "$stage" && "$stage" != "$last_stage" ]]; then
     echo "$stage"
     last_stage="$stage"
+    last_progress_epoch="$(date +%s)"
+  fi
+
+  now_epoch="$(date +%s)"
+  if (( now_epoch - last_progress_epoch >= max_idle_seconds )); then
+    echo "App-ready producer made no stage progress for ${max_idle_seconds}s; last stage: ${last_stage:-none}" >&2
+    printf '%s\\n' "$appready_logs" >&2
+    adb logcat -d | tail -600 >&2 || true
+    exit 1
+  fi
+  if (( now_epoch - start_epoch >= max_total_seconds )); then
+    echo "App-ready producer exceeded total build ceiling ${max_total_seconds}s; last stage: ${last_stage:-none}" >&2
+    printf '%s\\n' "$appready_logs" >&2
+    exit 1
   fi
 
   if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then
@@ -114,7 +132,7 @@ done
 appready_logs="$(adb logcat -d -s StatMakerAppReady:V "*:S" || true)"
 printf '%s\n' "$appready_logs"
 if [[ "$ok" -ne 1 ]]; then
-  echo "App-ready producer did not complete within 25 minutes" >&2
+  echo "App-ready producer did not complete within the progress-aware build window" >&2
   adb logcat -d | tail -600 >&2
   exit 1
 fi

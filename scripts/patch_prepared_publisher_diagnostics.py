@@ -163,6 +163,89 @@ def main() -> None:
         "prepared failure marker",
     )
 
+    # Publisher-only progress heartbeat around the expensive Domestic matcher. This
+    # does not change matcher/engine semantics; it only exposes real progress so the
+    # emulator watchdog can distinguish a slow healthy build from a stalled one.
+    text = replace_once(
+        text,
+        '''        if (leagueFeeds.isEmpty()) return emptyList()
+
+        val workerCount = minOf(
+''',
+        '''        if (leagueFeeds.isEmpty()) return emptyList()
+
+        fun buildPublisherLeague(
+            source: LeagueSource,
+            leagueFeed: OddsFeed
+        ): List<PatternBackedSelection> {
+            val startedAt = System.nanoTime()
+            Log.i(
+                "StatMakerAppReady",
+                "stage=prepared_domestic_league_\${source.code}_begin " +
+                    "matches=\${leagueFeed.matches.size} " +
+                    "markets=\${leagueFeed.matches.sumOf { it.markets.size }}"
+            )
+            return matcher.findPatternBackedSelections(
+                league = source,
+                oddsFeed = leagueFeed,
+                selectedFilters = "prepared-snapshot"
+            ).also { selections ->
+                val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L
+                Log.i(
+                    "StatMakerAppReady",
+                    "stage=prepared_domestic_league_\${source.code}_complete " +
+                        "selections=\${selections.size} elapsedMs=$elapsedMs"
+                )
+            }
+        }
+
+        val workerCount = minOf(
+''',
+        "prepared Domestic per-league heartbeat helper",
+    )
+
+    text = replace_once(
+        text,
+        '''        if (workerCount <= 1) {
+            return leagueFeeds.flatMap { (source, leagueFeed) ->
+                matcher.findPatternBackedSelections(
+                    league = source,
+                    oddsFeed = leagueFeed,
+                    selectedFilters = "prepared-snapshot"
+                )
+            }
+        }
+''',
+        '''        if (workerCount <= 1) {
+            return leagueFeeds.flatMap { (source, leagueFeed) ->
+                buildPublisherLeague(source, leagueFeed)
+            }
+        }
+''',
+        "prepared Domestic sequential heartbeat",
+    )
+
+    text = replace_once(
+        text,
+        '''            leagueFeeds.map { (source, leagueFeed) ->
+                executor.submit(Callable {
+                    matcher.findPatternBackedSelections(
+                        league = source,
+                        oddsFeed = leagueFeed,
+                        selectedFilters = "prepared-snapshot"
+                    )
+                })
+            }.flatMap { future -> future.get() }
+''',
+        '''            leagueFeeds.map { (source, leagueFeed) ->
+                executor.submit(Callable {
+                    buildPublisherLeague(source, leagueFeed)
+                })
+            }.flatMap { future -> future.get() }
+''',
+        "prepared Domestic parallel heartbeat",
+    )
+
     SOURCE.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_DIAGNOSTICS_OK")
 
