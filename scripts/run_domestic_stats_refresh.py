@@ -37,6 +37,16 @@ def normalize_code(value: Any) -> str:
     return scope.normalize_code(value)
 
 
+def roster_code(value: Any) -> str:
+    """Preserve the canonical registry league code in roster artifacts.
+
+    Scope aliases (notably ROM->ROU) are valid for inclusion filtering only; odds
+    identity joins use the registry code verbatim and therefore must not persist
+    the scope alias into domestic_rosters.json.
+    """
+    return str(value or "").strip().upper()
+
+
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
@@ -164,7 +174,7 @@ def roster_catalog_entries(raw: Any) -> Dict[tuple[str, str], Dict[str, Any]]:
     for item in rows if isinstance(rows, list) else []:
         if not isinstance(item, dict):
             continue
-        code = normalize_code(item.get("leagueCode"))
+        code = roster_code(item.get("leagueCode"))
         season = str(item.get("appSeason") or "").strip()
         teams = [str(name).strip() for name in item.get("teams", []) if str(name).strip()]
         if code and season and teams:
@@ -245,11 +255,26 @@ def discover_missing_target_rosters(
     entries = roster_catalog_entries(catalog)
     changed = False
 
+    # Migrate any historical scope aliases already persisted in the roster catalog
+    # back to the canonical registry code (for example ROU -> ROM).
+    for league in leagues:
+        code = roster_code(league.get("leagueCode"))
+        app_season = target_app_season(league)
+        if not code or not app_season:
+            continue
+        canonical_key = (code, app_season)
+        scope_key = (normalize_code(code), app_season)
+        if canonical_key not in entries and scope_key in entries and scope_key != canonical_key:
+            row = dict(entries.pop(scope_key))
+            row["leagueCode"] = code
+            entries[canonical_key] = row
+            changed = True
+
     # Zero-call first pass: the normal Stats refresh already caches exact target-season
     # fixture identities. Use those caches to populate current rosters, including
     # same-season leagues such as MLS/Brazil/Nordics where target==historical.
     for league in leagues:
-        code = normalize_code(league.get("leagueCode"))
+        code = roster_code(league.get("leagueCode"))
         app_season = target_app_season(league)
         season = target_season(league)
         if not code or not app_season or not season:
@@ -276,13 +301,13 @@ def discover_missing_target_rosters(
         league for league in leagues
         if target_season(league)
         and target_app_season(league)
-        and (normalize_code(league.get("leagueCode")), target_app_season(league)) not in entries
+        and (roster_code(league.get("leagueCode")), target_app_season(league)) not in entries
     ]
     missing.sort(
         key=lambda league: (
             scope.priority_rank(league),
             str(league.get("targetSeasonStart") or ""),
-            normalize_code(league.get("leagueCode")),
+            roster_code(league.get("leagueCode")),
         )
     )
 
@@ -316,7 +341,7 @@ def discover_missing_target_rosters(
             teams = target.stats_fetch.roster_from_fixtures(fixtures)
             if not teams:
                 continue
-            code = normalize_code(league.get("leagueCode"))
+            code = roster_code(league.get("leagueCode"))
             app_season = target_app_season(league)
             entries[(code, app_season)] = {
                 "leagueCode": code,
@@ -574,7 +599,7 @@ def main() -> int:
             code
             for code, season in roster_catalog
             if any(
-                normalize_code(league.get("leagueCode")) == code
+                roster_code(league.get("leagueCode")) == code
                 and target_app_season(league) == season
                 for league in roster_scope
             )
@@ -588,10 +613,10 @@ def main() -> int:
             "rosterScopeLeagueCount": len(roster_scope),
             "rosterCoveredLeagueCount": len(covered_codes),
             "rosterMissingLeagueCodes": sorted(
-                normalize_code(league.get("leagueCode"))
+                roster_code(league.get("leagueCode"))
                 for league in roster_scope
                 if (
-                    normalize_code(league.get("leagueCode")),
+                    roster_code(league.get("leagueCode")),
                     target_app_season(league),
                 ) not in roster_catalog
             ),
