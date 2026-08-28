@@ -34,6 +34,7 @@ jobs:
       - name: Validate offline rehydration code
         run: |
           python -m py_compile \
+            scripts/run_domestic_stats_refresh.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/odds_market_integrity.py \
             scripts/build_domestic_proposal_readiness.py \
@@ -42,10 +43,23 @@ jobs:
             scripts/refresh_domestic_lineups.py \
             scripts/refresh_domestic_squads.py
           python -m unittest \
+            tests/test_domestic_stats_completeness.py \
             tests/test_odds_market_integrity.py \
             tests/test_rehydrate_domestic_betting_from_archive.py \
             tests/test_domestic_proposal_readiness.py \
             tests/test_statmaker_update_manifest.py
+
+      - name: Repair authoritative current Domestic rosters
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
+        run: |
+          # Roster-only mode performs no stats/history backfill. It first rebuilds
+          # from existing exact target-season caches (zero calls), then uses at most
+          # one exact league+season request per still-missing league.
+          python scripts/run_domestic_stats_refresh.py \
+            --max-requests 600 \
+            --roster-only
 
       - name: Validate current Domestic feed
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
@@ -75,9 +89,11 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             odds/odds_api_io/domestic_odds.json \
+            data/statmaker/domestic_rosters.json \
             data/statmaker/domestic_proposal_readiness.json \
             data/statmaker/domestic_match_context_cache.json \
             reports/domestic_archive_betting_rehydrate.json \
+            reports/domestic_live_july_stats_refresh.json \
             reports/domestic_odds_integrity.json \
             reports/domestic_proposal_readiness.json \
             reports/domestic_lineup_watch.json \
