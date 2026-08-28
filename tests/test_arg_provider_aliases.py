@@ -130,6 +130,16 @@ class ConservativeSemanticProviderAliasTest(unittest.TestCase):
         self.assertTrue(debug.get("unmatchedTeams"))
 
 
+    def test_ingestion_preserves_real_sociedad_identity_words(self):
+        aliases = {"TST": {"real sociedad": "Real Sociedad"}}
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "Real Sociedad San Sebastian", "TST", aliases, debug
+        )
+        self.assertEqual("Real Sociedad", mapped)
+        self.assertEqual("Real Sociedad", canonical)
+
+
 class ArgentinaProviderAliasTest(unittest.TestCase):
     def test_all_observed_imminent_provider_names_map_exactly(self):
         registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
