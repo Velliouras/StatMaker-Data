@@ -23,7 +23,7 @@ TEAM_NAME_PREFIX_TOKENS = {
 SEMANTIC_GENERIC_TEAM_TOKENS = {
     "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if", "sk", "sv",
     "pfc", "kks", "wks", "acs", "asc", "mfk", "nk", "vfl", "vfb", "tsg",
-    "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
+    "bsc", "rc", "sfc", "ssc", "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
 }
 
 VERIFIED_PROVIDER_SLUGS = {
@@ -102,10 +102,9 @@ def simplified_team_name(odds_module: Any, value: Any) -> str:
 
 def _semantic_team_tokens(odds_module: Any, value: Any) -> Set[str]:
     normalized = odds_module.normalize_text(value or "", drop_suffixes=True)
-    simplified = simplified_team_name(odds_module, normalized)
     return {
         token
-        for token in simplified.split()
+        for token in normalized.split()
         if token not in SEMANTIC_GENERIC_TEAM_TOKENS and len(token) >= 2
     }
 
