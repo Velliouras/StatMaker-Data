@@ -71,12 +71,10 @@ jobs:
           report = json.loads(
               Path("reports/domestic_api_football_league_identity_repair.json").read_text(encoding="utf-8")
           )
-          repair_rows = list(report.get("repairs", []) or [])
-          stale_rows = list(report.get("staleStatsCaches", []) or [])
           codes = sorted({
-              str(row.get("leagueCode") or "").strip().upper()
-              for row in [*repair_rows, *stale_rows]
-              if str(row.get("leagueCode") or "").strip()
+              str(code).strip().upper()
+              for code in report.get("statsRebuildCodes", []) or []
+              if str(code).strip()
           })
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
               handle.write(f"corrected_codes={','.join(codes)}\n")
