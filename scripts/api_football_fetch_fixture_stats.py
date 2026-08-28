@@ -93,6 +93,12 @@ def normalize_key(value: Any) -> str:
     return re.sub(r"\s+", " ", text)
 
 
+VERIFIED_COMPETITION_NAME_ALIASES = {
+    "obos ligaen": {"1 division"},
+    "liga portugal": {"primeira liga"},
+}
+
+
 def provider_league_name_compatible(expected: Any, actual: Any) -> bool:
     """Conservative competition-name identity check.
 
@@ -105,6 +111,12 @@ def provider_league_name_compatible(expected: Any, actual: Any) -> bool:
     if not expected_text or not actual_text:
         return False
     if expected_text == actual_text:
+        return True
+    verified_actuals = VERIFIED_COMPETITION_NAME_ALIASES.get(expected_text, set())
+    if actual_text in verified_actuals:
+        return True
+    verified_reverse = VERIFIED_COMPETITION_NAME_ALIASES.get(actual_text, set())
+    if expected_text in verified_reverse:
         return True
     expected_tokens = expected_text.split()
     actual_tokens = actual_text.split()
