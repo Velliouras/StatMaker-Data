@@ -74,6 +74,9 @@ _GENERIC_ANCHOR_TOKENS = {
     "fc", "cf", "sc", "afc", "fk", "ac", "if", "sv", "sk", "tsg",
     "pfc", "wks", "kks", "acs", "asc", "cd", "ud", "sd", "ca",
     "de", "da", "do", "dos", "das", "the",
+    # Colours are common club descriptors and are not strong identity anchors.
+    "white", "black", "blue", "red", "green",
+    "weiss", "schwarz", "blau", "rot", "grun",
 }
 
 
