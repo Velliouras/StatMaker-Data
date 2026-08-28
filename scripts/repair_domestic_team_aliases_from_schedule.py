@@ -26,6 +26,7 @@ import update_domestic_odds_api_io as odds
 
 ROOT = Path(__file__).resolve().parents[1]
 ALIASES_PATH = ROOT / "mappings" / "domestic_team_aliases.json"
+ROSTER_PATH = ROOT / "data" / "statmaker" / "domestic_rosters.json"
 ARCHIVE_PATH = ROOT / "odds" / "odds_api_io" / "domestic_provider_markets.json"
 REHYDRATE_REPORT_PATH = ROOT / "reports" / "domestic_archive_betting_rehydrate.json"
 REPORT_PATH = ROOT / "reports" / "domestic_team_alias_schedule_repair.json"
@@ -62,6 +63,62 @@ def norm(value: Any) -> str:
 
 def same_team(left: Any, right: Any) -> bool:
     return bool(left and right and norm(left) == norm(right))
+
+
+_GENERIC_ANCHOR_TOKENS = {
+    "club", "city", "united", "athletic", "sporting", "real", "racing",
+    "deportivo", "football", "association", "team", "town", "county",
+    "fc", "cf", "sc", "afc", "fk", "ac", "if", "sv", "sk", "tsg",
+    "pfc", "wks", "kks", "acs", "asc", "cd", "ud", "sd", "ca",
+    "de", "da", "do", "dos", "das", "the",
+}
+
+
+def meaningful_tokens(value: Any) -> set[str]:
+    return {
+        token
+        for token in norm(value).split()
+        if token not in _GENERIC_ANCHOR_TOKENS
+        and len(token) >= 4
+        and not token.isdigit()
+    }
+
+
+def roster_by_code(payload: Dict[str, Any]) -> Dict[str, List[str]]:
+    out: Dict[str, List[str]] = {}
+    for row in payload.get("leagues", []) or []:
+        if not isinstance(row, dict):
+            continue
+        code = str(row.get("leagueCode") or "").strip().upper()
+        teams = [
+            str(name).strip()
+            for name in row.get("teams", []) or []
+            if str(name).strip()
+        ]
+        if code and teams:
+            out[code] = teams
+    return out
+
+
+def unique_roster_anchor(
+    provider_name: Any,
+    code: str,
+    rosters: Dict[str, List[str]],
+) -> Optional[str]:
+    """Return one league-local roster candidate sharing a unique strong token.
+
+    This is not accepted as a final alias on its own. It is only a constraint for
+    the exact date/kickoff fixture identity check, which must still resolve uniquely.
+    """
+    tokens = meaningful_tokens(provider_name)
+    if not tokens:
+        return None
+    candidates: List[str] = []
+    for canonical in rosters.get(code, []):
+        if tokens.intersection(meaningful_tokens(canonical)):
+            candidates.append(canonical)
+    unique = list(dict.fromkeys(candidates))
+    return unique[0] if len(unique) == 1 else None
 
 
 def archive_by_id(archive: Dict[str, Any]) -> Dict[Tuple[str, str], Dict[str, Any]]:
@@ -216,6 +273,7 @@ def main() -> int:
     archive = load(ARCHIVE_PATH, {})
     archive_matches = archive_by_id(archive)
     raw_aliases = load(ALIASES_PATH, {"version": 1, "normalizationRules": {}, "aliases": {}})
+    rosters = roster_by_code(load(ROSTER_PATH, {}))
 
     domestic_odds_expansion.install(odds, pipeline)
     generated_aliases = pipeline.generated_aliases(registry)
@@ -232,6 +290,7 @@ def main() -> int:
     learned: List[Dict[str, Any]] = []
     conflicts: List[Dict[str, Any]] = []
     ambiguous: List[Dict[str, Any]] = []
+    roster_anchors: List[Dict[str, Any]] = []
     league_reports: List[Dict[str, Any]] = []
     changed = False
 
@@ -295,7 +354,39 @@ def main() -> int:
             archive_match = archive_matches.get((code, match_id))
             if not archive_match:
                 continue
-            fixture = unique_fixture_identity(archive_match, unresolved, fixtures)
+            identity_row = dict(unresolved)
+            if not identity_row.get("homeResolved"):
+                anchor = unique_roster_anchor(
+                    archive_match.get("providerHomeTeam"),
+                    code,
+                    rosters,
+                )
+                if anchor:
+                    identity_row["homeResolved"] = anchor
+                    roster_anchors.append({
+                        "leagueCode": code,
+                        "matchId": match_id,
+                        "side": "home",
+                        "providerTeam": archive_match.get("providerHomeTeam"),
+                        "anchorTeam": anchor,
+                    })
+            if not identity_row.get("awayResolved"):
+                anchor = unique_roster_anchor(
+                    archive_match.get("providerAwayTeam"),
+                    code,
+                    rosters,
+                )
+                if anchor:
+                    identity_row["awayResolved"] = anchor
+                    roster_anchors.append({
+                        "leagueCode": code,
+                        "matchId": match_id,
+                        "side": "away",
+                        "providerTeam": archive_match.get("providerAwayTeam"),
+                        "anchorTeam": anchor,
+                    })
+
+            fixture = unique_fixture_identity(archive_match, identity_row, fixtures)
             if fixture is None:
                 ambiguous.append({
                     "leagueCode": code,
@@ -373,7 +464,9 @@ def main() -> int:
         "aliasesLearned": len(learned),
         "conflicts": len(conflicts),
         "ambiguousMatches": len(ambiguous),
+        "rosterAnchorsUsed": len(roster_anchors),
         "learned": learned,
+        "rosterAnchorDetails": roster_anchors,
         "conflictDetails": conflicts,
         "ambiguousDetails": ambiguous,
         "leagueReports": league_reports,
