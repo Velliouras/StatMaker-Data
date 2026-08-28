@@ -9,6 +9,7 @@ only from exact archived Odds-API.io payloads; no price is estimated or synthesi
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
@@ -118,6 +119,125 @@ def _is_current_roster_member(name: str, roster_variants: set[str]) -> bool:
     return bool(_variants(name).intersection(roster_variants))
 
 
+def _parse_kickoff(value: Any) -> dt.datetime | None:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def _current_schedule_by_league(
+    registry: Sequence[Dict[str, Any]],
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Load exact target-season API-Football fixture identity with zero API calls."""
+    result: Dict[str, List[Dict[str, Any]]] = {}
+    for league in registry:
+        if not isinstance(league, dict):
+            continue
+        code = str(league.get("leagueCode") or "").strip().upper()
+        target_season = str(
+            league.get("targetApiSeason")
+            or league.get("season")
+            or ""
+        ).strip()
+        if not code or not target_season:
+            continue
+        cache_league = dict(league)
+        cache_league["season"] = target_season
+        cache_league["historyApiSeason"] = target_season
+        cache = load(pipeline.stats_fetch.cache_path_for(cache_league), {})
+        fixtures: List[Dict[str, Any]] = []
+        for fixture in cache.get("fixtures", []) or []:
+            if not isinstance(fixture, dict):
+                continue
+            home = str(fixture.get("home_team") or "").strip()
+            away = str(fixture.get("away_team") or "").strip()
+            kickoff = str(fixture.get("date") or "").strip()
+            if not home or not away or not kickoff:
+                continue
+            fixtures.append({
+                "date": kickoff[:10],
+                "kickoff": kickoff,
+                "homeTeam": home,
+                "awayTeam": away,
+            })
+        if fixtures:
+            result[code] = fixtures
+    return result
+
+
+def _same_team(left: Any, right: Any) -> bool:
+    return bool(_variants(left).intersection(_variants(right)))
+
+
+def _resolve_from_current_schedule(
+    code: str,
+    archive_match: Dict[str, Any],
+    home: str | None,
+    away: str | None,
+    schedules: Dict[str, List[Dict[str, Any]]],
+) -> Tuple[str | None, str | None, bool]:
+    """Resolve provider naming only when current fixture identity is unique.
+
+    No fuzzy-name guess is used. Candidate fixtures must match the same date, any
+    already-resolved side, and (when available) a close kickoff. If both provider
+    sides are unresolved, kickoff identity must reduce the candidates to exactly one.
+    """
+    date = str(
+        archive_match.get("date")
+        or archive_match.get("kickoff")
+        or ""
+    )[:10]
+    candidates = [
+        row for row in schedules.get(code, [])
+        if str(row.get("date") or "") == date
+    ]
+    if not candidates:
+        return home, away, False
+
+    provider_kickoff = _parse_kickoff(archive_match.get("kickoff"))
+    compatible: List[Tuple[float, Dict[str, Any]]] = []
+    for row in candidates:
+        if home and not _same_team(home, row.get("homeTeam")):
+            continue
+        if away and not _same_team(away, row.get("awayTeam")):
+            continue
+        fixture_kickoff = _parse_kickoff(row.get("kickoff"))
+        delta_minutes = 10_000.0
+        if provider_kickoff is not None and fixture_kickoff is not None:
+            delta_minutes = abs(
+                (provider_kickoff - fixture_kickoff).total_seconds()
+            ) / 60.0
+            if delta_minutes > 180.0:
+                continue
+        compatible.append((delta_minutes, row))
+
+    if not compatible:
+        return home, away, False
+
+    if home is None and away is None:
+        close = [item for item in compatible if item[0] <= 90.0]
+        if len(close) != 1:
+            return home, away, False
+        chosen = close[0][1]
+    else:
+        if len(compatible) != 1:
+            return home, away, False
+        chosen = compatible[0][1]
+
+    return (
+        home or str(chosen.get("homeTeam") or "").strip() or None,
+        away or str(chosen.get("awayTeam") or "").strip() or None,
+        True,
+    )
+
+
 def _meaningful(text: str) -> set[str]:
     return {
         token for token in text.split()
@@ -193,6 +313,7 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
     domestic_market_expansion_v15.install(odds, pipeline)
     aliases = _historical_aliases(registry)
     current_rosters = _current_roster_variants(registry)
+    current_schedules = _current_schedule_by_league(registry)
     archive_leagues = {
         str(league.get("leagueCode") or ""): league
         for league in archive.get("leagues", []) or []
@@ -210,6 +331,7 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
         "matchesConsidered": 0,
         "matchesWithArchive": 0,
         "matchesRehydrated": 0,
+        "matchesResolvedByCurrentSchedule": 0,
         "matchesCreatedFromArchive": 0,
         "matchesRepairedExisting": 0,
         "healthyMatchesPreserved": 0,
@@ -301,6 +423,21 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
             )
             home, home_policy = _resolve_team(provider_home, code, aliases)
             away, away_policy = _resolve_team(provider_away, code, aliases)
+            if not home or not away:
+                before_home, before_away = home, away
+                home, away, schedule_resolved = _resolve_from_current_schedule(
+                    code,
+                    archive_match,
+                    home,
+                    away,
+                    current_schedules,
+                )
+                if schedule_resolved:
+                    report["matchesResolvedByCurrentSchedule"] += 1
+                    if before_home is None and home is not None:
+                        home_policy = "unique_current_schedule_identity"
+                    if before_away is None and away is not None:
+                        away_policy = "unique_current_schedule_identity"
             if not home or not away:
                 report["unresolvedHistoricalTeams"].append({
                     "leagueCode": code,
