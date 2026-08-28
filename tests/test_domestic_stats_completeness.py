@@ -91,7 +91,7 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
                 "key", league, request_state, 10
             )
 
-        self.assertEqual(0, row["completed"])
+        self.assertEqual(0, row["completed_fixtures_found"])
         self.assertIn("provider competition mismatch", row["notes"])
         write_json.assert_called_once()
         written_payload = write_json.call_args.args[1]
