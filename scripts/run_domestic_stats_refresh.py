@@ -172,6 +172,73 @@ def roster_catalog_entries(raw: Any) -> Dict[tuple[str, str], Dict[str, Any]]:
     return result
 
 
+def target_roster_cache_league(league: Mapping[str, Any]) -> Dict[str, Any] | None:
+    season = target_season(league)
+    app_season = target_app_season(league)
+    if not season or not app_season:
+        return None
+    row = dict(league)
+    row["season"] = season
+    row["historyApiSeason"] = season
+    row["app_season"] = app_season
+    row["targetApiSeason"] = season
+    row["targetAppSeason"] = app_season
+    return row
+
+
+def cached_target_roster(league: Mapping[str, Any]) -> List[str]:
+    cache_league = target_roster_cache_league(league)
+    if cache_league is None:
+        return []
+    cache = load_json(target.stats_fetch.cache_path_for(cache_league), {})
+    teams = {
+        str(name).strip()
+        for name in cache.get("roster", []) or []
+        if str(name).strip()
+    }
+    if not teams:
+        teams = {
+            str(fixture.get(key) or "").strip()
+            for fixture in cache.get("fixtures", []) or []
+            if isinstance(fixture, dict)
+            for key in ("home_team", "away_team")
+            if str(fixture.get(key) or "").strip()
+        }
+    return sorted(teams, key=str.casefold)
+
+
+def roster_discovery_scope(
+    registry: List[Dict[str, Any]],
+    selected: List[Dict[str, Any]],
+    requested_codes: set[str],
+    historical_only: bool,
+) -> List[Dict[str, Any]]:
+    # Normal scheduled runs must keep authoritative roster coverage for the whole
+    # active Stats universe. Explicit targeted/historical runs stay targeted so a
+    # small maintenance run cannot consume quota for unrelated leagues.
+    if requested_codes or historical_only:
+        return selected
+    return registry
+
+
+def _write_roster_catalog(entries: Dict[tuple[str, str], Dict[str, Any]]) -> None:
+    write_json(ROSTER_PATH, {
+        "schemaVersion": 1,
+        "generatedAt": target.pipeline.now_utc(),
+        "source": "api-football",
+        "contract": (
+            "authoritative target-season league rosters are rebuilt from exact "
+            "league+season fixture caches first and API-Football discovery only "
+            "fills remaining gaps inside the existing Domestic Stats request ceiling"
+        ),
+        "leagueCount": len(entries),
+        "leagues": [
+            entries[key]
+            for key in sorted(entries, key=lambda item: (item[0], item[1]))
+        ],
+    })
+
+
 def discover_missing_target_rosters(
     api_key: str,
     leagues: List[Dict[str, Any]],
@@ -179,12 +246,40 @@ def discover_missing_target_rosters(
 ) -> int:
     catalog = load_json(ROSTER_PATH, {})
     entries = roster_catalog_entries(catalog)
+    changed = False
+
+    # Zero-call first pass: the normal Stats refresh already caches exact target-season
+    # fixture identities. Use those caches to populate current rosters, including
+    # same-season leagues such as MLS/Brazil/Nordics where target==historical.
+    for league in leagues:
+        code = normalize_code(league.get("leagueCode"))
+        app_season = target_app_season(league)
+        season = target_season(league)
+        if not code or not app_season or not season:
+            continue
+        teams = cached_target_roster(league)
+        if not teams:
+            continue
+        key = (code, app_season)
+        previous = entries.get(key) or {}
+        row = {
+            "leagueCode": code,
+            "country": league.get("country"),
+            "competition": league.get("competition"),
+            "appSeason": app_season,
+            "apiFootballSeason": str(season),
+            "source": "api-football exact target-season fixture cache",
+            "teams": teams,
+        }
+        if previous != row:
+            entries[key] = row
+            changed = True
+
     missing = [
         league for league in leagues
         if target_season(league)
         and target_app_season(league)
         and (normalize_code(league.get("leagueCode")), target_app_season(league)) not in entries
-        and target_season(league) != historical_season(league)
     ]
     missing.sort(
         key=lambda league: (
@@ -193,66 +288,52 @@ def discover_missing_target_rosters(
             normalize_code(league.get("leagueCode")),
         )
     )
-    if not missing or max_requests <= 1:
-        return 0
 
-    # Stay inside the caller's existing request ceiling. At the normal 2400-request run
-    # this is enough to discover every rollover roster in one pass; small targeted runs
-    # reserve almost all of their budget for the historical/statistics work they requested.
-    roster_request_cap = min(len(missing), max(1, max_requests // 20))
     request_state = {"count": 0}
+    if missing and max_requests > 1:
+        # Stay inside the caller's existing request ceiling. A roster needs one exact
+        # league+season fixture discovery request; targeted runs retain their small scope.
+        roster_request_cap = min(len(missing), max(1, max_requests // 20))
+        for league in missing[:roster_request_cap]:
+            if request_state["count"] >= roster_request_cap:
+                break
+            try:
+                league_id = int(league.get("apiFootballLeagueId") or league.get("api_football_league_id"))
+                season = int(target_season(league))
+            except (TypeError, ValueError):
+                continue
+            try:
+                payload = target.stats_fetch.api_get(
+                    api_key,
+                    "fixtures",
+                    {"league": league_id, "season": season},
+                    request_state,
+                    roster_request_cap,
+                )
+            except target.stats_fetch.RequestLimitReached:
+                break
+            except Exception:
+                continue
 
-    for league in missing[:roster_request_cap]:
-        if request_state["count"] >= roster_request_cap:
-            break
-        try:
-            league_id = int(league.get("apiFootballLeagueId") or league.get("api_football_league_id"))
-            season = int(target_season(league))
-        except (TypeError, ValueError):
-            continue
-        try:
-            payload = target.stats_fetch.api_get(
-                api_key,
-                "fixtures",
-                {"league": league_id, "season": season},
-                request_state,
-                roster_request_cap,
-            )
-        except target.stats_fetch.RequestLimitReached:
-            break
-        except Exception:
-            continue
+            fixtures = target.stats_fetch.response_items(payload)
+            teams = target.stats_fetch.roster_from_fixtures(fixtures)
+            if not teams:
+                continue
+            code = normalize_code(league.get("leagueCode"))
+            app_season = target_app_season(league)
+            entries[(code, app_season)] = {
+                "leagueCode": code,
+                "country": league.get("country"),
+                "competition": league.get("competition"),
+                "appSeason": app_season,
+                "apiFootballSeason": str(season),
+                "source": "api-football exact target league+season fixture discovery",
+                "teams": teams,
+            }
+            changed = True
 
-        fixtures = target.stats_fetch.response_items(payload)
-        teams = target.stats_fetch.roster_from_fixtures(fixtures)
-        if not teams:
-            continue
-        code = normalize_code(league.get("leagueCode"))
-        app_season = target_app_season(league)
-        entries[(code, app_season)] = {
-            "leagueCode": code,
-            "country": league.get("country"),
-            "competition": league.get("competition"),
-            "appSeason": app_season,
-            "apiFootballSeason": str(season),
-            "source": "api-football exact target league+season fixture discovery",
-            "teams": teams,
-        }
-
-    write_json(ROSTER_PATH, {
-        "schemaVersion": 1,
-        "generatedAt": target.pipeline.now_utc(),
-        "source": "api-football",
-        "contract": (
-            "league rosters discovered from exact league+season fixture responses; "
-            "target-roster discovery stays inside the existing Domestic Stats request ceiling"
-        ),
-        "leagueCount": len(entries),
-        "leagues": [
-            entries[key]
-            for key in sorted(entries, key=lambda item: (item[0], item[1]))
-        ],
-    })
+    if changed:
+        _write_roster_catalog(entries)
     return request_state["count"]
 
 
@@ -400,6 +481,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Do not discover current target-season rosters in this run",
     )
+    parser.add_argument(
+        "--roster-only",
+        action="store_true",
+        help="Repair authoritative target-season rosters only; skip stats/history refresh",
+    )
     return parser.parse_args()
 
 
@@ -474,11 +560,50 @@ def main() -> int:
                 }
         active.append(league)
 
+    roster_scope = roster_discovery_scope(
+        registry,
+        selected,
+        requested_codes,
+        bool(args.historical_only),
+    )
     roster_requests = (
         0
         if args.skip_roster_discovery
-        else discover_missing_target_rosters(api_key, selected, max_requests)
+        else discover_missing_target_rosters(api_key, roster_scope, max_requests)
     )
+    if args.roster_only:
+        roster_catalog = roster_catalog_entries(load_json(ROSTER_PATH, {}))
+        covered_codes = {
+            code
+            for code, season in roster_catalog
+            if any(
+                normalize_code(league.get("leagueCode")) == code
+                and target_app_season(league) == season
+                for league in roster_scope
+            )
+        }
+        roster_report = {
+            "generatedAt": target.pipeline.now_utc(),
+            "rosterOnlyMode": True,
+            "maxRequests": max_requests,
+            "requestsUsed": roster_requests,
+            "rosterDiscoveryRequests": roster_requests,
+            "rosterScopeLeagueCount": len(roster_scope),
+            "rosterCoveredLeagueCount": len(covered_codes),
+            "rosterMissingLeagueCodes": sorted(
+                normalize_code(league.get("leagueCode"))
+                for league in roster_scope
+                if (
+                    normalize_code(league.get("leagueCode")),
+                    target_app_season(league),
+                ) not in roster_catalog
+            ),
+            "apiFootballQuotaGuard": quota_guard.status(),
+        }
+        write_json(REPORT_PATH, roster_report)
+        print(json.dumps(roster_report, ensure_ascii=False, indent=2))
+        return 0
+
     historical_active = [league for league in active if is_historical_snapshot(league)]
     refresh_rows = list(active)
     if not args.historical_only:
