@@ -83,6 +83,24 @@ class DomesticVerifiedScheduleAliasRepairTest(unittest.TestCase):
             target.unique_fixture_identity(self.archive_match, unresolved, fixtures)
         )
 
+    def test_unique_roster_anchor_is_only_used_when_league_local_token_is_unique(self):
+        rosters = {
+            "D1": ["1. FC Köln", "1899 Hoffenheim", "Bayern München"],
+            "AUT2": ["FC BW Linz", "WSPG Wels", "Schwarz-Weiß Bregenz"],
+        }
+
+        self.assertEqual(
+            "1899 Hoffenheim",
+            target.unique_roster_anchor("TSG Hoffenheim", "D1", rosters),
+        )
+        self.assertEqual(
+            "FC BW Linz",
+            target.unique_roster_anchor("Blau-Weiss Linz", "AUT2", rosters),
+        )
+        self.assertIsNone(
+            target.unique_roster_anchor("FC United", "D1", rosters),
+        )
+
     def test_verified_alias_never_overwrites_conflicting_owner(self):
         payload = {
             "version": 1,
