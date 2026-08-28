@@ -104,7 +104,19 @@ def _existing_slug_map(registry: Sequence[Dict[str, Any]]) -> Dict[str, str]:
     return mapping
 
 
-def _imminent_codes(events: Iterable[Dict[str, Any]], slug_to_code: Dict[str, str]) -> List[str]:
+def _imminent_codes(
+    events: Iterable[Dict[str, Any]],
+    slug_to_code: Dict[str, str],
+    last_refresh_by_code: Dict[str, str] | None = None,
+) -> List[str]:
+    """Order imminent leagues by exact-odds staleness, not kickoff alone.
+
+    The previous implementation moved every imminent league ahead of the cursor in
+    kickoff order. When the imminent set was larger than the cycle size, the same
+    first leagues could be selected repeatedly while the cursor advanced only on
+    paper. Missing timestamps sort first; after each successful batch its leagues
+    receive a timestamp and naturally fall behind never/older-refreshed leagues.
+    """
     earliest: Dict[str, str] = {}
     for event in events:
         code = slug_to_code.get(_league_slug(event))
@@ -114,7 +126,19 @@ def _imminent_codes(events: Iterable[Dict[str, Any]], slug_to_code: Dict[str, st
         previous = earliest.get(code)
         if previous is None or kickoff < previous:
             earliest[code] = kickoff
-    return [code for code, _ in sorted(earliest.items(), key=lambda item: (item[1], item[0]))]
+
+    freshness = last_refresh_by_code if isinstance(last_refresh_by_code, dict) else {}
+    return [
+        code
+        for code, _ in sorted(
+            earliest.items(),
+            key=lambda item: (
+                str(freshness.get(item[0]) or ""),
+                item[1],
+                item[0],
+            ),
+        )
+    ]
 
 
 def _install_priority_rotation(priority_codes: Sequence[str]) -> None:
@@ -401,7 +425,15 @@ def main() -> int:
     global_debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     events = _global_imminent_events(api_key, schedule_days, global_debug)
     slug_to_code = _existing_slug_map(registry)
-    priority_codes = _imminent_codes(events, slug_to_code)
+    state = pipeline.load_json(pipeline.STATE_PATH, {})
+    last_refresh_by_code = state.get("oddsLastRefreshByLeague")
+    if not isinstance(last_refresh_by_code, dict):
+        last_refresh_by_code = {}
+    priority_codes = _imminent_codes(
+        events,
+        slug_to_code,
+        last_refresh_by_code=last_refresh_by_code,
+    )
 
     _install_priority_rotation(priority_codes)
     _install_near_term_event_horizon(odds_days)

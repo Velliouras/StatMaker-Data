@@ -64,6 +64,49 @@ class DomesticScheduleOnlyValidationTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             target.target.validate_feed(feed, self.registry(), dt.date(2026, 8, 14))
 
+    def test_imminent_priority_uses_oldest_exact_odds_refresh_first(self):
+        events = [
+            {"league": {"slug": "england-premier-league"}, "date": "2026-08-29T11:30:00Z"},
+            {"league": {"slug": "england-championship"}, "date": "2026-08-29T11:30:00Z"},
+            {"league": {"slug": "england-league-one"}, "date": "2026-08-29T11:30:00Z"},
+        ]
+        # _kickoff delegates to the provider helper; use its accepted kickoff key shape.
+        for row in events:
+            row["startTime"] = row.pop("date")
+        mapping = {
+            "england-premier-league": "E0",
+            "england-championship": "E1",
+            "england-league-one": "E2",
+        }
+        ordered = target._imminent_codes(
+            events,
+            mapping,
+            {
+                "E0": "2026-08-28T05:00:00Z",
+                "E1": "2026-08-28T01:00:00Z",
+                # E2 has never been refreshed and must be first.
+            },
+        )
+        self.assertEqual(["E2", "E1", "E0"], ordered)
+
+    def test_imminent_priority_does_not_repeat_just_refreshed_batch(self):
+        events = []
+        mapping = {}
+        freshness = {}
+        for index in range(20):
+            code = f"L{index:02d}"
+            slug = f"league-{index:02d}"
+            mapping[slug] = code
+            events.append({
+                "league": {"slug": slug},
+                "startTime": f"2026-08-29T{index % 20:02d}:00:00Z",
+            })
+            if index < 16:
+                freshness[code] = "2026-08-28T06:00:00Z"
+
+        ordered = target._imminent_codes(events, mapping, freshness)
+        self.assertEqual(["L16", "L17", "L18", "L19"], ordered[:4])
+
     def test_unverified_zero_market_row_still_fails_closed(self):
         feed = {"leagues": [{
             "leagueCode": "AUT",

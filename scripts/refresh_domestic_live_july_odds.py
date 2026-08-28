@@ -336,16 +336,23 @@ def main() -> int:
     archive_validation = validate_provider_archive(archive, registry, today)
     pipeline.write_json(odds_fetch.REPORT_PATH, debug)
 
+    refresh_at = pipeline.now_utc()
     if eligible and completed:
         state["oddsCursor"] = (cursor + len(completed)) % len(eligible)
+    refresh_by_league = state.get("oddsLastRefreshByLeague")
+    if not isinstance(refresh_by_league, dict):
+        refresh_by_league = {}
+    for code in completed:
+        refresh_by_league[str(code)] = refresh_at
     state.update(
         {
             "lastOddsLeagues": completed,
             "lastOddsRequestedLeagues": [row.get("leagueCode") for row in selected_registry],
             "lastOddsRateLimitRemaining": debug.get("rateLimitRemaining"),
-            "lastOddsRefreshAt": pipeline.now_utc(),
+            "lastOddsRefreshAt": refresh_at,
+            "oddsLastRefreshByLeague": refresh_by_league,
             "registryLeagueCount": len(registry),
-            "generatedAt": pipeline.now_utc(),
+            "generatedAt": refresh_at,
         }
     )
     pipeline.write_json(pipeline.STATE_PATH, state)
