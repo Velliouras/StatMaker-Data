@@ -93,6 +93,57 @@ def normalize_key(value: Any) -> str:
     return re.sub(r"\s+", " ", text)
 
 
+def provider_league_name_compatible(expected: Any, actual: Any) -> bool:
+    """Conservative competition-name identity check.
+
+    Accept exact normalized names, token-order differences (for example
+    "Bundesliga 2" vs "2. Bundesliga"), and a clear whole-name containment
+    used by providers that append/remove a country or sponsor qualifier.
+    """
+    expected_text = normalize_key(expected)
+    actual_text = normalize_key(actual)
+    if not expected_text or not actual_text:
+        return False
+    if expected_text == actual_text:
+        return True
+    expected_tokens = expected_text.split()
+    actual_tokens = actual_text.split()
+    if set(expected_tokens) == set(actual_tokens):
+        return True
+    if len(expected_tokens) >= 2 and len(actual_tokens) >= 2:
+        if expected_text in actual_text or actual_text in expected_text:
+            return True
+    return False
+
+
+def provider_league_name_mismatch_reason(
+    league: Dict[str, Any],
+    source_names: Iterable[Any],
+) -> Optional[str]:
+    expected_names = [
+        league.get("competition"),
+        league.get("display_name"),
+    ]
+    expected_names = [name for name in expected_names if str(name or "").strip()]
+    actual_names = sorted({
+        str(name).strip()
+        for name in source_names
+        if str(name or "").strip()
+    })
+    if not expected_names or not actual_names:
+        return None
+    if any(
+        provider_league_name_compatible(expected, actual)
+        for expected in expected_names
+        for actual in actual_names
+    ):
+        return None
+    return (
+        f"fixture source league names {actual_names} do not match configured "
+        f"competition {[str(name) for name in expected_names]}"
+    )
+
+
 def parse_number(value: Any) -> Optional[float | int]:
     if value is None:
         return None
@@ -385,6 +436,19 @@ def cache_identity_mismatch_reason(
                 f"fixture source league ids {sorted(wrong_source_ids)} "
                 f"do not match configured={expected_id}"
             )
+
+    source_league_names = [
+        (fixture.get("source_league") or {}).get("name")
+        for fixture in cache.get("fixtures", []) or []
+        if isinstance(fixture, dict)
+        and isinstance(fixture.get("source_league"), dict)
+    ]
+    source_name_error = provider_league_name_mismatch_reason(
+        league,
+        source_league_names,
+    )
+    if source_name_error:
+        return source_name_error
 
     expected_season = str(league.get("season") or "").strip()
     actual_season = str(cache.get("season") or "").strip()
