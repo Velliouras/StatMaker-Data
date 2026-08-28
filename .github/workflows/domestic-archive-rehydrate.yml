@@ -61,6 +61,26 @@ jobs:
           python scripts/repair_domestic_api_football_league_ids.py \
             --max-requests 10
 
+      - name: Capture corrected league identities
+        id: league_identity
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads(
+              Path("reports/domestic_api_football_league_identity_repair.json").read_text(encoding="utf-8")
+          )
+          codes = sorted({
+              str(row.get("leagueCode") or "").strip().upper()
+              for row in report.get("repairs", []) or []
+              if str(row.get("leagueCode") or "").strip()
+          })
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+              handle.write(f"corrected_codes={','.join(codes)}\n")
+          print(f"Corrected API-Football league identities: {codes}")
+          PY
+
       - name: Repair authoritative current Domestic rosters
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -72,6 +92,36 @@ jobs:
           python scripts/run_domestic_stats_refresh.py \
             --max-requests 600 \
             --roster-only
+
+      - name: Rebuild corrected Domestic statistics
+        if: steps.league_identity.outputs.corrected_codes != ''
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
+        run: |
+          python scripts/run_domestic_stats_refresh.py \
+            --league-codes "${{ steps.league_identity.outputs.corrected_codes }}" \
+            --max-requests 300 \
+            --skip-roster-discovery
+
+      - name: Rebuild app statistics after league identity correction
+        if: steps.league_identity.outputs.corrected_codes != ''
+        run: |
+          python scripts/expand_domestic_full_stats.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic Stats registry is empty')
+          pipeline.build_roster_catalog(registry)
+          pipeline.build_app_statistics(registry)
+          PY
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
 
       - name: Validate current Domestic feed
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
@@ -114,7 +164,12 @@ jobs:
             config/domestic_leagues.json \
             config/api_football_enrichment_leagues.json \
             config/nordic_extra_leagues.json \
+            config/july_extra_leagues_2026.json \
             data/statmaker/domestic_live_july_registry.json \
+            data/api_football/fixture_stats \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/domestic_enriched \
+            data/statmaker/uefa_support_history.json \
             odds/odds_api_io/domestic_odds.json \
             data/statmaker/domestic_rosters.json \
             mappings/domestic_team_aliases.json \
