@@ -124,6 +124,7 @@ def now_utc() -> str:
 
 def normalize_text(value: Any, *, drop_suffixes: bool = False) -> str:
     text = str(value or "").strip().lower()
+    text = text.replace("ß", "ss")
     text = unicodedata.normalize("NFKD", text)
     text = "".join(ch for ch in text if not unicodedata.combining(ch))
     text = text.replace("&", " and ")
