@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,10 +75,10 @@ class DomesticRosterDiscoveryTest(unittest.TestCase):
         written = {}
 
         with (
-            unittest.mock.patch.object(orchestrator, "load_json", return_value={}),
-            unittest.mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
-            unittest.mock.patch.object(orchestrator, "cached_target_roster", return_value=[]),
-            unittest.mock.patch.object(orchestrator.target.stats_fetch, "api_get", return_value=fixture_payload) as api_get,
+            mock.patch.object(orchestrator, "load_json", return_value={}),
+            mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
+            mock.patch.object(orchestrator, "cached_target_roster", return_value=[]),
+            mock.patch.object(orchestrator.target.stats_fetch, "api_get", return_value=fixture_payload) as api_get,
         ):
             used = orchestrator.discover_missing_target_rosters("key", [league], 20)
 
@@ -101,10 +102,10 @@ class DomesticRosterDiscoveryTest(unittest.TestCase):
         written = {}
 
         with (
-            unittest.mock.patch.object(orchestrator, "load_json", return_value={}),
-            unittest.mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
-            unittest.mock.patch.object(orchestrator, "cached_target_roster", return_value=["HJK helsinki", "Inter Turku"]),
-            unittest.mock.patch.object(orchestrator.target.stats_fetch, "api_get") as api_get,
+            mock.patch.object(orchestrator, "load_json", return_value={}),
+            mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
+            mock.patch.object(orchestrator, "cached_target_roster", return_value=["HJK helsinki", "Inter Turku"]),
+            mock.patch.object(orchestrator.target.stats_fetch, "api_get") as api_get,
         ):
             used = orchestrator.discover_missing_target_rosters("key", [league], 20)
 
