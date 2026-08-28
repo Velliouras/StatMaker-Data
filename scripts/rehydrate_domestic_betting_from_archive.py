@@ -86,6 +86,14 @@ def _historical_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[st
 
 def _current_roster_variants(registry: Sequence[Dict[str, Any]]) -> Dict[str, set[str]]:
     """Return normalized authoritative target-season roster membership by league."""
+    cached = getattr(pipeline, "_statmaker_current_roster_members", {})
+    if isinstance(cached, dict) and cached:
+        return {
+            str(code).strip().upper(): set(values)
+            for code, values in cached.items()
+            if isinstance(values, (set, list, tuple))
+        }
+
     target_season_by_code = {
         str(row.get("leagueCode") or "").strip().upper(): str(
             row.get("targetAppSeason")
