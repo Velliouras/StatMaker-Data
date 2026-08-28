@@ -42,10 +42,19 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
             }],
         }
 
-    def run_rebuild(self, feed, archive, aliases=None, markets=None, current_rosters=None):
+    def run_rebuild(
+        self,
+        feed,
+        archive,
+        aliases=None,
+        markets=None,
+        current_rosters=None,
+        current_schedule=None,
+    ):
         with (
             patch.object(target, "_historical_aliases", return_value=aliases if aliases is not None else self.aliases),
             patch.object(target, "_current_roster_variants", return_value=current_rosters or {}),
+            patch.object(target, "_current_schedule_by_league", return_value=current_schedule or {}),
             patch.object(target, "_normalize_archived_markets", return_value=markets if markets is not None else self.markets),
             patch.object(target.pipeline, "today_utc", return_value=dt.date(2026, 8, 28)),
         ):
@@ -106,6 +115,64 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
         self.assertEqual(0, report["matchesRehydrated"])
         self.assertEqual(0, report["matchesCreatedFromArchive"])
         self.assertEqual([], feed["leagues"][0]["matches"])
+        self.assertEqual(1, len(report["unresolvedHistoricalTeams"]))
+
+
+    def test_unique_current_schedule_identity_recovers_provider_name_variants(self):
+        feed = {"leagues": [{"leagueCode": "TST", "matches": []}]}
+        archive = {"leagues": [{"leagueCode": "TST", "matches": [dict(self.archive_match)]}]}
+        schedule = {
+            "TST": [{
+                "date": "2026-08-29",
+                "kickoff": "2026-08-29T14:00:00+00:00",
+                "homeTeam": "Canonical Home",
+                "awayTeam": "Canonical Away",
+            }]
+        }
+
+        report = self.run_rebuild(
+            feed,
+            archive,
+            aliases={"TST": {}},
+            current_schedule=schedule,
+        )
+
+        self.assertEqual(1, report["matchesRehydrated"])
+        self.assertEqual(1, report["matchesResolvedByCurrentSchedule"])
+        match = feed["leagues"][0]["matches"][0]
+        self.assertEqual("Canonical Home", match["homeTeam"])
+        self.assertEqual("Canonical Away", match["awayTeam"])
+
+    def test_ambiguous_same_date_schedule_stays_fail_closed(self):
+        feed = {"leagues": [{"leagueCode": "TST", "matches": []}]}
+        archive_match = dict(self.archive_match)
+        archive_match["kickoff"] = ""
+        archive = {"leagues": [{"leagueCode": "TST", "matches": [archive_match]}]}
+        schedule = {
+            "TST": [
+                {
+                    "date": "2026-08-29",
+                    "kickoff": "2026-08-29T14:00:00+00:00",
+                    "homeTeam": "Canonical Home",
+                    "awayTeam": "Canonical Away",
+                },
+                {
+                    "date": "2026-08-29",
+                    "kickoff": "2026-08-29T16:00:00+00:00",
+                    "homeTeam": "Other Home",
+                    "awayTeam": "Other Away",
+                },
+            ]
+        }
+
+        report = self.run_rebuild(
+            feed,
+            archive,
+            aliases={"TST": {}},
+            current_schedule=schedule,
+        )
+
+        self.assertEqual(0, report["matchesRehydrated"])
         self.assertEqual(1, len(report["unresolvedHistoricalTeams"]))
 
 
