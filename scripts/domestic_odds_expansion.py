@@ -18,6 +18,14 @@ TEAM_NAME_PREFIX_TOKENS = {
     "rks", "wks", "kks", "ks", "lkp", "gks", "afk",
 }
 
+# Legal-form / club-designator tokens are weak identity evidence. Ignore them only
+# in the conservative fallback matcher; exact aliases always win first.
+SEMANTIC_GENERIC_TEAM_TOKENS = {
+    "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if", "sk", "sv",
+    "pfc", "kks", "wks", "acs", "asc", "mfk", "nk", "vfl", "vfb", "tsg",
+    "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
+}
+
 VERIFIED_PROVIDER_SLUGS = {
     "ARG": "argentina-liga-profesional",
     "BRA": "brazil-serie-a",
@@ -92,6 +100,55 @@ def simplified_team_name(odds_module: Any, value: Any) -> str:
     return " ".join(words)
 
 
+def _semantic_team_tokens(odds_module: Any, value: Any) -> Set[str]:
+    normalized = odds_module.normalize_text(value or "", drop_suffixes=True)
+    simplified = simplified_team_name(odds_module, normalized)
+    return {
+        token
+        for token in simplified.split()
+        if token not in SEMANTIC_GENERIC_TEAM_TOKENS and len(token) >= 2
+    }
+
+
+def _unique_semantic_alias(
+    odds_module: Any,
+    name: Any,
+    league_aliases: Dict[str, str],
+) -> Optional[str]:
+    provider_tokens = _semantic_team_tokens(odds_module, name)
+    if not provider_tokens:
+        return None
+
+    candidates: Dict[str, Set[str]] = {}
+    for alias_key, canonical in league_aliases.items():
+        alias_tokens = _semantic_team_tokens(odds_module, alias_key)
+        if not alias_tokens:
+            continue
+        overlap = provider_tokens.intersection(alias_tokens)
+        if not overlap:
+            continue
+
+        contained = (
+            alias_tokens.issubset(provider_tokens)
+            or provider_tokens.issubset(alias_tokens)
+        )
+        short_unique_overlap = (
+            len(provider_tokens) <= 2
+            and len(alias_tokens) <= 2
+            and len(overlap) == 1
+            and len(next(iter(overlap))) >= 5
+        )
+        overlap_ratio = len(overlap) / max(1, min(len(provider_tokens), len(alias_tokens)))
+        strong_multi_overlap = len(overlap) >= 2 and overlap_ratio >= 0.5
+
+        if contained or short_unique_overlap or strong_multi_overlap:
+            candidates.setdefault(str(canonical), set()).add(str(alias_key))
+
+    if len(candidates) == 1:
+        return next(iter(candidates))
+    return None
+
+
 def canonical_team_info(
     odds_module: Any,
     name: str,
@@ -117,6 +174,16 @@ def canonical_team_info(
         }
         if normalized in verified_variants or simplified in verified_variants:
             return canonical, canonical
+
+    semantic = _unique_semantic_alias(odds_module, name, league_aliases)
+    if semantic:
+        debug.setdefault("conservativeTeamMappings", []).append({
+            "leagueCode": league_code,
+            "providerTeam": str(name or "").strip(),
+            "canonicalTeam": semantic,
+            "policy": "unique semantic token match",
+        })
+        return semantic, semantic
 
     odds_module.record_unmatched_team(debug, league_code, str(name or "").strip(), normalized)
     provider_name = str(name or "").strip()
