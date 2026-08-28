@@ -101,6 +101,32 @@ class DomesticVerifiedScheduleAliasRepairTest(unittest.TestCase):
             target.unique_roster_anchor("FC United", "D1", rosters),
         )
 
+    def test_exact_normalized_anchor_outweighs_weak_city_token_anchor(self):
+        rosters = {
+            "AUT2": [
+                "Austria Vienna (Am)",
+                "Rapid Wien II",
+                "Schwarz-Weiß Bregenz",
+            ],
+        }
+        home = target.unique_roster_anchor(
+            "Young Violets Wien", "AUT2", rosters
+        )
+        away = target.unique_roster_anchor(
+            "Schwarz-Weiss Bregenz", "AUT2", rosters
+        )
+
+        self.assertEqual("Rapid Wien II", home)
+        self.assertEqual("Schwarz-Weiß Bregenz", away)
+        self.assertEqual(
+            1,
+            target.roster_anchor_strength("Young Violets Wien", home),
+        )
+        self.assertEqual(
+            2,
+            target.roster_anchor_strength("Schwarz-Weiss Bregenz", away),
+        )
+
     def test_verified_alias_never_overwrites_conflicting_owner(self):
         payload = {
             "version": 1,
