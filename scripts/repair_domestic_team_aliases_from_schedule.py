@@ -121,6 +121,22 @@ def unique_roster_anchor(
     return unique[0] if len(unique) == 1 else None
 
 
+def roster_anchor_strength(provider_name: Any, canonical: Any) -> int:
+    """Rank deterministic roster anchors without turning tokens into fuzzy aliases.
+
+    2 = exact normalized provider/canonical name (accent/punctuation insensitive)
+    1 = league-local unique strong-token anchor
+    0 = unusable
+    """
+    if not provider_name or not canonical:
+        return 0
+    if norm(provider_name) == norm(canonical):
+        return 2
+    return 1 if meaningful_tokens(provider_name).intersection(
+        meaningful_tokens(canonical)
+    ) else 0
+
+
 def archive_by_id(archive: Dict[str, Any]) -> Dict[Tuple[str, str], Dict[str, Any]]:
     out: Dict[Tuple[str, str], Dict[str, Any]] = {}
     for league in archive.get("leagues", []) or []:
@@ -355,36 +371,42 @@ def main() -> int:
             if not archive_match:
                 continue
             identity_row = dict(unresolved)
-            if not identity_row.get("homeResolved"):
-                anchor = unique_roster_anchor(
-                    archive_match.get("providerHomeTeam"),
-                    code,
-                    rosters,
-                )
-                if anchor:
-                    identity_row["homeResolved"] = anchor
-                    roster_anchors.append({
-                        "leagueCode": code,
-                        "matchId": match_id,
-                        "side": "home",
-                        "providerTeam": archive_match.get("providerHomeTeam"),
-                        "anchorTeam": anchor,
-                    })
-            if not identity_row.get("awayResolved"):
-                anchor = unique_roster_anchor(
-                    archive_match.get("providerAwayTeam"),
-                    code,
-                    rosters,
-                )
-                if anchor:
-                    identity_row["awayResolved"] = anchor
-                    roster_anchors.append({
-                        "leagueCode": code,
-                        "matchId": match_id,
-                        "side": "away",
-                        "providerTeam": archive_match.get("providerAwayTeam"),
-                        "anchorTeam": anchor,
-                    })
+            pending_anchors: List[Tuple[str, str, str, int]] = []
+            for side, resolved_key, provider_key in (
+                ("home", "homeResolved", "providerHomeTeam"),
+                ("away", "awayResolved", "providerAwayTeam"),
+            ):
+                if identity_row.get(resolved_key):
+                    continue
+                provider_name = str(archive_match.get(provider_key) or "")
+                anchor = unique_roster_anchor(provider_name, code, rosters)
+                if not anchor:
+                    continue
+                pending_anchors.append((
+                    side,
+                    provider_name,
+                    anchor,
+                    roster_anchor_strength(provider_name, anchor),
+                ))
+
+            # If one side is an exact normalized roster identity, never let a weaker
+            # one-token anchor on the other side veto it (Young Violets Wien vs
+            # Rapid Wien II was the concrete failure). Weak anchors remain usable
+            # only when no stronger exact roster anchor exists.
+            strongest = max((item[3] for item in pending_anchors), default=0)
+            for side, provider_name, anchor, strength in pending_anchors:
+                if strongest and strength < strongest:
+                    continue
+                resolved_key = "homeResolved" if side == "home" else "awayResolved"
+                identity_row[resolved_key] = anchor
+                roster_anchors.append({
+                    "leagueCode": code,
+                    "matchId": match_id,
+                    "side": side,
+                    "providerTeam": provider_name,
+                    "anchorTeam": anchor,
+                    "anchorStrength": "exact_normalized" if strength == 2 else "unique_token",
+                })
 
             fixture = unique_fixture_identity(archive_match, identity_row, fixtures)
             if fixture is None:
