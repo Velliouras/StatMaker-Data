@@ -48,6 +48,41 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
         self.assertTrue(refresh.has_final_score(fixture))
         self.assertFalse(refresh.has_real_normalized_stats(fixture))
 
+    def test_wrong_provider_competition_name_invalidates_cache(self):
+        league = {
+            "apiFootballLeagueId": 245,
+            "competition": "Ykkösliiga",
+            "display_name": "Ykkösliiga",
+            "season": "2026",
+        }
+        cache = {
+            "league_id": 245,
+            "season": "2026",
+            "fixtures": [{
+                "source_league": {
+                    "id": 245,
+                    "name": "Ykkönen",
+                    "season": 2026,
+                }
+            }],
+        }
+
+        reason = stats_fetch.cache_identity_mismatch_reason(league, cache)
+
+        self.assertIsNotNone(reason)
+        self.assertIn("Ykkönen", reason)
+        self.assertIn("Ykkösliiga", reason)
+
+    def test_provider_competition_token_order_difference_is_compatible(self):
+        self.assertTrue(
+            stats_fetch.provider_league_name_compatible(
+                "Bundesliga 2",
+                "2. Bundesliga",
+            )
+        )
+
+
+
 
 class DomesticRosterDiscoveryTest(unittest.TestCase):
     def test_same_season_league_is_not_excluded_from_roster_discovery(self):
