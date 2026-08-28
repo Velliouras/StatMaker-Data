@@ -80,6 +80,102 @@ class EnglandCurrentMembershipProviderAliasTest(unittest.TestCase):
                     self.assertFalse(debug.get("unmatchedTeams"))
 
 
+class ConservativeSemanticProviderAliasTest(unittest.TestCase):
+    def setUp(self):
+        schedule_priority.target.domestic_odds_expansion.install(
+            schedule_priority.target.odds_fetch,
+            schedule_priority.target.pipeline,
+        )
+
+    def test_ingestion_maps_club_prefix_variant_uniquely(self):
+        aliases = {
+            "TST": {
+                "rapid vienna": "Rapid Vienna",
+                "sturm graz": "Sturm Graz",
+            }
+        }
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "SK Rapid", "TST", aliases, debug
+        )
+        self.assertEqual("Rapid Vienna", mapped)
+        self.assertEqual("Rapid Vienna", canonical)
+        self.assertEqual(
+            "unique semantic token match",
+            debug["conservativeTeamMappings"][0]["policy"],
+        )
+
+    def test_ingestion_maps_contained_short_name_uniquely(self):
+        aliases = {"TST": {"ktp": "KTP"}}
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "FC KTP Kotka", "TST", aliases, debug
+        )
+        self.assertEqual("KTP", mapped)
+        self.assertEqual("KTP", canonical)
+
+    def test_ingestion_does_not_guess_ambiguous_semantic_name(self):
+        aliases = {
+            "TST": {
+                "austria vienna": "Austria Vienna",
+                "austria lustenau": "Austria Lustenau",
+            }
+        }
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "FK Austria", "TST", aliases, debug
+        )
+        self.assertEqual("FK Austria", mapped)
+        self.assertIsNone(canonical)
+        self.assertTrue(debug.get("unmatchedTeams"))
+
+
+    def test_ingestion_preserves_real_sociedad_identity_words(self):
+        aliases = {"TST": {"real sociedad": "Real Sociedad"}}
+        debug = {}
+        mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+            "Real Sociedad San Sebastian", "TST", aliases, debug
+        )
+        self.assertEqual("Real Sociedad", mapped)
+        self.assertEqual("Real Sociedad", canonical)
+
+
+    def test_ingestion_rejects_historical_alias_outside_current_roster(self):
+        old_members = getattr(
+            schedule_priority.target.pipeline,
+            "_statmaker_current_roster_members",
+            None,
+        )
+        try:
+            schedule_priority.target.pipeline._statmaker_current_roster_members = {
+                "TST": {"current team"}
+            }
+            aliases = {"TST": {"old team": "Old Team"}}
+            debug = {}
+            mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+                "Old Team", "TST", aliases, debug
+            )
+            self.assertEqual("Old Team", mapped)
+            self.assertIsNone(canonical)
+            self.assertTrue(debug.get("rejectedOutsideCurrentRoster"))
+        finally:
+            if old_members is None:
+                delattr(
+                    schedule_priority.target.pipeline,
+                    "_statmaker_current_roster_members",
+                )
+            else:
+                schedule_priority.target.pipeline._statmaker_current_roster_members = old_members
+
+    def test_missing_roster_row_falls_back_to_current_enriched_membership(self):
+        registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
+        schedule_priority.target.pipeline.generated_aliases(registry)
+        current = schedule_priority.target.pipeline._statmaker_current_roster_members
+        self.assertIn("FIN2", current)
+        self.assertIn("fc jazz", current["FIN2"])
+        self.assertNotIn("ktp kotka", current["FIN2"])
+
+
 class ArgentinaProviderAliasTest(unittest.TestCase):
     def test_all_observed_imminent_provider_names_map_exactly(self):
         registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])

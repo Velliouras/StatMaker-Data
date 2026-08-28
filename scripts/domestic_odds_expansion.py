@@ -18,6 +18,14 @@ TEAM_NAME_PREFIX_TOKENS = {
     "rks", "wks", "kks", "ks", "lkp", "gks", "afk",
 }
 
+# Legal-form / club-designator tokens are weak identity evidence. Ignore them only
+# in the conservative fallback matcher; exact aliases always win first.
+SEMANTIC_GENERIC_TEAM_TOKENS = {
+    "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if", "sk", "sv",
+    "pfc", "kks", "wks", "acs", "asc", "mfk", "nk", "vfl", "vfb", "tsg",
+    "bsc", "rc", "sfc", "ssc", "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
+}
+
 VERIFIED_PROVIDER_SLUGS = {
     "ARG": "argentina-liga-profesional",
     "BRA": "brazil-serie-a",
@@ -53,6 +61,101 @@ VERIFIED_PROVIDER_COUNTRY_ALIASES: Dict[str, Sequence[str]] = {
 # valid exact-odds fixture is never discarded merely because the two providers
 # use different city/suffix labels.
 VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    "AUT": {
+        "Austria Vienna": ("FK Austria Wien",),
+        "Rapid Vienna": ("SK Rapid",),
+        "Red Bull Salzburg": ("FC Salzburg",),
+        "Sturm Graz": ("SK Sturm Graz",),
+        "WSG Wattens": ("WSG Tirol",),
+    },
+    "AUT2": {
+        "Austria Vienna (Am)": ("Young Violets Wien",),
+        "FC BW Linz": ("Blau-Weiss Linz",),
+        "Floridsdorfer AC": ("FAC Wien",),
+        "SV Kapfenberg": ("Kapfenberger SV",),
+        "Schwarz-Weiß Bregenz": ("Schwarz-Weiss Bregenz",),
+        "WSPG Wels": ("FC Hertha Wels",),
+    },
+    "CHL": {
+        "A. Italiano": ("Audax Italiano",),
+        "Everton de Vina": ("CD Everton Vina del Mar",),
+        "O'Higgins": ("CD O´Higgins", "CD O'Higgins"),
+        "U. Catolica": ("CD Universidad Catolica",),
+    },
+    "CYP": {
+        "AEL": ("AEL Limassol",),
+        "Apoel Nicosia": ("APOEL Nikosia",),
+        "Nea Salamis": ("Nea Salamina Famagusta",),
+        "Omonia 29is Maiou": ("Als Omonia", "ALS Omonia"),
+    },
+    "D1": {
+        "1. FC Köln": ("1. FC Cologne",),
+        "1899 Hoffenheim": ("TSG Hoffenheim",),
+        "Bayern München": ("Bayern Munich",),
+    },
+    "D2": {
+        "1. FC Nürnberg": ("1 FC Nuremberg", "1. FC Nuremberg"),
+    },
+    "EC": {
+        "Sutton Utd": ("Sutton United",),
+    },
+    "EGY": {
+        "Masr": ("Zed FC", "ZED FC"),
+    },
+    "F1": {
+        "Rennes": ("Stade Rennais FC",),
+        "Stade Brestois 29": ("Stade Brest 29",),
+    },
+    "F2": {
+        "Laval": ("Stade Lavallois MFC",),
+    },
+    "HUN": {
+        "Gyori ETO FC": ("WKW ETO FC Gyor",),
+        "Paks": ("Paksi FC",),
+        "Zalaegerszegi TE": ("Zalaegerszeg TE",),
+    },
+    "I2": {
+        "Vicenza Virtus": ("L.R. Vicenza",),
+    },
+    "IRL": {
+        "St Patrick's Athl.": ("Saint Patrick´s Athletic FC", "Saint Patrick's Athletic FC"),
+    },
+    "KOR": {
+        "Jeju United FC": ("Jeju SK FC",),
+        "Ulsan Hyundai FC": ("Ulsan HD FC",),
+    },
+    "P1": {
+        "Vitória SC": ("Vitoria SC Guimaraes",),
+    },
+    "ROM": {
+        "Arges Pitesti": ("ACS Champions FC Arges",),
+    },
+    "SAU": {
+        "Al Khaleej Saihat": ("Al-Khaleej Club",),
+        "Al Taawon": ("Al-Taawoun FC",),
+        "Al-Ahli Jeddah": ("Al Ahli Saudi FC",),
+        "Al-Hilal Saudi FC": ("Al Hilal SFC",),
+        "Al-Qadisiyah FC": ("Al Qadsiah",),
+    },
+    "SP1": {
+        "Athletic Club": ("Athletic Bilbao",),
+        "Espanyol": ("Espanyol Barcelona",),
+        "Real Sociedad": ("Real Sociedad San Sebastian",),
+    },
+    "SP2": {
+        "Celta de Vigo II": ("RC Celta Fortuna",),
+        "Real Sociedad II": ("Real Sociedad San Sebastian B",),
+    },
+    "SWZ": {
+        "BSC Young Boys": ("Young Boys Bern",),
+    },
+    "UKR": {
+        "Epitsentr Dunayivtsi": ("FC Epitsentr Kamianets-Podilskyi",),
+        "Obolon'-Brovar": ("FC Obolon Kyiv",),
+    },
+    "USA": {
+        "St. Louis City": ("Saint Louis City SC",),
+    },
     "SC0": {
         "Celtic": ("Celtic Glasgow", "Celtic FC"),
         "Dundee": ("Dundee FC",),
@@ -92,6 +195,54 @@ def simplified_team_name(odds_module: Any, value: Any) -> str:
     return " ".join(words)
 
 
+def _semantic_team_tokens(odds_module: Any, value: Any) -> Set[str]:
+    normalized = odds_module.normalize_text(value or "", drop_suffixes=True)
+    return {
+        token
+        for token in normalized.split()
+        if token not in SEMANTIC_GENERIC_TEAM_TOKENS and len(token) >= 2
+    }
+
+
+def _unique_semantic_alias(
+    odds_module: Any,
+    name: Any,
+    league_aliases: Dict[str, str],
+) -> Optional[str]:
+    provider_tokens = _semantic_team_tokens(odds_module, name)
+    if not provider_tokens:
+        return None
+
+    candidates: Dict[str, Set[str]] = {}
+    for alias_key, canonical in league_aliases.items():
+        alias_tokens = _semantic_team_tokens(odds_module, alias_key)
+        if not alias_tokens:
+            continue
+        overlap = provider_tokens.intersection(alias_tokens)
+        if not overlap:
+            continue
+
+        contained = (
+            alias_tokens.issubset(provider_tokens)
+            or provider_tokens.issubset(alias_tokens)
+        )
+        short_unique_overlap = (
+            len(provider_tokens) <= 2
+            and len(alias_tokens) <= 2
+            and len(overlap) == 1
+            and len(next(iter(overlap))) >= 5
+        )
+        overlap_ratio = len(overlap) / max(1, min(len(provider_tokens), len(alias_tokens)))
+        strong_multi_overlap = len(overlap) >= 2 and overlap_ratio >= 0.5
+
+        if contained or short_unique_overlap or strong_multi_overlap:
+            candidates.setdefault(str(canonical), set()).add(str(alias_key))
+
+    if len(candidates) == 1:
+        return next(iter(candidates))
+    return None
+
+
 def canonical_team_info(
     odds_module: Any,
     name: str,
@@ -117,6 +268,16 @@ def canonical_team_info(
         }
         if normalized in verified_variants or simplified in verified_variants:
             return canonical, canonical
+
+    semantic = _unique_semantic_alias(odds_module, name, league_aliases)
+    if semantic:
+        debug.setdefault("conservativeTeamMappings", []).append({
+            "leagueCode": league_code,
+            "providerTeam": str(name or "").strip(),
+            "canonicalTeam": semantic,
+            "policy": "unique semantic token match",
+        })
+        return semantic, semantic
 
     odds_module.record_unmatched_team(debug, league_code, str(name or "").strip(), normalized)
     provider_name = str(name or "").strip()
@@ -481,13 +642,100 @@ def expanded_build_output(
 def install(odds_module: Any, pipeline_module: Any) -> None:
     """Install the shared extension once into Domestic odds ingestion."""
 
-    def expanded_generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
+    def authoritative_roster_payload(registry: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         roster_path = getattr(pipeline_module, "ROSTER_PATH", None)
-        roster_payload = (
+        raw_roster = (
             pipeline_module.load_json(roster_path, {})
             if roster_path is not None
             else {}
         )
+        rows = [
+            dict(row)
+            for row in raw_roster.get("leagues", []) or []
+            if isinstance(row, dict)
+        ]
+        existing = {
+            (
+                str(row.get("leagueCode") or "").strip().upper(),
+                str(row.get("appSeason") or "").strip(),
+            )
+            for row in rows
+        }
+        target_season = {
+            str(row.get("leagueCode") or "").strip().upper(): str(
+                row.get("targetAppSeason")
+                or row.get("app_season")
+                or ""
+            ).strip()
+            for row in registry
+            if isinstance(row, dict) and str(row.get("leagueCode") or "").strip()
+        }
+
+        # Some leagues do not yet have a domestic_rosters row. Their current-season
+        # enriched artifact is still authoritative for StatMaker membership and is
+        # safer than falling back to historical support.
+        root = getattr(pipeline_module, "ROOT", None)
+        if root is not None:
+            index_path = root / "data" / "statmaker" / "domestic_enriched" / "index.json"
+            index = pipeline_module.load_json(index_path, {})
+            for item in index.get("leagues", []) or []:
+                if not isinstance(item, dict):
+                    continue
+                code = str(item.get("league_code") or item.get("leagueCode") or "").strip().upper()
+                app_season = str(item.get("app_season") or item.get("appSeason") or "").strip()
+                if not code or not app_season or target_season.get(code) != app_season:
+                    continue
+                key = (code, app_season)
+                if key in existing:
+                    continue
+                output_path = str(item.get("output_path") or "").strip()
+                if not output_path:
+                    continue
+                artifact = pipeline_module.load_json(root / output_path, {})
+                teams = sorted({
+                    str(match.get(field) or "").strip()
+                    for match in artifact.get("matches", []) or []
+                    if isinstance(match, dict)
+                    for field in ("home_team", "away_team")
+                    if str(match.get(field) or "").strip()
+                })
+                if not teams:
+                    continue
+                rows.append({
+                    "leagueCode": code,
+                    "appSeason": app_season,
+                    "source": "current StatMaker enriched artifact fallback",
+                    "teams": teams,
+                })
+                existing.add(key)
+
+        return {"leagues": rows}
+
+    def expanded_generated_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[str, str]]:
+        roster_payload = authoritative_roster_payload(registry)
+        current_members: Dict[str, Set[str]] = {}
+        target_season = {
+            str(row.get("leagueCode") or "").strip().upper(): str(
+                row.get("targetAppSeason")
+                or row.get("app_season")
+                or ""
+            ).strip()
+            for row in registry
+            if isinstance(row, dict)
+        }
+        for row in roster_payload.get("leagues", []) or []:
+            if not isinstance(row, dict):
+                continue
+            code = str(row.get("leagueCode") or "").strip().upper()
+            app_season = str(row.get("appSeason") or "").strip()
+            if not code or target_season.get(code) != app_season:
+                continue
+            current_members.setdefault(code, set()).update(
+                odds_module.normalize_text(team, drop_suffixes=True)
+                for team in row.get("teams", []) or []
+                if str(team or "").strip()
+            )
+        pipeline_module._statmaker_current_roster_members = current_members
         return generated_aliases(
             odds_module,
             pipeline_module.stats_fetch,
@@ -524,7 +772,30 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
         aliases: Dict[str, Dict[str, str]],
         debug: Dict[str, Any],
     ) -> Tuple[str, Optional[str]]:
-        return canonical_team_info(odds_module, name, league_code, aliases, debug)
+        mapped, canonical = canonical_team_info(
+            odds_module, name, league_code, aliases, debug
+        )
+        members = getattr(
+            pipeline_module, "_statmaker_current_roster_members", {}
+        ).get(str(league_code or "").strip().upper(), set())
+        if canonical is not None and members:
+            canonical_norm = odds_module.normalize_text(
+                canonical, drop_suffixes=True
+            )
+            if canonical_norm not in members:
+                debug.setdefault("rejectedOutsideCurrentRoster", []).append({
+                    "leagueCode": league_code,
+                    "providerTeam": str(name or "").strip(),
+                    "canonicalTeam": canonical,
+                })
+                odds_module.record_unmatched_team(
+                    debug,
+                    league_code,
+                    str(name or "").strip(),
+                    odds_module.normalize_text(name, drop_suffixes=True),
+                )
+                return str(name or "").strip(), None
+        return mapped, canonical
 
     def expanded_match_provider_league(
         config_league: Dict[str, Any],

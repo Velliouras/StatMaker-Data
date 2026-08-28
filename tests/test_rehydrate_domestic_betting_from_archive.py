@@ -124,5 +124,34 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
         self.assertEqual(1, len(report["rejectedOutsideCurrentRoster"]))
 
 
+    def test_semantic_match_ignores_club_tokens_but_requires_unique_canonical(self):
+        aliases = {
+            "TST": {
+                "rapid vienna": "Rapid Vienna",
+                "sturm graz": "Sturm Graz",
+            }
+        }
+        canonical, policy = target._resolve_team("SK Rapid", "TST", aliases)
+        self.assertEqual("Rapid Vienna", canonical)
+        self.assertEqual("unique_semantic_token_match", policy)
+
+    def test_semantic_match_supports_short_contained_current_name(self):
+        aliases = {"TST": {"ktp": "KTP"}}
+        canonical, policy = target._resolve_team("FC KTP Kotka", "TST", aliases)
+        self.assertEqual("KTP", canonical)
+        self.assertEqual("unique_semantic_token_match", policy)
+
+    def test_semantic_match_remains_fail_closed_when_two_canonicals_match(self):
+        aliases = {
+            "TST": {
+                "austria vienna": "Austria Vienna",
+                "austria lustenau": "Austria Lustenau",
+            }
+        }
+        canonical, policy = target._resolve_team("FK Austria", "TST", aliases)
+        self.assertIsNone(canonical)
+        self.assertEqual("unresolved_or_ambiguous", policy)
+
+
 if __name__ == "__main__":
     unittest.main()
