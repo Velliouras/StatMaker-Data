@@ -60,6 +60,39 @@ class DomesticLeagueIdentityRepairTest(unittest.TestCase):
         self.assertEqual(901, payload["leagues"][0]["api_football_league_id"])
         self.assertEqual(244, payload["leagues"][1]["apiFootballLeagueId"])
 
+    def test_stale_stats_cache_identity_is_reported_for_target_season(self):
+        registry = {
+            "leagues": [{
+                "leagueCode": "FIN2",
+                "country": "Finland",
+                "competition": "Ykkösliiga",
+                "display_name": "Ykkösliiga",
+                "apiFootballLeagueId": 1087,
+                "api_football_league_id": 1087,
+                "season": "2026",
+                "targetApiSeason": "2026",
+                "targetAppSeason": "2026",
+            }]
+        }
+        fake_path = ROOT / "fake-fin2-cache.json"
+        old_cache = {
+            "league_id": 245,
+            "season": "2026",
+            "fixtures": [],
+        }
+
+        from unittest import mock
+        with (
+            mock.patch.object(target.stats_fetch, "cache_path_for", return_value=fake_path),
+            mock.patch.object(Path, "exists", return_value=True),
+            mock.patch.object(target, "load", return_value=old_cache),
+        ):
+            stale = target.stale_stats_cache_identities(registry)
+
+        self.assertEqual(1, len(stale))
+        self.assertEqual("FIN2", stale[0]["leagueCode"])
+        self.assertIn("provider league id changed", stale[0]["reason"])
+
     def test_remove_roster_code_removes_stale_entry(self):
         payload = {
             "leagueCount": 2,
