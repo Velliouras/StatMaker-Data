@@ -191,19 +191,16 @@ def cached_target_roster(league: Mapping[str, Any]) -> List[str]:
     if cache_league is None:
         return []
     cache = load_json(target.stats_fetch.cache_path_for(cache_league), {})
+
+    # Only an explicit provider roster is authoritative enough to close a roster
+    # gap without a new request. Completed-fixture caches can contain just the first
+    # few rounds; deriving membership from those rows could silently create a partial
+    # roster and prevent the exact league+season discovery from ever running.
     teams = {
         str(name).strip()
         for name in cache.get("roster", []) or []
         if str(name).strip()
     }
-    if not teams:
-        teams = {
-            str(fixture.get(key) or "").strip()
-            for fixture in cache.get("fixtures", []) or []
-            if isinstance(fixture, dict)
-            for key in ("home_team", "away_team")
-            if str(fixture.get(key) or "").strip()
-        }
     return sorted(teams, key=str.casefold)
 
 
