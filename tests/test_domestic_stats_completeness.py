@@ -9,6 +9,7 @@ if str(SCRIPTS) not in sys.path:
 
 import api_football_fetch_fixture_stats as stats_fetch
 import refresh_domestic_live_july_stats as refresh
+import run_domestic_stats_refresh as orchestrator
 
 
 class DomesticStatsCompletenessTest(unittest.TestCase):
@@ -45,6 +46,84 @@ class DomesticStatsCompletenessTest(unittest.TestCase):
         }
         self.assertTrue(refresh.has_final_score(fixture))
         self.assertFalse(refresh.has_real_normalized_stats(fixture))
+
+
+class DomesticRosterDiscoveryTest(unittest.TestCase):
+    def test_same_season_league_is_not_excluded_from_roster_discovery(self):
+        league = {
+            "leagueCode": "USA",
+            "country": "USA",
+            "competition": "Major League Soccer",
+            "display_name": "Major League Soccer",
+            "apiFootballLeagueId": 253,
+            "season": "2026",
+            "historyApiSeason": "2026",
+            "targetApiSeason": "2026",
+            "targetAppSeason": "2026",
+        }
+        fixture_payload = {
+            "response": [
+                {
+                    "teams": {
+                        "home": {"name": "Inter Miami"},
+                        "away": {"name": "FC Dallas"},
+                    }
+                }
+            ]
+        }
+        written = {}
+
+        with (
+            unittest.mock.patch.object(orchestrator, "load_json", return_value={}),
+            unittest.mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
+            unittest.mock.patch.object(orchestrator, "cached_target_roster", return_value=[]),
+            unittest.mock.patch.object(orchestrator.target.stats_fetch, "api_get", return_value=fixture_payload) as api_get,
+        ):
+            used = orchestrator.discover_missing_target_rosters("key", [league], 20)
+
+        self.assertEqual(1, used)
+        api_get.assert_called_once()
+        self.assertEqual(1, written["payload"]["leagueCount"])
+        self.assertEqual("USA", written["payload"]["leagues"][0]["leagueCode"])
+        self.assertEqual(["FC Dallas", "Inter Miami"], written["payload"]["leagues"][0]["teams"])
+
+    def test_cached_target_fixture_roster_costs_zero_provider_calls(self):
+        league = {
+            "leagueCode": "FIN",
+            "country": "Finland",
+            "competition": "Veikkausliiga",
+            "display_name": "Veikkausliiga",
+            "apiFootballLeagueId": 244,
+            "season": "2026",
+            "targetApiSeason": "2026",
+            "targetAppSeason": "2026",
+        }
+        written = {}
+
+        with (
+            unittest.mock.patch.object(orchestrator, "load_json", return_value={}),
+            unittest.mock.patch.object(orchestrator, "write_json", side_effect=lambda path, payload: written.update({"payload": payload})),
+            unittest.mock.patch.object(orchestrator, "cached_target_roster", return_value=["HJK helsinki", "Inter Turku"]),
+            unittest.mock.patch.object(orchestrator.target.stats_fetch, "api_get") as api_get,
+        ):
+            used = orchestrator.discover_missing_target_rosters("key", [league], 20)
+
+        self.assertEqual(0, used)
+        api_get.assert_not_called()
+        self.assertEqual(1, written["payload"]["leagueCount"])
+
+    def test_normal_run_uses_full_registry_but_targeted_run_stays_targeted(self):
+        registry = [{"leagueCode": "A"}, {"leagueCode": "B"}]
+        selected = [{"leagueCode": "A"}]
+
+        self.assertIs(
+            registry,
+            orchestrator.roster_discovery_scope(registry, selected, set(), False),
+        )
+        self.assertIs(
+            selected,
+            orchestrator.roster_discovery_scope(registry, selected, {"A"}, False),
+        )
 
 
 if __name__ == "__main__":
