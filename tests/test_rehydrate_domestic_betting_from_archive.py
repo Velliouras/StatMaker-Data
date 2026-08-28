@@ -42,9 +42,10 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
             }],
         }
 
-    def run_rebuild(self, feed, archive, aliases=None, markets=None):
+    def run_rebuild(self, feed, archive, aliases=None, markets=None, current_rosters=None):
         with (
             patch.object(target, "_historical_aliases", return_value=aliases if aliases is not None else self.aliases),
+            patch.object(target, "_current_roster_variants", return_value=current_rosters or {}),
             patch.object(target, "_normalize_archived_markets", return_value=markets if markets is not None else self.markets),
             patch.object(target.pipeline, "today_utc", return_value=dt.date(2026, 8, 28)),
         ):
@@ -106,6 +107,21 @@ class DomesticArchiveDroppedFixtureRehydrateTest(unittest.TestCase):
         self.assertEqual(0, report["matchesCreatedFromArchive"])
         self.assertEqual([], feed["leagues"][0]["matches"])
         self.assertEqual(1, len(report["unresolvedHistoricalTeams"]))
+
+
+    def test_archive_fixture_outside_authoritative_current_roster_is_rejected(self):
+        feed = {"leagues": [{"leagueCode": "TST", "matches": []}]}
+        archive = {"leagues": [{"leagueCode": "TST", "matches": [dict(self.archive_match)]}]}
+
+        report = self.run_rebuild(
+            feed,
+            archive,
+            current_rosters={"TST": {"some other team"}},
+        )
+
+        self.assertEqual(0, report["matchesRehydrated"])
+        self.assertEqual([], feed["leagues"][0]["matches"])
+        self.assertEqual(1, len(report["rejectedOutsideCurrentRoster"]))
 
 
 if __name__ == "__main__":
