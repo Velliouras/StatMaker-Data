@@ -83,6 +83,41 @@ def _historical_aliases(registry: Sequence[Dict[str, Any]]) -> Dict[str, Dict[st
     return aliases
 
 
+def _current_roster_variants(registry: Sequence[Dict[str, Any]]) -> Dict[str, set[str]]:
+    """Return normalized authoritative target-season roster membership by league."""
+    target_season_by_code = {
+        str(row.get("leagueCode") or "").strip().upper(): str(
+            row.get("targetAppSeason")
+            or row.get("app_season")
+            or ""
+        ).strip()
+        for row in registry
+        if isinstance(row, dict) and str(row.get("leagueCode") or "").strip()
+    }
+    roster_payload = load(pipeline.ROSTER_PATH, {})
+    result: Dict[str, set[str]] = {}
+    for row in roster_payload.get("leagues", []) or []:
+        if not isinstance(row, dict):
+            continue
+        code = str(row.get("leagueCode") or "").strip().upper()
+        if not code:
+            continue
+        target_season = target_season_by_code.get(code, "")
+        roster_season = str(row.get("appSeason") or "").strip()
+        if target_season and roster_season and roster_season != target_season:
+            continue
+        variants = result.setdefault(code, set())
+        for team in row.get("teams", []) or []:
+            variants.update(_variants(team))
+    return result
+
+
+def _is_current_roster_member(name: str, roster_variants: set[str]) -> bool:
+    if not roster_variants:
+        return True
+    return bool(_variants(name).intersection(roster_variants))
+
+
 def _meaningful(text: str) -> set[str]:
     return {
         token for token in text.split()
@@ -157,6 +192,7 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
     domestic_odds_expansion.install(odds, pipeline)
     domestic_market_expansion_v15.install(odds, pipeline)
     aliases = _historical_aliases(registry)
+    current_rosters = _current_roster_variants(registry)
     archive_leagues = {
         str(league.get("leagueCode") or ""): league
         for league in archive.get("leagues", []) or []
@@ -181,6 +217,7 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
         "archiveMatchesWithoutCanonicalMarkets": 0,
         "marketsRehydrated": 0,
         "unresolvedHistoricalTeams": [],
+        "rejectedOutsideCurrentRoster": [],
         "rehydratedMatches": [],
     }
 
@@ -275,6 +312,21 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
                 })
                 continue
 
+            roster_variants = current_rosters.get(code, set())
+            if roster_variants and (
+                not _is_current_roster_member(home, roster_variants)
+                or not _is_current_roster_member(away, roster_variants)
+            ):
+                report["rejectedOutsideCurrentRoster"].append({
+                    "leagueCode": code,
+                    "matchId": archive_id,
+                    "providerHomeTeam": provider_home,
+                    "providerAwayTeam": provider_away,
+                    "homeResolved": home,
+                    "awayResolved": away,
+                })
+                continue
+
             canonical_key = (
                 date,
                 odds.normalize_text(home, drop_suffixes=True),
@@ -355,6 +407,7 @@ def rebuild(feed: Dict[str, Any], archive: Dict[str, Any], registry: Sequence[Di
 
     # Keep diagnostics compact and deterministic.
     report["unresolvedHistoricalTeams"] = report["unresolvedHistoricalTeams"][:100]
+    report["rejectedOutsideCurrentRoster"] = report["rejectedOutsideCurrentRoster"][:100]
     report["normalizationWarnings"] = debug.get("warnings", [])[:100]
     if report["matchesRehydrated"]:
         feed["generatedAt"] = report["generatedAt"]
