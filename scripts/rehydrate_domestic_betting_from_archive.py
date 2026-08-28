@@ -25,8 +25,9 @@ INDEX_PATH = ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
 REPORT_PATH = ROOT / "reports" / "domestic_archive_betting_rehydrate.json"
 
 _GENERIC_TEAM_TOKENS = {
-    "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if",
-    "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
+    "club", "fc", "cf", "sc", "ac", "afc", "fk", "bk", "if", "sk", "sv",
+    "pfc", "kks", "wks", "acs", "asc", "mfk", "nk", "vfl", "vfb", "tsg",
+    "stade", "ca", "cd", "sd", "ud", "de", "da", "do", "dos", "das", "the",
 }
 
 
@@ -118,10 +119,20 @@ def _is_current_roster_member(name: str, roster_variants: set[str]) -> bool:
     return bool(_variants(name).intersection(roster_variants))
 
 
+def _core_tokens(text: Any) -> set[str]:
+    normalized = odds.normalize_text(text or "", drop_suffixes=True)
+    simplified = odds.simplified_team_name(normalized)
+    return {
+        token
+        for token in simplified.split()
+        if token not in _GENERIC_TEAM_TOKENS and len(token) >= 2
+    }
+
+
 def _meaningful(text: str) -> set[str]:
     return {
-        token for token in text.split()
-        if token not in _GENERIC_TEAM_TOKENS and (len(token) >= 4 or token.isdigit())
+        token for token in _core_tokens(text)
+        if len(token) >= 4 or token.isdigit()
     }
 
 
@@ -136,20 +147,48 @@ def _resolve_team(name: Any, code: str, aliases: Dict[str, Dict[str, str]]) -> T
         if canonical:
             return str(canonical), "exact_historical_alias"
 
-    provider_tokens = set(simplified.split())
-    provider_meaningful = _meaningful(simplified)
+    provider_core = _core_tokens(simplified)
     candidates: Dict[str, set[str]] = {}
-    if provider_tokens and provider_meaningful:
+    if provider_core:
         for alias_key, canonical in bucket.items():
-            alias_text = odds.simplified_team_name(alias_key)
-            alias_tokens = set(alias_text.split())
-            if not alias_tokens or not provider_meaningful.intersection(_meaningful(alias_text)):
+            alias_core = _core_tokens(alias_key)
+            if not alias_core:
                 continue
-            if alias_tokens.issubset(provider_tokens) or provider_tokens.issubset(alias_tokens):
+            overlap = provider_core.intersection(alias_core)
+            if not overlap:
+                continue
+
+            # Strongest safe generic rule: after removing club/legal-form tokens,
+            # one name is contained in the other. This covers e.g. "SK Rapid" vs
+            # "Rapid Vienna", "FC KTP Kotka" vs "KTP" and "Young Boys Bern" vs
+            # "Young Boys" without fuzzy edit-distance guessing.
+            contained = (
+                alias_core.issubset(provider_core)
+                or provider_core.issubset(alias_core)
+            )
+
+            # Translation/transliteration variants can leave one token different
+            # (Bayern Munich/Muenchen, Ulsan HD/Hyundai). Allow that only when both
+            # sides are very short names and the shared token is distinctive.
+            short_unique_overlap = (
+                len(provider_core) <= 2
+                and len(alias_core) <= 2
+                and len(overlap) == 1
+                and len(next(iter(overlap))) >= 5
+            )
+
+            # Multi-token provider labels can add a city/region suffix while keeping
+            # at least two authoritative name tokens. Require >=50% overlap.
+            overlap_ratio = len(overlap) / max(1, min(len(provider_core), len(alias_core)))
+            strong_multi_overlap = len(overlap) >= 2 and overlap_ratio >= 0.5
+
+            if contained or short_unique_overlap or strong_multi_overlap:
                 candidates.setdefault(str(canonical), set()).add(alias_key)
 
+    # Never guess between two canonical teams. Current-roster membership is enforced
+    # separately before a recovered fixture is admitted to the canonical feed.
     if len(candidates) == 1:
-        return next(iter(candidates)), "unique_historical_token_containment"
+        return next(iter(candidates)), "unique_semantic_token_match"
     return None, "unresolved_or_ambiguous"
 
 
