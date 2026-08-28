@@ -19,6 +19,7 @@ import domestic_odds_expansion
 import domestic_market_expansion_v15
 import rebuild_domestic_corners_from_archive as corner_rebuild
 import rebuild_domestic_expanded_markets_from_archive as expanded_rebuild
+import rehydrate_domestic_betting_from_archive as archive_rehydrate
 import update_domestic_odds_api_io as odds_fetch
 
 REPORT_PATH = pipeline.ROOT / "reports" / "domestic_live_july_odds_refresh.json"
@@ -332,6 +333,10 @@ def main() -> int:
         archive = previous_archive
         corner_report = dict((feed.get("debug") or {}).get("cornerArchiveRebuild") or {})
 
+    archive_rehydrate_report = archive_rehydrate.rebuild(feed, archive, registry)
+    if int(archive_rehydrate_report.get("matchesRehydrated") or 0) > 0:
+        pipeline.write_json(pipeline.ODDS_PATH, feed)
+
     validation = validate_feed(feed, registry, today)
     archive_validation = validate_provider_archive(archive, registry, today)
     pipeline.write_json(odds_fetch.REPORT_PATH, debug)
@@ -370,6 +375,7 @@ def main() -> int:
         "expandedMarketArchiveRebuild": (feed.get("debug") or {}).get(
             "expandedMarketArchiveRebuild", {}
         ),
+        "archiveBettingRehydrate": archive_rehydrate_report,
         "oddsLeaguesWithMatches": sum(
             1 for row in feed.get("leagues", []) or [] if row.get("matches")
         ),
