@@ -87,7 +87,14 @@ jobs:
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
-            cycle_size="1"
+            target_codes="$(head -n 1 .github/domestic-odds-refresh-request | tr -d '[:space:]')"
+            if [ -z "$target_codes" ]; then
+              echo "Domestic odds refresh request is missing target league codes." >&2
+              exit 1
+            fi
+            export STATMAKER_DOMESTIC_EXACT_TARGET_CODES="$target_codes"
+            IFS=',' read -r -a target_array <<< "$target_codes"
+            cycle_size="${#target_array[@]}"
           else
             cycle_size="${INPUT_CYCLE_SIZE:-16}"
           fi

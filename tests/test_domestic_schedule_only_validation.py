@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -106,6 +107,26 @@ class DomesticScheduleOnlyValidationTest(unittest.TestCase):
 
         ordered = target._imminent_codes(events, mapping, freshness)
         self.assertEqual(["L16", "L17", "L18", "L19"], ordered[:4])
+
+    def test_explicit_target_codes_are_bounded_to_enabled_registry(self):
+        previous = os.environ.get("STATMAKER_DOMESTIC_EXACT_TARGET_CODES")
+        os.environ["STATMAKER_DOMESTIC_EXACT_TARGET_CODES"] = "E0,E1,E2,E3"
+        try:
+            registry = [
+                {"leagueCode": "E0", "enabledForOdds": True},
+                {"leagueCode": "E1", "enabledForOdds": True},
+                {"leagueCode": "E2", "enabledForOdds": True},
+                {"leagueCode": "E3", "enabledForOdds": True},
+            ]
+            self.assertEqual(
+                ["E0", "E1", "E2", "E3"],
+                target._explicit_target_codes(registry),
+            )
+        finally:
+            if previous is None:
+                os.environ.pop("STATMAKER_DOMESTIC_EXACT_TARGET_CODES", None)
+            else:
+                os.environ["STATMAKER_DOMESTIC_EXACT_TARGET_CODES"] = previous
 
     def test_unverified_zero_market_row_still_fails_closed(self):
         feed = {"leagues": [{

@@ -35,6 +35,28 @@ _GENERIC_TEAM_TOKENS = {
 }
 
 
+def _explicit_target_codes(registry: Sequence[Dict[str, Any]]) -> List[str]:
+    raw = os.getenv("STATMAKER_DOMESTIC_EXACT_TARGET_CODES", "").strip()
+    if not raw:
+        return []
+    requested = list(dict.fromkeys(
+        token.strip().upper()
+        for token in raw.split(",")
+        if token.strip()
+    ))
+    enabled = {
+        str(row.get("leagueCode") or "").strip().upper()
+        for row in registry
+        if bool(row.get("enabledForOdds", True))
+    }
+    invalid = [code for code in requested if code not in enabled]
+    if invalid:
+        raise RuntimeError(
+            "Unknown/disabled targeted Domestic odds league codes: " + ", ".join(invalid)
+        )
+    return requested
+
+
 def _positive_int(name: str, default: int) -> int:
     try:
         return max(1, int(os.getenv(name, str(default)).strip()))
@@ -429,7 +451,8 @@ def main() -> int:
     last_refresh_by_code = state.get("oddsLastRefreshByLeague")
     if not isinstance(last_refresh_by_code, dict):
         last_refresh_by_code = {}
-    priority_codes = _imminent_codes(
+    explicit_targets = _explicit_target_codes(registry)
+    priority_codes = explicit_targets or _imminent_codes(
         events,
         slug_to_code,
         last_refresh_by_code=last_refresh_by_code,
