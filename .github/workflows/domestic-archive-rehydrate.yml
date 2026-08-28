@@ -35,6 +35,7 @@ jobs:
         run: |
           python -m py_compile \
             scripts/run_domestic_stats_refresh.py \
+            scripts/repair_domestic_api_football_league_ids.py \
             scripts/repair_domestic_team_aliases_from_schedule.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/odds_market_integrity.py \
@@ -45,11 +46,20 @@ jobs:
             scripts/refresh_domestic_squads.py
           python -m unittest \
             tests/test_domestic_stats_completeness.py \
+            tests/test_repair_domestic_api_football_league_ids.py \
             tests/test_repair_domestic_team_aliases_from_schedule.py \
             tests/test_odds_market_integrity.py \
             tests/test_rehydrate_domestic_betting_from_archive.py \
             tests/test_domestic_proposal_readiness.py \
             tests/test_statmaker_update_manifest.py
+
+      - name: Repair exact API-Football league identities
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
+        run: |
+          python scripts/repair_domestic_api_football_league_ids.py \
+            --max-requests 10
 
       - name: Repair authoritative current Domestic rosters
         env:
@@ -101,12 +111,17 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
+            config/domestic_leagues.json \
+            config/api_football_enrichment_leagues.json \
+            config/nordic_extra_leagues.json \
+            data/statmaker/domestic_live_july_registry.json \
             odds/odds_api_io/domestic_odds.json \
             data/statmaker/domestic_rosters.json \
             mappings/domestic_team_aliases.json \
             data/statmaker/domestic_proposal_readiness.json \
             data/statmaker/domestic_match_context_cache.json \
             reports/domestic_archive_betting_rehydrate.json \
+            reports/domestic_api_football_league_identity_repair.json \
             reports/domestic_live_july_stats_refresh.json \
             reports/domestic_team_alias_schedule_repair.json \
             reports/domestic_odds_integrity.json \
