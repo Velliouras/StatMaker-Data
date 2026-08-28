@@ -58,7 +58,10 @@ def parse_dt(value: Any) -> Optional[dt.datetime]:
 
 
 def norm(value: Any) -> str:
-    return odds.normalize_text(value, drop_suffixes=True)
+    # Unicode NFKD does not expand German ß. Normalize it explicitly so verified
+    # provider/canonical forms such as Schwarz-Weiss / Schwarz-Weiß compare exactly.
+    text = str(value or "").replace("ß", "ss").replace("ẞ", "SS")
+    return odds.normalize_text(text, drop_suffixes=True)
 
 
 def same_team(left: Any, right: Any) -> bool:
