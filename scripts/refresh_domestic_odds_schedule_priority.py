@@ -460,6 +460,12 @@ def main() -> int:
 
     _install_priority_rotation(priority_codes)
     _install_near_term_event_horizon(odds_days)
+
+    # Install the shared Domestic expansion before the schedule wrapper replaces
+    # canonical_team_info. guarded.main() installs the same expansion later, but
+    # its installer is idempotent; doing it here prevents that later call from
+    # overwriting the conservative current-roster-aware mapper.
+    target.domestic_odds_expansion.install(target.odds_fetch, target.pipeline)
     _install_conservative_team_mapping()
     _install_schedule_only_validation()
 
