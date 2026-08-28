@@ -186,6 +186,47 @@ def stale_stats_cache_identities(
     return stale
 
 
+def carry_forward_stats_rebuild_codes(
+    registry_payload: Dict[str, Any],
+    previous_report: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    by_code = registry_by_code(registry_payload)
+    previous_codes = {
+        str(row.get("leagueCode") or "").strip().upper()
+        for key in ("staleStatsCaches", "repairs")
+        for row in previous_report.get(key, []) or []
+        if isinstance(row, dict) and str(row.get("leagueCode") or "").strip()
+    }
+    previous_codes.update({
+        str(code).strip().upper()
+        for code in previous_report.get("statsRebuildCodes", []) or []
+        if str(code).strip()
+    })
+    carry: List[Dict[str, Any]] = []
+    for code in sorted(previous_codes):
+        meta = by_code.get(code)
+        if not meta:
+            continue
+        cache_league = target_cache_league(meta)
+        cache_path = stats_fetch.cache_path_for(cache_league)
+        cache = load(cache_path, {}) if cache_path.exists() else {}
+        fixtures = [
+            row for row in cache.get("fixtures", []) or []
+            if isinstance(row, dict)
+        ] if isinstance(cache, dict) else []
+        reason = (
+            stats_fetch.cache_identity_mismatch_reason(cache_league, cache)
+            if cache else "cache missing"
+        )
+        if not fixtures or reason:
+            carry.append({
+                "leagueCode": code,
+                "cachePath": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
+                "reason": reason or "cache has no fixtures",
+            })
+    return carry
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-requests", type=int, default=DEFAULT_MAX_REQUESTS)
@@ -201,6 +242,7 @@ def main() -> int:
 
     quota_guard.install(stats_fetch)
     registry_payload = load(REGISTRY_PATH, {})
+    previous_report = load(REPORT_PATH, {})
     by_code = registry_by_code(registry_payload)
     unresolved_report = load(REHYDRATE_REPORT_PATH, {})
     unresolved_codes = sorted({
@@ -291,6 +333,15 @@ def main() -> int:
         save(ROSTER_PATH, roster_payload)
 
     stale_stats = stale_stats_cache_identities(registry_payload)
+    carry_forward = carry_forward_stats_rebuild_codes(
+        registry_payload,
+        previous_report,
+    )
+    stats_rebuild_codes = sorted({
+        *[str(row.get("leagueCode") or "").strip().upper() for row in repairs],
+        *[str(row.get("leagueCode") or "").strip().upper() for row in stale_stats],
+        *[str(row.get("leagueCode") or "").strip().upper() for row in carry_forward],
+    } - {""})
 
     report = {
         "generatedAt": pipeline.now_utc(),
@@ -303,6 +354,8 @@ def main() -> int:
         "repairs": repairs,
         "staleStatsCacheCount": len(stale_stats),
         "staleStatsCaches": stale_stats,
+        "carryForwardStatsRebuild": carry_forward,
+        "statsRebuildCodes": stats_rebuild_codes,
         "inspected": inspected,
         "apiFootballQuotaGuard": quota_guard.status(),
     }
