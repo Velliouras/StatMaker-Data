@@ -106,6 +106,31 @@ def fetch_league_preserving_fixture_metadata(
         completed_count = len(fixtures)
         notes.extend(query_notes)
 
+        source_name_error = stats_fetch.provider_league_name_mismatch_reason(
+            league,
+            [
+                (fixture.get("league") or {}).get("name")
+                for fixture in all_fixtures
+                if isinstance(fixture, dict)
+                and isinstance(fixture.get("league"), dict)
+            ],
+        )
+        if source_name_error:
+            notes.append(
+                "provider competition mismatch; refusing fixture cache: "
+                + source_name_error
+            )
+            stats_fetch.write_json(
+                cache_path,
+                stats_fetch.cache_payload(league, []),
+            )
+            return stats_fetch.report_row(
+                league, cache_path, 0, 0, 0,
+                0, 0, 0, requests_before,
+                request_state["count"], fixture_query_used,
+                fixtures_returned, "; ".join(notes),
+            )
+
         if not all_fixtures:
             notes.append("no fixtures returned after fallback queries")
         elif not fixtures:
