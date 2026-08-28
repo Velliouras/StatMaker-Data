@@ -138,6 +138,54 @@ def remove_roster_code(payload: Dict[str, Any], code: str) -> int:
     return removed
 
 
+def target_cache_league(meta: Dict[str, Any]) -> Dict[str, Any]:
+    row = dict(meta)
+    target_season = str(
+        meta.get("targetApiSeason")
+        or meta.get("season")
+        or ""
+    ).strip()
+    target_app_season = str(
+        meta.get("targetAppSeason")
+        or meta.get("app_season")
+        or ""
+    ).strip()
+    if target_season:
+        row["season"] = target_season
+        row["historyApiSeason"] = target_season
+    if target_app_season:
+        row["app_season"] = target_app_season
+    return row
+
+
+def stale_stats_cache_identities(
+    registry_payload: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    stale: List[Dict[str, Any]] = []
+    for meta in registry_payload.get("leagues", []) or []:
+        if not isinstance(meta, dict):
+            continue
+        code = str(meta.get("leagueCode") or "").strip().upper()
+        if not code:
+            continue
+        cache_league = target_cache_league(meta)
+        cache_path = stats_fetch.cache_path_for(cache_league)
+        if not cache_path.exists():
+            continue
+        cache = load(cache_path, {})
+        reason = stats_fetch.cache_identity_mismatch_reason(
+            cache_league,
+            cache,
+        )
+        if reason:
+            stale.append({
+                "leagueCode": code,
+                "cachePath": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
+                "reason": reason,
+            })
+    return stale
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-requests", type=int, default=DEFAULT_MAX_REQUESTS)
@@ -242,6 +290,8 @@ def main() -> int:
         save(REGISTRY_PATH, registry_payload)
         save(ROSTER_PATH, roster_payload)
 
+    stale_stats = stale_stats_cache_identities(registry_payload)
+
     report = {
         "generatedAt": pipeline.now_utc(),
         "source": "API-Football exact league catalog identity",
@@ -251,6 +301,8 @@ def main() -> int:
         "unresolvedLeagueCodesInspected": unresolved_codes,
         "repairCount": len(repairs),
         "repairs": repairs,
+        "staleStatsCacheCount": len(stale_stats),
+        "staleStatsCaches": stale_stats,
         "inspected": inspected,
         "apiFootballQuotaGuard": quota_guard.status(),
     }
