@@ -64,6 +64,147 @@ APK="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug/app-debug.a
 test -s "$APK"
 adb install -r "$APK"
 
+# Seed the disposable publisher APK from the most recent verified app-ready generation.
+# This lets the producer patch the immutable prepared source snapshot instead of rebuilding
+# the complete Domestic history universe from zero on every publisher run.
+SEED_ROOT="$GITHUB_WORKSPACE/app-ready-seed"
+rm -rf "$SEED_ROOT"
+mkdir -p "$SEED_ROOT"
+
+git -C "$GITHUB_WORKSPACE" fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
+SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
+if [[ -n "$SEED_COMMIT" ]]; then
+  echo "APP_READY_SEED_COMMIT $SEED_COMMIT"
+  git -C "$GITHUB_WORKSPACE" show "$SEED_COMMIT:data/statmaker/app_ready/update_manifest.json" > "$SEED_ROOT/update_manifest.json"
+
+  python3 - "$GITHUB_WORKSPACE" "$SEED_ROOT" "$SEED_COMMIT" <<'PY'
+import html
+import json
+import subprocess
+import sys
+import zipfile
+from pathlib import Path
+
+workspace = Path(sys.argv[1])
+seed_root = Path(sys.argv[2])
+seed_commit = sys.argv[3]
+
+manifest = json.loads((seed_root / "update_manifest.json").read_text(encoding="utf-8"))
+artifacts = manifest.get("artifacts", [])
+betting = next((x for x in artifacts if x.get("id") == "app_ready_betting_bundle"), None)
+if not betting:
+    raise SystemExit("Seed manifest has no app_ready_betting_bundle")
+
+bundle_rel = str(betting.get("path") or "").strip()
+if not bundle_rel:
+    raise SystemExit("Seed betting artifact path is empty")
+
+bundle_path = seed_root / "betting_bundle.zip"
+with bundle_path.open("wb") as handle:
+    handle.write(
+        subprocess.check_output(
+            ["git", "-C", str(workspace), "show", f"{seed_commit}:{bundle_rel}"]
+        )
+    )
+
+extract_root = seed_root / "bundle"
+with zipfile.ZipFile(bundle_path) as archive:
+    archive.extractall(extract_root)
+
+required = [
+    extract_root / "databases/statmaker_prepared_betting.db",
+    extract_root / "files/app_ready_odds/domestic.json",
+    extract_root / "files/app_ready_odds/champions_league.json",
+    extract_root / "files/app_ready_odds/europa_league.json",
+    extract_root / "files/app_ready_odds/conference_league.json",
+]
+for path in required:
+    if not path.is_file() or path.stat().st_size <= 0:
+        raise SystemExit(f"Seed bundle missing {path}")
+
+metadata = manifest.get("metadata", {})
+main_raw = str(metadata.get("mainManifestRaw") or "")
+uefa_raw = str(metadata.get("uefaManifestRaw") or "")
+if not main_raw or not uefa_raw:
+    raise SystemExit("Seed manifest is missing raw canonical manifests")
+
+def git_text(path: str) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(workspace), "show", f"{seed_commit}:{path}"],
+        text=True,
+    )
+
+support_values = {
+    "uefa_support_history_json": git_text("data/statmaker/uefa_support_history.json"),
+    "uefa_team_support_history_json": git_text("data/statmaker/uefa_team_support_history.json"),
+    "uefa_domestic_team_aliases_json": git_text("mappings/domestic_team_aliases.json"),
+}
+greek_path = "data/api_football/fixture_stats/greece/super-league/2025/fixture_stats.json"
+try:
+    support_values["uefa_greece_super_league_2025_json"] = git_text(greek_path)
+except subprocess.CalledProcessError:
+    support_values["uefa_greece_super_league_2025_json"] = '{"fixtures":[]}'
+
+def write_prefs(path: Path, values: dict[str, str]) -> None:
+    body = "\n".join(
+        f'    <string name="{html.escape(key, quote=True)}">{html.escape(value)}</string>'
+        for key, value in values.items()
+    )
+    path.write_text(
+        "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+        "<map>\n" + body + "\n</map>\n",
+        encoding="utf-8",
+    )
+
+prefs_root = seed_root / "prefs"
+prefs_root.mkdir(parents=True, exist_ok=True)
+write_prefs(
+    prefs_root / "statmaker_app_ready_artifacts.xml",
+    {"betting_bundle_sha256": str(betting.get("sha256") or "seed")},
+)
+write_prefs(
+    prefs_root / "statmaker_data_manifests.xml",
+    {
+        "main_manifest_raw": main_raw,
+        "uefa_manifest_raw": uefa_raw,
+    },
+)
+write_prefs(
+    prefs_root / "statmaker_uefa_support_history.xml",
+    support_values,
+)
+
+print(
+    "APP_READY_SEED_PREPARED",
+    f"commit={seed_commit}",
+    f"db_bytes={required[0].stat().st_size}",
+    f"betting_sha={str(betting.get('sha256') or '')[:12]}",
+)
+PY
+
+  adb shell run-as "$APP_ID" mkdir -p databases files/app_ready_odds shared_prefs
+
+  adb push "$SEED_ROOT/bundle/databases/statmaker_prepared_betting.db" /data/local/tmp/statmaker_prepared_betting.db >/dev/null
+  adb shell run-as "$APP_ID" cp /data/local/tmp/statmaker_prepared_betting.db databases/statmaker_prepared_betting.db
+  adb shell rm -f /data/local/tmp/statmaker_prepared_betting.db
+
+  for name in domestic champions_league europa_league conference_league; do
+    adb push "$SEED_ROOT/bundle/files/app_ready_odds/$name.json" "/data/local/tmp/$name.json" >/dev/null
+    adb shell run-as "$APP_ID" cp "/data/local/tmp/$name.json" "files/app_ready_odds/$name.json"
+    adb shell rm -f "/data/local/tmp/$name.json"
+  done
+
+  for pref in statmaker_app_ready_artifacts statmaker_data_manifests statmaker_uefa_support_history; do
+    adb push "$SEED_ROOT/prefs/$pref.xml" "/data/local/tmp/$pref.xml" >/dev/null
+    adb shell run-as "$APP_ID" cp "/data/local/tmp/$pref.xml" "shared_prefs/$pref.xml"
+    adb shell rm -f "/data/local/tmp/$pref.xml"
+  done
+
+  echo "APP_READY_SEED_INSTALLED"
+else
+  echo "APP_READY_SEED_UNAVAILABLE rebuilding from scratch"
+fi
+
 # Do not depend on the emulator-specific 10.0.2.2 host route. The temporary publisher APK uses
 # 127.0.0.1:8765 and ADB reverse provides a deterministic tunnel back to the runner HTTP server.
 adb reverse --remove tcp:8765 >/dev/null 2>&1 || true
