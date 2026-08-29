@@ -7,7 +7,7 @@ on:
       statmaker_ref:
         description: "Private StatMaker ref"
         required: true
-        default: "uat"
+        default: "uat-instant-prepared-search-20260828"
         type: string
       force:
         description: "Force generation"
@@ -41,6 +41,7 @@ on:
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - 'scripts/patch_app_ready_producer.py'
+      - 'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt'
       - 'scripts/patch_prepared_publisher_diagnostics.py'
       - 'scripts/patch_prepared_publisher_bulk.py'
       - 'scripts/run_app_ready_emulator.sh'
@@ -82,9 +83,18 @@ jobs:
           main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
           uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
-          m=old.get('metadata',{}); changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"generate={'true' if generate else 'false'}\n")
+          m=old.get('metadata',{})
+          changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
+          expected_rules='pattern-policy-v2-final-read-model-v3'
+          expected_schema=10
+          contract_migration=(
+              str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
+              int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
+          )
+          generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write(f"generate={'true' if generate else 'false'}\n")
+              f.write(f"contract_migration={'true' if contract_migration else 'false'}\n")
           PY
 
       - name: Require private read token
@@ -97,7 +107,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat' }}
+          # Until the v10 Android patch is committed to UAT, scheduled publishers use the
+          # validated source-generation branch. workflow_dispatch can still override the ref.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat-instant-prepared-search-20260828' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -145,7 +157,9 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process
 
       - name: Enable KVM acceleration
         if: steps.preflight.outputs.generate == 'true'
@@ -287,6 +301,10 @@ jobs:
               'mainContentVersion':incoming.get('metadata',{}).get('mainContentVersion',''),
               'uefaContentVersion':incoming.get('metadata',{}).get('uefaContentVersion',''),
               'statmakerCommit':subprocess.check_output(['git','-C','statmaker-private','rev-parse','HEAD'],text=True).strip(),
+              'preparedBettingSchemaVersion':incoming.get('metadata',{}).get('preparedBettingSchemaVersion',0),
+              'preparedPatternRulesFingerprint':incoming.get('metadata',{}).get('preparedPatternRulesFingerprint',''),
+              'preparedPatternGenerationId':incoming.get('metadata',{}).get('preparedPatternGenerationId',''),
+              'preparedPatternCandidateCount':incoming.get('metadata',{}).get('preparedPatternCandidateCount',0),
           }
           (dst/'publish_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
@@ -346,6 +364,18 @@ jobs:
           assert status.get('contentVersion') == manifest.get('contentVersion')
           assert status.get('artifactCount') == len(artifacts) == 2
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
-          assert manifest.get('metadata',{}).get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          print('APP_READY_PUBLISH_OK', status['contentVersion'], status['generatedAt'])
+          metadata=manifest.get('metadata',{})
+          assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 10
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v3'
+          assert str(metadata.get('preparedPatternGenerationId') or '').strip()
+          assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
+          assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')
+          print(
+              'APP_READY_PUBLISH_OK',
+              status['contentVersion'],
+              status['generatedAt'],
+              'generation='+metadata['preparedPatternGenerationId'],
+              'candidates='+str(metadata['preparedPatternCandidateCount']),
+          )
           PY
