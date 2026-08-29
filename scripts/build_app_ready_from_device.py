@@ -14,6 +14,15 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v3"
+PREPARED_PATTERN_SCHEMA_VERSION = 10
+PREPARED_PATTERN_COMPETITIONS = (
+    "domestic",
+    "champions_league",
+    "europa_league",
+    "conference_league",
+)
+
 
 def prefs(name):
     path = root / "shared_prefs" / f"{name}.xml"
@@ -217,70 +226,215 @@ def validate_generated_betting(source_exact_markets):
     db_path = root / "databases" / "statmaker_prepared_betting.db"
     if not db_path.is_file() or db_path.stat().st_size <= 0:
         raise SystemExit(f"Missing/empty generated prepared betting DB: {db_path}")
+
     uefa = {"champions_league", "europa_league", "conference_league"}
-    # Production clients require all four competition metadata rows even when a UEFA
-    # competition has zero exact markets. Empty 0/0 READY snapshots are valid; absence is not.
-    required = {"domestic", "champions_league", "europa_league", "conference_league"}
+    required = set(PREPARED_PATTERN_COMPETITIONS)
+
     try:
         connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         try:
+            quick = connection.execute("PRAGMA quick_check").fetchone()
+            if not quick or quick[0] != "ok":
+                raise SystemExit(f"Prepared betting DB quick_check failed: {quick}")
+
+            user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+            if user_version < PREPARED_PATTERN_SCHEMA_VERSION:
+                raise SystemExit(
+                    "Refusing app-ready publish: prepared betting DB schema "
+                    f"{user_version} < {PREPARED_PATTERN_SCHEMA_VERSION}"
+                )
+
             rows = connection.execute(
-                "SELECT competition_id, state, match_count, selection_count FROM prepared_snapshot_meta"
+                """
+                SELECT competition_id, snapshot_version, state, match_count, selection_count
+                FROM prepared_snapshot_meta
+                """
             ).fetchall()
+
+            ready = {
+                str(competition_id): (
+                    int(match_count),
+                    int(selection_count),
+                    str(snapshot_version),
+                )
+                for competition_id, snapshot_version, state, match_count, selection_count in rows
+                if state == "ready"
+            }
+            missing = sorted(required - ready.keys())
+            if missing:
+                raise SystemExit(
+                    "Refusing app-ready publish: prepared betting DB missing READY snapshots: "
+                    + ", ".join(missing)
+                )
+
+            domestic_counts = ready["domestic"]
+            if domestic_counts[0] <= 0 or domestic_counts[1] <= 0:
+                raise SystemExit(
+                    "Refusing app-ready publish: empty Domestic prepared betting snapshot: "
+                    f"matches={domestic_counts[0]}, selections={domestic_counts[1]}"
+                )
+
+            invalid_uefa = {}
+            valid_empty_uefa = []
+            for competition_id in sorted(uefa):
+                exact_markets = int(source_exact_markets.get(competition_id, 0) or 0)
+                counts = ready.get(competition_id, (0, 0, ""))
+                if exact_markets > 0 and (counts[0] <= 0 or counts[1] <= 0):
+                    invalid_uefa[competition_id] = (counts, exact_markets)
+                elif exact_markets == 0 and counts[1] <= 0:
+                    valid_empty_uefa.append(competition_id)
+
+            if invalid_uefa:
+                detail = ", ".join(
+                    f"{competition_id}(source_exact_markets={exact_markets}, "
+                    f"matches={counts[0]}, selections={counts[1]})"
+                    for competition_id, (counts, exact_markets) in sorted(invalid_uefa.items())
+                )
+                raise SystemExit(
+                    "Refusing app-ready publish: UEFA source has exact bookmaker markets "
+                    f"but prepared snapshot is empty: {detail}"
+                )
+
+            if valid_empty_uefa:
+                print(
+                    "APP_READY_VALID_EMPTY_UEFA",
+                    ",".join(valid_empty_uefa),
+                    "source_exact_markets=0",
+                )
+
+            tables = {
+                str(row[0])
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            required_tables = {
+                "prepared_pattern_generation",
+                "prepared_pattern_candidates",
+            }
+            missing_tables = sorted(required_tables - tables)
+            if missing_tables:
+                raise SystemExit(
+                    "Refusing app-ready publish: missing prepared recommendation tables: "
+                    + ", ".join(missing_tables)
+                )
+
+            indexes = {
+                str(row[0])
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type='index'"
+                ).fetchall()
+            }
+            required_indexes = {
+                "idx_prepared_pattern_generation_ready",
+                "idx_prepared_pattern_candidates_scope",
+                "idx_prepared_pattern_candidates_rank",
+                "idx_prepared_pattern_candidates_competition_rank",
+            }
+            missing_indexes = sorted(required_indexes - indexes)
+            if missing_indexes:
+                raise SystemExit(
+                    "Refusing app-ready publish: missing prepared recommendation indexes: "
+                    + ", ".join(missing_indexes)
+                )
+
+            candidate_columns = {
+                str(row[1])
+                for row in connection.execute(
+                    "PRAGMA table_info(prepared_pattern_candidates)"
+                ).fetchall()
+            }
+            required_candidate_columns = {
+                "evidence_score",
+                "source_order",
+                "policy_rejection_reason",
+            }
+            missing_columns = sorted(required_candidate_columns - candidate_columns)
+            if missing_columns:
+                raise SystemExit(
+                    "Refusing app-ready publish: missing prepared candidate columns: "
+                    + ", ".join(missing_columns)
+                )
+
+            source_seed = "\n".join(
+                f"{competition_id}|{ready[competition_id][2]}"
+                for competition_id in sorted(required)
+            )
+            source_fingerprint = hashlib.sha256(source_seed.encode()).hexdigest()
+            generation_id = hashlib.sha256(
+                f"{source_fingerprint}|{PREPARED_PATTERN_RULES_FINGERPRINT}".encode()
+            ).hexdigest()
+
+            generation = connection.execute(
+                """
+                SELECT source_fingerprint, rules_fingerprint, state,
+                       candidate_count, proposal_count
+                FROM prepared_pattern_generation
+                WHERE generation_id=?
+                LIMIT 1
+                """,
+                (generation_id,),
+            ).fetchone()
+            if generation is None:
+                raise SystemExit(
+                    "Refusing app-ready publish: exact current prepared recommendation "
+                    f"generation missing: {generation_id}"
+                )
+
+            stored_source, stored_rules, state, candidate_count, proposal_count = generation
+            if str(state) != "ready":
+                raise SystemExit(
+                    f"Refusing app-ready publish: recommendation generation is {state!r}"
+                )
+            if str(stored_source) != source_fingerprint:
+                raise SystemExit("Prepared recommendation source fingerprint mismatch")
+            if str(stored_rules) != PREPARED_PATTERN_RULES_FINGERPRINT:
+                raise SystemExit("Prepared recommendation rules fingerprint mismatch")
+            if int(proposal_count) != 0:
+                raise SystemExit(
+                    "Candidate-only v10 generation must not persist Paroli proposal templates"
+                )
+
+            actual_candidate_count = int(
+                connection.execute(
+                    "SELECT COUNT(*) FROM prepared_pattern_candidates WHERE generation_id=?",
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if actual_candidate_count != int(candidate_count):
+                raise SystemExit(
+                    "Prepared recommendation candidate-count mismatch: "
+                    f"meta={candidate_count} actual={actual_candidate_count}"
+                )
+            if any(ready[competition_id][0] > 0 for competition_id in required) and actual_candidate_count <= 0:
+                raise SystemExit(
+                    "Refusing app-ready publish: current source has matches but "
+                    "prepared recommendation generation is empty"
+                )
+
+            pattern_meta = {
+                "generationId": generation_id,
+                "sourceFingerprint": source_fingerprint,
+                "rulesFingerprint": PREPARED_PATTERN_RULES_FINGERPRINT,
+                "candidateCount": actual_candidate_count,
+                "schemaVersion": user_version,
+            }
         finally:
             connection.close()
     except sqlite3.Error as exc:
         raise SystemExit(f"Invalid generated prepared betting DB {db_path}: {exc}") from exc
 
-    ready = {
-        str(competition_id): (int(match_count), int(selection_count))
-        for competition_id, state, match_count, selection_count in rows
-        if state == "ready"
+    counts = {
+        competition_id: (ready[competition_id][0], ready[competition_id][1])
+        for competition_id in sorted(required)
     }
-    missing = sorted(required - ready.keys())
-    if missing:
-        raise SystemExit(
-            "Refusing app-ready publish: prepared betting DB missing READY snapshots: "
-            + ", ".join(missing)
-        )
-
-    domestic_counts = ready["domestic"]
-    if domestic_counts[0] <= 0 or domestic_counts[1] <= 0:
-        raise SystemExit(
-            "Refusing app-ready publish: empty Domestic prepared betting snapshot: "
-            f"matches={domestic_counts[0]}, selections={domestic_counts[1]}"
-        )
-
-    invalid_uefa = {}
-    valid_empty_uefa = []
-    for competition_id in sorted(uefa):
-        exact_markets = int(source_exact_markets.get(competition_id, 0) or 0)
-        counts = ready.get(competition_id, (0, 0))
-        if exact_markets > 0 and (counts[0] <= 0 or counts[1] <= 0):
-            invalid_uefa[competition_id] = (counts, exact_markets)
-        elif exact_markets == 0 and counts[1] <= 0:
-            valid_empty_uefa.append(competition_id)
-
-    if invalid_uefa:
-        detail = ", ".join(
-            f"{competition_id}(source_exact_markets={exact_markets}, "
-            f"matches={counts[0]}, selections={counts[1]})"
-            for competition_id, (counts, exact_markets) in sorted(invalid_uefa.items())
-        )
-        raise SystemExit(
-            "Refusing app-ready publish: UEFA source has exact bookmaker markets "
-            f"but prepared snapshot is empty: {detail}"
-        )
-
-    if valid_empty_uefa:
-        print(
-            "APP_READY_VALID_EMPTY_UEFA",
-            ",".join(valid_empty_uefa),
-            "source_exact_markets=0",
-        )
-
-    return {competition_id: ready[competition_id] for competition_id in sorted(required)}
-
+    print(
+        "APP_READY_PATTERN_VALIDATION_OK",
+        f"schema={pattern_meta['schemaVersion']}",
+        f"generation={pattern_meta['generationId']}",
+        f"candidates={pattern_meta['candidateCount']}",
+    )
+    return counts, pattern_meta
 
 def bundle(artifact_id, kind, sources):
     work = out / f".{kind}"
@@ -362,7 +516,7 @@ versions = prefs("statmaker_prepared_data_versions")
 domestic_fp = validate_fingerprint(versions.get("domestic_history_fingerprint", ""), "domestic history")
 support_fp = validate_fingerprint(versions.get("uefa_support_fingerprint", ""), "UEFA support")
 stats_match_count = validate_generated_stats(domestic_index)
-prepared_counts = validate_generated_betting(source_exact_markets)
+prepared_counts, prepared_pattern = validate_generated_betting(source_exact_markets)
 print(
     "APP_READY_VALIDATION_OK",
     f"stats_matches={stats_match_count}",
@@ -425,6 +579,11 @@ manifest = {
         "uefaContentVersion": uefa.get("contentVersion", ""),
         "mainManifestRaw": main_raw,
         "uefaManifestRaw": uefa_raw,
+        "preparedBettingSchemaVersion": prepared_pattern["schemaVersion"],
+        "preparedPatternGenerationId": prepared_pattern["generationId"],
+        "preparedPatternSourceFingerprint": prepared_pattern["sourceFingerprint"],
+        "preparedPatternRulesFingerprint": prepared_pattern["rulesFingerprint"],
+        "preparedPatternCandidateCount": prepared_pattern["candidateCount"],
     },
 }
 (out / "update_manifest.json").write_text(
