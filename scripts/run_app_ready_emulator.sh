@@ -406,9 +406,11 @@ monitor_phase "prepared" "true"
 # Freeze and persist 4/4 READY work before final recommendation materialization.
 export_checkpoint
 
-# Phase 2: restart against the exact checkpoint. Prepared snapshots are reused; only final recommendations remain.
+# Phase 2: run the dedicated publisher-only activity against the exact checkpoint.
+# Do NOT restart Welcome here: Welcome can legitimately short-circuit on an already-valid
+# local read model before recommendation materialization is invoked.
 adb logcat -c
-adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+adb shell am start -W -n "$APP_ID/com.statmaker.app.AppReadyPatternPublisherActivity"
 monitor_phase "recommendations" "false"
 
 appready_logs="$(adb logcat -d -s StatMakerAppReady:V "*:S" || true)"
