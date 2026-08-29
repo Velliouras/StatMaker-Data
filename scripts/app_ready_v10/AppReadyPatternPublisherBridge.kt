@@ -112,17 +112,24 @@ internal object AppReadyPatternPublisher {
 
     fun publish(context: Context, historyDb: StatMakerDb): AppReadyPatternPublishReport {
         val startedAt = System.nanoTime()
+        Log.i(TAG, "stage=recommendations_store_helper_begin")
         val store = PreparedBettingSnapshotStore(context.applicationContext)
+        Log.i(TAG, "stage=recommendations_store_helper_created")
         try {
+            Log.i(TAG, "stage=recommendations_versions_begin")
             val versions = readyVersions(store)
+            Log.i(TAG, "stage=recommendations_versions_complete ready=${versions.size}")
             check(versions.keys.containsAll(competitions)) {
                 "Prepared source snapshots are incomplete: ${competitions.toSet() - versions.keys}"
             }
             val sourceFingerprint = sourceFingerprint(versions)
             val generationId = sha256("$sourceFingerprint|$APP_READY_PATTERN_RULES_FINGERPRINT")
+            Log.i(TAG, "stage=recommendations_generation_lookup_begin generation=${generationId.take(12)}")
             existingCandidateCount(store, generationId)?.let { count ->
+                Log.i(TAG, "stage=recommendations_generation_reused generation=${generationId.take(12)} candidates=$count")
                 return AppReadyPatternPublishReport(generationId, count, true, elapsedMilliseconds(startedAt))
             }
+            Log.i(TAG, "stage=recommendations_generation_lookup_complete generation=${generationId.take(12)}")
 
             Log.i(TAG, "stage=recommendations_candidates_begin generation=${generationId.take(12)}")
             val candidates = buildCandidates(context, historyDb, loadSources(store, versions))
