@@ -1,8 +1,10 @@
 package com.statmaker.app
 
+import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import android.os.Bundle
 import android.util.Log
 import java.security.MessageDigest
 
@@ -341,5 +343,35 @@ internal object AppReadyPatternPublisher {
         } finally {
             db.endTransaction()
         }
+    }
+}
+
+
+/**
+ * Publisher-only entry point used by GitHub Actions after the expensive prepared snapshots
+ * have been checkpointed. It deliberately bypasses WelcomeDataUpdater so a restart cannot
+ * short-circuit on "local read model ready" before final recommendation materialization.
+ */
+internal class AppReadyPatternPublisherActivity : Activity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        Thread({
+            val db = StatMakerDb(applicationContext)
+            try {
+                Log.i("StatMakerAppReady", "stage=recommendations_resume_begin")
+                val report = AppReadyPatternPublisher.publish(applicationContext, db)
+                Log.i(
+                    "StatMakerAppReady",
+                    "stage=recommendations_complete generation=${report.generationId} " +
+                        "candidates=${report.candidateCount} reused=${report.reused} " +
+                        "elapsedMs=${report.elapsedMs}"
+                )
+            } catch (error: Throwable) {
+                Log.e("StatMakerAppReady", "stage=recommendations_failed ${error.message.orEmpty()}", error)
+            } finally {
+                runCatching { db.close() }
+                runOnUiThread { finish() }
+            }
+        }, "StatMaker-AppReady-Recommendations").start()
     }
 }
