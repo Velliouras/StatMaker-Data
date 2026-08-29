@@ -355,6 +355,10 @@ monitor_phase() {
   local last_stage=""
   local max_total_seconds=2700
   local max_idle_seconds=1200
+  if [[ "$phase" == "recommendations" && "${APP_READY_RECOMMENDATION_ONLY:-false}" == "true" ]]; then
+    max_total_seconds=900
+    max_idle_seconds=300
+  fi
 
   for _ in $(seq 1 540); do
     if ! server_healthy; then
@@ -408,17 +412,23 @@ monitor_phase() {
   return 1
 }
 
-# Phase 1: expensive immutable source preparation. A restored exact checkpoint makes this a quick reuse.
-adb logcat -c
-adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
-monitor_phase "prepared" "true"
+if [[ "${APP_READY_RECOMMENDATION_ONLY:-false}" == "true" ]]; then
+  if [[ "$CHECKPOINT_RESTORED" -ne 1 ]]; then
+    echo "Recommendation-only resume requires a restored checkpoint" >&2
+    exit 1
+  fi
+  echo "APP_READY_RECOMMENDATION_ONLY_BEGIN"
+else
+  # Phase 1: expensive immutable source preparation.
+  adb logcat -c
+  adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+  monitor_phase "prepared" "true"
 
-# Freeze and persist 4/4 READY work before final recommendation materialization.
-export_checkpoint
+  # Freeze and persist 4/4 READY work before final recommendation materialization.
+  export_checkpoint
+fi
 
-# Phase 2: run the dedicated publisher-only activity against the exact checkpoint.
-# Do NOT restart Welcome here: Welcome can legitimately short-circuit on an already-valid
-# local read model before recommendation materialization is invoked.
+# Phase 2: run the dedicated publisher-only activity against the restored/current prepared DB.
 adb logcat -c
 adb shell am start -W -n "$APP_ID/com.statmaker.app.AppReadyPatternPublisherActivity"
 monitor_phase "recommendations" "false"
