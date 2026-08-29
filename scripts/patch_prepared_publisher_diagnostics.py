@@ -7,6 +7,7 @@ from pathlib import Path
 SOURCE = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
 WELCOME_SOURCE = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
 GRADLE_PROPERTIES = Path("gradle.properties")
+PATTERN_MATCHER_SOURCE = Path("app/src/main/java/com/statmaker/app/PatternOddsMatcher.kt")
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -81,9 +82,67 @@ def patch_legacy_welcome_contract() -> None:
     print("APP_READY_WELCOME_CONTRACT_OK legacy-adapter single-flight")
 
 
+
+def patch_pattern_matcher_regex_reuse() -> None:
+    text = PATTERN_MATCHER_SOURCE.read_text(encoding="utf-8")
+
+    old_body = '''        text = Normalizer.normalize(text, Normalizer.Form.NFD).replace("\\\\p{Mn}+".toRegex(), "")
+        text = text.replace("oe", "o").replace("aa", "a")
+        return text.replace("[^a-z0-9]+".toRegex(), " ").trim().replace("\\\\s+".toRegex(), " ")
+'''
+    new_body = '''        text = Normalizer.normalize(text, Normalizer.Form.NFD).replace(PUBLISHER_COMBINING_MARKS_REGEX, "")
+        text = text.replace("oe", "o").replace("aa", "a")
+        return text.replace(PUBLISHER_NON_ALNUM_REGEX, " ").trim().replace(PUBLISHER_WHITESPACE_REGEX, " ")
+'''
+    if old_body in text:
+        text = text.replace(old_body, new_body, 1)
+    elif "PUBLISHER_COMBINING_MARKS_REGEX" not in text:
+        raise SystemExit("Could not locate PatternOddsMatcher normalizeTeamName regex block")
+
+    class_marker = "class PatternOddsMatcher("
+    class_index = text.find(class_marker)
+    if class_index < 0:
+        raise SystemExit("Could not locate PatternOddsMatcher class")
+
+    body_index = text.find("{", class_index)
+    if body_index < 0:
+        raise SystemExit("Could not locate PatternOddsMatcher class body")
+
+    if "private val PUBLISHER_COMBINING_MARKS_REGEX" not in text:
+        constants = '''
+    // Publisher-only staged optimization. These regexes were previously compiled on every
+    // normalizeTeamName call. Under parallel Domestic generation Android ICU eventually failed
+    // native allocation (U_MEMORY_ALLOCATION_ERROR). Reusing compiled Regex objects preserves
+    // exact normalization semantics while removing the allocation storm.
+    private val PUBLISHER_COMBINING_MARKS_REGEX = Regex("\\\\p{Mn}+")
+    private val PUBLISHER_NON_ALNUM_REGEX = Regex("[^a-z0-9]+")
+    private val PUBLISHER_WHITESPACE_REGEX = Regex("\\\\s+")
+
+'''
+        text = text[:body_index + 1] + constants + text[body_index + 1:]
+
+    PATTERN_MATCHER_SOURCE.write_text(text, encoding="utf-8")
+    print("APP_READY_PATTERN_REGEX_REUSE_OK")
+
+
+def limit_publisher_domestic_parallelism() -> None:
+    text = SOURCE.read_text(encoding="utf-8")
+    old = "    private const val MAX_DOMESTIC_WORKERS = 4"
+    new = "    private const val MAX_DOMESTIC_WORKERS = 2"
+    if old in text:
+        text = text.replace(old, new, 1)
+    elif new not in text:
+        raise SystemExit("Could not locate MAX_DOMESTIC_WORKERS")
+    SOURCE.write_text(text, encoding="utf-8")
+    print("APP_READY_DOMESTIC_WORKERS_OK workers=2")
+
+
+
 def main() -> None:
     configure_compiler_memory()
     patch_legacy_welcome_contract()
+    patch_pattern_matcher_regex_reuse()
+    limit_publisher_domestic_parallelism()
 
     text = SOURCE.read_text(encoding="utf-8")
 
