@@ -176,13 +176,15 @@ internal object AppReadyPatternPublisher {
         var sourceOrder = 0
         competitions.forEach { competitionId ->
             val version = versions[competitionId] ?: return@forEach
-            val catalog = store.loadLatestCatalog(competitionId) ?: return@forEach
-            val selections = store.loadForFeed(
+            val selections = store.loadAllPatternSelectionsForPublisher(
                 competitionId = competitionId,
-                snapshotVersion = version,
-                requestedFeed = catalog.feed,
-                purpose = PreparedSelectionPurpose.PATTERN
+                snapshotVersion = version
             )?.selections.orEmpty()
+            Log.i(
+                TAG,
+                "stage=recommendations_source_loaded competition=$competitionId " +
+                    "snapshot=${version.take(12)} selections=${selections.size}"
+            )
             selections.forEach { add(SourceSelection(competitionId, version, it, sourceOrder++)) }
         }
     }
