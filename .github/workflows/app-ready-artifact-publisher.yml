@@ -75,7 +75,7 @@ jobs:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
@@ -206,8 +206,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main
-          git fetch --no-tags --depth=1 origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+          git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
@@ -299,8 +299,8 @@ jobs:
           # Never rebase a bundle built from source version A onto a newer canonical
           # source version B. Rebase is allowed only when the canonical manifests
           # still match the versions embedded in the generated app-ready manifest.
-          git fetch --no-tags origin main:refs/remotes/origin/main
-          git fetch --no-tags origin build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, subprocess
           from pathlib import Path
