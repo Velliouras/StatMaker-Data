@@ -181,9 +181,9 @@ def main() -> None:
             val startedAt = System.nanoTime()
             Log.i(
                 "StatMakerAppReady",
-                "stage=prepared_domestic_league_\${source.code}_begin " +
-                    "matches=\${leagueFeed.matches.size} " +
-                    "markets=\${leagueFeed.matches.sumOf { it.markets.size }}"
+                "stage=prepared_domestic_league_${source.code}_begin " +
+                    "matches=${leagueFeed.matches.size} " +
+                    "markets=${leagueFeed.matches.sumOf { it.markets.size }}"
             )
             return matcher.findPatternBackedSelections(
                 league = source,
@@ -193,8 +193,8 @@ def main() -> None:
                 val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L
                 Log.i(
                     "StatMakerAppReady",
-                    "stage=prepared_domestic_league_\${source.code}_complete " +
-                        "selections=\${selections.size} elapsedMs=$elapsedMs"
+                    "stage=prepared_domestic_league_${source.code}_complete " +
+                        "selections=${selections.size} elapsedMs=$elapsedMs"
                 )
             }
         }
