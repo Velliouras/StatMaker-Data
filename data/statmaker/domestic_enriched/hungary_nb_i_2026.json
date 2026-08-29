@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-29T17:47:40Z",
+  "generated_at": "2026-08-29T22:44:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/hungary/nb-i/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-29T17:47:23Z",
+    "cache_generated_at": "2026-08-29T22:43:33Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,11 +40,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 31,
+    "completed_fixtures": 32,
     "fixtures_with_any_stats": 19,
     "fixtures_with_bb_core_stats": 19,
-    "any_stats_coverage": 0.6129,
-    "bb_core_coverage": 0.6129,
+    "any_stats_coverage": 0.5938,
+    "bb_core_coverage": 0.5938,
     "group_counts": {
       "shots_total": 19,
       "shots_on_target": 19,
@@ -57,20 +57,20 @@
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.6129,
-      "shots_on_target": 0.6129,
-      "corners": 0.6129,
-      "fouls": 0.6129,
-      "yellow_cards": 0.6129,
-      "red_cards": 0.1613,
-      "possession": 0.6129,
-      "passes": 0.6129,
+      "shots_total": 0.5938,
+      "shots_on_target": 0.5938,
+      "corners": 0.5938,
+      "fouls": 0.5938,
+      "yellow_cards": 0.5938,
+      "red_cards": 0.1562,
+      "possession": 0.5938,
+      "passes": 0.5938,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.6129 < 0.65",
-      "low BB-core coverage: 0.6129 < 0.65",
+      "low any-stats coverage: 0.5938 < 0.65",
+      "low BB-core coverage: 0.5938 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -2669,6 +2669,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560236,
+      "date_utc": "2026-08-29T17:30:00+00:00",
+      "country": "Hungary",
+      "league": "NB I",
+      "league_code": "HUN",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 271,
+      "round": "Regular Season - 6",
+      "home_team": "Ujpest",
+      "away_team": "Vasas",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
         },
         "extratime": {
           "home": null,

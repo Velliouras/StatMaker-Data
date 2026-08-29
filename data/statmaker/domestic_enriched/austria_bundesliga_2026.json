@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-29T17:47:40Z",
+  "generated_at": "2026-08-29T22:44:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-29T17:46:17Z",
+    "cache_generated_at": "2026-08-29T22:42:41Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,29 +40,29 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 23,
-    "fixtures_with_any_stats": 23,
-    "fixtures_with_bb_core_stats": 22,
+    "completed_fixtures": 24,
+    "fixtures_with_any_stats": 24,
+    "fixtures_with_bb_core_stats": 23,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9565,
+    "bb_core_coverage": 0.9583,
     "group_counts": {
-      "shots_total": 23,
-      "shots_on_target": 23,
-      "corners": 23,
-      "fouls": 23,
-      "yellow_cards": 22,
+      "shots_total": 24,
+      "shots_on_target": 24,
+      "corners": 24,
+      "fouls": 24,
+      "yellow_cards": 23,
       "red_cards": 5,
-      "possession": 23,
-      "passes": 23,
-      "xg": 23
+      "possession": 24,
+      "passes": 24,
+      "xg": 24
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9565,
-      "red_cards": 0.2174,
+      "yellow_cards": 0.9583,
+      "red_cards": 0.2083,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
@@ -1993,6 +1993,90 @@
         },
         "fulltime": {
           "home": 0,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561920,
+      "date_utc": "2026-08-29T17:30:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 5",
+      "home_team": "Lask Linz",
+      "away_team": "SCR Altach",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 7,
+        "HST": 11,
+        "AST": 2,
+        "HC": 4,
+        "AC": 0,
+        "HF": 9,
+        "AF": 15,
+        "HY": 2,
+        "AY": 4,
+        "HR": null,
+        "AR": null,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 2,
+        "ASaves": 8,
+        "HPasses": 528,
+        "APasses": 383,
+        "HPassesAccurate": 457,
+        "APassesAccurate": 299,
+        "HxG": 2.88,
+        "AxG": 0.28
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
           "away": 0
         },
         "extratime": {
