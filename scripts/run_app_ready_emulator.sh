@@ -64,16 +64,63 @@ APK="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug/app-debug.a
 test -s "$APK"
 adb install -r "$APK"
 
-# Seed the disposable publisher APK from the most recent verified app-ready generation.
-# This lets the producer patch the immutable prepared source snapshot instead of rebuilding
-# the complete Domestic history universe from zero on every publisher run.
+## RESUMABLE_CHECKPOINT_SEED
+# Prefer an exact resumable checkpoint from a previous failed/cancelled publisher.
+CHECKPOINT_IN="$GITHUB_WORKSPACE/app-ready-checkpoint-incoming"
+CHECKPOINT_RESTORED=0
+if [[ -s "$CHECKPOINT_IN/checkpoint.json" ]]; then
+  if python3 - "$GITHUB_WORKSPACE" "$u" "$CHECKPOINT_IN/checkpoint.json" <<'PY'
+import json, sys
+from pathlib import Path
+workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2])
+checkpoint=json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
+main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(encoding="utf-8"))
+uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
+if checkpoint.get("mainContentVersion") != main.get("contentVersion"): raise SystemExit(1)
+if checkpoint.get("uefaContentVersion") != uefa.get("contentVersion"): raise SystemExit(1)
+if int(checkpoint.get("preparedReadyCount",0)) != 4: raise SystemExit(1)
+print("APP_READY_CHECKPOINT_MATCH", str(checkpoint.get("mainContentVersion",""))[:12], str(checkpoint.get("uefaContentVersion",""))[:12])
+PY
+  then
+    for rel in \
+      databases/statmaker.db \
+      databases/statmaker_prepared_betting.db \
+      files/domestic_normalized_stats_v2.bin \
+      files/statmaker_stats_snapshots/champions_league.bin \
+      files/statmaker_stats_snapshots/europa_league.bin \
+      files/statmaker_stats_snapshots/conference_league.bin \
+      files/app_ready_odds/domestic.json \
+      files/app_ready_odds/champions_league.json \
+      files/app_ready_odds/europa_league.json \
+      files/app_ready_odds/conference_league.json \
+      shared_prefs/statmaker_prepared_data_versions.xml \
+      shared_prefs/statmaker_data_manifests.xml \
+      shared_prefs/statmaker_uefa_support_history.xml \
+      shared_prefs/statmaker_app_ready_artifacts.xml
+    do
+      test -s "$CHECKPOINT_IN/$rel"
+      dir="$(dirname "$rel")"
+      adb shell run-as "$APP_ID" mkdir -p "$dir"
+      tmp="/data/local/tmp/$(basename "$rel")"
+      adb push "$CHECKPOINT_IN/$rel" "$tmp" >/dev/null
+      adb shell run-as "$APP_ID" cp "$tmp" "$rel"
+      adb shell rm -f "$tmp"
+    done
+    CHECKPOINT_RESTORED=1
+    echo "APP_READY_CHECKPOINT_RESTORED"
+  else
+    echo "APP_READY_CHECKPOINT_STALE ignored"
+  fi
+fi
+
+# Otherwise seed from the most recent verified app-ready generation.
 SEED_ROOT="$GITHUB_WORKSPACE/app-ready-seed"
 rm -rf "$SEED_ROOT"
 mkdir -p "$SEED_ROOT"
 
 git -C "$GITHUB_WORKSPACE" fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
 SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
-if [[ -n "$SEED_COMMIT" ]]; then
+if [[ "$CHECKPOINT_RESTORED" -eq 0 && -n "$SEED_COMMIT" ]]; then
   echo "APP_READY_SEED_COMMIT $SEED_COMMIT"
   git -C "$GITHUB_WORKSPACE" show "$SEED_COMMIT:data/statmaker/app_ready/update_manifest.json" > "$SEED_ROOT/update_manifest.json"
 
@@ -201,7 +248,7 @@ PY
   done
 
   echo "APP_READY_SEED_INSTALLED"
-else
+elif [[ "$CHECKPOINT_RESTORED" -eq 0 ]]; then
   echo "APP_READY_SEED_UNAVAILABLE rebuilding from scratch"
 fi
 
@@ -216,105 +263,166 @@ if ! adb reverse --list | grep -q "tcp:8765 tcp:8765"; then
 fi
 echo "APP_READY_ADB_REVERSE_OK"
 
+checkpoint_root="$GITHUB_WORKSPACE/app-ready-checkpoint"
+rm -rf "$checkpoint_root"
+
+export_checkpoint() {
+  local target="$checkpoint_root"
+  rm -rf "$target"
+  mkdir -p "$target/databases" "$target/files/statmaker_stats_snapshots" "$target/files/app_ready_odds" "$target/shared_prefs"
+
+  adb shell am force-stop "$APP_ID"
+  sleep 2
+
+  adb exec-out run-as "$APP_ID" cat databases/statmaker.db > "$target/databases/statmaker.db"
+  adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$target/databases/statmaker_prepared_betting.db"
+  adb exec-out run-as "$APP_ID" cat files/domestic_normalized_stats_v2.bin > "$target/files/domestic_normalized_stats_v2.bin"
+  for competition in champions_league europa_league conference_league; do
+    adb exec-out run-as "$APP_ID" cat "files/statmaker_stats_snapshots/$competition.bin" > "$target/files/statmaker_stats_snapshots/$competition.bin"
+  done
+
+  cp "$GITHUB_WORKSPACE/odds/odds_api_io/domestic_odds.json" "$target/files/app_ready_odds/domestic.json"
+  cp "$u/odds/odds_api_io/champions_league_odds.json" "$target/files/app_ready_odds/champions_league.json"
+  cp "$u/odds/odds_api_io/europa_league_odds.json" "$target/files/app_ready_odds/europa_league.json"
+  cp "$u/odds/odds_api_io/conference_league_odds.json" "$target/files/app_ready_odds/conference_league.json"
+
+  for pref in statmaker_prepared_data_versions statmaker_data_manifests statmaker_uefa_support_history statmaker_app_ready_artifacts; do
+    adb exec-out run-as "$APP_ID" cat "shared_prefs/$pref.xml" > "$target/shared_prefs/$pref.xml"
+  done
+
+  python3 - "$GITHUB_WORKSPACE" "$u" "$target" <<'PY'
+import hashlib, json, sqlite3, sys
+from datetime import datetime, timezone
+from pathlib import Path
+workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2]); root=Path(sys.argv[3])
+db_path=root/"databases/statmaker_prepared_betting.db"
+con=sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+try:
+    quick=con.execute("PRAGMA quick_check").fetchone()
+    if not quick or quick[0]!="ok": raise SystemExit(f"Checkpoint quick_check failed: {quick}")
+    ready=con.execute("""
+      SELECT competition_id,snapshot_version,match_count,selection_count
+      FROM prepared_snapshot_meta WHERE state='ready' ORDER BY competition_id
+    """).fetchall()
+finally:
+    con.close()
+expected={"domestic","champions_league","europa_league","conference_league"}
+if {str(r[0]) for r in ready} != expected:
+    raise SystemExit(f"Checkpoint requires exact 4/4 READY snapshots; got {[r[0] for r in ready]}")
+main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(encoding="utf-8"))
+uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
+digest=hashlib.sha256(db_path.read_bytes()).hexdigest()
+payload={
+ "schemaVersion":1,
+ "createdAt":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
+ "mainContentVersion":main.get("contentVersion",""),
+ "uefaContentVersion":uefa.get("contentVersion",""),
+ "preparedReadyCount":len(ready),
+ "preparedDbSha256":digest,
+ "preparedSnapshots":[
+   {"competitionId":str(r[0]),"snapshotVersion":str(r[1]),"matchCount":int(r[2]),"selectionCount":int(r[3])}
+   for r in ready
+ ],
+}
+(root/"checkpoint.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+print("APP_READY_CHECKPOINT_EXPORTED",f"db_bytes={db_path.stat().st_size}",f"db_sha={digest[:12]}",
+      "snapshots="+",".join(f"{r[0]}:{r[2]}/{r[3]}" for r in ready))
+PY
+
+  for name in domestic champions_league europa_league conference_league; do
+    adb push "$target/files/app_ready_odds/$name.json" "/data/local/tmp/$name.json" >/dev/null
+    adb shell run-as "$APP_ID" mkdir -p files/app_ready_odds
+    adb shell run-as "$APP_ID" cp "/data/local/tmp/$name.json" "files/app_ready_odds/$name.json"
+    adb shell rm -f "/data/local/tmp/$name.json"
+  done
+}
+
+monitor_phase() {
+  local phase="$1"
+  local require_prepared="$2"
+  local start_epoch="$(date +%s)"
+  local last_progress_epoch="$start_epoch"
+  local last_stage=""
+  local max_total_seconds=2700
+  local max_idle_seconds=1200
+
+  for _ in $(seq 1 540); do
+    if ! server_healthy; then
+      echo "App-ready HTTP server became unhealthy during phase=$phase" >&2
+      return 1
+    fi
+    appready_logs="$(adb logcat -d -s StatMakerAppReady:V "*:S" || true)"
+    if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then
+      echo "App-ready producer reported a data task error during phase=$phase" >&2
+      printf '%s\n' "$appready_logs" >&2
+      return 1
+    fi
+    stage="$(grep "stage=" <<<"$appready_logs" | tail -1 || true)"
+    if [[ -n "$stage" && "$stage" != "$last_stage" ]]; then
+      echo "$stage"
+      last_stage="$stage"
+      last_progress_epoch="$(date +%s)"
+    fi
+
+    if [[ "$require_prepared" == "true" ]]; then
+      prepared_line="$(grep "stage=prepared_complete ready=" <<<"$appready_logs" | tail -1 || true)"
+      if [[ "$prepared_line" =~ stage=prepared_complete[[:space:]]ready=4[[:space:]]requested=4 ]]; then
+        echo "APP_READY_PREPARED_PHASE_COMPLETE"
+        return 0
+      fi
+    else
+      recommendations_line="$(grep "stage=recommendations_complete generation=" <<<"$appready_logs" | tail -1 || true)"
+      if [[ "$recommendations_line" =~ stage=recommendations_complete[[:space:]]generation=([0-9a-f]{64})[[:space:]]candidates=([0-9]+)[[:space:]]reused=(true|false)[[:space:]]elapsedMs=([0-9]+) ]]; then
+        if (( BASH_REMATCH[2] <= 0 )); then
+          echo "Prepared recommendation generation completed with 0 candidates" >&2
+          return 1
+        fi
+        echo "APP_READY_RECOMMENDATION_PHASE_COMPLETE generation=${BASH_REMATCH[1]} candidates=${BASH_REMATCH[2]}"
+        return 0
+      fi
+    fi
+
+    now_epoch="$(date +%s)"
+    if (( now_epoch - last_progress_epoch >= max_idle_seconds )); then
+      echo "App-ready phase=$phase made no stage progress for ${max_idle_seconds}s; last stage: ${last_stage:-none}" >&2
+      printf '%s\n' "$appready_logs" >&2
+      return 1
+    fi
+    if (( now_epoch - start_epoch >= max_total_seconds )); then
+      echo "App-ready phase=$phase exceeded phase ceiling ${max_total_seconds}s; last stage: ${last_stage:-none}" >&2
+      printf '%s\n' "$appready_logs" >&2
+      return 1
+    fi
+    sleep 5
+  done
+  return 1
+}
+
+# Phase 1: expensive immutable source preparation. A restored exact checkpoint makes this a quick reuse.
 adb logcat -c
 adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+monitor_phase "prepared" "true"
 
-ok=0
-last_stage=""
-start_epoch="$(date +%s)"
-last_progress_epoch="$start_epoch"
-max_total_seconds=2700
-max_idle_seconds=1200
-# This is an off-device artifact build, not an interactive phone update. Use a progress-aware
-# watchdog rather than a fixed 25-minute wall clock: real producer stage changes extend the run,
-# while transport/data errors still fail immediately and a genuinely stalled producer is bounded.
-for _ in $(seq 1 540); do
-  if ! server_healthy; then
-    echo "App-ready HTTP server became unhealthy while producer was running" >&2
-    cat "$HTTP_LOG" >&2 || true
-    adb logcat -d "StatMakerAppReady:V" "*:S" >&2 || true
-    exit 1
-  fi
+# Freeze and persist 4/4 READY work before final recommendation materialization.
+export_checkpoint
 
-  appready_logs="$(adb logcat -d -s StatMakerAppReady:V "*:S" || true)"
-  if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then
-    echo "App-ready producer reported a data task error" >&2
-    printf '%s\n' "$appready_logs" >&2
-    exit 1
-  fi
-
-  stage="$(grep "stage=" <<<"$appready_logs" | tail -1 || true)"
-  if [[ -n "$stage" && "$stage" != "$last_stage" ]]; then
-    echo "$stage"
-    last_stage="$stage"
-    last_progress_epoch="$(date +%s)"
-  fi
-
-  now_epoch="$(date +%s)"
-  if (( now_epoch - last_progress_epoch >= max_idle_seconds )); then
-    echo "App-ready producer made no stage progress for ${max_idle_seconds}s; last stage: ${last_stage:-none}" >&2
-    printf '%s\\n' "$appready_logs" >&2
-    adb logcat -d | tail -600 >&2 || true
-    exit 1
-  fi
-  if (( now_epoch - start_epoch >= max_total_seconds )); then
-    echo "App-ready producer exceeded total build ceiling ${max_total_seconds}s; last stage: ${last_stage:-none}" >&2
-    printf '%s\\n' "$appready_logs" >&2
-    exit 1
-  fi
-
-  if adb logcat -d -s StatMakerWelcomePerf:I "*:S" | grep -q "total="; then
-    ok=1
-    break
-  fi
-  sleep 5
-done
+# Phase 2: restart against the exact checkpoint. Prepared snapshots are reused; only final recommendations remain.
+adb logcat -c
+adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+monitor_phase "recommendations" "false"
 
 appready_logs="$(adb logcat -d -s StatMakerAppReady:V "*:S" || true)"
 printf '%s\n' "$appready_logs"
-if [[ "$ok" -ne 1 ]]; then
-  echo "App-ready producer did not complete within the progress-aware build window" >&2
-  adb logcat -d | tail -600 >&2
-  exit 1
-fi
 
-# A Welcome trace completion alone is not a valid app-ready generation. Require every data stage
-# and require the producer to prepare exactly the competitions it requested. Some competitions can
-# legitimately have zero pending/live fixtures, so the requested count is dynamic.
-required_stages=(
-  domestic_resolved
-  normalized_resolved
-  domestic_odds_resolved
-  champions_odds_resolved
-  europa_odds_resolved
-  conference_odds_resolved
-  support_resolved
-  all_futures_resolved
-  prepared_begin
-  recommendations_begin
-  recommendations_candidates_begin
-  recommendations_candidates_complete
-  recommendations_complete
-)
-for stage_name in "${required_stages[@]}"; do
-  if ! grep -q "stage=${stage_name}" <<<"$appready_logs"; then
-    echo "App-ready producer missing required stage=${stage_name}" >&2
-    exit 1
-  fi
-done
 prepared_complete_line="$(grep "stage=prepared_complete ready=" <<<"$appready_logs" | tail -1 || true)"
 if [[ ! "$prepared_complete_line" =~ stage=prepared_complete[[:space:]]ready=([0-9]+)[[:space:]]requested=([0-9]+) ]]; then
-  echo "App-ready producer missing valid prepared_complete summary" >&2
+  echo "Resumed app-ready producer missing valid prepared_complete summary" >&2
   exit 1
 fi
 prepared_ready="${BASH_REMATCH[1]}"
 prepared_requested="${BASH_REMATCH[2]}"
 if (( prepared_requested != 4 || prepared_ready != 4 )); then
-  echo "App-ready producer must prepare production-compatible 4/4 snapshots; got ${prepared_ready}/${prepared_requested}" >&2
-  exit 1
-fi
-if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then
-  echo "App-ready producer completed with task errors" >&2
+  echo "Resumed app-ready producer must reuse 4/4 snapshots; got ${prepared_ready}/${prepared_requested}" >&2
   exit 1
 fi
 
@@ -330,7 +438,6 @@ if (( recommendation_candidates <= 0 )); then
   exit 1
 fi
 echo "APP_READY_PATTERN_GENERATION_OK generation=$recommendation_generation candidates=$recommendation_candidates"
-
 echo "APP_READY_PRODUCER_SEMANTICS_OK"
 
 adb shell am force-stop "$APP_ID"
