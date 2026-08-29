@@ -262,6 +262,85 @@ def patch_prepared_store_v10() -> None:
     elif new_version not in text:
         raise SystemExit("Could not locate PreparedBettingSnapshotStore database version")
 
+    publisher_load_marker = '''    /**
+     * Returns null only when the requested immutable snapshot is unavailable. An empty but ready
+     * snapshot returns a non-null result with an empty selections list.
+     */
+    fun loadForFeed(
+'''
+    publisher_load_method = '''    /**
+     * Publisher-only full PATTERN read that avoids prepared_snapshot_meta.catalog_payload.
+     *
+     * The compact catalogue can exceed Android CursorWindow limits after league expansion.
+     * Final recommendation materialization only needs the persisted prepared match rows plus
+     * PATTERN selections, so hydrate those rows directly and never read the giant catalogue blob.
+     */
+    fun loadAllPatternSelectionsForPublisher(
+        competitionId: String,
+        snapshotVersion: String
+    ): PreparedSnapshotLoadResult? {
+        if (!hasReadySnapshot(competitionId, snapshotVersion)) return null
+
+        val requestedMatches = readableDatabase.rawQuery(
+            """
+            SELECT match_key, payload
+            FROM prepared_matches
+            WHERE competition_id=? AND snapshot_version=?
+            ORDER BY local_date, match_key
+            """.trimIndent(),
+            arrayOf(competitionId, snapshotVersion)
+        ).use { cursor ->
+            buildMap<String, OddsMatch> {
+                while (cursor.moveToNext()) {
+                    val matchKey = cursor.getString(0)
+                    val match = runCatching {
+                        JSONObject(cursor.getString(1)).toPreparedOddsMatch()
+                    }.getOrNull() ?: continue
+                    put(matchKey, match)
+                }
+            }
+        }
+
+        if (requestedMatches.isEmpty()) {
+            return PreparedSnapshotLoadResult(
+                selections = emptyList(),
+                selectionCount = 0,
+                snapshotVersion = snapshotVersion
+            )
+        }
+
+        val dates = requestedMatches.values
+            .asSequence()
+            .map(::bettingLocalDate)
+            .filter(String::isNotBlank)
+            .toSet()
+
+        val selections = loadSelections(
+            competitionId = competitionId,
+            snapshotVersion = snapshotVersion,
+            dates = dates,
+            requestedMatches = requestedMatches,
+            purpose = PreparedSelectionPurpose.PATTERN
+        )
+
+        return PreparedSnapshotLoadResult(
+            selections = selections,
+            selectionCount = selections.size,
+            snapshotVersion = snapshotVersion
+        )
+    }
+
+    /**
+     * Returns null only when the requested immutable snapshot is unavailable. An empty but ready
+     * snapshot returns a non-null result with an empty selections list.
+     */
+    fun loadForFeed(
+'''
+    if publisher_load_method not in text:
+        if text.count(publisher_load_marker) != 1:
+            raise SystemExit("Could not locate PreparedBettingSnapshotStore loadForFeed marker")
+        text = text.replace(publisher_load_marker, publisher_load_method, 1)
+
     source.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_STORE_V10_OK")
 
