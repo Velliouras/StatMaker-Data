@@ -186,7 +186,7 @@ jobs:
           rm -rf app-ready-checkpoint-incoming
           mkdir -p app-ready-checkpoint-incoming
           python - <<'PY'
-          import io, json, os, urllib.request, zipfile
+          import io, json, os, time, urllib.error, urllib.request, zipfile
           from pathlib import Path
 
           api = os.environ["API_URL"].rstrip("/")
@@ -198,12 +198,18 @@ jobs:
               "X-GitHub-Api-Version": "2022-11-28",
               "User-Agent": "statmaker-app-ready-checkpoint",
           }
-          req = urllib.request.Request(
-              f"{api}/repos/{repo}/actions/artifacts?per_page=100",
-              headers=headers,
-          )
-          with urllib.request.urlopen(req, timeout=30) as response:
-              payload = json.load(response)
+
+          try:
+              req = urllib.request.Request(
+                  f"{api}/repos/{repo}/actions/artifacts?per_page=100",
+                  headers=headers,
+              )
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  payload = json.load(response)
+          except Exception as exc:
+              print("APP_READY_CHECKPOINT_LIST_UNAVAILABLE", type(exc).__name__, str(exc))
+              raise SystemExit(0)
+
           artifacts = [
               item for item in payload.get("artifacts", [])
               if item.get("name") == "statmaker-app-ready-prepared-checkpoint"
@@ -213,15 +219,41 @@ jobs:
           if not artifacts:
               print("APP_READY_CHECKPOINT_ARTIFACT_NONE")
               raise SystemExit(0)
+
           artifact = artifacts[0]
-          req = urllib.request.Request(artifact["archive_download_url"], headers=headers)
-          with urllib.request.urlopen(req, timeout=120) as response:
-              raw = response.read()
-          with zipfile.ZipFile(io.BytesIO(raw)) as archive:
-              archive.extractall("app-ready-checkpoint-incoming")
+          raw = None
+          for attempt in range(1, 6):
+              try:
+                  req = urllib.request.Request(artifact["archive_download_url"], headers=headers)
+                  with urllib.request.urlopen(req, timeout=180) as response:
+                      raw = response.read()
+                  break
+              except Exception as exc:
+                  print(
+                      "APP_READY_CHECKPOINT_DOWNLOAD_RETRY",
+                      f"attempt={attempt}",
+                      type(exc).__name__,
+                      str(exc),
+                  )
+                  if attempt < 5:
+                      time.sleep(10 * attempt)
+
+          if not raw:
+              print("APP_READY_CHECKPOINT_DOWNLOAD_UNAVAILABLE continuing_without_checkpoint")
+              raise SystemExit(0)
+
+          try:
+              with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+                  archive.extractall("app-ready-checkpoint-incoming")
+          except Exception as exc:
+              print("APP_READY_CHECKPOINT_ARCHIVE_INVALID", type(exc).__name__, str(exc))
+              raise SystemExit(0)
+
           checkpoint = Path("app-ready-checkpoint-incoming/checkpoint.json")
           if not checkpoint.is_file():
-              raise SystemExit("Downloaded checkpoint artifact has no checkpoint.json")
+              print("APP_READY_CHECKPOINT_JSON_MISSING continuing_without_checkpoint")
+              raise SystemExit(0)
+
           print(
               "APP_READY_CHECKPOINT_ARTIFACT_RESTORED",
               f"id={artifact.get('id')}",
