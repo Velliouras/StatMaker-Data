@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -177,6 +178,68 @@ def patch_empty_uefa_ready_snapshots() -> None:
     print("APP_READY_EMPTY_UEFA_READY_OK")
 
 
+
+def install_prepared_pattern_bridge() -> None:
+    workspace = Path(os.environ["GITHUB_WORKSPACE"])
+    source = workspace / "scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"
+    target = Path("app/src/main/java/com/statmaker/app/AppReadyPatternPublisherBridge.kt")
+    if not source.is_file() or source.stat().st_size <= 0:
+        raise SystemExit(f"Missing prepared recommendation bridge: {source}")
+    shutil.copy2(source, target)
+    print(f"APP_READY_PATTERN_BRIDGE_OK bytes={target.stat().st_size}")
+
+
+def patch_prepared_store_v10() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
+    text = source.read_text(encoding="utf-8")
+
+    if "AppReadyPatternSchema.create(db)" not in text:
+        on_create_marker = '''        db.execSQL(
+            "CREATE INDEX idx_prepared_selections_builder ON prepared_selections(competition_id, snapshot_version, qualifies_builder, local_date, match_key)"
+        )
+    }
+'''
+        on_create_replacement = '''        db.execSQL(
+            "CREATE INDEX idx_prepared_selections_builder ON prepared_selections(competition_id, snapshot_version, qualifies_builder, local_date, match_key)"
+        )
+        AppReadyPatternSchema.create(db)
+    }
+'''
+        if text.count(on_create_marker) != 1:
+            raise SystemExit("Could not locate PreparedBettingSnapshotStore onCreate tail")
+        text = text.replace(on_create_marker, on_create_replacement, 1)
+
+        upgrade_marker = '''        if (oldVersion < 8) {
+            db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_home_outcomes_bits TEXT")
+            db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_away_outcomes_bits TEXT")
+        }
+        createPerformanceIndexes(db)
+'''
+        upgrade_replacement = '''        if (oldVersion < 8) {
+            db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_home_outcomes_bits TEXT")
+            db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_away_outcomes_bits TEXT")
+        }
+        if (oldVersion < APP_READY_PATTERN_SCHEMA_VERSION) {
+            AppReadyPatternSchema.create(db)
+        }
+        createPerformanceIndexes(db)
+'''
+        if text.count(upgrade_marker) != 1:
+            raise SystemExit("Could not locate PreparedBettingSnapshotStore upgrade tail")
+        text = text.replace(upgrade_marker, upgrade_replacement, 1)
+
+    old_version = "        private const val DATABASE_VERSION = 8"
+    new_version = "        private const val DATABASE_VERSION = APP_READY_PATTERN_SCHEMA_VERSION"
+    if old_version in text:
+        text = text.replace(old_version, new_version, 1)
+    elif new_version not in text:
+        raise SystemExit("Could not locate PreparedBettingSnapshotStore database version")
+
+    source.write_text(text, encoding="utf-8")
+    print("APP_READY_PREPARED_STORE_V10_OK")
+
+
+
 def add_producer_diagnostics() -> None:
     source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
     text = source.read_text(encoding="utf-8")
@@ -201,7 +264,22 @@ def add_producer_diagnostics() -> None:
         ("            val supportResults = supportFutures.map(::resolve)\n", "            val supportResults = supportFutures.map(::resolve)\n" + '            Log.i("StatMakerAppReady", "stage=support_resolved ready=${supportResults.count { it != null }}")\n'),
         ("            val logosUpdated = resolve(logosFuture) == true\n", "            val logosUpdated = resolve(logosFuture) == true\n" + '            Log.i("StatMakerAppReady", "stage=all_futures_resolved")\n'),
         ('            val prepared = trace.measure("prepared_coordinator") {\n', '            Log.i("StatMakerAppReady", "stage=prepared_begin")\n            val prepared = trace.measure("prepared_coordinator") {\n'),
-        ("            warnings += prepared.warnings\n", '            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")\n            warnings += prepared.warnings\n'),
+        ("            warnings += prepared.warnings\n", '''            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")
+            check(prepared.requestedCompetitions.size == 4 && prepared.readyCompetitions.size == 4) {
+                "App-ready publisher requires 4/4 prepared source snapshots"
+            }
+            Log.i("StatMakerAppReady", "stage=recommendations_begin")
+            val recommendationReport = trace.measure("prepared_recommendations") {
+                AppReadyPatternPublisher.publish(appContext, db)
+            }
+            Log.i(
+                "StatMakerAppReady",
+                "stage=recommendations_complete generation=${recommendationReport.generationId} " +
+                    "candidates=${recommendationReport.candidateCount} reused=${recommendationReport.reused} " +
+                    "elapsedMs=${recommendationReport.elapsedMs}"
+            )
+            warnings += prepared.warnings
+'''),
     ]
     for old_marker, new_marker in replacements:
         if text.count(old_marker) != 1:
@@ -219,4 +297,6 @@ harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "Domestic API registry")
 patch_domestic_multi_season_index()
 patch_empty_uefa_ready_snapshots()
+install_prepared_pattern_bridge()
+patch_prepared_store_v10()
 add_producer_diagnostics()
