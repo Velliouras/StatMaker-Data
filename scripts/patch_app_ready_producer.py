@@ -48,6 +48,33 @@ def tune_runner_manifest() -> None:
     print("APP_READY_RUNNER_MANIFEST_OK")
 
 
+
+def register_recommendation_publisher_activity() -> None:
+    manifest = Path("app/src/main/AndroidManifest.xml")
+    text = manifest.read_text(encoding="utf-8")
+    if 'android:name=".AppReadyPatternPublisherActivity"' in text:
+        print("APP_READY_PATTERN_ACTIVITY_OK already-registered")
+        return
+
+    marker = '''        <activity
+            android:name=".StatMakerWelcomeActivity"
+'''
+    addition = '''        <activity
+            android:name=".AppReadyPatternPublisherActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay" />
+
+        <activity
+            android:name=".StatMakerWelcomeActivity"
+'''
+    if text.count(marker) != 1:
+        raise SystemExit("Could not locate Welcome activity manifest marker")
+    manifest.write_text(text.replace(marker, addition, 1), encoding="utf-8")
+    print("APP_READY_PATTERN_ACTIVITY_OK registered")
+
+
+
 def bundle_normalized_snapshot() -> None:
     workspace = Path(os.environ["GITHUB_WORKSPACE"])
     source = workspace / "data/api_football/domestic_normalized_fixture_stats.json"
@@ -291,6 +318,7 @@ def add_producer_diagnostics() -> None:
 
 replace_repository_urls()
 tune_runner_manifest()
+register_recommendation_publisher_activity()
 bundle_normalized_snapshot()
 patch_normalized_repository()
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt", "Domestic API artifact")
