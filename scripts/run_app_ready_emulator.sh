@@ -150,6 +150,10 @@ required_stages=(
   support_resolved
   all_futures_resolved
   prepared_begin
+  recommendations_begin
+  recommendations_candidates_begin
+  recommendations_candidates_complete
+  recommendations_complete
 )
 for stage_name in "${required_stages[@]}"; do
   if ! grep -q "stage=${stage_name}" <<<"$appready_logs"; then
@@ -172,6 +176,19 @@ if grep -q " E StatMakerAppReady:" <<<"$appready_logs"; then
   echo "App-ready producer completed with task errors" >&2
   exit 1
 fi
+
+recommendations_complete_line="$(grep "stage=recommendations_complete generation=" <<<"$appready_logs" | tail -1 || true)"
+if [[ ! "$recommendations_complete_line" =~ stage=recommendations_complete[[:space:]]generation=([0-9a-f]{64})[[:space:]]candidates=([0-9]+)[[:space:]]reused=(true|false)[[:space:]]elapsedMs=([0-9]+) ]]; then
+  echo "App-ready producer missing valid recommendations_complete summary" >&2
+  exit 1
+fi
+recommendation_generation="${BASH_REMATCH[1]}"
+recommendation_candidates="${BASH_REMATCH[2]}"
+if (( recommendation_candidates <= 0 )); then
+  echo "App-ready producer created an empty prepared recommendation generation" >&2
+  exit 1
+fi
+echo "APP_READY_PATTERN_GENERATION_OK generation=$recommendation_generation candidates=$recommendation_candidates"
 
 echo "APP_READY_PRODUCER_SEMANTICS_OK"
 
@@ -214,9 +231,84 @@ for raw in sys.argv[1:]:
     connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     try:
         result = connection.execute("PRAGMA quick_check").fetchone()
+        if not result or result[0] != "ok":
+            raise SystemExit(f"SQLite quick_check failed after emulator export: {path}: {result}")
+
+        if path.name == "statmaker_prepared_betting.db":
+            user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+            if user_version < 10:
+                raise SystemExit(f"Prepared DB schema must be >=10; got {user_version}")
+
+            tables = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                ).fetchall()
+            }
+            required_tables = {
+                "prepared_pattern_generation",
+                "prepared_pattern_candidates",
+            }
+            missing_tables = sorted(required_tables - tables)
+            if missing_tables:
+                raise SystemExit(
+                    "Prepared DB missing v10 recommendation tables: " + ", ".join(missing_tables)
+                )
+
+            indexes = {
+                row[0]
+                for row in connection.execute(
+                    "SELECT name FROM sqlite_master WHERE type='index'"
+                ).fetchall()
+            }
+            required_indexes = {
+                "idx_prepared_pattern_generation_ready",
+                "idx_prepared_pattern_candidates_scope",
+                "idx_prepared_pattern_candidates_rank",
+                "idx_prepared_pattern_candidates_competition_rank",
+            }
+            missing_indexes = sorted(required_indexes - indexes)
+            if missing_indexes:
+                raise SystemExit(
+                    "Prepared DB missing v10 recommendation indexes: " + ", ".join(missing_indexes)
+                )
+
+            generation = connection.execute(
+                """
+                SELECT generation_id, candidate_count, rules_fingerprint
+                FROM prepared_pattern_generation
+                WHERE state='ready'
+                ORDER BY built_at_ms DESC
+                LIMIT 1
+                """
+            ).fetchone()
+            if not generation:
+                raise SystemExit("Prepared DB has no READY recommendation generation")
+            generation_id, candidate_count, rules_fingerprint = generation
+            if int(candidate_count) <= 0:
+                raise SystemExit("Prepared recommendation generation has 0 candidates")
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v3":
+                raise SystemExit(
+                    f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
+                )
+            actual_candidates = int(
+                connection.execute(
+                    "SELECT COUNT(*) FROM prepared_pattern_candidates WHERE generation_id=?",
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if actual_candidates != int(candidate_count):
+                raise SystemExit(
+                    "Prepared recommendation candidate-count mismatch: "
+                    f"meta={candidate_count} actual={actual_candidates}"
+                )
+            print(
+                "APP_READY_PATTERN_SQLITE_OK",
+                f"schema={user_version}",
+                f"generation={generation_id}",
+                f"candidates={candidate_count}",
+            )
     finally:
         connection.close()
-    if not result or result[0] != "ok":
-        raise SystemExit(f"SQLite quick_check failed after emulator export: {path}: {result}")
     print(f"APP_READY_SQLITE_EXPORT_OK path={path} bytes={path.stat().st_size}")
 PY
