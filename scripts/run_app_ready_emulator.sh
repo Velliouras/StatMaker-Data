@@ -76,10 +76,20 @@ workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2])
 checkpoint=json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
 main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(encoding="utf-8"))
 uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
-if checkpoint.get("mainContentVersion") != main.get("contentVersion"): raise SystemExit(1)
-if checkpoint.get("uefaContentVersion") != uefa.get("contentVersion"): raise SystemExit(1)
-if int(checkpoint.get("preparedReadyCount",0)) != 4: raise SystemExit(1)
-print("APP_READY_CHECKPOINT_MATCH", str(checkpoint.get("mainContentVersion",""))[:12], str(checkpoint.get("uefaContentVersion",""))[:12])
+if int(checkpoint.get("preparedReadyCount",0)) != 4:
+    raise SystemExit(1)
+exact = (
+    checkpoint.get("mainContentVersion") == main.get("contentVersion")
+    and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
+)
+print(
+    "APP_READY_CHECKPOINT_SEED",
+    "exact" if exact else "stale-but-reusable",
+    "checkpoint_main="+str(checkpoint.get("mainContentVersion",""))[:12],
+    "current_main="+str(main.get("contentVersion",""))[:12],
+    "checkpoint_uefa="+str(checkpoint.get("uefaContentVersion",""))[:12],
+    "current_uefa="+str(uefa.get("contentVersion",""))[:12],
+)
 PY
   then
     for rel in \
@@ -107,9 +117,9 @@ PY
       adb shell rm -f "$tmp"
     done
     CHECKPOINT_RESTORED=1
-    echo "APP_READY_CHECKPOINT_RESTORED"
+    echo "APP_READY_CHECKPOINT_RESTORED_AS_SEED"
   else
-    echo "APP_READY_CHECKPOINT_STALE ignored"
+    echo "APP_READY_CHECKPOINT_INVALID ignored"
   fi
 fi
 
