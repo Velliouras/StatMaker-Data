@@ -51,11 +51,12 @@ on:
 
 permissions:
   contents: write
+  actions: read
 concurrency:
   # Failed/cancelled upstream workflow_run events are no-op runs. Give those runs a
   # unique key so they cannot cancel a valid publisher already building a generation.
   group: statmaker-app-ready-${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && github.run_id || 'active' }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -171,6 +172,61 @@ jobs:
           sudo chmod 600 /dev/kvm
           test -r /dev/kvm -a -w /dev/kvm
 
+      - name: Restore resumable prepared checkpoint
+        if: steps.preflight.outputs.generate == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          API_URL: ${{ github.api_url }}
+        run: |
+          set -euo pipefail
+          rm -rf app-ready-checkpoint-incoming
+          mkdir -p app-ready-checkpoint-incoming
+          python - <<'PY'
+          import io, json, os, urllib.request, zipfile
+          from pathlib import Path
+
+          api = os.environ["API_URL"].rstrip("/")
+          repo = os.environ["REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "User-Agent": "statmaker-app-ready-checkpoint",
+          }
+          req = urllib.request.Request(
+              f"{api}/repos/{repo}/actions/artifacts?per_page=100",
+              headers=headers,
+          )
+          with urllib.request.urlopen(req, timeout=30) as response:
+              payload = json.load(response)
+          artifacts = [
+              item for item in payload.get("artifacts", [])
+              if item.get("name") == "statmaker-app-ready-prepared-checkpoint"
+              and not item.get("expired", False)
+          ]
+          artifacts.sort(key=lambda item: item.get("created_at", ""), reverse=True)
+          if not artifacts:
+              print("APP_READY_CHECKPOINT_ARTIFACT_NONE")
+              raise SystemExit(0)
+          artifact = artifacts[0]
+          req = urllib.request.Request(artifact["archive_download_url"], headers=headers)
+          with urllib.request.urlopen(req, timeout=120) as response:
+              raw = response.read()
+          with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+              archive.extractall("app-ready-checkpoint-incoming")
+          checkpoint = Path("app-ready-checkpoint-incoming/checkpoint.json")
+          if not checkpoint.is_file():
+              raise SystemExit("Downloaded checkpoint artifact has no checkpoint.json")
+          print(
+              "APP_READY_CHECKPOINT_ARTIFACT_RESTORED",
+              f"id={artifact.get('id')}",
+              f"created_at={artifact.get('created_at')}",
+          )
+          PY
+
       - name: Produce indexed read models off-device
         if: steps.preflight.outputs.generate == 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -187,6 +243,17 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
+
+      - name: Persist resumable prepared checkpoint
+        if: always() && steps.preflight.outputs.generate == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: statmaker-app-ready-prepared-checkpoint
+          path: app-ready-checkpoint
+          if-no-files-found: ignore
+          retention-days: 3
+          compression-level: 6
+          overwrite: true
 
       - name: Stage canonical repository inputs
         if: steps.preflight.outputs.generate == 'true'
