@@ -56,7 +56,9 @@ concurrency:
   # Failed/cancelled upstream workflow_run events are no-op runs. Give those runs a
   # unique key so they cannot cancel a valid publisher already building a generation.
   group: statmaker-app-ready-${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && github.run_id || 'active' }}
-  cancel-in-progress: false
+  # A deliberate publisher-code push supersedes older in-flight publisher attempts.
+  # Normal schedule/workflow_run triggers never cancel a valid expensive generation.
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 jobs:
   publish:
