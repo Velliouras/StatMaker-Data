@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-30T18:07:52Z",
+  "generated_at": "2026-08-30T22:51:59Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/israel/ligat-ha-al/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-30T09:22:13Z",
+    "cache_generated_at": "2026-08-30T22:51:08Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,11 +40,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 10,
+    "completed_fixtures": 11,
     "fixtures_with_any_stats": 2,
     "fixtures_with_bb_core_stats": 2,
-    "any_stats_coverage": 0.2,
-    "bb_core_coverage": 0.2,
+    "any_stats_coverage": 0.1818,
+    "bb_core_coverage": 0.1818,
     "group_counts": {
       "shots_total": 2,
       "shots_on_target": 2,
@@ -57,21 +57,21 @@
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.2,
-      "shots_on_target": 0.2,
-      "corners": 0.2,
-      "fouls": 0.2,
-      "yellow_cards": 0.2,
+      "shots_total": 0.1818,
+      "shots_on_target": 0.1818,
+      "corners": 0.1818,
+      "fouls": 0.1818,
+      "yellow_cards": 0.1818,
       "red_cards": 0.0,
-      "possession": 0.2,
-      "passes": 0.2,
+      "possession": 0.1818,
+      "passes": 0.1818,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 10 < 15",
-      "low any-stats coverage: 0.2 < 0.65",
-      "low BB-core coverage: 0.2 < 0.65",
+      "not enough completed fixtures: 11 < 15",
+      "low any-stats coverage: 0.1818 < 0.65",
+      "low BB-core coverage: 0.1818 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -906,6 +906,90 @@
         "fulltime": {
           "home": 1,
           "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1555487,
+      "date_utc": "2026-08-30T17:15:00+00:00",
+      "country": "Israel",
+      "league": "Ligat Ha'al",
+      "league_code": "ISR",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 383,
+      "round": "Regular Season - 2",
+      "home_team": "Hapoel Haifa",
+      "away_team": "Hapoel Tel Aviv",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,
