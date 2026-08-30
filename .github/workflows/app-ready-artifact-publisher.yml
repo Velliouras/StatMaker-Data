@@ -460,15 +460,50 @@ jobs:
           if [ -z "$(git status --porcelain -- data/statmaker/app_ready)" ]; then exit 0; fi
           git config user.name "StatMaker Artifact Bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/statmaker/app_ready
-          git commit -m "Publish verified app-ready StatMaker read models"
 
-          # Never rebase a bundle built from source version A onto a newer canonical
-          # source version B. Rebase is allowed only when the canonical manifests
-          # still match the versions embedded in the generated app-ready manifest.
-          git fetch --no-tags origin +main:refs/remotes/origin/main
-          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
-          python - <<'PY'
+          if [[ "${RECOVERY_PUBLISH:-false}" == "true" ]]; then
+            # Recovery generation is already fully validated. Never rebase the workflow/code
+            # commit chain onto a moving main branch: that replays unrelated canonical producer
+            # commits and causes conflicts. Preserve only the generated app_ready directory,
+            # reset to the latest canonical main, then commit ONLY those immutable artifacts.
+            recovery_dir="$(mktemp -d)"
+            cp -a data/statmaker/app_ready "$recovery_dir/app_ready"
+
+            published=false
+            for attempt in 1 2 3 4 5; do
+              git fetch --no-tags origin +main:refs/remotes/origin/main
+              git reset --hard refs/remotes/origin/main
+              rm -rf data/statmaker/app_ready
+              mkdir -p data/statmaker
+              cp -a "$recovery_dir/app_ready" data/statmaker/app_ready
+              git add data/statmaker/app_ready
+
+              if git diff --cached --quiet; then
+                echo "APP_READY_RECOVERY_ALREADY_PUBLISHED"
+                published=true
+                break
+              fi
+
+              git commit -m "Publish verified app-ready StatMaker read models"
+              if git push origin HEAD:main; then
+                echo "APP_READY_RECOVERY_PUBLISH_OK attempt=$attempt"
+                published=true
+                break
+              fi
+              echo "APP_READY_RECOVERY_PUBLISH_RETRY attempt=$attempt"
+            done
+            [[ "$published" == "true" ]] || {
+              echo "Could not publish recovery app-ready artifacts after 5 retries" >&2
+              exit 1
+            }
+          else
+            git add data/statmaker/app_ready
+            git commit -m "Publish verified app-ready StatMaker read models"
+
+            # Normal generations remain strict: never publish if canonical source changed.
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+            python - <<'PY'
           import json, subprocess
           from pathlib import Path
           incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
@@ -485,23 +520,16 @@ jobs:
           ))
           actual_main=str(current_main.get('contentVersion') or '')
           actual_uefa=str(current_uefa.get('contentVersion') or '')
-          import os
-          if os.environ.get('RECOVERY_PUBLISH','false').lower() != 'true':
-              if expected_main != actual_main or expected_uefa != actual_uefa:
-                  raise SystemExit(
-                      'Refusing stale app-ready publish after concurrent canonical update: '
-                      f'main={expected_main[:12]}->{actual_main[:12]} '
-                      f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}'
-                  )
-          else:
-              print(
-                  'APP_READY_RECOVERY_REBASE_ALLOWED',
-                  f'main={expected_main[:12]}->{actual_main[:12]}',
-                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}',
+          if expected_main != actual_main or expected_uefa != actual_uefa:
+              raise SystemExit(
+                  'Refusing stale app-ready publish after concurrent canonical update: '
+                  f'main={expected_main[:12]}->{actual_main[:12]} '
+                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}'
               )
           PY
-          git rebase refs/remotes/origin/main
-          git push origin HEAD:main
+            git rebase refs/remotes/origin/main
+            git push origin HEAD:main
+          fi
 
       - name: Verify published generation
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
