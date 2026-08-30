@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-08-30T09:26:39Z",
+  "generated_at": "2026-08-30T18:07:52Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/spain/la-liga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-08-30T09:10:03Z",
+    "cache_generated_at": "2026-08-30T18:06:04Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,21 +40,21 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 25,
-    "fixtures_with_any_stats": 25,
-    "fixtures_with_bb_core_stats": 25,
+    "completed_fixtures": 26,
+    "fixtures_with_any_stats": 26,
+    "fixtures_with_bb_core_stats": 26,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 25,
-      "shots_on_target": 25,
-      "corners": 25,
-      "fouls": 25,
-      "yellow_cards": 25,
+      "shots_total": 26,
+      "shots_on_target": 26,
+      "corners": 26,
+      "fouls": 26,
+      "yellow_cards": 26,
       "red_cards": 5,
-      "possession": 25,
-      "passes": 25,
-      "xg": 25
+      "possession": 26,
+      "passes": 26,
+      "xg": 26
     },
     "group_coverage": {
       "shots_total": 1.0,
@@ -62,7 +62,7 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.2,
+      "red_cards": 0.1923,
       "possession": 1.0,
       "passes": 1.0,
       "xg": 1.0
@@ -2162,6 +2162,90 @@
         "fulltime": {
           "home": 1,
           "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1570360,
+      "date_utc": "2026-08-30T15:00:00+00:00",
+      "country": "Spain",
+      "league": "La Liga",
+      "league_code": "SP1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 140,
+      "round": "Regular Season - 3",
+      "home_team": "Real Madrid",
+      "away_team": "Malaga",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 14,
+        "HST": 8,
+        "AST": 1,
+        "HC": 9,
+        "AC": 6,
+        "HF": 6,
+        "AF": 9,
+        "HY": 0,
+        "AY": 2,
+        "HR": null,
+        "AR": null,
+        "HPossession": 57,
+        "APossession": 43,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 598,
+        "APasses": 460,
+        "HPassesAccurate": 548,
+        "APassesAccurate": 405,
+        "HxG": 2.34,
+        "AxG": 0.72
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 0,
+      "home_score": 4,
+      "away_score": 0,
+      "fthg": 4,
+      "ftag": 0,
+      "hthg": 3,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 3,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 0
         },
         "extratime": {
           "home": null,
