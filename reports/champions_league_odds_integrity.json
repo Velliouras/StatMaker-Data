@@ -4,9 +4,9 @@
     "Bet365",
     "Unibet"
   ],
-  "matchesChecked": 27,
+  "matchesChecked": 36,
   "mixedBookmakerGroupsResolved": 125,
-  "incompleteRowsPruned": 51,
+  "incompleteRowsPruned": 53,
   "groupsDropped": 18,
   "matches": [
     {
@@ -153,7 +153,7 @@
       "matchId": "74165870",
       "fixture": "Club Brugge - Aston Villa",
       "before": 97,
-      "after": 56,
+      "after": 54,
       "groups": [
         {
           "market": "1X2",
@@ -212,7 +212,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 12,
+          "rows": 10,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -858,8 +858,8 @@
     {
       "matchId": "74165880",
       "fixture": "Barcelona - Feyenoord Rotterdam",
-      "before": 112,
-      "after": 62,
+      "before": 106,
+      "after": 60,
       "groups": [
         {
           "market": "1X2",
@@ -897,8 +897,12 @@
             "Bet365",
             "Unibet"
           ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
+          "rejected": {
+            "Unibet": "incomplete fixed market"
+          },
+          "prunedIncompleteRows": {
+            "Unibet": 2
+          }
         },
         {
           "market": "FIRST_HALF_GOALS",
@@ -918,7 +922,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 10,
+          "rows": 12,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -946,7 +950,7 @@
           "team": "Barcelona",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 10,
+          "rows": 8,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -958,7 +962,7 @@
           "team": "Feyenoord Rotterdam",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 4,
+          "rows": 2,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -991,7 +995,9 @@
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
@@ -1280,7 +1286,7 @@
     {
       "matchId": "74165886",
       "fixture": "Paris - SK Slovan Bratislava",
-      "before": 105,
+      "before": 103,
       "after": 59,
       "groups": [
         {
@@ -1314,16 +1320,13 @@
           "team": null,
           "status": "dropped",
           "candidateBookmakers": [
-            "Bet365",
-            "Unibet"
+            "Bet365"
           ],
           "rejected": {
-            "Bet365": "incomplete fixed market",
-            "Unibet": "incomplete fixed market"
+            "Bet365": "incomplete fixed market"
           },
           "prunedIncompleteRows": {
-            "Bet365": 2,
-            "Unibet": 2
+            "Bet365": 2
           }
         },
         {
@@ -1988,7 +1991,7 @@
     {
       "matchId": "74165898",
       "fixture": "Bayern Munich - Bodoe/Glimt",
-      "before": 109,
+      "before": 110,
       "after": 66,
       "groups": [
         {
@@ -2069,7 +2072,7 @@
             "Bet365": "integrity"
           },
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 2
           }
         },
         {
@@ -2101,14 +2104,14 @@
           "team": "Bayern Munich",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 14,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 2
+            "Bet365": 1
           }
         },
         {
@@ -2116,13 +2119,15 @@
           "team": "Bodoe/Glimt",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 8,
+          "rows": 6,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
@@ -2269,8 +2274,8 @@
     {
       "matchId": "74165900",
       "fixture": "Manchester United - Sabah Masazir",
-      "before": 108,
-      "after": 60,
+      "before": 106,
+      "after": 58,
       "groups": [
         {
           "market": "1X2",
@@ -2361,7 +2366,7 @@
           "team": "Manchester United",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 8,
+          "rows": 6,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -2415,8 +2420,8 @@
     {
       "matchId": "74165902",
       "fixture": "Slavia Praha - Racing Club De Lens",
-      "before": 87,
-      "after": 48,
+      "before": 95,
+      "after": 54,
       "groups": [
         {
           "market": "1X2",
@@ -2461,9 +2466,10 @@
           "market": "FIRST_HALF_GOALS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 2,
+          "bookmaker": "Bet365",
+          "rows": 8,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2612,6 +2618,69 @@
     {
       "matchId": "74165920",
       "fixture": "Villarreal - SSC Napoli",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165922",
+      "fixture": "Feyenoord Rotterdam - Como 1907",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165924",
+      "fixture": "LASK Linz - Liverpool",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165926",
+      "fixture": "AS Roma - Real Madrid",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165928",
+      "fixture": "Aston Villa - Fenerbahce Istanbul",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165932",
+      "fixture": "Bodoe/Glimt - Borussia Dortmund",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165930",
+      "fixture": "FC Shakhtar Donetsk - AEK Athens",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165934",
+      "fixture": "Manchester City - Paris",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165936",
+      "fixture": "Real Betis Seville - FC Porto",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74165938",
+      "fixture": "SK Slovan Bratislava - VfB Stuttgart",
       "before": 0,
       "after": 0,
       "groups": []
