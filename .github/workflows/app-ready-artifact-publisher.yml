@@ -302,6 +302,7 @@ jobs:
         env:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
+          APP_READY_SOURCE_ONLY: "true"
         with:
           api-level: 35
           target: google_apis
@@ -313,6 +314,18 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
+
+      - name: Materialize current v10 candidates host-side
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf app-ready-export
+          mkdir -p app-ready-export/source
+          python scripts/materialize_app_ready_pattern_candidates.py \
+            app-ready-checkpoint \
+            app-ready-export/raw \
+            app-ready-export/source
 
       - name: Persist resumable prepared checkpoint
         if: always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))

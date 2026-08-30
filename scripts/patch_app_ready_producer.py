@@ -422,16 +422,9 @@ def add_producer_diagnostics() -> None:
             check(prepared.requestedCompetitions.size == 4 && prepared.readyCompetitions.size == 4) {
                 "App-ready publisher requires 4/4 prepared source snapshots"
             }
-            Log.i("StatMakerAppReady", "stage=recommendations_begin")
-            val recommendationReport = trace.measure("prepared_recommendations") {
-                AppReadyPatternPublisher.publish(appContext, db)
-            }
-            Log.i(
-                "StatMakerAppReady",
-                "stage=recommendations_complete generation=${recommendationReport.generationId} " +
-                    "candidates=${recommendationReport.candidateCount} reused=${recommendationReport.reused} " +
-                    "elapsedMs=${recommendationReport.elapsedMs}"
-            )
+            // Final v10 recommendation candidates are materialized host-side from the frozen
+            // prepared checkpoint. Do not start the heavy publisher in the Welcome process:
+            // run_app_ready_emulator.sh intentionally stops the app immediately after 4/4 READY.
             warnings += prepared.warnings
 '''),
     ]

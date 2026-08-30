@@ -426,8 +426,15 @@ else
 
   # Freeze and persist 4/4 READY work before final recommendation materialization.
   export_checkpoint
+
+  if [[ "${APP_READY_SOURCE_ONLY:-false}" == "true" ]]; then
+    echo "APP_READY_SOURCE_PHASE_ONLY_COMPLETE"
+    exit 0
+  fi
 fi
 
+# Legacy fallback only. Normal publisher runs materialize v10 candidates host-side from the
+# frozen checkpoint and therefore never enter this Android recommendation phase.
 # Phase 2: run the dedicated publisher-only activity against the restored/current prepared DB.
 adb logcat -c
 adb shell am start -W -n "$APP_ID/com.statmaker.app.AppReadyPatternPublisherActivity"
