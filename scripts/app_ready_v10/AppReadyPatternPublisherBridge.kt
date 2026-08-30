@@ -301,7 +301,7 @@ internal object AppReadyPatternPublisher {
         }
 
         private fun isUefaCompetitive(row: ChampionsLeagueMatchStats): Boolean {
-            val descriptor = "\${row.competition} \${row.stage} \${row.sourceLabel}".lowercase(Locale.US)
+            val descriptor = "${row.competition} ${row.stage} ${row.sourceLabel}".lowercase(Locale.US)
             if (descriptor.contains("friendly") || descriptor.contains("club friendly")) return false
             return descriptor.contains("champions league") ||
                 descriptor.contains("europa league") ||
@@ -324,12 +324,12 @@ internal object AppReadyPatternPublisher {
         }
 
         private fun seasonYears(raw: String, fallbackDate: LocalDate): Set<Int> {
-            val shortRange = Regex("(20\\\\d{2})\\\\s*[-_/]\\\\s*(\\\\d{2})(?!\\\\d)").find(raw)
+            val shortRange = Regex("(20\\d{2})\\s*[-_/]\\s*(\\d{2})(?!\\d)").find(raw)
             if (shortRange != null) {
                 val first = shortRange.groupValues[1].toInt()
                 return setOf(first, 2000 + shortRange.groupValues[2].toInt())
             }
-            val years = Regex("20\\\\d{2}").findAll(raw).map { it.value.toInt() }.toSet()
+            val years = Regex("20\\d{2}").findAll(raw).map { it.value.toInt() }.toSet()
             if (years.isNotEmpty()) return years
             val digits = raw.filter(Char::isDigit)
             if (digits.length == 4 && !digits.startsWith("20")) {
@@ -352,7 +352,7 @@ internal object AppReadyPatternPublisher {
             }
 
         private fun normalizedCompetition(value: String): String = value.trim().lowercase(Locale.US)
-            .replace(Regex("[^\\\\p{L}\\\\p{N}]+"), " ")
+            .replace(Regex("[^\\p{L}\\p{N}]+"), " ")
             .trim()
 
         private fun parseDate(value: String): LocalDate? {
@@ -391,7 +391,7 @@ internal object AppReadyPatternPublisher {
             val matches = loadMinimalMatches(store, competitionId, version)
             Log.i(
                 TAG,
-                "stage=recommendations_match_index_complete competition=$competitionId matches=\${matches.size}"
+                "stage=recommendations_match_index_complete competition=$competitionId matches=${matches.size}"
             )
 
             var rowCount = 0
@@ -483,7 +483,7 @@ internal object AppReadyPatternPublisher {
                         match = match,
                         oddsSelection = oddsSelection,
                         category = cursor.getString(8),
-                        patternSupport = "\${strict.hits}/\${strict.sample}",
+                        patternSupport = "${strict.hits}/${strict.sample}",
                         hitRate = strict.hitRate,
                         sample = strict.sample,
                         reasoning = "",
@@ -553,7 +553,7 @@ internal object AppReadyPatternPublisher {
                         Log.i(
                             TAG,
                             "stage=recommendations_scalar_rows competition=$competitionId " +
-                                "rows=$rowCount candidates=\${candidates.size}"
+                                "rows=$rowCount candidates=${candidates.size}"
                         )
                     }
                 }
@@ -561,7 +561,7 @@ internal object AppReadyPatternPublisher {
             Log.i(
                 TAG,
                 "stage=recommendations_source_complete competition=$competitionId " +
-                    "rows=$rowCount candidates=\${candidates.size}"
+                    "rows=$rowCount candidates=${candidates.size}"
             )
         }
 
