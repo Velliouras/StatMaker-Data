@@ -194,6 +194,7 @@ internal object AppReadyPatternPublisher {
     ) {
         private val domesticByTeam: Map<String, List<IndexedFixture>>
         private val europeanByTeam: Map<String, List<IndexedFixture>>
+        // Exact-equivalence cache: normalize each raw team label once per publisher process.
         private val teamKeyCache = HashMap<String, String>()
         private val dateFormatters = listOf(
             DateTimeFormatter.ISO_LOCAL_DATE,
