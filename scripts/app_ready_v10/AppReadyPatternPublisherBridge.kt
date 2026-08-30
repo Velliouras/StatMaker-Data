@@ -194,6 +194,15 @@ internal object AppReadyPatternPublisher {
     ) {
         private val domesticByTeam: Map<String, List<IndexedFixture>>
         private val europeanByTeam: Map<String, List<IndexedFixture>>
+        private val teamKeyCache = HashMap<String, String>()
+        private val dateFormatters = listOf(
+            DateTimeFormatter.ISO_LOCAL_DATE,
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+            DateTimeFormatter.ofPattern("dd_MM_yyyy")
+        )
+        private val shortSeasonRangeRegex = Regex("(20\\d{2})\\s*[-_/]\\s*(\\d{2})(?!\\d)")
+        private val seasonYearRegex = Regex("20\\d{2}")
 
         init {
             val domestic = linkedMapOf<String, MutableList<IndexedFixture>>()
@@ -201,7 +210,9 @@ internal object AppReadyPatternPublisher {
                 "SELECT season, division, date_text, home_team, away_team FROM matches",
                 null
             ).use { cursor ->
+                var rows = 0
                 while (cursor.moveToNext()) {
+                    rows += 1
                     val date = parseDate(cursor.getString(2)) ?: continue
                     val home = normalizedTeam(cursor.getString(3))
                     val away = normalizedTeam(cursor.getString(4))
@@ -218,7 +229,11 @@ internal object AppReadyPatternPublisher {
                     )
                     domestic.getOrPut(home) { mutableListOf() }.add(fixture)
                     if (away != home) domestic.getOrPut(away) { mutableListOf() }.add(fixture)
+                    if (rows % 5000 == 0) {
+                        Log.i(TAG, "stage=recommendations_maturity_domestic_rows rows=$rows teams=${domestic.size}")
+                    }
                 }
+                Log.i(TAG, "stage=recommendations_maturity_domestic_complete rows=$rows teams=${domestic.size}")
             }
             domesticByTeam = domestic.mapValues { (_, rows) -> rows.toList() }
 
@@ -248,6 +263,7 @@ internal object AppReadyPatternPublisher {
                     }
             }
             europeanByTeam = european.mapValues { (_, rows) -> rows.toList() }
+            Log.i(TAG, "stage=recommendations_maturity_uefa_complete teams=${europeanByTeam.size}")
         }
 
         fun resolve(match: OddsMatch): CurrentSeasonMatchEvidence? {
@@ -324,12 +340,12 @@ internal object AppReadyPatternPublisher {
         }
 
         private fun seasonYears(raw: String, fallbackDate: LocalDate): Set<Int> {
-            val shortRange = Regex("(20\\d{2})\\s*[-_/]\\s*(\\d{2})(?!\\d)").find(raw)
+            val shortRange = shortSeasonRangeRegex.find(raw)
             if (shortRange != null) {
                 val first = shortRange.groupValues[1].toInt()
                 return setOf(first, 2000 + shortRange.groupValues[2].toInt())
             }
-            val years = Regex("20\\d{2}").findAll(raw).map { it.value.toInt() }.toSet()
+            val years = seasonYearRegex.findAll(raw).map { it.value.toInt() }.toSet()
             if (years.isNotEmpty()) return years
             val digits = raw.filter(Char::isDigit)
             if (digits.length == 4 && !digits.startsWith("20")) {
@@ -344,11 +360,13 @@ internal object AppReadyPatternPublisher {
         }
 
         private fun normalizedTeam(value: String): String =
-            when (val key = DomesticNormalizedStatsRepository.normalizedTeamKey(value)) {
-                "bod_glimt", "bodoe_glimt" -> "bodo_glimt"
-                "olympiacos", "olympiakos" -> "olympiakos_piraeus"
-                "aek_athens" -> "aek_athens_fc"
-                else -> key
+            teamKeyCache.getOrPut(value) {
+                when (val key = DomesticNormalizedStatsRepository.normalizedTeamKey(value)) {
+                    "bod_glimt", "bodoe_glimt" -> "bodo_glimt"
+                    "olympiacos", "olympiakos" -> "olympiakos_piraeus"
+                    "aek_athens" -> "aek_athens_fc"
+                    else -> key
+                }
             }
 
         private fun normalizedCompetition(value: String): String = value.trim().lowercase(Locale.US)
@@ -357,13 +375,7 @@ internal object AppReadyPatternPublisher {
 
         private fun parseDate(value: String): LocalDate? {
             val text = value.trim().take(10)
-            val formats = listOf(
-                DateTimeFormatter.ISO_LOCAL_DATE,
-                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy"),
-                DateTimeFormatter.ofPattern("dd_MM_yyyy")
-            )
-            return formats.firstNotNullOfOrNull { formatter ->
+            return dateFormatters.firstNotNullOfOrNull { formatter ->
                 runCatching { LocalDate.parse(text, formatter) }.getOrNull()
             }
         }
