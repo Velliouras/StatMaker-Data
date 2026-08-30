@@ -175,17 +175,17 @@ jobs:
           test -r /dev/kvm -a -w /dev/kvm
 
       - name: Restore exact prepared checkpoint for v10 resume
-        if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume v10 recommendations from checkpoint')
+        if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Finalize scalar v10 candidates from checkpoint')
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
           path: app-ready-checkpoint-incoming
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: 33272027960
+          run-id: 33283282657
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume v10 recommendations from checkpoint'))
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Finalize scalar v10 candidates from checkpoint'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -276,7 +276,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat.local
-          APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume v10 recommendations from checkpoint') && 'true' || 'false' }}
+          APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Finalize scalar v10 candidates from checkpoint') && 'true' || 'false' }}
         with:
           api-level: 35
           target: google_apis
