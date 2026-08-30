@@ -6,7 +6,11 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.util.Log
+import org.json.JSONObject
 import java.security.MessageDigest
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v3"
 internal const val APP_READY_PATTERN_SCHEMA_VERSION = 10
@@ -80,13 +84,6 @@ internal object AppReadyPatternPublisher {
     private const val TAG = "StatMakerAppReady"
     private val competitions = listOf("domestic", "champions_league", "europa_league", "conference_league")
 
-    private data class SourceSelection(
-        val competitionId: String,
-        val snapshotVersion: String,
-        val selection: PatternBackedSelection,
-        val sourceOrder: Int
-    )
-
     private data class Candidate(
         val competitionId: String,
         val snapshotVersion: String,
@@ -132,7 +129,7 @@ internal object AppReadyPatternPublisher {
             Log.i(TAG, "stage=recommendations_generation_lookup_complete generation=${generationId.take(12)}")
 
             Log.i(TAG, "stage=recommendations_candidates_begin generation=${generationId.take(12)}")
-            val candidates = buildCandidates(context, historyDb, loadSources(store, versions))
+            val candidates = buildCandidates(context, historyDb, store, versions)
             Log.i(TAG, "stage=recommendations_candidates_complete count=${candidates.size}")
             writeGeneration(store, generationId, sourceFingerprint, candidates)
             return AppReadyPatternPublishReport(
@@ -176,119 +173,490 @@ internal object AppReadyPatternPublisher {
             cursor.getInt(0).takeIf { cursor.getString(1) == APP_READY_PATTERN_RULES_FINGERPRINT }
         }
 
-    private fun loadSources(
-        store: PreparedBettingSnapshotStore,
-        versions: Map<String, String>
-    ): List<SourceSelection> = buildList {
-        var sourceOrder = 0
-        competitions.forEach { competitionId ->
-            val version = versions[competitionId] ?: return@forEach
-            val selections = store.loadAllPatternSelectionsForPublisher(
-                competitionId = competitionId,
-                snapshotVersion = version
-            )?.selections.orEmpty()
-            Log.i(
-                TAG,
-                "stage=recommendations_source_loaded competition=$competitionId " +
-                    "snapshot=${version.take(12)} selections=${selections.size}"
+
+    private data class IndexedFixture(
+        val season: String,
+        val date: LocalDate,
+        val key: String
+    )
+
+    /**
+     * Scalar maturity index used only by the off-device publisher.
+     *
+     * The old candidate phase called CurrentSeasonMaturityResolver once per match. That resolver
+     * repeatedly queried every league roster/team history, turning ~400 upcoming matches into
+     * tens of thousands of SQLite/history scans. The index below preserves the same season/date/
+     * team identity semantics, but reads Domestic history and UEFA snapshots once.
+     */
+    private class FastMaturityIndex(
+        context: Context,
+        historyDb: StatMakerDb
+    ) {
+        private val domesticByTeam: Map<String, List<IndexedFixture>>
+        private val europeanByTeam: Map<String, List<IndexedFixture>>
+
+        init {
+            val domestic = linkedMapOf<String, MutableList<IndexedFixture>>()
+            historyDb.readableDatabase.rawQuery(
+                "SELECT season, division, date_text, home_team, away_team FROM matches",
+                null
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val date = parseDate(cursor.getString(2)) ?: continue
+                    val home = normalizedTeam(cursor.getString(3))
+                    val away = normalizedTeam(cursor.getString(4))
+                    if (home.isBlank() || away.isBlank()) continue
+                    val fixture = IndexedFixture(
+                        season = cursor.getString(0),
+                        date = date,
+                        key = listOf(
+                            date,
+                            home,
+                            away,
+                            cursor.getString(1)
+                        ).joinToString("|")
+                    )
+                    domestic.getOrPut(home) { mutableListOf() }.add(fixture)
+                    if (away != home) domestic.getOrPut(away) { mutableListOf() }.add(fixture)
+                }
+            }
+            domesticByTeam = domestic.mapValues { (_, rows) -> rows.toList() }
+
+            val european = linkedMapOf<String, MutableList<IndexedFixture>>()
+            val snapshots = UefaStatsSnapshotStore(context.applicationContext)
+            listOf("champions_league", "europa_league", "conference_league").forEach { competitionId ->
+                snapshots.load(competitionId)?.matches.orEmpty()
+                    .asSequence()
+                    .filter(::isUefaCompetitive)
+                    .forEach { row ->
+                        val date = parseDate(row.date) ?: return@forEach
+                        val home = normalizedTeam(row.homeTeam)
+                        val away = normalizedTeam(row.awayTeam)
+                        if (home.isBlank() || away.isBlank()) return@forEach
+                        val fixture = IndexedFixture(
+                            season = row.season,
+                            date = date,
+                            key = listOf(
+                                date,
+                                home,
+                                away,
+                                normalizedCompetition(row.competition)
+                            ).joinToString("|")
+                        )
+                        european.getOrPut(home) { mutableListOf() }.add(fixture)
+                        if (away != home) european.getOrPut(away) { mutableListOf() }.add(fixture)
+                    }
+            }
+            europeanByTeam = european.mapValues { (_, rows) -> rows.toList() }
+        }
+
+        fun resolve(match: OddsMatch): CurrentSeasonMatchEvidence? {
+            val fixtureDate = parseDate(bettingLocalDate(match).ifBlank { match.date }) ?: return null
+            return CurrentSeasonMatchEvidence(
+                home = teamEvidence(match, home = true, fixtureDate = fixtureDate),
+                away = teamEvidence(match, home = false, fixtureDate = fixtureDate)
             )
-            selections.forEach { add(SourceSelection(competitionId, version, it, sourceOrder++)) }
+        }
+
+        private fun teamEvidence(
+            match: OddsMatch,
+            home: Boolean,
+            fixtureDate: LocalDate
+        ): CurrentSeasonTeamEvidence {
+            val canonical = if (home) {
+                match.canonicalHomeTeam?.takeIf(String::isNotBlank) ?: match.homeTeam
+            } else {
+                match.canonicalAwayTeam?.takeIf(String::isNotBlank) ?: match.awayTeam
+            }
+            val aliases = buildSet {
+                add(canonical)
+                add(if (home) match.homeTeam else match.awayTeam)
+                add(if (home) match.providerHomeTeam else match.providerAwayTeam)
+            }.asSequence()
+                .filter(String::isNotBlank)
+                .map(::normalizedTeam)
+                .filter(String::isNotBlank)
+                .toSet()
+
+            fun count(index: Map<String, List<IndexedFixture>>): Int {
+                val keys = linkedSetOf<String>()
+                aliases.forEach { alias ->
+                    index[alias].orEmpty().forEach { fixture ->
+                        if (
+                            fixture.date.isBefore(fixtureDate) &&
+                            seasonMatchesFixture(fixture.season, match.season, fixtureDate)
+                        ) {
+                            keys += fixture.key
+                        }
+                    }
+                }
+                return keys.size
+            }
+
+            return CurrentSeasonTeamEvidence(
+                team = canonical,
+                domesticMatches = count(domesticByTeam),
+                europeanMatches = count(europeanByTeam)
+            )
+        }
+
+        private fun isUefaCompetitive(row: ChampionsLeagueMatchStats): Boolean {
+            val descriptor = "\${row.competition} \${row.stage} \${row.sourceLabel}".lowercase(Locale.US)
+            if (descriptor.contains("friendly") || descriptor.contains("club friendly")) return false
+            return descriptor.contains("champions league") ||
+                descriptor.contains("europa league") ||
+                descriptor.contains("conference league") ||
+                descriptor.contains("uefa")
+        }
+
+        private fun seasonMatchesFixture(
+            sourceSeason: String,
+            fixtureSeason: String,
+            fixtureDate: LocalDate
+        ): Boolean {
+            val sourceYears = seasonYears(sourceSeason, fixtureDate)
+            val fixtureYears = seasonYears(fixtureSeason, fixtureDate)
+            return when {
+                sourceYears.size == 1 -> sourceYears.first() in fixtureYears
+                fixtureYears.size == 1 -> fixtureYears.first() in sourceYears
+                else -> sourceYears == fixtureYears
+            }
+        }
+
+        private fun seasonYears(raw: String, fallbackDate: LocalDate): Set<Int> {
+            val shortRange = Regex("(20\\\\d{2})\\\\s*[-_/]\\\\s*(\\\\d{2})(?!\\\\d)").find(raw)
+            if (shortRange != null) {
+                val first = shortRange.groupValues[1].toInt()
+                return setOf(first, 2000 + shortRange.groupValues[2].toInt())
+            }
+            val years = Regex("20\\\\d{2}").findAll(raw).map { it.value.toInt() }.toSet()
+            if (years.isNotEmpty()) return years
+            val digits = raw.filter(Char::isDigit)
+            if (digits.length == 4 && !digits.startsWith("20")) {
+                val first = 2000 + digits.take(2).toInt()
+                return setOf(first, 2000 + digits.takeLast(2).toInt())
+            }
+            return if (fallbackDate.monthValue >= 7) {
+                setOf(fallbackDate.year, fallbackDate.year + 1)
+            } else {
+                setOf(fallbackDate.year - 1, fallbackDate.year)
+            }
+        }
+
+        private fun normalizedTeam(value: String): String =
+            when (val key = DomesticNormalizedStatsRepository.normalizedTeamKey(value)) {
+                "bod_glimt", "bodoe_glimt" -> "bodo_glimt"
+                "olympiacos", "olympiakos" -> "olympiakos_piraeus"
+                "aek_athens" -> "aek_athens_fc"
+                else -> key
+            }
+
+        private fun normalizedCompetition(value: String): String = value.trim().lowercase(Locale.US)
+            .replace(Regex("[^\\\\p{L}\\\\p{N}]+"), " ")
+            .trim()
+
+        private fun parseDate(value: String): LocalDate? {
+            val text = value.trim().take(10)
+            val formats = listOf(
+                DateTimeFormatter.ISO_LOCAL_DATE,
+                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy"),
+                DateTimeFormatter.ofPattern("dd_MM_yyyy")
+            )
+            return formats.firstNotNullOfOrNull { formatter ->
+                runCatching { LocalDate.parse(text, formatter) }.getOrNull()
+            }
         }
     }
 
     private fun buildCandidates(
         context: Context,
         historyDb: StatMakerDb,
-        sources: List<SourceSelection>
+        store: PreparedBettingSnapshotStore,
+        versions: Map<String, String>
     ): List<Candidate> {
-        val allSelections = sources.map(SourceSelection::selection)
-        val evidenceByKey = sharedBettingEvidenceBatch(allSelections)
-        val leagues = DomesticApiRegistry.bundledLeagueSources()
-        val maturityResolver = CurrentSeasonMaturityResolver(
-            context = context,
-            db = historyDb,
-            leagueSources = { leagues },
-            primaryLeagueForMatch = { match ->
-                val code = DomesticApiRegistry.normalizeLeagueCode(match.leagueCode)
-                leagues.firstOrNull { DomesticApiRegistry.normalizeLeagueCode(it.code) == code }
-            }
-        )
+        PreparedBettingDecisionRegistry.clear()
+        PreparedBettingEvidenceRegistry.clear()
+
+        Log.i(TAG, "stage=recommendations_maturity_index_begin")
+        val maturityIndex = FastMaturityIndex(context, historyDb)
+        Log.i(TAG, "stage=recommendations_maturity_index_complete")
+
         val maturityByMatch = HashMap<String, CurrentSeasonMatchEvidence?>()
+        val candidates = ArrayList<Candidate>(16_384)
+        var sourceOrder = 0
 
-        return sources.map { source ->
-            val selection = source.selection
-            val evidence = evidenceByKey[PatternTrendCoverageAudit.selectionKey(selection)]
-            val strict = strictEvidence(selection)
-            val identity = normalizedMarketIdentity(selection)
-            val signal = BettingValueFirstRanking.signal(selection, evidenceByKey)
-            val eligible = selection.odd >= visibleMinimumOdd(selection) &&
-                passesPatternRecommendationGate(selection) && identity != null && isSaneExactOdd(selection)
-            val policy = if (eligible) {
-                RecommendationPolicyV2.evaluate(
-                    selection = selection,
-                    evidence = evidence,
-                    maturity = maturityByMatch.getOrPut(selection.match.key) {
-                        maturityResolver.resolve(selection.match)
+        competitions.forEach { competitionId ->
+            val version = versions[competitionId] ?: return@forEach
+            val matches = loadMinimalMatches(store, competitionId, version)
+            Log.i(
+                TAG,
+                "stage=recommendations_match_index_complete competition=$competitionId matches=\${matches.size}"
+            )
+
+            var rowCount = 0
+            store.readableDatabase.rawQuery(
+                """
+                SELECT selection_key, match_key, local_date,
+                       selection_market, selection_name, selection_team, selection_line, selection_odd,
+                       category,
+                       bm_hits, bm_sample, bm_hit_rate,
+                       bm_market_probability, bm_market_probability_source,
+                       bm_empirical_probability, bm_posterior_probability, bm_market_edge,
+                       bm_sample_reliability, bm_normalized_positive_edge, bm_raw_implied_probability,
+                       bm_market_overround, bm_bookmaker_margin,
+                       identity_broad_group, identity_family, identity_sub_market_key,
+                       identity_team_side, identity_line, identity_selection_side,
+                       identity_source_market, identity_team, identity_selection_token,
+                       score_value, score_tier, score_bookmaker_base,
+                       score_model_adjustment, score_trend_adjustment,
+                       qualifies_builder
+                FROM prepared_selections
+                WHERE competition_id=? AND snapshot_version=? AND qualifies_pattern=1
+                """.trimIndent(),
+                arrayOf(competitionId, version)
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val order = sourceOrder++
+                    rowCount += 1
+                    val selectionKey = cursor.getString(0)
+                    val preparedMatchKey = cursor.getString(1)
+                    val match = matches[preparedMatchKey] ?: continue
+                    val odd = cursor.getDouble(7)
+
+                    if (
+                        cursor.isNull(9) || cursor.isNull(10) || cursor.isNull(11) ||
+                        cursor.isNull(12) || cursor.isNull(15) || cursor.isNull(17) ||
+                        cursor.isNull(18) || cursor.isNull(22) || cursor.isNull(31)
+                    ) {
+                        continue
                     }
-                )
-            } else null
-            val marketLabel = identity?.let(::bettingMarketFilterLabel)?.takeIf(String::isNotBlank)
-                ?: canonicalMarketFamilyLabel(selection.oddsSelection.market)
-            val evidenceScore = BettingEvidenceScorer.evaluate(selection)?.value ?: 0.0
 
-            Candidate(
-                competitionId = source.competitionId,
-                snapshotVersion = source.snapshotVersion,
-                selectionKey = preparedSelectionKey(selection),
-                matchKey = selection.match.key,
-                localDate = bettingLocalDate(selection.match),
-                continent = sharedContinentForCountry(selection.match.country),
-                country = selection.match.country,
-                league = selection.match.leagueCode.ifBlank { selection.match.competition },
-                marketFamily = marketLabel,
-                odd = selection.odd,
-                exactRecommendationKey = exactRecommendationKey(selection),
-                selectionScore = selectionScore(selection),
-                evidenceScore = evidenceScore,
-                sourceOrder = source.sourceOrder,
-                strictHitRate = strict?.hitRate ?: 0.0,
-                strictSample = strict?.sample ?: 0,
-                valueTier = signal?.tier?.name,
-                recommendationEligible = eligible,
-                policyPremiumEligible = policy?.premiumEligible == true,
-                policyRejectionReason = policy?.rejectionReason?.name
+                    val identity = runCatching {
+                        NormalizedMarketIdentity(
+                            broadGroup = MarketBroadGroup.valueOf(cursor.getString(22)),
+                            family = cursor.getString(23),
+                            subMarketKey = cursor.getString(24),
+                            teamSide = cursor.getStringOrNull(25),
+                            line = cursor.getDoubleOrNull(26),
+                            selectionSide = MarketSelectionSide.valueOf(cursor.getString(27)),
+                            sourceMarket = cursor.getString(28),
+                            team = cursor.getStringOrNull(29),
+                            selectionToken = cursor.getString(30)
+                        )
+                    }.getOrNull() ?: continue
+
+                    val strict = StrictEvidence(
+                        hits = cursor.getInt(9),
+                        sample = cursor.getInt(10),
+                        hitRate = cursor.getDouble(11)
+                    )
+                    val bookmaker = BookmakerAlignedEvidence(
+                        strict = strict,
+                        marketProbability = cursor.getDouble(12),
+                        marketProbabilitySource = cursor.getString(13),
+                        empiricalProbability = cursor.getDouble(14),
+                        posteriorProbability = cursor.getDouble(15),
+                        marketEdge = cursor.getDouble(16),
+                        sampleReliability = cursor.getDouble(17),
+                        normalizedPositiveEdge = cursor.getDouble(18),
+                        rawImpliedProbability = cursor.getDouble(19),
+                        marketOverround = cursor.getDoubleOrNull(20),
+                        bookmakerMargin = cursor.getDoubleOrNull(21)
+                    )
+                    val score = BettingEvidenceScore(
+                        value = cursor.getDouble(31),
+                        tier = BettingEvidenceTier.valueOf(cursor.getString(32)),
+                        bookmakerBase = cursor.getDouble(33),
+                        modelAdjustment = cursor.getDouble(34),
+                        trendAdjustment = cursor.getDouble(35)
+                    )
+
+                    val oddsSelection = OddsSelection(
+                        market = cursor.getString(3),
+                        selection = cursor.getString(4),
+                        team = cursor.getStringOrNull(5),
+                        line = cursor.getDoubleOrNull(6),
+                        odd = odd
+                    )
+                    val selection = PatternBackedSelection(
+                        match = match,
+                        oddsSelection = oddsSelection,
+                        category = cursor.getString(8),
+                        patternSupport = "\${strict.hits}/\${strict.sample}",
+                        hitRate = strict.hitRate,
+                        sample = strict.sample,
+                        reasoning = "",
+                        preparedSelectionKey = selectionKey
+                    )
+
+                    PreparedBettingEvidenceRegistry.register(selection, bookmaker)
+                    PreparedBettingDecisionRegistry.register(
+                        selection,
+                        PreparedBettingDecisionRegistry.Decision(
+                            identity = identity,
+                            score = score,
+                            qualifiesForPattern = true,
+                            qualifiesForBuilder = cursor.getInt(36) == 1
+                        )
+                    )
+
+                    val eligible = selection.odd >= visibleMinimumOdd(selection) &&
+                        passesPatternRecommendationGate(selection) &&
+                        isSaneExactOdd(selection)
+                    val sharedEvidence = SharedBettingEvidence(
+                        bookmaker = bookmaker,
+                        trend = null
+                    )
+                    val policy = if (eligible) {
+                        RecommendationPolicyV2.evaluate(
+                            selection = selection,
+                            evidence = sharedEvidence,
+                            maturity = maturityByMatch.getOrPut(selection.match.key) {
+                                maturityIndex.resolve(selection.match)
+                            }
+                        )
+                    } else null
+                    val signal = BettingValueSignalPolicy.evaluate(selection, sharedEvidence)
+                    val marketLabel = bettingMarketFilterLabel(identity)
+                        .takeIf(String::isNotBlank)
+                        ?: canonicalMarketFamilyLabel(selection.oddsSelection.market)
+
+                    candidates += Candidate(
+                        competitionId = competitionId,
+                        snapshotVersion = version,
+                        selectionKey = selectionKey,
+                        matchKey = selection.match.key,
+                        localDate = cursor.getString(2),
+                        continent = sharedContinentForCountry(match.country),
+                        country = match.country,
+                        league = match.leagueCode.ifBlank { match.competition },
+                        marketFamily = marketLabel,
+                        odd = odd,
+                        exactRecommendationKey = identity.exactKey,
+                        selectionScore = selectionScore(
+                            selection = selection,
+                            strict = strict,
+                            bookmaker = bookmaker
+                        ),
+                        evidenceScore = score.value,
+                        sourceOrder = order,
+                        strictHitRate = strict.hitRate,
+                        strictSample = strict.sample,
+                        valueTier = signal?.tier?.name,
+                        recommendationEligible = eligible,
+                        policyPremiumEligible = policy?.premiumEligible == true,
+                        policyRejectionReason = policy?.rejectionReason?.name
+                    )
+
+                    if (rowCount % 2500 == 0) {
+                        Log.i(
+                            TAG,
+                            "stage=recommendations_scalar_rows competition=$competitionId " +
+                                "rows=$rowCount candidates=\${candidates.size}"
+                        )
+                    }
+                }
+            }
+            Log.i(
+                TAG,
+                "stage=recommendations_source_complete competition=$competitionId " +
+                    "rows=$rowCount candidates=\${candidates.size}"
             )
         }
+
+        return candidates
     }
 
-    private fun exactRecommendationKey(selection: PatternBackedSelection): String {
-        val identity = normalizedMarketIdentity(selection)
-        return identity?.exactKey ?: listOf(
-            selection.oddsSelection.market,
-            selection.oddsSelection.selection,
-            selection.oddsSelection.line?.toString().orEmpty(),
-            selection.oddsSelection.team.orEmpty()
-        ).joinToString("|")
+    private fun loadMinimalMatches(
+        store: PreparedBettingSnapshotStore,
+        competitionId: String,
+        snapshotVersion: String
+    ): Map<String, OddsMatch> =
+        store.readableDatabase.rawQuery(
+            """
+            SELECT match_key, local_date, payload
+            FROM prepared_matches
+            WHERE competition_id=? AND snapshot_version=?
+            """.trimIndent(),
+            arrayOf(competitionId, snapshotVersion)
+        ).use { cursor ->
+            buildMap {
+                while (cursor.moveToNext()) {
+                    val preparedMatchKey = cursor.getString(0)
+                    val localDate = cursor.getString(1)
+                    val payload = cursor.getString(2)
+                    val header = payload.substringBefore(",\"markets\":")
+                    val jsonText = if (header.length < payload.length) "$header}" else payload
+                    val json = runCatching { JSONObject(jsonText) }.getOrNull() ?: continue
+                    val home = json.optString("homeTeam").trim()
+                    val away = json.optString("awayTeam").trim()
+                    if (home.isBlank() || away.isBlank()) continue
+
+                    put(
+                        preparedMatchKey,
+                        OddsMatch(
+                            id = json.optString("id"),
+                            date = json.optString("date").ifBlank { localDate },
+                            kickoff = json.optString("kickoff"),
+                            leagueCode = json.optString("leagueCode"),
+                            country = json.optString("country"),
+                            competition = json.optString("competition"),
+                            season = json.optString("season"),
+                            providerHomeTeam = json.optString("providerHomeTeam"),
+                            providerAwayTeam = json.optString("providerAwayTeam"),
+                            homeTeam = home,
+                            awayTeam = away,
+                            canonicalHomeTeam = json.optNullableString("canonicalHomeTeam"),
+                            canonicalAwayTeam = json.optNullableString("canonicalAwayTeam"),
+                            homeTeamLogo = json.optNullableString("homeTeamLogo"),
+                            awayTeamLogo = json.optNullableString("awayTeamLogo"),
+                            teamMappingStatus = json.optString("teamMappingStatus", "matched"),
+                            usableForStats = json.optBoolean("usableForStats", true),
+                            markets = emptyList(),
+                            venue = json.optNullableString("venue")
+                        )
+                    )
+                }
+            }
+        }
+
+    private fun JSONObject.optNullableString(name: String): String? {
+        if (!has(name) || isNull(name)) return null
+        return optString(name).trim().takeIf(String::isNotBlank)
     }
 
-    private fun selectionScore(selection: PatternBackedSelection): Double {
-        val evidence = strictEvidence(selection) ?: return 0.0
-        val familyRank = sharedMarketFamilyOrder(marketFamily(selection)).let { if (it <= 0) 1.0 else 1.0 / it.toDouble() }
+    private fun selectionScore(
+        selection: PatternBackedSelection,
+        strict: StrictEvidence,
+        bookmaker: BookmakerAlignedEvidence
+    ): Double {
+        val familyRank = sharedMarketFamilyOrder(marketFamily(selection))
+            .let { if (it <= 0) 1.0 else 1.0 / it.toDouble() }
         val priceScore = when {
             selection.odd <= 1.80 -> 0.86
             selection.odd <= 2.60 -> 1.00
             selection.odd <= 3.50 -> 0.72
             else -> 0.45
         }
-        val bookmakerScore = bookmakerSelectionScore(selection)
+        val bookmakerScore =
+            bookmaker.posteriorProbability * 0.78 +
+                bookmaker.sampleReliability * 0.12 +
+                bookmaker.normalizedPositiveEdge * 0.10
         return bookmakerScore * 0.72 +
             priceScore * 0.08 +
             familyRank * 0.04 +
-            (evidence.sample.coerceAtMost(20) / 20.0) * 0.08 +
-            (evidence.hits.coerceAtMost(15) / 15.0) * 0.08 +
+            (strict.sample.coerceAtMost(20) / 20.0) * 0.08 +
+            (strict.hits.coerceAtMost(15) / 15.0) * 0.08 +
             ResultMarketPolicy.scoreBonus(selection) +
             if (ResultMarketPolicy.isDoubleChance(selection)) -0.08 else 0.0
     }
+
+    private fun android.database.Cursor.getStringOrNull(index: Int): String? =
+        if (index < 0 || isNull(index)) null else getString(index)
+
+    private fun android.database.Cursor.getDoubleOrNull(index: Int): Double? =
+        if (index < 0 || isNull(index)) null else getDouble(index)
 
     private fun writeGeneration(
         store: PreparedBettingSnapshotStore,
