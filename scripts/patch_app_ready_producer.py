@@ -262,6 +262,54 @@ def patch_prepared_store_v10() -> None:
     elif new_version not in text:
         raise SystemExit("Could not locate PreparedBettingSnapshotStore database version")
 
+    catalog_start_marker = "    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {"
+    catalog_end_marker = """\n    /**
+     * Publishes the compact, filter-only catalogue"""
+    catalog_start = text.find(catalog_start_marker)
+    catalog_end = text.find(catalog_end_marker, catalog_start)
+    if catalog_start < 0 or catalog_end < 0:
+        raise SystemExit("Could not locate PreparedBettingSnapshotStore loadLatestCatalog block")
+
+    safe_catalog_reader = '''    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {
+        if (competitionId.isBlank()) return null
+
+        // Do not read catalog_payload through Android CursorWindow. Domestic catalogues can exceed
+        // the per-row CursorWindow limit after league expansion and throw SQLiteBlobTooBigException.
+        // Rebuild the compact filter feed from normalized prepared rows instead.
+        val snapshotVersion = readableDatabase.rawQuery(
+            """
+            SELECT snapshot_version
+            FROM prepared_snapshot_meta
+            WHERE competition_id=? AND state='ready'
+            ORDER BY built_at_ms DESC
+            LIMIT 1
+            """.trimIndent(),
+            arrayOf(competitionId)
+        ).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getString(0) else null
+        } ?: return null
+
+        PreparedBettingCatalogMemoryCache.get(competitionId, snapshotVersion)?.let { return it }
+
+        val feed = rebuildCatalogFromStoredMatches(competitionId, snapshotVersion)
+            ?: return null
+
+        return PreparedBettingCatalog(
+            competitionId = competitionId,
+            snapshotVersion = snapshotVersion,
+            feed = feed
+        ).also(PreparedBettingCatalogMemoryCache::publish)
+    }
+'''
+    existing_catalog = text[catalog_start:catalog_end]
+    if "SELECT snapshot_version, catalog_payload" in existing_catalog:
+        text = text[:catalog_start] + safe_catalog_reader + text[catalog_end:]
+        print("APP_READY_PREPARED_CATALOG_CURSORWINDOW_OK patched")
+    elif "rebuildCatalogFromStoredMatches(competitionId, snapshotVersion)" in existing_catalog:
+        print("APP_READY_PREPARED_CATALOG_CURSORWINDOW_OK source-already-safe")
+    else:
+        raise SystemExit("Unsupported PreparedBettingSnapshotStore loadLatestCatalog contract")
+
     publisher_load_marker = '''    /**
      * Returns null only when the requested immutable snapshot is unavailable. An empty but ready
      * snapshot returns a non-null result with an empty selections list.
