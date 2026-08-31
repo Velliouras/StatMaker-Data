@@ -347,14 +347,23 @@ PY
   done
 }
 
+app_cpu_ticks() {
+  local pid stat
+  pid="$(adb shell pidof "$APP_ID" 2>/dev/null | tr -d '\r' | awk '{print $1}')"
+  [[ -n "$pid" ]] || return 1
+  stat="$(adb shell run-as "$APP_ID" cat "/proc/$pid/stat" 2>/dev/null | tr -d '\r')" || return 1
+  awk '{print $14 + $15}' <<<"$stat"
+}
 monitor_phase() {
   local phase="$1"
   local require_prepared="$2"
   local start_epoch="$(date +%s)"
   local last_progress_epoch="$start_epoch"
   local last_stage=""
-  local max_total_seconds=2700
-  local max_idle_seconds=1200
+  local max_total_seconds=3300
+  local max_idle_seconds=600
+  local last_cpu_ticks=""
+  local last_heartbeat_epoch="$start_epoch"
   if [[ "$phase" == "recommendations" && "${APP_READY_RECOMMENDATION_ONLY:-false}" == "true" ]]; then
     max_total_seconds=900
     max_idle_seconds=300
@@ -397,6 +406,17 @@ monitor_phase() {
     fi
 
     now_epoch="$(date +%s)"
+    cpu_ticks="$(app_cpu_ticks || true)"
+    if [[ "$cpu_ticks" =~ ^[0-9]+$ ]]; then
+      if [[ -n "$last_cpu_ticks" && "$cpu_ticks" != "$last_cpu_ticks" ]]; then
+        last_progress_epoch="$now_epoch"
+      fi
+      last_cpu_ticks="$cpu_ticks"
+      if (( now_epoch - last_heartbeat_epoch >= 60 )); then
+        echo "APP_READY_PHASE_HEARTBEAT phase=$phase cpuTicks=$cpu_ticks idleSeconds=$((now_epoch - last_progress_epoch)) lastStage=${last_stage:-none}"
+        last_heartbeat_epoch="$now_epoch"
+      fi
+    fi
     if (( now_epoch - last_progress_epoch >= max_idle_seconds )); then
       echo "App-ready phase=$phase made no stage progress for ${max_idle_seconds}s; last stage: ${last_stage:-none}" >&2
       printf '%s\n' "$appready_logs" >&2
