@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-28T13:04:16Z",
+  "generatedAt": "2026-08-31T07:08:51Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,77 +15,43 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 2500,
-  "requestsUsed": 372,
-  "registryLeagueCount": 2,
-  "polledLeagueCount": 2,
-  "incompleteBefore": 2,
+  "requestsUsed": 217,
+  "registryLeagueCount": 1,
+  "polledLeagueCount": 1,
+  "incompleteBefore": 1,
   "completeAfter": 0,
-  "incompleteAfter": 2,
+  "incompleteAfter": 1,
   "allocations": [
     {
       "phase": "tier3_restored26",
       "priorityTier": "tier3_restored26",
-      "leagueCode": "SC2",
-      "country": "Scotland",
-      "league": "League One",
-      "lifecycle": "active",
-      "allocatedRequests": 1249,
-      "usedRequests": 187,
+      "leagueCode": "MAR",
+      "country": "Morocco",
+      "league": "Botola Pro",
+      "lifecycle": "starts_soon",
+      "allocatedRequests": 2499,
+      "usedRequests": 216,
       "before": {
-        "leagueCode": "SC2",
+        "leagueCode": "MAR",
         "priorityTier": "tier3_restored26",
-        "completed": 186,
-        "withStats": 0,
-        "withScores": 186,
-        "missingStats": 186,
+        "completed": 244,
+        "withStats": 29,
+        "withScores": 244,
+        "missingStats": 215,
         "missingScores": 0,
-        "coverage": 0.0,
+        "coverage": 0.118852,
         "scoreCoverage": 1.0,
         "complete": false
       },
       "after": {
-        "leagueCode": "SC2",
+        "leagueCode": "MAR",
         "priorityTier": "tier3_restored26",
-        "completed": 186,
-        "withStats": 0,
-        "withScores": 186,
-        "missingStats": 186,
+        "completed": 244,
+        "withStats": 109,
+        "withScores": 244,
+        "missingStats": 135,
         "missingScores": 0,
-        "coverage": 0.0,
-        "scoreCoverage": 1.0,
-        "complete": false
-      }
-    },
-    {
-      "phase": "tier3_restored26",
-      "priorityTier": "tier3_restored26",
-      "leagueCode": "SC3",
-      "country": "Scotland",
-      "league": "League Two",
-      "lifecycle": "active",
-      "allocatedRequests": 2311,
-      "usedRequests": 183,
-      "before": {
-        "leagueCode": "SC3",
-        "priorityTier": "tier3_restored26",
-        "completed": 182,
-        "withStats": 0,
-        "withScores": 182,
-        "missingStats": 182,
-        "missingScores": 0,
-        "coverage": 0.0,
-        "scoreCoverage": 1.0,
-        "complete": false
-      },
-      "after": {
-        "leagueCode": "SC3",
-        "priorityTier": "tier3_restored26",
-        "completed": 182,
-        "withStats": 0,
-        "withScores": 182,
-        "missingStats": 182,
-        "missingScores": 0,
-        "coverage": 0.0,
+        "coverage": 0.446721,
         "scoreCoverage": 1.0,
         "complete": false
       }
@@ -93,26 +59,14 @@
   ],
   "progress": [
     {
-      "leagueCode": "SC2",
+      "leagueCode": "MAR",
       "priorityTier": "tier3_restored26",
-      "completed": 186,
-      "withStats": 0,
-      "withScores": 186,
-      "missingStats": 186,
+      "completed": 244,
+      "withStats": 109,
+      "withScores": 244,
+      "missingStats": 135,
       "missingScores": 0,
-      "coverage": 0.0,
-      "scoreCoverage": 1.0,
-      "complete": false
-    },
-    {
-      "leagueCode": "SC3",
-      "priorityTier": "tier3_restored26",
-      "completed": 182,
-      "withStats": 0,
-      "withScores": 182,
-      "missingStats": 182,
-      "missingScores": 0,
-      "coverage": 0.0,
+      "coverage": 0.446721,
       "scoreCoverage": 1.0,
       "complete": false
     }
@@ -161,7 +115,8 @@
     "I1",
     "I2",
     "D1",
-    "CYP"
+    "CYP",
+    "MAR"
   ],
   "targetedMode": false,
   "historicalOnlyMode": true,
@@ -183,6 +138,8 @@
     "SC0:2025",
     "CRO:2025",
     "SC1:2025",
+    "SC2:2025",
+    "SC3:2025",
     "RSA:2025",
     "UKR:2025",
     "B1:2025",
@@ -210,21 +167,19 @@
     "CYP:2025"
   ],
   "historicalNewlyFrozen": [
-    "SC2:2025",
-    "SC3:2025"
+    "MAR:2025"
   ],
   "historicalVerificationPending": [],
-  "historicalSnapshotCount": 43,
+  "historicalSnapshotCount": 44,
   "historicalPendingBefore": [
-    "SC2:2025",
-    "SC3:2025"
+    "MAR:2025"
   ],
   "historicalPendingAfter": [],
-  "historicalFrozenSnapshotCount": 43,
+  "historicalFrozenSnapshotCount": 44,
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 6638,
+    "dailyRemaining": 7128,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
