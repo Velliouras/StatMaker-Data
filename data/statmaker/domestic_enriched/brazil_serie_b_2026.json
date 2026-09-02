@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-01T22:41:26Z",
+  "generated_at": "2026-09-02T01:07:50Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-01T08:50:12Z",
+    "cache_generated_at": "2026-09-02T01:07:43Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,11 +40,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 249,
+    "completed_fixtures": 250,
     "fixtures_with_any_stats": 249,
     "fixtures_with_bb_core_stats": 243,
-    "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9759,
+    "any_stats_coverage": 0.996,
+    "bb_core_coverage": 0.972,
     "group_counts": {
       "shots_total": 248,
       "shots_on_target": 248,
@@ -57,15 +57,15 @@
       "xg": 240
     },
     "group_coverage": {
-      "shots_total": 0.996,
-      "shots_on_target": 0.996,
-      "corners": 0.988,
-      "fouls": 0.996,
-      "yellow_cards": 0.9799,
-      "red_cards": 0.2169,
-      "possession": 0.992,
-      "passes": 0.9839,
-      "xg": 0.9639
+      "shots_total": 0.992,
+      "shots_on_target": 0.992,
+      "corners": 0.984,
+      "fouls": 0.992,
+      "yellow_cards": 0.976,
+      "red_cards": 0.216,
+      "possession": 0.988,
+      "passes": 0.98,
+      "xg": 0.96
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -20978,6 +20978,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1520846,
+      "date_utc": "2026-09-01T22:30:00+00:00",
+      "country": "Brazil",
+      "league": "Serie B",
+      "league_code": "BRA2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 72,
+      "round": "Regular Season - 25",
+      "home_team": "Londrina",
+      "away_team": "Juventude",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,
