@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-02T17:57:44Z",
+  "generated_at": "2026-09-02T22:44:41Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/israel/ligat-ha-al/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-02T08:05:18Z",
+    "cache_generated_at": "2026-09-02T22:44:12Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,38 +40,38 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 12,
-    "fixtures_with_any_stats": 4,
-    "fixtures_with_bb_core_stats": 4,
-    "any_stats_coverage": 0.3333,
-    "bb_core_coverage": 0.3333,
+    "completed_fixtures": 13,
+    "fixtures_with_any_stats": 5,
+    "fixtures_with_bb_core_stats": 5,
+    "any_stats_coverage": 0.3846,
+    "bb_core_coverage": 0.3846,
     "group_counts": {
-      "shots_total": 4,
-      "shots_on_target": 4,
-      "corners": 4,
-      "fouls": 4,
-      "yellow_cards": 4,
-      "red_cards": 1,
-      "possession": 4,
-      "passes": 4,
+      "shots_total": 5,
+      "shots_on_target": 5,
+      "corners": 5,
+      "fouls": 5,
+      "yellow_cards": 5,
+      "red_cards": 2,
+      "possession": 5,
+      "passes": 5,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.3333,
-      "shots_on_target": 0.3333,
-      "corners": 0.3333,
-      "fouls": 0.3333,
-      "yellow_cards": 0.3333,
-      "red_cards": 0.0833,
-      "possession": 0.3333,
-      "passes": 0.3333,
+      "shots_total": 0.3846,
+      "shots_on_target": 0.3846,
+      "corners": 0.3846,
+      "fouls": 0.3846,
+      "yellow_cards": 0.3846,
+      "red_cards": 0.1538,
+      "possession": 0.3846,
+      "passes": 0.3846,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 12 < 15",
-      "low any-stats coverage: 0.3333 < 0.65",
-      "low BB-core coverage: 0.3333 < 0.65",
+      "not enough completed fixtures: 13 < 15",
+      "low any-stats coverage: 0.3846 < 0.65",
+      "low BB-core coverage: 0.3846 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -1074,6 +1074,90 @@
         "fulltime": {
           "home": 3,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1555481,
+      "date_utc": "2026-09-02T17:00:00+00:00",
+      "country": "Israel",
+      "league": "Ligat Ha'al",
+      "league_code": "ISR",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 383,
+      "round": "Regular Season - 1",
+      "home_team": "Hapoel Beer Sheva",
+      "away_team": "Hapoel Haifa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 5,
+        "HST": 6,
+        "AST": 2,
+        "HC": 4,
+        "AC": 2,
+        "HF": 17,
+        "AF": 14,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 543,
+        "APasses": 302,
+        "HPassesAccurate": 471,
+        "APassesAccurate": 227,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
         },
         "extratime": {
           "home": null,
