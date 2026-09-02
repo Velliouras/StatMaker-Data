@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-02T05:57:14Z",
+  "generated_at": "2026-09-02T08:08:52Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/colombia/primera-a/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-01T08:50:04Z",
+    "cache_generated_at": "2026-09-02T08:08:36Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 262,
-    "fixtures_with_any_stats": 261,
-    "fixtures_with_bb_core_stats": 252,
+    "completed_fixtures": 263,
+    "fixtures_with_any_stats": 262,
+    "fixtures_with_bb_core_stats": 253,
     "any_stats_coverage": 0.9962,
-    "bb_core_coverage": 0.9618,
+    "bb_core_coverage": 0.962,
     "group_counts": {
-      "shots_total": 260,
-      "shots_on_target": 260,
-      "corners": 259,
-      "fouls": 260,
-      "yellow_cards": 252,
-      "red_cards": 88,
-      "possession": 259,
-      "passes": 259,
+      "shots_total": 261,
+      "shots_on_target": 261,
+      "corners": 260,
+      "fouls": 261,
+      "yellow_cards": 253,
+      "red_cards": 89,
+      "possession": 260,
+      "passes": 260,
       "xg": 218
     },
     "group_coverage": {
       "shots_total": 0.9924,
       "shots_on_target": 0.9924,
-      "corners": 0.9885,
+      "corners": 0.9886,
       "fouls": 0.9924,
-      "yellow_cards": 0.9618,
-      "red_cards": 0.3359,
-      "possession": 0.9885,
-      "passes": 0.9885,
-      "xg": 0.8321
+      "yellow_cards": 0.962,
+      "red_cards": 0.3384,
+      "possession": 0.9886,
+      "passes": 0.9886,
+      "xg": 0.8289
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -22070,6 +22070,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1549758,
+      "date_utc": "2026-09-02T01:00:00+00:00",
+      "country": "Colombia",
+      "league": "Primera A",
+      "league_code": "COL",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 239,
+      "round": "Clausura - 8",
+      "home_team": "Fortaleza FC",
+      "away_team": "Once Caldas",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 21,
+        "HST": 2,
+        "AST": 7,
+        "HC": 0,
+        "AC": 4,
+        "HF": 7,
+        "AF": 14,
+        "HY": 1,
+        "AY": 1,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 44,
+        "APossession": 56,
+        "HSaves": 5,
+        "ASaves": 1,
+        "HPasses": 385,
+        "APasses": 475,
+        "HPassesAccurate": 328,
+        "APassesAccurate": 411,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
