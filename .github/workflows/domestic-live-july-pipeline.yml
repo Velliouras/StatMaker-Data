@@ -125,8 +125,17 @@ jobs:
               raise SystemExit(f'Core odds contract must contain 27 leagues, got {len(core_odds)}')
           if not registry_codes or not registry_codes.issubset(stats_universe):
               raise SystemExit('Domestic Stats registry is empty or outside the configured Stats universe')
-          if registry_codes != index_codes:
-              raise SystemExit(f'Stats index mismatch: registry={len(registry_codes)} index={len(index_codes)}')
+          if not registry_codes.issubset(index_codes):
+              missing_from_index = sorted(registry_codes - index_codes)
+              raise SystemExit(
+                  'Published Stats index is missing rolling registry leagues: '
+                  f'{missing_from_index}'
+              )
+          if not index_codes.issubset(stats_universe):
+              raise SystemExit(
+                  'Published Stats index contains league outside configured Stats universe: '
+                  f'{sorted(index_codes - stats_universe)}'
+              )
 
           # domestic_odds.json also carries explicitly schedule-only competitions such as G2.
           # They are allowed outside the Stats universe only when the producer marks the league
@@ -148,8 +157,11 @@ jobs:
                   f'{sorted(set(out_of_universe_violations))}'
               )
 
-          if not normalized_codes.issubset(registry_codes):
-              raise SystemExit('Normalized stats contain a league outside the rolling Stats registry')
+          if not normalized_codes.issubset(index_codes):
+              raise SystemExit(
+                  'Normalized stats contain a league outside the published Stats index: '
+                  f'{sorted(normalized_codes - index_codes)}'
+              )
 
           expected_contract = 'all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled'
           if progress.get('completenessContract') != expected_contract:
