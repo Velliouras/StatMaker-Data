@@ -14,7 +14,7 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
-PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v3"
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v4-modifiers-v1"
 PREPARED_PATTERN_SCHEMA_VERSION = 10
 PREPARED_PATTERN_COMPETITIONS = (
     "domestic",

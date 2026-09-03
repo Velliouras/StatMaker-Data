@@ -7,7 +7,7 @@ on:
       statmaker_ref:
         description: "Private StatMaker ref"
         required: true
-        default: "uat-instant-prepared-search-20260828"
+        default: "uat-filter-only"
         type: string
       force:
         description: "Force generation"
@@ -91,7 +91,7 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v3'
+          expected_rules='pattern-policy-v2-final-read-model-v4-modifiers-v1'
           expected_schema=10
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
@@ -115,7 +115,7 @@ jobs:
           repository: Velliouras/StatMaker
           # Until the v10 Android patch is committed to UAT, scheduled publishers use the
           # validated source-generation branch. workflow_dispatch can still override the ref.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat-instant-prepared-search-20260828' }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat-filter-only' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -555,7 +555,7 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 10
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v3'
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v4-modifiers-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')

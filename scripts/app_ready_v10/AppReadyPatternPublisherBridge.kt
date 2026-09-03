@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v3"
+internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v4-modifiers-v1"
 internal const val APP_READY_PATTERN_SCHEMA_VERSION = 10
 
 internal object AppReadyPatternSchema {

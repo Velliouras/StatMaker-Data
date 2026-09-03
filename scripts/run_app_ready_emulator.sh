@@ -584,7 +584,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v3":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v4-modifiers-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )
