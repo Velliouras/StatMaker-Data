@@ -36,20 +36,42 @@ def main() -> None:
         "prepared key materialization",
     )
 
-    text = replace_once(
-        text,
-        '''        clearBookmakerAlignedEvidenceRuntimeCache()
+    legacy_evidence = '''        clearBookmakerAlignedEvidenceRuntimeCache()
         val sharedEvidenceByAuditKey = sharedBettingEvidenceBatch(uniqueSelections)
         val bookmakerEvidenceBySelectionKey = uniqueSelections.mapNotNull { selection ->
+'''
+    v11_evidence = '''        clearBookmakerAlignedEvidenceRuntimeCache()
+        val baseEvidenceByAuditKey = sharedBettingEvidenceBatch(uniqueSelections)
+        val bookmakerEvidenceBySelectionKey = uniqueSelections.mapNotNull { selection ->
+'''
+    if 'stage=store_${competitionId}_evidence_begin' not in text:
+        if v11_evidence in text:
+            text = replace_once(
+                text,
+                v11_evidence,
+                '''        Log.i("StatMakerAppReady", "stage=store_${competitionId}_evidence_begin selections=${uniqueSelections.size}")
+        clearBookmakerAlignedEvidenceRuntimeCache()
+        val baseEvidenceByAuditKey = sharedBettingEvidenceBatch(uniqueSelections)
+        Log.i("StatMakerAppReady", "stage=store_${competitionId}_evidence_complete entries=${baseEvidenceByAuditKey.size}")
+        val bookmakerEvidenceBySelectionKey = uniqueSelections.mapNotNull { selection ->
 ''',
-        '''        Log.i("StatMakerAppReady", "stage=store_${competitionId}_evidence_begin selections=${uniqueSelections.size}")
+                "v11 evidence timing markers",
+            )
+        elif legacy_evidence in text:
+            text = replace_once(
+                text,
+                legacy_evidence,
+                '''        Log.i("StatMakerAppReady", "stage=store_${competitionId}_evidence_begin selections=${uniqueSelections.size}")
         clearBookmakerAlignedEvidenceRuntimeCache()
         val sharedEvidenceByAuditKey = sharedBettingEvidenceBatch(uniqueSelections)
         Log.i("StatMakerAppReady", "stage=store_${competitionId}_evidence_complete entries=${sharedEvidenceByAuditKey.size}")
         val bookmakerEvidenceBySelectionKey = uniqueSelections.mapNotNull { selection ->
 ''',
-        "evidence timing markers",
-    )
+                "legacy evidence timing markers",
+            )
+        else:
+            raise SystemExit("Could not locate supported prepared evidence block")
+    }
 
     text = replace_once(
         text,

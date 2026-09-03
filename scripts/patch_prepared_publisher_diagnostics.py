@@ -173,12 +173,22 @@ def main() -> None:
         "prepared mode marker",
     )
 
-    old_full = '''                } else {
+    legacy_full = '''                } else {
                     store.replaceSnapshot(
                         competitionId = competitionId,
                         snapshotVersion = version,
                         catalogFeed = warmFeed,
                         selections = buildAll(warmFeed)
+                    )
+                }
+'''
+    v11_full = '''                } else {
+                    store.replaceSnapshot(
+                        competitionId = competitionId,
+                        snapshotVersion = version,
+                        catalogFeed = warmFeed,
+                        selections = buildAll(warmFeed),
+                        resolveSharedEvidence = resolveSharedEvidence
                     )
                 }
 '''
@@ -191,13 +201,21 @@ def main() -> None:
                         competitionId = competitionId,
                         snapshotVersion = version,
                         catalogFeed = warmFeed,
-                        selections = builtSelections
+                        selections = builtSelections,
+                        resolveSharedEvidence = resolveSharedEvidence
                     )
                     Log.i("StatMakerAppReady", "stage=prepared_${competitionId}_write_complete selections=${replaced.selectionCount}")
                     replaced
                 }
 '''
-    text = replace_once(text, old_full, new_full, "full prepared snapshot build")
+    if 'stage=prepared_${competitionId}_build_complete' in text:
+        print("APP_READY_PREPARED_FULL_DIAGNOSTICS_OK source-already-patched")
+    elif v11_full in text:
+        text = replace_once(text, v11_full, new_full, "v11 full prepared snapshot build")
+    elif legacy_full in text:
+        text = replace_once(text, legacy_full, new_full, "legacy full prepared snapshot build")
+    else:
+        raise SystemExit("Could not locate supported full prepared snapshot build contract")
 
     text = replace_once(
         text,
