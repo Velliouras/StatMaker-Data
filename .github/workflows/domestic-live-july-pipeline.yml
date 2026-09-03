@@ -110,6 +110,8 @@ jobs:
 
           normalize = lambda code: 'ROU' if str(code or '').strip().upper() == 'ROM' else str(code or '').strip().upper()
           stats_universe = {normalize(code) for code in scope_contract.get('statsUniverseLeagueCodes', [])}
+          history_exceptions = {normalize(code) for code in scope_contract.get('publishedHistoryExceptionLeagueCodes', [])}
+          published_history_universe = stats_universe | history_exceptions
           core_odds = {normalize(code) for code in scope_contract.get('coreOddsLeagueCodes', [])}
           expansion = {normalize(code) for code in scope_contract.get('expansionLeagueCodes', [])}
           registry_codes = {normalize(item.get('leagueCode')) for item in registry.get('leagues', [])}
@@ -131,10 +133,26 @@ jobs:
                   'Published Stats index is missing rolling registry leagues: '
                   f'{missing_from_index}'
               )
-          if not index_codes.issubset(stats_universe):
+          if not index_codes.issubset(published_history_universe):
               raise SystemExit(
-                  'Published Stats index contains league outside configured Stats universe: '
-                  f'{sorted(index_codes - stats_universe)}'
+                  'Published Stats index contains league outside configured Stats/history universe: '
+                  f'{sorted(index_codes - published_history_universe)}'
+              )
+
+          exception_rows = [
+              item for item in index.get('leagues', [])
+              if normalize(item.get('league_code')) in history_exceptions
+          ]
+          bad_history_exceptions = [
+              normalize(item.get('league_code'))
+              for item in exception_rows
+              if str(item.get('lifecycle') or '').strip() != 'schedule_only'
+              or item.get('betting_enabled') is not False
+          ]
+          if bad_history_exceptions:
+              raise SystemExit(
+                  'Published history exception is not schedule-only/betting-disabled: '
+                  f'{sorted(set(bad_history_exceptions))}'
               )
 
           # domestic_odds.json also carries explicitly schedule-only competitions such as G2.
