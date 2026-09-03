@@ -71,7 +71,6 @@ def main() -> None:
             )
         else:
             raise SystemExit("Could not locate supported prepared evidence block")
-    }
 
     text = replace_once(
         text,
