@@ -27,6 +27,7 @@ import update_domestic_odds_api_io as odds_fetch
 ROOT = Path(__file__).resolve().parents[1]
 DOMESTIC_CONFIG = ROOT / "config" / "domestic_leagues.json"
 ENRICHMENT_CONFIG = ROOT / "config" / "api_football_enrichment_leagues.json"
+FINAL_SCOPE_CONFIG = ROOT / "config" / "statmaker_final_domestic_scope.json"
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
 STATE_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_state.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_pipeline.json"
@@ -359,7 +360,45 @@ def fetch_stats_cycle(
     return rows
 
 
+def _published_stats_continuity_rows(
+    refreshed_rows: Sequence[Dict[str, Any]],
+    previous_rows: Sequence[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Retain historical support for configured leagues outside the rolling refresh window.
+
+    The rolling registry deliberately contains only active/upcoming competitions so we do not
+    poll completed seasons forever. The app-facing enriched index has a different contract:
+    historical support for a configured Stats-universe league must not disappear on the day its
+    season ends. Keep its last published rows until a newer active/upcoming season replaces them.
+    """
+    scope_payload = load_json(FINAL_SCOPE_CONFIG, {})
+    allowed_codes = {
+        str(code or "").strip().upper()
+        for code in scope_payload.get("statsUniverseLeagueCodes", []) or []
+        if str(code or "").strip()
+    }
+    refreshed_codes = {
+        str(row.get("league_code") or "").strip().upper()
+        for row in refreshed_rows
+        if str(row.get("league_code") or "").strip()
+    }
+    retained: List[Dict[str, Any]] = []
+    for previous in previous_rows:
+        if not isinstance(previous, dict):
+            continue
+        code = str(previous.get("league_code") or "").strip().upper()
+        if not code or code not in allowed_codes or code in refreshed_codes:
+            continue
+        output_path = str(previous.get("output_path") or "").strip()
+        if output_path and not (ROOT / output_path).is_file():
+            continue
+        retained.append(dict(previous))
+    return retained
+
+
 def build_app_statistics(registry: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    previous_index = load_json(enriched_build.OUTPUT_ROOT / "index.json", {})
+    previous_rows = previous_index.get("leagues", []) if isinstance(previous_index, dict) else []
     rows: List[Dict[str, Any]] = []
     for base_league in registry:
         for league in stats_artifact_variants(base_league):
@@ -395,6 +434,7 @@ def build_app_statistics(registry: Sequence[Dict[str, Any]]) -> List[Dict[str, A
             })
             rows.append(row)
 
+    rows.extend(_published_stats_continuity_rows(rows, previous_rows))
     rows = sorted(
         rows,
         key=lambda row: (
