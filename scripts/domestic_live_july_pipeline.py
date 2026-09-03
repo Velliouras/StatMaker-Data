@@ -374,7 +374,10 @@ def _published_stats_continuity_rows(
     scope_payload = load_json(FINAL_SCOPE_CONFIG, {})
     allowed_codes = {
         str(code or "").strip().upper()
-        for code in scope_payload.get("statsUniverseLeagueCodes", []) or []
+        for code in (
+            list(scope_payload.get("statsUniverseLeagueCodes", []) or [])
+            + list(scope_payload.get("publishedHistoryExceptionLeagueCodes", []) or [])
+        )
         if str(code or "").strip()
     }
     refreshed_codes = {
