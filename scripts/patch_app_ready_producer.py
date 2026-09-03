@@ -349,11 +349,6 @@ def patch_prepared_store_v11() -> None:
         )
     }
 
-    /**
-     * Returns null only when the requested immutable snapshot is unavailable. An empty but ready
-     * snapshot returns a non-null result with an empty selections list.
-     */
-    fun loadForFeed(
 '''
     if "fun loadAllPatternSelectionsForPublisher(" not in text:
         marker = publisher_load_marker if text.count(publisher_load_marker) == 1 else publisher_load_fallback_marker
@@ -362,6 +357,13 @@ def patch_prepared_store_v11() -> None:
         text = text.replace(marker, publisher_load_method + marker, 1)
     else:
         print("APP_READY_PREPARED_PUBLISHER_READ_OK source-already-compatible")
+
+    if text.count("    fun loadAllPatternSelectionsForPublisher(") != 1:
+        raise SystemExit("PreparedBettingSnapshotStore publisher read method count mismatch")
+    if text.count("    fun loadForSelectionKeys(") != 1:
+        raise SystemExit("PreparedBettingSnapshotStore candidate-key read method count mismatch")
+    if text.count("    fun loadForFeed(") != 1:
+        raise SystemExit("PreparedBettingSnapshotStore loadForFeed method count mismatch")
 
     source.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_STORE_V11_OK")
