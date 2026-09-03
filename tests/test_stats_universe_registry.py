@@ -126,6 +126,18 @@ class StatsUniverseRegistryTest(unittest.TestCase):
             registry.pipeline.select_history_season = original_selector
         self.assertIs(previous, chosen)
 
+    def test_published_index_retains_completed_configured_league_outside_rolling_registry(self):
+        refreshed = [
+            {"league_code": "FIN2", "app_season": "2026"},
+        ]
+        previous = [
+            {"league_code": "FIN", "app_season": "2026", "output_path": ""},
+            {"league_code": "FIN2", "app_season": "2026", "output_path": ""},
+            {"league_code": "OUTSIDE_SCOPE", "app_season": "2026", "output_path": ""},
+        ]
+        retained = registry.pipeline._published_stats_continuity_rows(refreshed, previous)
+        self.assertEqual(["FIN"], [row["league_code"] for row in retained])
+
 
 if __name__ == "__main__":
     unittest.main()
