@@ -283,12 +283,10 @@ def patch_prepared_store_v11() -> None:
     else:
         raise SystemExit("Unsupported PreparedBettingSnapshotStore loadLatestCatalog contract")
 
-    publisher_load_marker = '''    /**
-     * Returns null only when the requested immutable snapshot is unavailable. An empty but ready
-     * snapshot returns a non-null result with an empty selections list.
-     */
-    fun loadForFeed(
-'''
+    # The current UAT store may expose candidate-key helpers before loadForFeed.
+    # Anchor publisher compatibility code to a stable method declaration instead of comments/order.
+    publisher_load_marker = "    fun loadForSelectionKeys("
+    publisher_load_fallback_marker = "    fun loadForFeed("
     publisher_load_method = '''    /**
      * Publisher-only full PATTERN read that avoids prepared_snapshot_meta.catalog_payload.
      *
@@ -357,10 +355,13 @@ def patch_prepared_store_v11() -> None:
      */
     fun loadForFeed(
 '''
-    if publisher_load_method not in text:
-        if text.count(publisher_load_marker) != 1:
-            raise SystemExit("Could not locate PreparedBettingSnapshotStore loadForFeed marker")
-        text = text.replace(publisher_load_marker, publisher_load_method, 1)
+    if "fun loadAllPatternSelectionsForPublisher(" not in text:
+        marker = publisher_load_marker if text.count(publisher_load_marker) == 1 else publisher_load_fallback_marker
+        if text.count(marker) != 1:
+            raise SystemExit("Could not locate PreparedBettingSnapshotStore publisher insertion boundary")
+        text = text.replace(marker, publisher_load_method + marker, 1)
+    else:
+        print("APP_READY_PREPARED_PUBLISHER_READ_OK source-already-compatible")
 
     source.write_text(text, encoding="utf-8")
     print("APP_READY_PREPARED_STORE_V11_OK")
