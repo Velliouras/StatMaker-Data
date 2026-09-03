@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 5,
   "purpose": "Authoritative StatMaker Domestic scope contract. All 69 configured leagues are eligible for statistics and rotating exact-odds polling; the previously selected 27 remain the core odds priority set.",
   "policy": {
     "statsApiCallsOutsideUniverse": false,
@@ -8,7 +8,8 @@
     "statsVisibilityIndependentOfOdds": true,
     "proposalReadinessRequiresMatchingExactOdds": true,
     "historicalArtifactsMayRemainForUefaSupport": true,
-    "uefaMissingTeamsUseSeparateTeamSpecificSupportPool": true
+    "uefaMissingTeamsUseSeparateTeamSpecificSupportPool": true,
+    "publishedHistoryScheduleOnlyExceptionsAllowed": true
   },
   "absoluteStatsPriorityLeagueCodes": [
     "E0",
@@ -235,5 +236,8 @@
     "EGY",
     "MAR",
     "RSA"
+  ],
+  "publishedHistoryExceptionLeagueCodes": [
+    "G2"
   ]
 }
