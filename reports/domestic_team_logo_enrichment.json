@@ -4,24 +4,32 @@
   "oddsSemanticsTouched": false,
   "source": "API-Football cached metadata, cross-league unique mappings, and current team catalog fallback",
   "mappingPolicy": "league exact/verified aliases, league unique simplified, global unique exact, global unique simplified",
-  "matchesSeen": 606,
-  "homeLogosAddedOrUpdated": 125,
-  "awayLogosAddedOrUpdated": 126,
-  "matchesWithBothLogos": 586,
-  "logoIndexEntries": 1136,
+  "matchesSeen": 624,
+  "homeLogosAddedOrUpdated": 110,
+  "awayLogosAddedOrUpdated": 108,
+  "matchesWithBothLogos": 600,
+  "logoIndexEntries": 1112,
   "fixtureTeamIdEntries": 0,
   "rawStatisticsEntries": 1071,
   "lookupHitCounts": {
-    "league_exact_or_verified_alias": 902,
-    "missing": 309,
+    "league_exact_or_verified_alias": 911,
+    "missing": 335,
+    "global_unique_exact_or_alias": 1,
     "league_unique_simplified": 1
   },
   "apiFootballCatalogFallback": {
     "enabled": true,
     "lookupsAttempted": 15,
-    "lookupsSucceeded": 15,
-    "teamsAdded": 65,
-    "errors": [],
+    "lookupsSucceeded": 14,
+    "teamsAdded": 41,
+    "errors": [
+      {
+        "leagueCode": "SVK",
+        "leagueId": "332",
+        "season": 2026,
+        "reason": "API-Football errors: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}"
+      }
+    ],
     "lookupLimit": 24,
     "unresolvedLeagueCandidates": 15
   },
@@ -29,9 +37,12 @@
     "BRA2:CR Brasil AL",
     "BRA2:Nautico PE",
     "BRA:Red Bull Bragantino SP",
+    "DNK:Broendby IF",
     "DNK:Soenderjyske",
     "ECU:Leones Futbol Club",
+    "HUN:Ferencvarosi Budapest",
     "ISR:Hapoel Jerusalem FC",
+    "RUS:FK Dinamo Moscow",
     "SAU:Diriyah Club",
     "SC1:Inverness Caledonian Thistle FC",
     "SC1:Queens Park FC",
@@ -48,6 +59,7 @@
     "SAU:Al-Ittifaq FC",
     "SC1:Ayr United FC",
     "SP1:RC Deportivo de A Coruna",
+    "SVK:Dukla Banská Bystrica",
     "UAE:Khor Fakkan Club"
   ]
 }
