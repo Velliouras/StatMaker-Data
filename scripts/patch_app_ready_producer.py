@@ -216,63 +216,24 @@ def install_prepared_pattern_bridge() -> None:
     print(f"APP_READY_PATTERN_BRIDGE_OK bytes={target.stat().st_size}")
 
 
-def patch_prepared_store_v10() -> None:
+def patch_prepared_store_v11() -> None:
     source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
     text = source.read_text(encoding="utf-8")
 
-    native_v10_schema = (
+    native_v11_schema = (
         "createPatternReadModelSchema(db)" in text
         and "CREATE TABLE IF NOT EXISTS prepared_pattern_generation" in text
         and "CREATE TABLE IF NOT EXISTS prepared_pattern_candidates" in text
-        and "private const val DATABASE_VERSION = 10" in text
+        and "opponent_without_favorite_probability REAL" in text
+        and "opponent_without_squad_turnover_probability REAL" in text
+        and "private const val DATABASE_VERSION = 11" in text
     )
 
-    if native_v10_schema:
-        # Current UAT owns schema v10 natively. Do not inject the legacy external schema hook
-        # or rewrite its database version; doing so couples the publisher to an obsolete Store tail.
-        print("APP_READY_PREPARED_SCHEMA_V10_OK source-native")
-    else:
-        if "AppReadyPatternSchema.create(db)" not in text:
-            on_create_marker = '''        db.execSQL(
-                "CREATE INDEX idx_prepared_selections_builder ON prepared_selections(competition_id, snapshot_version, qualifies_builder, local_date, match_key)"
-            )
-        }
-    '''
-            on_create_replacement = '''        db.execSQL(
-                "CREATE INDEX idx_prepared_selections_builder ON prepared_selections(competition_id, snapshot_version, qualifies_builder, local_date, match_key)"
-            )
-            AppReadyPatternSchema.create(db)
-        }
-    '''
-            if text.count(on_create_marker) != 1:
-                raise SystemExit("Could not locate PreparedBettingSnapshotStore onCreate tail")
-            text = text.replace(on_create_marker, on_create_replacement, 1)
-
-            upgrade_marker = '''        if (oldVersion < 8) {
-                db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_home_outcomes_bits TEXT")
-                db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_away_outcomes_bits TEXT")
-            }
-            createPerformanceIndexes(db)
-    '''
-            upgrade_replacement = '''        if (oldVersion < 8) {
-                db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_home_outcomes_bits TEXT")
-                db.execSQL("ALTER TABLE prepared_selections ADD COLUMN evidence_away_outcomes_bits TEXT")
-            }
-            if (oldVersion < APP_READY_PATTERN_SCHEMA_VERSION) {
-                AppReadyPatternSchema.create(db)
-            }
-            createPerformanceIndexes(db)
-    '''
-            if text.count(upgrade_marker) != 1:
-                raise SystemExit("Could not locate PreparedBettingSnapshotStore upgrade tail")
-            text = text.replace(upgrade_marker, upgrade_replacement, 1)
-
-        old_version = "        private const val DATABASE_VERSION = 8"
-        new_version = "        private const val DATABASE_VERSION = APP_READY_PATTERN_SCHEMA_VERSION"
-        if old_version in text:
-            text = text.replace(old_version, new_version, 1)
-        elif new_version not in text:
-            raise SystemExit("Could not locate PreparedBettingSnapshotStore database version")
+    if not native_v11_schema:
+        raise SystemExit(
+            "App-Ready v11 requires the native UAT PreparedBettingSnapshotStore v11 contract"
+        )
+    print("APP_READY_PREPARED_SCHEMA_V11_OK source-native")
 
     catalog_start_marker = "    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {"
     catalog_end_marker = """\n    /**
@@ -402,7 +363,7 @@ def patch_prepared_store_v10() -> None:
         text = text.replace(publisher_load_marker, publisher_load_method, 1)
 
     source.write_text(text, encoding="utf-8")
-    print("APP_READY_PREPARED_STORE_V10_OK")
+    print("APP_READY_PREPARED_STORE_V11_OK")
 
 
 
@@ -458,5 +419,5 @@ harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "D
 patch_domestic_multi_season_index()
 patch_empty_uefa_ready_snapshots()
 install_prepared_pattern_bridge()
-patch_prepared_store_v10()
+patch_prepared_store_v11()
 add_producer_diagnostics()

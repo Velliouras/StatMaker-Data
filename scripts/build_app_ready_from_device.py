@@ -14,8 +14,8 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
-PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v4-modifiers-v1"
-PREPARED_PATTERN_SCHEMA_VERSION = 10
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+PREPARED_PATTERN_SCHEMA_VERSION = 11
 PREPARED_PATTERN_COMPETITIONS = (
     "domestic",
     "champions_league",
@@ -356,6 +356,34 @@ def validate_generated_betting(source_exact_markets):
                     + ", ".join(missing_columns)
                 )
 
+            selection_columns = {
+                str(row[1])
+                for row in connection.execute(
+                    "PRAGMA table_info(prepared_selections)"
+                ).fetchall()
+            }
+            required_performance_columns = {
+                "opponent_adjusted_required",
+                "opponent_model_probability",
+                "opponent_base_model_probability",
+                "opponent_without_favorite_probability",
+                "opponent_without_xg_probability",
+                "opponent_without_fatigue_probability",
+                "opponent_without_injuries_probability",
+                "opponent_without_lineup_probability",
+                "opponent_without_formation_probability",
+                "opponent_without_squad_turnover_probability",
+                "opponent_modifier_profile",
+            }
+            missing_performance_columns = sorted(
+                required_performance_columns - selection_columns
+            )
+            if missing_performance_columns:
+                raise SystemExit(
+                    "Refusing app-ready publish: missing v11 performance/shadow columns: "
+                    + ", ".join(missing_performance_columns)
+                )
+
             source_seed = "\n".join(
                 f"{competition_id}|{ready[competition_id][2]}"
                 for competition_id in sorted(required)
@@ -392,7 +420,7 @@ def validate_generated_betting(source_exact_markets):
                 raise SystemExit("Prepared recommendation rules fingerprint mismatch")
             if int(proposal_count) != 0:
                 raise SystemExit(
-                    "Candidate-only v10 generation must not persist Paroli proposal templates"
+                    "Candidate-only v11 generation must not persist Paroli proposal templates"
                 )
 
             actual_candidate_count = int(
@@ -412,11 +440,77 @@ def validate_generated_betting(source_exact_markets):
                     "prepared recommendation generation is empty"
                 )
 
+            eligible_candidate_count = int(
+                connection.execute(
+                    "SELECT COUNT(*) FROM prepared_pattern_candidates WHERE generation_id=? AND recommendation_eligible=1",
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            performance_row_count = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    JOIN prepared_matches m
+                      ON m.competition_id=s.competition_id
+                     AND m.snapshot_version=s.snapshot_version
+                     AND m.match_key=s.match_key
+                    WHERE c.generation_id=? AND c.recommendation_eligible=1
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if performance_row_count != eligible_candidate_count:
+                raise SystemExit(
+                    "Canonical Performance ledger join mismatch: "
+                    f"eligible={eligible_candidate_count} joined={performance_row_count}"
+                )
+
+            context_counts = connection.execute(
+                """
+                SELECT
+                    SUM(CASE WHEN s.opponent_adjusted_required=1 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN s.opponent_model_probability IS NOT NULL THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN s.opponent_model_probability IS NOT NULL AND s.opponent_base_model_probability IS NOT NULL THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN s.opponent_model_probability IS NOT NULL AND TRIM(COALESCE(s.opponent_modifier_profile,''))<>'' THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN s.opponent_without_favorite_probability IS NOT NULL THEN 1 ELSE 0 END)
+                FROM prepared_pattern_candidates c
+                JOIN prepared_selections s
+                  ON s.competition_id=c.competition_id
+                 AND s.snapshot_version=c.snapshot_version
+                 AND s.selection_key=c.selection_key
+                WHERE c.generation_id=? AND c.recommendation_eligible=1 AND c.competition_id='domestic'
+                """,
+                (generation_id,),
+            ).fetchone()
+            opponent_required_count = int(context_counts[0] or 0)
+            opponent_model_count = int(context_counts[1] or 0)
+            opponent_base_count = int(context_counts[2] or 0)
+            modifier_profile_count = int(context_counts[3] or 0)
+            favorite_shadow_count = int(context_counts[4] or 0)
+            if opponent_required_count > 0 and opponent_model_count <= 0:
+                raise SystemExit("Domestic recommendations require opponent-adjusted context but no persisted opponent model probabilities were produced")
+            if opponent_base_count != opponent_model_count:
+                raise SystemExit(f"Opponent model/base shadow mismatch: model={opponent_model_count} base={opponent_base_count}")
+            if modifier_profile_count != opponent_model_count:
+                raise SystemExit(f"Opponent model/profile mismatch: model={opponent_model_count} profile={modifier_profile_count}")
+            if opponent_model_count > 0 and favorite_shadow_count <= 0:
+                raise SystemExit("Modifier Engine produced opponent models but no Favorite counterfactuals")
+
             pattern_meta = {
                 "generationId": generation_id,
                 "sourceFingerprint": source_fingerprint,
                 "rulesFingerprint": PREPARED_PATTERN_RULES_FINGERPRINT,
                 "candidateCount": actual_candidate_count,
+                "recommendationEligibleCount": eligible_candidate_count,
+                "performanceRowCount": performance_row_count,
+                "opponentAdjustedRequiredCount": opponent_required_count,
+                "opponentModelCount": opponent_model_count,
+                "favoriteShadowCount": favorite_shadow_count,
                 "schemaVersion": user_version,
             }
         finally:
@@ -433,6 +527,10 @@ def validate_generated_betting(source_exact_markets):
         f"schema={pattern_meta['schemaVersion']}",
         f"generation={pattern_meta['generationId']}",
         f"candidates={pattern_meta['candidateCount']}",
+        f"eligible={pattern_meta['recommendationEligibleCount']}",
+        f"performance={pattern_meta['performanceRowCount']}",
+        f"opponent_models={pattern_meta['opponentModelCount']}",
+        f"favorite_shadow={pattern_meta['favoriteShadowCount']}",
     )
     return counts, pattern_meta
 
@@ -584,6 +682,11 @@ manifest = {
         "preparedPatternSourceFingerprint": prepared_pattern["sourceFingerprint"],
         "preparedPatternRulesFingerprint": prepared_pattern["rulesFingerprint"],
         "preparedPatternCandidateCount": prepared_pattern["candidateCount"],
+        "preparedPatternRecommendationEligibleCount": prepared_pattern["recommendationEligibleCount"],
+        "preparedPerformanceRowCount": prepared_pattern["performanceRowCount"],
+        "preparedOpponentAdjustedRequiredCount": prepared_pattern["opponentAdjustedRequiredCount"],
+        "preparedOpponentModelCount": prepared_pattern["opponentModelCount"],
+        "preparedFavoriteShadowCount": prepared_pattern["favoriteShadowCount"],
     },
 }
 (out / "update_manifest.json").write_text(

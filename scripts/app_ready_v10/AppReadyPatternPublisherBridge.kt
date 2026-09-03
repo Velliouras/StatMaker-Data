@@ -12,8 +12,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v4-modifiers-v1"
-internal const val APP_READY_PATTERN_SCHEMA_VERSION = 10
+internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+internal const val APP_READY_PATTERN_SCHEMA_VERSION = 11
 
 internal object AppReadyPatternSchema {
     fun create(db: SQLiteDatabase) {

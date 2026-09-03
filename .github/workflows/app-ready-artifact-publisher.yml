@@ -91,8 +91,8 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v4-modifiers-v1'
-          expected_schema=10
+          expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
+          expected_schema=11
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
@@ -189,7 +189,7 @@ jobs:
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.contract_migration != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -250,7 +250,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
+        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.contract_migration != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -303,7 +303,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
 
-      - name: Materialize current v10 candidates host-side
+      - name: Materialize current v11 candidates host-side
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
@@ -456,6 +456,11 @@ jobs:
               'preparedPatternRulesFingerprint':incoming.get('metadata',{}).get('preparedPatternRulesFingerprint',''),
               'preparedPatternGenerationId':incoming.get('metadata',{}).get('preparedPatternGenerationId',''),
               'preparedPatternCandidateCount':incoming.get('metadata',{}).get('preparedPatternCandidateCount',0),
+              'preparedPatternRecommendationEligibleCount':incoming.get('metadata',{}).get('preparedPatternRecommendationEligibleCount',0),
+              'preparedPerformanceRowCount':incoming.get('metadata',{}).get('preparedPerformanceRowCount',0),
+              'preparedOpponentAdjustedRequiredCount':incoming.get('metadata',{}).get('preparedOpponentAdjustedRequiredCount',0),
+              'preparedOpponentModelCount':incoming.get('metadata',{}).get('preparedOpponentModelCount',0),
+              'preparedFavoriteShadowCount':incoming.get('metadata',{}).get('preparedFavoriteShadowCount',0),
               'recoveryPublish':__import__('os').environ.get('RECOVERY_PUBLISH','false').lower() == 'true',
           }
           (dst/'publish_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -554,16 +559,33 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 10
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v4-modifiers-v1'
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 11
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
+          eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
+          performance_rows=int(metadata.get('preparedPerformanceRowCount') or 0)
+          opponent_required=int(metadata.get('preparedOpponentAdjustedRequiredCount') or 0)
+          opponent_models=int(metadata.get('preparedOpponentModelCount') or 0)
+          favorite_shadow=int(metadata.get('preparedFavoriteShadowCount') or 0)
+          assert eligible > 0
+          assert performance_rows == eligible
+          assert opponent_required == 0 or opponent_models > 0
+          assert opponent_models == 0 or favorite_shadow > 0
           assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')
+          assert int(status.get('preparedPatternRecommendationEligibleCount') or 0) == eligible
+          assert int(status.get('preparedPerformanceRowCount') or 0) == performance_rows
+          assert int(status.get('preparedOpponentModelCount') or 0) == opponent_models
+          assert int(status.get('preparedFavoriteShadowCount') or 0) == favorite_shadow
           print(
               'APP_READY_PUBLISH_OK',
               status['contentVersion'],
               status['generatedAt'],
               'generation='+metadata['preparedPatternGenerationId'],
               'candidates='+str(metadata['preparedPatternCandidateCount']),
+              'eligible='+str(metadata['preparedPatternRecommendationEligibleCount']),
+              'performance='+str(metadata['preparedPerformanceRowCount']),
+              'opponent_models='+str(metadata['preparedOpponentModelCount']),
+              'favorite_shadow='+str(metadata['preparedFavoriteShadowCount']),
           )
           PY

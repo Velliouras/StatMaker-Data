@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v4-modifiers-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -543,8 +543,32 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 10:
-        raise SystemExit("Prepared checkpoint schema is below v10")
+    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 11:
+        raise SystemExit("Prepared checkpoint schema is below v11")
+
+    selection_columns = {
+        str(row[1])
+        for row in connection.execute("PRAGMA table_info(prepared_selections)").fetchall()
+    }
+    required_v11_columns = {
+        "opponent_adjusted_required",
+        "opponent_model_probability",
+        "opponent_base_model_probability",
+        "opponent_without_favorite_probability",
+        "opponent_without_xg_probability",
+        "opponent_without_fatigue_probability",
+        "opponent_without_injuries_probability",
+        "opponent_without_lineup_probability",
+        "opponent_without_formation_probability",
+        "opponent_without_squad_turnover_probability",
+        "opponent_modifier_profile",
+    }
+    missing_v11 = sorted(required_v11_columns - selection_columns)
+    if missing_v11:
+        raise SystemExit(
+            "Prepared checkpoint is missing v11 performance/shadow columns: "
+            + ", ".join(missing_v11)
+        )
 
     versions = {
         str(competition): str(version)

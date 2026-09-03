@@ -533,8 +533,8 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version < 10:
-                raise SystemExit(f"Prepared DB schema must be >=10; got {user_version}")
+            if user_version < 11:
+                raise SystemExit(f"Prepared DB schema must be >=11; got {user_version}")
 
             tables = {
                 row[0]
@@ -549,7 +549,7 @@ for raw in sys.argv[1:]:
             missing_tables = sorted(required_tables - tables)
             if missing_tables:
                 raise SystemExit(
-                    "Prepared DB missing v10 recommendation tables: " + ", ".join(missing_tables)
+                    "Prepared DB missing v11 recommendation tables: " + ", ".join(missing_tables)
                 )
 
             indexes = {
@@ -567,8 +567,50 @@ for raw in sys.argv[1:]:
             missing_indexes = sorted(required_indexes - indexes)
             if missing_indexes:
                 raise SystemExit(
-                    "Prepared DB missing v10 recommendation indexes: " + ", ".join(missing_indexes)
+                    "Prepared DB missing v11 recommendation indexes: " + ", ".join(missing_indexes)
                 )
+
+            selection_columns = {
+                row[1]
+                for row in connection.execute("PRAGMA table_info(prepared_selections)").fetchall()
+            }
+            required_v11_columns = {
+                "opponent_adjusted_required",
+                "opponent_model_probability",
+                "opponent_base_model_probability",
+                "opponent_without_favorite_probability",
+                "opponent_without_xg_probability",
+                "opponent_without_fatigue_probability",
+                "opponent_without_injuries_probability",
+                "opponent_without_lineup_probability",
+                "opponent_without_formation_probability",
+                "opponent_without_squad_turnover_probability",
+                "opponent_modifier_profile",
+            }
+            missing_v11_columns = sorted(required_v11_columns - selection_columns)
+            if missing_v11_columns:
+                raise SystemExit(
+                    "Prepared DB missing v11 performance/shadow columns: " + ", ".join(missing_v11_columns)
+                )
+            domestic_context = connection.execute(
+                """
+                SELECT
+                    SUM(CASE WHEN opponent_adjusted_required=1 THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN opponent_model_probability IS NOT NULL THEN 1 ELSE 0 END),
+                    SUM(CASE WHEN opponent_without_favorite_probability IS NOT NULL THEN 1 ELSE 0 END)
+                FROM prepared_selections s
+                JOIN prepared_snapshot_meta m
+                  ON m.competition_id=s.competition_id AND m.snapshot_version=s.snapshot_version
+                WHERE s.competition_id='domestic' AND m.state='ready' AND s.qualifies_pattern=1
+                """
+            ).fetchone()
+            required_context = int(domestic_context[0] or 0)
+            opponent_models = int(domestic_context[1] or 0)
+            favorite_shadow = int(domestic_context[2] or 0)
+            if required_context > 0 and opponent_models <= 0:
+                raise SystemExit("Prepared v11 Domestic snapshot has required opponent context but no model probabilities")
+            if opponent_models > 0 and favorite_shadow <= 0:
+                raise SystemExit("Prepared v11 Domestic snapshot has opponent models but no Favorite shadow")
 
             generation = connection.execute(
                 """
@@ -584,7 +626,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v4-modifiers-v1":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )
@@ -604,6 +646,8 @@ for raw in sys.argv[1:]:
                 f"schema={user_version}",
                 f"generation={generation_id}",
                 f"candidates={candidate_count}",
+                f"opponent_models={opponent_models}",
+                f"favorite_shadow={favorite_shadow}",
             )
     finally:
         connection.close()
