@@ -133,10 +133,11 @@ class StatsUniverseRegistryTest(unittest.TestCase):
         previous = [
             {"league_code": "FIN", "app_season": "2026", "output_path": ""},
             {"league_code": "FIN2", "app_season": "2026", "output_path": ""},
+            {"league_code": "G2", "app_season": "2025-2026", "output_path": ""},
             {"league_code": "OUTSIDE_SCOPE", "app_season": "2026", "output_path": ""},
         ]
         retained = registry.pipeline._published_stats_continuity_rows(refreshed, previous)
-        self.assertEqual(["FIN"], [row["league_code"] for row in retained])
+        self.assertEqual(["FIN", "G2"], [row["league_code"] for row in retained])
 
 
 if __name__ == "__main__":
