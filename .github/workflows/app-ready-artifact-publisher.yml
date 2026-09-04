@@ -189,7 +189,7 @@ jobs:
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.contract_migration != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -250,7 +250,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.contract_migration != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -258,6 +258,7 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ steps.checkpoint_lookup.outputs.run_id }}
+
       - name: Materialize v10 candidates host-side from checkpoint
         if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')
         shell: bash
