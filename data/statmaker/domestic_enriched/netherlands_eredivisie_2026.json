@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-04T17:41:36Z",
+  "generated_at": "2026-09-04T22:27:32Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/netherlands/eredivisie/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-04T07:57:49Z",
+    "cache_generated_at": "2026-09-04T22:26:11Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 33,
-    "fixtures_with_any_stats": 33,
-    "fixtures_with_bb_core_stats": 26,
+    "completed_fixtures": 34,
+    "fixtures_with_any_stats": 34,
+    "fixtures_with_bb_core_stats": 27,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.7879,
+    "bb_core_coverage": 0.7941,
     "group_counts": {
-      "shots_total": 33,
-      "shots_on_target": 33,
-      "corners": 33,
-      "fouls": 33,
-      "yellow_cards": 26,
-      "red_cards": 2,
-      "possession": 33,
-      "passes": 33,
+      "shots_total": 34,
+      "shots_on_target": 34,
+      "corners": 34,
+      "fouls": 34,
+      "yellow_cards": 27,
+      "red_cards": 3,
+      "possession": 34,
+      "passes": 34,
       "xg": 33
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.7879,
-      "red_cards": 0.0606,
+      "yellow_cards": 0.7941,
+      "red_cards": 0.0882,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 1.0
+      "xg": 0.9706
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2007,7 +2007,7 @@
     },
     {
       "fixture_id": 1552141,
-      "date_utc": "2026-08-23T14:45:00+00:00",
+      "date_utc": "2026-08-23T15:15:00+00:00",
       "country": "Netherlands",
       "league": "Eredivisie",
       "league_code": "N1",
@@ -2834,6 +2834,90 @@
         "fulltime": {
           "home": 1,
           "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1552153,
+      "date_utc": "2026-09-04T18:00:00+00:00",
+      "country": "Netherlands",
+      "league": "Eredivisie",
+      "league_code": "N1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 88,
+      "round": "Regular Season - 5",
+      "home_team": "Sparta Rotterdam",
+      "away_team": "PEC Zwolle",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 15,
+        "HST": 8,
+        "AST": 6,
+        "HC": 15,
+        "AC": 4,
+        "HF": 12,
+        "AF": 11,
+        "HY": 0,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 4,
+        "ASaves": 6,
+        "HPasses": 463,
+        "APasses": 366,
+        "HPassesAccurate": 391,
+        "APassesAccurate": 291,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 2,
+      "home_score": 2,
+      "away_score": 2,
+      "fthg": 2,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 2
         },
         "extratime": {
           "home": null,

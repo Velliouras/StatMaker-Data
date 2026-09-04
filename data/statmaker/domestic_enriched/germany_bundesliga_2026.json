@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-04T17:41:36Z",
+  "generated_at": "2026-09-04T22:27:32Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/germany/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-04T07:56:14Z",
+    "cache_generated_at": "2026-09-04T22:25:53Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 9,
-    "fixtures_with_any_stats": 9,
-    "fixtures_with_bb_core_stats": 9,
+    "completed_fixtures": 10,
+    "fixtures_with_any_stats": 10,
+    "fixtures_with_bb_core_stats": 10,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 9,
-      "shots_on_target": 9,
-      "corners": 9,
-      "fouls": 9,
-      "yellow_cards": 9,
-      "red_cards": 2,
-      "possession": 9,
-      "passes": 9,
+      "shots_total": 10,
+      "shots_on_target": 10,
+      "corners": 10,
+      "fouls": 10,
+      "yellow_cards": 10,
+      "red_cards": 3,
+      "possession": 10,
+      "passes": 10,
       "xg": 9
     },
     "group_coverage": {
@@ -62,14 +62,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.2222,
+      "red_cards": 0.3,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 1.0
+      "xg": 0.9
     },
     "bb_ready_candidate": false,
     "notes": [
-      "not enough completed fixtures: 9 < 15"
+      "not enough completed fixtures: 10 < 15"
     ]
   },
   "matches": [
@@ -818,6 +818,90 @@
         "fulltime": {
           "home": 3,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575149,
+      "date_utc": "2026-09-04T18:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "VfB Stuttgart",
+      "away_team": "1. FC Köln",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 18,
+        "HST": 8,
+        "AST": 5,
+        "HC": 10,
+        "AC": 8,
+        "HF": 5,
+        "AF": 6,
+        "HY": 1,
+        "AY": 3,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 526,
+        "APasses": 378,
+        "HPassesAccurate": 450,
+        "APassesAccurate": 316,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
         },
         "extratime": {
           "home": null,

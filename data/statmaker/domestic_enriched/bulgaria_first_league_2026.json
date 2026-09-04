@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-04T17:41:35Z",
+  "generated_at": "2026-09-04T22:27:31Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-04T08:08:47Z",
+    "cache_generated_at": "2026-09-04T22:26:47Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,11 +40,11 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 48,
+    "completed_fixtures": 50,
     "fixtures_with_any_stats": 16,
     "fixtures_with_bb_core_stats": 1,
-    "any_stats_coverage": 0.3333,
-    "bb_core_coverage": 0.0208,
+    "any_stats_coverage": 0.32,
+    "bb_core_coverage": 0.02,
     "group_counts": {
       "shots_total": 1,
       "shots_on_target": 1,
@@ -57,20 +57,20 @@
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.0208,
-      "shots_on_target": 0.0208,
-      "corners": 0.0208,
+      "shots_total": 0.02,
+      "shots_on_target": 0.02,
+      "corners": 0.02,
       "fouls": 0.0,
-      "yellow_cards": 0.3333,
-      "red_cards": 0.3333,
-      "possession": 0.0208,
+      "yellow_cards": 0.32,
+      "red_cards": 0.32,
+      "possession": 0.02,
       "passes": 0.0,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.3333 < 0.65",
-      "low BB-core coverage: 0.0208 < 0.65",
+      "low any-stats coverage: 0.32 < 0.65",
+      "low BB-core coverage: 0.02 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -4097,6 +4097,174 @@
         "fulltime": {
           "home": 1,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1551101,
+      "date_utc": "2026-09-04T16:00:00+00:00",
+      "country": "Bulgaria",
+      "league": "First League",
+      "league_code": "BGR",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 172,
+      "round": "Regular Season - 8",
+      "home_team": "Septemvri Sofia",
+      "away_team": "Botev Vratsa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1551096,
+      "date_utc": "2026-09-04T18:15:00+00:00",
+      "country": "Bulgaria",
+      "league": "First League",
+      "league_code": "BGR",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 172,
+      "round": "Regular Season - 8",
+      "home_team": "Arda Kardzhali",
+      "away_team": "Botev Plovdiv",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
         },
         "extratime": {
           "home": null,
