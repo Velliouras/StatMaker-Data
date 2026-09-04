@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-04T08:11:57Z",
+  "generated_at": "2026-09-04T17:41:36Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/united-arab-emirates/pro-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-04T08:08:18Z",
+    "cache_generated_at": "2026-09-04T17:41:28Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,37 +40,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 21,
-    "fixtures_with_any_stats": 5,
-    "fixtures_with_bb_core_stats": 5,
-    "any_stats_coverage": 0.2381,
-    "bb_core_coverage": 0.2381,
+    "completed_fixtures": 22,
+    "fixtures_with_any_stats": 6,
+    "fixtures_with_bb_core_stats": 6,
+    "any_stats_coverage": 0.2727,
+    "bb_core_coverage": 0.2727,
     "group_counts": {
-      "shots_total": 5,
-      "shots_on_target": 5,
-      "corners": 5,
-      "fouls": 5,
-      "yellow_cards": 5,
-      "red_cards": 3,
-      "possession": 5,
-      "passes": 5,
+      "shots_total": 6,
+      "shots_on_target": 6,
+      "corners": 6,
+      "fouls": 6,
+      "yellow_cards": 6,
+      "red_cards": 4,
+      "possession": 6,
+      "passes": 6,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.2381,
-      "shots_on_target": 0.2381,
-      "corners": 0.2381,
-      "fouls": 0.2381,
-      "yellow_cards": 0.2381,
-      "red_cards": 0.1429,
-      "possession": 0.2381,
-      "passes": 0.2381,
+      "shots_total": 0.2727,
+      "shots_on_target": 0.2727,
+      "corners": 0.2727,
+      "fouls": 0.2727,
+      "yellow_cards": 0.2727,
+      "red_cards": 0.1818,
+      "possession": 0.2727,
+      "passes": 0.2727,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.2381 < 0.65",
-      "low BB-core coverage: 0.2381 < 0.65",
+      "low any-stats coverage: 0.2727 < 0.65",
+      "low BB-core coverage: 0.2727 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -1829,6 +1829,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1599445,
+      "date_utc": "2026-09-04T13:45:00+00:00",
+      "country": "United Arab Emirates",
+      "league": "Pro League",
+      "league_code": "UAE",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 301,
+      "round": "Regular Season - 4",
+      "home_team": "Al-Ittihad Kalba",
+      "away_team": "Al Ain",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 17,
+        "HST": 8,
+        "AST": 7,
+        "HC": 3,
+        "AC": 7,
+        "HF": 11,
+        "AF": 10,
+        "HY": 2,
+        "AY": 0,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": 5,
+        "ASaves": 8,
+        "HPasses": 448,
+        "APasses": 440,
+        "HPassesAccurate": 400,
+        "APassesAccurate": 387,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 2,
+      "home_score": 0,
+      "away_score": 2,
+      "fthg": 0,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 0,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 2
         },
         "extratime": {
           "home": null,
