@@ -16,6 +16,8 @@ on:
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/refresh_fixture_validity.py'
       - 'scripts/refresh_fixture_validity_priority.py'
+      - 'scripts/apply_fixture_disposition_overrides.py'
+      - 'data/statmaker/fixture_disposition_overrides.json'
   schedule:
     - cron: "*/15 * * * *"
 
@@ -48,7 +50,8 @@ jobs:
             scripts/api_football_daily_quota_guard.py \
             scripts/refresh_live_settlements.py \
             scripts/refresh_fixture_validity.py \
-            scripts/refresh_fixture_validity_priority.py
+            scripts/refresh_fixture_validity_priority.py \
+            scripts/apply_fixture_disposition_overrides.py
 
       - name: Refresh completed fixtures and canonical fixture validity
         env:
@@ -66,6 +69,7 @@ jobs:
           settlement=$((total - validity))
           python scripts/refresh_live_settlements.py --max-requests "$settlement"
           python scripts/refresh_fixture_validity_priority.py --max-requests "$validity"
+          python scripts/apply_fixture_disposition_overrides.py
 
       - name: Publish live settlement and validity only when content changed
         run: |
