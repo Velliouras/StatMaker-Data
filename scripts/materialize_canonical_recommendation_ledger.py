@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=3
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -119,7 +119,7 @@ def extract(bundle,target=None):
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
-                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(s.get('score_tier')),
+                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
@@ -133,7 +133,7 @@ def merge(seq):
     for r in seq:
         k=(str(r.get('competitionId') or ''),str(r.get('localDate') or '')[:10],str(r.get('matchKey') or ''))
         if not all(k):continue
-        if k not in d or intval(r.get('generationBuiltAtMs'))>intval(d[k].get('generationBuiltAtMs')):d[k]=r
+        if k not in d or intval(r.get('generationBuiltAtMs'))>=intval(d[k].get('generationBuiltAtMs')):d[k]=r
     return list(d.values())
 
 def git_show(commit,path,out=None):
@@ -167,7 +167,8 @@ def main():
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=2:
         for r in old.get('entries',[]):
             if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat():existing.append(dict(r))
-    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)}
+    old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
+    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
     allr=[*existing,*current]; processed=[]; hb=hr=0
@@ -177,12 +178,12 @@ def main():
         if iso in done:continue
         r,n=history(day); allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':2,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v2','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v3','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v2 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v3 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
