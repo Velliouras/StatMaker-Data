@@ -67,7 +67,9 @@ jobs:
   publish:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    # The prepared source phase has its own explicit 90-minute ceiling and failure checkpoint.
+    # Keep the job ceiling above that so GitHub never kills the runner before the checkpoint trap.
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
@@ -292,6 +294,8 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
+          # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
+          APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
           api-level: 35
           target: google_apis
