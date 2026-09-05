@@ -16,6 +16,7 @@ on:
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/refresh_fixture_validity.py'
       - 'scripts/refresh_fixture_validity_priority.py'
+      - 'scripts/materialize_canonical_recommendation_ledger.py'
       - 'scripts/apply_fixture_disposition_overrides.py'
       - 'data/statmaker/fixture_disposition_overrides.json'
   schedule:
@@ -51,6 +52,7 @@ jobs:
             scripts/refresh_live_settlements.py \
             scripts/refresh_fixture_validity.py \
             scripts/refresh_fixture_validity_priority.py \
+            scripts/materialize_canonical_recommendation_ledger.py \
             scripts/apply_fixture_disposition_overrides.py
 
       - name: Refresh completed fixtures and canonical fixture validity
@@ -70,6 +72,9 @@ jobs:
           python scripts/refresh_live_settlements.py --max-requests "$settlement"
           python scripts/refresh_fixture_validity_priority.py --max-requests "$validity"
           python scripts/apply_fixture_disposition_overrides.py
+          # Repository-only identity materialization. No provider/API calls; one missing past date
+          # per run keeps Git history I/O bounded while making UAT/PROD converge deterministically.
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
 
       - name: Publish live settlement and validity only when content changed
         run: |
