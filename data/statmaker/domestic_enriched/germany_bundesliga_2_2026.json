@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T19:09:33Z",
+  "generated_at": "2026-09-05T22:08:26Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/germany/bundesliga-2/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-05T19:09:09Z",
+    "cache_generated_at": "2026-09-05T22:08:14Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 32,
-    "fixtures_with_any_stats": 32,
-    "fixtures_with_bb_core_stats": 32,
+    "completed_fixtures": 33,
+    "fixtures_with_any_stats": 33,
+    "fixtures_with_bb_core_stats": 33,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 32,
-      "shots_on_target": 32,
-      "corners": 32,
-      "fouls": 32,
-      "yellow_cards": 32,
-      "red_cards": 10,
-      "possession": 32,
-      "passes": 32,
+      "shots_total": 33,
+      "shots_on_target": 33,
+      "corners": 33,
+      "fouls": 33,
+      "yellow_cards": 33,
+      "red_cards": 11,
+      "possession": 33,
+      "passes": 33,
       "xg": 27
     },
     "group_coverage": {
@@ -62,10 +62,10 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.3125,
+      "red_cards": 0.3333,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.8438
+      "xg": 0.8182
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2750,6 +2750,90 @@
         "fulltime": {
           "home": 4,
           "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1576167,
+      "date_utc": "2026-09-05T18:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga 2",
+      "league_code": "D2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 79,
+      "round": "Regular Season - 4",
+      "home_team": "Dynamo Dresden",
+      "away_team": "VfL Bochum",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 15,
+        "HST": 4,
+        "AST": 6,
+        "HC": 8,
+        "AC": 4,
+        "HF": 10,
+        "AF": 15,
+        "HY": 1,
+        "AY": 7,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 4,
+        "ASaves": 4,
+        "HPasses": 462,
+        "APasses": 480,
+        "HPassesAccurate": 373,
+        "APassesAccurate": 384,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,

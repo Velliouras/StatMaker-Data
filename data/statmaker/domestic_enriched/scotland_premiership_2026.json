@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T19:09:33Z",
+  "generated_at": "2026-09-05T22:08:26Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/scotland/premiership/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-05T19:08:19Z",
+    "cache_generated_at": "2026-09-05T22:07:05Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 28,
-    "fixtures_with_any_stats": 28,
-    "fixtures_with_bb_core_stats": 27,
+    "completed_fixtures": 29,
+    "fixtures_with_any_stats": 29,
+    "fixtures_with_bb_core_stats": 28,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9643,
+    "bb_core_coverage": 0.9655,
     "group_counts": {
-      "shots_total": 28,
-      "shots_on_target": 28,
-      "corners": 28,
-      "fouls": 28,
-      "yellow_cards": 27,
-      "red_cards": 10,
-      "possession": 28,
-      "passes": 28,
+      "shots_total": 29,
+      "shots_on_target": 29,
+      "corners": 29,
+      "fouls": 29,
+      "yellow_cards": 28,
+      "red_cards": 11,
+      "possession": 29,
+      "passes": 29,
       "xg": 19
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9643,
-      "red_cards": 0.3571,
+      "yellow_cards": 0.9655,
+      "red_cards": 0.3793,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.6786
+      "xg": 0.6552
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2414,6 +2414,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1556663,
+      "date_utc": "2026-09-05T19:00:00+00:00",
+      "country": "Scotland",
+      "league": "Premiership",
+      "league_code": "SC0",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 179,
+      "round": "Regular Season - 6",
+      "home_team": "ST Mirren",
+      "away_team": "Celtic",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 23,
+        "HST": 6,
+        "AST": 8,
+        "HC": 6,
+        "AC": 10,
+        "HF": 6,
+        "AF": 15,
+        "HY": 4,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 40,
+        "APossession": 60,
+        "HSaves": 5,
+        "ASaves": 5,
+        "HPasses": 354,
+        "APasses": 528,
+        "HPassesAccurate": 269,
+        "APassesAccurate": 447,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,

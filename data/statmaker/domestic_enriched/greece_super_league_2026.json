@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T19:09:33Z",
+  "generated_at": "2026-09-05T22:08:27Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/greece/super-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-05T19:07:53Z",
+    "cache_generated_at": "2026-09-05T22:06:39Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 14,
-    "fixtures_with_any_stats": 14,
-    "fixtures_with_bb_core_stats": 12,
+    "completed_fixtures": 15,
+    "fixtures_with_any_stats": 15,
+    "fixtures_with_bb_core_stats": 13,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8571,
+    "bb_core_coverage": 0.8667,
     "group_counts": {
-      "shots_total": 14,
-      "shots_on_target": 14,
-      "corners": 14,
-      "fouls": 14,
-      "yellow_cards": 12,
-      "red_cards": 6,
-      "possession": 14,
-      "passes": 14,
+      "shots_total": 15,
+      "shots_on_target": 15,
+      "corners": 15,
+      "fouls": 15,
+      "yellow_cards": 13,
+      "red_cards": 7,
+      "possession": 15,
+      "passes": 15,
       "xg": 12
     },
     "group_coverage": {
@@ -61,15 +61,15 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.8571,
-      "red_cards": 0.4286,
+      "yellow_cards": 0.8667,
+      "red_cards": 0.4667,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.8571
+      "xg": 0.8
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "not enough completed fixtures: 14 < 15"
+      "ok"
     ]
   },
   "matches": [
@@ -1238,6 +1238,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1593303,
+      "date_utc": "2026-09-05T18:00:00+00:00",
+      "country": "Greece",
+      "league": "Super League",
+      "league_code": "G1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 197,
+      "round": "Regular Season - 3",
+      "home_team": "AEK Athens FC",
+      "away_team": "Aris Thessalonikis",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 7,
+        "HST": 10,
+        "AST": 2,
+        "HC": 2,
+        "AC": 2,
+        "HF": 16,
+        "AF": 17,
+        "HY": 2,
+        "AY": 0,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 60,
+        "APossession": 40,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 542,
+        "APasses": 357,
+        "HPassesAccurate": 473,
+        "APassesAccurate": 286,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 5,
+      "away_goals": 0,
+      "home_score": 5,
+      "away_score": 0,
+      "fthg": 5,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 5,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 5,
+          "away": 0
         },
         "extratime": {
           "home": null,
