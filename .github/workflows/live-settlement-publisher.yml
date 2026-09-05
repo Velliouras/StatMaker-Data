@@ -15,6 +15,7 @@ on:
       - '.github/workflows/live-settlement-publisher.yml'
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/refresh_fixture_validity.py'
+      - 'scripts/refresh_fixture_validity_priority.py'
   schedule:
     - cron: "*/15 * * * *"
 
@@ -46,7 +47,8 @@ jobs:
             scripts/api_football_fetch_fixture_stats.py \
             scripts/api_football_daily_quota_guard.py \
             scripts/refresh_live_settlements.py \
-            scripts/refresh_fixture_validity.py
+            scripts/refresh_fixture_validity.py \
+            scripts/refresh_fixture_validity_priority.py
 
       - name: Refresh completed fixtures and canonical fixture validity
         env:
@@ -63,7 +65,7 @@ jobs:
           if (( validity < 0 )); then validity=0; fi
           settlement=$((total - validity))
           python scripts/refresh_live_settlements.py --max-requests "$settlement"
-          python scripts/refresh_fixture_validity.py --max-requests "$validity"
+          python scripts/refresh_fixture_validity_priority.py --max-requests "$validity"
 
       - name: Publish live settlement and validity only when content changed
         run: |
