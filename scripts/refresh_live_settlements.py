@@ -3,8 +3,9 @@
 
 This producer is intentionally independent of the heavyweight App-Ready build. It polls only
 API-Football's fixture scoreboard for the current/previous UTC day, filters to the configured
-Domestic Stats universe, and fetches fixture statistics only once for newly completed matches.
-The Android app consumes the resulting repository JSON; it never calls API-Football directly.
+Domestic Stats universe plus StatMaker's three UEFA competitions, and fetches fixture statistics
+only for newly completed matches. The Android app consumes the repository JSON and never calls
+API-Football directly.
 """
 from __future__ import annotations
 
@@ -29,6 +30,31 @@ DEFAULT_MAX_REQUESTS = 80
 RETENTION_DAYS = 4
 MAX_STATS_ATTEMPTS = 4
 COMPLETED = {"FT", "AET", "PEN"}
+
+# Verified API-Football competition ids already used by StatMaker's UEFA capability audit.
+UEFA_PROVIDER_ROWS: Dict[int, Dict[str, Any]] = {
+    2: {
+        "leagueCode": "CL",
+        "country": "Europe",
+        "competition": "UEFA Champions League",
+        "display_name": "UEFA Champions League",
+        "lifecycle": "active",
+    },
+    3: {
+        "leagueCode": "EL",
+        "country": "Europe",
+        "competition": "UEFA Europa League",
+        "display_name": "UEFA Europa League",
+        "lifecycle": "active",
+    },
+    848: {
+        "leagueCode": "CONF",
+        "country": "Europe",
+        "competition": "UEFA Europa Conference League",
+        "display_name": "UEFA Europa Conference League",
+        "lifecycle": "active",
+    },
+}
 
 
 def now_utc() -> dt.datetime:
@@ -89,6 +115,15 @@ def choose_registry_row(
     provider_id = as_int(league.get("id"))
     if provider_id is None:
         return None
+
+    uefa = UEFA_PROVIDER_ROWS.get(provider_id)
+    if uefa is not None:
+        return {
+            **uefa,
+            "season": str(league.get("season") or "").strip(),
+            "app_season": str(league.get("season") or "").strip(),
+        }
+
     candidates = rows_by_provider.get(provider_id, [])
     if not candidates:
         return None
@@ -179,7 +214,7 @@ def fetch_fixture_dates(
             )
         except stats_fetch.RequestLimitReached:
             break
-        except Exception as error:  # network/provider failure is best-effort; keep last good feed
+        except Exception as error:
             print(f"live-settlement fixture poll failed date={date_text}: {error}", file=sys.stderr)
             continue
         error_text = stats_fetch.api_errors(payload)
