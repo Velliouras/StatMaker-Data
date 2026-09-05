@@ -78,8 +78,10 @@ main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(enco
 uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
 if int(checkpoint.get("preparedReadyCount",0)) != 4:
     raise SystemExit(1)
+complete_for_target = bool(checkpoint.get("completeForTarget", True))
 exact = (
-    checkpoint.get("mainContentVersion") == main.get("contentVersion")
+    complete_for_target
+    and checkpoint.get("mainContentVersion") == main.get("contentVersion")
     and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
 )
 print(
@@ -89,6 +91,7 @@ print(
     "current_main="+str(main.get("contentVersion",""))[:12],
     "checkpoint_uefa="+str(checkpoint.get("uefaContentVersion",""))[:12],
     "current_uefa="+str(uefa.get("contentVersion",""))[:12],
+    "complete_for_target="+str(complete_for_target).lower(),
 )
 PY
   then
@@ -277,6 +280,7 @@ checkpoint_root="$GITHUB_WORKSPACE/app-ready-checkpoint"
 rm -rf "$checkpoint_root"
 
 export_checkpoint() {
+  local complete_for_target="${1:-true}"
   local target="$checkpoint_root"
   rm -rf "$target"
   mkdir -p "$target/databases" "$target/files/statmaker_stats_snapshots" "$target/files/app_ready_odds" "$target/shared_prefs"
@@ -300,11 +304,12 @@ export_checkpoint() {
     adb exec-out run-as "$APP_ID" cat "shared_prefs/$pref.xml" > "$target/shared_prefs/$pref.xml"
   done
 
-  python3 - "$GITHUB_WORKSPACE" "$u" "$target" <<'PY'
+  python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" <<'PY'
 import hashlib, json, sqlite3, sys
 from datetime import datetime, timezone
 from pathlib import Path
 workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2]); root=Path(sys.argv[3])
+complete_for_target=sys.argv[4].strip().lower()=="true"
 db_path=root/"databases/statmaker_prepared_betting.db"
 con=sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
 try:
@@ -327,6 +332,7 @@ payload={
  "createdAt":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
  "mainContentVersion":main.get("contentVersion",""),
  "uefaContentVersion":uefa.get("contentVersion",""),
+ "completeForTarget":complete_for_target,
  "preparedReadyCount":len(ready),
  "preparedDbSha256":digest,
  "preparedSnapshots":[
@@ -336,6 +342,7 @@ payload={
 }
 (root/"checkpoint.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print("APP_READY_CHECKPOINT_EXPORTED",f"db_bytes={db_path.stat().st_size}",f"db_sha={digest[:12]}",
+      f"complete_for_target={str(complete_for_target).lower()}",
       "snapshots="+",".join(f"{r[0]}:{r[2]}/{r[3]}" for r in ready))
 PY
 
@@ -346,6 +353,25 @@ PY
     adb shell rm -f "/data/local/tmp/$name.json"
   done
 }
+
+checkpoint_failure_export_enabled=0
+on_exit() {
+  local status="$1"
+  trap - EXIT
+  set +e
+  if (( status != 0 )) && (( checkpoint_failure_export_enabled == 1 )); then
+    echo "APP_READY_FAILURE_CHECKPOINT_BEGIN status=$status"
+    if ( set -e; export_checkpoint false ); then
+      echo "APP_READY_FAILURE_CHECKPOINT_OK"
+    else
+      echo "APP_READY_FAILURE_CHECKPOINT_UNAVAILABLE" >&2
+      rm -rf "$checkpoint_root"
+    fi
+  fi
+  cleanup
+  exit "$status"
+}
+trap 'on_exit $?' EXIT
 
 app_cpu_ticks() {
   local pid stat
@@ -360,7 +386,7 @@ monitor_phase() {
   local start_epoch="$(date +%s)"
   local last_progress_epoch="$start_epoch"
   local last_stage=""
-  local max_total_seconds=3300
+  local max_total_seconds="${APP_READY_PREPARED_MAX_SECONDS:-5400}"
   local max_idle_seconds=600
   local last_cpu_ticks=""
   local last_heartbeat_epoch="$start_epoch"
@@ -369,7 +395,10 @@ monitor_phase() {
     max_idle_seconds=300
   fi
 
-  for _ in $(seq 1 540); do
+  # Never use an iteration-count timeout here. adb/logcat polling time is variable, so a fixed
+  # number of loops can expire while the producer is still actively progressing. The explicit
+  # elapsed-time and idle ceilings below are the only phase deadlines.
+  while true; do
     if ! server_healthy; then
       echo "App-ready HTTP server became unhealthy during phase=$phase" >&2
       return 1
@@ -429,7 +458,6 @@ monitor_phase() {
     fi
     sleep 5
   done
-  return 1
 }
 
 if [[ "${APP_READY_RECOMMENDATION_ONLY:-false}" == "true" ]]; then
@@ -440,12 +468,16 @@ if [[ "${APP_READY_RECOMMENDATION_ONLY:-false}" == "true" ]]; then
   echo "APP_READY_RECOMMENDATION_ONLY_BEGIN"
 else
   # Phase 1: expensive immutable source preparation.
+  # Any non-zero exit during this phase first exports the current 4/4 DB state as a resumable
+  # seed. A partial seed is explicitly marked non-exact and may only be reused as input.
+  checkpoint_failure_export_enabled=1
   adb logcat -c
   adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
   monitor_phase "prepared" "true"
+  checkpoint_failure_export_enabled=0
 
   # Freeze and persist 4/4 READY work before final recommendation materialization.
-  export_checkpoint
+  export_checkpoint true
 
   if [[ "${APP_READY_SOURCE_ONLY:-false}" == "true" ]]; then
     echo "APP_READY_SOURCE_PHASE_ONLY_COMPLETE"
