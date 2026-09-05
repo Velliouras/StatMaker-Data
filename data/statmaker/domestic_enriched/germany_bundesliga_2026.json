@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T07:54:06Z",
+  "generated_at": "2026-09-05T16:55:23Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/germany/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-05T07:37:05Z",
+    "cache_generated_at": "2026-09-05T16:53:30Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 10,
-    "fixtures_with_any_stats": 10,
-    "fixtures_with_bb_core_stats": 10,
+    "completed_fixtures": 15,
+    "fixtures_with_any_stats": 15,
+    "fixtures_with_bb_core_stats": 15,
     "any_stats_coverage": 1.0,
     "bb_core_coverage": 1.0,
     "group_counts": {
-      "shots_total": 10,
-      "shots_on_target": 10,
-      "corners": 10,
-      "fouls": 10,
-      "yellow_cards": 10,
-      "red_cards": 3,
-      "possession": 10,
-      "passes": 10,
+      "shots_total": 15,
+      "shots_on_target": 15,
+      "corners": 15,
+      "fouls": 15,
+      "yellow_cards": 15,
+      "red_cards": 8,
+      "possession": 15,
+      "passes": 15,
       "xg": 9
     },
     "group_coverage": {
@@ -62,14 +62,14 @@
       "corners": 1.0,
       "fouls": 1.0,
       "yellow_cards": 1.0,
-      "red_cards": 0.3,
+      "red_cards": 0.5333,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.9
+      "xg": 0.6
     },
-    "bb_ready_candidate": false,
+    "bb_ready_candidate": true,
     "notes": [
-      "not enough completed fixtures: 10 < 15"
+      "ok"
     ]
   },
   "matches": [
@@ -901,6 +901,426 @@
         },
         "fulltime": {
           "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575150,
+      "date_utc": "2026-09-05T13:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "1899 Hoffenheim",
+      "away_team": "Borussia Dortmund",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 18,
+        "AS": 11,
+        "HST": 6,
+        "AST": 4,
+        "HC": 10,
+        "AC": 3,
+        "HF": 13,
+        "AF": 7,
+        "HY": 4,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 60,
+        "APossession": 40,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 490,
+        "APasses": 329,
+        "HPassesAccurate": 394,
+        "APassesAccurate": 250,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 3,
+      "home_score": 2,
+      "away_score": 3,
+      "fthg": 2,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575151,
+      "date_utc": "2026-09-05T13:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "Bayer Leverkusen",
+      "away_team": "Union Berlin",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 5,
+        "HST": 10,
+        "AST": 0,
+        "HC": 11,
+        "AC": 1,
+        "HF": 11,
+        "AF": 12,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 0,
+        "ASaves": 6,
+        "HPasses": 580,
+        "APasses": 325,
+        "HPassesAccurate": 522,
+        "APassesAccurate": 262,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 0,
+      "home_score": 4,
+      "away_score": 0,
+      "fthg": 4,
+      "ftag": 0,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575153,
+      "date_utc": "2026-09-05T13:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "Borussia Mönchengladbach",
+      "away_team": "SV Elversberg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 25,
+        "AS": 14,
+        "HST": 6,
+        "AST": 10,
+        "HC": 13,
+        "AC": 4,
+        "HF": 18,
+        "AF": 9,
+        "HY": 3,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 6,
+        "ASaves": 2,
+        "HPasses": 363,
+        "APasses": 363,
+        "HPassesAccurate": 296,
+        "APassesAccurate": 302,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 4,
+      "home_score": 3,
+      "away_score": 4,
+      "fthg": 3,
+      "ftag": 4,
+      "hthg": 2,
+      "htag": 1,
+      "goals": {
+        "home": 3,
+        "away": 4
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 4
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575155,
+      "date_utc": "2026-09-05T13:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "Werder Bremen",
+      "away_team": "RB Leipzig",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 12,
+        "AS": 19,
+        "HST": 7,
+        "AST": 5,
+        "HC": 2,
+        "AC": 7,
+        "HF": 13,
+        "AF": 8,
+        "HY": 1,
+        "AY": 0,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 29,
+        "APossession": 71,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 287,
+        "APasses": 689,
+        "HPassesAccurate": 211,
+        "APassesAccurate": 612,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575157,
+      "date_utc": "2026-09-05T13:30:00+00:00",
+      "country": "Germany",
+      "league": "Bundesliga",
+      "league_code": "D1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 78,
+      "round": "Regular Season - 2",
+      "home_team": "SC Paderborn 07",
+      "away_team": "SC Freiburg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 16,
+        "HST": 3,
+        "AST": 5,
+        "HC": 5,
+        "AC": 4,
+        "HF": 16,
+        "AF": 10,
+        "HY": 3,
+        "AY": 3,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 4,
+        "ASaves": 3,
+        "HPasses": 531,
+        "APasses": 362,
+        "HPassesAccurate": 437,
+        "APassesAccurate": 274,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
           "away": 1
         },
         "extratime": {
