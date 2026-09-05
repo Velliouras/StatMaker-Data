@@ -3,6 +3,10 @@
 
 Input is the already-canonical compact catalog_payload stored by the existing prepared
 snapshot builder. No provider/API call and no raw odds JSON parse is performed here.
+
+The same host step also applies the repository fixture-validity ledger to canonical recommendation
+candidates. This is deliberately off-device: a postponed/cancelled/rescheduled fixture is made
+ineligible before the immutable App-Ready betting bundle is published.
 """
 
 from __future__ import annotations
@@ -21,6 +25,9 @@ COMPETITIONS = (
     "conference_league",
 )
 ATHENS = ZoneInfo("Europe/Athens")
+REPO_ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_VALIDITY_PATH = REPO_ROOT / "data" / "statmaker" / "fixture_validity.json"
+VOID_DISPOSITIONS = {"POSTPONED", "CANCELLED", "RESCHEDULED", "ABANDONED", "AWARDED", "WALKOVER"}
 
 
 def betting_local_date(match: dict) -> str:
@@ -128,6 +135,64 @@ def create_schema(connection: sqlite3.Connection) -> None:
         ON prepared_fixture_markets(competition_id, snapshot_version, match_key);
         """
     )
+
+
+def fixture_dispositions() -> list[dict]:
+    if not FIXTURE_VALIDITY_PATH.is_file():
+        return []
+    try:
+        payload = json.loads(FIXTURE_VALIDITY_PATH.read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    rows = payload.get("dispositions") if isinstance(payload, dict) else []
+    return [row for row in rows or [] if isinstance(row, dict)]
+
+
+def apply_fixture_validity_gate(connection: sqlite3.Connection) -> int:
+    dispositions = fixture_dispositions()
+    if not dispositions:
+        print("APP_READY_FIXTURE_VALIDITY_OK dispositions=0 blocked=0")
+        return 0
+
+    tables = {
+        str(row[0])
+        for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    }
+    if "prepared_pattern_candidates" not in tables:
+        raise SystemExit("Fixture-validity gate requires prepared_pattern_candidates")
+
+    blocked = 0
+    for row in dispositions:
+        disposition = str(row.get("disposition") or "").strip().upper()
+        if disposition not in VOID_DISPOSITIONS:
+            continue
+        competition_id = str(row.get("competitionId") or "").strip()
+        candidate_match_key = str(row.get("matchKey") or "").strip()
+        local_date = str(row.get("localDate") or "").strip()[:10]
+        if not competition_id or not candidate_match_key or not local_date:
+            continue
+        reason = f"FIXTURE_{disposition}"
+        cursor = connection.execute(
+            """
+            UPDATE prepared_pattern_candidates
+            SET recommendation_eligible=0,
+                policy_premium_eligible=0,
+                policy_rejection_reason=?
+            WHERE competition_id=?
+              AND match_key=?
+              AND local_date=?
+              AND recommendation_eligible=1
+            """,
+            (reason, competition_id, candidate_match_key, local_date),
+        )
+        blocked += max(0, int(cursor.rowcount or 0))
+
+    print(
+        "APP_READY_FIXTURE_VALIDITY_OK",
+        f"dispositions={len(dispositions)}",
+        f"blocked={blocked}",
+    )
+    return blocked
 
 
 def materialize(prepared_db: Path) -> dict[str, int]:
@@ -263,6 +328,7 @@ def materialize(prepared_db: Path) -> dict[str, int]:
                     f"Fixture index count mismatch {competition_id}: expected={expected} actual={actual}"
                 )
 
+        apply_fixture_validity_gate(connection)
         connection.commit()
     except Exception:
         connection.rollback()

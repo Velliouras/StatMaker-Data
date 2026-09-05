@@ -14,6 +14,7 @@ on:
     paths:
       - '.github/workflows/live-settlement-publisher.yml'
       - 'scripts/refresh_live_settlements.py'
+      - 'scripts/refresh_fixture_validity.py'
   schedule:
     - cron: "*/15 * * * *"
 
@@ -39,35 +40,47 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Validate live settlement producer
+      - name: Validate live settlement producers
         run: |
           python -m py_compile \
             scripts/api_football_fetch_fixture_stats.py \
             scripts/api_football_daily_quota_guard.py \
-            scripts/refresh_live_settlements.py
+            scripts/refresh_live_settlements.py \
+            scripts/refresh_fixture_validity.py
 
-      - name: Refresh completed fixtures and settlement stats
+      - name: Refresh completed fixtures and canonical fixture validity
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           API_FOOTBALL_DAILY_RESERVE: "1500"
           INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '80' }}
+        shell: bash
         run: |
-          python scripts/refresh_live_settlements.py --max-requests "${INPUT_MAX_REQUESTS:-80}"
+          set -euo pipefail
+          total="${INPUT_MAX_REQUESTS:-80}"
+          if ! [[ "$total" =~ ^[0-9]+$ ]] || (( total < 2 )); then total=80; fi
+          validity=4
+          if (( total <= 6 )); then validity=$((total - 2)); fi
+          if (( validity < 0 )); then validity=0; fi
+          settlement=$((total - validity))
+          python scripts/refresh_live_settlements.py --max-requests "$settlement"
+          python scripts/refresh_fixture_validity.py --max-requests "$validity"
 
-      - name: Publish live settlement feed only when content changed
+      - name: Publish live settlement and validity only when content changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
             data/statmaker/live_settlements.json \
-            data/api_football/live_settlement_cache.json
+            data/api_football/live_settlement_cache.json \
+            data/statmaker/fixture_validity.json \
+            data/statmaker/update_manifest.json
 
           if git diff --cached --quiet; then
-            echo "No new completed fixtures or settlement statistics."
+            echo "No new completed fixtures, settlement statistics or fixture dispositions."
             exit 0
           fi
 
-          git commit -m "Refresh live settlement feed"
+          git commit -m "Refresh live settlement and fixture validity"
 
           for attempt in 1 2 3; do
             git pull --rebase origin main
