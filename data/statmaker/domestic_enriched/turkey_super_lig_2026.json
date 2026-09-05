@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-05T16:55:23Z",
+  "generated_at": "2026-09-05T19:09:33Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-05T16:54:12Z",
+    "cache_generated_at": "2026-09-05T19:08:25Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 29,
-    "fixtures_with_any_stats": 29,
-    "fixtures_with_bb_core_stats": 28,
+    "completed_fixtures": 30,
+    "fixtures_with_any_stats": 30,
+    "fixtures_with_bb_core_stats": 29,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9655,
+    "bb_core_coverage": 0.9667,
     "group_counts": {
-      "shots_total": 29,
-      "shots_on_target": 29,
-      "corners": 29,
-      "fouls": 29,
-      "yellow_cards": 28,
-      "red_cards": 6,
-      "possession": 29,
-      "passes": 29,
+      "shots_total": 30,
+      "shots_on_target": 30,
+      "corners": 30,
+      "fouls": 30,
+      "yellow_cards": 29,
+      "red_cards": 7,
+      "possession": 30,
+      "passes": 30,
       "xg": 27
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9655,
-      "red_cards": 0.2069,
+      "yellow_cards": 0.9667,
+      "red_cards": 0.2333,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.931
+      "xg": 0.9
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2498,6 +2498,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1584397,
+      "date_utc": "2026-09-05T17:00:00+00:00",
+      "country": "Turkey",
+      "league": "Süper Lig",
+      "league_code": "T1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 203,
+      "round": "Regular Season - 4",
+      "home_team": "Fenerbahçe",
+      "away_team": "Beşiktaş",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 14,
+        "HST": 2,
+        "AST": 6,
+        "HC": 2,
+        "AC": 7,
+        "HF": 18,
+        "AF": 21,
+        "HY": 4,
+        "AY": 3,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 4,
+        "ASaves": 1,
+        "HPasses": 426,
+        "APasses": 419,
+        "HPassesAccurate": 347,
+        "APassesAccurate": 346,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
