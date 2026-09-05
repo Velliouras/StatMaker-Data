@@ -1,0 +1,76 @@
+name: Live Settlement Publisher
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Safe API-Football request cap for this run"
+        required: true
+        default: "80"
+        type: string
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-live-settlement-publisher
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate live settlement producer
+        run: |
+          python -m py_compile \
+            scripts/api_football_fetch_fixture_stats.py \
+            scripts/api_football_daily_quota_guard.py \
+            scripts/refresh_live_settlements.py
+
+      - name: Refresh completed fixtures and settlement stats
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: "1500"
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '80' }}
+        run: |
+          python scripts/refresh_live_settlements.py --max-requests "${INPUT_MAX_REQUESTS:-80}"
+
+      - name: Publish live settlement feed only when content changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/statmaker/live_settlements.json \
+            data/api_football/live_settlement_cache.json
+
+          if git diff --cached --quiet; then
+            echo "No new completed fixtures or settlement statistics."
+            exit 0
+          fi
+
+          git commit -m "Refresh live settlement feed"
+
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "Live settlement push attempt ${attempt} failed; retrying."
+            sleep $((attempt * 4))
+          done
+
+          echo "Could not publish live settlement feed after retries."
+          exit 1
