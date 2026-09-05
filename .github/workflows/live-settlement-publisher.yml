@@ -75,10 +75,11 @@ jobs:
             data/statmaker/live_settlements.json \
             data/api_football/live_settlement_cache.json \
             data/statmaker/fixture_validity.json \
+            data/statmaker/canonical_recommendation_ledger.json \
             data/statmaker/update_manifest.json
 
           if git diff --cached --quiet; then
-            echo "No new completed fixtures, settlement statistics or fixture dispositions."
+            echo "No new completed fixtures, settlement statistics, canonical ledger rows or fixture dispositions."
             exit 0
           fi
 
