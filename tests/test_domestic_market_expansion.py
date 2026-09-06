@@ -115,7 +115,21 @@ class DomesticMarketExpansionTest(unittest.TestCase):
             "leagues": [
                 {
                     "leagueCode": "AUT",
-                    "matches": [self._canonical_match(markets=[self._market("1X2", "Home", 1.80)])],
+                    "matches": [
+                        self._canonical_match(
+                            markets=[
+                                self._market("1X2", "Home", 1.80),
+                                # Regression fixture: a period/specialty corner row was once
+                                # flattened to MATCH_CORNERS and could survive a merge.
+                                self._market(
+                                    "MATCH_CORNERS",
+                                    "Corners Under 24.5",
+                                    1.73,
+                                    line=24.5,
+                                ),
+                            ]
+                        )
+                    ],
                 }
             ],
         }
@@ -170,6 +184,7 @@ class DomesticMarketExpansionTest(unittest.TestCase):
                 for row in corners
             },
         )
+        self.assertNotIn("Corners Under 24.5", {row["selection"] for row in corners})
         self.assertTrue(all(row["exactBookmakerOdds"] is True for row in corners))
         self.assertEqual(2, report["totalCanonicalCornerSelections"])
         self.assertFalse(report["syntheticOdds"])
@@ -180,12 +195,81 @@ class DomesticMarketExpansionTest(unittest.TestCase):
         self.assertEqual(1, debug_report["canonicalFixturesMatched"])
         self.assertFalse(debug_report["syntheticOdds"])
 
-    def test_missing_corner_payload_does_not_create_synthetic_fallback(self):
+    def test_half_time_corner_payload_cannot_publish_as_match_corners(self):
         feed = {
             "leagues": [
                 {
                     "leagueCode": "AUT",
-                    "matches": [self._canonical_match(markets=[self._market("1X2", "Home", 1.80)])],
+                    "matches": [
+                        self._canonical_match(
+                            markets=[
+                                self._market("1X2", "Home", 1.80),
+                                self._market(
+                                    "MATCH_CORNERS",
+                                    "Corners Under 24.5",
+                                    1.73,
+                                    line=24.5,
+                                ),
+                            ]
+                        )
+                    ],
+                }
+            ]
+        }
+        archive = {
+            "leagues": [
+                {
+                    "leagueCode": "AUT",
+                    "matches": [
+                        {
+                            "id": "fixture-1",
+                            "date": "2026-07-31",
+                            "homeTeam": "Lask Linz",
+                            "awayTeam": "Grazer AK",
+                            "teamMappingStatus": "matched",
+                            "providerMarkets": [
+                                {
+                                    "bookmaker": "Bet365",
+                                    "exactProviderPayload": True,
+                                    "market": {
+                                        "name": "Corners Totals HT",
+                                        "odds": [{"hdp": 4.5, "over": "2.05", "under": "1.73"}],
+                                    },
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+
+        report = corner_rebuild.rebuild_feed_corners(feed, archive, require_corners=False)
+
+        markets = feed["leagues"][0]["matches"][0]["markets"]
+        self.assertFalse(any(row["market"] in corner_rebuild.CORNER_MARKETS for row in markets))
+        self.assertTrue(any(row["market"] == "1X2" for row in markets))
+        self.assertEqual(0, report["totalCanonicalCornerSelections"])
+        self.assertEqual(1, report["fixturesClearedWithoutVerifiedFullTimeCorners"])
+        self.assertFalse(report["syntheticOdds"])
+
+    def test_missing_corner_archive_fails_closed(self):
+        feed = {
+            "leagues": [
+                {
+                    "leagueCode": "AUT",
+                    "matches": [
+                        self._canonical_match(
+                            markets=[
+                                self._market("1X2", "Home", 1.80),
+                                self._market(
+                                    "MATCH_CORNERS",
+                                    "Corners Under 24.5",
+                                    1.73,
+                                    line=24.5,
+                                ),
+                            ]
+                        )
+                    ],
                 }
             ]
         }
@@ -195,7 +279,9 @@ class DomesticMarketExpansionTest(unittest.TestCase):
 
         markets = feed["leagues"][0]["matches"][0]["markets"]
         self.assertFalse(any(row["market"] in corner_rebuild.CORNER_MARKETS for row in markets))
+        self.assertTrue(any(row["market"] == "1X2" for row in markets))
         self.assertEqual(0, report["totalCanonicalCornerSelections"])
+        self.assertEqual(1, report["canonicalFixturesMissingProviderArchive"])
         self.assertFalse(report["syntheticOdds"])
 
     @staticmethod
