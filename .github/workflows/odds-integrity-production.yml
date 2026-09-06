@@ -53,6 +53,9 @@ jobs:
             scripts/refresh_domestic_odds_schedule_priority.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/domestic_odds_expansion.py \
+            scripts/update_domestic_odds_api_io_push_aware.py \
+            scripts/rebuild_domestic_corners_from_archive.py \
+            scripts/clean_domestic_corner_scopes.py \
             scripts/enrich_domestic_odds_team_logos.py \
             scripts/update_uefa_qualifier_odds_integrity.py \
             scripts/annotate_domestic_odds_movement.py \
@@ -69,6 +72,7 @@ jobs:
             tests/test_domestic_schedule_only_validation.py \
             tests/test_rehydrate_domestic_betting_from_archive.py \
             tests/test_arg_provider_aliases.py \
+            tests/test_domestic_market_expansion.py \
             tests/test_domestic_proposal_readiness.py \
             tests/test_statmaker_update_manifest.py
 
@@ -161,6 +165,12 @@ jobs:
           print(f"Preserved {restored} unexpired Domestic matches.")
           PY
 
+      - name: Enforce verified full-time Domestic corner scope
+        # Canonical corner identity is rebuilt only from exact raw provider payloads.
+        # This runs after restored rotating fixtures so stale 1H/2H/specialty rows
+        # cannot re-enter MATCH_CORNERS or TEAM_CORNERS through preservation.
+        run: python scripts/clean_domestic_corner_scopes.py
+
       - name: Enrich Domestic team logos
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
@@ -211,6 +221,7 @@ jobs:
             reports/domestic_odds_debug.json \
             reports/domestic_live_july_odds_refresh.json \
             reports/domestic_corner_archive_rebuild.json \
+            reports/domestic_corner_scope_cleanup.json \
             reports/domestic_expanded_market_rebuild.json \
             reports/domestic_team_logo_enrichment.json \
             reports/domestic_odds_integrity.json \
