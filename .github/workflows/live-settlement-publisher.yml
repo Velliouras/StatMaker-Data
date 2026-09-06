@@ -12,7 +12,6 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/live-settlement-publisher.yml'
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/reconcile_canonical_settlement_gaps.py'
       - 'scripts/refresh_fixture_validity.py'
@@ -27,8 +26,10 @@ permissions:
   contents: write
 
 concurrency:
-  group: statmaker-live-settlement-publisher
-  cancel-in-progress: true
+  # Live settlement rewrites update_manifest.json and canonical settlement artifacts,
+  # so it must serialize with every other workflow that publishes canonical main data.
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
 
 jobs:
   publish:
