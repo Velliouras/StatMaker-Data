@@ -26,10 +26,11 @@ permissions:
   contents: write
 
 concurrency:
-  # Live settlement rewrites update_manifest.json and canonical settlement artifacts,
-  # so it must serialize with every other workflow that publishes canonical main data.
-  group: statmaker-canonical-main-writer
-  cancel-in-progress: false
+  # This is the latency-critical settlement lane. It owns only live settlement/validity artifacts
+  # and must never wait behind heavyweight canonical producers. A newer scheduled run supersedes
+  # an older one if runner scheduling ever causes overlap.
+  group: statmaker-live-settlement-publisher
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -102,16 +103,23 @@ jobs:
           # the identity integrity gate remains authoritative.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
 
-      - name: Publish live settlement and validity only when content changed
+      - name: Publish latency-critical settlement artifacts
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Ownership boundary: update_manifest.json belongs to the canonical producer lane.
+          # Fixture-validity helpers may refresh it in the worktree for standalone/manual runs,
+          # but this 15-minute publisher must never commit that shared file or contend with the
+          # heavyweight canonical writers that rebuild it.
+          git restore --source=HEAD --worktree --staged data/statmaker/update_manifest.json
+
           git add \
             data/statmaker/live_settlements.json \
             data/api_football/live_settlement_cache.json \
             data/statmaker/fixture_validity.json \
-            data/statmaker/canonical_recommendation_ledger.json \
-            data/statmaker/update_manifest.json
+            data/statmaker/canonical_recommendation_ledger.json
 
           if git diff --cached --quiet; then
             echo "No new completed fixtures, settlement statistics, canonical ledger rows or fixture dispositions."
@@ -120,12 +128,20 @@ jobs:
 
           git commit -m "Refresh live settlement and fixture validity"
 
+          # Other producers may advance main while this short run is executing. They no longer
+          # touch this lane's owned artifacts, so rebasing is expected to be conflict-free. Retry
+          # only non-fast-forward races; fail closed if the ownership contract is ever violated.
           for attempt in 1 2 3; do
-            git pull --rebase origin main
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Live settlement ownership conflict detected during rebase."
+              git rebase --abort || true
+              exit 1
+            fi
             if git push origin HEAD:main; then
               exit 0
             fi
-            echo "Live settlement push attempt ${attempt} failed; retrying."
+            echo "Live settlement push attempt ${attempt} lost a remote race; retrying."
             sleep $((attempt * 4))
           done
 
