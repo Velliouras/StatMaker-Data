@@ -14,6 +14,7 @@ on:
     paths:
       - '.github/workflows/live-settlement-publisher.yml'
       - 'scripts/refresh_live_settlements.py'
+      - 'scripts/reconcile_canonical_settlement_gaps.py'
       - 'scripts/refresh_fixture_validity.py'
       - 'scripts/refresh_fixture_validity_priority.py'
       - 'scripts/materialize_canonical_recommendation_ledger.py'
@@ -50,6 +51,7 @@ jobs:
             scripts/api_football_fetch_fixture_stats.py \
             scripts/api_football_daily_quota_guard.py \
             scripts/refresh_live_settlements.py \
+            scripts/reconcile_canonical_settlement_gaps.py \
             scripts/refresh_fixture_validity.py \
             scripts/refresh_fixture_validity_priority.py \
             scripts/materialize_canonical_recommendation_ledger.py \
@@ -65,15 +67,38 @@ jobs:
           set -euo pipefail
           total="${INPUT_MAX_REQUESTS:-80}"
           if ! [[ "$total" =~ ^[0-9]+$ ]] || (( total < 2 )); then total=80; fi
+
           validity=4
           if (( total <= 6 )); then validity=$((total - 2)); fi
           if (( validity < 0 )); then validity=0; fi
-          settlement=$((total - validity))
+
+          # Materialize first so the just-finished Athens day is present before the exact-id gap pass.
+          # This stage is repository-only and consumes no provider quota.
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
+
+          # Spend only what is needed on past canonical recommendations that have an authoritative
+          # API-Football fixture id but are absent from the rolling settlement cache. Unused capacity
+          # is immediately returned to the normal date-driven live producer below.
+          gap_cap=$((total - validity - 2))
+          if (( gap_cap > 8 )); then gap_cap=8; fi
+          if (( gap_cap < 0 )); then gap_cap=0; fi
+          gap_log="$(mktemp)"
+          python scripts/reconcile_canonical_settlement_gaps.py --max-requests "$gap_cap" | tee "$gap_log"
+          gap_used="$(sed -n 's/.* requests=\([0-9][0-9]*\).*/\1/p' "$gap_log" | tail -n 1)"
+          rm -f "$gap_log"
+          if ! [[ "${gap_used:-}" =~ ^[0-9]+$ ]]; then gap_used=0; fi
+          if (( gap_used > gap_cap )); then gap_used=$gap_cap; fi
+
+          settlement=$((total - validity - gap_used))
+          if (( settlement < 2 )); then settlement=2; fi
           python scripts/refresh_live_settlements.py --max-requests "$settlement"
+
           python scripts/refresh_fixture_validity_priority.py --max-requests "$validity"
           python scripts/apply_fixture_disposition_overrides.py
-          # Repository-only identity materialization. No provider/API calls; one missing past date
-          # per run keeps Git history I/O bounded while making UAT/PROD converge deterministically.
+
+          # The validity bridge can transiently touch the shared ledger in legacy-compatible form.
+          # Re-materialize once, without provider calls, so the published artifact is always v3 and
+          # the identity integrity gate remains authoritative.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
 
       - name: Publish live settlement and validity only when content changed

@@ -73,6 +73,13 @@ def nullable(v):
 def tier(v):
     s=str(v or '').strip().upper(); return {'STRONG_VALUE':'Strong Value','VALUE':'Solid Value','LEAN_VALUE':'Marginal Value','NONE':'No signal','':'No signal'}.get(s,str(v or 'No signal').replace('_',' '))
 
+def valid_fixture_identity(row):
+    home=row.get('homeNames') if isinstance(row.get('homeNames'),list) else [row.get('homeTeam')]
+    away=row.get('awayNames') if isinstance(row.get('awayNames'),list) else [row.get('awayTeam')]
+    hk={live.normalize_team(x) for x in home if live.normalize_team(x)}
+    ak={live.normalize_team(x) for x in away if live.normalize_team(x)}
+    return bool(hk and ak and hk.isdisjoint(ak))
+
 def extract(bundle,target=None):
     with tempfile.TemporaryDirectory() as td:
         dbp=Path(td)/'db.sqlite'
@@ -111,6 +118,8 @@ def extract(bundle,target=None):
                 sub=str(s.get('identity_sub_market_key') or '')
                 hp=list(live._names_from_match_payload(m,'home')); ap=list(live._names_from_match_payload(m,'away'))
                 if not hp or not ap:continue
+                identity_probe={'homeNames':hp,'awayNames':ap,'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or '')}
+                if not valid_fixture_identity(identity_probe):continue
                 mp=nullable(s.get('opponent_model_probability')); post=nullable(s.get('bm_posterior_probability'))
                 out.append({
                   'generationId':gid,'generationBuiltAtMs':built,'competitionId':comp,'snapshotVersion':snap,'selectionKey':sk,
@@ -131,6 +140,7 @@ def extract(bundle,target=None):
 def merge(seq):
     d={}
     for r in seq:
+        if not valid_fixture_identity(r):continue
         k=(str(r.get('competitionId') or ''),str(r.get('localDate') or '')[:10],str(r.get('matchKey') or ''))
         if not all(k):continue
         if k not in d or intval(r.get('generationBuiltAtMs'))>=intval(d[k].get('generationBuiltAtMs')):d[k]=r
@@ -166,7 +176,7 @@ def main():
     old=load(LEDGER,{}); existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=2:
         for r in old.get('entries',[]):
-            if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat():existing.append(dict(r))
+            if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
     done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
