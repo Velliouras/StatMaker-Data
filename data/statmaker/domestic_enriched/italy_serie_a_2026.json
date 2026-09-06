@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-06T19:20:39Z",
+  "generated_at": "2026-09-06T22:13:06Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/italy/serie-a/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-06T19:19:03Z",
+    "cache_generated_at": "2026-09-06T22:11:27Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 27,
-    "fixtures_with_any_stats": 27,
-    "fixtures_with_bb_core_stats": 26,
+    "completed_fixtures": 28,
+    "fixtures_with_any_stats": 28,
+    "fixtures_with_bb_core_stats": 27,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.963,
+    "bb_core_coverage": 0.9643,
     "group_counts": {
-      "shots_total": 27,
-      "shots_on_target": 27,
-      "corners": 27,
-      "fouls": 27,
-      "yellow_cards": 26,
-      "red_cards": 7,
-      "possession": 27,
-      "passes": 27,
+      "shots_total": 28,
+      "shots_on_target": 28,
+      "corners": 28,
+      "fouls": 28,
+      "yellow_cards": 27,
+      "red_cards": 8,
+      "possession": 28,
+      "passes": 28,
       "xg": 20
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.963,
-      "red_cards": 0.2593,
+      "yellow_cards": 0.9643,
+      "red_cards": 0.2857,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.7407
+      "xg": 0.7143
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -2330,6 +2330,90 @@
         "fulltime": {
           "home": 2,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550114,
+      "date_utc": "2026-09-06T18:45:00+00:00",
+      "country": "Italy",
+      "league": "Serie A",
+      "league_code": "I1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 135,
+      "round": "Regular Season - 3",
+      "home_team": "Juventus",
+      "away_team": "AC Milan",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 3,
+        "HST": 5,
+        "AST": 1,
+        "HC": 7,
+        "AC": 1,
+        "HF": 10,
+        "AF": 11,
+        "HY": 1,
+        "AY": 3,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 49,
+        "APossession": 51,
+        "HSaves": 0,
+        "ASaves": 4,
+        "HPasses": 453,
+        "APasses": 479,
+        "HPassesAccurate": 380,
+        "APassesAccurate": 412,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 1
         },
         "extratime": {
           "home": null,
