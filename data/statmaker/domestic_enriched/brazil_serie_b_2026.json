@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-06T08:11:22Z",
+  "generated_at": "2026-09-06T17:11:22Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-06T08:11:05Z",
+    "cache_generated_at": "2026-09-06T17:11:01Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 258,
-    "fixtures_with_any_stats": 258,
-    "fixtures_with_bb_core_stats": 252,
+    "completed_fixtures": 259,
+    "fixtures_with_any_stats": 259,
+    "fixtures_with_bb_core_stats": 253,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9767,
+    "bb_core_coverage": 0.9768,
     "group_counts": {
-      "shots_total": 257,
-      "shots_on_target": 257,
-      "corners": 255,
-      "fouls": 256,
-      "yellow_cards": 253,
-      "red_cards": 63,
-      "possession": 256,
-      "passes": 253,
+      "shots_total": 258,
+      "shots_on_target": 258,
+      "corners": 256,
+      "fouls": 257,
+      "yellow_cards": 254,
+      "red_cards": 64,
+      "possession": 257,
+      "passes": 254,
       "xg": 240
     },
     "group_coverage": {
       "shots_total": 0.9961,
       "shots_on_target": 0.9961,
       "corners": 0.9884,
-      "fouls": 0.9922,
-      "yellow_cards": 0.9806,
-      "red_cards": 0.2442,
-      "possession": 0.9922,
-      "passes": 0.9806,
-      "xg": 0.9302
+      "fouls": 0.9923,
+      "yellow_cards": 0.9807,
+      "red_cards": 0.2471,
+      "possession": 0.9923,
+      "passes": 0.9807,
+      "xg": 0.9266
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -21734,6 +21734,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1520856,
+      "date_utc": "2026-09-06T14:00:00+00:00",
+      "country": "Brazil",
+      "league": "Serie B",
+      "league_code": "BRA2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 72,
+      "round": "Regular Season - 26",
+      "home_team": "Londrina",
+      "away_team": "Operario-PR",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 17,
+        "HST": 5,
+        "AST": 4,
+        "HC": 7,
+        "AC": 3,
+        "HF": 17,
+        "AF": 24,
+        "HY": 5,
+        "AY": 7,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 427,
+        "APasses": 317,
+        "HPassesAccurate": 364,
+        "APassesAccurate": 243,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
