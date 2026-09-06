@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-06T17:11:23Z",
+  "generated_at": "2026-09-06T19:20:38Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/south-africa/premier-soccer-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-06T17:10:59Z",
+    "cache_generated_at": "2026-09-06T19:20:18Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 40,
-    "fixtures_with_any_stats": 38,
-    "fixtures_with_bb_core_stats": 36,
-    "any_stats_coverage": 0.95,
-    "bb_core_coverage": 0.9,
+    "completed_fixtures": 41,
+    "fixtures_with_any_stats": 39,
+    "fixtures_with_bb_core_stats": 37,
+    "any_stats_coverage": 0.9512,
+    "bb_core_coverage": 0.9024,
     "group_counts": {
-      "shots_total": 38,
-      "shots_on_target": 38,
-      "corners": 38,
-      "fouls": 38,
-      "yellow_cards": 36,
-      "red_cards": 10,
-      "possession": 38,
-      "passes": 38,
+      "shots_total": 39,
+      "shots_on_target": 39,
+      "corners": 39,
+      "fouls": 39,
+      "yellow_cards": 37,
+      "red_cards": 11,
+      "possession": 39,
+      "passes": 39,
       "xg": 31
     },
     "group_coverage": {
-      "shots_total": 0.95,
-      "shots_on_target": 0.95,
-      "corners": 0.95,
-      "fouls": 0.95,
-      "yellow_cards": 0.9,
-      "red_cards": 0.25,
-      "possession": 0.95,
-      "passes": 0.95,
-      "xg": 0.775
+      "shots_total": 0.9512,
+      "shots_on_target": 0.9512,
+      "corners": 0.9512,
+      "fouls": 0.9512,
+      "yellow_cards": 0.9024,
+      "red_cards": 0.2683,
+      "possession": 0.9512,
+      "passes": 0.9512,
+      "xg": 0.7561
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -3421,6 +3421,90 @@
         },
         "fulltime": {
           "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1600335,
+      "date_utc": "2026-09-06T15:30:00+00:00",
+      "country": "South Africa",
+      "league": "Premier Soccer League",
+      "league_code": "RSA",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 288,
+      "round": "Regular Season - 5",
+      "home_team": "Kaizer Chiefs",
+      "away_team": "Siwelele",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 9,
+        "HST": 6,
+        "AST": 4,
+        "HC": 6,
+        "AC": 2,
+        "HF": 8,
+        "AF": 12,
+        "HY": 2,
+        "AY": 0,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 56,
+        "APossession": 44,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 537,
+        "APasses": 425,
+        "HPassesAccurate": 473,
+        "APassesAccurate": 345,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
           "away": 2
         },
         "extratime": {
