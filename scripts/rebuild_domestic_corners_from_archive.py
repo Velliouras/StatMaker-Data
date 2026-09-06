@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Rebuild canonical integer corner totals from exact archived provider payloads.
+"""Rebuild canonical corner totals from exact archived provider payloads.
 
-This module performs no network calls. It reads exact provider archive payloads,
-normalizes only full-time match/team corner total markets with the push-aware
-corner policy, and merges those selections into matching canonical Domestic
-fixtures. The reusable ``rebuild_feed_corners`` entry point is also used by the
-rotating Domestic refresh so a fresh league replacement cannot silently remove
-real corner markets that are still present in the provider archive.
+This module performs no network calls. It treats the raw provider archive as the
+only authority for canonical MATCH_CORNERS / TEAM_CORNERS identity. Canonical
+corner rows are replaced, never merged, so a previously misclassified 1H/2H or
+specialty corner market cannot survive once its raw provider scope is available.
+If a canonical fixture has no matching raw provider archive entry, corner rows are
+removed rather than trusted without provenance. No synthetic price or transformed
+line is created.
 """
 
 from __future__ import annotations
@@ -39,11 +40,34 @@ def normalized_text(value: Any) -> str:
 
 
 def is_supported_full_time_corner_market(raw_name: str) -> bool:
+    """Return True only when the raw provider name can safely represent FT corners.
+
+    The base Odds-API.io parser intentionally has broad family detection. That is
+    useful for discovery, but canonical publishing must be stricter because the
+    canonical row no longer retains the provider period/scope. Any explicit
+    non-full-time or specialty scope therefore fails closed here.
+    """
+
     name = normalized_text(raw_name)
     if "corner" not in name:
         return False
-    excluded = ("half", " ht", "1h", "2h", "race", "spread", "handicap")
-    return not any(token in f" {name}" for token in excluded)
+    padded = f" {name} "
+    excluded = (
+        " half",
+        " ht ",
+        " 1h ",
+        " 2h ",
+        " 1st ",
+        " 2nd ",
+        " period",
+        " race",
+        " spread",
+        " handicap",
+        " player",
+        " first corner",
+        " last corner",
+    )
+    return not any(token in padded for token in excluded)
 
 
 def archive_key(league_code: str, match: Dict[str, Any]) -> Tuple[str, str, str, str]:
@@ -58,6 +82,15 @@ def archive_key(league_code: str, match: Dict[str, Any]) -> Tuple[str, str, str,
 def canonical_matches(feed: Dict[str, Any]) -> Dict[Tuple[str, str, str, str], Dict[str, Any]]:
     result: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
     for league in feed.get("leagues", []) or []:
+        code = str(league.get("leagueCode") or "")
+        for match in league.get("matches", []) or []:
+            result[archive_key(code, match)] = match
+    return result
+
+
+def archived_matches(archive: Dict[str, Any]) -> Dict[Tuple[str, str, str, str], Dict[str, Any]]:
+    result: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
+    for league in archive.get("leagues", []) or []:
         code = str(league.get("leagueCode") or "")
         for match in league.get("matches", []) or []:
             result[archive_key(code, match)] = match
@@ -101,12 +134,11 @@ def market_key(item: Dict[str, Any]) -> Tuple[str, str, str, str]:
     )
 
 
-def merge_exact_corners(existing: Iterable[Dict[str, Any]], rebuilt: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def replace_exact_corners(existing: Iterable[Dict[str, Any]], rebuilt: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Replace the entire canonical corner ladder with raw-verified FT rows only."""
+
     non_corners = [dict(item) for item in existing if item.get("market") not in CORNER_MARKETS]
-    corners = base.dedupe_markets(
-        [dict(item) for item in existing if item.get("market") in CORNER_MARKETS]
-        + [dict(item) for item in rebuilt]
-    )
+    corners = base.dedupe_markets([dict(item) for item in rebuilt])
     return sorted(
         non_corners + corners,
         key=lambda item: (
@@ -124,50 +156,72 @@ def rebuild_feed_corners(
     *,
     require_corners: bool = True,
 ) -> Dict[str, Any]:
-    """Merge exact archived corner prices into an in-memory canonical feed.
+    """Rebuild canonical corners from raw provider provenance, failing closed.
 
     ``require_corners`` remains strict for the dedicated manual rebuild command.
-    The rotating live refresh uses ``False`` so a provider cycle with genuinely no
-    corner payloads is reported as zero rather than replaced with synthetic data.
+    Rotating/production cleanup uses ``False`` so a provider snapshot with genuinely
+    no verified FT corner payloads removes unproven corner rows instead of creating
+    synthetic or stale fallback data.
     """
 
     push_aware._self_check()
-    matches = canonical_matches(feed)
+    archive_by_key = archived_matches(archive)
 
-    archive_matches = 0
-    matched_fixtures = 0
-    added_or_replaced = 0
+    archive_matches_scanned = len(archive_by_key)
+    canonical_fixtures_checked = 0
+    canonical_fixtures_matched = 0
+    canonical_fixtures_missing_archive = 0
+    fixtures_rebuilt = 0
+    fixtures_cleared = 0
+    removed_canonical_rows = 0
+    rebuilt_rows = 0
+    changed_selections = 0
     emitted_by_market = {"MATCH_CORNERS": 0, "TEAM_CORNERS": 0}
     examples: List[Dict[str, Any]] = []
 
-    for league in archive.get("leagues", []) or []:
+    for league in feed.get("leagues", []) or []:
         code = str(league.get("leagueCode") or "")
-        for archived_match in league.get("matches", []) or []:
-            archive_matches += 1
-            target = matches.get(archive_key(code, archived_match))
-            if target is None:
-                continue
-            rebuilt = normalize_archived_corners(archived_match)
-            if not rebuilt:
-                continue
-            matched_fixtures += 1
-            before = {market_key(item): item for item in target.get("markets", []) or []}
-            target["markets"] = merge_exact_corners(target.get("markets", []) or [], rebuilt)
-            after = {market_key(item): item for item in target.get("markets", []) or []}
+        for target in league.get("matches", []) or []:
+            canonical_fixtures_checked += 1
+            archived_match = archive_by_key.get(archive_key(code, target))
+            if archived_match is None:
+                canonical_fixtures_missing_archive += 1
+                rebuilt: List[Dict[str, Any]] = []
+            else:
+                canonical_fixtures_matched += 1
+                rebuilt = normalize_archived_corners(archived_match)
+
+            existing = list(target.get("markets", []) or [])
+            existing_corners = [item for item in existing if item.get("market") in CORNER_MARKETS]
+            before = {market_key(item): item for item in existing_corners}
+            target["markets"] = replace_exact_corners(existing, rebuilt)
+            after = {market_key(item): item for item in rebuilt}
+
             changed_keys = {
                 key
-                for key, item in after.items()
-                if key not in before or before[key] != item
+                for key in set(before) | set(after)
+                if before.get(key) != after.get(key)
             }
-            added_or_replaced += len(changed_keys)
+            changed_selections += len(changed_keys)
+            removed_canonical_rows += len(existing_corners)
+            rebuilt_rows += len(rebuilt)
+
+            if existing_corners or rebuilt:
+                fixtures_rebuilt += 1
+            if existing_corners and not rebuilt:
+                fixtures_cleared += 1
+
             for item in rebuilt:
                 emitted_by_market[str(item.get("market"))] += 1
-            if len(examples) < 8:
+
+            if len(examples) < 10 and changed_keys:
                 examples.append(
                     {
                         "leagueCode": code,
                         "fixture": f"{target.get('homeTeam')} - {target.get('awayTeam')}",
-                        "corners": rebuilt[:6],
+                        "providerArchivePresent": archived_match is not None,
+                        "removedCanonicalCorners": existing_corners[:8],
+                        "rebuiltFullTimeCorners": rebuilt[:8],
                     }
                 )
 
@@ -180,15 +234,22 @@ def rebuild_feed_corners(
     )
     if require_corners and total_corner_rows <= 0:
         raise RuntimeError(
-            "Provider archive rebuild emitted zero canonical corner markets; refusing to write feed"
+            "Provider archive rebuild emitted zero verified full-time canonical corner markets; refusing to write feed"
         )
 
     summary = {
         "source": "exact archived Odds-API.io provider payloads",
+        "policy": "replace canonical corners from raw-name-verified full-time provider markets; fail closed without provenance",
         "syntheticOdds": False,
-        "archiveMatchesScanned": archive_matches,
-        "canonicalFixturesMatched": matched_fixtures,
-        "addedOrReplacedSelections": added_or_replaced,
+        "archiveMatchesScanned": archive_matches_scanned,
+        "canonicalFixturesChecked": canonical_fixtures_checked,
+        "canonicalFixturesMatched": canonical_fixtures_matched,
+        "canonicalFixturesMissingProviderArchive": canonical_fixtures_missing_archive,
+        "fixturesRebuilt": fixtures_rebuilt,
+        "fixturesClearedWithoutVerifiedFullTimeCorners": fixtures_cleared,
+        "removedCanonicalCornerSelections": removed_canonical_rows,
+        "rebuiltFullTimeCornerSelections": rebuilt_rows,
+        "addedOrReplacedSelections": changed_selections,
         "totalCanonicalCornerSelections": total_corner_rows,
         "rebuiltByMarket": emitted_by_market,
     }
