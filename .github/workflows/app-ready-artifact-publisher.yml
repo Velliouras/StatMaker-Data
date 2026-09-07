@@ -32,7 +32,6 @@ on:
     branches:
       - main
     paths:
-      - '.github/workflows/app-ready-artifact-publisher.yml'
       - 'data/statmaker/update_manifest.json'
       - 'odds/odds_api_io/domestic_odds.json'
       - 'data/statmaker/uefa_support_history.json'
@@ -510,13 +509,21 @@ jobs:
               exit 1
             }
           else
-            git add data/statmaker/app_ready
-            git commit -m "Publish verified app-ready StatMaker read models"
+            # Normal generations are already validated. Preserve only the immutable app_ready
+            # tree, then replay that tree onto the latest main. Never rebase the long-lived
+            # workflow checkout: doing so can replay unrelated producer commits after main moves.
+            publish_dir="$(mktemp -d)"
+            cp -a data/statmaker/app_ready "$publish_dir/app_ready"
 
-            # Normal generations remain strict: never publish if canonical source changed.
-            git fetch --no-tags origin +main:refs/remotes/origin/main
-            git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
-            python - <<'PY'
+            published=false
+            for attempt in 1 2 3 4 5; do
+              git fetch --no-tags origin +main:refs/remotes/origin/main
+              git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+
+              # Keep the strict source contract on every retry. A live-settlement-only commit
+              # leaves these content versions unchanged and is safe to publish over; a canonical
+              # source change aborts rather than publishing a stale generation.
+              python - <<'PY'
           import json, subprocess
           from pathlib import Path
           incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
@@ -540,8 +547,34 @@ jobs:
                   f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}'
               )
           PY
-            git rebase refs/remotes/origin/main
-            git push origin HEAD:main
+
+              git reset --hard refs/remotes/origin/main
+              rm -rf data/statmaker/app_ready
+              mkdir -p data/statmaker
+              cp -a "$publish_dir/app_ready" data/statmaker/app_ready
+              git add data/statmaker/app_ready
+
+              if git diff --cached --quiet; then
+                echo "APP_READY_ALREADY_PUBLISHED"
+                published=true
+                break
+              fi
+
+              git commit -m "Publish verified app-ready StatMaker read models"
+              if git push origin HEAD:main; then
+                echo "APP_READY_PUBLISH_OK attempt=$attempt"
+                published=true
+                break
+              fi
+
+              echo "APP_READY push attempt ${attempt} lost a remote race; retrying immutable artifacts only."
+              sleep $((attempt * 2))
+            done
+
+            [[ "$published" == "true" ]] || {
+              echo "Could not publish app-ready artifacts after 5 retries" >&2
+              exit 1
+            }
           fi
 
       - name: Verify published generation
