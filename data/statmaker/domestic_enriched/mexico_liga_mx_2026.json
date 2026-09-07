@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-06T22:13:05Z",
+  "generated_at": "2026-09-07T01:09:16Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/mexico/liga-mx/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-06T22:11:47Z",
+    "cache_generated_at": "2026-09-07T01:08:00Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 58,
-    "fixtures_with_any_stats": 58,
-    "fixtures_with_bb_core_stats": 50,
+    "completed_fixtures": 59,
+    "fixtures_with_any_stats": 59,
+    "fixtures_with_bb_core_stats": 51,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.8621,
+    "bb_core_coverage": 0.8644,
     "group_counts": {
-      "shots_total": 58,
-      "shots_on_target": 58,
-      "corners": 57,
-      "fouls": 58,
-      "yellow_cards": 50,
-      "red_cards": 25,
-      "possession": 58,
-      "passes": 58,
+      "shots_total": 59,
+      "shots_on_target": 59,
+      "corners": 58,
+      "fouls": 59,
+      "yellow_cards": 51,
+      "red_cards": 26,
+      "possession": 59,
+      "passes": 59,
       "xg": 49
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
-      "corners": 0.9828,
+      "corners": 0.9831,
       "fouls": 1.0,
-      "yellow_cards": 0.8621,
-      "red_cards": 0.431,
+      "yellow_cards": 0.8644,
+      "red_cards": 0.4407,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.8448
+      "xg": 0.8305
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -4934,6 +4934,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1550956,
+      "date_utc": "2026-09-06T23:00:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 7",
+      "home_team": "Cruz Azul",
+      "away_team": "Santos Laguna",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 24,
+        "AS": 11,
+        "HST": 7,
+        "AST": 1,
+        "HC": 9,
+        "AC": 5,
+        "HF": 8,
+        "AF": 9,
+        "HY": 0,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 62,
+        "APossession": 38,
+        "HSaves": 1,
+        "ASaves": 7,
+        "HPasses": 578,
+        "APasses": 363,
+        "HPassesAccurate": 511,
+        "APassesAccurate": 301,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
         },
         "extratime": {
           "home": null,
