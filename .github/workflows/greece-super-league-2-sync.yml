@@ -8,7 +8,6 @@ on:
     branches:
       - main
     paths:
-      - ".github/workflows/greece-super-league-2-sync.yml"
       - "scripts/refresh_greece_super_league_2.py"
       - "tests/test_refresh_greece_super_league_2.py"
 
@@ -64,6 +63,7 @@ jobs:
 
       - name: Commit Super League 2 artifacts
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add \
@@ -76,11 +76,26 @@ jobs:
             reports/domestic_odds_integrity.json
           if git diff --cached --quiet; then
             echo "No Super League 2 changes."
-          else
-            git commit -m "Add Greece Super League 2 schedule and history"
-            git pull --rebase --autostash origin main
-            # The producer may have rebased over another canonical writer. Rebuild the
-            # deterministic manifest now so it describes the exact tree being pushed.
+            exit 0
+          fi
+
+          git commit -m "Add Greece Super League 2 schedule and history"
+
+          # Canonical writers are serialized, but the latency-critical live-settlement lane
+          # may still advance main between fetch and push. Rebase only over non-overlapping
+          # live artifacts and retry the narrow non-fast-forward window without re-running
+          # provider work.
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            if ! git rebase refs/remotes/origin/main; then
+              echo "Super League 2 ownership conflict detected during rebase."
+              git rebase --abort || true
+              exit 1
+            fi
+
+            # Rebuild the deterministic manifest after every rebase so it describes the
+            # exact canonical tree being proposed for publication.
             python scripts/build_statmaker_update_manifest.py \
               --profile main \
               --branch main \
@@ -89,5 +104,18 @@ jobs:
             if ! git diff --cached --quiet; then
               git commit -m "Rebuild main manifest after producer rebase"
             fi
-            git push origin HEAD:main
-          fi
+
+            if git push origin HEAD:main; then
+              echo "G2_PUBLISH_OK attempt=${attempt}"
+              published=true
+              break
+            fi
+
+            echo "G2 push attempt ${attempt} lost a remote race; retrying without provider calls."
+            sleep $((attempt * 2))
+          done
+
+          [[ "$published" == "true" ]] || {
+            echo "Could not publish Super League 2 artifacts after 5 retries." >&2
+            exit 1
+          }
