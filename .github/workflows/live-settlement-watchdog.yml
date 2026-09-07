@@ -1,0 +1,118 @@
+name: Live Settlement Watchdog
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Independent, off-boundary watchdog. It does not call providers itself; it only
+    # dispatches the existing live publisher when that workflow has gone stale.
+    - cron: "7,17,27,37,47,57 * * * *"
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: statmaker-live-settlement-watchdog
+  cancel-in-progress: true
+
+jobs:
+  ensure-fresh-live-settlement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch live settlement only when stale
+        env:
+          GH_TOKEN: ${{ github.token }}
+          API_URL: ${{ github.api_url }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import os
+          import urllib.request
+
+          api = os.environ["API_URL"].rstrip("/")
+          repo = os.environ["REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+              "User-Agent": "statmaker-live-settlement-watchdog",
+          }
+
+          runs_url = (
+              f"{api}/repos/{repo}/actions/workflows/"
+              "live-settlement-publisher.yml/runs?branch=main&per_page=1"
+          )
+          req = urllib.request.Request(runs_url, headers=headers)
+          with urllib.request.urlopen(req, timeout=30) as response:
+              payload = json.load(response)
+
+          runs = payload.get("workflow_runs") or []
+          now = dt.datetime.now(dt.timezone.utc)
+          dispatch = False
+          reason = ""
+
+          if not runs:
+              dispatch = True
+              reason = "no_previous_run"
+          else:
+              latest = runs[0]
+              status = str(latest.get("status") or "")
+              conclusion = str(latest.get("conclusion") or "")
+              created_text = str(latest.get("created_at") or "")
+              try:
+                  created = dt.datetime.fromisoformat(created_text.replace("Z", "+00:00"))
+              except ValueError:
+                  created = now - dt.timedelta(days=1)
+              age_minutes = max(0.0, (now - created).total_seconds() / 60.0)
+
+              print(
+                  "LIVE_SETTLEMENT_WATCHDOG",
+                  f"run_id={latest.get('id')}",
+                  f"status={status}",
+                  f"conclusion={conclusion}",
+                  f"age_minutes={age_minutes:.1f}",
+              )
+
+              if status in {"queued", "in_progress", "waiting", "requested", "pending"}:
+                  dispatch = False
+                  reason = "publisher_already_active"
+              elif conclusion != "success":
+                  dispatch = True
+                  reason = f"latest_{conclusion or 'unknown'}"
+              elif age_minutes > 22.0:
+                  dispatch = True
+                  reason = f"stale_{age_minutes:.1f}m"
+              else:
+                  dispatch = False
+                  reason = "fresh"
+
+          if not dispatch:
+              print("LIVE_SETTLEMENT_WATCHDOG_OK", reason)
+              raise SystemExit(0)
+
+          body = json.dumps({
+              "ref": "main",
+              "inputs": {"max_requests": "80"},
+          }).encode("utf-8")
+          dispatch_url = (
+              f"{api}/repos/{repo}/actions/workflows/"
+              "live-settlement-publisher.yml/dispatches"
+          )
+          req = urllib.request.Request(
+              dispatch_url,
+              data=body,
+              headers={**headers, "Content-Type": "application/json"},
+              method="POST",
+          )
+          with urllib.request.urlopen(req, timeout=30) as response:
+              if response.status not in (200, 201, 204):
+                  raise SystemExit(f"Unexpected dispatch status: {response.status}")
+
+          print("LIVE_SETTLEMENT_WATCHDOG_DISPATCHED", reason)
+          PY
