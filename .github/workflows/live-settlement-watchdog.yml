@@ -2,6 +2,13 @@ name: Live Settlement Watchdog
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      # A watchdog code change is safe to execute immediately because this workflow
+      # never calls the football provider itself; it only dispatches when freshness is stale.
+      - '.github/workflows/live-settlement-watchdog.yml'
   schedule:
     # Independent, off-boundary watchdog. It does not call providers itself; it only
     # dispatches the existing live publisher when that workflow has gone stale.
@@ -80,8 +87,15 @@ jobs:
               )
 
               if status in {"queued", "in_progress", "waiting", "requested", "pending"}:
-                  dispatch = False
-                  reason = "publisher_already_active"
+                  if age_minutes > 22.0:
+                      # The publisher itself has an 8-minute timeout. An active run older than
+                      # 22 minutes is stale; dispatching a fresh run will replace it through the
+                      # publisher's cancel-in-progress concurrency contract.
+                      dispatch = True
+                      reason = f"stale_active_{age_minutes:.1f}m"
+                  else:
+                      dispatch = False
+                      reason = "publisher_already_active"
               elif conclusion != "success":
                   dispatch = True
                   reason = f"latest_{conclusion or 'unknown'}"
