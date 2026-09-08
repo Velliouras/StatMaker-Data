@@ -25,6 +25,16 @@ ARCHIVE_PATH = ROOT / "odds" / "odds_api_io" / "domestic_provider_markets.json"
 REPORT_PATH = ROOT / "reports" / "domestic_corner_archive_rebuild.json"
 CORNER_MARKETS = {"MATCH_CORNERS", "TEAM_CORNERS"}
 
+# Canonical FT corner totals have one exact provider identity. Everything else is
+# a different product (alternative ladder, range/band total, race, period, spread,
+# handicap, player, first/last corner, etc.) and must fail closed instead of being
+# inferred from a name that merely contains the word "corner".
+SUPPORTED_FULL_TIME_CORNER_MARKETS = {
+    "corners totals",
+    "corners totals home",
+    "corners totals away",
+}
+
 
 def read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8-sig"))
@@ -40,34 +50,36 @@ def normalized_text(value: Any) -> str:
 
 
 def is_supported_full_time_corner_market(raw_name: str) -> bool:
-    """Return True only when the raw provider name can safely represent FT corners.
+    """Accept only the provider's exact FT binary corner-total market names."""
 
-    The base Odds-API.io parser intentionally has broad family detection. That is
-    useful for discovery, but canonical publishing must be stricter because the
-    canonical row no longer retains the provider period/scope. Any explicit
-    non-full-time or specialty scope therefore fails closed here.
+    return normalized_text(raw_name) in SUPPORTED_FULL_TIME_CORNER_MARKETS
+
+
+def explicit_corner_ou_rows(market: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Return only structured binary O/U rows with an explicit provider line.
+
+    Canonical lines must originate from the provider's structured ``hdp`` field.
+    We deliberately do not parse a number from a label: categorical markets such
+    as ``Total Corners`` (Under 6 / 6-8 / 9-11 / Over 14) are not binary totals and
+    must never become MATCH_CORNERS. A complete over+under pair is required so a
+    specialty one-sided row cannot leak into the betting feed either.
     """
 
-    name = normalized_text(raw_name)
-    if "corner" not in name:
-        return False
-    padded = f" {name} "
-    excluded = (
-        " half",
-        " ht ",
-        " 1h ",
-        " 2h ",
-        " 1st ",
-        " 2nd ",
-        " period",
-        " race",
-        " spread",
-        " handicap",
-        " player",
-        " first corner",
-        " last corner",
-    )
-    return not any(token in padded for token in excluded)
+    rows = market.get("odds")
+    if not isinstance(rows, list):
+        return []
+
+    clean: List[Dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        line = base.line_float(row.get("hdp"))
+        over = base.to_float(row.get("over"))
+        under = base.to_float(row.get("under"))
+        if line is None or over is None or under is None:
+            continue
+        clean.append(dict(row))
+    return clean
 
 
 def archive_key(league_code: str, match: Dict[str, Any]) -> Tuple[str, str, str, str]:
@@ -114,8 +126,15 @@ def normalize_archived_corners(match: Dict[str, Any]) -> List[Dict[str, Any]]:
         raw_name = base.raw_market_name(market)
         if not is_supported_full_time_corner_market(raw_name):
             continue
+
+        clean_rows = explicit_corner_ou_rows(market)
+        if not clean_rows:
+            continue
+        clean_market = dict(market)
+        clean_market["odds"] = clean_rows
+
         normalized = push_aware._normalize_market_with_integer_corners(
-            market,
+            clean_market,
             bookmaker,
             home,
             away,
@@ -239,7 +258,7 @@ def rebuild_feed_corners(
 
     summary = {
         "source": "exact archived Odds-API.io provider payloads",
-        "policy": "replace canonical corners from raw-name-verified full-time provider markets; fail closed without provenance",
+        "policy": "allowlist exact FT Corners Totals/Home/Away plus structured hdp+over+under pairs; fail closed otherwise",
         "syntheticOdds": False,
         "archiveMatchesScanned": archive_matches_scanned,
         "canonicalFixturesChecked": canonical_fixtures_checked,
