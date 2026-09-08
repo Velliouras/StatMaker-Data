@@ -1,15 +1,15 @@
 {
   "source": "exact archived Odds-API.io provider payloads",
-  "policy": "replace canonical corners from raw-name-verified full-time provider markets; fail closed without provenance",
+  "policy": "allowlist exact FT Corners Totals/Home/Away plus structured hdp+over+under pairs; fail closed otherwise",
   "syntheticOdds": false,
   "fixturesChecked": 415,
-  "fixturesWithProviderArchive": 257,
-  "fixturesMissingProviderArchive": 158,
-  "fixturesRebuilt": 236,
-  "fixturesClearedWithoutFullTimeCornerMarket": 0,
-  "removedCanonicalCornerRows": 8399,
-  "rebuiltFullTimeCornerRows": 7693,
-  "totalCanonicalCornerRows": 7693,
+  "fixturesWithProviderArchive": 256,
+  "fixturesMissingProviderArchive": 159,
+  "fixturesRebuilt": 237,
+  "fixturesClearedWithoutFullTimeCornerMarket": 1,
+  "removedCanonicalCornerRows": 6386,
+  "rebuiltFullTimeCornerRows": 5670,
+  "totalCanonicalCornerRows": 5670,
   "examples": [
     {
       "leagueCode": "CHL",
@@ -18,15 +18,6 @@
       "removedCanonicalCorners": [
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
           "odds": 2.1,
           "bookmaker": "Bet365",
@@ -54,277 +45,16 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.02,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 5",
-          "odds": 1.04,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 5.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 6",
-          "odds": 1.111,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 6.0
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.7,
+          "selection": "Corners Over 9.5",
+          "odds": 1.68,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 11.5
+          "line": 9.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.02,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 5",
-          "odds": 1.04,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 5.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 6",
-          "odds": 1.111,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 6.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 7",
-          "odds": 1.222,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 7.0
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "Blackburn - Sheffield Utd",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 1.83,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.28,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.75,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 4.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.28,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.75,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 4.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 23.5
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "Cardiff - Stoke City",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
+          "selection": "Corners Under 10.5",
           "odds": 1.61,
           "bookmaker": "Unibet",
           "confidence": "high",
@@ -333,304 +63,7 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11",
-          "odds": 1.85,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 1.92,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.38,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 5.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 3.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 1.61,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.38,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 5.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 3.9,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 15.5",
-          "odds": 5.1,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 15.5
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "Watford - Preston",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.85,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 1.84,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.3,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.95,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.8,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 5.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.3,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.95,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.8,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14.5",
-          "odds": 5.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.833,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 23.5
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "West Ham - Wrexham",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
+          "selection": "Corners Under 10.5",
           "odds": 1.666,
           "bookmaker": "Bet365",
           "confidence": "high",
@@ -639,26 +72,8 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 1.84,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11",
-          "odds": 1.925,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.28,
+          "selection": "Corners Under 11.5",
+          "odds": 1.37,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -666,64 +81,28 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.85,
+          "selection": "Corners Under 9.5",
+          "odds": 1.98,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.65,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 5.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 27.5",
-          "odds": 1.833,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 27.5
+          "line": 9.5
         }
       ],
       "rebuiltFullTimeCorners": [
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
-          "odds": 1.84,
-          "bookmaker": "Unibet",
+          "odds": 2.1,
+          "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
           "line": 10.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.0
-        },
-        {
-          "market": "MATCH_CORNERS",
           "selection": "Corners Over 11.5",
-          "odds": 2.28,
+          "odds": 2.7,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -731,78 +110,71 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 2.85,
+          "selection": "Corners Over 9.5",
+          "odds": 1.68,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 12.5
+          "line": 9.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 3.65,
+          "selection": "Corners Under 10.5",
+          "odds": 1.666,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 11.5",
+          "odds": 1.37,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 13.5
+          "line": 11.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 5.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Under 9.5",
+          "odds": 1.98,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 9.5
         },
         {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 27.5",
-          "odds": 1.833,
+          "market": "TEAM_CORNERS",
+          "selection": "Huachipato Corners Over 3.5",
+          "odds": 1.666,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 27.5
+          "line": 3.5,
+          "team": "Huachipato"
         },
         {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.01,
-          "bookmaker": "Bet365",
+          "market": "TEAM_CORNERS",
+          "selection": "Huachipato Corners Over 4.5",
+          "odds": 2.12,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 4.0
+          "line": 4.5,
+          "team": "Huachipato"
         }
       ]
     },
     {
       "leagueCode": "E1",
-      "fixture": "Derby - Birmingham",
+      "fixture": "Southampton - Swansea",
       "providerArchivePresent": true,
       "removedCanonicalCorners": [
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.2,
+          "odds": 2.05,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -811,7 +183,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 11.5",
-          "odds": 2.8,
+          "odds": 2.6,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -820,7 +192,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 12.5",
-          "odds": 3.7,
+          "odds": 3.35,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -829,7 +201,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 13.5",
-          "odds": 5.0,
+          "odds": 4.4,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -837,37 +209,46 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 6.5",
+          "odds": 1.11,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 7.5",
+          "odds": 1.23,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 23.5
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.67,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
         }
       ],
       "rebuiltFullTimeCorners": [
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
-          "odds": 2.2,
+          "odds": 2.05,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -876,7 +257,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 11.5",
-          "odds": 2.8,
+          "odds": 2.6,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -885,7 +266,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 12.5",
-          "odds": 3.7,
+          "odds": 3.35,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -894,7 +275,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 13.5",
-          "odds": 5.0,
+          "odds": 4.4,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -902,30 +283,192 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 6.5",
+          "odds": 1.11,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
+          "selection": "Corners Over 7.5",
+          "odds": 1.23,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.833,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        }
+      ]
+    },
+    {
+      "leagueCode": "E1",
+      "fixture": "Blackburn - Millwall",
+      "providerArchivePresent": true,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
           "odds": 1.8,
-          "bookmaker": "Bet365",
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 23.5
+          "line": 10.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.015,
+          "selection": "Corners Over 10.5",
+          "odds": 1.85,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 4.0
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.23,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 2.85,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 3.7,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 6.5",
+          "odds": 1.08,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 6.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.17,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.3,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        }
+      ],
+      "rebuiltFullTimeCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 1.85,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.23,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 2.85,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 3.7,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 6.5",
+          "odds": 1.08,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 6.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.17,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.3,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.5,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
         }
       ]
     },
@@ -936,15 +479,6 @@
       "removedCanonicalCorners": [
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.909,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
           "odds": 1.909,
           "bookmaker": "Bet365",
@@ -990,33 +524,33 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 6.5",
+          "odds": 1.11,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.727,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 7.5",
+          "odds": 1.23,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 23.5
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.41,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
         }
       ],
       "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.909,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 10.5",
@@ -1055,336 +589,39 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 7.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.727,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 23.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.015,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "Swansea - Burnley",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.15,
+          "selection": "Corners Over 6.5",
+          "odds": 1.11,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 10.5
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.75,
+          "selection": "Corners Over 7.5",
+          "odds": 1.23,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 11.5
+          "line": 7.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 3.6,
+          "selection": "Corners Over 8.5",
+          "odds": 1.41,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 12.5
+          "line": 8.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 4.7,
+          "selection": "Corners Over 9.5",
+          "odds": 1.67,
           "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 13.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 17.5",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 17.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 3",
-          "odds": 1.01,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 3.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.04,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.15,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.75,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 3.6,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 4.7,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 13.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 17.5",
-          "odds": 1.8,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 17.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 3",
-          "odds": 1.01,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 3.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.04,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
-        }
-      ]
-    },
-    {
-      "leagueCode": "E1",
-      "fixture": "Watford - Stoke City",
-      "providerArchivePresent": true,
-      "removedCanonicalCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 1.875,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.23,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.85,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 3.8,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 5.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.833,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 23.5
-        }
-      ],
-      "rebuiltFullTimeCorners": [
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10",
-          "odds": 2.1,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 10.5",
-          "odds": 2.23,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 10.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 11.5",
-          "odds": 2.85,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 11.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 12.5",
-          "odds": 3.8,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 12.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 13.5",
-          "odds": 5.0,
-          "bookmaker": "Unibet",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 13.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 8.0,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 14.0
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 23.5",
-          "odds": 1.833,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 23.5
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.02,
-          "bookmaker": "Bet365",
-          "confidence": "high",
-          "exactBookmakerOdds": true,
-          "line": 4.0
+          "line": 9.5
         }
       ]
     },
@@ -1396,7 +633,7 @@
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 10",
-          "odds": 2.2,
+          "odds": 2.025,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -1440,37 +677,37 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 9.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 6.5",
+          "odds": 1.13,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 20.5",
-          "odds": 1.833,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 7.5",
+          "odds": 1.26,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 20.5
+          "line": 7.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.02,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 8.5",
+          "odds": 1.46,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 4.0
+          "line": 8.5
         }
       ],
       "rebuiltFullTimeCorners": [
         {
           "market": "MATCH_CORNERS",
           "selection": "Corners Over 10",
-          "odds": 2.2,
+          "odds": 2.025,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
@@ -1514,30 +751,724 @@
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 14",
-          "odds": 9.0,
-          "bookmaker": "Bet365",
+          "selection": "Corners Over 6.5",
+          "odds": 1.13,
+          "bookmaker": "Unibet",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 14.0
+          "line": 6.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 20.5",
+          "selection": "Corners Over 7.5",
+          "odds": 1.26,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.46,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        }
+      ]
+    },
+    {
+      "leagueCode": "E2",
+      "fixture": "Stevenage - Luton",
+      "providerArchivePresent": true,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 2.7,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 3.55,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 4.8,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.41,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.68,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.9,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 2.1,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.38,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        }
+      ],
+      "rebuiltFullTimeCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 2.7,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 3.55,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 4.8,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.41,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.9,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 2.1,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.38,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 11.5",
+          "odds": 1.24,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        }
+      ]
+    },
+    {
+      "leagueCode": "E2",
+      "fixture": "Milton Keynes Dons - Peterborough",
+      "providerArchivePresent": true,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 1.96,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.48,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 3.2,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 4.2,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.37,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.61,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.666,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.73,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        }
+      ],
+      "rebuiltFullTimeCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 1.96,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.48,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 3.2,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 4.2,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.37,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.666,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.73,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 11.5",
+          "odds": 1.46,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        }
+      ]
+    },
+    {
+      "leagueCode": "ECU",
+      "fixture": "Mushuc Runa SC - Leones del Norte",
+      "providerArchivePresent": false,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 21.5",
           "odds": 1.833,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 20.5
+          "line": 21.5
         },
         {
           "market": "MATCH_CORNERS",
-          "selection": "Corners Over 4",
-          "odds": 1.02,
+          "selection": "Corners Over 4.5",
+          "odds": 1.875,
           "bookmaker": "Bet365",
           "confidence": "high",
           "exactBookmakerOdds": true,
-          "line": 4.0
+          "line": 4.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 1.727,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 21.5",
+          "odds": 1.833,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 21.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 4.5",
+          "odds": 1.925,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 4.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 9.5",
+          "odds": 2.0,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "TEAM_CORNERS",
+          "selection": "Leones del Norte Over 3.5",
+          "odds": 1.8,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 3.5,
+          "team": "Leones del Norte"
+        },
+        {
+          "market": "TEAM_CORNERS",
+          "selection": "Leones del Norte Under 3.5",
+          "odds": 1.909,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 3.5,
+          "team": "Leones del Norte"
+        }
+      ],
+      "rebuiltFullTimeCorners": []
+    },
+    {
+      "leagueCode": "KOR",
+      "fixture": "Incheon United - Bucheon FC 1995",
+      "providerArchivePresent": true,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 3.05,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 4.1,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.5,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.8,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.83,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 2.33,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.3,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 11.5",
+          "odds": 1.18,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        }
+      ],
+      "rebuiltFullTimeCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 3.05,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 4.1,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.5,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.83,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 9.5",
+          "odds": 2.33,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 9.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 10.5",
+          "odds": 1.3,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 11.5",
+          "odds": 1.18,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Under 7.5",
+          "odds": 2.38,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        }
+      ]
+    },
+    {
+      "leagueCode": "SAU",
+      "fixture": "Al-Qadisiyah FC - Al-Ahli Jeddah",
+      "providerArchivePresent": true,
+      "removedCanonicalCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10",
+          "odds": 1.975,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.0
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 2.06,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.6,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 3.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 4.5,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 6.5",
+          "odds": 1.09,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 6.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.21,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
+        }
+      ],
+      "rebuiltFullTimeCorners": [
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10",
+          "odds": 1.975,
+          "bookmaker": "Bet365",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.0
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 10.5",
+          "odds": 2.06,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 10.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 11.5",
+          "odds": 2.6,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 11.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 12.5",
+          "odds": 3.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 12.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 13.5",
+          "odds": 4.5,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 13.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 6.5",
+          "odds": 1.09,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 6.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 7.5",
+          "odds": 1.21,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 7.5
+        },
+        {
+          "market": "MATCH_CORNERS",
+          "selection": "Corners Over 8.5",
+          "odds": 1.4,
+          "bookmaker": "Unibet",
+          "confidence": "high",
+          "exactBookmakerOdds": true,
+          "line": 8.5
         }
       ]
     }
