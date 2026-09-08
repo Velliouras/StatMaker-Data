@@ -20,6 +20,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import domestic_live_july_pipeline as domestic_pipeline
 import domestic_odds_expansion
 import update_domestic_odds_api_io as odds
+import update_domestic_odds_api_io_push_aware as market_contract
 
 domestic_odds_expansion.install(odds, domestic_pipeline)
 
@@ -150,7 +151,7 @@ def normalize_event(
                     debug,
                 )
             )
-    markets = odds.dedupe_markets(markets)
+    markets = market_contract._explicit_team_market_labels(odds.dedupe_markets(markets))
     if not markets:
         return None
 
