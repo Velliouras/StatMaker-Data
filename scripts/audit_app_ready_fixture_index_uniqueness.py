@@ -13,7 +13,7 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import refresh_live_settlements as settlement
 
@@ -22,11 +22,11 @@ def _norm(value: Any) -> str:
     return settlement.normalize_team(value)
 
 
-def _identity_keys(canonical: str, app_name: str, provider_name: str) -> List[str]:
-    # Prefer the canonical name when present, but also retain exact normalized app/provider names
-    # as defensive aliases so an inconsistent canonical field cannot hide an obvious collision.
-    values = [canonical, app_name, provider_name]
-    return list(dict.fromkeys(key for key in map(_norm, values) if key))
+def _identity_key(canonical: str, app_name: str) -> str:
+    # Cross-league uniqueness must be based on the canonical/app identity only. Provider aliases
+    # such as "SK Rapid" are intentionally NOT used globally because they can collapse unrelated
+    # clubs (e.g. Rapid Vienna vs Rapid Bucuresti) after decoration removal.
+    return _norm(canonical or app_name)
 
 
 def _extract_db(bundle: Path, root: Path) -> Path:
@@ -106,23 +106,25 @@ def _inspect(bundle: Path) -> Tuple[int, List[Dict[str, Any]]]:
         date = fixture["localDate"]
         sides = (
             (
-                fixture["canonicalHomeTeam"], fixture["homeTeam"], fixture["providerHomeTeam"],
-                fixture["canonicalAwayTeam"], fixture["awayTeam"], fixture["providerAwayTeam"],
+                fixture["canonicalHomeTeam"], fixture["homeTeam"],
+                fixture["canonicalAwayTeam"], fixture["awayTeam"],
             ),
             (
-                fixture["canonicalAwayTeam"], fixture["awayTeam"], fixture["providerAwayTeam"],
-                fixture["canonicalHomeTeam"], fixture["homeTeam"], fixture["providerHomeTeam"],
+                fixture["canonicalAwayTeam"], fixture["awayTeam"],
+                fixture["canonicalHomeTeam"], fixture["homeTeam"],
             ),
         )
-        for canonical, app_name, provider, opp_canonical, opp_app, opp_provider in sides:
-            opponent_key = _norm(opp_canonical or opp_app or opp_provider)
+        for canonical, app_name, opp_canonical, opp_app in sides:
+            team_key = _identity_key(canonical, app_name)
+            opponent_key = _identity_key(opp_canonical, opp_app)
+            if not team_key or not opponent_key:
+                continue
             signature = (
                 fixture["competitionId"],
                 fixture["matchKey"],
                 opponent_key,
             )
-            for team_key in _identity_keys(canonical, app_name, provider):
-                by_team_day[(date, team_key)][signature] = fixture
+            by_team_day[(date, team_key)][signature] = fixture
 
     conflicts: List[Dict[str, Any]] = []
     seen_conflicts = set()
