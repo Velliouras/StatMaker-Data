@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Close past canonical settlement gaps by exact API-Football fixture id.
+"""Reconcile canonical settlements by exact API-Football fixture identity.
 
-The normal live publisher remains date-driven for cheap same-day coverage. This bounded second stage
-handles only past canonical recommendations that still have an authoritative apiFixtureId but are
-missing from the rolling settlement cache. It never guesses by team name when an exact id exists.
+The canonical recommendation ledger is the authoritative recommendation identity. This stage runs
+before the broader date-driven settlement collector and fetches only canonical rows that have an
+exact API-Football fixture id. It covers both today's finished matches and past gaps, never guesses
+by team name, and fails closed when the provider fixture identity disagrees with the canonical row.
 """
 from __future__ import annotations
 
@@ -47,7 +48,7 @@ def _names(item: Dict[str, Any], list_key: str, fallback_key: str) -> Tuple[str,
 
 def ledger_requirements(today: dt.date) -> List[live.SettlementRequirement]:
     root = live.load_json(LEDGER_PATH, {})
-    if not isinstance(root, dict) or int(root.get("schemaVersion") or 0) < 2:
+    if not isinstance(root, dict) or int(root.get("schemaVersion") or 0) < 4:
         return []
     cutoff = today - dt.timedelta(days=live.RETENTION_DAYS)
     result: List[live.SettlementRequirement] = []
@@ -59,8 +60,9 @@ def ledger_requirements(today: dt.date) -> List[live.SettlementRequirement]:
             day = dt.date.fromisoformat(day_text)
         except ValueError:
             continue
-        # Same-day coverage stays with the cheap date poll. This stage is strictly for past gaps.
-        if day < cutoff or day >= today:
+        # Exact-id reconciliation is authoritative for both same-day and past canonical rows.
+        # Future fixtures are not settlement candidates.
+        if day < cutoff or day > today:
             continue
         fixture_id = live.as_int(item.get("apiFixtureId"))
         if fixture_id is None:
@@ -141,8 +143,55 @@ def _chunks(values: Sequence[int], size: int) -> List[List[int]]:
     return [list(values[index:index + size]) for index in range(0, len(values), size)]
 
 
+def _league_compatible(left: str, right: str) -> bool:
+    a = str(left or "").strip().upper()
+    b = str(right or "").strip().upper()
+    if not a or not b or a == b:
+        return True
+    return {a, b} <= {"CONF", "UECL"}
+
+
+def _provider_fixture_matches(
+    fixture: Dict[str, Any],
+    registry_row: Dict[str, Any],
+    requirement: live.SettlementRequirement,
+) -> bool:
+    fixture_id = stats_fetch.fixture_identity(fixture)
+    if requirement.api_fixture_id is None or fixture_id != requirement.api_fixture_id:
+        return False
+    summary = stats_fetch.fixture_summary(fixture)
+    home = str(summary.get("home_team") or "").strip()
+    away = str(summary.get("away_team") or "").strip()
+    provider_league = str(registry_row.get("leagueCode") or "").strip().upper()
+    if not _league_compatible(requirement.league_code, provider_league):
+        return False
+    return live.team_matches(home, requirement.home_names) and live.team_matches(away, requirement.away_names)
+
+
+def _cached_row_satisfies(
+    row: Dict[str, Any],
+    requirements: Sequence[live.SettlementRequirement],
+) -> bool:
+    if str(row.get("status") or "").upper() not in live.COMPLETED:
+        return False
+    if row.get("homeGoals") is None or row.get("awayGoals") is None:
+        return False
+    home = str(row.get("homeTeam") or "").strip()
+    away = str(row.get("awayTeam") or "").strip()
+    league = str(row.get("leagueCode") or "").strip().upper()
+    for requirement in requirements:
+        if not _league_compatible(requirement.league_code, league):
+            return False
+        if not live.team_matches(home, requirement.home_names):
+            return False
+        if not live.team_matches(away, requirement.away_names):
+            return False
+    required_kinds = {r.required_kind for r in requirements if r.required_kind in live.REQUIRED_FIELDS}
+    return not live.missing_required_kinds(row.get("normalizedStats"), required_kinds)
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Close past canonical settlement gaps by exact fixture id")
+    parser = argparse.ArgumentParser(description="Reconcile canonical settlements by exact fixture id")
     parser.add_argument("--max-requests", type=int, default=8)
     args = parser.parse_args()
     max_requests = max(0, args.max_requests)
@@ -160,14 +209,30 @@ def main() -> int:
     by_id: Dict[int, List[live.SettlementRequirement]] = {}
     for row in requirements:
         fixture_id = row.api_fixture_id
-        if fixture_id is None or fixture_id in cache or _requirement_key(row) in disposed:
+        if fixture_id is None or _requirement_key(row) in disposed:
             continue
         by_id.setdefault(fixture_id, []).append(row)
 
-    if not by_id or max_requests == 0:
+    # Do not spend provider quota on an exact fixture already cached as completed with the same
+    # canonical home/away identity and all required detailed statistics present.
+    pending_by_id: Dict[int, List[live.SettlementRequirement]] = {}
+    cache_identity_rejected = 0
+    for fixture_id, rows in by_id.items():
+        cached = cache.get(fixture_id)
+        if cached is not None and _cached_row_satisfies(cached, rows):
+            continue
+        if cached is not None:
+            # A cache entry with the right numeric id but incompatible canonical identity must never
+            # survive as a settlement source. Re-fetch that exact id and replace only after verify.
+            cache.pop(fixture_id, None)
+            cache_identity_rejected += 1
+        pending_by_id[fixture_id] = rows
+
+    if not pending_by_id or max_requests == 0:
         print(
-            "canonical-settlement-gap "
-            f"pastExact={len(requirements)} unresolvedExact={len(by_id)} requests=0 captured=0 statsRequests=0"
+            "canonical-settlement-exact "
+            f"canonicalExact={len(requirements)} pendingExact={len(pending_by_id)} requests=0 "
+            f"captured=0 identityRejected={cache_identity_rejected} statsRequests=0"
         )
         return 0
 
@@ -184,12 +249,17 @@ def main() -> int:
         if provider_id is not None:
             rows_by_provider.setdefault(provider_id, []).append(row)
 
-    ordered_ids = sorted(by_id, key=lambda fixture_id: (min(row.local_date for row in by_id[fixture_id]), fixture_id))
+    # Oldest unresolved day first, then fixture id. A single API call can verify up to 20 exact ids.
+    ordered_ids = sorted(
+        pending_by_id,
+        key=lambda fixture_id: (min(row.local_date for row in pending_by_id[fixture_id]), fixture_id),
+    )
     request_state = {"count": 0}
     captured = 0
     stats_requests = 0
     nonfinal = 0
     missing_provider = 0
+    provider_identity_rejected = 0
 
     for id_chunk in _chunks(ordered_ids, MAX_IDS_PER_REQUEST):
         if request_state["count"] >= max_requests:
@@ -199,7 +269,7 @@ def main() -> int:
         except stats_fetch.RequestLimitReached:
             break
         except Exception as error:
-            print(f"canonical-settlement-gap ids fetch failed: {error}", file=os.sys.stderr)
+            print(f"canonical-settlement-exact ids fetch failed: {error}", file=os.sys.stderr)
             continue
         fixture_by_id = {
             stats_fetch.fixture_identity(fixture): fixture
@@ -214,11 +284,30 @@ def main() -> int:
             if stats_fetch.fixture_status_short(fixture).upper() not in live.COMPLETED:
                 nonfinal += 1
                 continue
-            matched = by_id.get(fixture_id, [])
             registry_row = live.choose_registry_row(fixture, rows_by_provider)
-            if registry_row is None or not matched:
+            candidate_requirements = pending_by_id.get(fixture_id, [])
+            if registry_row is None or not candidate_requirements:
                 continue
-            row = live.settlement_row(fixture, registry_row, cache.get(fixture_id, {}), matched)
+
+            # Exact numeric id is necessary but not sufficient. The provider's home/away and league
+            # must agree with every canonical row attached to that id; otherwise fail closed.
+            if not all(
+                _provider_fixture_matches(fixture, registry_row, requirement)
+                for requirement in candidate_requirements
+            ):
+                provider_identity_rejected += 1
+                summary = stats_fetch.fixture_summary(fixture)
+                print(
+                    "canonical-settlement-exact IDENTITY_REJECTED "
+                    f"fixtureId={fixture_id} provider={summary.get('home_team')} vs {summary.get('away_team')} "
+                    f"canonical=" + ";".join(
+                        f"{r.home_names[0]} vs {r.away_names[0]}" for r in candidate_requirements
+                    ),
+                    file=os.sys.stderr,
+                )
+                continue
+
+            row = live.settlement_row(fixture, registry_row, cache.get(fixture_id, {}), candidate_requirements)
             if row.get("homeGoals") is None or row.get("awayGoals") is None:
                 continue
             if live.fetch_required_stats(api_key, fixture, row, request_state, max_requests):
@@ -256,10 +345,11 @@ def main() -> int:
     feed_changed = live.write_json_if_changed(live.FEED_PATH, feed_payload, "fixtures")
 
     print(
-        "canonical-settlement-gap "
-        f"pastExact={len(requirements)} unresolvedExact={len(by_id)} captured={captured} "
-        f"nonFinal={nonfinal} missingProvider={missing_provider} statsRequests={stats_requests} "
-        f"feedFixtures={len(feed_rows)} requests={request_state['count']} "
+        "canonical-settlement-exact "
+        f"canonicalExact={len(requirements)} pendingExact={len(pending_by_id)} captured={captured} "
+        f"nonFinal={nonfinal} missingProvider={missing_provider} "
+        f"identityRejected={cache_identity_rejected + provider_identity_rejected} "
+        f"statsRequests={stats_requests} feedFixtures={len(feed_rows)} requests={request_state['count']} "
         f"cacheChanged={cache_changed} feedChanged={feed_changed} quota={json.dumps(quota_guard.status())}"
     )
     return 0
