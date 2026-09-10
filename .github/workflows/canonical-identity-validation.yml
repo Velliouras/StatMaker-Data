@@ -10,10 +10,12 @@ on:
       - 'scripts/canonical_team_identity.py'
       - 'scripts/validate_domestic_cache_provider_identity.py'
       - 'scripts/domestic_odds_expansion.py'
+      - 'scripts/refresh_live_settlements.py'
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_rosters.json'
       - 'data/statmaker/domestic_enriched/**'
       - 'odds/odds_api_io/domestic_odds.json'
+      - 'data/statmaker/app_ready/**'
 
 permissions:
   contents: read
@@ -33,3 +35,17 @@ jobs:
 
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
+
+      - name: Validate settlement candidate identity from App-Ready bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, 'scripts')
+          import refresh_live_settlements as settlement
+          rows = settlement.canonical_requirements()
+          if not rows:
+              raise SystemExit('SETTLEMENT_REQUIREMENTS_EMPTY')
+          print('SETTLEMENT_CANDIDATE_IDENTITY_OK', f'requirements={len(rows)}')
+          PY
