@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-10T17:46:11Z",
+  "generated_at": "2026-09-10T22:42:53Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/league-one/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-10T08:06:33Z",
+    "cache_generated_at": "2026-09-10T22:41:37Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 59,
-    "fixtures_with_any_stats": 59,
-    "fixtures_with_bb_core_stats": 56,
+    "completed_fixtures": 60,
+    "fixtures_with_any_stats": 60,
+    "fixtures_with_bb_core_stats": 57,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9492,
+    "bb_core_coverage": 0.95,
     "group_counts": {
-      "shots_total": 59,
-      "shots_on_target": 59,
-      "corners": 59,
-      "fouls": 59,
-      "yellow_cards": 56,
-      "red_cards": 28,
-      "possession": 59,
-      "passes": 59,
+      "shots_total": 60,
+      "shots_on_target": 60,
+      "corners": 60,
+      "fouls": 60,
+      "yellow_cards": 57,
+      "red_cards": 29,
+      "possession": 60,
+      "passes": 60,
       "xg": 35
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9492,
-      "red_cards": 0.4746,
+      "yellow_cards": 0.95,
+      "red_cards": 0.4833,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.5932
+      "xg": 0.5833
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -5018,6 +5018,90 @@
         "fulltime": {
           "home": 0,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1564305,
+      "date_utc": "2026-09-10T19:00:00+00:00",
+      "country": "England",
+      "league": "League One",
+      "league_code": "E2",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 41,
+      "round": "Regular Season - 6",
+      "home_team": "Stevenage",
+      "away_team": "Luton",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 9,
+        "AS": 10,
+        "HST": 3,
+        "AST": 2,
+        "HC": 2,
+        "AC": 4,
+        "HF": 15,
+        "AF": 10,
+        "HY": 5,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 29,
+        "APossession": 71,
+        "HSaves": 1,
+        "ASaves": 1,
+        "HPasses": 257,
+        "APasses": 612,
+        "HPassesAccurate": 177,
+        "APassesAccurate": 526,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,
