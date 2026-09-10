@@ -61,6 +61,58 @@ jobs:
             scripts/materialize_canonical_recommendation_ledger.py \
             scripts/apply_fixture_disposition_overrides.py
 
+      - name: Validate settlement registry identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from pathlib import Path
+
+          path = Path('data/statmaker/domestic_live_july_registry.json')
+          root = json.loads(path.read_text(encoding='utf-8-sig'))
+          rows = [
+              row for row in root.get('leagues', [])
+              if isinstance(row, dict) and row.get('enabledForStats') is not False
+          ]
+          grouped = defaultdict(list)
+          for row in rows:
+              provider = row.get('api_football_league_id') or row.get('apiFootballLeagueId')
+              season = str(
+                  row.get('targetApiSeason')
+                  or row.get('historyApiSeason')
+                  or row.get('season')
+                  or ''
+              ).strip()
+              if provider is None:
+                  continue
+              grouped[(int(provider), season)].append(row)
+
+          ambiguous = []
+          for (provider, season), candidates in grouped.items():
+              if len(candidates) <= 1:
+                  continue
+              active = [
+                  row for row in candidates
+                  if str(row.get('lifecycle') or '').strip().lower() == 'active'
+              ]
+              if len(active) == 1:
+                  continue
+              ambiguous.append({
+                  'providerLeagueId': provider,
+                  'season': season,
+                  'leagueCodes': [str(row.get('leagueCode') or '') for row in candidates],
+                  'activeLeagueCodes': [str(row.get('leagueCode') or '') for row in active],
+              })
+
+          if ambiguous:
+              raise SystemExit(
+                  'SETTLEMENT_REGISTRY_IDENTITY_AMBIGUOUS ' + json.dumps(ambiguous[:20], ensure_ascii=False)
+              )
+          print('SETTLEMENT_REGISTRY_IDENTITY_OK', f'groups={len(grouped)}')
+          PY
+
       - name: Refresh completed fixtures and canonical fixture validity
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
