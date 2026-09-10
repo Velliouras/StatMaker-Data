@@ -4,9 +4,10 @@
 Input is the already-canonical compact catalog_payload stored by the existing prepared
 snapshot builder. No provider/API call and no raw odds JSON parse is performed here.
 
-The same host step also applies the repository fixture-validity ledger to canonical recommendation
-candidates. This is deliberately off-device: a postponed/cancelled/rescheduled fixture is made
-ineligible before the immutable App-Ready betting bundle is published.
+The same host step also applies the repository fixture-validity ledger and validates canonical
+recommendation candidate identity before the immutable App-Ready betting bundle is published.
+A postponed/cancelled/rescheduled fixture is made ineligible off-device, and any eligible candidate
+whose runtime fixture key no longer matches its exact prepared match payload fails publication.
 """
 
 from __future__ import annotations
@@ -56,6 +57,17 @@ def match_key(match: dict) -> str:
             str(match.get("date") or ""),
             str(match.get("homeTeam") or ""),
             str(match.get("awayTeam") or ""),
+        )
+    )
+
+
+def runtime_match_key(match: dict) -> str:
+    """Runtime recommendation identity; intentionally distinct from prepared_matches.match_key."""
+    return "|".join(
+        (
+            str(match.get("date") or "").strip(),
+            str(match.get("homeTeam") or "").strip(),
+            str(match.get("awayTeam") or "").strip(),
         )
     )
 
@@ -195,6 +207,118 @@ def apply_fixture_validity_gate(connection: sqlite3.Connection) -> int:
     return blocked
 
 
+def validate_candidate_fixture_identity(connection: sqlite3.Connection) -> int:
+    """Fail closed if an eligible runtime candidate points at a different prepared fixture payload.
+
+    prepared_selections.match_key and prepared_matches.match_key are the prepared identity domain.
+    prepared_pattern_candidates.match_key is the runtime identity domain and therefore must equal
+    date|homeTeam|awayTeam derived from the exact payload reached through the selection.
+    """
+    required_tables = {
+        "prepared_pattern_candidates",
+        "prepared_selections",
+        "prepared_matches",
+    }
+    tables = {
+        str(row[0])
+        for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
+    }
+    missing = sorted(required_tables - tables)
+    if missing:
+        raise SystemExit(
+            "Candidate identity gate requires prepared tables: " + ", ".join(missing)
+        )
+
+    eligible_count = int(
+        connection.execute(
+            "SELECT COUNT(*) FROM prepared_pattern_candidates WHERE recommendation_eligible=1"
+        ).fetchone()[0]
+    )
+    rows = connection.execute(
+        """
+        SELECT c.competition_id,
+               c.snapshot_version,
+               c.selection_key,
+               c.match_key,
+               c.local_date,
+               s.match_key,
+               m.payload
+        FROM prepared_pattern_candidates c
+        JOIN prepared_selections s
+          ON s.competition_id=c.competition_id
+         AND s.snapshot_version=c.snapshot_version
+         AND s.selection_key=c.selection_key
+        JOIN prepared_matches m
+          ON m.competition_id=s.competition_id
+         AND m.snapshot_version=s.snapshot_version
+         AND m.match_key=s.match_key
+        WHERE c.recommendation_eligible=1
+        """
+    ).fetchall()
+
+    if len(rows) != eligible_count:
+        raise SystemExit(
+            "Candidate identity gate join mismatch: "
+            f"eligible={eligible_count} joined={len(rows)}"
+        )
+
+    mismatches: list[str] = []
+    for (
+        competition_id,
+        snapshot_version,
+        selection_key,
+        candidate_match_key,
+        candidate_local_date,
+        prepared_match_key,
+        raw_payload,
+    ) in rows:
+        try:
+            payload = json.loads(str(raw_payload))
+        except (TypeError, json.JSONDecodeError) as exc:
+            mismatches.append(
+                f"{competition_id}:{selection_key}:invalid_payload={type(exc).__name__}"
+            )
+            continue
+        if not isinstance(payload, dict):
+            mismatches.append(f"{competition_id}:{selection_key}:payload_not_object")
+            continue
+
+        payload_date = str(payload.get("date") or "").strip()
+        payload_home = str(payload.get("homeTeam") or "").strip()
+        payload_away = str(payload.get("awayTeam") or "").strip()
+        expected_runtime_key = runtime_match_key(payload)
+        actual_runtime_key = str(candidate_match_key or "").strip()
+        actual_local_date = str(candidate_local_date or "").strip()[:10]
+        expected_local_date = payload_date[:10]
+
+        reason = ""
+        if not str(prepared_match_key or "").strip():
+            reason = "blank_prepared_match_key"
+        elif not payload_date or not payload_home or not payload_away:
+            reason = "incomplete_payload_identity"
+        elif actual_runtime_key != expected_runtime_key:
+            reason = "runtime_match_key_mismatch"
+        elif not actual_local_date or actual_local_date != expected_local_date:
+            reason = "local_date_mismatch"
+
+        if reason:
+            mismatches.append(
+                f"{competition_id}:{snapshot_version}:{selection_key}:{reason}:"
+                f"candidate={actual_runtime_key!r}:payload={expected_runtime_key!r}:"
+                f"candidate_date={actual_local_date!r}:payload_date={expected_local_date!r}"
+            )
+
+    if mismatches:
+        examples = " | ".join(mismatches[:10])
+        raise SystemExit(
+            "Refusing App-Ready publish: canonical candidate fixture identity drift: "
+            f"count={len(mismatches)} examples={examples}"
+        )
+
+    print("APP_READY_CANDIDATE_IDENTITY_OK", f"eligible={eligible_count}")
+    return eligible_count
+
+
 def materialize(prepared_db: Path) -> dict[str, int]:
     connection = sqlite3.connect(prepared_db)
     connection.execute("PRAGMA foreign_keys=OFF")
@@ -329,6 +453,7 @@ def materialize(prepared_db: Path) -> dict[str, int]:
                 )
 
         apply_fixture_validity_gate(connection)
+        validate_candidate_fixture_identity(connection)
         connection.commit()
     except Exception:
         connection.rollback()
