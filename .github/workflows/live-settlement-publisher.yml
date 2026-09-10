@@ -20,9 +20,9 @@ on:
       - 'scripts/apply_fixture_disposition_overrides.py'
       - 'data/statmaker/fixture_disposition_overrides.json'
   schedule:
-    # Settlement is latency-critical. Five-minute polling keeps the repository result feed
-    # comfortably inside the requested ten-minute post-FT target even with normal Actions delay.
-    - cron: "*/5 * * * *"
+    # Keep API-Football pressure bounded. The exact-id canonical reconciliation below remains
+    # authoritative, so completed recommendations settle correctly on the next 15-minute cycle.
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
@@ -72,14 +72,10 @@ jobs:
           total="${INPUT_MAX_REQUESTS:-80}"
           if ! [[ "$total" =~ ^[0-9]+$ ]] || (( total < 2 )); then total=80; fi
 
-          # Settlement now runs three times as often. Keep provider pressure approximately flat:
-          # scheduled runs spend only one request on fixture-validity; explicit/push runs retain
-          # the previous four-request validity budget. The global quota guard remains authoritative.
-          if [[ "${GITHUB_EVENT_NAME:-}" == "schedule" ]]; then
-            validity=1
-          else
-            validity=4
-          fi
+          # With the 15-minute cadence restored, keep the normal four-request fixture-validity
+          # allowance. The exact settlement pass remains first-class and the global quota guard
+          # still stops all provider work before the daily reserve is consumed.
+          validity=4
           if (( total <= validity + 2 )); then validity=$((total - 2)); fi
           if (( validity < 0 )); then validity=0; fi
 
@@ -87,7 +83,7 @@ jobs:
           # This stage is repository-only and consumes no provider quota.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
 
-          # Spend only what is needed on past canonical recommendations that have an authoritative
+          # Spend only what is needed on canonical recommendations that have an authoritative
           # API-Football fixture id but are absent from the rolling settlement cache. Unused capacity
           # is immediately returned to the normal date-driven live producer below.
           gap_cap=$((total - validity - 2))
@@ -110,7 +106,7 @@ jobs:
           python scripts/apply_fixture_disposition_overrides.py
 
           # The validity bridge can transiently touch the shared ledger in legacy-compatible form.
-          # Re-materialize once, without provider calls, so the published artifact is always v3 and
+          # Re-materialize once, without provider calls, so the published artifact is always v4 and
           # the identity integrity gate remains authoritative.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
 
