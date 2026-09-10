@@ -13,6 +13,7 @@ on:
       - 'scripts/refresh_live_settlements.py'
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_rosters.json'
+      - 'data/statmaker/domestic_live_july_registry.json'
       - 'data/statmaker/domestic_enriched/**'
       - 'odds/odds_api_io/domestic_odds.json'
       - 'data/statmaker/app_ready/**'
@@ -48,4 +49,44 @@ jobs:
           if not rows:
               raise SystemExit('SETTLEMENT_REQUIREMENTS_EMPTY')
           print('SETTLEMENT_CANDIDATE_IDENTITY_OK', f'requirements={len(rows)}')
+          PY
+
+      - name: Validate settlement registry identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from pathlib import Path
+
+          root = json.loads(Path('data/statmaker/domestic_live_july_registry.json').read_text(encoding='utf-8-sig'))
+          rows = [
+              row for row in root.get('leagues', [])
+              if isinstance(row, dict) and row.get('enabledForStats') is not False
+          ]
+          grouped = defaultdict(list)
+          for row in rows:
+              provider = row.get('api_football_league_id') or row.get('apiFootballLeagueId')
+              season = str(row.get('targetApiSeason') or row.get('historyApiSeason') or row.get('season') or '').strip()
+              if provider is not None:
+                  grouped[(int(provider), season)].append(row)
+
+          ambiguous = []
+          for (provider, season), candidates in grouped.items():
+              if len(candidates) <= 1:
+                  continue
+              active = [row for row in candidates if str(row.get('lifecycle') or '').strip().lower() == 'active']
+              if len(active) == 1:
+                  continue
+              ambiguous.append({
+                  'providerLeagueId': provider,
+                  'season': season,
+                  'leagueCodes': [str(row.get('leagueCode') or '') for row in candidates],
+                  'activeLeagueCodes': [str(row.get('leagueCode') or '') for row in active],
+              })
+
+          if ambiguous:
+              raise SystemExit('SETTLEMENT_REGISTRY_IDENTITY_AMBIGUOUS ' + json.dumps(ambiguous[:20], ensure_ascii=False))
+          print('SETTLEMENT_REGISTRY_IDENTITY_OK', f'groups={len(grouped)}')
           PY
