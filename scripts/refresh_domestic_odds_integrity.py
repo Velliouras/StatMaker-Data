@@ -8,6 +8,7 @@ import os
 import time
 from typing import Any, Callable, MutableMapping, Optional
 
+import canonical_team_identity
 import domestic_market_expansion_v18
 import refresh_domestic_live_july_odds as target
 import statmaker_domestic_scope as scope
@@ -380,11 +381,12 @@ def main() -> int:
     install_parser_guard(target.odds_fetch)
     scope.install_odds_registry_load_guard(target.pipeline)
 
-    # Install in the same order as target.main(), then add the cumulative v18
-    # Asian-family wrapper last. target.main() sees the installer guards and keeps
-    # this exact order.
+    # Install the existing market/league expansions first, then install the single
+    # canonical team-identity resolver last. This is the production identity boundary:
+    # no later wrapper may replace team matching with a different heuristic.
     target.domestic_odds_expansion.install(target.odds_fetch, target.pipeline)
     domestic_market_expansion_v18.install(target.odds_fetch, target.pipeline)
+    canonical_team_identity.install_domestic(target.odds_fetch, target.pipeline)
 
     # Fail closed on clearly stale imminent provider odds. This uses only timestamps
     # already present in the Odds-API.io payload and therefore consumes no extra API
