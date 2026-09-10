@@ -42,8 +42,7 @@ jobs:
                   return
               if old not in text:
                   raise SystemExit(f'PATCH_ANCHOR_MISSING {path}')
-              text = text.replace(old, new, 1)
-              p.write_text(text, encoding='utf-8')
+              p.write_text(text.replace(old, new, 1), encoding='utf-8')
 
           replace_once(
               'config/uefa_club_competitions.json',
@@ -54,12 +53,16 @@ jobs:
           replace_once(
               'scripts/refresh_live_settlements.py',
               'FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"\n',
-              'FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"\nUEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"\n',
+              'FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"\nUEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"\nCANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"\n',
           )
 
           old_team_matches = '''def team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:\n    provider = normalize_team(provider_name)\n    if not provider:\n        return False\n    for candidate in accepted_names:\n        key = normalize_team(candidate)\n        if not key:\n            continue\n        if provider == key:\n            return True\n        # Fail closed on fuzzy identity. Only harmless whole-token order differences are allowed.\n        p_tokens = provider.split()\n        c_tokens = key.split()\n        if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):\n            return True\n    return False\n'''
-          new_team_matches = '''_UEFA_EXACT_IDENTITY_CACHE: Optional[Dict[str, str]] = None\n\n\ndef _uefa_exact_identity_map() -> Dict[str, str]:\n    global _UEFA_EXACT_IDENTITY_CACHE\n    if _UEFA_EXACT_IDENTITY_CACHE is not None:\n        return _UEFA_EXACT_IDENTITY_CACHE\n\n    root = load_json(UEFA_CONFIG_PATH, {})\n    claims: Dict[str, str] = {}\n    for competition in root.get("competitions", []) if isinstance(root, dict) else []:\n        if not isinstance(competition, dict):\n            continue\n        for canonical in competition.get("canonicalTeams", []) or []:\n            canonical_key = normalize_team(canonical)\n            if not canonical_key:\n                continue\n            previous = claims.get(canonical_key)\n            if previous is not None and previous != canonical_key:\n                raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={canonical!r} owners={previous!r},{canonical_key!r}")\n            claims[canonical_key] = canonical_key\n        aliases = competition.get("aliases", {})\n        for alias, canonical in aliases.items() if isinstance(aliases, dict) else []:\n            alias_key = normalize_team(alias)\n            canonical_key = normalize_team(canonical)\n            if not alias_key or not canonical_key:\n                continue\n            previous = claims.get(alias_key)\n            if previous is not None and previous != canonical_key:\n                raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={alias!r} owners={previous!r},{canonical_key!r}")\n            claims[alias_key] = canonical_key\n    _UEFA_EXACT_IDENTITY_CACHE = claims\n    return claims\n\n\ndef team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:\n    provider = normalize_team(provider_name)\n    if not provider:\n        return False\n    exact_map = _uefa_exact_identity_map()\n    provider_canonical = exact_map.get(provider, provider)\n    for candidate in accepted_names:\n        key = normalize_team(candidate)\n        if not key:\n            continue\n        if provider == key:\n            return True\n        # Fail closed on fuzzy identity. Only harmless whole-token order differences are allowed.\n        p_tokens = provider.split()\n        c_tokens = key.split()\n        if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):\n            return True\n        # UEFA provider/app naming differences are accepted only when both names collapse through\n        # the explicit checked-in UEFA canonical/alias registry. No substring/edit-distance match.\n        if provider_canonical == exact_map.get(key, key) and (provider in exact_map or key in exact_map):\n            return True\n    return False\n'''
+          new_team_matches = '''_UEFA_EXACT_IDENTITY_CACHE: Optional[Dict[str, str]] = None\n\n\ndef _uefa_exact_identity_map() -> Dict[str, str]:\n    global _UEFA_EXACT_IDENTITY_CACHE\n    if _UEFA_EXACT_IDENTITY_CACHE is not None:\n        return _UEFA_EXACT_IDENTITY_CACHE\n    root = load_json(UEFA_CONFIG_PATH, {})\n    claims: Dict[str, str] = {}\n    for competition in root.get("competitions", []) if isinstance(root, dict) else []:\n        if not isinstance(competition, dict):\n            continue\n        for canonical in competition.get("canonicalTeams", []) or []:\n            canonical_key = normalize_team(canonical)\n            if canonical_key:\n                previous = claims.get(canonical_key)\n                if previous is not None and previous != canonical_key:\n                    raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={canonical!r} owners={previous!r},{canonical_key!r}")\n                claims[canonical_key] = canonical_key\n        aliases = competition.get("aliases", {})\n        for alias, canonical in aliases.items() if isinstance(aliases, dict) else []:\n            alias_key = normalize_team(alias)\n            canonical_key = normalize_team(canonical)\n            if not alias_key or not canonical_key:\n                continue\n            previous = claims.get(alias_key)\n            if previous is not None and previous != canonical_key:\n                raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={alias!r} owners={previous!r},{canonical_key!r}")\n            claims[alias_key] = canonical_key\n    _UEFA_EXACT_IDENTITY_CACHE = claims\n    return claims\n\n\ndef team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:\n    provider = normalize_team(provider_name)\n    if not provider:\n        return False\n    exact_map = _uefa_exact_identity_map()\n    provider_canonical = exact_map.get(provider, provider)\n    for candidate in accepted_names:\n        key = normalize_team(candidate)\n        if not key:\n            continue\n        if provider == key:\n            return True\n        p_tokens = provider.split()\n        c_tokens = key.split()\n        if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):\n            return True\n        # UEFA naming differences are accepted only through the checked-in exact alias registry.\n        # No substring, edit-distance or arbitrary first-match fallback is permitted.\n        if provider_canonical == exact_map.get(key, key) and (provider in exact_map or key in exact_map):\n            return True\n    return False\n'''
           replace_once('scripts/refresh_live_settlements.py', old_team_matches, new_team_matches)
+
+          old_requirements = '''def canonical_requirements() -> List[SettlementRequirement]:\n    merged: Dict[Tuple[str, str, str, str], SettlementRequirement] = {}\n    for bundle in betting_bundle_paths():\n        for row in requirements_from_bundle(bundle):\n            key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)\n            merged[key] = row\n    return list(merged.values())\n'''
+          new_requirements = '''def _ledger_names(item: Dict[str, Any], list_key: str, fallback_key: str) -> Tuple[str, ...]:\n    raw = item.get(list_key)\n    values = list(raw) if isinstance(raw, list) else []\n    values.append(item.get(fallback_key))\n    result: List[str] = []\n    seen: Set[str] = set()\n    for value in values:\n        text = str(value or "").strip()\n        key = normalize_team(text)\n        if text and key and key not in seen:\n            result.append(text)\n            seen.add(key)\n    return tuple(result)\n\n\ndef requirements_from_canonical_ledger() -> List[SettlementRequirement]:\n    root = load_json(CANONICAL_LEDGER_PATH, {})\n    if not isinstance(root, dict) or as_int(root.get("schemaVersion")) is None or int(root.get("schemaVersion") or 0) < 4:\n        return []\n    invalidated = {str(value).strip() for value in root.get("invalidatedMatchKeys", []) or [] if str(value).strip()}\n    result: List[SettlementRequirement] = []\n    for item in root.get("entries", []) or []:\n        if not isinstance(item, dict):\n            continue\n        match_key = str(item.get("matchKey") or "").strip()\n        local_date = str(item.get("localDate") or "").strip()[:10]\n        sub = str(item.get("subMarketKey") or "").strip().upper()\n        required = SUBMARKET_REQUIREMENT.get(sub)\n        home_names = _ledger_names(item, "homeNames", "homeTeam")\n        away_names = _ledger_names(item, "awayNames", "awayTeam")\n        if not match_key or match_key in invalidated or not local_date or not required or not home_names or not away_names:\n            continue\n        result.append(SettlementRequirement(\n            generation_id=str(item.get("generationId") or "canonical-ledger-v4").strip(),\n            competition_id=str(item.get("competitionId") or "").strip(),\n            match_key=match_key,\n            local_date=local_date,\n            league_code=str(item.get("leagueCode") or "").strip().upper(),\n            api_fixture_id=as_int(item.get("apiFixtureId")),\n            home_names=home_names,\n            away_names=away_names,\n            required_kind=required,\n            sub_market_key=sub,\n        ))\n    return result\n\n\ndef canonical_requirements() -> List[SettlementRequirement]:\n    merged: Dict[Tuple[str, str, str, str], SettlementRequirement] = {}\n    for bundle in betting_bundle_paths():\n        for row in requirements_from_bundle(bundle):\n            key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)\n            merged[key] = row\n    # Historical canonical rows remain settlement requirements after their odds disappear from the\n    # current App-Ready bundles. This is the convergence source for null-fixture-id recommendations.\n    for row in requirements_from_canonical_ledger():\n        key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)\n        merged[key] = row\n    return list(merged.values())\n'''
+          replace_once('scripts/refresh_live_settlements.py', old_requirements, new_requirements)
 
           replace_once(
               'scripts/materialize_canonical_recommendation_ledger.py',
@@ -107,15 +110,17 @@ jobs:
           print('UEFA_SETTLEMENT_EXACT_ALIAS_OK')
           PY
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 0
-          python - <<'PY'
+          PYTHONPATH=scripts python - <<'PY'
           import json
           from pathlib import Path
-          p=Path('data/statmaker/canonical_recommendation_ledger.json')
-          root=json.loads(p.read_text(encoding='utf-8-sig'))
+          import refresh_live_settlements as live
+          root=json.loads(Path('data/statmaker/canonical_recommendation_ledger.json').read_text(encoding='utf-8-sig'))
           stale='2026-09-04|Shamrock Rovers|Bohemians'
           assert stale in set(root.get('invalidatedMatchKeys',[])), 'SHAMROCK_INVALIDATION_NOT_PUBLISHED'
           assert all(str(r.get('matchKey') or '') != stale for r in root.get('entries',[]) if isinstance(r,dict)), 'SHAMROCK_STALE_LEDGER_ROW_RETAINED'
-          print('SHAMROCK_CANONICAL_INVALIDATION_OK')
+          historical=live.requirements_from_canonical_ledger()
+          assert any(r.local_date=='2026-09-09' and live.team_matches('Sporting CP',r.home_names) and live.team_matches('Galatasaray',r.away_names) for r in historical), 'SPORTING_LEDGER_REQUIREMENT_MISSING'
+          print('SHAMROCK_CANONICAL_INVALIDATION_OK', f'ledgerRequirements={len(historical)}')
           PY
 
       - name: Refresh Sporting final with bounded provider calls
@@ -127,27 +132,17 @@ jobs:
           set -euo pipefail
           python scripts/refresh_live_settlements.py --max-requests 4
           python scripts/reconcile_canonical_ledger_identity.py
-          python - <<'PY'
-          import json, sys
+          PYTHONPATH=scripts python - <<'PY'
+          import json
           from pathlib import Path
-          sys.path.insert(0,'scripts')
           import refresh_live_settlements as live
-
           feed=json.loads(Path('data/statmaker/live_settlements.json').read_text(encoding='utf-8-sig'))
-          sporting=[]
-          for row in feed.get('fixtures',[]):
-              if not isinstance(row,dict) or str(row.get('status') or '').upper() not in {'FT','AET','PEN'}:
-                  continue
-              if str(row.get('dateUtc') or '')[:10] not in {'2026-09-09','2026-09-10'}:
-                  continue
-              if live.team_matches(str(row.get('homeTeam') or ''), ('Sporting CP',)) and live.team_matches(str(row.get('awayTeam') or ''), ('Galatasaray Istanbul','Galatasaray')):
-                  sporting.append(row)
+          sporting=[row for row in feed.get('fixtures',[]) if isinstance(row,dict) and str(row.get('status') or '').upper() in {'FT','AET','PEN'} and str(row.get('dateUtc') or '')[:10] in {'2026-09-09','2026-09-10'} and live.team_matches(str(row.get('homeTeam') or ''),('Sporting CP',)) and live.team_matches(str(row.get('awayTeam') or ''),('Galatasaray Istanbul','Galatasaray'))]
           if len(sporting) != 1:
               raise SystemExit(f'SPORTING_FINAL_NOT_UNIQUE count={len(sporting)}')
           fixture_id=int(sporting[0].get('fixtureId') or 0)
           if fixture_id <= 0:
               raise SystemExit('SPORTING_FIXTURE_ID_MISSING')
-
           ledger=json.loads(Path('data/statmaker/canonical_recommendation_ledger.json').read_text(encoding='utf-8-sig'))
           rows=[r for r in ledger.get('entries',[]) if isinstance(r,dict) and str(r.get('localDate') or '')[:10]=='2026-09-09' and live.team_matches(str(r.get('homeTeam') or ''),('Sporting CP',)) and live.team_matches(str(r.get('awayTeam') or ''),('Galatasaray Istanbul','Galatasaray'))]
           if not rows:
@@ -171,7 +166,7 @@ jobs:
             data/statmaker/live_settlements.json \
             data/api_football/live_settlement_cache.json \
             data/statmaker/canonical_recommendation_ledger.json
-          git commit -m 'Converge UEFA settlement aliases and invalid fixtures'
+          git commit -m 'Converge canonical settlement history and invalid fixtures'
           for attempt in 1 2 3; do
             git fetch origin main
             if git rebase origin/main && git push origin HEAD:main; then exit 0; fi
