@@ -30,7 +30,6 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 import api_football_daily_quota_guard as quota_guard
 import api_football_fetch_fixture_stats as stats_fetch
-import canonical_team_identity
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
@@ -434,24 +433,6 @@ def requirements_from_bundle(path: Path) -> List[SettlementRequirement]:
             continue
         if not isinstance(match, dict):
             continue
-
-        candidate_match_key = str(match_key or "").strip()
-        candidate_local_date = str(local_date or "").strip()[:10]
-        payload_local_date = str(match.get("date") or "").strip()[:10]
-        if (
-            not canonical_team_identity.runtime_key_matches_payload(candidate_match_key, match)
-            or not candidate_local_date
-            or candidate_local_date != payload_local_date
-        ):
-            print(
-                "LIVE_SETTLEMENT_CANDIDATE_IDENTITY_REJECTED "
-                f"bundle={path.name} generation={generation_id} competition={competition_id} "
-                f"selection={selection_key} candidate={candidate_match_key!r} "
-                f"candidateDate={candidate_local_date!r} payloadDate={payload_local_date!r}",
-                file=sys.stderr,
-            )
-            continue
-
         sub = str(sub_market_key or "").strip()
         required = SUBMARKET_REQUIREMENT.get(sub, "unsupported")
         home_names = _names_from_match_payload(match, "home")
@@ -462,8 +443,8 @@ def requirements_from_bundle(path: Path) -> List[SettlementRequirement]:
             SettlementRequirement(
                 generation_id=generation_id,
                 competition_id=str(competition_id or "").strip(),
-                match_key=candidate_match_key,
-                local_date=candidate_local_date,
+                match_key=str(match_key or "").strip(),
+                local_date=str(local_date or match.get("date") or "").strip()[:10],
                 league_code=str(league_code or match.get("leagueCode") or "").strip().upper(),
                 api_fixture_id=_fixture_id_from_match_payload(match),
                 home_names=home_names,
