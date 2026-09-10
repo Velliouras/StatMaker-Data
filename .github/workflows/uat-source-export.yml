@@ -1,0 +1,63 @@
+name: UAT Source Export
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/uat-source-export.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout Data repository
+        uses: actions/checkout@v4
+
+      - name: Checkout exact StatMaker UAT
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: uat-filter-only
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify expected UAT head
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd statmaker-private
+          actual="$(git rev-parse HEAD)"
+          expected="0ee0dbdfce41054c0da54e848fc3540355ef4061"
+          [[ "$actual" == "$expected" ]] || { echo "UAT moved: $actual" >&2; exit 1; }
+
+      - name: Stage exact source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p export/app/src/main/java/com/statmaker/app
+          for file in \
+            ModelPerformanceFeature.kt \
+            ModelPerformanceDailyAuditSection.kt \
+            ModelPerformanceCanonicalLedgerSynchronizer.kt \
+            ModelPerformanceRepositorySettlementResolver.kt \
+            ModelPerformanceSettlementResolver.kt \
+            ModelPerformanceDailyScanner.kt \
+            DomesticDataUpdateController.kt; do
+            cp "statmaker-private/app/src/main/java/com/statmaker/app/$file" \
+               "export/app/src/main/java/com/statmaker/app/$file"
+          done
+          printf '%s\n' "$(cd statmaker-private && git rev-parse HEAD)" > export/UAT_HEAD.txt
+
+      - name: Upload source-only artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: statmaker-uat-model-performance-sources
+          path: export
+          if-no-files-found: error
+          retention-days: 1
