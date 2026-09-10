@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=3
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=4
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -48,6 +48,13 @@ def final_candidates(db,gid):
         old=best.get(k); oldrank=None if old is None else (num(old.get('selection_score')),num(old.get('strict_hit_rate')),intval(old.get('strict_sample')),num(old.get('selection_odd')))
         if old is None or rank>oldrank: best[k]=r
     return list(best.values())
+
+def runtime_match_key(match):
+    return '|'.join((
+        str(match.get('date') or '').strip(),
+        str(match.get('homeTeam') or '').strip(),
+        str(match.get('awayTeam') or '').strip(),
+    ))
 
 def kickoff_ms(m):
     for k in ('kickoffEpochMillis','kickoff_epoch_ms','kickoffTimestamp','timestamp'):
@@ -92,6 +99,7 @@ def extract(bundle,target=None):
                         d.write(b)
         except Exception:return []
         db=sqlite3.connect(f'file:{dbp}?mode=ro',uri=True)
+        rejected_identity=0
         try:
             g=first(db,"SELECT * FROM prepared_pattern_generation WHERE state='ready' ORDER BY built_at_ms DESC LIMIT 1")
             if not g:return []
@@ -108,6 +116,16 @@ def extract(bundle,target=None):
                 if not mr:continue
                 try:m=json.loads(str(mr.get('payload') or '{}'))
                 except Exception:continue
+
+                # Hard fixture-identity invariant. Candidate identity is the runtime
+                # date|home|away key; selection -> prepared_match must resolve to that exact same
+                # fixture. A selection from another match is never allowed to inherit c.match_key.
+                candidate_match_key=str(c.get('match_key') or '').strip()
+                payload_match_key=runtime_match_key(m)
+                if not candidate_match_key or candidate_match_key != payload_match_key:
+                    rejected_identity+=1
+                    continue
+
                 day=day or str(m.get('date') or '')[:10]
                 if target and day!=target:continue
                 ko=kickoff_ms(m)
@@ -123,7 +141,7 @@ def extract(bundle,target=None):
                 mp=nullable(s.get('opponent_model_probability')); post=nullable(s.get('bm_posterior_probability'))
                 out.append({
                   'generationId':gid,'generationBuiltAtMs':built,'competitionId':comp,'snapshotVersion':snap,'selectionKey':sk,
-                  'matchKey':str(c.get('match_key') or ''),'localDate':day,'leagueCode':str(c.get('league_code') or m.get('leagueCode') or '').upper(),
+                  'matchKey':candidate_match_key,'localDate':day,'leagueCode':str(c.get('league_code') or m.get('leagueCode') or '').upper(),
                   'competition':str(m.get('competition') or ''),'season':str(m.get('season') or ''),'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or ''),
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
@@ -133,6 +151,8 @@ def extract(bundle,target=None):
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
                   'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':'OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR','requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
+            if rejected_identity:
+                print(f"CANONICAL_LEDGER_IDENTITY_REJECTED bundle={bundle.name} rows={rejected_identity}")
             return out
         except sqlite3.Error:return []
         finally:db.close()
@@ -173,8 +193,13 @@ def history(day):
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=1); a=ap.parse_args(); limit=max(0,min(3,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
-    old=load(LEDGER,{}); existing=[]
-    if isinstance(old,dict) and intval(old.get('schemaVersion'))>=2:
+    old=load(LEDGER,{})
+
+    # Schema v4 is an identity-contract migration. Never carry forward v3 rows that were created
+    # without the candidate->selection->prepared-match invariant; they are re-materialized from
+    # immutable pre-match bundles instead.
+    existing=[]
+    if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
             if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
@@ -186,14 +211,18 @@ def main():
         if len(processed)>=limit:break
         day=today-dt.timedelta(days=off); iso=day.isoformat()
         if iso in done:continue
-        r,n=history(day); allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
+        r,n=history(day)
+        # A completed backfill day is an authoritative replacement, not an append. This removes
+        # any stale/corrupt identity row from an older ledger generation.
+        allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
+        allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v3','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v4-identity-locked','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v3 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v4 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
