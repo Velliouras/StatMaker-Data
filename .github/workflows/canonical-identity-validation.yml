@@ -12,6 +12,7 @@ on:
       - 'scripts/domestic_odds_expansion.py'
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/audit_app_ready_fixture_team_date_uniqueness.py'
+      - 'scripts/audit_app_ready_fixture_index_uniqueness.py'
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_rosters.json'
       - 'data/statmaker/domestic_live_july_registry.json'
@@ -52,8 +53,11 @@ jobs:
           print('SETTLEMENT_CANDIDATE_IDENTITY_OK', f'requirements={len(rows)}')
           PY
 
-      - name: Validate App-Ready team-date fixture uniqueness
+      - name: Validate App-Ready candidate team-date uniqueness
         run: python scripts/audit_app_ready_fixture_team_date_uniqueness.py
+
+      - name: Validate full App-Ready fixture-index uniqueness
+        run: python scripts/audit_app_ready_fixture_index_uniqueness.py
 
       - name: Validate settlement registry identity
         shell: bash
