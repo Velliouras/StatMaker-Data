@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
+import canonical_team_identity
 import domestic_live_july_pipeline as domestic_pipeline
 import domestic_odds_expansion
 import update_domestic_odds_api_io as odds
@@ -85,48 +86,33 @@ def competition_provider_match(
     return scored[0][1]
 
 
-def simplified_team_name(value: Any) -> str:
-    return domestic_odds_expansion.simplified_team_name(odds, value)
+def canonical_map(competition: Dict[str, Any]) -> canonical_team_identity.CanonicalIdentityIndex:
+    return canonical_team_identity.configured_index(
+        scope=str(competition.get("leagueCode") or competition.get("competitionId") or "UEFA"),
+        canonical_names=list(competition.get("canonicalTeams", []) or []),
+        aliases=dict(competition.get("aliases") or {}),
+    )
 
 
-def canonical_map(competition: Dict[str, Any]) -> Dict[str, str]:
-    mapping: Dict[str, str] = {}
-    for canonical in competition.get("canonicalTeams", []) or []:
-        name = str(canonical or "").strip()
-        if name:
-            mapping[odds.normalize_text(name, drop_suffixes=True)] = name
-            mapping[simplified_team_name(name)] = name
-    for alias, canonical in (competition.get("aliases") or {}).items():
-        canonical_name = str(canonical or "").strip()
-        alias_name = str(alias or "").strip()
-        if alias_name and canonical_name:
-            mapping[odds.normalize_text(alias_name, drop_suffixes=True)] = canonical_name
-            mapping[simplified_team_name(alias_name)] = canonical_name
-    return {key: value for key, value in mapping.items() if key}
-
-
-def canonical_team(name: str, mapping: Dict[str, str]) -> Optional[str]:
-    candidates = [
-        odds.normalize_text(name, drop_suffixes=True),
-        simplified_team_name(name),
-    ]
-    for candidate in dict.fromkeys(candidates):
-        if candidate in mapping:
-            return mapping[candidate]
-    return None
+def canonical_team(
+    name: str,
+    mapping: canonical_team_identity.CanonicalIdentityIndex,
+) -> Optional[str]:
+    canonical, _status, _candidates = mapping.resolve(name)
+    return canonical
 
 
 def normalize_event(
     competition: Dict[str, Any],
     event: Dict[str, Any],
     odds_payload: Optional[Dict[str, Any]],
-    mapping: Dict[str, str],
+    mapping: canonical_team_identity.CanonicalIdentityIndex,
     debug: Dict[str, Any],
 ) -> Optional[Dict[str, Any]]:
     provider_home = odds.event_home(event)
     provider_away = odds.event_away(event)
-    canonical_home = canonical_team(provider_home, mapping)
-    canonical_away = canonical_team(provider_away, mapping)
+    canonical_home, home_status, home_candidates = mapping.resolve(provider_home)
+    canonical_away, away_status, away_candidates = mapping.resolve(provider_away)
     if canonical_home is None or canonical_away is None:
         debug.setdefault("unmatchedTeams", []).append({
             "eventId": odds.event_id(event),
@@ -134,7 +120,16 @@ def normalize_event(
             "providerAwayTeam": provider_away,
             "homeMapped": canonical_home,
             "awayMapped": canonical_away,
+            "homePolicy": home_status,
+            "awayPolicy": away_status,
+            "homeCandidates": list(home_candidates),
+            "awayCandidates": list(away_candidates),
         })
+        return None
+    if canonical_team_identity.equivalent(canonical_home, canonical_away):
+        debug.setdefault("warnings", []).append(
+            f"Rejected UEFA identity collision {provider_home!r} vs {provider_away!r}"
+        )
         return None
 
     markets: List[Dict[str, Any]] = []
