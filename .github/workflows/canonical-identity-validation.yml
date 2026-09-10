@@ -11,6 +11,7 @@ on:
       - 'scripts/validate_domestic_cache_provider_identity.py'
       - 'scripts/domestic_odds_expansion.py'
       - 'scripts/refresh_live_settlements.py'
+      - 'scripts/audit_app_ready_fixture_team_date_uniqueness.py'
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_rosters.json'
       - 'data/statmaker/domestic_live_july_registry.json'
@@ -50,6 +51,9 @@ jobs:
               raise SystemExit('SETTLEMENT_REQUIREMENTS_EMPTY')
           print('SETTLEMENT_CANDIDATE_IDENTITY_OK', f'requirements={len(rows)}')
           PY
+
+      - name: Validate App-Ready team-date fixture uniqueness
+        run: python scripts/audit_app_ready_fixture_team_date_uniqueness.py
 
       - name: Validate settlement registry identity
         shell: bash
