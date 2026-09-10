@@ -80,6 +80,18 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
         "PAOK": ("PAOK Thessaloniki",),
         "Panathinaikos": ("Panathinaikos FC",),
     },
+    "CHL": {
+        "D. La Serena": ("Deportes La Serena",),
+    },
+    "ECU": {
+        "Deportivo Cuenca": ("CD Cuenca",),
+    },
+    "NOR": {
+        "Tromsø": ("Tromsoe IL",),
+    },
+    "KOR": {
+        "Jeonbuk Motors": ("Jeonbuk FC",),
+    },
 }
 
 
