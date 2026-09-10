@@ -37,6 +37,8 @@ APP_READY_DIR = ROOT / "data" / "statmaker" / "app_ready"
 APP_READY_MANIFEST = APP_READY_DIR / "update_manifest.json"
 CACHE_PATH = ROOT / "data" / "api_football" / "live_settlement_cache.json"
 FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"
+UEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"
+CANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
 
 SCHEMA_VERSION = 2
 DEFAULT_MAX_REQUESTS = 80
@@ -215,20 +217,58 @@ def normalize_team(value: Any) -> str:
     return " ".join(tokens)
 
 
+_UEFA_EXACT_IDENTITY_CACHE: Optional[Dict[str, str]] = None
+
+
+def _uefa_exact_identity_map() -> Dict[str, str]:
+    global _UEFA_EXACT_IDENTITY_CACHE
+    if _UEFA_EXACT_IDENTITY_CACHE is not None:
+        return _UEFA_EXACT_IDENTITY_CACHE
+    root = load_json(UEFA_CONFIG_PATH, {})
+    claims: Dict[str, str] = {}
+    for competition in root.get("competitions", []) if isinstance(root, dict) else []:
+        if not isinstance(competition, dict):
+            continue
+        for canonical in competition.get("canonicalTeams", []) or []:
+            canonical_key = normalize_team(canonical)
+            if canonical_key:
+                previous = claims.get(canonical_key)
+                if previous is not None and previous != canonical_key:
+                    raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={canonical!r} owners={previous!r},{canonical_key!r}")
+                claims[canonical_key] = canonical_key
+        aliases = competition.get("aliases", {})
+        for alias, canonical in aliases.items() if isinstance(aliases, dict) else []:
+            alias_key = normalize_team(alias)
+            canonical_key = normalize_team(canonical)
+            if not alias_key or not canonical_key:
+                continue
+            previous = claims.get(alias_key)
+            if previous is not None and previous != canonical_key:
+                raise RuntimeError(f"UEFA_IDENTITY_AMBIGUOUS alias={alias!r} owners={previous!r},{canonical_key!r}")
+            claims[alias_key] = canonical_key
+    _UEFA_EXACT_IDENTITY_CACHE = claims
+    return claims
+
+
 def team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:
     provider = normalize_team(provider_name)
     if not provider:
         return False
+    exact_map = _uefa_exact_identity_map()
+    provider_canonical = exact_map.get(provider, provider)
     for candidate in accepted_names:
         key = normalize_team(candidate)
         if not key:
             continue
         if provider == key:
             return True
-        # Fail closed on fuzzy identity. Only harmless whole-token order differences are allowed.
         p_tokens = provider.split()
         c_tokens = key.split()
         if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):
+            return True
+        # UEFA naming differences are accepted only through the checked-in exact alias registry.
+        # No substring, edit-distance or arbitrary first-match fallback is permitted.
+        if provider_canonical == exact_map.get(key, key) and (provider in exact_map or key in exact_map):
             return True
     return False
 
@@ -456,12 +496,64 @@ def requirements_from_bundle(path: Path) -> List[SettlementRequirement]:
     return requirements
 
 
+def _ledger_names(item: Dict[str, Any], list_key: str, fallback_key: str) -> Tuple[str, ...]:
+    raw = item.get(list_key)
+    values = list(raw) if isinstance(raw, list) else []
+    values.append(item.get(fallback_key))
+    result: List[str] = []
+    seen: Set[str] = set()
+    for value in values:
+        text = str(value or "").strip()
+        key = normalize_team(text)
+        if text and key and key not in seen:
+            result.append(text)
+            seen.add(key)
+    return tuple(result)
+
+
+def requirements_from_canonical_ledger() -> List[SettlementRequirement]:
+    root = load_json(CANONICAL_LEDGER_PATH, {})
+    if not isinstance(root, dict) or as_int(root.get("schemaVersion")) is None or int(root.get("schemaVersion") or 0) < 4:
+        return []
+    invalidated = {str(value).strip() for value in root.get("invalidatedMatchKeys", []) or [] if str(value).strip()}
+    result: List[SettlementRequirement] = []
+    for item in root.get("entries", []) or []:
+        if not isinstance(item, dict):
+            continue
+        match_key = str(item.get("matchKey") or "").strip()
+        local_date = str(item.get("localDate") or "").strip()[:10]
+        sub = str(item.get("subMarketKey") or "").strip().upper()
+        required = SUBMARKET_REQUIREMENT.get(sub)
+        home_names = _ledger_names(item, "homeNames", "homeTeam")
+        away_names = _ledger_names(item, "awayNames", "awayTeam")
+        if not match_key or match_key in invalidated or not local_date or not required or not home_names or not away_names:
+            continue
+        result.append(SettlementRequirement(
+            generation_id=str(item.get("generationId") or "canonical-ledger-v4").strip(),
+            competition_id=str(item.get("competitionId") or "").strip(),
+            match_key=match_key,
+            local_date=local_date,
+            league_code=str(item.get("leagueCode") or "").strip().upper(),
+            api_fixture_id=as_int(item.get("apiFixtureId")),
+            home_names=home_names,
+            away_names=away_names,
+            required_kind=required,
+            sub_market_key=sub,
+        ))
+    return result
+
+
 def canonical_requirements() -> List[SettlementRequirement]:
     merged: Dict[Tuple[str, str, str, str], SettlementRequirement] = {}
     for bundle in betting_bundle_paths():
         for row in requirements_from_bundle(bundle):
             key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
             merged[key] = row
+    # Historical canonical rows remain settlement requirements after their odds disappear from the
+    # current App-Ready bundles. This is the convergence source for null-fixture-id recommendations.
+    for row in requirements_from_canonical_ledger():
+        key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
+        merged[key] = row
     return list(merged.values())
 
 

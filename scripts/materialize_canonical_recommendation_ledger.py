@@ -6,12 +6,24 @@ from zoneinfo import ZoneInfo
 import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
-APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'
+APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
 ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=4
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
     except Exception:return default
+
+def invalidated_match_keys(low,high):
+    root=load(VALIDITY,{})
+    out=set()
+    for row in root.get('dispositions',[]) if isinstance(root,dict) else []:
+        if not isinstance(row,dict):continue
+        key=str(row.get('matchKey') or '').strip(); day=str(row.get('localDate') or '')[:10]
+        disposition=str(row.get('disposition') or '').strip().upper()
+        if key and day and low.isoformat()<=day<=high.isoformat() and disposition in {'RESCHEDULED','CANCELLED','POSTPONED','ABANDONED'}:
+            out.add(key)
+    return out
+
 
 def num(v,d=float('-inf')):
     try:
@@ -194,6 +206,7 @@ def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=1); a=ap.parse_args(); limit=max(0,min(3,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
+    invalidated=invalidated_match_keys(low,high)
 
     # Schema v4 is an identity-contract migration. Never carry forward v3 rows that were created
     # without the candidate->selection->prepared-match invariant; they are re-materialized from
@@ -206,7 +219,7 @@ def main():
     done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
-    allr=[*existing,*current]; processed=[]; hb=hr=0
+    allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
     for off in range(1,RETENTION+1):
         if len(processed)>=limit:break
         day=today-dt.timedelta(days=off); iso=day.isoformat()
@@ -217,7 +230,7 @@ def main():
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v4-identity-locked','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-recommendation-ledger-v4-identity-locked','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
