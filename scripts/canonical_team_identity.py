@@ -2,10 +2,13 @@
 """Canonical football-team identity resolution shared by StatMaker ingestion/audit.
 
 The resolver is intentionally deterministic and fail-closed:
-- exact configured aliases win;
+- verified provider aliases win over configured aliases;
+- exact configured aliases win over inferred/current-name matches;
 - harmless punctuation/diacritic/club-suffix differences are normalized;
 - a provider label may use unique league-local token containment only when it points
   to exactly one canonical club;
+- a multi-word provider label may resolve to a unique single-word canonical club, but
+  the unsafe reverse direction (for example Paris -> Paris Saint Germain) is forbidden;
 - fuzzy edit-distance matching is diagnostic only and never enters production data.
 
 No provider call is made here. Domestic canonical universes are built only from the
@@ -30,6 +33,13 @@ GENERIC_PREFIX_TOKENS = {
 GENERIC_CONTAINMENT_TOKENS = CLUB_DECORATION_TOKENS | GENERIC_PREFIX_TOKENS | {
     "de", "da", "do", "dos", "das", "the"
 }
+
+# Alias sources are deliberately ordered. VERIFIED_TEAM_ALIASES is the compatibility
+# layer already checked against the provider/current API-Football identity, so it must
+# be able to disambiguate stale historical aliases without deleting those aliases.
+BASE_IDENTITY_PRIORITY = 0
+CONFIGURED_ALIAS_PRIORITY = 100
+VERIFIED_ALIAS_PRIORITY = 200
 
 
 def normalize_text(value: Any) -> str:
@@ -76,6 +86,14 @@ class CanonicalIdentityIndex:
     scope: str
     canonical_names: Set[str] = field(default_factory=set)
     _owners: Dict[str, Set[str]] = field(default_factory=dict)
+    _claim_priorities: Dict[str, Dict[str, int]] = field(default_factory=dict)
+
+    def _add_claim(self, key: str, canonical: str, priority: int) -> None:
+        if not key:
+            return
+        self._owners.setdefault(key, set()).add(canonical)
+        priorities = self._claim_priorities.setdefault(key, {})
+        priorities[canonical] = max(int(priority), priorities.get(canonical, BASE_IDENTITY_PRIORITY))
 
     def add_canonical(self, canonical: Any) -> None:
         name = str(canonical or "").strip()
@@ -83,31 +101,48 @@ class CanonicalIdentityIndex:
             return
         self.canonical_names.add(name)
         for key in {exact_identity_key(name), identity_key(name)}:
-            if key:
-                self._owners.setdefault(key, set()).add(name)
+            self._add_claim(key, name, BASE_IDENTITY_PRIORITY)
 
-    def add_alias(self, alias: Any, canonical: Any) -> None:
+    def add_alias(
+        self,
+        alias: Any,
+        canonical: Any,
+        *,
+        priority: int = CONFIGURED_ALIAS_PRIORITY,
+    ) -> None:
         canonical_name = str(canonical or "").strip()
         alias_name = str(alias or "").strip()
         if not canonical_name or not alias_name:
             return
         self.add_canonical(canonical_name)
         for key in {exact_identity_key(alias_name), identity_key(alias_name)}:
-            if key:
-                self._owners.setdefault(key, set()).add(canonical_name)
+            self._add_claim(key, canonical_name, priority)
 
     def resolve(self, provider_name: Any) -> Tuple[Optional[str], str, Sequence[str]]:
         raw = str(provider_name or "").strip()
         if not raw:
             return None, "blank", []
 
-        direct_owners: Set[str] = set()
+        direct_claims: Dict[str, int] = {}
         for key in {exact_identity_key(raw), identity_key(raw)}:
-            direct_owners.update(self._owners.get(key, set()))
-        if len(direct_owners) == 1:
-            return next(iter(direct_owners)), "exact", sorted(direct_owners)
-        if len(direct_owners) > 1:
-            return None, "ambiguous-exact", sorted(direct_owners)
+            for owner in self._owners.get(key, set()):
+                priority = self._claim_priorities.get(key, {}).get(owner, BASE_IDENTITY_PRIORITY)
+                direct_claims[owner] = max(priority, direct_claims.get(owner, BASE_IDENTITY_PRIORITY))
+        if direct_claims:
+            best_priority = max(direct_claims.values())
+            direct_owners = sorted(
+                owner for owner, priority in direct_claims.items() if priority == best_priority
+            )
+            if len(direct_owners) == 1:
+                method = (
+                    "exact-verified"
+                    if best_priority >= VERIFIED_ALIAS_PRIORITY
+                    else "exact-configured"
+                    if best_priority >= CONFIGURED_ALIAS_PRIORITY
+                    else "exact"
+                )
+                return direct_owners[0], method, direct_owners
+            return None, "ambiguous-exact", direct_owners
 
         provider_tokens = set(identity_tokens(raw))
         provider_meaningful = _meaningful(provider_tokens)
@@ -123,13 +158,16 @@ class CanonicalIdentityIndex:
             shared = provider_meaningful.intersection(canonical_meaningful)
             if not shared:
                 continue
-            # Never infer a multi-word club from a single generic/location token (for
-            # example ``Paris`` -> ``Paris Saint Germain``). Single-word clubs still
-            # resolve through exact/suffix-normalized identity above.
-            if min(len(provider_meaningful), len(canonical_meaningful)) < 2:
+
+            # Direction matters. A short provider label must never infer a longer club
+            # identity ("Paris" -> "Paris Saint Germain"). The reverse is useful and
+            # safe when league-local uniqueness holds ("Tottenham Hotspur" -> "Tottenham",
+            # "Bolton Wanderers" -> "Bolton").
+            if len(provider_meaningful) == 1 and len(canonical_meaningful) > 1:
                 continue
             if not (provider_tokens.issubset(canonical_tokens) or canonical_tokens.issubset(provider_tokens)):
                 continue
+
             # More shared meaningful identity and fewer extra tokens rank higher.
             union = provider_tokens | canonical_tokens
             rank = (len(shared), -len(union - (provider_tokens & canonical_tokens)), len(canonical_tokens))
@@ -154,7 +192,7 @@ def configured_index(
     for canonical in canonical_names:
         index.add_canonical(canonical)
     for alias, canonical in aliases.items():
-        index.add_alias(alias, canonical)
+        index.add_alias(alias, canonical, priority=CONFIGURED_ALIAS_PRIORITY)
     return index
 
 
@@ -189,7 +227,7 @@ def domestic_indexes(
             for canonical, aliases in league_aliases.items():
                 index.add_canonical(canonical)
                 for alias in aliases or []:
-                    index.add_alias(alias, canonical)
+                    index.add_alias(alias, canonical, priority=CONFIGURED_ALIAS_PRIORITY)
 
         cache = pipeline_module.load_json(pipeline_module.stats_fetch.cache_path_for(league), {})
         for fixture in cache.get("fixtures", []) if isinstance(cache, dict) else []:
@@ -204,8 +242,9 @@ def domestic_indexes(
         for canonical in roster_by_key.get((code, target_season), []):
             index.add_canonical(canonical)
 
-    # Preserve already-verified provider aliases from the shared expansion, but register
-    # them through this collision-aware index rather than through a lossy simplifier.
+    # Preserve already-verified provider aliases from the shared expansion. These are
+    # intentionally stronger than the historical alias registry because they bridge
+    # known provider/current API-Football naming differences (for example Greek clubs).
     try:
         import domestic_odds_expansion as expansion
         verified = getattr(expansion, "VERIFIED_TEAM_ALIASES", {})
@@ -216,7 +255,7 @@ def domestic_indexes(
         for canonical, aliases in teams.items():
             index.add_canonical(canonical)
             for alias in aliases or []:
-                index.add_alias(alias, canonical)
+                index.add_alias(alias, canonical, priority=VERIFIED_ALIAS_PRIORITY)
 
     return indexes
 
