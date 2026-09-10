@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-"""Fail closed when one first-team identity is attached to multiple fixtures on one date.
+"""Fail closed when one first-team identity is attached to multiple fixtures on one local date.
 
 This audit reads only the immutable App-Ready betting bundles already committed in the
-repository. It makes zero provider/API calls. The invariant is intentionally global across
-competition sources: a canonical first-team identity cannot play two different opponents on
-the same local date. Such a collision indicates cross-source fixture identity corruption and
-must block publication/validation rather than leak contradictory recommendations to Android.
+repository. It makes zero provider/API calls. The runtime candidate key uses the source fixture
+date, while local_date is the Athens/UI date; those are intentionally separate date domains.
 """
 from __future__ import annotations
 
@@ -15,7 +13,7 @@ import tempfile
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Tuple
 
 import canonical_team_identity
 import refresh_live_settlements as settlement
@@ -35,7 +33,6 @@ def _fixture_id(match: Dict[str, Any]) -> int | None:
 
 
 def _norm_team(value: Any) -> str:
-    # Use the same conservative normalization family as the production settlement path.
     return settlement.normalize_team(value)
 
 
@@ -97,13 +94,12 @@ def _inspect_bundle(path: Path) -> Tuple[int, List[Dict[str, Any]]]:
             continue
         candidate_key = str(candidate_key or "").strip()
         candidate_date = str(local_date or "").strip()[:10]
-        payload_date = str(match.get("date") or "").strip()[:10]
         if not canonical_team_identity.runtime_key_matches_payload(candidate_key, match):
             continue
-        if not candidate_date or candidate_date != payload_date:
+        if not candidate_date:
             continue
-        home = str(match.get("homeTeam") or "").strip()
-        away = str(match.get("awayTeam") or "").strip()
+        home = str(match.get("canonicalHomeTeam") or match.get("homeTeam") or "").strip()
+        away = str(match.get("canonicalAwayTeam") or match.get("awayTeam") or "").strip()
         if not home or not away:
             continue
         signature = (str(competition_id or ""), candidate_key, home, away)
@@ -114,6 +110,7 @@ def _inspect_bundle(path: Path) -> Tuple[int, List[Dict[str, Any]]]:
             "leagueCode": str(league_code or match.get("leagueCode") or "").strip(),
             "matchKey": candidate_key,
             "localDate": candidate_date,
+            "sourceDate": str(match.get("date") or "").strip()[:10],
             "homeTeam": home,
             "awayTeam": away,
             "providerHomeTeam": str(match.get("providerHomeTeam") or "").strip(),
