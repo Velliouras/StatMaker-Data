@@ -92,6 +92,15 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
     "KOR": {
         "Jeonbuk Motors": ("Jeonbuk FC",),
     },
+    "EGY": {
+        "Olympic El Qanah": ("El Qanah FC",),
+    },
+    "SAU": {
+        "Al-Ettifaq": ("Al-Ittifaq FC",),
+    },
+    "UAE": {
+        "Khorfakkan": ("Khor Fakkan Club",),
+    },
 }
 
 
