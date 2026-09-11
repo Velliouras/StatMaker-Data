@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=5
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=6
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -165,7 +165,7 @@ def extract(bundle,target=None):
                   'generationId':gid,'generationBuiltAtMs':built,'competitionId':comp,'snapshotVersion':snap,'selectionKey':sk,
                   'matchKey':candidate_match_key,'localDate':day,'leagueCode':str(c.get('league_code') or m.get('leagueCode') or '').upper(),
                   'competition':str(m.get('competition') or ''),'season':str(m.get('season') or ''),'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or ''),
-                  'apiFixtureId':live._fixture_id_from_match_payload(m),'homeNames':hp,'awayNames':ap,
+                  'apiFixtureId':live._fixture_id_from_match_payload(m),'kickoffEpochMillis':ko,'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
                   'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
@@ -218,7 +218,7 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v5 is the default-Singles performance contract. Never carry forward v4 rows selected
+    # Schema v6 keeps the default-Singles performance contract and adds canonical kickoff identity. Never carry forward v4 rows selected
     # from the broad recommendation universe; they are re-materialized from immutable pre-match
     # bundles after Strong Value + minimum odd 1.50 are applied before MAIN selection.
     existing=[]
@@ -240,12 +240,12 @@ def main():
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v5','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v6','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v4 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v6 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
