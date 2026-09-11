@@ -127,19 +127,20 @@ def _ledger_semantic(rows: Sequence[live.SettlementRequirement]) -> List[dict]:
 def _merge_ledger(
     current: Sequence[live.SettlementRequirement],
 ) -> tuple[List[live.SettlementRequirement], bool]:
-    root = base.load_json(LEDGER_PATH, {})
-    previous_rows: List[live.SettlementRequirement] = []
-    for value in root.get("entries", []) if isinstance(root, dict) else []:
-        row = _requirement_from_dict(value)
-        if row is not None:
-            previous_rows.append(row)
+    """Return the bounded canonical validity universe without mutating its source ledger.
 
+    The canonical recommendation ledger is owned exclusively by
+    materialize_canonical_recommendation_ledger.py. Validity refresh is a consumer of that
+    identity contract, never a producer. Rewriting the rich v5 ledger here used to collapse it
+    to a schema-v1 settlement-requirement document between the two materialization passes,
+    resetting historical backfill progress on every run.
+    """
     today = base.now_utc().astimezone(base.ATHENS).date()
     cutoff = today - dt.timedelta(days=LEDGER_RETENTION_DAYS)
     high = today + dt.timedelta(days=base.LOOKAHEAD_DAYS)
 
     merged: Dict[str, live.SettlementRequirement] = {}
-    for row in [*previous_rows, *current]:
+    for row in current:
         try:
             day = dt.date.fromisoformat(row.local_date)
         except ValueError:
@@ -148,20 +149,7 @@ def _merge_ledger(
             continue
         merged[_requirement_identity(row)] = row
 
-    rows = list(merged.values())
-    old_semantic = _ledger_semantic(previous_rows)
-    new_semantic = _ledger_semantic(rows)
-    changed = old_semantic != new_semantic or not LEDGER_PATH.is_file()
-    if changed:
-        base.atomic_write(LEDGER_PATH, {
-            "schemaVersion": 1,
-            "generatedAt": base.iso_now(),
-            "retentionDays": LEDGER_RETENTION_DAYS,
-            "source": "canonical-app-ready-recommendation-ledger",
-            "entries": new_semantic,
-        })
-    return _expand_aliases(rows), changed
-
+    return _expand_aliases(list(merged.values())), False
 
 def _disposed_requirement_keys(root: dict) -> set[str]:
     keys: set[str] = set()
