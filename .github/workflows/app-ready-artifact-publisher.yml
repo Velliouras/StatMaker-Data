@@ -7,7 +7,7 @@ on:
       statmaker_ref:
         description: "Private StatMaker ref"
         required: true
-        default: "uat-filter-only"
+        default: "main"
         type: string
       force:
         description: "Force generation"
@@ -109,14 +109,14 @@ jobs:
         env: {TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"}
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
-      - name: Checkout current StatMaker UAT
+      - name: Checkout current StatMaker production source
         if: steps.preflight.outputs.generate == 'true'
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          # Until the v10 Android patch is committed to UAT, scheduled publishers use the
-          # validated source-generation branch. workflow_dispatch can still override the ref.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'uat-filter-only' }}
+          # Production App-Ready artifacts must be generated from the production StatMaker branch.
+          # workflow_dispatch may explicitly override the ref for controlled testing only.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
