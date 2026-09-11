@@ -22,9 +22,9 @@ on:
       - 'scripts/apply_fixture_disposition_overrides.py'
       - 'data/statmaker/fixture_disposition_overrides.json'
   schedule:
-    # Keep API-Football pressure bounded. The exact-id canonical reconciliation below remains
-    # authoritative, so completed recommendations settle correctly on the next 15-minute cycle.
-    - cron: "*/15 * * * *"
+    # Keep the exact 15-minute cadence, but avoid the heavily contended :00/:15/:30/:45
+    # boundaries where GitHub scheduled events are more likely to be delayed.
+    - cron: "3,18,33,48 * * * *"
 
 permissions:
   contents: write
