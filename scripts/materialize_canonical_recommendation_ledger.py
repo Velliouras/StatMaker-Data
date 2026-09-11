@@ -213,7 +213,7 @@ def history(day):
     return merge(out),n
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=1); a=ap.parse_args(); limit=max(0,min(3,a.backfill_dates))
+    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)

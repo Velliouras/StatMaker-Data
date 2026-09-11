@@ -130,7 +130,7 @@ jobs:
 
           # Rebuild recommendation history first, then repair stale historical team/fixture identity
           # from the already-published explicit-final feed. Both steps are repository-only.
-          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
 
           gap_cap=$((total - validity - 2))
@@ -154,7 +154,7 @@ jobs:
 
           # Re-materialization may restore an old historical row from an immutable pre-match bundle;
           # immediately re-apply the same unique-final identity reconciliation before publication.
-          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 1
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
 
       - name: Publish latency-critical settlement artifacts
