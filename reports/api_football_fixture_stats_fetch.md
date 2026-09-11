@@ -1,15 +1,40 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-09-11T17:51:01Z`
-Requests used: `84` / `120`
+Generated at: `2026-09-11T22:43:08Z`
+Requests used: `106` / `120`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Romania | Liga I | 2026 | 283 | 64 | 63 | 1 | 64 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=64 |
-| Russia | Premier League | 2026 | 235 | 57 | 56 | 1 | 57 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/russia/premier-league/2026/fixture_stats.json | league+season:2026 returned=240 completed=57 |
-| Latvia | Virsliga | 2026 | 365 | 145 | 0 | 28 | 145 | 0 | 28 | 29 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=145; request cap reached before all fixture statistics were fetched |
-| Ukraine | Premier League | 2026 | 333 | 39 | 0 | 28 | 39 | 0 | 28 | 29 | league+season:2026 | 240 | data/api_football/fixture_stats/ukraine/premier-league/2026/fixture_stats.json | league+season:2026 returned=240 completed=39; request cap reached before all fixture statistics were fetched |
-| United Arab Emirates | Pro League | 2026 | 301 | 33 | 16 | 17 | 33 | 0 | 15 | 18 | league+season:2026 | 42 | data/api_football/fixture_stats/united-arab-emirates/pro-league/2026/fixture_stats.json | league+season:2026 returned=42 completed=33 |
-| Saudi Arabia | Pro League | 2026 | 307 | 56 | 53 | 3 | 56 | 0 | 1 | 4 | league+season:2026 | 306 | data/api_football/fixture_stats/saudi-arabia/pro-league/2026/fixture_stats.json | league+season:2026 returned=306 completed=56 |
+| Spain | La Liga | 2026 | 140 | 42 | 41 | 1 | 42 | 0 | 0 | 2 | league+season:2026 | 380 | data/api_football/fixture_stats/spain/la-liga/2026/fixture_stats.json | league+season:2026 returned=380 completed=42 |
+| France | Ligue 1 | 2026 | 61 | 28 | 27 | 1 | 28 | 0 | 0 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/france/ligue-1/2026/fixture_stats.json | league+season:2026 returned=306 completed=28 |
+| Italy | Serie A | 2026 | 135 | 31 | 30 | 1 | 31 | 0 | 0 | 2 | league+season:2026 | 380 | data/api_football/fixture_stats/italy/serie-a/2026/fixture_stats.json | league+season:2026 returned=380 completed=31 |
+| Germany | Bundesliga | 2026 | 78 | 19 | 18 | 1 | 19 | 0 | 0 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/germany/bundesliga/2026/fixture_stats.json | league+season:2026 returned=306 completed=19 |
+| Argentina | Liga Profesional Argentina | 2026 | 128 | 376 | 371 | 5 | 376 | 0 | 4 | 6 | league+season:2026 | 495 | data/api_football/fixture_stats/argentina/liga-profesional-argentina/2026/fixture_stats.json | league+season:2026 returned=495 completed=376 |
+| Sweden | Allsvenskan | 2026 | 113 | 160 | 159 | 1 | 160 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/allsvenskan/2026/fixture_stats.json | league+season:2026 returned=240 completed=160 |
+| Romania | Liga I | 2026 | 283 | 65 | 64 | 1 | 65 | 0 | 0 | 2 | league+season:2026 | 240 | data/api_football/fixture_stats/romania/liga-i/2026/fixture_stats.json | league+season:2026 returned=240 completed=65 |
+| Denmark | Superliga | 2026 | 119 | 43 | 42 | 1 | 43 | 0 | 0 | 2 | league+season:2026 | 132 | data/api_football/fixture_stats/denmark/superliga/2026/fixture_stats.json | league+season:2026 returned=132 completed=43 |
+| Poland | Ekstraklasa | 2026 | 106 | 60 | 58 | 2 | 60 | 0 | 0 | 3 | league+season:2026 | 306 | data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json | league+season:2026 returned=306 completed=60 |
+| Russia | Premier League | 2026 | 235 | 57 | 57 | 0 | 57 | 0 | 0 | 1 | league+season:2026 | 240 | data/api_football/fixture_stats/russia/premier-league/2026/fixture_stats.json | league+season:2026 returned=240 completed=57 |
+| Austria | Bundesliga | 2026 | 218 | 31 | 30 | 1 | 31 | 0 | 0 | 2 | league+season:2026 | 132 | data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json | league+season:2026 returned=132 completed=31 |
+| Netherlands | Eredivisie | 2026 | 88 | 45 | 44 | 1 | 45 | 0 | 0 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/netherlands/eredivisie/2026/fixture_stats.json | league+season:2026 returned=306 completed=45 |
+| England | Championship | 2026 | 40 | 70 | 69 | 1 | 70 | 0 | 0 | 2 | league+season:2026 | 552 | data/api_football/fixture_stats/england/championship/2026/fixture_stats.json | league+season:2026 returned=552 completed=70 |
+| Turkey | Süper Lig | 2026 | 203 | 37 | 36 | 1 | 37 | 0 | 1 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/turkey/super-lig/2026/fixture_stats.json | league+season:2026 returned=306 completed=37 |
+| Latvia | Virsliga | 2026 | 365 | 145 | 0 | 4 | 145 | 0 | 4 | 5 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=145; request cap reached before all fixture statistics were fetched |
+| Finland | Ykkösliiga | 2026 | 1087 | 112 | 0 | 4 | 112 | 0 | 4 | 5 | league+season:2026 | 135 | data/api_football/fixture_stats/finland/ykkosliiga/2026/fixture_stats.json | league+season:2026 returned=135 completed=112; request cap reached before all fixture statistics were fetched |
+| Slovenia | 1. SNL | 2026 | 373 | 40 | 0 | 4 | 40 | 0 | 4 | 5 | league+season:2026 | 180 | data/api_football/fixture_stats/slovenia/1-snl/2026/fixture_stats.json | league+season:2026 returned=180 completed=40; request cap reached before all fixture statistics were fetched |
+| Austria | 2. Liga | 2026 | 219 | 44 | 0 | 4 | 44 | 0 | 4 | 5 | league+season:2026 | 240 | data/api_football/fixture_stats/austria/2-liga/2026/fixture_stats.json | league+season:2026 returned=240 completed=44; request cap reached before all fixture statistics were fetched |
+| Scotland | Championship | 2026 | 180 | 26 | 0 | 4 | 26 | 0 | 4 | 5 | league+season:2026 | 180 | data/api_football/fixture_stats/scotland/championship/2026/fixture_stats.json | league+season:2026 returned=180 completed=26; request cap reached before all fixture statistics were fetched |
+| England | National League | 2026 | 43 | 73 | 0 | 4 | 73 | 0 | 4 | 5 | league+season:2026 | 552 | data/api_football/fixture_stats/england/national-league/2026/fixture_stats.json | league+season:2026 returned=552 completed=73; request cap reached before all fixture statistics were fetched |
+| Cyprus | 1. Division | 2026 | 318 | 15 | 0 | 4 | 15 | 0 | 4 | 5 | league+season:2026 | 182 | data/api_football/fixture_stats/cyprus/1-division/2026/fixture_stats.json | league+season:2026 returned=182 completed=15; request cap reached before all fixture statistics were fetched |
+| Bulgaria | First League | 2026 | 172 | 56 | 0 | 4 | 56 | 0 | 4 | 5 | league+season:2026 | 182 | data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=56; request cap reached before all fixture statistics were fetched |
+| United Arab Emirates | Pro League | 2026 | 301 | 35 | 1 | 4 | 35 | 0 | 4 | 5 | league+season:2026 | 42 | data/api_football/fixture_stats/united-arab-emirates/pro-league/2026/fixture_stats.json | league+season:2026 returned=42 completed=35; request cap reached before all fixture statistics were fetched |
+| South Africa | Premier Soccer League | 2026 | 288 | 43 | 40 | 3 | 43 | 0 | 2 | 4 | league+season:2026 | 240 | data/api_football/fixture_stats/south-africa/premier-soccer-league/2026/fixture_stats.json | league+season:2026 returned=240 completed=43 |
+| Ireland | Premier Division | 2026 | 357 | 149 | 101 | 4 | 149 | 0 | 4 | 5 | league+season:2026 | 180 | data/api_football/fixture_stats/ireland/premier-division/2026/fixture_stats.json | league+season:2026 returned=180 completed=149; request cap reached before all fixture statistics were fetched |
+| Saudi Arabia | Pro League | 2026 | 307 | 57 | 55 | 2 | 57 | 0 | 1 | 3 | league+season:2026 | 306 | data/api_football/fixture_stats/saudi-arabia/pro-league/2026/fixture_stats.json | league+season:2026 returned=306 completed=57 |
+| Serbia | Super Liga | 2026 | 286 | 54 | 53 | 1 | 54 | 0 | 0 | 2 | league+season:2026 | 182 | data/api_football/fixture_stats/serbia/super-liga/2026/fixture_stats.json | league+season:2026 returned=182 completed=54 |
+| Germany | Bundesliga 2 | 2026 | 79 | 38 | 36 | 2 | 38 | 0 | 0 | 3 | league+season:2026 | 306 | data/api_football/fixture_stats/germany/bundesliga-2/2026/fixture_stats.json | league+season:2026 returned=306 completed=38 |
+| France | Ligue 2 | 2026 | 62 | 50 | 45 | 5 | 50 | 0 | 0 | 6 | league+season:2026 | 306 | data/api_football/fixture_stats/france/ligue-2/2026/fixture_stats.json | league+season:2026 returned=306 completed=50 |
+| Spain | Segunda División | 2026 | 141 | 45 | 44 | 1 | 45 | 0 | 0 | 2 | league+season:2026 | 462 | data/api_football/fixture_stats/spain/segunda-division/2026/fixture_stats.json | league+season:2026 returned=462 completed=45 |
+| Italy | Serie B | 2026 | 136 | 33 | 30 | 3 | 33 | 0 | 0 | 4 | league+season:2026 | 380 | data/api_football/fixture_stats/italy/serie-b/2026/fixture_stats.json | league+season:2026 returned=380 completed=33 |
