@@ -347,6 +347,8 @@ def _best_final_candidate_refs(connection: sqlite3.Connection, generation_id: st
                strict_hit_rate, strict_sample, selection_odd
         FROM prepared_pattern_candidates
         WHERE generation_id=? AND recommendation_eligible=1
+          AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE'
+          AND selection_odd>=1.50
         ORDER BY evidence_score DESC, source_order ASC
         """,
         (generation_id,),
@@ -529,7 +531,7 @@ def requirements_from_canonical_ledger() -> List[SettlementRequirement]:
         if not match_key or match_key in invalidated or not local_date or not required or not home_names or not away_names:
             continue
         result.append(SettlementRequirement(
-            generation_id=str(item.get("generationId") or "canonical-ledger-v4").strip(),
+            generation_id=str(item.get("generationId") or "canonical-ledger-v5").strip(),
             competition_id=str(item.get("competitionId") or "").strip(),
             match_key=match_key,
             local_date=local_date,
