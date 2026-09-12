@@ -11,14 +11,8 @@ on:
   schedule:
     # Lightweight same-day settlement refresh. Four runs/day cover the main
     # afternoon/evening football windows without duplicating the heavy daily
-    # 53-league statistics universe workflow.
+    # 69-league statistics universe workflow.
     - cron: "20 14,17,20,23 * * *"
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/model-performance-settlement-refresh.yml"
-
 permissions:
   contents: write
 
@@ -48,12 +42,17 @@ jobs:
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
+          import sys
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
+
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import statmaker_domestic_scope as domestic_scope
 
           odds_path = Path('odds/odds_api_io/domestic_odds.json')
           if not odds_path.is_file():
               print('league_codes=')
+              print('excluded_codes=')
               print('candidate_matches=0')
               raise SystemExit(0)
 
@@ -64,10 +63,10 @@ jobs:
           settled_before = now - timedelta(minutes=140)
           window_start = now - timedelta(hours=12)
 
-          codes = set()
+          discovered_codes = set()
           candidate_matches = 0
           for league in payload.get('leagues', []) or []:
-              code = str(league.get('leagueCode') or '').strip().upper()
+              code = domestic_scope.normalize_code(league.get('leagueCode'))
               if not code:
                   continue
               for match in league.get('matches', []) or []:
@@ -82,10 +81,15 @@ jobs:
                   except ValueError:
                       continue
                   if window_start <= kickoff <= settled_before:
-                      codes.add(code)
+                      discovered_codes.add(code)
                       candidate_matches += 1
 
-          print(f"league_codes={','.join(sorted(codes))}")
+          authoritative_codes = domestic_scope.stats_universe_codes()
+          eligible_codes = sorted(discovered_codes & authoritative_codes)
+          excluded_codes = sorted(discovered_codes - authoritative_codes)
+
+          print(f"league_codes={','.join(eligible_codes)}")
+          print(f"excluded_codes={','.join(excluded_codes)}")
           print(f"candidate_matches={candidate_matches}")
           PY
 
@@ -95,11 +99,15 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '120' }}
         run: |
+          set +e
           python scripts/run_domestic_stats_refresh.py \
             --league-codes "${{ steps.scope.outputs.league_codes }}" \
             --max-requests "${INPUT_MAX_REQUESTS:-120}" \
             > reports/model_performance_settlement_refresh.log 2>&1
+          status=$?
+          set -e
           cat reports/model_performance_settlement_refresh.log
+          exit "$status"
 
       - name: Rebuild app-facing settlement artifacts
         if: steps.scope.outputs.league_codes != ''
