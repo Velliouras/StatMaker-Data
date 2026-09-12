@@ -14,8 +14,8 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
-PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-PREPARED_PATTERN_SCHEMA_VERSION = 11
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
+PREPARED_PATTERN_SCHEMA_VERSION = 12
 PREPARED_PATTERN_COMPETITIONS = (
     "domestic",
     "champions_league",
@@ -374,13 +374,22 @@ def validate_generated_betting(source_exact_markets):
                 "opponent_without_formation_probability",
                 "opponent_without_squad_turnover_probability",
                 "opponent_modifier_profile",
+                "value_signal_tier",
+                "value_signal_market_probability",
+                "value_signal_conservative_probability",
+                "value_signal_edge",
+                "value_signal_expected_value",
+                "value_signal_reliability",
+                "value_signal_low_odds_penalty",
+                "value_signal_market_movement",
+                "value_signal_ranking_score",
             }
             missing_performance_columns = sorted(
                 required_performance_columns - selection_columns
             )
             if missing_performance_columns:
                 raise SystemExit(
-                    "Refusing app-ready publish: missing v11 performance/shadow columns: "
+                    "Refusing app-ready publish: missing v12 performance/value-signal columns: "
                     + ", ".join(missing_performance_columns)
                 )
 
@@ -420,7 +429,7 @@ def validate_generated_betting(source_exact_markets):
                 raise SystemExit("Prepared recommendation rules fingerprint mismatch")
             if int(proposal_count) != 0:
                 raise SystemExit(
-                    "Candidate-only v11 generation must not persist Paroli proposal templates"
+                    "Candidate-only v12 generation must not persist Paroli proposal templates"
                 )
 
             actual_candidate_count = int(
@@ -468,6 +477,73 @@ def validate_generated_betting(source_exact_markets):
                 raise SystemExit(
                     "Canonical Performance ledger join mismatch: "
                     f"eligible={eligible_candidate_count} joined={performance_row_count}"
+                )
+
+            value_signal_mismatches = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=?
+                      AND COALESCE(TRIM(c.value_tier),'') <> COALESCE(TRIM(s.value_signal_tier),'')
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if value_signal_mismatches:
+                raise SystemExit(
+                    "Prepared Value Signal parity mismatch: "
+                    f"candidate_vs_source={value_signal_mismatches}"
+                )
+
+            invalid_value_signals = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=?
+                      AND c.value_tier IS NOT NULL
+                      AND (
+                        s.value_signal_edge IS NULL OR s.value_signal_edge < 0.04
+                        OR s.value_signal_expected_value IS NULL OR s.value_signal_expected_value < 0.05
+                      )
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if invalid_value_signals:
+                raise SystemExit(
+                    "Prepared Value Signal violates source Edge/EV contract: "
+                    f"invalid={invalid_value_signals}"
+                )
+
+            premium_probability_violations = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=? AND c.policy_premium_eligible=1
+                      AND COALESCE(s.opponent_model_probability, s.bm_posterior_probability) < 0.65
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if premium_probability_violations:
+                raise SystemExit(
+                    "Policy v2 premium rows violate final model probability floor: "
+                    f"invalid={premium_probability_violations}"
                 )
 
             context_counts = connection.execute(
