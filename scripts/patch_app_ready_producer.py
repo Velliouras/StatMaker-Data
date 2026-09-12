@@ -216,24 +216,26 @@ def install_prepared_pattern_bridge() -> None:
     print(f"APP_READY_PATTERN_BRIDGE_OK bytes={target.stat().st_size}")
 
 
-def patch_prepared_store_v11() -> None:
+def patch_prepared_store_v12() -> None:
     source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
     text = source.read_text(encoding="utf-8")
 
-    native_v11_schema = (
+    native_v12_schema = (
         "createPatternReadModelSchema(db)" in text
         and "CREATE TABLE IF NOT EXISTS prepared_pattern_generation" in text
         and "CREATE TABLE IF NOT EXISTS prepared_pattern_candidates" in text
         and "opponent_without_favorite_probability REAL" in text
         and "opponent_without_squad_turnover_probability REAL" in text
-        and "private const val DATABASE_VERSION = 11" in text
+        and "value_signal_conservative_probability REAL" in text
+        and "value_signal_ranking_score REAL" in text
+        and "private const val DATABASE_VERSION = 12" in text
     )
 
-    if not native_v11_schema:
+    if not native_v12_schema:
         raise SystemExit(
-            "App-Ready v11 requires the native UAT PreparedBettingSnapshotStore v11 contract"
+            "App-Ready v12 requires the native UAT PreparedBettingSnapshotStore v12 probability-parity contract"
         )
-    print("APP_READY_PREPARED_SCHEMA_V11_OK source-native")
+    print("APP_READY_PREPARED_SCHEMA_V12_OK source-native")
 
     catalog_start_marker = "    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {"
     catalog_end_marker = """\n    /**
@@ -366,7 +368,7 @@ def patch_prepared_store_v11() -> None:
         raise SystemExit("PreparedBettingSnapshotStore loadForFeed method count mismatch")
 
     source.write_text(text, encoding="utf-8")
-    print("APP_READY_PREPARED_STORE_V11_OK")
+    print("APP_READY_PREPARED_STORE_V12_OK")
 
 
 
@@ -422,5 +424,5 @@ harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "D
 patch_domestic_multi_season_index()
 patch_empty_uefa_ready_snapshots()
 install_prepared_pattern_bridge()
-patch_prepared_store_v11()
+patch_prepared_store_v12()
 add_producer_diagnostics()
