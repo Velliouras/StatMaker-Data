@@ -565,8 +565,8 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version < 11:
-                raise SystemExit(f"Prepared DB schema must be >=11; got {user_version}")
+            if user_version < 12:
+                raise SystemExit(f"Prepared DB schema must be >=12; got {user_version}")
 
             tables = {
                 row[0]
@@ -581,7 +581,7 @@ for raw in sys.argv[1:]:
             missing_tables = sorted(required_tables - tables)
             if missing_tables:
                 raise SystemExit(
-                    "Prepared DB missing v11 recommendation tables: " + ", ".join(missing_tables)
+                    "Prepared DB missing v12 recommendation tables: " + ", ".join(missing_tables)
                 )
 
             indexes = {
@@ -599,14 +599,14 @@ for raw in sys.argv[1:]:
             missing_indexes = sorted(required_indexes - indexes)
             if missing_indexes:
                 raise SystemExit(
-                    "Prepared DB missing v11 recommendation indexes: " + ", ".join(missing_indexes)
+                    "Prepared DB missing v12 recommendation indexes: " + ", ".join(missing_indexes)
                 )
 
             selection_columns = {
                 row[1]
                 for row in connection.execute("PRAGMA table_info(prepared_selections)").fetchall()
             }
-            required_v11_columns = {
+            required_v12_columns = {
                 "opponent_adjusted_required",
                 "opponent_model_probability",
                 "opponent_base_model_probability",
@@ -618,11 +618,20 @@ for raw in sys.argv[1:]:
                 "opponent_without_formation_probability",
                 "opponent_without_squad_turnover_probability",
                 "opponent_modifier_profile",
+                "value_signal_tier",
+                "value_signal_market_probability",
+                "value_signal_conservative_probability",
+                "value_signal_edge",
+                "value_signal_expected_value",
+                "value_signal_reliability",
+                "value_signal_low_odds_penalty",
+                "value_signal_market_movement",
+                "value_signal_ranking_score",
             }
-            missing_v11_columns = sorted(required_v11_columns - selection_columns)
-            if missing_v11_columns:
+            missing_v12_columns = sorted(required_v12_columns - selection_columns)
+            if missing_v12_columns:
                 raise SystemExit(
-                    "Prepared DB missing v11 performance/shadow columns: " + ", ".join(missing_v11_columns)
+                    "Prepared DB missing v12 performance/value-signal columns: " + ", ".join(missing_v12_columns)
                 )
             domestic_context = connection.execute(
                 """
@@ -640,9 +649,9 @@ for raw in sys.argv[1:]:
             opponent_models = int(domestic_context[1] or 0)
             favorite_shadow = int(domestic_context[2] or 0)
             if required_context > 0 and opponent_models <= 0:
-                raise SystemExit("Prepared v11 Domestic snapshot has required opponent context but no model probabilities")
+                raise SystemExit("Prepared v12 Domestic snapshot has required opponent context but no model probabilities")
             if opponent_models > 0 and favorite_shadow <= 0:
-                raise SystemExit("Prepared v11 Domestic snapshot has opponent models but no Favorite shadow")
+                raise SystemExit("Prepared v12 Domestic snapshot has opponent models but no Favorite shadow")
 
             generation = connection.execute(
                 """
@@ -658,7 +667,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v6-probability-parity-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )
