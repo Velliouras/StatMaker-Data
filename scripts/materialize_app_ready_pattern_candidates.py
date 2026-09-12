@@ -450,12 +450,12 @@ def selection_score(identity_family, sub_market_key, selection_side, odd, sample
 
 
 
-def policy_decision(match, posterior, maturity, eligible):
+def policy_decision(match, probability, maturity, eligible):
     if not eligible:
         return False, None
     is_world_cup = "world cup" in str(match.get("competition") or "").lower() or str(match.get("leagueCode") or "").lower() == "wc"
     if is_world_cup:
-        if posterior is not None and posterior >= 0.65:
+        if probability is not None and probability >= 0.65:
             return True, None
         return False, "REJECTED_POLICY_V2_PROBABILITY_LT_65"
     if maturity is None:
@@ -465,9 +465,9 @@ def policy_decision(match, posterior, maturity, eligible):
     minimum_sample = min(home_total, away_total)
     if minimum_sample <= 3:
         return False, "REJECTED_POLICY_V2_SEASON_SAMPLE_0_3"
-    if minimum_sample <= 6 and (posterior is None or posterior < 0.70):
+    if minimum_sample <= 6 and (probability is None or probability < 0.70):
         return False, "REJECTED_POLICY_V2_SEASON_SAMPLE_4_6_PROB_LT_70"
-    if posterior is None or posterior < 0.65:
+    if probability is None or probability < 0.65:
         return False, "REJECTED_POLICY_V2_PROBABILITY_LT_65"
     return True, None
 
