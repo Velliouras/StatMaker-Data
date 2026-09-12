@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-12T01:16:50Z",
+  "generated_at": "2026-09-12T08:11:15Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/belgium/jupiler-pro-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-11T08:02:27Z",
+    "cache_generated_at": "2026-09-12T07:55:19Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 45,
-    "fixtures_with_any_stats": 45,
-    "fixtures_with_bb_core_stats": 42,
+    "completed_fixtures": 46,
+    "fixtures_with_any_stats": 46,
+    "fixtures_with_bb_core_stats": 43,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9333,
+    "bb_core_coverage": 0.9348,
     "group_counts": {
-      "shots_total": 45,
-      "shots_on_target": 45,
-      "corners": 45,
-      "fouls": 45,
-      "yellow_cards": 42,
-      "red_cards": 16,
-      "possession": 45,
-      "passes": 45,
+      "shots_total": 46,
+      "shots_on_target": 46,
+      "corners": 46,
+      "fouls": 46,
+      "yellow_cards": 43,
+      "red_cards": 17,
+      "possession": 46,
+      "passes": 46,
       "xg": 33
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9333,
-      "red_cards": 0.3556,
+      "yellow_cards": 0.9348,
+      "red_cards": 0.3696,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.7333
+      "xg": 0.7174
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -3842,6 +3842,90 @@
         "fulltime": {
           "home": 3,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1558626,
+      "date_utc": "2026-09-11T18:45:00+00:00",
+      "country": "Belgium",
+      "league": "Jupiler Pro League",
+      "league_code": "B1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 144,
+      "round": "Regular Season - 6",
+      "home_team": "KV Mechelen",
+      "away_team": "Anderlecht",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 14,
+        "HST": 4,
+        "AST": 3,
+        "HC": 10,
+        "AC": 5,
+        "HF": 13,
+        "AF": 21,
+        "HY": 1,
+        "AY": 4,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 34,
+        "APossession": 66,
+        "HSaves": 2,
+        "ASaves": 4,
+        "HPasses": 260,
+        "APasses": 555,
+        "HPassesAccurate": 178,
+        "APassesAccurate": 487,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
         },
         "extratime": {
           "home": null,
