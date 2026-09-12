@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-12T08:11:14Z",
+  "generated_at": "2026-09-12T17:20:01Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-12T07:55:05Z",
+    "cache_generated_at": "2026-09-12T17:18:25Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 152,
-    "fixtures_with_any_stats": 152,
-    "fixtures_with_bb_core_stats": 145,
+    "completed_fixtures": 153,
+    "fixtures_with_any_stats": 153,
+    "fixtures_with_bb_core_stats": 146,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9539,
+    "bb_core_coverage": 0.9542,
     "group_counts": {
-      "shots_total": 152,
-      "shots_on_target": 152,
-      "corners": 152,
-      "fouls": 152,
-      "yellow_cards": 145,
-      "red_cards": 27,
-      "possession": 152,
-      "passes": 152,
+      "shots_total": 153,
+      "shots_on_target": 153,
+      "corners": 153,
+      "fouls": 153,
+      "yellow_cards": 146,
+      "red_cards": 28,
+      "possession": 153,
+      "passes": 153,
       "xg": 144
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9539,
-      "red_cards": 0.1776,
+      "yellow_cards": 0.9542,
+      "red_cards": 0.183,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.9474
+      "xg": 0.9412
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -12792,6 +12792,90 @@
         "APasses": 527,
         "HPassesAccurate": 281,
         "APassesAccurate": 429,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 0,
+      "home_score": 2,
+      "away_score": 0,
+      "fthg": 2,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1494760,
+      "date_utc": "2026-09-12T14:00:00+00:00",
+      "country": "Norway",
+      "league": "Eliteserien",
+      "league_code": "NOR",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 103,
+      "round": "Regular Season - 21",
+      "home_team": "Lillestrom",
+      "away_team": "Valerenga",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 7,
+        "AS": 17,
+        "HST": 2,
+        "AST": 3,
+        "HC": 6,
+        "AC": 6,
+        "HF": 14,
+        "AF": 14,
+        "HY": 2,
+        "AY": 4,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": 3,
+        "ASaves": 0,
+        "HPasses": 395,
+        "APasses": 386,
+        "HPassesAccurate": 309,
+        "APassesAccurate": 297,
         "HxG": null,
         "AxG": null
       },
