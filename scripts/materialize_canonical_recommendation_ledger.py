@@ -48,15 +48,37 @@ def current_bundles():
     return sorted(p,key=lambda x:(x.name!=current,-x.stat().st_mtime))[:2]
 
 def final_candidates(db,gid):
-    # Model Performance measures the exact default precision-first Singles product:
-    # precision_eligible only, then one deterministic MAIN selection per match.
-    src=rows(
-        db,
-        "SELECT * FROM prepared_pattern_candidates "
-        "WHERE generation_id=? AND precision_eligible=1 "
-        "ORDER BY evidence_score DESC,source_order ASC",
-        (gid,),
-    )
+    # Model Performance measures the exact default precision-first Singles product.
+    # V13 persists precision_eligible directly. Retained v12 bundles predate that column,
+    # but already persist all immutable inputs needed to reproduce the same gate exactly.
+    candidate_columns={
+        str(row[1])
+        for row in db.execute("PRAGMA table_info(prepared_pattern_candidates)").fetchall()
+    }
+    if "precision_eligible" in candidate_columns:
+        src=rows(
+            db,
+            "SELECT * FROM prepared_pattern_candidates "
+            "WHERE generation_id=? AND precision_eligible=1 "
+            "ORDER BY evidence_score DESC,source_order ASC",
+            (gid,),
+        )
+    else:
+        src=rows(
+            db,
+            "SELECT c.* FROM prepared_pattern_candidates c "
+            "JOIN prepared_selections s "
+            "ON s.competition_id=c.competition_id "
+            "AND s.snapshot_version=c.snapshot_version "
+            "AND s.selection_key=c.selection_key "
+            "WHERE c.generation_id=? AND c.recommendation_eligible=1 "
+            "AND c.policy_premium_eligible=1 "
+            "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' "
+            "AND c.selection_odd>=1.50 "
+            "AND COALESCE(s.opponent_model_probability,s.bm_posterior_probability)>=0.75 "
+            "ORDER BY c.evidence_score DESC,c.source_order ASC",
+            (gid,),
+        )
     exact={}
     for r in src:
         k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''),str(r.get('exact_recommendation_key') or ''))
@@ -216,9 +238,9 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v7 measures only precision-qualified default Singles. Never carry forward older rows selected
-    # from the broad recommendation universe; they are re-materialized from immutable pre-match
-    # bundles after the persisted precision gate is applied before MAIN selection.
+    # Schema v7 measures only precision-qualified default Singles. Older ledger rows are never
+    # carried forward blindly: immutable pre-match bundles are re-materialized through the v13
+    # persisted precision flag or the exact equivalent v12 Strong+PolicyV2+75% contract.
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
