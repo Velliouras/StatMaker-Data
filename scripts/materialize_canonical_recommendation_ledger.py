@@ -15,6 +15,11 @@ RETIRED_SUB_MARKET_KEYS={
     'ASIAN_MATCH_CORNERS_TOTAL','ASIAN_CORNER_HANDICAP','CORNER_HANDICAP'
 }
 
+HISTORICAL_GATE_COUNTS={
+    'bundles':0,'candidates':0,'recommendationEligible':0,'policyEligible':0,
+    'strongValue':0,'odd150':0,'nonRetired':0,'independent75':0,
+}
+
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
     except Exception:return default
@@ -79,6 +84,47 @@ def final_candidates(db,gid):
             (gid,*retired_args),
         )
     else:
+        # Aggregate gate diagnostics for historical contracts. This is repository-only and lets us
+        # distinguish a genuinely empty v8 counterfactual from a migration/filter bug.
+        try:
+            diag=first(
+                db,
+                "SELECT "
+                "COUNT(*) AS candidates,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 THEN 1 ELSE 0 END) AS recommendationEligible,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 THEN 1 ELSE 0 END) AS policyEligible,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
+                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' THEN 1 ELSE 0 END) AS strongValue,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
+                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 THEN 1 ELSE 0 END) AS odd150,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
+                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 "
+                f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) THEN 1 ELSE 0 END) AS nonRetired,"
+                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
+                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 "
+                f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
+                "AND COALESCE("
+                "s.opponent_model_probability,"
+                "CASE WHEN s.value_signal_conservative_probability IS NOT NULL "
+                "AND s.value_signal_market_probability IS NOT NULL "
+                "AND s.value_signal_conservative_probability>s.value_signal_market_probability "
+                "AND ABS(s.value_signal_conservative_probability-s.bm_posterior_probability)>0.000000001 "
+                "THEN s.value_signal_conservative_probability END"
+                ")>=0.75 THEN 1 ELSE 0 END) AS independent75 "
+                "FROM prepared_pattern_candidates c "
+                "JOIN prepared_selections s "
+                "ON s.competition_id=c.competition_id "
+                "AND s.snapshot_version=c.snapshot_version "
+                "AND s.selection_key=c.selection_key "
+                "WHERE c.generation_id=?",
+                (gid,*retired_args,*retired_args),
+            ) or {}
+            HISTORICAL_GATE_COUNTS['bundles']+=1
+            for key in ('candidates','recommendationEligible','policyEligible','strongValue','odd150','nonRetired','independent75'):
+                HISTORICAL_GATE_COUNTS[key]+=intval(diag.get(key))
+        except sqlite3.Error:
+            HISTORICAL_GATE_COUNTS['bundles']+=1
+
         src=rows(
             db,
             "SELECT c.* FROM prepared_pattern_candidates c "
@@ -323,5 +369,6 @@ def main():
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
     print(f"canonical-ledger-v8 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print("CANONICAL_LEDGER_HISTORICAL_GATES "+json.dumps(HISTORICAL_GATE_COUNTS,sort_keys=True))
     return 0
 if __name__=='__main__':raise SystemExit(main())
