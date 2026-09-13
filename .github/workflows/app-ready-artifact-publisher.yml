@@ -105,8 +105,32 @@ jobs:
               and int(m.get('preparedBettingSchemaVersion') or 0) >= expected_schema
               and published_ids == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           )
-          rules_only_reuse=contract_migration and verified_v13_source
-          generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
+
+          event={}
+          event_path=os.environ.get('GITHUB_EVENT_PATH','')
+          if event_path and Path(event_path).is_file():
+              event=json.loads(Path(event_path).read_text())
+          changed_paths=set()
+          for commit in event.get('commits',[]) or []:
+              for key in ('added','modified','removed'):
+                  changed_paths.update(str(path) for path in (commit.get(key) or []))
+          rules_only_builder_paths={
+              'scripts/build_app_ready_rules_only.py',
+              'scripts/materialize_app_ready_pattern_candidates.py',
+              'scripts/materialize_prepared_fixture_index.py',
+          }
+          rules_only_code_change=bool(changed_paths & rules_only_builder_paths)
+
+          rules_only_reuse=verified_v13_source and (
+              contract_migration or rules_only_code_change
+          )
+          generate=(
+              os.environ.get('FORCE','false').lower()=='true'
+              or not old
+              or changed
+              or contract_migration
+              or rules_only_code_change
+          )
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write(f"generate={'true' if generate else 'false'}\n")
               f.write(f"contract_migration={'true' if contract_migration else 'false'}\n")
@@ -115,6 +139,7 @@ jobs:
               'APP_READY_PREFLIGHT',
               f'changed={str(changed).lower()}',
               f'contract_migration={str(contract_migration).lower()}',
+              f'rules_only_code_change={str(rules_only_code_change).lower()}',
               f'rules_only_reuse={str(rules_only_reuse).lower()}',
           )
           PY
