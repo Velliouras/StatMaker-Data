@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=8
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
 RULES_FINGERPRINT='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
 RETIRED_SUB_MARKET_KEYS={
     'RESULT_ASIAN_HANDICAP','HT_RESULT_ASIAN_HANDICAP',
@@ -295,12 +295,12 @@ def git_show(commit,path,out=None):
     except Exception:return None
 
 def latest_legacy_ledger():
-    """Load the last canonical precision ledger before schema v8.
+    """Load the last canonical actual-Singles ledger before the v8 precision cutover.
 
-    Historical App-Ready ZIPs published before the standalone-SQLite/WAL hardening can have
-    recommendation rows only in the publisher's WAL and therefore cannot be reconstructed from
-    the archived main .db alone. The canonical ledger committed at the time is the immutable
-    recommendation record, so use it as a migration source and re-apply the stricter v8 contract.
+    Pre-WAL-hardening App-Ready ZIPs cannot reliably reconstruct their candidate tables from the
+    archived main SQLite file alone. The canonical ledger committed at recommendation time is the
+    immutable record of what the app actually recommended, so historical Performance must preserve
+    those rows instead of retroactively re-scoring them with a newer model contract.
     """
     try:
         commits=subprocess.run(
@@ -314,26 +314,23 @@ def latest_legacy_ledger():
         if not raw:continue
         try: root=json.loads(raw.decode())
         except Exception:continue
-        if intval(root.get('schemaVersion'))<SCHEMA_VERSION and isinstance(root.get('entries'),list):
+        if intval(root.get('schemaVersion'))<=7 and isinstance(root.get('entries'),list):
             return root,commit
     return {},''
 
-def legacy_v8_rows():
+def legacy_actual_rows(as_of_day):
     root,commit=latest_legacy_ledger()
     if not root:return [],''
     out=[]
+    cutoff=as_of_day.isoformat()
     for row in root.get('entries',[]):
         if not isinstance(row,dict) or not valid_fixture_identity(row):continue
-        if str(row.get('valueTier') or '').strip().upper().replace(' ','_')!='STRONG_VALUE':continue
-        if num(row.get('odd'))<1.50:continue
-        if str(row.get('subMarketKey') or '') in RETIRED_SUB_MARKET_KEYS:continue
-        source=str(row.get('predictionSource') or '').strip().upper()
-        if source not in {'OPPONENT_ADJUSTED','STRONG_PATTERN'}:continue
-        if num(row.get('modelProbability'))<0.75:continue
+        day=str(row.get('localDate') or '')[:10]
+        if not day or day>cutoff:continue
         out.append(dict(row))
     print(
-        f"CANONICAL_LEDGER_LEGACY_V8_MIGRATION commit={commit[:12]} "
-        f"sourceRows={len(root.get('entries',[]))} eligibleRows={len(out)}"
+        f"CANONICAL_LEDGER_LEGACY_ACTUAL_MIGRATION commit={commit[:12]} "
+        f"sourceRows={len(root.get('entries',[]))} historicalRows={len(out)} cutoff={cutoff}"
     )
     return out,commit
 
@@ -383,7 +380,7 @@ def main():
 
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
-    legacy_rows,legacy_commit=legacy_v8_rows()
+    legacy_rows,legacy_commit=legacy_actual_rows(today)
     allr=[
         r for r in [*legacy_rows,*existing,*current]
         if str(r.get('matchKey') or '').strip() not in invalidated
@@ -408,8 +405,9 @@ def main():
     sem={
         'schemaVersion':SCHEMA_VERSION,
         'retentionDays':RETENTION,
-        'source':'canonical-app-ready-default-independent-precision-no-asian-handicap-v8',
+        'source':'canonical-actual-singles-history-v9',
         'legacyMigrationCommit':legacy_commit,
+        'currentEngineRulesFingerprint':RULES_FINGERPRINT,
         'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),
         'backfillSourceCounts':{x:evidence[x] for x in sorted(done) if low.isoformat()<=x<=today.isoformat()},
         'invalidatedMatchKeys':sorted(invalidated),
@@ -420,7 +418,7 @@ def main():
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v8 currentBundles={len(cb)} currentRows={len(merge(current))} legacyRows={len(legacy_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v9 currentBundles={len(cb)} currentRows={len(merge(current))} legacyRows={len(legacy_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     print("CANONICAL_LEDGER_HISTORICAL_GATES "+json.dumps(HISTORICAL_GATE_COUNTS,sort_keys=True))
     return 0
 if __name__=='__main__':raise SystemExit(main())
