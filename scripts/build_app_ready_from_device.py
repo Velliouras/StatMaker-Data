@@ -328,6 +328,7 @@ def validate_generated_betting(source_exact_markets):
             required_indexes = {
                 "idx_prepared_pattern_generation_ready",
                 "idx_prepared_pattern_candidates_scope",
+                "idx_prepared_pattern_candidates_precision_scope",
                 "idx_prepared_pattern_candidates_rank",
                 "idx_prepared_pattern_candidates_competition_rank",
             }

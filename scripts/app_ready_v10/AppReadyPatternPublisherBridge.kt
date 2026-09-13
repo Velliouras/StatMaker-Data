@@ -71,6 +71,7 @@ internal object AppReadyPatternSchema {
             )
             """.trimIndent()
         )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_precision_scope ON prepared_pattern_candidates(generation_id, competition_id, local_date, match_key, precision_eligible, selection_odd)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_rank ON prepared_pattern_candidates(generation_id, evidence_score DESC, source_order ASC)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_competition_rank ON prepared_pattern_candidates(generation_id, competition_id, evidence_score DESC, source_order ASC)")
     }
