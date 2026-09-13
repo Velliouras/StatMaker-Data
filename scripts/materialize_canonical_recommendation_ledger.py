@@ -7,7 +7,13 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=7
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=8
+RULES_FINGERPRINT='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
+RETIRED_SUB_MARKET_KEYS={
+    'RESULT_ASIAN_HANDICAP','HT_RESULT_ASIAN_HANDICAP',
+    'ASIAN_MATCH_GOALS_TOTAL','ASIAN_FIRST_HALF_GOALS_TOTAL',
+    'ASIAN_MATCH_CORNERS_TOTAL','ASIAN_CORNER_HANDICAP','CORNER_HANDICAP'
+}
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -48,20 +54,29 @@ def current_bundles():
     return sorted(p,key=lambda x:(x.name!=current,-x.stat().st_mtime))[:2]
 
 def final_candidates(db,gid):
-    # Model Performance measures the exact default precision-first Singles product.
-    # V13 persists precision_eligible directly. Retained v12 bundles predate that column,
-    # but already persist all immutable inputs needed to reproduce the same gate exactly.
+    # Schema v8 measures the retired-market-free precision product. Only a generation built with
+    # the exact v8 contract may trust persisted precision_eligible. Older bundles are re-evaluated
+    # from immutable recommendation-time evidence using the same independent-confidence rule.
+    generation=first(db,"SELECT rules_fingerprint FROM prepared_pattern_generation WHERE generation_id=? LIMIT 1",(gid,))
+    rules=str((generation or {}).get('rules_fingerprint') or '')
+    retired_sql=",".join("?" for _ in RETIRED_SUB_MARKET_KEYS)
+    retired_args=tuple(sorted(RETIRED_SUB_MARKET_KEYS))
     candidate_columns={
         str(row[1])
         for row in db.execute("PRAGMA table_info(prepared_pattern_candidates)").fetchall()
     }
-    if "precision_eligible" in candidate_columns:
+    if "precision_eligible" in candidate_columns and rules==RULES_FINGERPRINT:
         src=rows(
             db,
-            "SELECT * FROM prepared_pattern_candidates "
-            "WHERE generation_id=? AND precision_eligible=1 "
-            "ORDER BY evidence_score DESC,source_order ASC",
-            (gid,),
+            "SELECT c.* FROM prepared_pattern_candidates c "
+            "JOIN prepared_selections s "
+            "ON s.competition_id=c.competition_id "
+            "AND s.snapshot_version=c.snapshot_version "
+            "AND s.selection_key=c.selection_key "
+            "WHERE c.generation_id=? AND c.precision_eligible=1 "
+            f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
+            "ORDER BY c.evidence_score DESC,c.source_order ASC",
+            (gid,*retired_args),
         )
     else:
         src=rows(
@@ -75,9 +90,17 @@ def final_candidates(db,gid):
             "AND c.policy_premium_eligible=1 "
             "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' "
             "AND c.selection_odd>=1.50 "
-            "AND COALESCE(s.opponent_model_probability,s.bm_posterior_probability)>=0.75 "
+            f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
+            "AND COALESCE("
+            "s.opponent_model_probability,"
+            "CASE WHEN s.value_signal_conservative_probability IS NOT NULL "
+            "AND s.value_signal_market_probability IS NOT NULL "
+            "AND s.value_signal_conservative_probability>s.value_signal_market_probability "
+            "AND ABS(s.value_signal_conservative_probability-s.bm_posterior_probability)>0.000000001 "
+            "THEN s.value_signal_conservative_probability END"
+            ")>=0.75 "
             "ORDER BY c.evidence_score DESC,c.source_order ASC",
-            (gid,),
+            (gid,*retired_args),
         )
     exact={}
     for r in src:
@@ -176,11 +199,20 @@ def extract(bundle,target=None):
                     gd=dt.datetime.fromtimestamp(built/1000,tz=dt.timezone.utc).astimezone(ATHENS).date().isoformat() if built else ''
                     if not day or day<=gd:continue
                 sub=str(s.get('identity_sub_market_key') or '')
+                if sub in RETIRED_SUB_MARKET_KEYS:continue
                 hp=list(live._names_from_match_payload(m,'home')); ap=list(live._names_from_match_payload(m,'away'))
                 if not hp or not ap:continue
                 identity_probe={'homeNames':hp,'awayNames':ap,'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or '')}
                 if not valid_fixture_identity(identity_probe):continue
                 mp=nullable(s.get('opponent_model_probability')); post=nullable(s.get('bm_posterior_probability'))
+                conservative=nullable(s.get('value_signal_conservative_probability'))
+                signal_market=nullable(s.get('value_signal_market_probability'))
+                independent=mp
+                prediction_source='OPPONENT_ADJUSTED' if mp is not None else None
+                if independent is None and conservative is not None and signal_market is not None and post is not None and conservative>signal_market and abs(conservative-post)>0.000000001:
+                    independent=conservative
+                    prediction_source='STRONG_PATTERN'
+                if independent is None or independent<0.75:continue
                 out.append({
                   'generationId':gid,'generationBuiltAtMs':built,'competitionId':comp,'snapshotVersion':snap,'selectionKey':sk,
                   'matchKey':candidate_match_key,'localDate':day,'leagueCode':str(c.get('league_code') or m.get('leagueCode') or '').upper(),
@@ -188,11 +220,11 @@ def extract(bundle,target=None):
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'kickoffEpochMillis':ko,'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
-                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
+                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':independent,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
-                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':'OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR','requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
+                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':prediction_source,'requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
             if rejected_identity:
                 print(f"CANONICAL_LEDGER_IDENTITY_REJECTED bundle={bundle.name} rows={rejected_identity}")
             return out
@@ -238,9 +270,8 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v7 measures only precision-qualified default Singles. Older ledger rows are never
-    # carried forward blindly: immutable pre-match bundles are re-materialized through the v13
-    # persisted precision flag or the exact equivalent v12 Strong+PolicyV2+75% contract.
+    # Schema v8 retires all Asian/handicap markets and requires independent predictive confidence.
+    # Older ledger rows are never carried forward blindly; historical bundles are re-materialized.
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
@@ -260,12 +291,12 @@ def main():
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-precision-singles-ledger-v7','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-independent-precision-no-asian-handicap-v8','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v6 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v8 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
