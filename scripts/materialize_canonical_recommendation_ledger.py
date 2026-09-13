@@ -218,7 +218,7 @@ def main():
 
     # Schema v7 measures only precision-qualified default Singles. Never carry forward older rows selected
     # from the broad recommendation universe; they are re-materialized from immutable pre-match
-    # bundles after Strong Value + minimum odd 1.50 are applied before MAIN selection.
+    # bundles after the persisted precision gate is applied before MAIN selection.
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):

@@ -392,7 +392,7 @@ def validate_generated_betting(source_exact_markets):
             )
             if missing_performance_columns:
                 raise SystemExit(
-                    "Refusing app-ready publish: missing v12 performance/value-signal columns: "
+                    "Refusing app-ready publish: missing v13 performance/value-signal columns: "
                     + ", ".join(missing_performance_columns)
                 )
 
@@ -486,6 +486,32 @@ def validate_generated_betting(source_exact_markets):
                 raise SystemExit(
                     "Precision Singles contract violation: "
                     f"invalid={invalid_precision_count}"
+                )
+            precision_probability_mismatches = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=? AND c.recommendation_eligible=1
+                      AND (
+                        c.precision_probability IS NULL
+                        OR ABS(
+                            c.precision_probability -
+                            COALESCE(s.opponent_model_probability, s.bm_posterior_probability)
+                        ) > 0.000000001
+                      )
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if precision_probability_mismatches:
+                raise SystemExit(
+                    "Precision probability parity mismatch: "
+                    f"invalid={precision_probability_mismatches}"
                 )
             performance_row_count = int(
                 connection.execute(
@@ -615,6 +641,7 @@ def validate_generated_betting(source_exact_markets):
                 "rulesFingerprint": PREPARED_PATTERN_RULES_FINGERPRINT,
                 "candidateCount": actual_candidate_count,
                 "recommendationEligibleCount": eligible_candidate_count,
+                "precisionEligibleCount": precision_candidate_count,
                 "performanceRowCount": performance_row_count,
                 "opponentAdjustedRequiredCount": opponent_required_count,
                 "opponentModelCount": opponent_model_count,
@@ -636,6 +663,7 @@ def validate_generated_betting(source_exact_markets):
         f"generation={pattern_meta['generationId']}",
         f"candidates={pattern_meta['candidateCount']}",
         f"eligible={pattern_meta['recommendationEligibleCount']}",
+        f"precision={pattern_meta['precisionEligibleCount']}",
         f"performance={pattern_meta['performanceRowCount']}",
         f"opponent_models={pattern_meta['opponentModelCount']}",
         f"favorite_shadow={pattern_meta['favoriteShadowCount']}",
@@ -791,6 +819,7 @@ manifest = {
         "preparedPatternRulesFingerprint": prepared_pattern["rulesFingerprint"],
         "preparedPatternCandidateCount": prepared_pattern["candidateCount"],
         "preparedPatternRecommendationEligibleCount": prepared_pattern["recommendationEligibleCount"],
+        "preparedPrecisionSinglesEligibleCount": prepared_pattern["precisionEligibleCount"],
         "preparedPerformanceRowCount": prepared_pattern["performanceRowCount"],
         "preparedOpponentAdjustedRequiredCount": prepared_pattern["opponentAdjustedRequiredCount"],
         "preparedOpponentModelCount": prepared_pattern["opponentModelCount"],

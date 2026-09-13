@@ -566,7 +566,7 @@ for raw in sys.argv[1:]:
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
             if user_version < 13:
-                raise SystemExit(f"Prepared DB schema must be >=12; got {user_version}")
+                raise SystemExit(f"Prepared DB schema must be >=13; got {user_version}")
 
             tables = {
                 row[0]
@@ -581,7 +581,7 @@ for raw in sys.argv[1:]:
             missing_tables = sorted(required_tables - tables)
             if missing_tables:
                 raise SystemExit(
-                    "Prepared DB missing v12 recommendation tables: " + ", ".join(missing_tables)
+                    "Prepared DB missing v13 recommendation tables: " + ", ".join(missing_tables)
                 )
 
             indexes = {
@@ -599,7 +599,23 @@ for raw in sys.argv[1:]:
             missing_indexes = sorted(required_indexes - indexes)
             if missing_indexes:
                 raise SystemExit(
-                    "Prepared DB missing v12 recommendation indexes: " + ", ".join(missing_indexes)
+                    "Prepared DB missing v13 recommendation indexes: " + ", ".join(missing_indexes)
+                )
+
+            candidate_columns = {
+                row[1]
+                for row in connection.execute("PRAGMA table_info(prepared_pattern_candidates)").fetchall()
+            }
+            required_candidate_columns = {
+                "precision_probability",
+                "precision_eligible",
+                "precision_rejection_reason",
+            }
+            missing_candidate_columns = sorted(required_candidate_columns - candidate_columns)
+            if missing_candidate_columns:
+                raise SystemExit(
+                    "Prepared DB missing v13 precision candidate columns: "
+                    + ", ".join(missing_candidate_columns)
                 )
 
             selection_columns = {
@@ -649,9 +665,9 @@ for raw in sys.argv[1:]:
             opponent_models = int(domestic_context[1] or 0)
             favorite_shadow = int(domestic_context[2] or 0)
             if required_context > 0 and opponent_models <= 0:
-                raise SystemExit("Prepared v12 Domestic snapshot has required opponent context but no model probabilities")
+                raise SystemExit("Prepared v13 Domestic snapshot has required opponent context but no model probabilities")
             if opponent_models > 0 and favorite_shadow <= 0:
-                raise SystemExit("Prepared v12 Domestic snapshot has opponent models but no Favorite shadow")
+                raise SystemExit("Prepared v13 Domestic snapshot has opponent models but no Favorite shadow")
 
             generation = connection.execute(
                 """

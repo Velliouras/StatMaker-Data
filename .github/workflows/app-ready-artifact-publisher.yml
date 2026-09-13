@@ -597,16 +597,18 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 13
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v7-precision-singles-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
+          precision=int(metadata.get('preparedPrecisionSinglesEligibleCount') or 0)
           performance_rows=int(metadata.get('preparedPerformanceRowCount') or 0)
           opponent_required=int(metadata.get('preparedOpponentAdjustedRequiredCount') or 0)
           opponent_models=int(metadata.get('preparedOpponentModelCount') or 0)
           favorite_shadow=int(metadata.get('preparedFavoriteShadowCount') or 0)
           assert eligible > 0
+          assert 0 <= precision <= eligible
           assert performance_rows == eligible
           assert opponent_required == 0 or opponent_models > 0
           assert opponent_models == 0 or favorite_shadow > 0
@@ -622,6 +624,7 @@ jobs:
               'generation='+metadata['preparedPatternGenerationId'],
               'candidates='+str(metadata['preparedPatternCandidateCount']),
               'eligible='+str(metadata['preparedPatternRecommendationEligibleCount']),
+              'precision='+str(metadata['preparedPrecisionSinglesEligibleCount']),
               'performance='+str(metadata['preparedPerformanceRowCount']),
               'opponent_models='+str(metadata['preparedOpponentModelCount']),
               'favorite_shadow='+str(metadata['preparedFavoriteShadowCount']),

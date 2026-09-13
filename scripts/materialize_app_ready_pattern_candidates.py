@@ -329,12 +329,7 @@ class MaturityIndex:
             "APP_READY_HOST_MATURITY_INDEX_OK",
             f"domestic_teams={len(self.domestic)}",
             f"uefa_teams={len(self.european)}",
-            "precision_rejections=" + ",".join(
-            f"{key}:{value}"
-            for key, value in sorted(precision_rejection_counts.items())
-            if key != "ELIGIBLE"
-        ),
-        f"elapsed_ms={int((time.monotonic() - started) * 1000)}",
+            f"elapsed_ms={int((time.monotonic() - started) * 1000)}",
         )
 
     def resolve(self, match):
@@ -735,6 +730,7 @@ def materialize(checkpoint_root, raw_root):
                 match, policy_probability, maturity, eligible
             )
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
+            precision_probability = policy_probability if eligible else None
             precision_eligible, precision_rejection_reason = precision_decision(
                 value_signal_tier,
                 odd,
@@ -785,7 +781,7 @@ def materialize(checkpoint_root, raw_root):
                     1 if eligible else 0,
                     1 if premium else 0,
                     rejection_reason,
-                    policy_probability,
+                    precision_probability,
                     1 if precision_eligible else 0,
                     precision_rejection_reason,
                 )
@@ -878,6 +874,11 @@ def materialize(checkpoint_root, raw_root):
         "rejections=" + ",".join(
             f"{key}:{value}"
             for key, value in sorted(rejection_counts.items())
+            if key != "ELIGIBLE"
+        ),
+        "precision_rejections=" + ",".join(
+            f"{key}:{value}"
+            for key, value in sorted(precision_rejection_counts.items())
             if key != "ELIGIBLE"
         ),
         f"elapsed_ms={int((time.monotonic() - started) * 1000)}",
