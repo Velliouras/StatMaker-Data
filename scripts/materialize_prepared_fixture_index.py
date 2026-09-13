@@ -277,12 +277,18 @@ def materialize(prepared_db: Path) -> dict[str, int]:
         SELECT competition_id, snapshot_version, catalog_payload
         FROM prepared_snapshot_meta
         WHERE state='ready'
+        ORDER BY competition_id, built_at_ms DESC, snapshot_version DESC
         """
     ).fetchall()
-    by_competition = {str(row[0]): (str(row[1]), str(row[2])) for row in rows}
-    if set(by_competition) != set(COMPETITIONS):
+    if len(rows) != len(COMPETITIONS):
         raise SystemExit(
-            f"Prepared DB does not contain exact 4/4 READY snapshots: {sorted(by_competition)}"
+            f"Prepared DB must contain exactly {len(COMPETITIONS)} READY rows, found={len(rows)}"
+        )
+    by_competition = {str(row[0]): (str(row[1]), str(row[2])) for row in rows}
+    if set(by_competition) != set(COMPETITIONS) or len(by_competition) != len(COMPETITIONS):
+        raise SystemExit(
+            f"Prepared DB does not contain exactly one READY snapshot per competition: "
+            f"{sorted(by_competition)}"
         )
 
     create_schema(connection)
