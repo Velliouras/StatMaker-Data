@@ -14,7 +14,7 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
-PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1"
 PREPARED_PATTERN_SCHEMA_VERSION = 13
 PREPARED_PATTERN_COMPETITIONS = (
     "domestic",
@@ -497,13 +497,23 @@ def validate_generated_betting(source_exact_markets):
                       ON s.competition_id=c.competition_id
                      AND s.snapshot_version=c.snapshot_version
                      AND s.selection_key=c.selection_key
-                    WHERE c.generation_id=? AND c.recommendation_eligible=1
+                    WHERE c.generation_id=? AND c.precision_eligible=1
                       AND (
                         c.precision_probability IS NULL
-                        OR ABS(
-                            c.precision_probability -
-                            COALESCE(s.opponent_model_probability, s.bm_posterior_probability)
-                        ) > 0.000000001
+                        OR (
+                            s.opponent_model_probability IS NOT NULL
+                            AND ABS(c.precision_probability - s.opponent_model_probability) > 0.000000001
+                        )
+                        OR (
+                            s.opponent_model_probability IS NULL
+                            AND (
+                                s.value_signal_conservative_probability IS NULL
+                                OR s.value_signal_market_probability IS NULL
+                                OR s.value_signal_conservative_probability <= s.value_signal_market_probability
+                                OR ABS(s.value_signal_conservative_probability - s.bm_posterior_probability) <= 0.000000001
+                                OR ABS(c.precision_probability - s.value_signal_conservative_probability) > 0.000000001
+                            )
+                        )
                       )
                     """,
                     (generation_id,),
@@ -514,6 +524,35 @@ def validate_generated_betting(source_exact_markets):
                     "Precision probability parity mismatch: "
                     f"invalid={precision_probability_mismatches}"
                 )
+            retired_candidate_count = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=?
+                      AND s.identity_sub_market_key IN (
+                        'RESULT_ASIAN_HANDICAP',
+                        'HT_RESULT_ASIAN_HANDICAP',
+                        'ASIAN_MATCH_GOALS_TOTAL',
+                        'ASIAN_FIRST_HALF_GOALS_TOTAL',
+                        'ASIAN_MATCH_CORNERS_TOTAL',
+                        'ASIAN_CORNER_HANDICAP',
+                        'CORNER_HANDICAP'
+                      )
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if retired_candidate_count:
+                raise SystemExit(
+                    "Retired Asian/handicap markets leaked into prepared candidates: "
+                    f"invalid={retired_candidate_count}"
+                )
+
             performance_row_count = int(
                 connection.execute(
                     """
@@ -527,15 +566,15 @@ def validate_generated_betting(source_exact_markets):
                       ON m.competition_id=s.competition_id
                      AND m.snapshot_version=s.snapshot_version
                      AND m.match_key=s.match_key
-                    WHERE c.generation_id=? AND c.recommendation_eligible=1
+                    WHERE c.generation_id=? AND c.precision_eligible=1
                     """,
                     (generation_id,),
                 ).fetchone()[0]
             )
-            if performance_row_count != eligible_candidate_count:
+            if performance_row_count != precision_candidate_count:
                 raise SystemExit(
-                    "Canonical Performance ledger join mismatch: "
-                    f"eligible={eligible_candidate_count} precision={precision_candidate_count} joined={performance_row_count}"
+                    "Canonical Performance precision join mismatch: "
+                    f"precision={precision_candidate_count} joined={performance_row_count}"
                 )
 
             value_signal_mismatches = int(
