@@ -449,7 +449,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         env:
-          RECOVERY_PUBLISH: ${{ (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) || steps.preflight.outputs.rules_only_reuse == 'true' && 'true' || 'false' }}
+          RECOVERY_PUBLISH: ${{ ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) || steps.preflight.outputs.rules_only_reuse == 'true') && 'true' || 'false' }}
         run: |
           set -euo pipefail
           python - <<'PY'
