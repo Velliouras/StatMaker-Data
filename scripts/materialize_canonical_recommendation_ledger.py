@@ -311,7 +311,7 @@ def history(day):
     return merge(out),n
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
+    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); ap.add_argument('--reprobe-authoritative',action='store_true'); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
@@ -344,7 +344,7 @@ def main():
     for off in range(1,RETENTION+1):
         if len(processed)>=limit:break
         day=today-dt.timedelta(days=off); iso=day.isoformat()
-        if iso in done:continue
+        if iso in done and not a.reprobe_authoritative:continue
         r,n=history(day)
         if n<=0:
             print(f"CANONICAL_LEDGER_BACKFILL_SOURCE_MISSING date={iso}")
@@ -352,7 +352,8 @@ def main():
         # Only a source-proven backfill day is an authoritative replacement. Zero qualifying v8
         # recommendations is valid when n>0; n==0 is unknown and must never delete local history.
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
-        allr.extend(r); hb+=n; hr+=len(r); evidence[iso]=n; done.add(iso); processed.append(iso)
+        allr.extend(r); hb+=n; hr+=len(r); evidence[iso]=n; done.add(iso)
+        if iso not in processed:processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
     sem={
         'schemaVersion':SCHEMA_VERSION,
