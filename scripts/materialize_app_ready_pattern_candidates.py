@@ -13,9 +13,18 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1"
 PRECISION_MIN_PROBABILITY = 0.75
 PRECISION_MIN_ODD = 1.50
+RETIRED_SUB_MARKET_KEYS = {
+    "RESULT_ASIAN_HANDICAP",
+    "HT_RESULT_ASIAN_HANDICAP",
+    "ASIAN_MATCH_GOALS_TOTAL",
+    "ASIAN_FIRST_HALF_GOALS_TOTAL",
+    "ASIAN_MATCH_CORNERS_TOTAL",
+    "ASIAN_CORNER_HANDICAP",
+    "CORNER_HANDICAP",
+}
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -483,7 +492,9 @@ def precision_decision(value_tier, odd, probability, premium, eligible):
         return False, "REJECTED_PRECISION_ODD_LT_1_50"
     if not premium:
         return False, "REJECTED_PRECISION_POLICY_V2"
-    if probability is None or probability < PRECISION_MIN_PROBABILITY:
+    if probability is None:
+        return False, "REJECTED_PRECISION_INDEPENDENT_EVIDENCE_UNAVAILABLE"
+    if probability < PRECISION_MIN_PROBABILITY:
         return False, "REJECTED_PRECISION_PROBABILITY_LT_75"
     return True, None
 
@@ -668,6 +679,9 @@ def materialize(checkpoint_root, raw_root):
             source_order += 1
             count += 1
 
+            if str(sub_market_key) in RETIRED_SUB_MARKET_KEYS:
+                continue
+
             required = (
                 hits, sample, hit_rate, market_probability, posterior_probability,
                 sample_reliability, normalized_positive_edge, broad_group,
@@ -730,11 +744,24 @@ def materialize(checkpoint_root, raw_root):
                 match, policy_probability, maturity, eligible
             )
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
-            precision_probability = policy_probability if eligible else None
+            precision_probability = None
+            if eligible:
+                if opponent_model_probability is not None:
+                    precision_probability = float(opponent_model_probability)
+                elif (
+                    value_signal_conservative_probability is not None
+                    and value_signal_market_probability is not None
+                    and float(value_signal_conservative_probability) > float(value_signal_market_probability)
+                    and abs(float(value_signal_conservative_probability) - posterior_probability) > 1e-9
+                ):
+                    # No opponent model: a persisted strong-pattern lower confidence bound is
+                    # independent of the bookmaker posterior and may qualify the precision gate.
+                    precision_probability = float(value_signal_conservative_probability)
+
             precision_eligible, precision_rejection_reason = precision_decision(
                 value_signal_tier,
                 odd,
-                policy_probability,
+                precision_probability,
                 premium,
                 eligible,
             )
