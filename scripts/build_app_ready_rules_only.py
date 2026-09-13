@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Re-materialize only the recommendation contract from the latest verified App-Ready source.
 
+READY snapshot identity is normalized before generation hashing so Kotlin/Python parity is stable.
+
 This path is intentionally emulator-free. It is valid only when the published betting source is
 already schema v13 and the source bundles are verified by their published SHA/size. The immutable
 prepared selections/history remain unchanged; only the rules-dependent recommendation generation,
