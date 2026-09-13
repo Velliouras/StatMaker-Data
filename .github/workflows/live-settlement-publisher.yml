@@ -117,7 +117,7 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           API_FOOTBALL_DAILY_RESERVE: "1500"
-          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'Fix canonical ledger backfill authority') || startsWith(github.event.head_commit.message, 'Restore actual Performance history v9')) && '2' || '80') }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'Fix canonical ledger backfill authority') || (startsWith(github.event.head_commit.message, 'Restore actual Performance history v9') || startsWith(github.event.head_commit.message, 'Retire Asian Handicap from Performance v10'))) && '2' || '80') }}
         shell: bash
         run: |
           set -euo pipefail

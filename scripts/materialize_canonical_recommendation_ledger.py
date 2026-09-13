@@ -7,7 +7,8 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=10
+CURRENT_CONTRACT_START=dt.date(2026,9,13)
 RULES_FINGERPRINT='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
 RETIRED_SUB_MARKET_KEYS={
     'RESULT_ASIAN_HANDICAP','HT_RESULT_ASIAN_HANDICAP',
@@ -318,19 +319,35 @@ def latest_legacy_ledger():
             return root,commit
     return {},''
 
+def row_is_retired(row):
+    sub=str(row.get('subMarketKey') or '').strip().upper()
+    market=str(row.get('market') or '').strip().upper()
+    selection=str(row.get('selection') or '').strip().upper()
+    return (
+        sub in RETIRED_SUB_MARKET_KEYS
+        or 'ASIAN' in market
+        or 'HANDICAP' in market
+        or 'ASIAN' in selection
+        or 'HANDICAP' in selection
+    )
+
 def legacy_actual_rows(as_of_day):
     root,commit=latest_legacy_ledger()
     if not root:return [],''
-    out=[]
+    out=[]; retired=0
     cutoff=as_of_day.isoformat()
     for row in root.get('entries',[]):
         if not isinstance(row,dict) or not valid_fixture_identity(row):continue
         day=str(row.get('localDate') or '')[:10]
         if not day or day>cutoff:continue
+        if row_is_retired(row):
+            retired+=1
+            continue
         out.append(dict(row))
     print(
         f"CANONICAL_LEDGER_LEGACY_ACTUAL_MIGRATION commit={commit[:12]} "
-        f"sourceRows={len(root.get('entries',[]))} historicalRows={len(out)} cutoff={cutoff}"
+        f"sourceRows={len(root.get('entries',[]))} historicalRows={len(out)} "
+        f"retiredRows={retired} cutoff={cutoff}"
     )
     return out,commit
 
@@ -361,7 +378,15 @@ def main():
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
-            if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
+            if (
+                isinstance(r,dict)
+                and r.get('market')
+                and r.get('selection')
+                and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
+                and valid_fixture_identity(r)
+                and not row_is_retired(r)
+            ):
+                existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
 
     # A date is authoritative only when we can prove that at least one historical App-Ready
@@ -380,7 +405,7 @@ def main():
 
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
-    legacy_rows,legacy_commit=legacy_actual_rows(today)
+    legacy_rows,legacy_commit=legacy_actual_rows(CURRENT_CONTRACT_START-dt.timedelta(days=1))
     allr=[
         r for r in [*legacy_rows,*existing,*current]
         if str(r.get('matchKey') or '').strip() not in invalidated
@@ -396,7 +421,10 @@ def main():
         # Only a source-proven backfill day is authoritative. For pre-WAL-hardening archives,
         # an empty reconstructed day does not override canonical legacy rows that independently pass
         # the v8 contract; those rows are the immutable recommendation-time record.
-        legacy_day=[x for x in legacy_rows if str(x.get('localDate') or '')[:10]==iso]
+        legacy_day=[
+            x for x in legacy_rows
+            if str(x.get('localDate') or '')[:10]==iso
+        ] if day<CURRENT_CONTRACT_START else []
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r if r else legacy_day)
         hb+=n; hr+=len(r); evidence[iso]=n; done.add(iso)
@@ -405,9 +433,10 @@ def main():
     sem={
         'schemaVersion':SCHEMA_VERSION,
         'retentionDays':RETENTION,
-        'source':'canonical-actual-singles-history-v9',
+        'source':'canonical-actual-singles-no-retired-history-v10',
         'legacyMigrationCommit':legacy_commit,
         'currentEngineRulesFingerprint':RULES_FINGERPRINT,
+        'currentContractStart':CURRENT_CONTRACT_START.isoformat(),
         'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),
         'backfillSourceCounts':{x:evidence[x] for x in sorted(done) if low.isoformat()<=x<=today.isoformat()},
         'invalidatedMatchKeys':sorted(invalidated),
@@ -418,7 +447,7 @@ def main():
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v9 currentBundles={len(cb)} currentRows={len(merge(current))} legacyRows={len(legacy_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v10 currentBundles={len(cb)} currentRows={len(merge(current))} legacyRows={len(legacy_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     print("CANONICAL_LEDGER_HISTORICAL_GATES "+json.dumps(HISTORICAL_GATE_COUNTS,sort_keys=True))
     return 0
 if __name__=='__main__':raise SystemExit(main())
