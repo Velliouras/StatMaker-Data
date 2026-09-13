@@ -101,6 +101,73 @@ def extract_verified_source(stats_zip: Path, betting_zip: Path, seed: Path) -> N
         raise SystemExit("Verified App-Ready source is incomplete: " + ", ".join(missing))
 
 
+def finalize_sqlite_for_bundle(db_path: Path) -> None:
+    """Merge any WAL into the main DB and make the database self-contained for the ZIP."""
+    if not db_path.is_file():
+        raise SystemExit(f"Prepared DB is missing before finalize: {db_path}")
+
+    connection = sqlite3.connect(db_path)
+    try:
+        connection.commit()
+        mode = str(connection.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+        if mode == "wal":
+            checkpoint = connection.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+            print("APP_READY_SQLITE_WAL_CHECKPOINT", checkpoint)
+        connection.execute("PRAGMA journal_mode=DELETE").fetchone()
+        connection.commit()
+    finally:
+        connection.close()
+
+    for suffix in ("-wal", "-shm", "-journal"):
+        sidecar = Path(str(db_path) + suffix)
+        if sidecar.exists():
+            sidecar.unlink()
+
+    # The bundle must be valid from the main SQLite file alone.
+    standalone = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        quick = standalone.execute("PRAGMA quick_check").fetchone()
+        if not quick or str(quick[0]).lower() != "ok":
+            raise SystemExit(f"Standalone prepared DB quick_check failed: {quick}")
+        mode = str(standalone.execute("PRAGMA journal_mode").fetchone()[0]).lower()
+        if mode == "wal":
+            raise SystemExit("Prepared DB remained in WAL mode after finalize")
+    finally:
+        standalone.close()
+
+
+def validate_betting_zip(bundle_path: Path, expected_generation: str) -> None:
+    """Validate the exact prepared DB bytes that the phone will receive from the ZIP."""
+    with tempfile.TemporaryDirectory(prefix="statmaker-betting-zip-verify-") as temp:
+        root = Path(temp)
+        with zipfile.ZipFile(bundle_path) as archive:
+            names = set(archive.namelist())
+            required = "databases/statmaker_prepared_betting.db"
+            if required not in names:
+                raise SystemExit("Betting ZIP is missing prepared DB")
+            forbidden = [
+                name for name in names
+                if name.endswith((".db-wal", ".db-shm", ".db-journal"))
+            ]
+            if forbidden:
+                raise SystemExit("Betting ZIP contains SQLite sidecars: " + ", ".join(forbidden))
+            archive.extract(required, root)
+
+        extracted = root / required
+        verified = validate_rules_generation(extracted)
+        if verified["generationId"] != expected_generation:
+            raise SystemExit(
+                "Bundled prepared DB generation mismatch: "
+                f"expected={expected_generation} actual={verified['generationId']}"
+            )
+        print(
+            "APP_READY_BETTING_ZIP_DB_OK",
+            f"generation={verified['generationId']}",
+            f"precision={verified['precisionEligibleCount']}",
+            f"performance={verified['performanceRowCount']}",
+        )
+
+
 def bundle_betting(raw_root: Path) -> dict:
     sources = {
         "databases/statmaker_prepared_betting.db": raw_root / "databases" / "statmaker_prepared_betting.db",
@@ -459,9 +526,9 @@ def main() -> None:
         pattern_materializer.materialize(seed, RAW)
         fixture_materializer.materialize(RAW / "databases" / "statmaker_prepared_betting.db")
 
-    rules_meta = validate_rules_generation(
-        RAW / "databases" / "statmaker_prepared_betting.db"
-    )
+    prepared_db = RAW / "databases" / "statmaker_prepared_betting.db"
+    finalize_sqlite_for_bundle(prepared_db)
+    rules_meta = validate_rules_generation(prepared_db)
 
     OUT.mkdir(parents=True, exist_ok=True)
     stats_out = OUT / stats_zip.name
@@ -470,6 +537,8 @@ def main() -> None:
         raise SystemExit("Rules-only reused stats bundle SHA mismatch")
 
     betting = bundle_betting(RAW)
+    betting_zip = OUT / Path(betting["path"]).name
+    validate_betting_zip(betting_zip, rules_meta["generationId"])
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     main_version = str(metadata.get("mainContentVersion") or "")
     uefa_version = str(metadata.get("uefaContentVersion") or "")
