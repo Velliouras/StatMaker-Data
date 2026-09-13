@@ -13,7 +13,9 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"
+PRECISION_MIN_PROBABILITY = 0.75
+PRECISION_MIN_ODD = 1.50
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -472,6 +474,20 @@ def policy_decision(match, probability, maturity, eligible):
     return True, None
 
 
+def precision_decision(value_tier, odd, probability, premium, eligible):
+    if not eligible:
+        return False, "REJECTED_PRECISION_BASE_INELIGIBLE"
+    if str(value_tier or "").strip().upper() != "STRONG_VALUE":
+        return False, "REJECTED_PRECISION_NOT_STRONG_VALUE"
+    if float(odd) < PRECISION_MIN_ODD:
+        return False, "REJECTED_PRECISION_ODD_LT_1_50"
+    if not premium:
+        return False, "REJECTED_PRECISION_POLICY_V2"
+    if probability is None or probability < PRECISION_MIN_PROBABILITY:
+        return False, "REJECTED_PRECISION_PROBABILITY_LT_75"
+    return True, None
+
+
 def extract_manifest_prefs(checkpoint_root, source_root):
     path = Path(checkpoint_root) / "shared_prefs" / "statmaker_data_manifests.xml"
     tree = ET.parse(path)
@@ -512,8 +528,8 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 12:
-        raise SystemExit("Prepared checkpoint schema is below v12")
+    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 13:
+        raise SystemExit("Prepared checkpoint schema is below v13")
 
     selection_columns = {
         str(row[1])
@@ -584,6 +600,7 @@ def materialize(checkpoint_root, raw_root):
     candidates = []
     source_order = 0
     rejection_counts = Counter()
+    precision_rejection_counts = Counter()
 
     query = """
         SELECT rowid, selection_key, match_key, local_date,
@@ -713,6 +730,17 @@ def materialize(checkpoint_root, raw_root):
                 match, policy_probability, maturity, eligible
             )
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
+            precision_probability = policy_probability if eligible else None
+            precision_eligible, precision_rejection_reason = precision_decision(
+                value_signal_tier,
+                odd,
+                policy_probability,
+                premium,
+                eligible,
+            )
+            precision_rejection_counts[
+                precision_rejection_reason or "ELIGIBLE"
+            ] += 1
 
             line_text = "" if identity_line is None else str(float(identity_line))
             exact_key = (
@@ -753,6 +781,9 @@ def materialize(checkpoint_root, raw_root):
                     1 if eligible else 0,
                     1 if premium else 0,
                     rejection_reason,
+                    precision_probability,
+                    1 if precision_eligible else 0,
+                    precision_rejection_reason,
                 )
             )
         print(
@@ -794,8 +825,9 @@ def materialize(checkpoint_root, raw_root):
                 match_key, local_date, continent, country, league_code, market_family,
                 selection_odd, exact_recommendation_key, selection_score, evidence_score,
                 source_order, strict_hit_rate, strict_sample, value_tier,
-                recommendation_eligible, policy_premium_eligible, policy_rejection_reason
-            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                recommendation_eligible, policy_premium_eligible, policy_rejection_reason,
+                precision_probability, precision_eligible, precision_rejection_reason
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             candidates,
         )
@@ -838,9 +870,15 @@ def materialize(checkpoint_root, raw_root):
         f"generation={generation_id}",
         f"candidates={len(candidates)}",
         f"premium={rejection_counts['ELIGIBLE']}",
+        f"precision={precision_rejection_counts['ELIGIBLE']}",
         "rejections=" + ",".join(
             f"{key}:{value}"
             for key, value in sorted(rejection_counts.items())
+            if key != "ELIGIBLE"
+        ),
+        "precision_rejections=" + ",".join(
+            f"{key}:{value}"
+            for key, value in sorted(precision_rejection_counts.items())
             if key != "ELIGIBLE"
         ),
         f"elapsed_ms={int((time.monotonic() - started) * 1000)}",

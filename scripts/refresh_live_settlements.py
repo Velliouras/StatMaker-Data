@@ -340,19 +340,42 @@ def betting_bundle_paths() -> List[Path]:
 
 
 def _best_final_candidate_refs(connection: sqlite3.Connection, generation_id: str) -> Set[Tuple[str, str]]:
-    rows = connection.execute(
-        """
-        SELECT competition_id, snapshot_version, selection_key, match_key,
-               exact_recommendation_key, selection_score, evidence_score, source_order,
-               strict_hit_rate, strict_sample, selection_odd
-        FROM prepared_pattern_candidates
-        WHERE generation_id=? AND recommendation_eligible=1
-          AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE'
-          AND selection_odd>=1.50
-        ORDER BY evidence_score DESC, source_order ASC
-        """,
-        (generation_id,),
-    ).fetchall()
+    candidate_columns = {
+        str(row[1])
+        for row in connection.execute("PRAGMA table_info(prepared_pattern_candidates)").fetchall()
+    }
+    if "precision_eligible" in candidate_columns:
+        rows = connection.execute(
+            """
+            SELECT competition_id, snapshot_version, selection_key, match_key,
+                   exact_recommendation_key, selection_score, evidence_score, source_order,
+                   strict_hit_rate, strict_sample, selection_odd
+            FROM prepared_pattern_candidates
+            WHERE generation_id=? AND precision_eligible=1
+            ORDER BY evidence_score DESC, source_order ASC
+            """,
+            (generation_id,),
+        ).fetchall()
+    else:
+        rows = connection.execute(
+            """
+            SELECT c.competition_id, c.snapshot_version, c.selection_key, c.match_key,
+                   c.exact_recommendation_key, c.selection_score, c.evidence_score, c.source_order,
+                   c.strict_hit_rate, c.strict_sample, c.selection_odd
+            FROM prepared_pattern_candidates c
+            JOIN prepared_selections s
+              ON s.competition_id=c.competition_id
+             AND s.snapshot_version=c.snapshot_version
+             AND s.selection_key=c.selection_key
+            WHERE c.generation_id=? AND c.recommendation_eligible=1
+              AND c.policy_premium_eligible=1
+              AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE'
+              AND c.selection_odd>=1.50
+              AND COALESCE(s.opponent_model_probability,s.bm_posterior_probability)>=0.75
+            ORDER BY c.evidence_score DESC, c.source_order ASC
+            """,
+            (generation_id,),
+        ).fetchall()
 
     strongest_exact: Dict[Tuple[str, str, str], Tuple[Any, ...]] = {}
     for row in rows:

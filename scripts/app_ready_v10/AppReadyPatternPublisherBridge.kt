@@ -12,8 +12,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
-internal const val APP_READY_PATTERN_SCHEMA_VERSION = 12
+internal const val APP_READY_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"
+internal const val APP_READY_PATTERN_SCHEMA_VERSION = 13
 
 internal object AppReadyPatternSchema {
     fun create(db: SQLiteDatabase) {
@@ -54,6 +54,9 @@ internal object AppReadyPatternSchema {
                 recommendation_eligible INTEGER NOT NULL,
                 policy_premium_eligible INTEGER NOT NULL,
                 policy_rejection_reason TEXT,
+                precision_probability REAL,
+                precision_eligible INTEGER NOT NULL DEFAULT 0,
+                precision_rejection_reason TEXT,
                 PRIMARY KEY (generation_id, competition_id, selection_key)
             )
             """.trimIndent()
@@ -64,10 +67,11 @@ internal object AppReadyPatternSchema {
             CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_scope
             ON prepared_pattern_candidates(
                 generation_id, competition_id, local_date, match_key,
-                recommendation_eligible, selection_odd
+                recommendation_eligible, precision_eligible, selection_odd
             )
             """.trimIndent()
         )
+        db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_precision_scope ON prepared_pattern_candidates(generation_id, competition_id, local_date, match_key, precision_eligible, selection_odd)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_rank ON prepared_pattern_candidates(generation_id, evidence_score DESC, source_order ASC)")
         db.execSQL("CREATE INDEX IF NOT EXISTS idx_prepared_pattern_candidates_competition_rank ON prepared_pattern_candidates(generation_id, competition_id, evidence_score DESC, source_order ASC)")
     }
