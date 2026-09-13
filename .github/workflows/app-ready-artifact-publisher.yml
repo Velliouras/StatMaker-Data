@@ -72,7 +72,7 @@ jobs:
     timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 1}
+        with: {fetch-depth: 2}
 
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
@@ -106,14 +106,19 @@ jobs:
               and published_ids == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           )
 
-          event={}
-          event_path=os.environ.get('GITHUB_EVENT_PATH','')
-          if event_path and Path(event_path).is_file():
-              event=json.loads(Path(event_path).read_text())
           changed_paths=set()
-          for commit in event.get('commits',[]) or []:
-              for key in ('added','modified','removed'):
-                  changed_paths.update(str(path) for path in (commit.get(key) or []))
+          if os.environ.get('GITHUB_EVENT_NAME','') == 'push':
+              try:
+                  changed_paths.update(
+                      line.strip()
+                      for line in subprocess.check_output(
+                          ['git','diff','--name-only','HEAD^','HEAD'],
+                          text=True,
+                      ).splitlines()
+                      if line.strip()
+                  )
+              except subprocess.CalledProcessError:
+                  pass
           rules_only_builder_paths={
               'scripts/build_app_ready_rules_only.py',
               'scripts/materialize_app_ready_pattern_candidates.py',
