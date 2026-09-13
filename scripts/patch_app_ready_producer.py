@@ -228,7 +228,7 @@ def patch_prepared_store_v12() -> None:
         and "opponent_without_squad_turnover_probability REAL" in text
         and "value_signal_conservative_probability REAL" in text
         and "value_signal_ranking_score REAL" in text
-        and "private const val DATABASE_VERSION = 12" in text
+        and "private const val DATABASE_VERSION = 13" in text
     )
 
     if not native_v12_schema:

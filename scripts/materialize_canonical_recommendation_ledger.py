@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=6
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=7
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -48,14 +48,12 @@ def current_bundles():
     return sorted(p,key=lambda x:(x.name!=current,-x.stat().st_mtime))[:2]
 
 def final_candidates(db,gid):
-    # Model Performance measures the exact default Singles product, not the broad candidate universe:
-    # Strong Value only, minimum quoted odd 1.50, then one deterministic MAIN selection per match.
+    # Model Performance measures the exact default precision-first Singles product:
+    # precision_eligible only, then one deterministic MAIN selection per match.
     src=rows(
         db,
         "SELECT * FROM prepared_pattern_candidates "
-        "WHERE generation_id=? AND recommendation_eligible=1 "
-        "AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE' "
-        "AND selection_odd>=1.50 "
+        "WHERE generation_id=? AND precision_eligible=1 "
         "ORDER BY evidence_score DESC,source_order ASC",
         (gid,),
     )
@@ -218,7 +216,7 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v6 keeps the default-Singles performance contract and adds canonical kickoff identity. Never carry forward v4 rows selected
+    # Schema v7 measures only precision-qualified default Singles. Never carry forward older rows selected
     # from the broad recommendation universe; they are re-materialized from immutable pre-match
     # bundles after Strong Value + minimum odd 1.50 are applied before MAIN selection.
     existing=[]
@@ -240,7 +238,7 @@ def main():
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v6','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-precision-singles-ledger-v7','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)

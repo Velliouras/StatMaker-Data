@@ -92,8 +92,8 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
-          expected_schema=12
+          expected_rules='pattern-policy-v2-final-read-model-v7-precision-singles-v1'
+          expected_schema=13
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
@@ -598,7 +598,7 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-parity-v1'
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v7-precision-singles-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)

@@ -565,7 +565,7 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version < 12:
+            if user_version < 13:
                 raise SystemExit(f"Prepared DB schema must be >=12; got {user_version}")
 
             tables = {
@@ -631,7 +631,7 @@ for raw in sys.argv[1:]:
             missing_v12_columns = sorted(required_v12_columns - selection_columns)
             if missing_v12_columns:
                 raise SystemExit(
-                    "Prepared DB missing v12 performance/value-signal columns: " + ", ".join(missing_v12_columns)
+                    "Prepared DB missing v13 performance/value-signal columns: " + ", ".join(missing_v12_columns)
                 )
             domestic_context = connection.execute(
                 """
@@ -667,7 +667,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v6-probability-parity-v1":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v7-precision-singles-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )

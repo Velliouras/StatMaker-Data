@@ -346,9 +346,7 @@ def _best_final_candidate_refs(connection: sqlite3.Connection, generation_id: st
                exact_recommendation_key, selection_score, evidence_score, source_order,
                strict_hit_rate, strict_sample, selection_odd
         FROM prepared_pattern_candidates
-        WHERE generation_id=? AND recommendation_eligible=1
-          AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE'
-          AND selection_odd>=1.50
+        WHERE generation_id=? AND precision_eligible=1
         ORDER BY evidence_score DESC, source_order ASC
         """,
         (generation_id,),
@@ -455,7 +453,7 @@ def requirements_from_bundle(path: Path) -> List[SettlementRequirement]:
                   ON m.competition_id=s.competition_id
                  AND m.snapshot_version=s.snapshot_version
                  AND m.match_key=s.match_key
-                WHERE c.generation_id=? AND c.recommendation_eligible=1
+                WHERE c.generation_id=? AND c.precision_eligible=1
                 """,
                 (generation_id,),
             ).fetchall()
