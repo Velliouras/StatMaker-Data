@@ -92,7 +92,7 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v7-precision-singles-v1'
+          expected_rules='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
           expected_schema=13
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
@@ -598,7 +598,7 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 13
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v7-precision-singles-v1'
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
@@ -609,7 +609,7 @@ jobs:
           favorite_shadow=int(metadata.get('preparedFavoriteShadowCount') or 0)
           assert eligible > 0
           assert 0 <= precision <= eligible
-          assert performance_rows == eligible
+          assert performance_rows == precision
           assert opponent_required == 0 or opponent_models > 0
           assert opponent_models == 0 or favorite_shadow > 0
           assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')
