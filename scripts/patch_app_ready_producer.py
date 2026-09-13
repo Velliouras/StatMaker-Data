@@ -230,7 +230,7 @@ def patch_prepared_store_v13() -> None:
         and "value_signal_conservative_probability REAL" in text
         and "value_signal_ranking_score REAL" in text
         and "private const val DATABASE_VERSION = 13" in text
-        and 'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"' in schema_text
+        and 'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1"' in schema_text
         and "const val DATABASE_VERSION = 13" in schema_text
         and "precision_probability REAL" in schema_text
         and "precision_eligible INTEGER NOT NULL DEFAULT 0" in schema_text
