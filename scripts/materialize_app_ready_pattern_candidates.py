@@ -575,14 +575,25 @@ def materialize(checkpoint_root, raw_root):
             + ", ".join(missing_v12)
         )
 
-    versions = {
-        str(competition): str(version)
-        for competition, version in connection.execute(
-            "SELECT competition_id, snapshot_version FROM prepared_snapshot_meta WHERE state='ready'"
+    ready_rows = connection.execute(
+        """
+        SELECT competition_id, snapshot_version
+        FROM prepared_snapshot_meta
+        WHERE state='ready'
+        ORDER BY competition_id, built_at_ms DESC, snapshot_version DESC
+        """
+    ).fetchall()
+    if len(ready_rows) != len(COMPETITIONS):
+        raise SystemExit(
+            f"Checkpoint must contain exactly {len(COMPETITIONS)} READY rows, "
+            f"found={len(ready_rows)}"
         )
-    }
-    if set(versions) != set(COMPETITIONS):
-        raise SystemExit(f"Checkpoint does not contain exact 4/4 READY snapshots: {sorted(versions)}")
+    versions = {str(competition): str(version) for competition, version in ready_rows}
+    if set(versions) != set(COMPETITIONS) or len(versions) != len(COMPETITIONS):
+        raise SystemExit(
+            f"Checkpoint does not contain exactly one READY snapshot per competition: "
+            f"{sorted(versions)}"
+        )
 
     source_seed = "\n".join(f"{competition}|{versions[competition]}" for competition in sorted(COMPETITIONS))
     source_fingerprint = sha256_text(source_seed)
