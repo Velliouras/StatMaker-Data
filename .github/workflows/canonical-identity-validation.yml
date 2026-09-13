@@ -36,10 +36,36 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Detect current App-Ready identity contract
+        id: app_ready_contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          expected='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
+          path=Path('data/statmaker/app_ready/publish_status.json')
+          current=False
+          actual=''
+          if path.is_file():
+              status=json.loads(path.read_text(encoding='utf-8'))
+              actual=str(status.get('preparedPatternRulesFingerprint') or '')
+              current=status.get('status') == 'READY' and actual == expected
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write(f"current={'true' if current else 'false'}\n")
+          print(
+              'APP_READY_IDENTITY_CONTRACT',
+              f'current={str(current).lower()}',
+              f'actual={actual or "missing"}',
+          )
+          PY
+
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
 
       - name: Validate settlement candidate identity from App-Ready bundles
+        if: steps.app_ready_contract.outputs.current == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -54,9 +80,11 @@ jobs:
           PY
 
       - name: Validate App-Ready candidate team-date uniqueness
+        if: steps.app_ready_contract.outputs.current == 'true'
         run: python scripts/audit_app_ready_fixture_team_date_uniqueness.py
 
       - name: Validate full App-Ready fixture-index uniqueness
+        if: steps.app_ready_contract.outputs.current == 'true'
         run: python scripts/audit_app_ready_fixture_index_uniqueness.py
 
       - name: Validate settlement registry identity

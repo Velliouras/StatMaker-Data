@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import refresh_live_settlements as settlement
+
 COMPETITIONS = (
     "domestic",
     "champions_league",
@@ -79,6 +81,74 @@ def all_catalog_matches(payload: dict) -> list[dict]:
             if isinstance(match, dict):
                 indexed.setdefault(match_key(match), match)
     return list(indexed.values())
+
+
+def fixture_identity_collisions(matches: list[dict]) -> set[str]:
+    """Return every fixture key involved in an impossible same-team/same-day collision.
+
+    This intentionally uses the same canonical identity normalization as the repository audit.
+    Ambiguous fixtures are suppressed fail-closed rather than choosing one provider row arbitrarily.
+    """
+    by_team_day: dict[tuple[str, str], set[str]] = {}
+    for match in matches:
+        key = match_key(match)
+        date = betting_local_date(match)
+        if not key or not date:
+            continue
+        home = nullable_text(match.get("canonicalHomeTeam")) or str(match.get("homeTeam") or "")
+        away = nullable_text(match.get("canonicalAwayTeam")) or str(match.get("awayTeam") or "")
+        for raw in (home, away):
+            identity = settlement.normalize_team(raw)
+            if identity:
+                by_team_day.setdefault((date, identity), set()).add(key)
+    return {
+        key
+        for keys in by_team_day.values()
+        if len(keys) > 1
+        for key in keys
+    }
+
+
+def suppress_collision_candidates(
+    connection: sqlite3.Connection,
+    competition_id: str,
+    snapshot_version: str,
+    fixture_keys: set[str],
+) -> int:
+    if not fixture_keys:
+        return 0
+    blocked = 0
+    for chunk_start in range(0, len(fixture_keys), 300):
+        chunk = sorted(fixture_keys)[chunk_start:chunk_start + 300]
+        placeholders = ",".join("?" for _ in chunk)
+        cursor = connection.execute(
+            f"""
+            UPDATE prepared_pattern_candidates
+            SET recommendation_eligible=0,
+                policy_premium_eligible=0,
+                policy_rejection_reason='FIXTURE_IDENTITY_COLLISION',
+                precision_eligible=0,
+                precision_rejection_reason='FIXTURE_IDENTITY_COLLISION'
+            WHERE competition_id=?
+              AND snapshot_version=?
+              AND selection_key IN (
+                  SELECT selection_key
+                  FROM prepared_selections
+                  WHERE competition_id=?
+                    AND snapshot_version=?
+                    AND match_key IN ({placeholders})
+              )
+            """,
+            (
+                competition_id,
+                snapshot_version,
+                competition_id,
+                snapshot_version,
+                *chunk,
+            ),
+        )
+        blocked += max(0, int(cursor.rowcount or 0))
+    return blocked
 
 
 def create_schema(connection: sqlite3.Connection) -> None:
@@ -230,9 +300,28 @@ def materialize(prepared_db: Path) -> dict[str, int]:
             if not matches:
                 raise SystemExit(f"Empty catalog_payload for {competition_id}")
 
+            collision_keys = fixture_identity_collisions(matches)
+            collision_candidates = suppress_collision_candidates(
+                connection,
+                competition_id,
+                snapshot_version,
+                collision_keys,
+            )
+            if collision_keys:
+                print(
+                    "APP_READY_FIXTURE_IDENTITY_COLLISION_SUPPRESSED",
+                    f"competition={competition_id}",
+                    f"fixtures={len(collision_keys)}",
+                    f"candidates={collision_candidates}",
+                )
+            visible_matches = [
+                match for match in matches
+                if match_key(match) not in collision_keys
+            ]
+
             match_rows = []
             market_rows = []
-            for match in matches:
+            for match in visible_matches:
                 key = match_key(match)
                 if not key:
                     raise SystemExit(f"Blank match key in {competition_id}")
