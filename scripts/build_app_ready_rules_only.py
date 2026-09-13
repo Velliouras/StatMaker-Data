@@ -162,6 +162,80 @@ def bundle_betting(raw_root: Path) -> dict:
     }
 
 
+def normalize_ready_snapshots(db_path: Path) -> dict[str, str]:
+    """Enforce exactly one deterministic READY snapshot per competition.
+
+    Historical READY rows can coexist in schema v13. Python/Kotlin must never rely on SQLite row
+    order when deriving the recommendation source fingerprint.
+    """
+    connection = sqlite3.connect(db_path)
+    try:
+        rows = connection.execute(
+            """
+            SELECT competition_id, snapshot_version, built_at_ms
+            FROM prepared_snapshot_meta
+            WHERE state='ready'
+            ORDER BY competition_id, built_at_ms DESC, snapshot_version DESC
+            """
+        ).fetchall()
+        required = set(pattern_materializer.COMPETITIONS)
+        by_competition: dict[str, list[tuple[str, int]]] = {}
+        for competition, version, built_at_ms in rows:
+            by_competition.setdefault(str(competition), []).append(
+                (str(version), int(built_at_ms or 0))
+            )
+        if set(by_competition) != required:
+            raise SystemExit(
+                "Rules-only source does not contain all required READY competitions: "
+                + str(sorted(by_competition))
+            )
+
+        chosen = {
+            competition: versions[0][0]
+            for competition, versions in by_competition.items()
+        }
+        connection.execute("BEGIN IMMEDIATE")
+        try:
+            for competition, versions in by_competition.items():
+                keep = chosen[competition]
+                connection.execute(
+                    """
+                    UPDATE prepared_snapshot_meta
+                    SET state='stale'
+                    WHERE competition_id=? AND state='ready' AND snapshot_version<>?
+                    """,
+                    (competition, keep),
+                )
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+
+        normalized = connection.execute(
+            """
+            SELECT competition_id, snapshot_version
+            FROM prepared_snapshot_meta
+            WHERE state='ready'
+            ORDER BY competition_id
+            """
+        ).fetchall()
+        if len(normalized) != len(required):
+            raise SystemExit(
+                f"READY snapshot cardinality mismatch after normalization: rows={len(normalized)}"
+            )
+        result = {str(row[0]): str(row[1]) for row in normalized}
+        if set(result) != required or len(result) != len(required):
+            raise SystemExit("READY snapshot uniqueness invariant failed after normalization")
+
+        print(
+            "APP_READY_READY_SNAPSHOT_NORMALIZED",
+            " ".join(f"{k}={result[k]}" for k in sorted(result)),
+        )
+        return result
+    finally:
+        connection.close()
+
+
 def validate_rules_generation(db_path: Path) -> dict:
     connection = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
     try:
@@ -180,10 +254,17 @@ def validate_rules_generation(db_path: Path) -> dict:
             ORDER BY competition_id
             """
         ).fetchall()
-        ready = {str(row[0]): str(row[1]) for row in ready_rows}
         required = set(pattern_materializer.COMPETITIONS)
-        if set(ready) != required:
-            raise SystemExit(f"Rules-only source is not exact 4/4 READY: {sorted(ready)}")
+        if len(ready_rows) != len(required):
+            raise SystemExit(
+                f"Rules-only source must contain exactly {len(required)} READY rows, "
+                f"found={len(ready_rows)}"
+            )
+        ready = {str(row[0]): str(row[1]) for row in ready_rows}
+        if set(ready) != required or len(ready) != len(required):
+            raise SystemExit(
+                f"Rules-only source is not exactly one READY row per competition: {sorted(ready)}"
+            )
 
         source_seed = "\n".join(
             f"{competition}|{ready[competition]}" for competition in sorted(required)
@@ -371,6 +452,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix="statmaker-rules-seed-") as temp:
         seed = Path(temp) / "seed"
         extract_verified_source(stats_zip, betting_zip, seed)
+        normalize_ready_snapshots(seed / "databases" / "statmaker_prepared_betting.db")
         shutil.rmtree(ROOT / "app-ready-export", ignore_errors=True)
         pattern_materializer.materialize(seed, RAW)
         fixture_materializer.materialize(RAW / "databases" / "statmaker_prepared_betting.db")
