@@ -218,22 +218,28 @@ def install_prepared_pattern_bridge() -> None:
 
 def patch_prepared_store_v13() -> None:
     source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
+    schema_source = Path("app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt")
     text = source.read_text(encoding="utf-8")
+    schema_text = schema_source.read_text(encoding="utf-8")
 
     native_v13_schema = (
         "createPatternReadModelSchema(db)" in text
-        and "CREATE TABLE IF NOT EXISTS prepared_pattern_generation" in text
-        and "CREATE TABLE IF NOT EXISTS prepared_pattern_candidates" in text
+        and "PreparedPatternRecommendationSchema.create(db)" in text
         and "opponent_without_favorite_probability REAL" in text
         and "opponent_without_squad_turnover_probability REAL" in text
         and "value_signal_conservative_probability REAL" in text
         and "value_signal_ranking_score REAL" in text
         and "private const val DATABASE_VERSION = 13" in text
+        and 'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-precision-singles-v1"' in schema_text
+        and "const val DATABASE_VERSION = 13" in schema_text
+        and "precision_probability REAL" in schema_text
+        and "precision_eligible INTEGER NOT NULL DEFAULT 0" in schema_text
+        and "precision_rejection_reason TEXT" in schema_text
     )
 
     if not native_v13_schema:
         raise SystemExit(
-            "App-Ready v13 requires the native PreparedBettingSnapshotStore precision-Singles contract"
+            "App-Ready v13 requires the centralized precision-Singles schema/fingerprint contract"
         )
     print("APP_READY_PREPARED_SCHEMA_V13_OK source-native")
 
