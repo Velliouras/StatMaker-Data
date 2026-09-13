@@ -277,7 +277,21 @@ def main():
         for r in old.get('entries',[]):
             if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
-    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
+
+    # A date is authoritative only when we can prove that at least one historical App-Ready
+    # betting bundle was actually inspected for that date. The previous v8 implementation marked
+    # dates complete even when history() found zero source bundles; Android then correctly pruned
+    # every local row for those falsely-complete dates. Persist the source count so zero-pick days
+    # can still be authoritative without confusing "no qualifying pick" with "no source existed".
+    evidence={}
+    if old_schema>=SCHEMA_VERSION and isinstance(old,dict):
+        raw_evidence=old.get('backfillSourceCounts',{})
+        if isinstance(raw_evidence,dict):
+            for key,value in raw_evidence.items():
+                iso=str(key or '')[:10]; count=intval(value)
+                if iso and count>0:evidence[iso]=count
+    done=set(evidence)
+
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
     allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
@@ -286,12 +300,23 @@ def main():
         day=today-dt.timedelta(days=off); iso=day.isoformat()
         if iso in done:continue
         r,n=history(day)
-        # A completed backfill day is an authoritative replacement, not an append. This removes
-        # any stale/corrupt identity row from an older ledger generation.
+        if n<=0:
+            print(f"CANONICAL_LEDGER_BACKFILL_SOURCE_MISSING date={iso}")
+            continue
+        # Only a source-proven backfill day is an authoritative replacement. Zero qualifying v8
+        # recommendations is valid when n>0; n==0 is unknown and must never delete local history.
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
-        allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
+        allr.extend(r); hb+=n; hr+=len(r); evidence[iso]=n; done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-independent-precision-no-asian-handicap-v8','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={
+        'schemaVersion':SCHEMA_VERSION,
+        'retentionDays':RETENTION,
+        'source':'canonical-app-ready-default-independent-precision-no-asian-handicap-v8',
+        'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),
+        'backfillSourceCounts':{x:evidence[x] for x in sorted(done) if low.isoformat()<=x<=today.isoformat()},
+        'invalidatedMatchKeys':sorted(invalidated),
+        'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))
+    }
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
