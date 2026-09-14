@@ -244,7 +244,15 @@ def main():
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
-            if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
+            if (
+                isinstance(r,dict)
+                and r.get('market')
+                and r.get('selection')
+                and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
+                and valid_fixture_identity(r)
+                and not retired_market(r.get('market'), r.get('subMarketKey'))
+            ):
+                existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
     done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
@@ -259,7 +267,11 @@ def main():
         # any stale/corrupt identity row from an older ledger generation.
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
         allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
-    entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
+    entries=[
+        r for r in merge(allr)
+        if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
+        and not retired_market(r.get('market'), r.get('subMarketKey'))
+    ]
     sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v6','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:

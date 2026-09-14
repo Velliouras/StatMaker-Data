@@ -48,8 +48,12 @@ jobs:
         run: |
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
+          import sys
           from datetime import datetime, timezone, timedelta
           from pathlib import Path
+
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import statmaker_domestic_scope as scope
 
           odds_path = Path('odds/odds_api_io/domestic_odds.json')
           if not odds_path.is_file():
@@ -58,6 +62,14 @@ jobs:
               raise SystemExit(0)
 
           payload = json.loads(odds_path.read_text(encoding='utf-8'))
+          registry_path = Path('data/statmaker/domestic_live_july_registry.json')
+          registry = json.loads(registry_path.read_text(encoding='utf-8-sig'))
+          active_stats_codes = {
+              scope.normalize_code(row.get('leagueCode'))
+              for row in scope.filter_stats_leagues(registry.get('leagues', []) or [])
+              if scope.normalize_code(row.get('leagueCode'))
+          }
+
           now = datetime.now(timezone.utc)
           # A football match should be settled by 140 minutes after scheduled kickoff.
           # Keep a 12-hour lookback so a delayed workflow run can still close matches.
@@ -67,8 +79,8 @@ jobs:
           codes = set()
           candidate_matches = 0
           for league in payload.get('leagues', []) or []:
-              code = str(league.get('leagueCode') or '').strip().upper()
-              if not code:
+              code = scope.normalize_code(league.get('leagueCode'))
+              if not code or code not in active_stats_codes:
                   continue
               for match in league.get('matches', []) or []:
                   raw = str(match.get('kickoff') or '').strip()
