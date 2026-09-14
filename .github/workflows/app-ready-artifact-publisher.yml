@@ -155,8 +155,16 @@ jobs:
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
-      - uses: android-actions/setup-android@v3
+      - name: Verify preinstalled Android SDK
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}" || { echo 'ANDROID_HOME is not set on this runner' >&2; exit 1; }
+          SDKMANAGER="$(command -v sdkmanager || true)"
+          test -n "$SDKMANAGER" || { echo 'sdkmanager is not available on this runner' >&2; exit 1; }
+          echo "Using preinstalled Android SDK: $ANDROID_HOME"
+          "$SDKMANAGER" --version
       - uses: gradle/actions/setup-gradle@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
 
