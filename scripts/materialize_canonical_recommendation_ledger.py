@@ -9,6 +9,24 @@ ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
 ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=6
 
+# Permanent product retirement. Legacy parsers may still recognize these identities for old
+# persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
+RETIRED_RAW_MARKETS={
+    'ASIAN_HANDICAP','ASIAN_HANDICAP_1H','ASIAN_GOALS','ASIAN_GOALS_1H',
+    'ASIAN_CORNERS','ASIAN_CORNER_HANDICAP','CORNER_HANDICAP'
+}
+RETIRED_SUBMARKETS={
+    'RESULT_ASIAN_HANDICAP','HT_RESULT_ASIAN_HANDICAP','ASIAN_MATCH_GOALS_TOTAL',
+    'ASIAN_FIRST_HALF_GOALS_TOTAL','ASIAN_MATCH_CORNERS_TOTAL',
+    'ASIAN_CORNER_HANDICAP','CORNER_HANDICAP'
+}
+
+def retired_market(raw_market, sub_market):
+    return (
+        str(raw_market or '').strip().upper() in RETIRED_RAW_MARKETS
+        or str(sub_market or '').strip().upper() in RETIRED_SUBMARKETS
+    )
+
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
     except Exception:return default
@@ -156,6 +174,8 @@ def extract(bundle,target=None):
                     gd=dt.datetime.fromtimestamp(built/1000,tz=dt.timezone.utc).astimezone(ATHENS).date().isoformat() if built else ''
                     if not day or day<=gd:continue
                 sub=str(s.get('identity_sub_market_key') or '')
+                if retired_market(s.get('selection_market'), sub):
+                    continue
                 hp=list(live._names_from_match_payload(m,'home')); ap=list(live._names_from_match_payload(m,'away'))
                 if not hp or not ap:continue
                 identity_probe={'homeNames':hp,'awayNames':ap,'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or '')}
