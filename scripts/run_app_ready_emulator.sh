@@ -1,3 +1,4 @@
+# v12 rollback publisher trigger: pinned Saturday compatible checkpoint
 #!/usr/bin/env bash
 set -euo pipefail
 
