@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-14T09:11:23Z",
+  "generated_at": "2026-09-14T20:03:22Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/denmark/superliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-14T08:52:02Z",
+    "cache_generated_at": "2026-09-14T20:02:03Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 47,
-    "fixtures_with_any_stats": 47,
-    "fixtures_with_bb_core_stats": 46,
+    "completed_fixtures": 48,
+    "fixtures_with_any_stats": 48,
+    "fixtures_with_bb_core_stats": 47,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9787,
+    "bb_core_coverage": 0.9792,
     "group_counts": {
-      "shots_total": 47,
-      "shots_on_target": 47,
-      "corners": 47,
-      "fouls": 47,
-      "yellow_cards": 46,
-      "red_cards": 16,
-      "possession": 47,
-      "passes": 47,
+      "shots_total": 48,
+      "shots_on_target": 48,
+      "corners": 48,
+      "fouls": 48,
+      "yellow_cards": 47,
+      "red_cards": 17,
+      "possession": 48,
+      "passes": 48,
       "xg": 34
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9787,
-      "red_cards": 0.3404,
+      "yellow_cards": 0.9792,
+      "red_cards": 0.3542,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.7234
+      "xg": 0.7083
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -4010,6 +4010,90 @@
         "fulltime": {
           "home": 2,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1549018,
+      "date_utc": "2026-09-14T17:00:00+00:00",
+      "country": "Denmark",
+      "league": "Superliga",
+      "league_code": "DNK",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 119,
+      "round": "Regular Season - 8",
+      "home_team": "FC Midtjylland",
+      "away_team": "Brondby",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 13,
+        "HST": 5,
+        "AST": 4,
+        "HC": 6,
+        "AC": 2,
+        "HF": 14,
+        "AF": 13,
+        "HY": 1,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 46,
+        "APossession": 54,
+        "HSaves": 3,
+        "ASaves": 0,
+        "HPasses": 297,
+        "APasses": 369,
+        "HPassesAccurate": 219,
+        "APassesAccurate": 288,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
         },
         "extratime": {
           "home": null,
