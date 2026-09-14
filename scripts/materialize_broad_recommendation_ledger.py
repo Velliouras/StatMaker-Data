@@ -247,7 +247,7 @@ def extract_broad(bundle: Path, target: str | None = None):
 def legacy_broad_rows(high_day: dt.date):
     root, commit = base.latest_legacy_ledger()
     if not root:
-        return [], ""
+        return [], "", []
     output = []
     high = high_day.isoformat()
     for raw in root.get("entries", []) or []:
@@ -268,7 +268,12 @@ def legacy_broad_rows(high_day: dt.date):
         f"broadRows={len(output)}",
         f"high={high}",
     )
-    return output, commit
+    authoritative_dates = [
+        str(value)[:10]
+        for value in root.get("backfilledDates", []) or []
+        if str(value).strip() and str(value)[:10] <= high
+    ]
+    return output, commit, authoritative_dates
 
 
 def main() -> int:
@@ -294,7 +299,7 @@ def main() -> int:
     for bundle in bundles:
         current.extend(extract_broad(bundle))
 
-    legacy, legacy_commit = legacy_broad_rows(high)
+    legacy, legacy_commit, legacy_authoritative_dates = legacy_broad_rows(high)
     merged = [
         row for row in [*legacy, *existing, *current]
         if str(row.get("matchKey") or "").strip() not in invalidated
@@ -309,9 +314,16 @@ def main() -> int:
         key=lambda row: (str(row.get("localDate") or ""), str(row.get("matchKey") or "")),
     )
     authoritative_dates = sorted({
-        str(row.get("localDate") or "")[:10]
-        for row in entries
-        if str(row.get("localDate") or "")[:10] <= today.isoformat()
+        *[
+            day
+            for day in legacy_authoritative_dates
+            if low.isoformat() <= day <= today.isoformat()
+        ],
+        *[
+            str(row.get("localDate") or "")[:10]
+            for row in entries
+            if str(row.get("localDate") or "")[:10] <= today.isoformat()
+        ],
     })
 
     semantic = dict(root)
