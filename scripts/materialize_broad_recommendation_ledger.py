@@ -23,6 +23,7 @@ from pathlib import Path
 import materialize_canonical_recommendation_ledger as base
 
 BROAD_SOURCE = "canonical-shared-main-broad-default-singles-no-retired-v1"
+ROLLBACK_HISTORY_END = dt.date(2026, 9, 13)
 
 
 def broad_final_candidates(db: sqlite3.Connection, generation_id: str):
@@ -300,9 +301,26 @@ def main() -> int:
         current.extend(extract_broad(bundle))
 
     legacy, legacy_commit, legacy_authoritative_dates = legacy_broad_rows(high)
+
+    # Dates through the rollback boundary are immutable historical truth. They were restored
+    # from the approved Saturday baseline into broadEntries on main and must never be repopulated
+    # from later precision-era ledgers/materializations. New live recommendations start strictly
+    # after the boundary.
+    rollback_end = ROLLBACK_HISTORY_END.isoformat()
+    legacy = [
+        row for row in legacy
+        if str(row.get("localDate") or "")[:10] > rollback_end
+    ]
+    current = [
+        row for row in current
+        if str(row.get("localDate") or "")[:10] > rollback_end
+    ]
     merged = [
-        row for row in [*legacy, *existing, *current]
-        if str(row.get("matchKey") or "").strip() not in invalidated
+        row for row in [*existing, *legacy, *current]
+        if (
+            str(row.get("localDate") or "")[:10] <= rollback_end
+            or str(row.get("matchKey") or "").strip() not in invalidated
+        )
     ]
     entries = [
         row
