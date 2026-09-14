@@ -27,7 +27,7 @@ concurrency:
   group: statmaker-uat-saturday-live-app-ready
   # A deliberate publisher-code push supersedes older in-flight publisher attempts.
   # Normal schedule/workflow_run triggers never cancel a valid expensive generation.
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   publish:
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Apply UAT-only Ecuador canonical aliases
         shell: bash
