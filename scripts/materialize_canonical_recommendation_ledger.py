@@ -442,6 +442,12 @@ def main():
         'invalidatedMatchKeys':sorted(invalidated),
         'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))
     }
+    # The broad/default-Singles ledger is an additive backward-compatible section maintained by
+    # materialize_broad_recommendation_ledger.py. Preserve it whenever the precision ledger is
+    # rematerialized so both products continue to share this one StatMaker-Data/main document.
+    for key in ('broadSource','broadLegacyMigrationCommit','broadBackfilledDates','broadEntries'):
+        if isinstance(old,dict) and key in old:
+            sem[key]=old[key]
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
