@@ -88,10 +88,10 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
     },
     "ECU": {
         "Deportivo Cuenca": ("CD Cuenca",),
-        // Ecuador 2026 is retained as historical support after the live registry rolls off.
-        // Keep exact provider bridges for betting fixtures that remain in the odds feed so the
-        // fail-closed App-Ready identity validator can still reconstruct canonical identity
-        // without any provider/API call.
+        # Ecuador 2026 is retained as historical support after the live registry rolls off.
+        # Keep exact provider bridges for betting fixtures that remain in the odds feed so the
+        # fail-closed App-Ready identity validator can still reconstruct canonical identity
+        # without any provider/API call.
         "Universidad Catolica": ("CD Universidad Catolica del Ecuador",),
         "Orense SC": ("Orense SC",),
     },
