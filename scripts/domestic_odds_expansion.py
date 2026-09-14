@@ -85,6 +85,8 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
     },
     "ECU": {
         "Deportivo Cuenca": ("CD Cuenca",),
+        "Universidad Catolica": ("CD Universidad Catolica del Ecuador", "CD Universidad Catolica"),
+        "Orense SC": ("Orense SC",),
     },
     "NOR": {
         "Tromsø": ("Tromsoe IL",),
