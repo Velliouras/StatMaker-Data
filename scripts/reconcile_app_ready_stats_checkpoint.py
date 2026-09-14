@@ -101,6 +101,8 @@ def main() -> int:
             if completed <= 0:
                 continue
             code = str(row.get("league_code") or row.get("leagueCode") or "").strip().upper()
+            if code == "ROM":
+                code = "ROU"
             season = db_season(row.get("app_season") or row.get("appSeason") or row.get("season"))
             output_path = str(row.get("output_path") or "").strip()
             if not code or not season or not output_path:
