@@ -53,9 +53,6 @@ VERIFIED_PROVIDER_COUNTRY_ALIASES: Dict[str, Sequence[str]] = {
 # valid exact-odds fixture is never discarded merely because the two providers
 # use different city/suffix labels.
 VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
-    "SC1": {
-        "Queen's Park": ("Queens Park FC",),
-    },
     "SC0": {
         "Celtic": ("Celtic Glasgow", "Celtic FC"),
         "Dundee": ("Dundee FC",),
@@ -88,12 +85,6 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
     },
     "ECU": {
         "Deportivo Cuenca": ("CD Cuenca",),
-        # Ecuador 2026 is retained as historical support after the live registry rolls off.
-        # Keep exact provider bridges for betting fixtures that remain in the odds feed so the
-        # fail-closed App-Ready identity validator can still reconstruct canonical identity
-        # without any provider/API call.
-        "Universidad Catolica": ("CD Universidad Catolica del Ecuador",),
-        "Orense SC": ("Orense SC",),
     },
     "NOR": {
         "Tromsø": ("Tromsoe IL",),

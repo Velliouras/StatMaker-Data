@@ -19,7 +19,6 @@ on:
       - 'scripts/refresh_fixture_validity.py'
       - 'scripts/refresh_fixture_validity_priority.py'
       - 'scripts/materialize_canonical_recommendation_ledger.py'
-      - 'scripts/materialize_broad_recommendation_ledger.py'
       - 'scripts/apply_fixture_disposition_overrides.py'
       - 'data/statmaker/fixture_disposition_overrides.json'
   schedule:
@@ -60,7 +59,6 @@ jobs:
             scripts/refresh_fixture_validity.py \
             scripts/refresh_fixture_validity_priority.py \
             scripts/materialize_canonical_recommendation_ledger.py \
-            scripts/materialize_broad_recommendation_ledger.py \
             scripts/apply_fixture_disposition_overrides.py
 
       - name: Validate settlement registry identity
@@ -119,7 +117,7 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           API_FOOTBALL_DAILY_RESERVE: "1500"
-          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || (github.event_name == 'push' && (startsWith(github.event.head_commit.message, 'Fix canonical ledger backfill authority') || (startsWith(github.event.head_commit.message, 'Restore actual Performance history v9') || startsWith(github.event.head_commit.message, 'Retire Asian Handicap from Performance v10') || startsWith(github.event.head_commit.message, 'Restore shared broad Performance ledger'))) && '2' || '80') }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '80' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -132,12 +130,7 @@ jobs:
 
           # Rebuild recommendation history first, then repair stale historical team/fixture identity
           # from the already-published explicit-final feed. Both steps are repository-only.
-          reprobe=""
-          if [[ "${GITHUB_EVENT_NAME:-}" == "push" && "${{ github.event.head_commit.message }}" == Fix\ canonical\ ledger\ backfill\ authority\ reprobe* ]]; then
-            reprobe="--reprobe-authoritative"
-          fi
-          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30 $reprobe
-          python scripts/materialize_broad_recommendation_ledger.py
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
 
           gap_cap=$((total - validity - 2))
@@ -161,8 +154,7 @@ jobs:
 
           # Re-materialization may restore an old historical row from an immutable pre-match bundle;
           # immediately re-apply the same unique-final identity reconciliation before publication.
-          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30 $reprobe
-          python scripts/materialize_broad_recommendation_ledger.py
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
 
       - name: Publish latency-critical settlement artifacts

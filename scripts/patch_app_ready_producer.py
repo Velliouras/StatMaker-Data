@@ -216,32 +216,26 @@ def install_prepared_pattern_bridge() -> None:
     print(f"APP_READY_PATTERN_BRIDGE_OK bytes={target.stat().st_size}")
 
 
-def patch_prepared_store_v13() -> None:
+def patch_prepared_store_v12() -> None:
     source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
-    schema_source = Path("app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt")
     text = source.read_text(encoding="utf-8")
-    schema_text = schema_source.read_text(encoding="utf-8")
 
-    native_v13_schema = (
+    native_v12_schema = (
         "createPatternReadModelSchema(db)" in text
-        and "PreparedPatternRecommendationSchema.create(db)" in text
+        and "CREATE TABLE IF NOT EXISTS prepared_pattern_generation" in text
+        and "CREATE TABLE IF NOT EXISTS prepared_pattern_candidates" in text
         and "opponent_without_favorite_probability REAL" in text
         and "opponent_without_squad_turnover_probability REAL" in text
         and "value_signal_conservative_probability REAL" in text
         and "value_signal_ranking_score REAL" in text
-        and "private const val DATABASE_VERSION = 13" in text
-        and 'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1"' in schema_text
-        and "const val DATABASE_VERSION = 13" in schema_text
-        and "precision_probability REAL" in schema_text
-        and "precision_eligible INTEGER NOT NULL DEFAULT 0" in schema_text
-        and "precision_rejection_reason TEXT" in schema_text
+        and "private const val DATABASE_VERSION = 12" in text
     )
 
-    if not native_v13_schema:
+    if not native_v12_schema:
         raise SystemExit(
-            "App-Ready v13 requires the centralized precision-Singles schema/fingerprint contract"
+            "App-Ready v12 requires the native UAT PreparedBettingSnapshotStore v12 probability-parity contract"
         )
-    print("APP_READY_PREPARED_SCHEMA_V13_OK source-native")
+    print("APP_READY_PREPARED_SCHEMA_V12_OK source-native")
 
     catalog_start_marker = "    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {"
     catalog_end_marker = """\n    /**
@@ -374,7 +368,7 @@ def patch_prepared_store_v13() -> None:
         raise SystemExit("PreparedBettingSnapshotStore loadForFeed method count mismatch")
 
     source.write_text(text, encoding="utf-8")
-    print("APP_READY_PREPARED_STORE_V13_OK")
+    print("APP_READY_PREPARED_STORE_V12_OK")
 
 
 
@@ -430,5 +424,5 @@ harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "D
 patch_domestic_multi_season_index()
 patch_empty_uefa_ready_snapshots()
 install_prepared_pattern_bridge()
-patch_prepared_store_v13()
+patch_prepared_store_v12()
 add_producer_diagnostics()

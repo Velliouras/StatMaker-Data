@@ -13,18 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1"
-PRECISION_MIN_PROBABILITY = 0.75
-PRECISION_MIN_ODD = 1.50
-RETIRED_SUB_MARKET_KEYS = {
-    "RESULT_ASIAN_HANDICAP",
-    "HT_RESULT_ASIAN_HANDICAP",
-    "ASIAN_MATCH_GOALS_TOTAL",
-    "ASIAN_FIRST_HALF_GOALS_TOTAL",
-    "ASIAN_MATCH_CORNERS_TOTAL",
-    "ASIAN_CORNER_HANDICAP",
-    "CORNER_HANDICAP",
-}
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -483,22 +472,6 @@ def policy_decision(match, probability, maturity, eligible):
     return True, None
 
 
-def precision_decision(value_tier, odd, probability, premium, eligible):
-    if not eligible:
-        return False, "REJECTED_PRECISION_BASE_INELIGIBLE"
-    if str(value_tier or "").strip().upper() != "STRONG_VALUE":
-        return False, "REJECTED_PRECISION_NOT_STRONG_VALUE"
-    if float(odd) < PRECISION_MIN_ODD:
-        return False, "REJECTED_PRECISION_ODD_LT_1_50"
-    if not premium:
-        return False, "REJECTED_PRECISION_POLICY_V2"
-    if probability is None:
-        return False, "REJECTED_PRECISION_INDEPENDENT_EVIDENCE_UNAVAILABLE"
-    if probability < PRECISION_MIN_PROBABILITY:
-        return False, "REJECTED_PRECISION_PROBABILITY_LT_75"
-    return True, None
-
-
 def extract_manifest_prefs(checkpoint_root, source_root):
     path = Path(checkpoint_root) / "shared_prefs" / "statmaker_data_manifests.xml"
     tree = ET.parse(path)
@@ -539,8 +512,8 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 13:
-        raise SystemExit("Prepared checkpoint schema is below v13")
+    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 12:
+        raise SystemExit("Prepared checkpoint schema is below v12")
 
     selection_columns = {
         str(row[1])
@@ -575,25 +548,14 @@ def materialize(checkpoint_root, raw_root):
             + ", ".join(missing_v12)
         )
 
-    ready_rows = connection.execute(
-        """
-        SELECT competition_id, snapshot_version
-        FROM prepared_snapshot_meta
-        WHERE state='ready'
-        ORDER BY competition_id, built_at_ms DESC, snapshot_version DESC
-        """
-    ).fetchall()
-    if len(ready_rows) != len(COMPETITIONS):
-        raise SystemExit(
-            f"Checkpoint must contain exactly {len(COMPETITIONS)} READY rows, "
-            f"found={len(ready_rows)}"
+    versions = {
+        str(competition): str(version)
+        for competition, version in connection.execute(
+            "SELECT competition_id, snapshot_version FROM prepared_snapshot_meta WHERE state='ready'"
         )
-    versions = {str(competition): str(version) for competition, version in ready_rows}
-    if set(versions) != set(COMPETITIONS) or len(versions) != len(COMPETITIONS):
-        raise SystemExit(
-            f"Checkpoint does not contain exactly one READY snapshot per competition: "
-            f"{sorted(versions)}"
-        )
+    }
+    if set(versions) != set(COMPETITIONS):
+        raise SystemExit(f"Checkpoint does not contain exact 4/4 READY snapshots: {sorted(versions)}")
 
     source_seed = "\n".join(f"{competition}|{versions[competition]}" for competition in sorted(COMPETITIONS))
     source_fingerprint = sha256_text(source_seed)
@@ -622,7 +584,6 @@ def materialize(checkpoint_root, raw_root):
     candidates = []
     source_order = 0
     rejection_counts = Counter()
-    precision_rejection_counts = Counter()
 
     query = """
         SELECT rowid, selection_key, match_key, local_date,
@@ -690,9 +651,6 @@ def materialize(checkpoint_root, raw_root):
             source_order += 1
             count += 1
 
-            if str(sub_market_key) in RETIRED_SUB_MARKET_KEYS:
-                continue
-
             required = (
                 hits, sample, hit_rate, market_probability, posterior_probability,
                 sample_reliability, normalized_positive_edge, broad_group,
@@ -755,30 +713,6 @@ def materialize(checkpoint_root, raw_root):
                 match, policy_probability, maturity, eligible
             )
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
-            precision_probability = None
-            if eligible:
-                if opponent_model_probability is not None:
-                    precision_probability = float(opponent_model_probability)
-                elif (
-                    value_signal_conservative_probability is not None
-                    and value_signal_market_probability is not None
-                    and float(value_signal_conservative_probability) > float(value_signal_market_probability)
-                    and abs(float(value_signal_conservative_probability) - posterior_probability) > 1e-9
-                ):
-                    # No opponent model: a persisted strong-pattern lower confidence bound is
-                    # independent of the bookmaker posterior and may qualify the precision gate.
-                    precision_probability = float(value_signal_conservative_probability)
-
-            precision_eligible, precision_rejection_reason = precision_decision(
-                value_signal_tier,
-                odd,
-                precision_probability,
-                premium,
-                eligible,
-            )
-            precision_rejection_counts[
-                precision_rejection_reason or "ELIGIBLE"
-            ] += 1
 
             line_text = "" if identity_line is None else str(float(identity_line))
             exact_key = (
@@ -819,9 +753,6 @@ def materialize(checkpoint_root, raw_root):
                     1 if eligible else 0,
                     1 if premium else 0,
                     rejection_reason,
-                    precision_probability,
-                    1 if precision_eligible else 0,
-                    precision_rejection_reason,
                 )
             )
         print(
@@ -863,9 +794,8 @@ def materialize(checkpoint_root, raw_root):
                 match_key, local_date, continent, country, league_code, market_family,
                 selection_odd, exact_recommendation_key, selection_score, evidence_score,
                 source_order, strict_hit_rate, strict_sample, value_tier,
-                recommendation_eligible, policy_premium_eligible, policy_rejection_reason,
-                precision_probability, precision_eligible, precision_rejection_reason
-            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                recommendation_eligible, policy_premium_eligible, policy_rejection_reason
+            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """,
             candidates,
         )
@@ -908,15 +838,9 @@ def materialize(checkpoint_root, raw_root):
         f"generation={generation_id}",
         f"candidates={len(candidates)}",
         f"premium={rejection_counts['ELIGIBLE']}",
-        f"precision={precision_rejection_counts['ELIGIBLE']}",
         "rejections=" + ",".join(
             f"{key}:{value}"
             for key, value in sorted(rejection_counts.items())
-            if key != "ELIGIBLE"
-        ),
-        "precision_rejections=" + ",".join(
-            f"{key}:{value}"
-            for key, value in sorted(precision_rejection_counts.items())
             if key != "ELIGIBLE"
         ),
         f"elapsed_ms={int((time.monotonic() - started) * 1000)}",

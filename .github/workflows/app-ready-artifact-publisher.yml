@@ -38,10 +38,6 @@ on:
       - 'data/statmaker/uefa_team_support_history.json'
       - 'data/statmaker/domestic_proposal_readiness.json'
       - 'mappings/domestic_team_aliases.json'
-      - 'scripts/canonical_team_identity.py'
-      - 'scripts/domestic_odds_expansion.py'
-      - 'scripts/validate_domestic_cache_provider_identity.py'
-      - '.github/workflows/app-ready-artifact-publisher.yml'
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - 'scripts/patch_app_ready_producer.py'
@@ -52,8 +48,6 @@ on:
       - 'scripts/build_app_ready_from_device.py'
       - 'scripts/materialize_app_ready_pattern_candidates.py'
       - 'scripts/materialize_prepared_fixture_index.py'
-      - 'scripts/reconcile_app_ready_stats_checkpoint.py'
-      - 'scripts/build_app_ready_rules_only.py'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -77,7 +71,7 @@ jobs:
     timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 2}
+        with: {fetch-depth: 1}
 
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
@@ -87,7 +81,6 @@ jobs:
         shell: bash
         env:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message || '' }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
@@ -99,66 +92,16 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
-          expected_schema=13
+          expected_rules='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
+          expected_schema=12
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
           )
-          published_ids={row.get('id') for row in old.get('artifacts',[]) if isinstance(row,dict)}
-          verified_v13_source=(
-              bool(old)
-              and int(m.get('preparedBettingSchemaVersion') or 0) >= expected_schema
-              and published_ids == {'app_ready_stats_bundle','app_ready_betting_bundle'}
-          )
-
-          changed_paths=set()
-          if os.environ.get('GITHUB_EVENT_NAME','') == 'push':
-              try:
-                  changed_paths.update(
-                      line.strip()
-                      for line in subprocess.check_output(
-                          ['git','diff','--name-only','HEAD^','HEAD'],
-                          text=True,
-                      ).splitlines()
-                      if line.strip()
-                  )
-              except subprocess.CalledProcessError:
-                  pass
-          rules_only_builder_paths={
-              'scripts/build_app_ready_rules_only.py',
-              'scripts/materialize_app_ready_pattern_candidates.py',
-              'scripts/materialize_prepared_fixture_index.py',
-          }
-          rules_only_code_change=bool(changed_paths & rules_only_builder_paths)
-
-          rules_only_reuse=verified_v13_source and (
-              contract_migration or rules_only_code_change
-          )
-          fast_recovery=os.environ.get('HEAD_COMMIT_MESSAGE','').startswith(
-              'Recover current App-Ready from checkpoint'
-          )
-          generate=(
-              fast_recovery
-              or os.environ.get('FORCE','false').lower()=='true'
-              or not old
-              or changed
-              or contract_migration
-              or rules_only_code_change
-          )
+          generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write(f"generate={'true' if generate else 'false'}\n")
               f.write(f"contract_migration={'true' if contract_migration else 'false'}\n")
-              f.write(f"rules_only_reuse={'true' if rules_only_reuse else 'false'}\n")
-              f.write(f"fast_recovery={'true' if fast_recovery else 'false'}\n")
-          print(
-              'APP_READY_PREFLIGHT',
-              f'changed={str(changed).lower()}',
-              f'contract_migration={str(contract_migration).lower()}',
-              f'rules_only_code_change={str(rules_only_code_change).lower()}',
-              f'rules_only_reuse={str(rules_only_reuse).lower()}',
-              f'fast_recovery={str(fast_recovery).lower()}',
-          )
           PY
 
       - name: Require private read token
@@ -179,15 +122,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Re-materialize recommendation contract from verified v13 source
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/build_app_ready_rules_only.py
-
       - name: Stage off-device legacy builder
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
           set -euo pipefail
@@ -214,15 +150,15 @@ jobs:
           python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
 
       - uses: actions/setup-java@v4
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
       - uses: android-actions/setup-android@v3
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
       - uses: gradle/actions/setup-gradle@v4
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
 
       - name: Compile off-device builder
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         working-directory: statmaker-private
         shell: bash
         run: |
@@ -233,7 +169,7 @@ jobs:
             -Pkotlin.compiler.execution.strategy=in-process
 
       - name: Enable KVM acceleration
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
           set -euo pipefail
@@ -252,19 +188,9 @@ jobs:
           repository: ${{ github.repository }}
           run-id: 33283282657
 
-      - name: Restore failed-run checkpoint for fast recovery
-        if: steps.preflight.outputs.fast_recovery == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: statmaker-app-ready-prepared-checkpoint
-          path: app-ready-fast-checkpoint
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: 34869572161
-
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -325,7 +251,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != '' && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -361,7 +287,7 @@ jobs:
             app-ready-export/source
 
       - name: Produce indexed read models off-device
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat.local
@@ -381,17 +307,8 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
 
-      - name: Reconcile prepared checkpoint stats with canonical main
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/reconcile_app_ready_stats_checkpoint.py \
-            app-ready-checkpoint/databases/statmaker.db \
-            data/statmaker/domestic_enriched/index.json
-
       - name: Materialize current v11 candidates host-side
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
           set -euo pipefail
@@ -404,41 +321,8 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Fast recover immutable bundles from saved checkpoint
-        if: steps.preflight.outputs.fast_recovery == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf app-ready-export
-          mkdir -p app-ready-export/source
-
-          python scripts/reconcile_app_ready_stats_checkpoint.py \
-            app-ready-fast-checkpoint/databases/statmaker.db \
-            data/statmaker/domestic_enriched/index.json
-
-          python scripts/materialize_app_ready_pattern_candidates.py \
-            app-ready-fast-checkpoint \
-            app-ready-export/raw \
-            app-ready-export/source
-          python scripts/materialize_prepared_fixture_index.py \
-            app-ready-export/raw/databases/statmaker_prepared_betting.db
-
-          s="app-ready-export/source"
-          cp data/statmaker/update_manifest.json "$s/main_manifest.json"
-          cp data/statmaker/domestic_enriched/index.json "$s/domestic_enriched_index.json"
-          cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
-          git show origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
-
-          python scripts/build_app_ready_from_device.py \
-            app-ready-export/raw \
-            app-ready-export/out \
-            app-ready-export/source
-
       - name: Persist resumable prepared checkpoint
-        if: always() && steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         uses: actions/upload-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -449,7 +333,7 @@ jobs:
           overwrite: true
 
       - name: Stage canonical repository inputs
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
           set -euo pipefail
@@ -471,7 +355,7 @@ jobs:
           test -s "$s/conference_league.json"
 
       - name: Build immutable bundles
-        if: steps.preflight.outputs.generate == 'true' && steps.preflight.outputs.rules_only_reuse != 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.preflight.outputs.fast_recovery != 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
       - name: Revalidate canonical source versions
@@ -479,8 +363,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true'
         shell: bash
         env:
-          HOST_RECOVERY: ${{ ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) || steps.preflight.outputs.fast_recovery == 'true') && 'true' || 'false' }}
-          RULES_ONLY_REUSE: ${{ steps.preflight.outputs.rules_only_reuse == 'true' && 'true' || 'false' }}
+          HOST_RECOVERY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
@@ -504,24 +387,10 @@ jobs:
           actual_main=str(current_main.get('contentVersion') or '')
           actual_uefa=str(current_uefa.get('contentVersion') or '')
           recovery=os.environ.get('HOST_RECOVERY','false').lower() == 'true'
-          rules_only=os.environ.get('RULES_ONLY_REUSE','false').lower() == 'true'
-          published=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
-          published_meta=published.get('metadata',{})
-          verified_reuse=(
-              rules_only
-              and expected_main == str(published_meta.get('mainContentVersion') or '')
-              and expected_uefa == str(published_meta.get('uefaContentVersion') or '')
-          )
-          current=recovery or verified_reuse or (expected_main == actual_main and expected_uefa == actual_uefa)
+          current=recovery or (expected_main == actual_main and expected_uefa == actual_uefa)
           if recovery:
               print(
                   'APP_READY_RECOVERY_SOURCE_ACCEPTED',
-                  f'main={expected_main[:12]} current={actual_main[:12]}',
-                  f'uefa={expected_uefa[:12]} current={actual_uefa[:12]}',
-              )
-          elif verified_reuse:
-              print(
-                  'APP_READY_RULES_ONLY_SOURCE_REUSED',
                   f'main={expected_main[:12]} current={actual_main[:12]}',
                   f'uefa={expected_uefa[:12]} current={actual_uefa[:12]}',
               )
@@ -543,7 +412,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         env:
-          RECOVERY_PUBLISH: ${{ ((github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) || steps.preflight.outputs.fast_recovery == 'true' || steps.preflight.outputs.rules_only_reuse == 'true') && 'true' || 'false' }}
+          RECOVERY_PUBLISH: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -728,19 +597,17 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 13
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-parity-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
-          precision=int(metadata.get('preparedPrecisionSinglesEligibleCount') or 0)
           performance_rows=int(metadata.get('preparedPerformanceRowCount') or 0)
           opponent_required=int(metadata.get('preparedOpponentAdjustedRequiredCount') or 0)
           opponent_models=int(metadata.get('preparedOpponentModelCount') or 0)
           favorite_shadow=int(metadata.get('preparedFavoriteShadowCount') or 0)
           assert eligible > 0
-          assert 0 <= precision <= eligible
-          assert performance_rows == precision
+          assert performance_rows == eligible
           assert opponent_required == 0 or opponent_models > 0
           assert opponent_models == 0 or favorite_shadow > 0
           assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')
@@ -755,7 +622,6 @@ jobs:
               'generation='+metadata['preparedPatternGenerationId'],
               'candidates='+str(metadata['preparedPatternCandidateCount']),
               'eligible='+str(metadata['preparedPatternRecommendationEligibleCount']),
-              'precision='+str(metadata['preparedPrecisionSinglesEligibleCount']),
               'performance='+str(metadata['preparedPerformanceRowCount']),
               'opponent_models='+str(metadata['preparedOpponentModelCount']),
               'favorite_shadow='+str(metadata['preparedFavoriteShadowCount']),

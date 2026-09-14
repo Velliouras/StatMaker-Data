@@ -7,19 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=10
-CURRENT_CONTRACT_START=dt.date(2026,9,13)
-RULES_FINGERPRINT='pattern-policy-v2-final-read-model-v8-retire-asian-handicap-independent-precision-v1'
-RETIRED_SUB_MARKET_KEYS={
-    'RESULT_ASIAN_HANDICAP','HT_RESULT_ASIAN_HANDICAP',
-    'ASIAN_MATCH_GOALS_TOTAL','ASIAN_FIRST_HALF_GOALS_TOTAL',
-    'ASIAN_MATCH_CORNERS_TOTAL','ASIAN_CORNER_HANDICAP','CORNER_HANDICAP'
-}
-
-HISTORICAL_GATE_COUNTS={
-    'bundles':0,'candidates':0,'recommendationEligible':0,'policyEligible':0,
-    'strongValue':0,'odd150':0,'nonRetired':0,'independent75':0,
-}
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=6
 
 def load(path,default):
     try:return json.loads(path.read_text(encoding='utf-8-sig'))
@@ -60,95 +48,17 @@ def current_bundles():
     return sorted(p,key=lambda x:(x.name!=current,-x.stat().st_mtime))[:2]
 
 def final_candidates(db,gid):
-    # Schema v8 measures the retired-market-free precision product. Only a generation built with
-    # the exact v8 contract may trust persisted precision_eligible. Older bundles are re-evaluated
-    # from immutable recommendation-time evidence using the same independent-confidence rule.
-    generation=first(db,"SELECT rules_fingerprint FROM prepared_pattern_generation WHERE generation_id=? LIMIT 1",(gid,))
-    rules=str((generation or {}).get('rules_fingerprint') or '')
-    retired_sql=",".join("?" for _ in RETIRED_SUB_MARKET_KEYS)
-    retired_args=tuple(sorted(RETIRED_SUB_MARKET_KEYS))
-    candidate_columns={
-        str(row[1])
-        for row in db.execute("PRAGMA table_info(prepared_pattern_candidates)").fetchall()
-    }
-    if "precision_eligible" in candidate_columns and rules==RULES_FINGERPRINT:
-        src=rows(
-            db,
-            "SELECT c.* FROM prepared_pattern_candidates c "
-            "JOIN prepared_selections s "
-            "ON s.competition_id=c.competition_id "
-            "AND s.snapshot_version=c.snapshot_version "
-            "AND s.selection_key=c.selection_key "
-            "WHERE c.generation_id=? AND c.precision_eligible=1 "
-            f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
-            "ORDER BY c.evidence_score DESC,c.source_order ASC",
-            (gid,*retired_args),
-        )
-    else:
-        # Aggregate gate diagnostics for historical contracts. This is repository-only and lets us
-        # distinguish a genuinely empty v8 counterfactual from a migration/filter bug.
-        try:
-            diag=first(
-                db,
-                "SELECT "
-                "COUNT(*) AS candidates,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 THEN 1 ELSE 0 END) AS recommendationEligible,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 THEN 1 ELSE 0 END) AS policyEligible,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
-                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' THEN 1 ELSE 0 END) AS strongValue,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
-                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 THEN 1 ELSE 0 END) AS odd150,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
-                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 "
-                f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) THEN 1 ELSE 0 END) AS nonRetired,"
-                "SUM(CASE WHEN c.recommendation_eligible=1 AND c.policy_premium_eligible=1 "
-                "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' AND c.selection_odd>=1.50 "
-                f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
-                "AND COALESCE("
-                "s.opponent_model_probability,"
-                "CASE WHEN s.value_signal_conservative_probability IS NOT NULL "
-                "AND s.value_signal_market_probability IS NOT NULL "
-                "AND s.value_signal_conservative_probability>s.value_signal_market_probability "
-                "AND ABS(s.value_signal_conservative_probability-s.bm_posterior_probability)>0.000000001 "
-                "THEN s.value_signal_conservative_probability END"
-                ")>=0.75 THEN 1 ELSE 0 END) AS independent75 "
-                "FROM prepared_pattern_candidates c "
-                "JOIN prepared_selections s "
-                "ON s.competition_id=c.competition_id "
-                "AND s.snapshot_version=c.snapshot_version "
-                "AND s.selection_key=c.selection_key "
-                "WHERE c.generation_id=?",
-                (gid,*retired_args,*retired_args),
-            ) or {}
-            HISTORICAL_GATE_COUNTS['bundles']+=1
-            for key in ('candidates','recommendationEligible','policyEligible','strongValue','odd150','nonRetired','independent75'):
-                HISTORICAL_GATE_COUNTS[key]+=intval(diag.get(key))
-        except sqlite3.Error:
-            HISTORICAL_GATE_COUNTS['bundles']+=1
-
-        src=rows(
-            db,
-            "SELECT c.* FROM prepared_pattern_candidates c "
-            "JOIN prepared_selections s "
-            "ON s.competition_id=c.competition_id "
-            "AND s.snapshot_version=c.snapshot_version "
-            "AND s.selection_key=c.selection_key "
-            "WHERE c.generation_id=? AND c.recommendation_eligible=1 "
-            "AND c.policy_premium_eligible=1 "
-            "AND UPPER(TRIM(COALESCE(c.value_tier,'')))='STRONG_VALUE' "
-            "AND c.selection_odd>=1.50 "
-            f"AND COALESCE(s.identity_sub_market_key,'') NOT IN ({retired_sql}) "
-            "AND COALESCE("
-            "s.opponent_model_probability,"
-            "CASE WHEN s.value_signal_conservative_probability IS NOT NULL "
-            "AND s.value_signal_market_probability IS NOT NULL "
-            "AND s.value_signal_conservative_probability>s.value_signal_market_probability "
-            "AND ABS(s.value_signal_conservative_probability-s.bm_posterior_probability)>0.000000001 "
-            "THEN s.value_signal_conservative_probability END"
-            ")>=0.75 "
-            "ORDER BY c.evidence_score DESC,c.source_order ASC",
-            (gid,*retired_args),
-        )
+    # Model Performance measures the exact default Singles product, not the broad candidate universe:
+    # Strong Value only, minimum quoted odd 1.50, then one deterministic MAIN selection per match.
+    src=rows(
+        db,
+        "SELECT * FROM prepared_pattern_candidates "
+        "WHERE generation_id=? AND recommendation_eligible=1 "
+        "AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE' "
+        "AND selection_odd>=1.50 "
+        "ORDER BY evidence_score DESC,source_order ASC",
+        (gid,),
+    )
     exact={}
     for r in src:
         k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''),str(r.get('exact_recommendation_key') or ''))
@@ -246,20 +156,11 @@ def extract(bundle,target=None):
                     gd=dt.datetime.fromtimestamp(built/1000,tz=dt.timezone.utc).astimezone(ATHENS).date().isoformat() if built else ''
                     if not day or day<=gd:continue
                 sub=str(s.get('identity_sub_market_key') or '')
-                if sub in RETIRED_SUB_MARKET_KEYS:continue
                 hp=list(live._names_from_match_payload(m,'home')); ap=list(live._names_from_match_payload(m,'away'))
                 if not hp or not ap:continue
                 identity_probe={'homeNames':hp,'awayNames':ap,'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or '')}
                 if not valid_fixture_identity(identity_probe):continue
                 mp=nullable(s.get('opponent_model_probability')); post=nullable(s.get('bm_posterior_probability'))
-                conservative=nullable(s.get('value_signal_conservative_probability'))
-                signal_market=nullable(s.get('value_signal_market_probability'))
-                independent=mp
-                prediction_source='OPPONENT_ADJUSTED' if mp is not None else None
-                if independent is None and conservative is not None and signal_market is not None and post is not None and conservative>signal_market and abs(conservative-post)>0.000000001:
-                    independent=conservative
-                    prediction_source='STRONG_PATTERN'
-                if independent is None or independent<0.75:continue
                 out.append({
                   'generationId':gid,'generationBuiltAtMs':built,'competitionId':comp,'snapshotVersion':snap,'selectionKey':sk,
                   'matchKey':candidate_match_key,'localDate':day,'leagueCode':str(c.get('league_code') or m.get('leagueCode') or '').upper(),
@@ -267,11 +168,11 @@ def extract(bundle,target=None):
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'kickoffEpochMillis':ko,'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
-                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':independent,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
+                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
-                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':prediction_source,'requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
+                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':'OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR','requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
             if rejected_identity:
                 print(f"CANONICAL_LEDGER_IDENTITY_REJECTED bundle={bundle.name} rows={rejected_identity}")
             return out
@@ -295,62 +196,6 @@ def git_show(commit,path,out=None):
         return subprocess.run(['git','show',f'{commit}:{path}'],cwd=ROOT,check=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL).stdout
     except Exception:return None
 
-def latest_legacy_ledger():
-    """Load the last canonical actual-Singles ledger before the v8 precision cutover.
-
-    Pre-WAL-hardening App-Ready ZIPs cannot reliably reconstruct their candidate tables from the
-    archived main SQLite file alone. The canonical ledger committed at recommendation time is the
-    immutable record of what the app actually recommended, so historical Performance must preserve
-    those rows instead of retroactively re-scoring them with a newer model contract.
-    """
-    try:
-        commits=subprocess.run(
-            ['git','log','--format=%H','--','data/statmaker/canonical_recommendation_ledger.json'],
-            cwd=ROOT,check=True,text=True,stdout=subprocess.PIPE
-        ).stdout.splitlines()
-    except Exception:
-        return {},''
-    for commit in commits:
-        raw=git_show(commit,'data/statmaker/canonical_recommendation_ledger.json')
-        if not raw:continue
-        try: root=json.loads(raw.decode())
-        except Exception:continue
-        if intval(root.get('schemaVersion'))<=7 and isinstance(root.get('entries'),list):
-            return root,commit
-    return {},''
-
-def row_is_retired(row):
-    sub=str(row.get('subMarketKey') or '').strip().upper()
-    market=str(row.get('market') or '').strip().upper()
-    selection=str(row.get('selection') or '').strip().upper()
-    return (
-        sub in RETIRED_SUB_MARKET_KEYS
-        or 'ASIAN' in market
-        or 'HANDICAP' in market
-        or 'ASIAN' in selection
-        or 'HANDICAP' in selection
-    )
-
-def legacy_actual_rows(as_of_day):
-    root,commit=latest_legacy_ledger()
-    if not root:return [],''
-    out=[]; retired=0
-    cutoff=as_of_day.isoformat()
-    for row in root.get('entries',[]):
-        if not isinstance(row,dict) or not valid_fixture_identity(row):continue
-        day=str(row.get('localDate') or '')[:10]
-        if not day or day>cutoff:continue
-        if row_is_retired(row):
-            retired+=1
-            continue
-        out.append(dict(row))
-    print(
-        f"CANONICAL_LEDGER_LEGACY_ACTUAL_MIGRATION commit={commit[:12]} "
-        f"sourceRows={len(root.get('entries',[]))} historicalRows={len(out)} "
-        f"retiredRows={retired} cutoff={cutoff}"
-    )
-    return out,commit
-
 def history(day):
     start=(day-dt.timedelta(days=1)).isoformat()+'T00:00:00Z'; end=day.isoformat()+'T23:59:59Z'
     try: commits=subprocess.run(['git','log','--format=%H',f'--since={start}',f'--until={end}','--','data/statmaker/app_ready/update_manifest.json'],cwd=ROOT,check=True,text=True,stdout=subprocess.PIPE).stdout.splitlines()[:24]
@@ -368,92 +213,39 @@ def history(day):
     return merge(out),n
 
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); ap.add_argument('--reprobe-authoritative',action='store_true'); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
+    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v8 retires all Asian/handicap markets and requires independent predictive confidence.
-    # Older ledger rows are never carried forward blindly; historical bundles are re-materialized.
+    # Schema v6 keeps the default-Singles performance contract and adds canonical kickoff identity. Never carry forward v4 rows selected
+    # from the broad recommendation universe; they are re-materialized from immutable pre-match
+    # bundles after Strong Value + minimum odd 1.50 are applied before MAIN selection.
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
-            if (
-                isinstance(r,dict)
-                and r.get('market')
-                and r.get('selection')
-                and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
-                and valid_fixture_identity(r)
-                and not row_is_retired(r)
-            ):
-                existing.append(dict(r))
+            if isinstance(r,dict) and r.get('market') and r.get('selection') and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat() and valid_fixture_identity(r):existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
-
-    # A date is authoritative only when we can prove that at least one historical App-Ready
-    # betting bundle was actually inspected for that date. The previous v8 implementation marked
-    # dates complete even when history() found zero source bundles; Android then correctly pruned
-    # every local row for those falsely-complete dates. Persist the source count so zero-pick days
-    # can still be authoritative without confusing "no qualifying pick" with "no source existed".
-    evidence={}
-    if old_schema>=SCHEMA_VERSION and isinstance(old,dict):
-        raw_evidence=old.get('backfillSourceCounts',{})
-        if isinstance(raw_evidence,dict):
-            for key,value in raw_evidence.items():
-                iso=str(key or '')[:10]; count=intval(value)
-                if iso and count>0:evidence[iso]=count
-    done=set(evidence)
-
+    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
-    legacy_rows,legacy_commit=legacy_actual_rows(CURRENT_CONTRACT_START-dt.timedelta(days=1))
-    allr=[
-        r for r in [*legacy_rows,*existing,*current]
-        if str(r.get('matchKey') or '').strip() not in invalidated
-    ]; processed=[]; hb=hr=0
+    allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
     for off in range(1,RETENTION+1):
         if len(processed)>=limit:break
         day=today-dt.timedelta(days=off); iso=day.isoformat()
-        if iso in done and not a.reprobe_authoritative:continue
+        if iso in done:continue
         r,n=history(day)
-        if n<=0:
-            print(f"CANONICAL_LEDGER_BACKFILL_SOURCE_MISSING date={iso}")
-            continue
-        # Only a source-proven backfill day is authoritative. For pre-WAL-hardening archives,
-        # an empty reconstructed day does not override canonical legacy rows that independently pass
-        # the v8 contract; those rows are the immutable recommendation-time record.
-        legacy_day=[
-            x for x in legacy_rows
-            if str(x.get('localDate') or '')[:10]==iso
-        ] if day<CURRENT_CONTRACT_START else []
+        # A completed backfill day is an authoritative replacement, not an append. This removes
+        # any stale/corrupt identity row from an older ledger generation.
         allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
-        allr.extend(r if r else legacy_day)
-        hb+=n; hr+=len(r); evidence[iso]=n; done.add(iso)
-        if iso not in processed:processed.append(iso)
+        allr.extend(r); hb+=n; hr+=len(r); done.add(iso); processed.append(iso)
     entries=[r for r in merge(allr) if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()]
-    sem={
-        'schemaVersion':SCHEMA_VERSION,
-        'retentionDays':RETENTION,
-        'source':'canonical-actual-singles-no-retired-history-v10',
-        'legacyMigrationCommit':legacy_commit,
-        'currentEngineRulesFingerprint':RULES_FINGERPRINT,
-        'currentContractStart':CURRENT_CONTRACT_START.isoformat(),
-        'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),
-        'backfillSourceCounts':{x:evidence[x] for x in sorted(done) if low.isoformat()<=x<=today.isoformat()},
-        'invalidatedMatchKeys':sorted(invalidated),
-        'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))
-    }
-    # The broad/default-Singles ledger is an additive backward-compatible section maintained by
-    # materialize_broad_recommendation_ledger.py. Preserve it whenever the precision ledger is
-    # rematerialized so both products continue to share this one StatMaker-Data/main document.
-    for key in ('broadSource','broadLegacyMigrationCommit','broadBackfilledDates','broadEntries'):
-        if isinstance(old,dict) and key in old:
-            sem[key]=old[key]
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v6','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v10 currentBundles={len(cb)} currentRows={len(merge(current))} legacyRows={len(legacy_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
-    print("CANONICAL_LEDGER_HISTORICAL_GATES "+json.dumps(HISTORICAL_GATE_COUNTS,sort_keys=True))
+    print(f"canonical-ledger-v6 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
