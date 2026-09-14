@@ -26,7 +26,7 @@ import refresh_domestic_live_july_odds as target
 import refresh_domestic_odds_integrity as guarded
 
 
-DEFAULT_SCHEDULE_HORIZON_DAYS = 3
+DEFAULT_SCHEDULE_HORIZON_DAYS = 7
 DEFAULT_EXACT_ODDS_HORIZON_DAYS = 7
 GLOBAL_EVENT_LIMIT = 5000
 _GENERIC_TEAM_TOKENS = {
