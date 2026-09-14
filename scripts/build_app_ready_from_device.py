@@ -9,6 +9,69 @@ import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def validate_domestic_enriched_index(index_path):
+    index_path = Path(index_path)
+    if not index_path.is_absolute():
+        index_path = REPO_ROOT / index_path
+    if not index_path.is_file() or index_path.stat().st_size <= 0:
+        raise SystemExit(f"Missing/empty Domestic enriched index: {index_path}")
+
+    try:
+        payload = json.loads(index_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid Domestic enriched index: {exc}") from exc
+
+    leagues = payload.get("leagues", []) if isinstance(payload, dict) else []
+    if not isinstance(leagues, list) or not leagues:
+        raise SystemExit("Invalid/empty Domestic enriched index")
+
+    checked = 0
+    mismatches = []
+    for row in leagues:
+        if not isinstance(row, dict):
+            raise SystemExit("Invalid Domestic enriched index league row")
+        output = str(row.get("output_path") or "").strip()
+        completed = int(row.get("completed_fixtures", 0) or 0)
+        if not output:
+            continue
+        output_path = Path(output)
+        if not output_path.is_absolute():
+            output_path = REPO_ROOT / output_path
+        if not output_path.is_file() or output_path.stat().st_size <= 0:
+            mismatches.append(f"{row.get('league_code') or '?'}:missing_output")
+            continue
+        try:
+            enriched = json.loads(output_path.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError:
+            mismatches.append(f"{row.get('league_code') or '?'}:invalid_output")
+            continue
+        matches = enriched.get("matches", []) if isinstance(enriched, dict) else []
+        actual = len(matches) if isinstance(matches, list) else -1
+        checked += 1
+        if actual != completed:
+            code = str(row.get("league_code") or row.get("leagueCode") or "?").strip().upper()
+            season = str(row.get("app_season") or row.get("appSeason") or row.get("season") or "").strip()
+            mismatches.append(f"{code}@{season}:{completed}!={actual}")
+
+    if mismatches:
+        raise SystemExit(
+            "Domestic enriched index is stale/inconsistent with canonical league payloads: "
+            + ",".join(mismatches[:20])
+        )
+
+    print("APP_READY_DOMESTIC_INDEX_VALIDATION_OK", f"leagues={checked}")
+
+
+if len(sys.argv) > 1 and sys.argv[1] == "--validate-domestic-index":
+    validate_domestic_enriched_index(
+        sys.argv[2] if len(sys.argv) > 2 else "data/statmaker/domestic_enriched/index.json"
+    )
+    raise SystemExit(0)
+
+
 root = Path(sys.argv[1] if len(sys.argv) > 1 else "app-ready-export/raw")
 out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")

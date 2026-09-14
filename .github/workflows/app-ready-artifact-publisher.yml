@@ -76,6 +76,9 @@ jobs:
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
 
+      - name: Validate Domestic enriched index consistency
+        run: python scripts/build_app_ready_from_device.py --validate-domestic-index data/statmaker/domestic_enriched/index.json
+
       - name: Check source versions
         id: preflight
         shell: bash
