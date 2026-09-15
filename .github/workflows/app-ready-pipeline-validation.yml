@@ -352,6 +352,76 @@ jobs:
                           f"match={match_key}",
                           f"candidates={n}",
                       )
+
+
+                  rows = con.execute(
+                      """
+                      SELECT c.match_key,
+                             c.selection_key,
+                             c.selection_odd,
+                             c.selection_score,
+                             c.exact_recommendation_key,
+                             c.market_family,
+                             s.selection_market,
+                             s.selection_name,
+                             s.selection_team,
+                             s.selection_line,
+                             s.identity_broad_group,
+                             s.identity_family,
+                             s.identity_sub_market_key,
+                             s.identity_team_side,
+                             s.identity_line,
+                             s.identity_selection_side
+                      FROM prepared_pattern_candidates c
+                      JOIN prepared_selections s
+                        ON s.competition_id=c.competition_id
+                       AND s.snapshot_version=c.snapshot_version
+                       AND s.selection_key=c.selection_key
+                      WHERE c.generation_id=?
+                        AND c.local_date='2026-09-19'
+                        AND c.recommendation_eligible=1
+                        AND c.value_tier='STRONG_VALUE'
+                        AND c.selection_odd>=1.50
+                        AND c.match_key IN (
+                          '2026-09-19|AS Roma|Inter',
+                          '2026-09-19|VfB Stuttgart|Borussia Dortmund'
+                        )
+                      ORDER BY c.match_key, c.selection_score DESC, c.selection_odd DESC
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  grouped={}
+                  for row in rows:
+                      grouped.setdefault(row[0], []).append(row[1:])
+                  for match_key, candidates in grouped.items():
+                      main=max(candidates, key=lambda r:(float(r[2]), float(r[1])))
+                      main_score=float(main[2])
+                      print(
+                          "STRONG_VALUE_ALT_DIAG",
+                          f"match={match_key}",
+                          f"main={main[6]}",
+                          f"odd={main[1]}",
+                          f"score={main_score:.4f}",
+                          f"min_alt_score={main_score*0.85:.4f}",
+                          f"candidate_count={len(candidates)}",
+                      )
+                      for c in candidates:
+                          score=float(c[2])
+                          print(
+                              "STRONG_VALUE_ALT_CANDIDATE",
+                              f"match={match_key}",
+                              f"name={c[6]}",
+                              f"odd={c[1]}",
+                              f"score={score:.4f}",
+                              f"passes85={'yes' if score >= main_score*0.85 else 'no'}",
+                              f"broad={c[9]}",
+                              f"family={c[10]}",
+                              f"sub={c[11]}",
+                              f"teamSide={c[12]}",
+                              f"line={c[13]}",
+                              f"side={c[14]}",
+                              f"exact={c[3]}",
+                          )
               finally:
                   con.close()
           PY
