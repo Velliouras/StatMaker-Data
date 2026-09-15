@@ -160,6 +160,30 @@ def harden_download(path: str, label: str) -> None:
     print(f"APP_READY_PRODUCER_PATCH_OK {source}")
 
 
+
+def patch_domestic_authoritative_scope_replace() -> None:
+    source = Path("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt")
+    text = source.read_text(encoding="utf-8")
+    marker = '''        val (inserted, duplicates) = db.upsertImportedMatches(rows)
+        return ImportResult(imported, inserted, duplicates, skipped)
+'''
+    replacement = '''        // Repository Domestic artifacts are authoritative full snapshots for one
+        // league+season scope. Remove rows that disappeared from the canonical artifact
+        // before inserting the current snapshot, otherwise resumable checkpoints retain
+        // stale fixtures forever after provider corrections or fixture reclassification.
+        db.deleteMatchesForLeague(seasonCode, league.leagueCode)
+        val (inserted, duplicates) = db.upsertImportedMatches(rows)
+        return ImportResult(imported, inserted, duplicates, skipped)
+'''
+    if text.count(marker) == 1:
+        source.write_text(text.replace(marker, replacement, 1), encoding="utf-8")
+        print("APP_READY_DOMESTIC_AUTHORITATIVE_SCOPE_OK patched")
+        return
+    if "Repository Domestic artifacts are authoritative full snapshots" in text:
+        print("APP_READY_DOMESTIC_AUTHORITATIVE_SCOPE_OK source-already-authoritative")
+        return
+    raise SystemExit("Could not locate Domestic artifact upsert boundary")
+
 def patch_domestic_multi_season_index() -> None:
     source = Path("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt")
     text = source.read_text(encoding="utf-8")
@@ -420,6 +444,7 @@ register_recommendation_publisher_activity()
 bundle_normalized_snapshot()
 patch_normalized_repository()
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt", "Domestic API artifact")
+patch_domestic_authoritative_scope_replace()
 harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "Domestic API registry")
 patch_domestic_multi_season_index()
 patch_empty_uefa_ready_snapshots()

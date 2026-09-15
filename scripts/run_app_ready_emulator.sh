@@ -19,6 +19,7 @@ if [[ "$APP_ID" != "$COMPILED_APP_ID" ]]; then
   echo "APP_READY_APP_ID_NORMALIZED workflow=$APP_ID compiled=$COMPILED_APP_ID"
 fi
 APP_ID="$COMPILED_APP_ID"
+APP_READY_STATS_PRODUCER_CONTRACT="domestic-authoritative-snapshot-v1"
 
 UEFA_REF=origin/build/uefa-qualifier-feed-20260720
 u="$GITHUB_WORKSPACE/__uefa__"
@@ -120,6 +121,23 @@ PY
       adb shell run-as "$APP_ID" cp "$tmp" "$rel"
       adb shell rm -f "$tmp"
     done
+
+    # Prepared betting state may remain reusable across producer changes, but the Domestic
+    # stats DB must only be reused when it was built with the same authoritative snapshot
+    # semantics. Old checkpoints used upsert-only imports and can contain deleted fixtures.
+    if python3 - "$CHECKPOINT_IN/checkpoint.json" "$APP_READY_STATS_PRODUCER_CONTRACT" <<'PY'
+import json, sys
+checkpoint=json.loads(open(sys.argv[1], encoding="utf-8").read())
+expected=sys.argv[2]
+raise SystemExit(0 if checkpoint.get("statsProducerContract") == expected else 1)
+PY
+    then
+      echo "APP_READY_STATS_CHECKPOINT_REUSED contract=$APP_READY_STATS_PRODUCER_CONTRACT"
+    else
+      adb shell run-as "$APP_ID" rm -f databases/statmaker.db
+      echo "APP_READY_STATS_CHECKPOINT_INVALIDATED contract=$APP_READY_STATS_PRODUCER_CONTRACT"
+    fi
+
     CHECKPOINT_RESTORED=1
     echo "APP_READY_CHECKPOINT_RESTORED_AS_SEED"
   else
@@ -305,12 +323,13 @@ export_checkpoint() {
     adb exec-out run-as "$APP_ID" cat "shared_prefs/$pref.xml" > "$target/shared_prefs/$pref.xml"
   done
 
-  python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" <<'PY'
+  python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" "$APP_READY_STATS_PRODUCER_CONTRACT" <<'PY'
 import hashlib, json, sqlite3, sys
 from datetime import datetime, timezone
 from pathlib import Path
 workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2]); root=Path(sys.argv[3])
 complete_for_target=sys.argv[4].strip().lower()=="true"
+stats_producer_contract=sys.argv[5].strip()
 db_path=root/"databases/statmaker_prepared_betting.db"
 con=sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
 try:
@@ -334,6 +353,7 @@ payload={
  "mainContentVersion":main.get("contentVersion",""),
  "uefaContentVersion":uefa.get("contentVersion",""),
  "completeForTarget":complete_for_target,
+ "statsProducerContract":stats_producer_contract,
  "preparedReadyCount":len(ready),
  "preparedDbSha256":digest,
  "preparedSnapshots":[
