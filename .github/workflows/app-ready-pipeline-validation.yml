@@ -492,6 +492,32 @@ jobs:
                       """,
                       (generation_id,),
                   ).fetchall()
+                  coverage = con.execute(
+                      """
+                      SELECT c.market_family,
+                             COUNT(*) AS candidates,
+                             SUM(CASE WHEN c.recommendation_eligible=1 THEN 1 ELSE 0 END) AS eligible,
+                             SUM(CASE WHEN c.recommendation_eligible=1 AND c.value_tier='STRONG_VALUE' AND c.selection_odd>=1.50 THEN 1 ELSE 0 END) AS strong,
+                             COUNT(DISTINCT c.match_key) AS matches
+                      FROM prepared_pattern_candidates c
+                      WHERE c.generation_id=?
+                        AND c.local_date='2026-09-19'
+                      GROUP BY c.market_family
+                      ORDER BY candidates DESC, c.market_family
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for family,candidates,eligible,strong,matches in coverage:
+                      print(
+                          "CURRENT_DATE_SOURCE_MARKETS",
+                          "date=2026-09-19",
+                          f"family={family}",
+                          f"candidates={candidates}",
+                          f"eligible={eligible}",
+                          f"strong={strong}",
+                          f"matches={matches}",
+                      )
+
                   for row in dc_rows:
                       match_key,name,odd,market_p,model_p,edge,ev,raw_p,overround,margin,bm_p,sub,side=row
                       print(
