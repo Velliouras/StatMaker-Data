@@ -311,6 +311,47 @@ jobs:
                           f"edge={edge}",
                           f"ev={ev}",
                       )
+
+
+                  collapse = con.execute(
+                      """
+                      SELECT COUNT(*), COUNT(DISTINCT match_key)
+                      FROM prepared_pattern_candidates
+                      WHERE generation_id=?
+                        AND local_date='2026-09-19'
+                        AND recommendation_eligible=1
+                        AND value_tier='STRONG_VALUE'
+                        AND selection_odd>=1.50
+                      """,
+                      (generation_id,),
+                  ).fetchone()
+                  print(
+                      "STRONG_VALUE_MATCH_COLLAPSE",
+                      "date=2026-09-19",
+                      f"candidates={collapse[0]}",
+                      f"distinct_matches={collapse[1]}",
+                  )
+                  duplicates = con.execute(
+                      """
+                      SELECT match_key, COUNT(*) AS n
+                      FROM prepared_pattern_candidates
+                      WHERE generation_id=?
+                        AND local_date='2026-09-19'
+                        AND recommendation_eligible=1
+                        AND value_tier='STRONG_VALUE'
+                        AND selection_odd>=1.50
+                      GROUP BY match_key
+                      HAVING COUNT(*)>1
+                      ORDER BY n DESC, match_key
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for match_key, n in duplicates:
+                      print(
+                          "STRONG_VALUE_MATCH_MULTI",
+                          f"match={match_key}",
+                          f"candidates={n}",
+                      )
               finally:
                   con.close()
           PY
