@@ -544,3 +544,65 @@ jobs:
               finally:
                   con.close()
           PY
+
+
+      - name: Compare exact Saturday and current recommendation models
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+
+          manifest=json.loads(Path("data/statmaker/app_ready/update_manifest.json").read_text(encoding="utf-8"))
+          current=Path(next(a["path"] for a in manifest["artifacts"] if a["id"]=="app_ready_betting_bundle"))
+          saturday=Path("data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip")
+
+          def inspect(label,bundle):
+              if not bundle.is_file():
+                  print("SATURDAY_CURRENT_MODEL_COMPARE",f"label={label}","missing=true",f"path={bundle}")
+                  return
+              with tempfile.TemporaryDirectory() as tmp:
+                  with zipfile.ZipFile(bundle) as z:
+                      names=[n for n in z.namelist() if n.endswith("databases/statmaker_prepared_betting.db")]
+                      if len(names)!=1: raise SystemExit(f"{label}: expected one prepared db; got {names}")
+                      z.extract(names[0],tmp)
+                      db=Path(tmp)/names[0]
+                  con=sqlite3.connect(f"file:{db}?mode=ro",uri=True)
+                  try:
+                      gen=con.execute("SELECT generation_id,candidate_count FROM prepared_pattern_generation WHERE state='ready' ORDER BY built_at_ms DESC LIMIT 1").fetchone()
+                      gid=str(gen[0])
+                      print("SATURDAY_CURRENT_MODEL_COMPARE",f"label={label}",f"generation={gid[:12]}",f"candidates={gen[1]}")
+                      rows=con.execute(
+                          """
+                          SELECT c.market_family,COUNT(*),
+                                 ROUND(AVG(c.selection_odd),3),
+                                 ROUND(AVG(s.value_signal_market_probability),4),
+                                 ROUND(AVG(s.value_signal_conservative_probability),4),
+                                 ROUND(AVG(s.value_signal_edge),4),
+                                 ROUND(AVG(s.value_signal_expected_value),4)
+                          FROM prepared_pattern_candidates c
+                          JOIN prepared_selections s
+                            ON s.competition_id=c.competition_id
+                           AND s.snapshot_version=c.snapshot_version
+                           AND s.selection_key=c.selection_key
+                          WHERE c.generation_id=?
+                            AND c.recommendation_eligible=1
+                            AND c.value_tier='STRONG_VALUE'
+                            AND c.selection_odd>=1.50
+                          GROUP BY c.market_family
+                          ORDER BY COUNT(*) DESC,c.market_family
+                          """,(gid,)
+                      ).fetchall()
+                      total=sum(int(r[1]) for r in rows)
+                      result=sum(int(r[1]) for r in rows if str(r[0]) in {"1X2","Double Chance","Draw No Bet"})
+                      print("SATURDAY_CURRENT_MODEL_SUMMARY",f"label={label}",f"strong={total}",f"result_family={result}",f"result_pct={(100*result/total if total else 0):.1f}")
+                      for fam,n,odd,mp,model,edge,ev in rows:
+                          if fam in {"1X2","Double Chance","Draw No Bet","Team Goals","Match Goals","BTTS"}:
+                              print("SATURDAY_CURRENT_MODEL_MARKET",f"label={label}",f"family={fam}",f"count={n}",f"avg_odd={odd}",f"market_p={mp}",f"model_p={model}",f"edge={edge}",f"ev={ev}")
+                  finally:
+                      con.close()
+
+          inspect("saturday",saturday)
+          inspect("current",current)
+          PY
