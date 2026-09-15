@@ -89,7 +89,7 @@ jobs:
           ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
           ODDS_API_IO_RATE_LIMIT_WAIT_MAX_SECONDS: "420"
           ODDS_API_IO_RATE_LIMIT_WAIT_BUFFER_SECONDS: "2"
-          STATMAKER_DOMESTIC_SCHEDULE_HORIZON_DAYS: "3"
+          STATMAKER_DOMESTIC_SCHEDULE_HORIZON_DAYS: "7"
           STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS: "7"
           INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
         run: |
