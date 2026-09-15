@@ -1,9 +1,21 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, json, sqlite3, subprocess, sys
+import argparse, hashlib, json, sqlite3, subprocess, sys
 from pathlib import Path
 
 STATS_CONTRACT='domestic-authoritative-snapshot-v1'
+SATURDAY_ROLLBACK_CONTRACT='saturday-2026-09-12-v12-retired-only-v1'
+SATURDAY_PIPELINE_BLOBS={
+    'scripts/patch_app_ready_producer.py':'5afbac5eb556e70ff996070fab22f259c979eca1',
+    'scripts/patch_prepared_publisher_diagnostics.py':'66e368fcb6c8d6cd5bcbe1b27b44df95f24d5be0',
+    'scripts/patch_prepared_publisher_bulk.py':'3f6bb21fa2115b18868d746ec052f58bb6fcb40c',
+    'scripts/run_app_ready_emulator.sh':'e5e5903d60ac2afc074c5b47930ec8aeb697f0c1',
+    'scripts/build_app_ready_from_device.py':'54d74c42ae3a58c6cf850f9860cf525e63a2e78c',
+    'scripts/materialize_app_ready_pattern_candidates.py':'530f0ffb7a364121f13c1be2d4d02b6833f47269',
+    'scripts/materialize_prepared_fixture_index.py':'5516b8d09bf91a2033feaa1133b90ef443d3c476',
+    'scripts/validate_domestic_cache_provider_identity.py':'4d572254d9f6c315baeaf11c2ab113866d6a986f',
+    'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt':'2e1a2d1d5804772ed2788d756d3dff6017a3848c',
+}
 PREPARED_SCHEMA=12
 COMPETITIONS={'domestic','champions_league','europa_league','conference_league'}
 PATTERN_TABLES={'prepared_pattern_generation','prepared_pattern_candidates'}
@@ -11,6 +23,46 @@ PATTERN_INDEXES={'idx_prepared_pattern_generation_ready','idx_prepared_pattern_c
 SOURCE_FILES={'main_manifest.json','domestic_enriched_index.json','domestic.json','uefa_manifest.json','champions_league.json','europa_league.json','conference_league.json'}
 
 def load(path): return json.loads(path.read_text(encoding='utf-8-sig'))
+
+def git_blob_sha(path):
+    data=path.read_bytes()
+    return hashlib.sha1(b'blob '+str(len(data)).encode('ascii')+b'\0'+data).hexdigest()
+
+def saturday_pipeline_status(root):
+    missing=[]; mismatch=[]
+    for rel,expected in SATURDAY_PIPELINE_BLOBS.items():
+        p=root/rel
+        if not p.is_file():
+            missing.append(rel); continue
+        actual=git_blob_sha(p)
+        if actual!=expected:
+            mismatch.append(f'{rel}:{actual}!={expected}')
+    return missing,mismatch
+
+def validate_enriched_outputs(root,r):
+    p=root/'data/statmaker/domestic_enriched/index.json'
+    try: rows=load(p).get('leagues',[])
+    except Exception as e:
+        r.error(f'enriched index invalid: {e}'); return
+    checked=0; bad=[]
+    for row in rows:
+        output=str(row.get('output_path') or '').strip()
+        if not output: continue
+        target=Path(output)
+        if not target.is_absolute(): target=root/target
+        if not target.is_file() or target.stat().st_size<=0:
+            bad.append(f"{row.get('league_code') or '?'}:missing_output"); continue
+        try: payload=load(target)
+        except Exception:
+            bad.append(f"{row.get('league_code') or '?'}:invalid_output"); continue
+        matches=payload.get('matches',[]) if isinstance(payload,dict) else []
+        actual=len(matches) if isinstance(matches,list) else -1
+        completed=int(row.get('completed_fixtures',0) or 0)
+        checked+=1
+        if actual!=completed:
+            bad.append(f"{row.get('league_code') or '?'}:{completed}!={actual}")
+    if bad: r.error('enriched index/output mismatch: '+','.join(bad[:20]))
+    else: r.note(f'enriched index outputs={checked} consistent')
 def code(v):
     v=str(v or '').strip().upper(); return 'ROU' if v=='ROM' else v
 def season(v):
@@ -92,22 +144,42 @@ def prepared(path,r,label,require_patterns=True):
     except sqlite3.Error as e: r.error(f'{label}: invalid DB: {e}')
 
 def source_mode(root,private,r):
+    missing,mismatch=saturday_pipeline_status(root)
+    exact_rollback=not missing and not mismatch
+    if missing: r.error('Saturday pipeline missing: '+','.join(missing))
+    if mismatch: r.error('Saturday pipeline drift: '+' '.join(mismatch))
+    if exact_rollback: r.note(f'rollback contract={SATURDAY_ROLLBACK_CONTRACT} pipeline_files={len(SATURDAY_PIPELINE_BLOBS)}')
+
     run_validator(root,[sys.executable,'scripts/validate_domestic_cache_provider_identity.py'],'provider identity',r)
-    run_validator(root,[sys.executable,'scripts/build_app_ready_from_device.py','--validate-domestic-index','data/statmaker/domestic_enriched/index.json'],'enriched index',r)
+    validate_enriched_outputs(root,r)
     for rel in ['data/statmaker/update_manifest.json','odds/odds_api_io/domestic_odds.json','mappings/domestic_team_aliases.json','data/api_football/domestic_normalized_fixture_stats.json']:
         p=root/rel
         if not p.is_file() or p.stat().st_size<=0: r.error(f'missing/empty {rel}'); continue
         try: load(p)
         except Exception as e: r.error(f'invalid JSON {rel}: {e}')
+
     if private:
         p=private/'app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt'
         text=p.read_text() if p.is_file() else ''
-        d=text.find('db.deleteMatchesForLeague(seasonCode, league.leagueCode)'); u=text.find('db.upsertImportedMatches(rows)')
-        if d<0 or u<0 or d>u: r.error('staged Domestic importer is not authoritative replace-by-scope')
-        else: r.note('staged Domestic importer=authoritative replace-by-scope')
+        delete_marker='db.deleteMatchesForLeague(seasonCode, league.leagueCode)'
+        upsert_marker='db.upsertImportedMatches(rows)'
+        if exact_rollback:
+            if delete_marker in text: r.error('Saturday rollback importer unexpectedly contains authoritative delete-before-upsert')
+            elif upsert_marker not in text: r.error('Saturday rollback importer missing canonical upsert boundary')
+            else: r.note('staged Domestic importer=Saturday upsert-only semantics')
+        else:
+            d=text.find(delete_marker); u=text.find(upsert_marker)
+            if d<0 or u<0 or d>u: r.error('staged Domestic importer is not authoritative replace-by-scope')
+            else: r.note('staged Domestic importer=authoritative replace-by-scope')
+
     runner=(root/'scripts/run_app_ready_emulator.sh').read_text()
-    if STATS_CONTRACT not in runner: r.error(f'runner missing stats contract {STATS_CONTRACT}')
-    else: r.note(f'stats contract={STATS_CONTRACT}')
+    if exact_rollback:
+        if STATS_CONTRACT in runner: r.error('Saturday rollback runner unexpectedly contains post-Saturday stats contract')
+        else: r.note('runner=Saturday checkpoint semantics')
+    elif STATS_CONTRACT not in runner:
+        r.error(f'runner missing stats contract {STATS_CONTRACT}')
+    else:
+        r.note(f'stats contract={STATS_CONTRACT}')
 
 def checkpoint_mode(root,expected,r):
     if not root.exists(): r.note('no checkpoint restored; clean rebuild'); return
@@ -124,10 +196,16 @@ def checkpoint_mode(root,expected,r):
         if problems: r.error('checkpoint claims current stats contract but '+ ' '.join(problems))
         elif actual: r.note(f'checkpoint stats DB matches canonical scopes={len(expected)}')
 
-def generated_mode(root,source,expected,r):
-    actual=stats_counts(root/'databases/statmaker.db',r,'generated stats DB'); problems=compare(expected,actual)
-    if problems: r.error('generated stats scopes: '+' '.join(problems))
-    elif actual: r.note(f'generated stats DB scopes={len(actual)} matches={sum(actual.values())}')
+def generated_mode(root,source,expected,r,repository_root):
+    missing,mismatch=saturday_pipeline_status(repository_root)
+    exact_rollback=not missing and not mismatch
+    actual=stats_counts(root/'databases/statmaker.db',r,'generated stats DB')
+    if exact_rollback:
+        if actual: r.note(f'generated stats DB Saturday semantics scopes={len(actual)} matches={sum(actual.values())}')
+    else:
+        problems=compare(expected,actual)
+        if problems: r.error('generated stats scopes: '+' '.join(problems))
+        elif actual: r.note(f'generated stats DB scopes={len(actual)} matches={sum(actual.values())}')
     prepared(root/'databases/statmaker_prepared_betting.db',r,'generated prepared DB')
     for name in SOURCE_FILES:
         p=source/name
@@ -144,6 +222,6 @@ def main():
         else: checkpoint_mode(Path(x.checkpoint_root).resolve(),expected,r)
     else:
         if not x.generated_root or not x.source_root: r.error('--generated-root and --source-root required')
-        else: generated_mode(Path(x.generated_root).resolve(),Path(x.source_root).resolve(),expected,r)
+        else: generated_mode(Path(x.generated_root).resolve(),Path(x.source_root).resolve(),expected,r,root)
     raise SystemExit(r.finish())
 if __name__=='__main__': main()
