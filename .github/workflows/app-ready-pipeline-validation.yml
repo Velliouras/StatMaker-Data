@@ -658,6 +658,57 @@ jobs:
           inspect("current",current)
           inspect_date("saturday",saturday,"2026-09-19")
           inspect_date("current",current,"2026-09-19")
+
+          retired = {
+              "RESULT_ASIAN_HANDICAP",
+              "HT_RESULT_ASIAN_HANDICAP",
+              "ASIAN_MATCH_GOALS_TOTAL",
+              "ASIAN_FIRST_HALF_GOALS_TOTAL",
+              "ASIAN_MATCH_CORNERS_TOTAL",
+              "ASIAN_CORNER_HANDICAP",
+              "CORNER_HANDICAP",
+          }
+
+          def inspect_without_retired(label,bundle):
+              if not bundle.is_file():
+                  return
+              with tempfile.TemporaryDirectory() as tmp:
+                  with zipfile.ZipFile(bundle) as z:
+                      names=[n for n in z.namelist() if n.endswith("databases/statmaker_prepared_betting.db")]
+                      z.extract(names[0],tmp)
+                      db=Path(tmp)/names[0]
+                  con=sqlite3.connect(f"file:{db}?mode=ro",uri=True)
+                  try:
+                      gid=str(con.execute("SELECT generation_id FROM prepared_pattern_generation WHERE state='ready' ORDER BY built_at_ms DESC LIMIT 1").fetchone()[0])
+                      placeholders=",".join("?" for _ in retired)
+                      rows=con.execute(
+                          f"""
+                          SELECT c.market_family,COUNT(*),
+                                 ROUND(AVG(c.selection_odd),3)
+                          FROM prepared_pattern_candidates c
+                          JOIN prepared_selections s
+                            ON s.competition_id=c.competition_id
+                           AND s.snapshot_version=c.snapshot_version
+                           AND s.selection_key=c.selection_key
+                          WHERE c.generation_id=?
+                            AND c.recommendation_eligible=1
+                            AND c.value_tier='STRONG_VALUE'
+                            AND c.selection_odd>=1.50
+                            AND COALESCE(s.identity_sub_market_key,'') NOT IN ({placeholders})
+                          GROUP BY c.market_family
+                          ORDER BY COUNT(*) DESC,c.market_family
+                          """,(gid,*sorted(retired))
+                      ).fetchall()
+                      total=sum(int(r[1]) for r in rows)
+                      result=sum(int(r[1]) for r in rows if str(r[0]) in {"1X2","Double Chance","Draw No Bet"})
+                      print("SATURDAY_NO_RETIRED_SUMMARY",f"label={label}",f"strong={total}",f"result={result}",f"result_pct={(100*result/total if total else 0):.1f}")
+                      for fam,n,avg_odd in rows:
+                          print("SATURDAY_NO_RETIRED_MARKET",f"label={label}",f"family={fam}",f"count={n}",f"avg_odd={avg_odd}")
+                  finally:
+                      con.close()
+
+          inspect_without_retired("saturday",saturday)
+          inspect_without_retired("current",current)
           PY
 
 
