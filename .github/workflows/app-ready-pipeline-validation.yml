@@ -461,6 +461,57 @@ jobs:
                           f"rank={rank}",
                       )
 
+
+                  dc_rows = con.execute(
+                      """
+                      SELECT c.match_key,
+                             s.selection_name,
+                             s.selection_odd,
+                             s.value_signal_market_probability,
+                             s.value_signal_conservative_probability,
+                             s.value_signal_edge,
+                             s.value_signal_expected_value,
+                             s.bm_raw_implied_probability,
+                             s.bm_market_overround,
+                             s.bm_bookmaker_margin,
+                             s.bm_market_probability,
+                             s.identity_sub_market_key,
+                             s.identity_selection_side
+                      FROM prepared_pattern_candidates c
+                      JOIN prepared_selections s
+                        ON s.competition_id=c.competition_id
+                       AND s.snapshot_version=c.snapshot_version
+                       AND s.selection_key=c.selection_key
+                      WHERE c.generation_id=?
+                        AND c.local_date='2026-09-19'
+                        AND c.recommendation_eligible=1
+                        AND c.value_tier='STRONG_VALUE'
+                        AND c.market_family='Double Chance'
+                        AND c.selection_odd>=1.50
+                      ORDER BY c.match_key, s.selection_odd
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for row in dc_rows:
+                      match_key,name,odd,market_p,model_p,edge,ev,raw_p,overround,margin,bm_p,sub,side=row
+                      print(
+                          "DC_PROBABILITY_AUDIT",
+                          f"match={match_key}",
+                          f"name={name}",
+                          f"odd={odd}",
+                          f"implied={1.0/float(odd):.4f}",
+                          f"market_p={market_p}",
+                          f"bm_market_p={bm_p}",
+                          f"raw_implied={raw_p}",
+                          f"overround={overround}",
+                          f"margin={margin}",
+                          f"model_p={model_p}",
+                          f"edge={edge}",
+                          f"ev={ev}",
+                          f"sub={sub}",
+                          f"side={side}",
+                      )
+
                   for match_key, candidates in grouped.items():
                       main=max(candidates, key=lambda r:(float(r[2]), float(r[1])))
                       main_score=float(main[2])
