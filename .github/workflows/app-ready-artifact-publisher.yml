@@ -188,7 +188,7 @@ jobs:
           run-id: 33283282657
 
       - name: Restore exact successful Saturday checkpoint for rollback
-        if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume rollback from Saturday checkpoint')
+        if: steps.preflight.outputs.generate == 'true'
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -199,7 +199,7 @@ jobs:
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume rollback from Saturday checkpoint'))
+        if: steps.preflight.outputs.generate == 'true' && false
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -260,7 +260,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Resume rollback from Saturday checkpoint')) && steps.checkpoint_lookup.outputs.run_id != ''
+        if: steps.preflight.outputs.generate == 'true' && false
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
