@@ -80,6 +80,11 @@ echo "APP_READY_SATURDAY_ENGINE_PARITY_OK baseline=$SATURDAY_ENGINE_COMMIT overl
 # verified Saturday publisher. Infrastructure/checkpoint/validation scripts are allowed
 # to evolve independently, but these two files define candidate materialization semantics.
 DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
+
+if ! git -C "$GITHUB_WORKSPACE" cat-file -e "${DATA_SATURDAY_COMMIT}^{commit}" 2>/dev/null; then
+  git -C "$GITHUB_WORKSPACE" fetch --no-tags origin "$DATA_SATURDAY_COMMIT"
+fi
+git -C "$GITHUB_WORKSPACE" cat-file -e "${DATA_SATURDAY_COMMIT}^{commit}" >/dev/null
 declare -A DATA_SEMANTIC_BLOBS=(
   ["scripts/materialize_app_ready_pattern_candidates.py"]="530f0ffb7a364121f13c1be2d4d02b6833f47269"
   ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="2e1a2d1d5804772ed2788d756d3dff6017a3848c"
