@@ -722,6 +722,71 @@ jobs:
           PY
 
 
+      - name: Compare active Saturday and current prepared universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+
+          manifest=json.loads(Path("data/statmaker/app_ready/update_manifest.json").read_text(encoding="utf-8"))
+          current=Path(next(a["path"] for a in manifest["artifacts"] if a["id"]=="app_ready_betting_bundle"))
+          saturday=Path("data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip")
+
+          retired={
+            "RESULT_ASIAN_HANDICAP",
+            "HT_RESULT_ASIAN_HANDICAP",
+            "ASIAN_MATCH_GOALS_TOTAL",
+            "ASIAN_FIRST_HALF_GOALS_TOTAL",
+            "ASIAN_MATCH_CORNERS_TOTAL",
+            "ASIAN_CORNER_HANDICAP",
+            "CORNER_HANDICAP",
+          }
+
+          def inspect(label,bundle):
+              with tempfile.TemporaryDirectory() as tmp:
+                  with zipfile.ZipFile(bundle) as z:
+                      names=[n for n in z.namelist() if n.endswith("databases/statmaker_prepared_betting.db")]
+                      if len(names)!=1:
+                          raise SystemExit(f"{label}: expected exactly one prepared db")
+                      z.extract(names[0],tmp)
+                      db=Path(tmp)/names[0]
+                  con=sqlite3.connect(f"file:{db}?mode=ro",uri=True)
+                  try:
+                      total=con.execute("SELECT COUNT(*) FROM prepared_selections WHERE competition_id='domestic'").fetchone()[0]
+                      retired_count=con.execute(
+                          f"SELECT COUNT(*) FROM prepared_selections WHERE competition_id='domestic' AND COALESCE(identity_sub_market_key,'') IN ({','.join('?' for _ in retired)})",
+                          tuple(sorted(retired))
+                      ).fetchone()[0]
+                      active=total-retired_count
+                      active_matches=con.execute(
+                          f"""SELECT COUNT(DISTINCT match_key) FROM prepared_selections
+                              WHERE competition_id='domestic'
+                                AND COALESCE(identity_sub_market_key,'') NOT IN ({','.join('?' for _ in retired)})""",
+                          tuple(sorted(retired))
+                      ).fetchone()[0]
+                      print("ACTIVE_UNIVERSE_COMPARE",f"label={label}",f"total={total}",f"retired={retired_count}",f"active={active}",f"active_matches={active_matches}")
+
+                      rows=con.execute(
+                          f"""SELECT COALESCE(identity_family,'<none>') AS fam, COUNT(*) AS n
+                              FROM prepared_selections
+                              WHERE competition_id='domestic'
+                                AND COALESCE(identity_sub_market_key,'') NOT IN ({','.join('?' for _ in retired)})
+                              GROUP BY fam
+                              ORDER BY n DESC""",
+                          tuple(sorted(retired))
+                      ).fetchall()
+                      for fam,n in rows[:25]:
+                          print("ACTIVE_UNIVERSE_FAMILY",f"label={label}",f"family={fam}",f"count={n}")
+                  finally:
+                      con.close()
+
+          inspect("saturday",saturday)
+          inspect("current",current)
+          PY
+
+
       - name: Compare Saturday and current Domestic odds universe
         shell: bash
         run: |
