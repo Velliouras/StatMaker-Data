@@ -97,6 +97,37 @@ for file in "${!DATA_SEMANTIC_BLOBS[@]}"; do
 done
 echo "APP_READY_DATA_SEMANTICS_PARITY_OK baseline=$DATA_SATURDAY_COMMIT files=${#DATA_SEMANTIC_BLOBS[@]}"
 
+
+# Exact rollback contract: materialize every Data-side script used by the verified
+# Saturday App-Ready publisher. Current infrastructure may orchestrate the run, but
+# recommendation/data transformation code must be bit-for-bit Saturday.
+SATURDAY_PIPELINE_FILES=(
+  "scripts/patch_app_ready_producer.py"
+  "scripts/patch_prepared_publisher_diagnostics.py"
+  "scripts/patch_prepared_publisher_bulk.py"
+  "scripts/run_app_ready_emulator.sh"
+  "scripts/build_app_ready_from_device.py"
+  "scripts/materialize_app_ready_pattern_candidates.py"
+  "scripts/materialize_prepared_fixture_index.py"
+  "scripts/validate_domestic_cache_provider_identity.py"
+  "scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"
+)
+
+for file in "${SATURDAY_PIPELINE_FILES[@]}"; do
+  mkdir -p "$GITHUB_WORKSPACE/$(dirname "$file")"
+  git -C "$GITHUB_WORKSPACE" show "$DATA_SATURDAY_COMMIT:$file" > "$GITHUB_WORKSPACE/$file"
+  expected_blob="$(git -C "$GITHUB_WORKSPACE" rev-parse "$DATA_SATURDAY_COMMIT:$file")"
+  actual_blob="$(git -C "$GITHUB_WORKSPACE" hash-object "$GITHUB_WORKSPACE/$file")"
+  if [[ "$actual_blob" != "$expected_blob" ]]; then
+    echo "Saturday pipeline materialization mismatch: $file" >&2
+    echo "Expected: $expected_blob" >&2
+    echo "Actual:   $actual_blob" >&2
+    exit 1
+  fi
+done
+
+echo "APP_READY_EXACT_SATURDAY_DATA_PIPELINE_OK baseline=$DATA_SATURDAY_COMMIT files=${#SATURDAY_PIPELINE_FILES[@]}"
+
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
 LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"
