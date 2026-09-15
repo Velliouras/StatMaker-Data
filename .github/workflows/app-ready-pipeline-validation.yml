@@ -195,6 +195,58 @@ jobs:
                               f"sub={sub}",
                               f"count={count}",
                           )
+
+
+                      generation = con.execute(
+                          """
+                          SELECT generation_id
+                          FROM prepared_pattern_generation
+                          WHERE state='ready'
+                          ORDER BY built_at_ms DESC
+                          LIMIT 1
+                          """
+                      ).fetchone()
+                      if generation:
+                          gid = str(generation[0])
+                          strong_total = int(con.execute(
+                              """
+                              SELECT COUNT(*)
+                              FROM prepared_pattern_candidates c
+                              JOIN prepared_selections s
+                                ON s.competition_id=c.competition_id
+                               AND s.snapshot_version=c.snapshot_version
+                               AND s.selection_key=c.selection_key
+                              WHERE c.generation_id=?
+                                AND c.recommendation_eligible=1
+                                AND c.value_tier='STRONG_VALUE'
+                                AND c.selection_odd>=1.50
+                              """,
+                              (gid,),
+                          ).fetchone()[0])
+                          strong_retired = int(con.execute(
+                              f"""
+                              SELECT COUNT(*)
+                              FROM prepared_pattern_candidates c
+                              JOIN prepared_selections s
+                                ON s.competition_id=c.competition_id
+                               AND s.snapshot_version=c.snapshot_version
+                               AND s.selection_key=c.selection_key
+                              WHERE c.generation_id=?
+                                AND c.recommendation_eligible=1
+                                AND c.value_tier='STRONG_VALUE'
+                                AND c.selection_odd>=1.50
+                                AND COALESCE(s.identity_sub_market_key,'') IN ({placeholders})
+                              """,
+                              (gid, *tuple(sorted(RETIRED))),
+                          ).fetchone()[0])
+                          print(
+                              "SATURDAY_STRONG_RETIREMENT_IMPACT",
+                              f"label={label}",
+                              f"strong_total={strong_total}",
+                              f"strong_retired={strong_retired}",
+                              f"strong_non_retired={strong_total-strong_retired}",
+                              f"retired_pct={(100.0*strong_retired/strong_total if strong_total else 0.0):.1f}",
+                          )
                   finally:
                       con.close()
           PY
