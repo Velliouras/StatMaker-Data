@@ -109,6 +109,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          git fetch --no-tags --depth=1 origin 5480af5d0636eb37b8b5aec84e6ee576a7195587
+          git show 5480af5d0636eb37b8b5aec84e6ee576a7195587:data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip > /tmp/saturday_app_ready_betting.zip
           python - <<'PY'
           import json
           import sqlite3
@@ -133,10 +135,7 @@ jobs:
               row["path"] for row in manifest["artifacts"]
               if row["id"] == "app_ready_betting_bundle"
           ))
-          saturday = Path(
-              "data/statmaker/app_ready/"
-              "app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip"
-          )
+          saturday = Path("/tmp/saturday_app_ready_betting.zip")
 
           def open_db(bundle, tmp):
               with zipfile.ZipFile(bundle) as zf:
