@@ -727,6 +727,73 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin 54e9bd4e28b29a0eb6313f4d16da4c99f27490b9
+          git show 54e9bd4e28b29a0eb6313f4d16da4c99f27490b9:odds/odds_api_io/domestic_odds.json > /tmp/domestic_odds_saturday.json
+          python - <<'PY'
+          import json
+          from collections import Counter,defaultdict
+          from pathlib import Path
+
+          RETIRED={
+              "ASIAN_HANDICAP","ASIAN_HANDICAP_1H","ASIAN_GOALS","ASIAN_GOALS_1H",
+              "ASIAN_CORNERS","ASIAN_CORNER_HANDICAP","CORNER_HANDICAP"
+          }
+
+          def load(path):
+              return json.loads(Path(path).read_text(encoding="utf-8"))
+
+          def summarize(label,payload):
+              leagues=payload.get("leagues") or []
+              matches=[]
+              market_counts=Counter()
+              by_league=defaultdict(lambda:[0,0])
+              for league in leagues:
+                  code=str(league.get("leagueCode") or "").strip()
+                  lm=league.get("matches") or []
+                  for match in lm:
+                      matches.append(match)
+                      markets=match.get("markets") or []
+                      by_league[code][0]+=1
+                      by_league[code][1]+=len(markets)
+                      for market in markets:
+                          key=str(
+                              market.get("market")
+                              or market.get("marketKey")
+                              or market.get("key")
+                              or market.get("name")
+                              or "UNKNOWN"
+                          ).strip().upper()
+                          market_counts[key]+=1
+              nonret=sum(v for k,v in market_counts.items() if k not in RETIRED)
+              retired=sum(v for k,v in market_counts.items() if k in RETIRED)
+              print("DOMESTIC_ODDS_SATURDAY_COMPARE",f"label={label}",f"leagues={len(leagues)}",f"matches={len(matches)}",f"market_rows={sum(market_counts.values())}",f"nonretired_rows={nonret}",f"retired_rows={retired}")
+              return market_counts,by_league
+
+          sat=load("/tmp/domestic_odds_saturday.json")
+          cur=load("odds/odds_api_io/domestic_odds.json")
+          sm,sl=summarize("saturday",sat)
+          cm,cl=summarize("current",cur)
+
+          for key in sorted(set(sm)|set(cm), key=lambda k: (cm[k]-sm[k],k)):
+              if sm[key]==cm[key]:
+                  continue
+              print("DOMESTIC_ODDS_MARKET_DELTA",f"market={key}",f"saturday={sm[key]}",f"current={cm[key]}",f"delta={cm[key]-sm[key]}",f"retired={'yes' if key in RETIRED else 'no'}")
+
+          league_rows=[]
+          for code in sorted(set(sl)|set(cl)):
+              smatches,smarkets=sl[code]
+              cmatches,cmarkets=cl[code]
+              if smatches!=cmatches or smarkets!=cmarkets:
+                  league_rows.append((cmarkets-smarkets,code,smatches,cmatches,smarkets,cmarkets))
+          for delta,code,smatches,cmatches,smarkets,cmarkets in sorted(league_rows)[:40]:
+              print("DOMESTIC_ODDS_LEAGUE_DELTA",f"league={code}",f"saturday_matches={smatches}",f"current_matches={cmatches}",f"saturday_markets={smarkets}",f"current_markets={cmarkets}",f"delta_markets={delta}")
+          PY
+
+
+      - name: Compare Saturday and current Domestic odds universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 54e9bd4e28b29a0eb6313f4d16da4c99f27490b9
           python - <<'PY'
           import json, subprocess
           from collections import Counter
