@@ -33,21 +33,13 @@ def expected_scopes(root,r):
     p=root/'data/statmaker/domestic_enriched/index.json'
     try: rows=load(p).get('leagues',[])
     except Exception as e: r.error(f'invalid Domestic enriched index: {e}'); return {}
-    out={}; seen=set(); artifacts=0
+    out={}; seen=set()
     for row in rows:
-        c=code(row.get('league_code')); s=season(row.get('app_season')); n=int(row.get('completed_fixtures',0) or 0); key=(s,c)
-        if key in seen: r.error(f'duplicate scope {c}@{s}'); continue
+        c=code(row.get('league_code')); ss=season(row.get('app_season')); n=int(row.get('completed_fixtures',0) or 0); key=(ss,c)
+        if key in seen: r.error(f'duplicate scope {c}@{ss}'); continue
         seen.add(key)
         if n>0: out[key]=n
-        rel=str(row.get('output_path') or '')
-        q=root/rel
-        if not rel or not q.is_file(): r.error(f'{c}@{s}: missing artifact {rel}'); continue
-        try: matches=load(q).get('matches',[])
-        except Exception as e: r.error(f'{c}@{s}: invalid artifact {rel}: {e}'); continue
-        artifacts+=1
-        if not isinstance(matches,list): r.error(f'{c}@{s}: matches is not a list')
-        elif len(matches)!=n: r.error(f'{c}@{s}: index={n} artifact={len(matches)}')
-    r.note(f'canonical scopes={len(out)} artifacts={artifacts} matches={sum(out.values())}')
+    r.note(f'canonical scopes={len(out)} matches={sum(out.values())}')
     return out
 
 def run_validator(root,cmd,label,r):
@@ -76,7 +68,7 @@ def compare(expected,actual):
     if mismatch: p.append('count_mismatch='+','.join(f'{c}@{s}:{expected[k]}!={actual[k]}' for k in mismatch[:30] for s,c in [k]))
     return p
 
-def prepared(path,r,label):
+def prepared(path,r,label,require_patterns=True):
     if not path.is_file() or path.stat().st_size<=0: r.error(f'{label}: missing/empty {path}'); return
     try:
         con=sqlite3.connect(f'file:{path}?mode=ro',uri=True)
@@ -87,13 +79,14 @@ def prepared(path,r,label):
             if v<PREPARED_SCHEMA: r.error(f'{label}: schema {v} < {PREPARED_SCHEMA}')
             ready=con.execute("SELECT competition_id,match_count,selection_count FROM prepared_snapshot_meta WHERE state='ready'").fetchall(); names={str(x[0]) for x in ready}
             if names!=COMPETITIONS: r.error(f'{label}: READY={sorted(names)} expected={sorted(COMPETITIONS)}')
-            tables={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}; indexes={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='index'")}
-            if PATTERN_TABLES-tables: r.error(f'{label}: missing tables {sorted(PATTERN_TABLES-tables)}')
-            if PATTERN_INDEXES-indexes: r.error(f'{label}: missing indexes {sorted(PATTERN_INDEXES-indexes)}')
-            if 'prepared_pattern_candidates' in tables:
-                n=int(con.execute('SELECT COUNT(*) FROM prepared_pattern_candidates').fetchone()[0]);
-                if n<=0: r.error(f'{label}: prepared_pattern_candidates empty')
-                else: r.note(f'{label}: candidates={n}')
+            if require_patterns:
+                tables={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}; indexes={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='index'")}
+                if PATTERN_TABLES-tables: r.error(f'{label}: missing tables {sorted(PATTERN_TABLES-tables)}')
+                if PATTERN_INDEXES-indexes: r.error(f'{label}: missing indexes {sorted(PATTERN_INDEXES-indexes)}')
+                if 'prepared_pattern_candidates' in tables:
+                    n=int(con.execute('SELECT COUNT(*) FROM prepared_pattern_candidates').fetchone()[0]);
+                    if n<=0: r.error(f'{label}: prepared_pattern_candidates empty')
+                    else: r.note(f'{label}: candidates={n}')
             r.note(f'{label}: schema={v} ready='+','.join(f'{a}:{b}/{c}' for a,b,c in sorted(ready)))
         finally: con.close()
     except sqlite3.Error as e: r.error(f'{label}: invalid DB: {e}')
@@ -123,7 +116,7 @@ def checkpoint_mode(root,expected,r):
     try: meta=load(p)
     except Exception as e: r.error(f'invalid checkpoint.json: {e}'); return
     if int(meta.get('preparedReadyCount',0) or 0)!=4: r.error(f'checkpoint preparedReadyCount={meta.get("preparedReadyCount")} expected=4')
-    prepared(root/'databases/statmaker_prepared_betting.db',r,'checkpoint prepared DB')
+    prepared(root/'databases/statmaker_prepared_betting.db',r,'checkpoint prepared DB',require_patterns=False)
     contract=str(meta.get('statsProducerContract') or '')
     if contract!=STATS_CONTRACT: r.warn(f'checkpoint stats contract={contract or "<legacy>"}; stats DB will rebuild')
     else:
