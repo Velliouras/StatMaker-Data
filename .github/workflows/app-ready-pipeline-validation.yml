@@ -393,6 +393,74 @@ jobs:
                   grouped={}
                   for row in rows:
                       grouped.setdefault(row[0], []).append(row[1:])
+                  market_rows = con.execute(
+                      """
+                      SELECT c.market_family,
+                             COUNT(*) AS n,
+                             ROUND(AVG(c.selection_odd), 3),
+                             ROUND(AVG(s.value_signal_market_probability), 4),
+                             ROUND(AVG(s.value_signal_conservative_probability), 4),
+                             ROUND(AVG(s.value_signal_edge), 4),
+                             ROUND(AVG(s.value_signal_expected_value), 4),
+                             ROUND(AVG(s.value_signal_ranking_score), 4)
+                      FROM prepared_pattern_candidates c
+                      JOIN prepared_selections s
+                        ON s.competition_id=c.competition_id
+                       AND s.snapshot_version=c.snapshot_version
+                       AND s.selection_key=c.selection_key
+                      WHERE c.generation_id=?
+                        AND c.recommendation_eligible=1
+                        AND c.value_tier='STRONG_VALUE'
+                        AND c.selection_odd>=1.50
+                      GROUP BY c.market_family
+                      ORDER BY n DESC, c.market_family
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for family, n, avg_odd, market_p, model_p, edge, ev, rank in market_rows:
+                      print(
+                          "STRONG_VALUE_MARKET_DISTRIBUTION",
+                          f"family={family}",
+                          f"count={n}",
+                          f"avg_odd={avg_odd}",
+                          f"market_p={market_p}",
+                          f"model_p={model_p}",
+                          f"edge={edge}",
+                          f"ev={ev}",
+                          f"rank={rank}",
+                      )
+
+                  market_rows_date = con.execute(
+                      """
+                      SELECT c.market_family,
+                             COUNT(*) AS n,
+                             ROUND(AVG(c.selection_odd), 3),
+                             ROUND(AVG(s.value_signal_ranking_score), 4)
+                      FROM prepared_pattern_candidates c
+                      JOIN prepared_selections s
+                        ON s.competition_id=c.competition_id
+                       AND s.snapshot_version=c.snapshot_version
+                       AND s.selection_key=c.selection_key
+                      WHERE c.generation_id=?
+                        AND c.local_date='2026-09-19'
+                        AND c.recommendation_eligible=1
+                        AND c.value_tier='STRONG_VALUE'
+                        AND c.selection_odd>=1.50
+                      GROUP BY c.market_family
+                      ORDER BY n DESC, c.market_family
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for family, n, avg_odd, rank in market_rows_date:
+                      print(
+                          "STRONG_VALUE_MARKET_DISTRIBUTION_DATE",
+                          "date=2026-09-19",
+                          f"family={family}",
+                          f"count={n}",
+                          f"avg_odd={avg_odd}",
+                          f"rank={rank}",
+                      )
+
                   for match_key, candidates in grouped.items():
                       main=max(candidates, key=lambda r:(float(r[2]), float(r[1])))
                       main_score=float(main[2])
