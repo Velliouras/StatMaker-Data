@@ -47,6 +47,7 @@ on:
       - 'scripts/patch_prepared_publisher_bulk.py'
       - 'scripts/run_app_ready_emulator.sh'
       - 'scripts/build_app_ready_from_device.py'
+      - 'scripts/preflight_app_ready_pipeline.py'
       - 'scripts/materialize_app_ready_pattern_candidates.py'
       - 'scripts/materialize_prepared_fixture_index.py'
   schedule:
@@ -73,12 +74,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
-
-      - name: Validate canonical Domestic provider identity
-        run: python scripts/validate_domestic_cache_provider_identity.py
-
-      - name: Validate Domestic enriched index consistency
-        run: python scripts/build_app_ready_from_device.py --validate-domestic-index data/statmaker/domestic_enriched/index.json
 
       - name: Check source versions
         id: preflight
@@ -152,6 +147,15 @@ jobs:
           git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
           python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"
           python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
+
+      - name: Aggregate source and producer preflight
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/preflight_app_ready_pipeline.py \
+            --mode source \
+            --private-root statmaker-private
 
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
@@ -296,6 +300,15 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ steps.checkpoint_lookup.outputs.run_id }}
 
+      - name: Aggregate checkpoint compatibility preflight
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/preflight_app_ready_pipeline.py \
+            --mode checkpoint \
+            --checkpoint-root app-ready-checkpoint-incoming
+
       - name: Materialize v10 candidates host-side from checkpoint
         if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')
         shell: bash
@@ -389,6 +402,16 @@ jobs:
           test -s "$s/champions_league.json"
           test -s "$s/europa_league.json"
           test -s "$s/conference_league.json"
+
+      - name: Aggregate generated read-model postflight
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/preflight_app_ready_pipeline.py \
+            --mode generated \
+            --generated-root app-ready-export/raw \
+            --source-root app-ready-export/source
 
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
