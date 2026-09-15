@@ -81,47 +81,26 @@ echo "APP_READY_SATURDAY_ENGINE_PARITY_OK baseline=$SATURDAY_ENGINE_COMMIT overl
 # to evolve independently, but these two files define candidate materialization semantics.
 DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
 
-if ! git -C "$GITHUB_WORKSPACE" cat-file -e "${DATA_SATURDAY_COMMIT}^{commit}" 2>/dev/null; then
-  git -C "$GITHUB_WORKSPACE" fetch --no-tags origin "$DATA_SATURDAY_COMMIT"
-fi
-git -C "$GITHUB_WORKSPACE" cat-file -e "${DATA_SATURDAY_COMMIT}^{commit}" >/dev/null
-declare -A DATA_SEMANTIC_BLOBS=(
+# Exact Saturday Data-side App-Ready pipeline. Download the immutable files directly
+# from the verified commit and verify their Git blob hashes. This avoids shallow-checkout
+# ambiguity and guarantees bit-for-bit rollback semantics.
+declare -A SATURDAY_PIPELINE_BLOBS=(
+  ["scripts/patch_app_ready_producer.py"]="5afbac5eb556e70ff996070fab22f259c979eca1"
+  ["scripts/patch_prepared_publisher_diagnostics.py"]="66e368fcb6c8d6cd5bcbe1b27b44df95f24d5be0"
+  ["scripts/patch_prepared_publisher_bulk.py"]="3f6bb21fa2115b18868d746ec052f58bb6fcb40c"
+  ["scripts/run_app_ready_emulator.sh"]="e5e5903d60ac2afc074c5b47930ec8aeb697f0c1"
+  ["scripts/build_app_ready_from_device.py"]="54d74c42ae3a58c6cf850f9860cf525e63a2e78c"
   ["scripts/materialize_app_ready_pattern_candidates.py"]="530f0ffb7a364121f13c1be2d4d02b6833f47269"
+  ["scripts/materialize_prepared_fixture_index.py"]="5516b8d09bf91a2033feaa1133b90ef443d3c476"
+  ["scripts/validate_domestic_cache_provider_identity.py"]="4d572254d9f6c315baeaf11c2ab113866d6a986f"
   ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="2e1a2d1d5804772ed2788d756d3dff6017a3848c"
 )
-for file in "${!DATA_SEMANTIC_BLOBS[@]}"; do
-  actual_blob="$(git -C "$GITHUB_WORKSPACE" hash-object "$GITHUB_WORKSPACE/$file")"
-  expected_blob="${DATA_SEMANTIC_BLOBS[$file]}"
-  if [[ "$actual_blob" != "$expected_blob" ]]; then
-    echo "Unexpected Data-side recommendation semantic drift: $file" >&2
-    echo "Saturday commit: $DATA_SATURDAY_COMMIT" >&2
-    echo "Expected blob: $expected_blob" >&2
-    echo "Actual blob:   $actual_blob" >&2
-    exit 1
-  fi
-done
-echo "APP_READY_DATA_SEMANTICS_PARITY_OK baseline=$DATA_SATURDAY_COMMIT files=${#DATA_SEMANTIC_BLOBS[@]}"
 
-
-# Exact rollback contract: materialize every Data-side script used by the verified
-# Saturday App-Ready publisher. Current infrastructure may orchestrate the run, but
-# recommendation/data transformation code must be bit-for-bit Saturday.
-SATURDAY_PIPELINE_FILES=(
-  "scripts/patch_app_ready_producer.py"
-  "scripts/patch_prepared_publisher_diagnostics.py"
-  "scripts/patch_prepared_publisher_bulk.py"
-  "scripts/run_app_ready_emulator.sh"
-  "scripts/build_app_ready_from_device.py"
-  "scripts/materialize_app_ready_pattern_candidates.py"
-  "scripts/materialize_prepared_fixture_index.py"
-  "scripts/validate_domestic_cache_provider_identity.py"
-  "scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"
-)
-
-for file in "${SATURDAY_PIPELINE_FILES[@]}"; do
+for file in "${!SATURDAY_PIPELINE_BLOBS[@]}"; do
   mkdir -p "$GITHUB_WORKSPACE/$(dirname "$file")"
-  git -C "$GITHUB_WORKSPACE" show "$DATA_SATURDAY_COMMIT:$file" > "$GITHUB_WORKSPACE/$file"
-  expected_blob="$(git -C "$GITHUB_WORKSPACE" rev-parse "$DATA_SATURDAY_COMMIT:$file")"
+  raw_url="https://raw.githubusercontent.com/Velliouras/StatMaker-Data/$DATA_SATURDAY_COMMIT/$file"
+  curl --fail --silent --show-error --location "$raw_url" --output "$GITHUB_WORKSPACE/$file"
+  expected_blob="${SATURDAY_PIPELINE_BLOBS[$file]}"
   actual_blob="$(git -C "$GITHUB_WORKSPACE" hash-object "$GITHUB_WORKSPACE/$file")"
   if [[ "$actual_blob" != "$expected_blob" ]]; then
     echo "Saturday pipeline materialization mismatch: $file" >&2
@@ -131,7 +110,7 @@ for file in "${SATURDAY_PIPELINE_FILES[@]}"; do
   fi
 done
 
-echo "APP_READY_EXACT_SATURDAY_DATA_PIPELINE_OK baseline=$DATA_SATURDAY_COMMIT files=${#SATURDAY_PIPELINE_FILES[@]}"
+echo "APP_READY_EXACT_SATURDAY_DATA_PIPELINE_OK baseline=$DATA_SATURDAY_COMMIT files=${#SATURDAY_PIPELINE_BLOBS[@]}"
 
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
