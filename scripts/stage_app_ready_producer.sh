@@ -5,25 +5,98 @@ set -euo pipefail
 PRIVATE_ROOT="${1:-statmaker-private}"
 cd "$PRIVATE_ROOT"
 
+# Product contract:
+#   - recommendation engine semantics are pinned to the exact verified Saturday baseline
+#   - the only allowed product-level semantic overlay is retiring Asian/handicap markets
+# Current StatMaker main must never silently alter App-Ready recommendation behavior.
+SATURDAY_ENGINE_COMMIT="d06364ab2625815aeafcb48ae93d6a328f7d6ac5"
+RETIREMENT_OVERLAY_COMMIT="31275facc7e9"
+APP_DIR="app/src/main/java/com/statmaker/app"
+
+ensure_commit() {
+  local commit="$1"
+  if ! git cat-file -e "${commit}^{commit}" 2>/dev/null; then
+    git fetch --no-tags origin "$commit"
+  fi
+  git cat-file -e "${commit}^{commit}" >/dev/null
+}
+
+ensure_commit "$SATURDAY_ENGINE_COMMIT"
+ensure_commit "$RETIREMENT_OVERLAY_COMMIT"
+
+# Restore the complete app package from the exact production commit that generated the
+# verified Saturday schema-12 App-Ready bundle.
+git checkout "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR"
+
+# These files are the only approved semantic delta from Saturday. Their diff against
+# d06364a is exclusively the hard retirement of Asian/handicap markets (including
+# Performance filtering). Pin the overlay itself to a reviewed production commit too.
+RETIREMENT_FILES=(
+  "app/src/main/java/com/statmaker/app/BetBuilderToolRunner.kt"
+  "app/src/main/java/com/statmaker/app/BettingFilterOptions.kt"
+  "app/src/main/java/com/statmaker/app/DomesticBettingMarketCatalog.kt"
+  "app/src/main/java/com/statmaker/app/DomesticMarketFilterPolicy.kt"
+  "app/src/main/java/com/statmaker/app/MarketIdentity.kt"
+  "app/src/main/java/com/statmaker/app/ModelPerformanceAnalytics.kt"
+  "app/src/main/java/com/statmaker/app/ModelPerformanceCanonicalLedgerSynchronizer.kt"
+  "app/src/main/java/com/statmaker/app/PatternBetsToolRunner.kt"
+  "app/src/main/java/com/statmaker/app/PreparedPatternRecommendationPublisher.kt"
+  "app/src/main/java/com/statmaker/app/PreparedPatternRecommendationRepository.kt"
+  "app/src/main/java/com/statmaker/app/SharedBetMarkets.kt"
+)
+
+for file in "${RETIREMENT_FILES[@]}"; do
+  git show "$RETIREMENT_OVERLAY_COMMIT:$file" > "$file"
+  expected_blob="$(git rev-parse "$RETIREMENT_OVERLAY_COMMIT:$file")"
+  actual_blob="$(git hash-object "$file")"
+  if [[ "$actual_blob" != "$expected_blob" ]]; then
+    echo "Retirement overlay blob mismatch: $file" >&2
+    echo "Expected: $expected_blob" >&2
+    echo "Actual:   $actual_blob" >&2
+    exit 1
+  fi
+done
+
+# Fail closed if anything other than the reviewed retirement overlay differs from Saturday.
+mapfile -t actual_engine_delta < <(
+  git diff --name-only "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR" | sort
+)
+mapfile -t expected_engine_delta < <(
+  printf '%s\n' "${RETIREMENT_FILES[@]}" | sort
+)
+if [[ "$(printf '%s\n' "${actual_engine_delta[@]}")" != "$(printf '%s\n' "${expected_engine_delta[@]}")" ]]; then
+  echo "Unexpected App-Ready engine drift from Saturday baseline." >&2
+  echo "Expected only:" >&2
+  printf '  %s\n' "${expected_engine_delta[@]}" >&2
+  echo "Actual:" >&2
+  printf '  %s\n' "${actual_engine_delta[@]}" >&2
+  exit 1
+fi
+
+echo "APP_READY_SATURDAY_ENGINE_PARITY_OK baseline=$SATURDAY_ENGINE_COMMIT overlay=$RETIREMENT_OVERLAY_COMMIT files=${#RETIREMENT_FILES[@]}"
+
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
 LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"
 
+if ! git rev-parse --verify --quiet "${LEGACY_BUILDER_REF}^{commit}" >/dev/null; then
+  git fetch --no-tags origin "automation/app-ready-v2-bootstrap-20260817:refs/remotes/origin/automation/app-ready-v2-bootstrap-20260817"
+fi
 if ! git rev-parse --verify --quiet "${LEGACY_BUILDER_REF}^{commit}" >/dev/null; then
   echo "Pinned legacy builder ref is unavailable in checkout: ${LEGACY_BUILDER_REF}" >&2
   exit 1
 fi
 
 ACTUAL_BLOB="$(git rev-parse "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}")"
-if [[ "$ACTUAL_BLOB" != "$LEGACY_BUILDER_BLOB" ]]; then
+if [[ "${ACTUAL_BLOB}" != "${LEGACY_BUILDER_BLOB}" ]]; then
   echo "Pinned legacy builder blob mismatch." >&2
-  echo "Expected: $LEGACY_BUILDER_BLOB" >&2
-  echo "Actual:   $ACTUAL_BLOB" >&2
+  echo "Expected: ${LEGACY_BUILDER_BLOB}" >&2
+  echo "Actual:   ${ACTUAL_BLOB}" >&2
   exit 1
 fi
 
-git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "$LEGACY_BUILDER_PATH"
-python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"
-python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
+git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
+python "${GITHUB_WORKSPACE}/scripts/patch_app_ready_producer.py"
+python "${GITHUB_WORKSPACE}/scripts/patch_prepared_publisher_diagnostics.py"
 
-echo "APP_READY_PRODUCER_STAGED ref=$LEGACY_BUILDER_REF blob=$LEGACY_BUILDER_BLOB"
+echo "APP_READY_PRODUCER_STAGED saturday_engine=$SATURDAY_ENGINE_COMMIT retirement_overlay=$RETIREMENT_OVERLAY_COMMIT legacy_ref=$LEGACY_BUILDER_REF"
