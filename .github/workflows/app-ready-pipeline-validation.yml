@@ -1,0 +1,105 @@
+name: App-Ready Pipeline Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/app-ready-artifact-publisher.yml'
+      - '.github/workflows/app-ready-pipeline-validation.yml'
+      - 'scripts/preflight_app_ready_pipeline.py'
+      - 'scripts/stage_app_ready_producer.sh'
+      - 'scripts/patch_app_ready_producer.py'
+      - 'scripts/app_ready_v10/**'
+      - 'scripts/patch_prepared_publisher_diagnostics.py'
+      - 'scripts/patch_prepared_publisher_bulk.py'
+      - 'scripts/run_app_ready_emulator.sh'
+      - 'scripts/build_app_ready_from_device.py'
+      - 'scripts/materialize_app_ready_pattern_candidates.py'
+      - 'scripts/materialize_prepared_fixture_index.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-app-ready-pipeline-validation
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/preflight_app_ready_pipeline.py \
+            scripts/patch_app_ready_producer.py \
+            scripts/patch_prepared_publisher_diagnostics.py \
+            scripts/patch_prepared_publisher_bulk.py \
+            scripts/build_app_ready_from_device.py \
+            scripts/materialize_app_ready_pattern_candidates.py \
+            scripts/materialize_prepared_fixture_index.py
+          bash -n scripts/stage_app_ready_producer.sh
+          bash -n scripts/run_app_ready_emulator.sh
+
+      - name: Enforce heavy publisher trigger separation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('.github/workflows/app-ready-artifact-publisher.yml').read_text(encoding='utf-8')
+          try:
+              push=text.split('  push:',1)[1].split('  schedule:',1)[0]
+          except IndexError as exc:
+              raise SystemExit('Could not isolate heavy publisher push trigger section') from exc
+          forbidden=[
+              '.github/workflows/app-ready-artifact-publisher.yml',
+              'scripts/preflight_app_ready_pipeline.py',
+              'scripts/stage_app_ready_producer.sh',
+              'scripts/patch_app_ready_producer.py',
+              'scripts/run_app_ready_emulator.sh',
+              'scripts/build_app_ready_from_device.py',
+              'scripts/materialize_app_ready_pattern_candidates.py',
+              'scripts/materialize_prepared_fixture_index.py',
+          ]
+          leaked=[item for item in forbidden if item in push]
+          if leaked:
+              raise SystemExit('Heavy publisher must not self-trigger on code changes: '+', '.join(leaked))
+          print('APP_READY_HEAVY_TRIGGER_SEPARATION_OK')
+          PY
+
+      - name: Require private read token
+        env:
+          TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"
+        run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
+
+      - name: Checkout current StatMaker production source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: main
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Stage publisher producer without building Android
+        shell: bash
+        run: bash scripts/stage_app_ready_producer.sh statmaker-private
+
+      - name: Run aggregate source and producer preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/preflight_app_ready_pipeline.py \
+            --mode source \
+            --private-root statmaker-private
