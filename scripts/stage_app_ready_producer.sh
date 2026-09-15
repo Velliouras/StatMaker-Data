@@ -10,7 +10,7 @@ cd "$PRIVATE_ROOT"
 #   - the only allowed product-level semantic overlay is retiring Asian/handicap markets
 # Current StatMaker main must never silently alter App-Ready recommendation behavior.
 SATURDAY_ENGINE_COMMIT="d06364ab2625815aeafcb48ae93d6a328f7d6ac5"
-RETIREMENT_OVERLAY_COMMIT="31275facc7e9"
+RETIREMENT_OVERLAY_COMMIT="31275facc7e9f84c71a14e72dc6090ba60eaeadb"
 APP_DIR="app/src/main/java/com/statmaker/app"
 
 ensure_commit() {
@@ -74,6 +74,28 @@ if [[ "$(printf '%s\n' "${actual_engine_delta[@]}")" != "$(printf '%s\n' "${expe
 fi
 
 echo "APP_READY_SATURDAY_ENGINE_PARITY_OK baseline=$SATURDAY_ENGINE_COMMIT overlay=$RETIREMENT_OVERLAY_COMMIT files=${#RETIREMENT_FILES[@]}"
+
+
+# Data-side recommendation semantics must also remain bit-for-bit identical to the
+# verified Saturday publisher. Infrastructure/checkpoint/validation scripts are allowed
+# to evolve independently, but these two files define candidate materialization semantics.
+DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
+declare -A DATA_SEMANTIC_BLOBS=(
+  ["scripts/materialize_app_ready_pattern_candidates.py"]="530f0ffb7a364121f13c1be2d4d02b6833f47269"
+  ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="2e1a2d1d5804772ed2788d756d3dff6017a3848c"
+)
+for file in "${!DATA_SEMANTIC_BLOBS[@]}"; do
+  actual_blob="$(git -C "$GITHUB_WORKSPACE" hash-object "$GITHUB_WORKSPACE/$file")"
+  expected_blob="${DATA_SEMANTIC_BLOBS[$file]}"
+  if [[ "$actual_blob" != "$expected_blob" ]]; then
+    echo "Unexpected Data-side recommendation semantic drift: $file" >&2
+    echo "Saturday commit: $DATA_SATURDAY_COMMIT" >&2
+    echo "Expected blob: $expected_blob" >&2
+    echo "Actual blob:   $actual_blob" >&2
+    exit 1
+  fi
+done
+echo "APP_READY_DATA_SEMANTICS_PARITY_OK baseline=$DATA_SATURDAY_COMMIT files=${#DATA_SEMANTIC_BLOBS[@]}"
 
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
