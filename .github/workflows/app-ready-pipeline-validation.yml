@@ -557,6 +557,16 @@ jobs:
           manifest=json.loads(Path("data/statmaker/app_ready/update_manifest.json").read_text(encoding="utf-8"))
           current=Path(next(a["path"] for a in manifest["artifacts"] if a["id"]=="app_ready_betting_bundle"))
           saturday=Path("data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip")
+          if not saturday.is_file():
+              import subprocess
+              historical_commit="5480af5d0636eb37b8b5aec84e6ee576a7195587"
+              historical_path="data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip"
+              subprocess.run(["git","fetch","--no-tags","origin",historical_commit],check=True)
+              materialized=Path(tempfile.gettempdir())/"statmaker-saturday-betting.zip"
+              with materialized.open("wb") as out:
+                  subprocess.run(["git","show",f"{historical_commit}:{historical_path}"],stdout=out,check=True)
+              saturday=materialized
+              print("SATURDAY_BUNDLE_MATERIALIZED",f"bytes={saturday.stat().st_size}",f"commit={historical_commit}")
 
           def inspect(label,bundle):
               if not bundle.is_file():
