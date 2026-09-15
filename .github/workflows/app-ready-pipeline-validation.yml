@@ -659,3 +659,91 @@ jobs:
           inspect_date("saturday",saturday,"2026-09-19")
           inspect_date("current",current,"2026-09-19")
           PY
+
+
+      - name: Compare Saturday and current Domestic odds universe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 54e9bd4e28b29a0eb6313f4d16da4c99f27490b9
+          python - <<'PY'
+          import json, subprocess
+          from collections import Counter
+
+          SATURDAY="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
+          PATH="odds/odds_api_io/domestic_odds.json"
+
+          def load(ref):
+              if ref=="HEAD":
+                  with open(PATH,encoding="utf-8") as fh:
+                      return json.load(fh)
+              raw=subprocess.check_output(["git","show",f"{ref}:{PATH}"],text=True)
+              return json.loads(raw)
+
+          def markets_of(match):
+              markets=match.get("markets") or []
+              if isinstance(markets,dict):
+                  return list(markets.values())
+              return list(markets)
+
+          def market_name(market):
+              if not isinstance(market,dict):
+                  return str(market)
+              return str(market.get("market") or market.get("name") or market.get("key") or market.get("marketName") or "").strip()
+
+          def summarize(label,payload):
+              leagues=payload.get("leagues") or []
+              total_matches=0
+              total_markets=0
+              fam=Counter()
+              per_league=[]
+              for league in leagues:
+                  code=str(league.get("leagueCode") or "").strip()
+                  matches=league.get("matches") or []
+                  lm=0
+                  lmk=0
+                  lf=Counter()
+                  for match in matches:
+                      market_items=markets_of(match)
+                      lm+=1
+                      lmk+=len(market_items)
+                      for market in market_items:
+                          name=market_name(market)
+                          if name:
+                              lf[name]+=1
+                              fam[name]+=1
+                  total_matches+=lm
+                  total_markets+=lmk
+                  per_league.append((code,lm,lmk,lf))
+              print("SATURDAY_CURRENT_ODDS_UNIVERSE",f"label={label}",f"leagues={len(leagues)}",f"matches={total_matches}",f"markets={total_markets}")
+              return per_league,fam
+
+          sat=load(SATURDAY)
+          cur=load("HEAD")
+          sat_leagues,sat_fam=summarize("saturday",sat)
+          cur_leagues,cur_fam=summarize("current",cur)
+
+          sm={x[0]:x for x in sat_leagues}
+          cm={x[0]:x for x in cur_leagues}
+          diffs=[]
+          for code in sorted(set(sm)|set(cm)):
+              s=sm.get(code,(code,0,0,Counter()))
+              c=cm.get(code,(code,0,0,Counter()))
+              dm=c[1]-s[1]
+              dmk=c[2]-s[2]
+              if dm or dmk:
+                  diffs.append((dmk,code,s,c))
+          for _,code,s,c in sorted(diffs)[:80]:
+              print("SATURDAY_CURRENT_ODDS_LEAGUE",
+                    f"league={code}",
+                    f"sat_matches={s[1]}",f"cur_matches={c[1]}",
+                    f"sat_markets={s[2]}",f"cur_markets={c[2]}",
+                    f"delta_matches={c[1]-s[1]}",f"delta_markets={c[2]-s[2]}")
+
+          for name in sorted(set(sat_fam)|set(cur_fam), key=lambda n: (cur_fam[n]-sat_fam[n],n)):
+              sv=sat_fam[name]; cv=cur_fam[name]
+              if sv!=cv:
+                  print("SATURDAY_CURRENT_ODDS_MARKET",
+                        f"market={name}",
+                        f"saturday={sv}",f"current={cv}",f"delta={cv-sv}")
+          PY
