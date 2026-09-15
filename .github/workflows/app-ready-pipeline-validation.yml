@@ -103,3 +103,125 @@ jobs:
           python scripts/preflight_app_ready_pipeline.py \
             --mode source \
             --private-root statmaker-private
+
+
+      - name: Published Strong Value odds distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import sqlite3
+          import tempfile
+          import zipfile
+          from pathlib import Path
+
+          manifest = json.loads(Path("data/statmaker/app_ready/update_manifest.json").read_text(encoding="utf-8"))
+          betting = next(
+              (row for row in manifest.get("artifacts", []) if row.get("id") == "app_ready_betting_bundle"),
+              None,
+          )
+          if not betting:
+              raise SystemExit("Published manifest has no app_ready_betting_bundle")
+          bundle = Path(str(betting.get("path") or ""))
+          if not bundle.is_file():
+              raise SystemExit(f"Published betting bundle is missing: {bundle}")
+
+          with tempfile.TemporaryDirectory() as tmp:
+              with zipfile.ZipFile(bundle) as zf:
+                  names = [name for name in zf.namelist() if name.endswith("databases/statmaker_prepared_betting.db")]
+                  if len(names) != 1:
+                      raise SystemExit(f"Expected exactly one prepared betting DB in bundle; got {names}")
+                  zf.extract(names[0], tmp)
+                  db_path = Path(tmp) / names[0]
+
+              con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+              try:
+                  generation = con.execute(
+                      """
+                      SELECT generation_id
+                      FROM prepared_pattern_generation
+                      WHERE state='ready'
+                      ORDER BY built_at_ms DESC
+                      LIMIT 1
+                      """
+                  ).fetchone()
+                  if not generation:
+                      raise SystemExit("No READY prepared pattern generation in published bundle")
+                  generation_id = str(generation[0])
+
+                  where = """
+                      generation_id=?
+                      AND recommendation_eligible=1
+                      AND value_tier='STRONG_VALUE'
+                      AND selection_odd>=1.50
+                  """
+                  rows = con.execute(
+                      f"""
+                      SELECT
+                        CASE
+                          WHEN selection_odd < 1.80 THEN '1.50-1.79'
+                          WHEN selection_odd < 2.00 THEN '1.80-1.99'
+                          WHEN selection_odd < 2.50 THEN '2.00-2.49'
+                          ELSE '2.50+'
+                        END AS bucket,
+                        COUNT(*),
+                        ROUND(AVG(selection_odd), 3),
+                        ROUND(MIN(selection_odd), 3),
+                        ROUND(MAX(selection_odd), 3)
+                      FROM prepared_pattern_candidates
+                      WHERE {where}
+                      GROUP BY bucket
+                      ORDER BY MIN(selection_odd)
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  total = sum(int(row[1]) for row in rows)
+                  print(
+                      "STRONG_VALUE_ODDS_DISTRIBUTION",
+                      f"generation={generation_id[:12]}",
+                      f"total={total}",
+                      f"published={manifest.get('generatedAt','')}",
+                  )
+                  for bucket, count, avg_odd, min_odd, max_odd in rows:
+                      pct = (100.0 * int(count) / total) if total else 0.0
+                      print(
+                          "STRONG_VALUE_ODDS_BUCKET",
+                          f"bucket={bucket}",
+                          f"count={count}",
+                          f"pct={pct:.1f}",
+                          f"avg={avg_odd}",
+                          f"min={min_odd}",
+                          f"max={max_odd}",
+                      )
+
+                  by_date = con.execute(
+                      f"""
+                      SELECT local_date,
+                             COUNT(*),
+                             SUM(CASE WHEN selection_odd < 1.80 THEN 1 ELSE 0 END),
+                             SUM(CASE WHEN selection_odd >= 1.80 AND selection_odd < 2.00 THEN 1 ELSE 0 END),
+                             SUM(CASE WHEN selection_odd >= 2.00 AND selection_odd < 2.50 THEN 1 ELSE 0 END),
+                             SUM(CASE WHEN selection_odd >= 2.50 THEN 1 ELSE 0 END),
+                             ROUND(AVG(selection_odd), 3)
+                      FROM prepared_pattern_candidates
+                      WHERE {where}
+                      GROUP BY local_date
+                      ORDER BY local_date
+                      """,
+                      (generation_id,),
+                  ).fetchall()
+                  for date, count, b1, b2, b3, b4, avg_odd in by_date:
+                      print(
+                          "STRONG_VALUE_ODDS_DATE",
+                          f"date={date}",
+                          f"total={count}",
+                          f"1.50-1.79={b1}",
+                          f"1.80-1.99={b2}",
+                          f"2.00-2.49={b3}",
+                          f"2.50+={b4}",
+                          f"avg={avg_odd}",
+                      )
+              finally:
+                  con.close()
+          PY
