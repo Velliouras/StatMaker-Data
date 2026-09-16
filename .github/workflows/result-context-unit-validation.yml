@@ -29,7 +29,7 @@ jobs:
           ref: uat-result-context-20260916
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
-          fetch-depth: 1
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Validate publisher script syntax
