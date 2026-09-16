@@ -15,6 +15,7 @@ Outputs:
 from __future__ import annotations
 
 import argparse
+import gzip
 import datetime as dt
 import json
 import os
@@ -22,6 +23,7 @@ import re
 import sys
 import time
 import unicodedata
+import zlib
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 from urllib.error import HTTPError, URLError
@@ -255,6 +257,20 @@ def should_stop_for_rate_limit(debug: Dict[str, Any]) -> bool:
     return isinstance(remaining, int) and remaining < RATE_LIMIT_STOP_BELOW
 
 
+def decode_http_body(raw: bytes, headers: Any) -> str:
+    """Decode Odds-API.io JSON regardless of HTTP content compression."""
+    encoding = str(headers.get("Content-Encoding") or "").strip().lower() if headers is not None else ""
+    payload = raw
+    if "gzip" in encoding or raw.startswith(b"\\x1f\\x8b"):
+        payload = gzip.decompress(raw)
+    elif "deflate" in encoding:
+        try:
+            payload = zlib.decompress(raw)
+        except zlib.error:
+            payload = zlib.decompress(raw, -zlib.MAX_WBITS)
+    return payload.decode("utf-8")
+
+
 def api_get(path: str, params: Dict[str, Any], debug: Dict[str, Any], *, allow_error: bool = True) -> Any:
     url = f"{BASE_URL}{path}?{urlencode({k: v for k, v in params.items() if v is not None})}"
     safe_params = dict(params)
@@ -263,9 +279,15 @@ def api_get(path: str, params: Dict[str, Any], debug: Dict[str, Any], *, allow_e
     started = time.time()
     record: Dict[str, Any] = {"path": path, "params": safe_params}
     try:
-        req = Request(url, headers={"User-Agent": "StatMaker-Data/1.0"})
+        req = Request(
+            url,
+            headers={
+                "User-Agent": "StatMaker-Data/1.0",
+                "Accept-Encoding": "gzip, deflate",
+            },
+        )
         with urlopen(req, timeout=45) as response:
-            body = response.read().decode("utf-8")
+            body = decode_http_body(response.read(), response.headers)
             update_rate_limit(debug, response.headers)
             data = json.loads(body) if body else None
             record.update({
@@ -278,7 +300,14 @@ def api_get(path: str, params: Dict[str, Any], debug: Dict[str, Any], *, allow_e
             debug.setdefault("apiCalls", []).append(record)
             return data
     except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+        if exc.fp:
+            raw_error = exc.read()
+            try:
+                body = decode_http_body(raw_error, exc.headers)
+            except (OSError, zlib.error, UnicodeDecodeError):
+                body = raw_error.decode("utf-8", errors="replace")
+        else:
+            body = ""
         update_rate_limit(debug, exc.headers)
         record.update({
             "status": exc.code,
