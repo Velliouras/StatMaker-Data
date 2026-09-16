@@ -86,40 +86,46 @@ def patch_legacy_welcome_contract() -> None:
 def patch_pattern_matcher_regex_reuse() -> None:
     text = PATTERN_MATCHER_SOURCE.read_text(encoding="utf-8")
 
-    old_body = '''        text = Normalizer.normalize(text, Normalizer.Form.NFD).replace("\\\\p{Mn}+".toRegex(), "")
-        text = text.replace("oe", "o").replace("aa", "a")
-        return text.replace("[^a-z0-9]+".toRegex(), " ").trim().replace("\\\\s+".toRegex(), " ")
+    old_body = '''    text = Normalizer.normalize(text, Normalizer.Form.NFD).replace("\\\\p{Mn}+".toRegex(), "")
+    text = text.replace("oe", "o").replace("aa", "a")
+    return text.replace("[^a-z0-9]+".toRegex(), " ").trim().replace("\\\\s+".toRegex(), " ")
 '''
-    new_body = '''        text = Normalizer.normalize(text, Normalizer.Form.NFD).replace(PUBLISHER_COMBINING_MARKS_REGEX, "")
-        text = text.replace("oe", "o").replace("aa", "a")
-        return text.replace(PUBLISHER_NON_ALNUM_REGEX, " ").trim().replace(PUBLISHER_WHITESPACE_REGEX, " ")
+    new_body = '''    text = Normalizer.normalize(text, Normalizer.Form.NFD).replace(PUBLISHER_COMBINING_MARKS_REGEX, "")
+    text = text.replace("oe", "o").replace("aa", "a")
+    return text.replace(PUBLISHER_NON_ALNUM_REGEX, " ").trim().replace(PUBLISHER_WHITESPACE_REGEX, " ")
 '''
+
+    # Support both current top-level normalizeTeamName() and the older class-local form.
     if old_body in text:
         text = text.replace(old_body, new_body, 1)
     elif "PUBLISHER_COMBINING_MARKS_REGEX" not in text:
         raise SystemExit("Could not locate PatternOddsMatcher normalizeTeamName regex block")
 
-    class_marker = "class PatternOddsMatcher("
-    class_index = text.find(class_marker)
-    if class_index < 0:
-        raise SystemExit("Could not locate PatternOddsMatcher class")
+    if "PUBLISHER_COMBINING_MARKS_REGEX" not in text:
+        normalize_marker = "private fun normalizeTeamName(value: String): String {"
+        normalize_index = text.find(normalize_marker)
+        class_index = text.find("class PatternOddsMatcher(")
+        if normalize_index < 0 or class_index < 0:
+            raise SystemExit("Could not locate PatternOddsMatcher normalization scope")
 
-    body_index = text.find("{", class_index)
-    if body_index < 0:
-        raise SystemExit("Could not locate PatternOddsMatcher class body")
+        if normalize_index < class_index:
+            constants = '''private val PUBLISHER_COMBINING_MARKS_REGEX = Regex("\\\\p{Mn}+")
+private val PUBLISHER_NON_ALNUM_REGEX = Regex("[^a-z0-9]+")
+private val PUBLISHER_WHITESPACE_REGEX = Regex("\\\\s+")
 
-    if "private val PUBLISHER_COMBINING_MARKS_REGEX" not in text:
-        constants = '''
-    // Publisher-only staged optimization. These regexes were previously compiled on every
-    // normalizeTeamName call. Under parallel Domestic generation Android ICU eventually failed
-    // native allocation (U_MEMORY_ALLOCATION_ERROR). Reusing compiled Regex objects preserves
-    // exact normalization semantics while removing the allocation storm.
+'''
+            text = text[:normalize_index] + constants + text[normalize_index:]
+        else:
+            body_index = text.find("{", class_index)
+            if body_index < 0:
+                raise SystemExit("Could not locate PatternOddsMatcher class body")
+            constants = '''
     private val PUBLISHER_COMBINING_MARKS_REGEX = Regex("\\\\p{Mn}+")
     private val PUBLISHER_NON_ALNUM_REGEX = Regex("[^a-z0-9]+")
     private val PUBLISHER_WHITESPACE_REGEX = Regex("\\\\s+")
 
 '''
-        text = text[:body_index + 1] + constants + text[body_index + 1:]
+            text = text[:body_index + 1] + constants + text[body_index + 1:]
 
     PATTERN_MATCHER_SOURCE.write_text(text, encoding="utf-8")
     print("APP_READY_PATTERN_REGEX_REUSE_OK")
