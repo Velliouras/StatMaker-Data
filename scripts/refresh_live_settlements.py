@@ -39,6 +39,7 @@ CACHE_PATH = ROOT / "data" / "api_football" / "live_settlement_cache.json"
 FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"
 UEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"
 DOMESTIC_ALIAS_PATH = ROOT / "mappings" / "domestic_team_aliases.json"
+ENRICHED_INDEX_PATH = ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
 CANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
 
 SCHEMA_VERSION = 2
@@ -690,6 +691,94 @@ def merge_normalized_stats(existing: Any, incoming: Any) -> Dict[str, Any]:
     return merged
 
 
+_ENRICHED_INDEX_CACHE: Optional[List[Dict[str, Any]]] = None
+_ENRICHED_FILE_CACHE: Dict[str, List[Dict[str, Any]]] = {}
+
+
+def _enriched_index_rows() -> List[Dict[str, Any]]:
+    global _ENRICHED_INDEX_CACHE
+    if _ENRICHED_INDEX_CACHE is not None:
+        return _ENRICHED_INDEX_CACHE
+    root = load_json(ENRICHED_INDEX_PATH, {})
+    rows = root.get("leagues", []) if isinstance(root, dict) else []
+    _ENRICHED_INDEX_CACHE = [item for item in rows if isinstance(item, dict)]
+    return _ENRICHED_INDEX_CACHE
+
+
+def _enriched_matches(path: str) -> List[Dict[str, Any]]:
+    cached = _ENRICHED_FILE_CACHE.get(path)
+    if cached is not None:
+        return cached
+    safe = str(path or "").strip()
+    if not safe or safe.startswith("/") or ".." in Path(safe).parts:
+        _ENRICHED_FILE_CACHE[safe] = []
+        return []
+    root = load_json(ROOT / safe, {})
+    rows = root.get("matches", []) if isinstance(root, dict) else []
+    parsed = [item for item in rows if isinstance(item, dict)]
+    _ENRICHED_FILE_CACHE[safe] = parsed
+    return parsed
+
+
+def _canonical_enriched_match(row: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    fixture_id = as_int(row.get("fixtureId"))
+    league_code = normalize_league_code(row.get("leagueCode"))
+    if fixture_id is None or not league_code:
+        return None
+
+    fixture_day = fixture_date(row.get("dateUtc"))
+    candidates: List[Tuple[int, str]] = []
+    for item in _enriched_index_rows():
+        if normalize_league_code(item.get("league_code")) != league_code:
+            continue
+        path = str(item.get("output_path") or "").strip()
+        if not path:
+            continue
+        start = str(item.get("target_season_start") or "").strip()[:10]
+        end = str(item.get("target_season_end") or "").strip()[:10]
+        in_target = bool(fixture_day and start and end and start <= fixture_day <= end)
+        active = str(item.get("lifecycle") or "").strip().lower() == "active"
+        candidates.append(((2 if in_target else 0) + (1 if active else 0), path))
+
+    for _, path in sorted(candidates, key=lambda pair: (-pair[0], pair[1])):
+        matches = [
+            match for match in _enriched_matches(path)
+            if as_int(match.get("fixture_id") or match.get("fixtureId") or match.get("api_fixture_id")) == fixture_id
+        ]
+        if len(matches) == 1:
+            return matches[0]
+    return None
+
+
+def hydrate_from_canonical_enriched(row: Dict[str, Any]) -> bool:
+    required = row.get("requiredStats") if isinstance(row.get("requiredStats"), list) else []
+    if not missing_required_kinds(row.get("normalizedStats"), required):
+        return False
+
+    match = _canonical_enriched_match(row)
+    if match is None:
+        return False
+
+    before = dict(row.get("normalizedStats") or {})
+    incoming = match.get("normalized_stats") or match.get("stats") or {}
+    row["normalizedStats"] = merge_normalized_stats(before, incoming)
+
+    if row.get("homeHalfGoals") is None:
+        row["homeHalfGoals"] = as_int(match.get("hthg"))
+    if row.get("awayHalfGoals") is None:
+        row["awayHalfGoals"] = as_int(match.get("htag"))
+
+    row["statsFetched"] = normalized_stats_ready_for(row.get("normalizedStats"), required)
+    changed = row.get("normalizedStats") != before
+    if changed:
+        print(
+            "live-settlement enriched-repair "
+            f"fixture={row.get('fixtureId')} required={','.join(sorted(set(str(x) for x in required)))} "
+            f"ready={str(bool(row.get('statsFetched'))).lower()}"
+        )
+    return changed
+
+
 def cached_map(root: Dict[str, Any]) -> Dict[int, Dict[str, Any]]:
     result: Dict[int, Dict[str, Any]] = {}
     for item in root.get("fixtures", []) if isinstance(root, dict) else []:
@@ -808,6 +897,9 @@ def fetch_required_stats(
 ) -> bool:
     required = row.get("requiredStats") if isinstance(row.get("requiredStats"), list) else []
     missing_before = missing_required_kinds(row.get("normalizedStats"), required)
+    if missing_before:
+        hydrate_from_canonical_enriched(row)
+        missing_before = missing_required_kinds(row.get("normalizedStats"), required)
     if not missing_before or not retry_due(row, now_utc()) or request_state["count"] >= max_requests:
         row["statsFetched"] = normalized_stats_ready_for(row.get("normalizedStats"), required)
         return False
