@@ -128,13 +128,13 @@ def patch_pattern_matcher_regex_reuse() -> None:
 def limit_publisher_domestic_parallelism() -> None:
     text = SOURCE.read_text(encoding="utf-8")
     old = "    private const val MAX_DOMESTIC_WORKERS = 4"
-    new = "    private const val MAX_DOMESTIC_WORKERS = 2"
+    new = "    private const val MAX_DOMESTIC_WORKERS = 1"
     if old in text:
         text = text.replace(old, new, 1)
     elif new not in text:
         raise SystemExit("Could not locate MAX_DOMESTIC_WORKERS")
     SOURCE.write_text(text, encoding="utf-8")
-    print("APP_READY_DOMESTIC_WORKERS_OK workers=2")
+    print("APP_READY_DOMESTIC_WORKERS_OK workers=1")
 
 
 
@@ -240,6 +240,28 @@ def main() -> None:
         "prepared failure marker",
     )
 
+    # Bound the two large Domestic evidence resolvers by league as well. With one
+    # publisher worker the selection stream is league-grouped, so clearing on a league
+    # transition preserves exact results while preventing whole-universe cache retention.
+    evidence_old = '''        val domesticSharedEvidenceResolver: (PatternBackedSelection) -> SharedBettingEvidence? = { selection ->
+            val history = domesticTrendHistoryResolver.resolve(selection)
+'''
+    evidence_new = '''        var domesticEvidenceLeagueCode: String? = null
+        val domesticSharedEvidenceResolver: (PatternBackedSelection) -> SharedBettingEvidence? = { selection ->
+            val selectionLeague = DomesticApiRegistry.normalizeLeagueCode(selection.match.leagueCode)
+            if (domesticEvidenceLeagueCode != null && selectionLeague != domesticEvidenceLeagueCode) {
+                domesticTrendHistoryResolver.clear()
+                domesticOpponentResolver.clear()
+                System.gc()
+            }
+            domesticEvidenceLeagueCode = selectionLeague
+            val history = domesticTrendHistoryResolver.resolve(selection)
+'''
+    if evidence_old in text:
+        text = text.replace(evidence_old, evidence_new, 1)
+    elif "domesticEvidenceLeagueCode" not in text:
+        raise SystemExit("Could not locate Domestic shared-evidence resolver cache boundary")
+
     # Publisher-only progress heartbeat around the expensive Domestic matcher. This
     # does not change matcher/engine semantics; it only exposes real progress so the
     # emulator watchdog can distinguish a slow healthy build from a stalled one.
@@ -262,17 +284,23 @@ def main() -> None:
                     "matches=${leagueFeed.matches.size} " +
                     "markets=${leagueFeed.matches.sumOf { it.markets.size }}"
             )
-            return matcher.findPatternBackedSelections(
-                league = source,
-                oddsFeed = leagueFeed,
-                selectedFilters = "prepared-snapshot"
-            ).also { selections ->
-                val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L
-                Log.i(
-                    "StatMakerAppReady",
-                    "stage=prepared_domestic_league_${source.code}_complete " +
-                        "selections=${selections.size} elapsedMs=$elapsedMs"
-                )
+            return try {
+                matcher.findPatternBackedSelections(
+                    league = source,
+                    oddsFeed = leagueFeed,
+                    selectedFilters = "prepared-snapshot"
+                ).also { selections ->
+                    val elapsedMs = (System.nanoTime() - startedAt) / 1_000_000L
+                    Log.i(
+                        "StatMakerAppReady",
+                        "stage=prepared_domestic_league_${source.code}_complete " +
+                            "selections=${selections.size} elapsedMs=$elapsedMs"
+                    )
+                }
+            } finally {
+                // Publisher-only memory boundary: no future league needs this matcher history.
+                matcher.clearHistoryCache()
+                System.gc()
             }
         }
 
