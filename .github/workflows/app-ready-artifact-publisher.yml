@@ -77,6 +77,13 @@ jobs:
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
+          rollback_lock=Path('.github/app-ready-rollback-lock')
+          if rollback_lock.is_file():
+              with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+                  f.write("generate=false\n")
+                  f.write("contract_migration=false\n")
+              print('APP_READY_ROLLBACK_LOCK_ACTIVE exact_saturday_snapshot')
+              raise SystemExit(0)
           main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
           uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
