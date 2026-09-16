@@ -1,0 +1,47 @@
+name: Result Context UAT Unit Validation
+
+on:
+  push:
+    branches:
+      - agent/result-context-app-ready-20260916
+    paths:
+      - '.github/workflows/result-context-unit-validation.yml'
+      - '.github/result-context-unit-trigger'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout UAT StatMaker source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: agent/fix-result-market-context-20260916
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run result-context regression tests
+        working-directory: statmaker-private
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon --stacktrace \
+            testDebugUnitTest \
+            --tests com.statmaker.app.ResultMarketContextRegressionTest \
+            --tests com.statmaker.app.DomesticOpponentAdjustedProbabilityResolverTest \
+            --tests com.statmaker.app.BettingValueSignalPolicyTest
