@@ -142,8 +142,10 @@ def source_mode(root,private,r):
             r.error(f'host materializer still contains market-family ranking bias: {forbidden}')
     if 'value_signal_ranking_score' not in materializer:
         r.error('host materializer does not consume persisted Value ranking score')
+    if 'APP_READY_PATTERN_RULES_FINGERPRINT' not in resume_patch or 'patternRulesFingerprint' not in resume_patch:
+        r.error('checkpoint compatibility is not bound to the result-context rules fingerprint')
     if 'APP_READY_STATMAKER_COMMIT' not in resume_patch or 'statmakerCommit' not in resume_patch:
-        r.error('checkpoint compatibility is not bound to the exact StatMaker commit')
+        r.error('checkpoint audit metadata does not record the exact StatMaker commit')
     r.note(f'engine contract={RESULT_CONTEXT_ENGINE_CONTRACT} rules={RESULT_CONTEXT_RULES}')
 
     run_validator(root,[sys.executable,'scripts/validate_domestic_cache_provider_identity.py'],'provider identity',r)
@@ -177,11 +179,13 @@ def checkpoint_mode(root,expected,r):
     if int(meta.get('preparedReadyCount',0) or 0)!=4: r.error(f'checkpoint preparedReadyCount={meta.get("preparedReadyCount")} expected=4')
     prepared(root/'databases/statmaker_prepared_betting.db',r,'checkpoint prepared DB',require_patterns=False)
     expected_engine=os.environ.get('APP_READY_ENGINE_CONTRACT','')
-    expected_commit=os.environ.get('APP_READY_STATMAKER_COMMIT','')
+    expected_rules=os.environ.get('APP_READY_PATTERN_RULES_FINGERPRINT','')
     if expected_engine and str(meta.get('engineContract') or '') != expected_engine:
         r.error(f'checkpoint engine contract={meta.get("engineContract") or "<legacy>"} expected={expected_engine}')
-    if expected_commit and str(meta.get('statmakerCommit') or '') != expected_commit:
-        r.error('checkpoint StatMaker commit does not match selected engine commit')
+    if expected_rules and str(meta.get('patternRulesFingerprint') or '') != expected_rules:
+        r.error(
+            f'checkpoint rules={meta.get("patternRulesFingerprint") or "<legacy>"} expected={expected_rules}'
+        )
     contract=str(meta.get('statsProducerContract') or '')
     if contract!=STATS_CONTRACT: r.warn(f'checkpoint stats contract={contract or "<legacy>"}; stats DB will rebuild')
     else:
