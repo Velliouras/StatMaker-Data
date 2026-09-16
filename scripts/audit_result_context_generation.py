@@ -119,12 +119,111 @@ def main() -> None:
         ).fetchall()
         market_counts = Counter(str(row[0]) for row in rows)
         value_counts = Counter(str(row[1] or "NONE") for row in rows)
+        market_value_counts = Counter((str(row[0]), str(row[1] or "NONE")) for row in rows)
         print(
             "RESULT_CONTEXT_DISTRIBUTION",
             "candidates="+str(candidate_count),
             "eligible="+str(len(rows)),
             "markets="+",".join(f"{k}:{v}" for k,v in sorted(market_counts.items())),
             "value="+",".join(f"{k}:{v}" for k,v in sorted(value_counts.items())),
+        )
+        print(
+            "RESULT_CONTEXT_MARKET_VALUE_DISTRIBUTION",
+            ",".join(
+                f"{market}|{tier}:{count}"
+                for (market, tier), count in sorted(market_value_counts.items())
+            ),
+        )
+
+        # Persisted Value rows must keep the canonical Android ranking score exactly.
+        value_score_mismatch = int(
+            con.execute(
+                """
+                SELECT COUNT(*)
+                FROM prepared_pattern_candidates c
+                JOIN prepared_selections s
+                  ON s.competition_id=c.competition_id
+                 AND s.snapshot_version=c.snapshot_version
+                 AND s.selection_key=c.selection_key
+                WHERE c.generation_id=?
+                  AND c.value_tier IS NOT NULL
+                  AND (
+                    s.value_signal_ranking_score IS NULL
+                    OR ABS(c.selection_score-s.value_signal_ranking_score) > 0.000000001
+                  )
+                """,
+                (generation_id,),
+            ).fetchone()[0]
+        )
+        if value_score_mismatch:
+            raise SystemExit(
+                f"Host/App Value ranking parity mismatch rows={value_score_mismatch}"
+            )
+
+        # Result-market historical hit rate must not move the bookmaker posterior away
+        # from the no-vig/raw market baseline. Independent matchup value comes only from
+        # opponent_model_probability/conservative probability.
+        result_posterior_drift = int(
+            con.execute(
+                """
+                SELECT COUNT(*)
+                FROM prepared_selections s
+                WHERE s.competition_id='domestic'
+                  AND s.qualifies_pattern=1
+                  AND s.identity_sub_market_key IN (
+                    'RESULT_1X2','RESULT_DOUBLE_CHANCE',
+                    'HT_RESULT_1X2','HT_RESULT_DOUBLE_CHANCE'
+                  )
+                  AND (
+                    s.bm_market_probability IS NULL
+                    OR s.bm_posterior_probability IS NULL
+                    OR ABS(s.bm_posterior_probability-s.bm_market_probability) > 0.000000001
+                  )
+                """
+            ).fetchone()[0]
+        )
+        if result_posterior_drift:
+            raise SystemExit(
+                f"Result-market bookmaker posterior drifted from market baseline rows={result_posterior_drift}"
+            )
+
+        # Mirror PreparedPatternRecommendationRepository.preparedSingles for the default
+        # visible price floor. This is diagnostic only: there is deliberately no quota.
+        main_rows = con.execute(
+            """
+            WITH exact_ranked AS (
+              SELECT c.*,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY c.competition_id,c.match_key,c.exact_recommendation_key
+                       ORDER BY c.selection_score DESC,c.strict_hit_rate DESC,
+                                c.strict_sample DESC,c.selection_odd DESC,c.source_order ASC
+                     ) AS exact_rn
+              FROM prepared_pattern_candidates c
+              WHERE c.generation_id=?
+                AND c.recommendation_eligible=1
+                AND c.selection_odd>=1.50
+            ),
+            match_ranked AS (
+              SELECT e.*,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY e.competition_id,e.match_key
+                       ORDER BY e.selection_score DESC,e.strict_hit_rate DESC,
+                                e.strict_sample DESC,e.selection_odd DESC,e.source_order ASC
+                     ) AS match_rn
+              FROM exact_ranked e
+              WHERE e.exact_rn=1
+            )
+            SELECT market_family,COUNT(*)
+            FROM match_ranked
+            WHERE match_rn=1
+            GROUP BY market_family
+            ORDER BY market_family
+            """,
+            (generation_id,),
+        ).fetchall()
+        print(
+            "RESULT_CONTEXT_DEFAULT_MAIN_DISTRIBUTION",
+            ",".join(f"{market}:{count}" for market,count in main_rows),
         )
 
         match_rows = con.execute(
@@ -170,6 +269,7 @@ def main() -> None:
               s.bm_sample,
               s.bm_hit_rate,
               s.bm_market_probability,
+              s.bm_market_probability_source,
               s.bm_posterior_probability,
               s.opponent_adjusted_required,
               s.opponent_model_probability,
@@ -204,7 +304,7 @@ def main() -> None:
         for row in target_rows:
             (
                 market, name, odd, sub_key, side,
-                hits, sample, hit_rate, market_p, posterior_p,
+                hits, sample, hit_rate, market_p, market_p_source, posterior_p,
                 required, model_p, without_fav_p,
                 value_tier, edge, ev, ranking, selection_score, eligible,
             ) = row
@@ -218,6 +318,7 @@ def main() -> None:
                 f"history={hits}/{sample}",
                 f"hit_rate={hit_rate}",
                 f"market_p={market_p}",
+                f"market_p_source={market_p_source}",
                 f"posterior_p={posterior_p}",
                 f"required={required}",
                 f"model_p={model_p}",
@@ -241,9 +342,14 @@ def main() -> None:
         ]
         for row in dc_rows:
             odd = float(row[2] or 0.0)
-            model_p = row[11]
-            without_fav_p = row[12]
+            market_p_source = row[9]
+            model_p = row[12]
+            without_fav_p = row[13]
             if odd >= 8.0:
+                if market_p_source != "no-vig-derived-1x2":
+                    raise SystemExit(
+                        f"Barcelona-Racing X2 market baseline is not derived from 1X2: {market_p_source}"
+                    )
                 if model_p is None:
                     raise SystemExit("Barcelona-Racing X2 is missing matchup model probability")
                 if without_fav_p is None:
