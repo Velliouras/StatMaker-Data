@@ -233,7 +233,11 @@ def main() -> None:
         dc_rows = [
             row for row in target_rows
             if str(row[3]) == "RESULT_DOUBLE_CHANCE"
-            and "x2" in norm(row[1])
+            and (
+                "x2" in norm(row[1])
+                or "x2" in norm(row[4])
+                or ("away" in norm(row[4]) and "draw" in norm(row[4]))
+            )
         ]
         for row in dc_rows:
             odd = float(row[2] or 0.0)
