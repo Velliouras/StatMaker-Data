@@ -1,21 +1,22 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-09-15T23:00:46Z`
-Requests used: `101` / `120`
+Generated at: `2026-09-16T01:33:13Z`
+Requests used: `84` / `120`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Spain | La Liga | 2026 | 140 | 54 | 51 | 3 | 54 | 0 | 0 | 4 | league+season:2026 | 380 | data/api_football/fixture_stats/spain/la-liga/2026/fixture_stats.json | league+season:2026 returned=380 completed=54 |
-| Poland | Ekstraklasa | 2026 | 106 | 69 | 67 | 2 | 69 | 0 | 0 | 3 | league+season:2026 | 306 | data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json | league+season:2026 returned=306 completed=69 |
-| Switzerland | Super League | 2026 | 207 | 46 | 45 | 1 | 46 | 0 | 0 | 2 | league+season:2026 | 132 | data/api_football/fixture_stats/switzerland/super-league/2026/fixture_stats.json | league+season:2026 returned=132 completed=46 |
-| Scotland | Premiership | 2026 | 179 | 36 | 33 | 3 | 36 | 0 | 0 | 4 | league+season:2026 | 198 | data/api_football/fixture_stats/scotland/premiership/2026/fixture_stats.json | league+season:2026 returned=198 completed=36 |
-| Netherlands | Eredivisie | 2026 | 88 | 54 | 53 | 1 | 54 | 0 | 0 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/netherlands/eredivisie/2026/fixture_stats.json | league+season:2026 returned=306 completed=54 |
-| England | Championship | 2026 | 40 | 83 | 81 | 2 | 83 | 0 | 0 | 3 | league+season:2026 | 552 | data/api_football/fixture_stats/england/championship/2026/fixture_stats.json | league+season:2026 returned=552 completed=83 |
-| Latvia | Virsliga | 2026 | 365 | 148 | 0 | 16 | 148 | 0 | 16 | 17 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=148; request cap reached before all fixture statistics were fetched |
-| Scotland | Championship | 2026 | 180 | 30 | 0 | 16 | 30 | 0 | 16 | 17 | league+season:2026 | 180 | data/api_football/fixture_stats/scotland/championship/2026/fixture_stats.json | league+season:2026 returned=180 completed=30; request cap reached before all fixture statistics were fetched |
-| England | National League | 2026 | 43 | 93 | 0 | 16 | 93 | 0 | 16 | 17 | league+season:2026 | 552 | data/api_football/fixture_stats/england/national-league/2026/fixture_stats.json | league+season:2026 returned=552 completed=93; request cap reached before all fixture statistics were fetched |
-| Sweden | Superettan | 2026 | 114 | 192 | 17 | 16 | 192 | 0 | 16 | 17 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json | league+season:2026 returned=240 completed=192; request cap reached before all fixture statistics were fetched |
-| Israel | Ligat Ha'al | 2026 | 383 | 28 | 19 | 9 | 28 | 0 | 7 | 10 | league+season:2026 | 182 | data/api_football/fixture_stats/israel/ligat-ha-al/2026/fixture_stats.json | league+season:2026 returned=182 completed=28 |
-| Egypt | Premier League | 2026 | 233 | 46 | 42 | 4 | 46 | 0 | 2 | 5 | league+season:2026 | 190 | data/api_football/fixture_stats/egypt/premier-league/2026/fixture_stats.json | league+season:2026 returned=190 completed=46 |
+| Spain | La Liga | 2026 | 140 | 54 | 54 | 0 | 54 | 0 | 0 | 1 | league+season:2026 | 380 | data/api_football/fixture_stats/spain/la-liga/2026/fixture_stats.json | league+season:2026 returned=380 completed=54 |
+| Poland | Ekstraklasa | 2026 | 106 | 69 | 69 | 0 | 69 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json | league+season:2026 returned=306 completed=69 |
+| Switzerland | Super League | 2026 | 207 | 46 | 46 | 0 | 46 | 0 | 0 | 1 | league+season:2026 | 132 | data/api_football/fixture_stats/switzerland/super-league/2026/fixture_stats.json | league+season:2026 returned=132 completed=46 |
+| Scotland | Premiership | 2026 | 179 | 36 | 36 | 0 | 36 | 0 | 0 | 1 | league+season:2026 | 198 | data/api_football/fixture_stats/scotland/premiership/2026/fixture_stats.json | league+season:2026 returned=198 completed=36 |
+| Netherlands | Eredivisie | 2026 | 88 | 54 | 54 | 0 | 54 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/netherlands/eredivisie/2026/fixture_stats.json | league+season:2026 returned=306 completed=54 |
+| England | Championship | 2026 | 40 | 83 | 83 | 0 | 83 | 0 | 0 | 1 | league+season:2026 | 552 | data/api_football/fixture_stats/england/championship/2026/fixture_stats.json | league+season:2026 returned=552 completed=83 |
+| Latvia | Virsliga | 2026 | 365 | 148 | 0 | 15 | 148 | 0 | 15 | 16 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=148; request cap reached before all fixture statistics were fetched |
+| Scotland | Championship | 2026 | 180 | 30 | 0 | 15 | 30 | 0 | 15 | 16 | league+season:2026 | 180 | data/api_football/fixture_stats/scotland/championship/2026/fixture_stats.json | league+season:2026 returned=180 completed=30; request cap reached before all fixture statistics were fetched |
+| England | National League | 2026 | 43 | 93 | 0 | 15 | 93 | 0 | 15 | 16 | league+season:2026 | 552 | data/api_football/fixture_stats/england/national-league/2026/fixture_stats.json | league+season:2026 returned=552 completed=93; request cap reached before all fixture statistics were fetched |
+| Sweden | Superettan | 2026 | 114 | 192 | 17 | 15 | 192 | 0 | 15 | 16 | league+season:2026 | 240 | data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json | league+season:2026 returned=240 completed=192; request cap reached before all fixture statistics were fetched |
+| Israel | Ligat Ha'al | 2026 | 383 | 28 | 21 | 7 | 28 | 0 | 7 | 8 | league+season:2026 | 182 | data/api_football/fixture_stats/israel/ligat-ha-al/2026/fixture_stats.json | league+season:2026 returned=182 completed=28 |
+| Egypt | Premier League | 2026 | 233 | 46 | 44 | 2 | 46 | 0 | 2 | 3 | league+season:2026 | 190 | data/api_football/fixture_stats/egypt/premier-league/2026/fixture_stats.json | league+season:2026 returned=190 completed=46 |
+| Brazil | Serie B | 2026 | 72 | 279 | 277 | 2 | 279 | 0 | 0 | 3 | league+season:2026 | 380 | data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json | league+season:2026 returned=380 completed=279 |
