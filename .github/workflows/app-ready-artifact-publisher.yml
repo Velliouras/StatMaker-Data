@@ -401,9 +401,10 @@ jobs:
         shell: bash
         env:
           HOST_RECOVERY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
+          TARGET_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+          git fetch --no-tags --depth=1 origin "+refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
@@ -414,7 +415,7 @@ jobs:
           expected_main=str(metadata.get('mainContentVersion') or '')
           expected_uefa=str(metadata.get('uefaContentVersion') or '')
           current_main=json.loads(subprocess.check_output(
-              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
+              ['git','show',f"refs/remotes/origin/{os.environ['TARGET_BRANCH']}:data/statmaker/update_manifest.json"],
               text=True,
           ))
           current_uefa=json.loads(subprocess.check_output(
@@ -450,6 +451,7 @@ jobs:
         shell: bash
         env:
           RECOVERY_PUBLISH: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -520,8 +522,8 @@ jobs:
 
             published=false
             for attempt in 1 2 3 4 5; do
-              git fetch --no-tags origin +main:refs/remotes/origin/main
-              git reset --hard refs/remotes/origin/main
+              git fetch --no-tags origin "+refs/heads/$PUBLISH_BRANCH:refs/remotes/origin/$PUBLISH_BRANCH"
+              git reset --hard "refs/remotes/origin/$PUBLISH_BRANCH"
               rm -rf data/statmaker/app_ready
               mkdir -p data/statmaker
               cp -a "$recovery_dir/app_ready" data/statmaker/app_ready
@@ -534,7 +536,7 @@ jobs:
               fi
 
               git commit -m "Publish verified app-ready StatMaker read models"
-              if git push origin HEAD:main; then
+              if git push origin "HEAD:$PUBLISH_BRANCH"; then
                 echo "APP_READY_RECOVERY_PUBLISH_OK attempt=$attempt"
                 published=true
                 break
@@ -554,21 +556,21 @@ jobs:
 
             published=false
             for attempt in 1 2 3 4 5; do
-              git fetch --no-tags origin +main:refs/remotes/origin/main
+              git fetch --no-tags origin "+refs/heads/$PUBLISH_BRANCH:refs/remotes/origin/$PUBLISH_BRANCH"
               git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
 
               # Keep the strict source contract on every retry. A live-settlement-only commit
               # leaves these content versions unchanged and is safe to publish over; a canonical
               # source change aborts rather than publishing a stale generation.
               python - <<'PY'
-          import json, subprocess
+          import json, os, subprocess
           from pathlib import Path
           incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
           metadata=incoming.get('metadata',{})
           expected_main=str(metadata.get('mainContentVersion') or '')
           expected_uefa=str(metadata.get('uefaContentVersion') or '')
           current_main=json.loads(subprocess.check_output(
-              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
+              ['git','show',f"refs/remotes/origin/{os.environ['PUBLISH_BRANCH']}:data/statmaker/update_manifest.json"],
               text=True,
           ))
           current_uefa=json.loads(subprocess.check_output(
@@ -585,7 +587,7 @@ jobs:
               )
           PY
 
-              git reset --hard refs/remotes/origin/main
+              git reset --hard "refs/remotes/origin/$PUBLISH_BRANCH"
               rm -rf data/statmaker/app_ready
               mkdir -p data/statmaker
               cp -a "$publish_dir/app_ready" data/statmaker/app_ready
@@ -598,7 +600,7 @@ jobs:
               fi
 
               git commit -m "Publish verified app-ready StatMaker read models"
-              if git push origin HEAD:main; then
+              if git push origin "HEAD:$PUBLISH_BRANCH"; then
                 echo "APP_READY_PUBLISH_OK attempt=$attempt"
                 published=true
                 break
@@ -617,10 +619,12 @@ jobs:
       - name: Verify published generation
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
+        env:
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
         run: |
           set -euo pipefail
           local_sha="$(git rev-parse HEAD)"
-          remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          remote_sha="$(git ls-remote origin "refs/heads/$PUBLISH_BRANCH" | awk '{print $1}')"
           test "$local_sha" = "$remote_sha"
           python - <<'PY'
           import json
