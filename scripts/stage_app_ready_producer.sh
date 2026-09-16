@@ -5,77 +5,54 @@ set -euo pipefail
 PRIVATE_ROOT="${1:-statmaker-private}"
 cd "$PRIVATE_ROOT"
 
-# Product contract:
-#   - recommendation engine semantics are pinned bit-for-bit to the exact verified Saturday baseline
-#   - Asian countries/leagues and Asian/handicap markets are retired BEFORE engine execution
-#     by the Data-repo App-Ready input policy, never by modifying recommendation code.
-# Current StatMaker main must never silently alter App-Ready recommendation behavior.
-SATURDAY_ENGINE_COMMIT="d06364ab2625815aeafcb48ae93d6a328f7d6ac5"
+# The Data pipeline must build the exact StatMaker ref selected by the workflow.
+# Never replace that checkout with a historical engine snapshot.
+EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v7-result-context-v1"
+RULES_FILE="app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt"
 APP_DIR="app/src/main/java/com/statmaker/app"
 
-ensure_commit() {
-  local commit="$1"
-  if ! git cat-file -e "${commit}^{commit}" 2>/dev/null; then
-    git fetch --no-tags origin "$commit"
-  fi
-  git cat-file -e "${commit}^{commit}" >/dev/null
+test -s "$RULES_FILE" || {
+  echo "Missing StatMaker recommendation contract: $RULES_FILE" >&2
+  exit 1
 }
 
-ensure_commit "$SATURDAY_ENGINE_COMMIT"
-
-# Restore the complete app package from the exact production commit that generated the
-# verified Saturday schema-12 App-Ready bundle.
-git checkout "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR"
-
-# Fail closed on ANY recommendation-source delta from Saturday. Product retirement is
-# intentionally enforced in canonical inputs before this exact engine sees them.
-mapfile -t actual_engine_delta < <(
-  git diff --name-only "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR" | sort
-)
-if (( ${#actual_engine_delta[@]} != 0 )); then
-  echo "Unexpected App-Ready engine drift from exact Saturday baseline." >&2
-  printf '  %s\n' "${actual_engine_delta[@]}" >&2
+ENGINE_SHA="$(git rev-parse HEAD)"
+ENGINE_DIRTY="$(git status --porcelain -- "$APP_DIR")"
+if [[ -n "$ENGINE_DIRTY" ]]; then
+  echo "Selected StatMaker ref is not clean before App-Ready staging." >&2
+  printf '%s\n' "$ENGINE_DIRTY" >&2
   exit 1
 fi
 
-echo "APP_READY_EXACT_SATURDAY_ENGINE_SOURCE_OK baseline=$SATURDAY_ENGINE_COMMIT"
+ACTUAL_RULES_FINGERPRINT="$(python - "$RULES_FILE" <<'PY'
+import re, sys
+from pathlib import Path
+text=Path(sys.argv[1]).read_text(encoding="utf-8")
+match=re.search(r'PREPARED_PATTERN_RULES_FINGERPRINT\s*=\s*"([^"]+)"', text)
+if not match:
+    raise SystemExit("Could not read PREPARED_PATTERN_RULES_FINGERPRINT")
+print(match.group(1))
+PY
+)"
 
-# Data-side recommendation semantics must also remain bit-for-bit identical to the
-# verified Saturday publisher. Infrastructure/checkpoint/validation scripts are allowed
-# to evolve independently, but these two files define candidate materialization semantics.
-DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
+if [[ "$ACTUAL_RULES_FINGERPRINT" != "$EXPECTED_RULES_FINGERPRINT" ]]; then
+  echo "Refusing App-Ready staging for incompatible StatMaker recommendation contract." >&2
+  echo "Expected: $EXPECTED_RULES_FINGERPRINT" >&2
+  echo "Actual:   $ACTUAL_RULES_FINGERPRINT" >&2
+  echo "Commit:   $ENGINE_SHA" >&2
+  exit 1
+fi
 
-# Exact Saturday Data-side App-Ready pipeline. Download the immutable files directly
-# from the verified commit and verify their Git blob hashes. This avoids shallow-checkout
-# ambiguity and guarantees bit-for-bit rollback semantics.
-declare -A SATURDAY_PIPELINE_BLOBS=(
-  ["scripts/patch_app_ready_producer.py"]="5afbac5eb556e70ff996070fab22f259c979eca1"
-  ["scripts/patch_prepared_publisher_diagnostics.py"]="66e368fcb6c8d6cd5bcbe1b27b44df95f24d5be0"
-  ["scripts/patch_prepared_publisher_bulk.py"]="3f6bb21fa2115b18868d746ec052f58bb6fcb40c"
-  ["scripts/run_app_ready_emulator.sh"]="e5e5903d60ac2afc074c5b47930ec8aeb697f0c1"
-  ["scripts/build_app_ready_from_device.py"]="54d74c42ae3a58c6cf850f9860cf525e63a2e78c"
-  ["scripts/materialize_app_ready_pattern_candidates.py"]="530f0ffb7a364121f13c1be2d4d02b6833f47269"
-  ["scripts/materialize_prepared_fixture_index.py"]="5516b8d09bf91a2033feaa1133b90ef443d3c476"
-  ["scripts/validate_domestic_cache_provider_identity.py"]="4d572254d9f6c315baeaf11c2ab113866d6a986f"
-  ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="2e1a2d1d5804772ed2788d756d3dff6017a3848c"
-)
+{
+  echo "APP_READY_STATMAKER_COMMIT=$ENGINE_SHA"
+  echo "APP_READY_PATTERN_RULES_FINGERPRINT=$ACTUAL_RULES_FINGERPRINT"
+} >> "$GITHUB_ENV"
 
-for file in "${!SATURDAY_PIPELINE_BLOBS[@]}"; do
-  mkdir -p "$GITHUB_WORKSPACE/$(dirname "$file")"
-  raw_url="https://raw.githubusercontent.com/Velliouras/StatMaker-Data/$DATA_SATURDAY_COMMIT/$file"
-  curl --fail --silent --show-error --location "$raw_url" --output "$GITHUB_WORKSPACE/$file"
-  expected_blob="${SATURDAY_PIPELINE_BLOBS[$file]}"
-  actual_blob="$(git -C "$GITHUB_WORKSPACE" hash-object "$GITHUB_WORKSPACE/$file")"
-  if [[ "$actual_blob" != "$expected_blob" ]]; then
-    echo "Saturday pipeline materialization mismatch: $file" >&2
-    echo "Expected: $expected_blob" >&2
-    echo "Actual:   $actual_blob" >&2
-    exit 1
-  fi
-done
+echo "APP_READY_RESULT_CONTEXT_ENGINE_SOURCE_OK commit=$ENGINE_SHA rules=$ACTUAL_RULES_FINGERPRINT"
 
-echo "APP_READY_EXACT_SATURDAY_DATA_PIPELINE_OK baseline=$DATA_SATURDAY_COMMIT files=${#SATURDAY_PIPELINE_BLOBS[@]}"
-
+# The legacy off-device entry point remains pinned because it is only the harness that
+# invokes the current checked-out producer. Recommendation semantics come from the
+# selected StatMaker ref above and from the current Data-branch materializer.
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
 LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"
@@ -89,15 +66,15 @@ if ! git rev-parse --verify --quiet "${LEGACY_BUILDER_REF}^{commit}" >/dev/null;
 fi
 
 ACTUAL_BLOB="$(git rev-parse "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}")"
-if [[ "${ACTUAL_BLOB}" != "${LEGACY_BUILDER_BLOB}" ]]; then
+if [[ "$ACTUAL_BLOB" != "$LEGACY_BUILDER_BLOB" ]]; then
   echo "Pinned legacy builder blob mismatch." >&2
-  echo "Expected: ${LEGACY_BUILDER_BLOB}" >&2
-  echo "Actual:   ${ACTUAL_BLOB}" >&2
+  echo "Expected: $LEGACY_BUILDER_BLOB" >&2
+  echo "Actual:   $ACTUAL_BLOB" >&2
   exit 1
 fi
 
-git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
+git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "$LEGACY_BUILDER_PATH"
 python "${GITHUB_WORKSPACE}/scripts/patch_app_ready_producer.py"
 python "${GITHUB_WORKSPACE}/scripts/patch_prepared_publisher_diagnostics.py"
 
-echo "APP_READY_PRODUCER_STAGED saturday_engine=$SATURDAY_ENGINE_COMMIT input_retirement=asian+handicap legacy_ref=$LEGACY_BUILDER_REF"
+echo "APP_READY_PRODUCER_STAGED engine_commit=$ENGINE_SHA rules=$ACTUAL_RULES_FINGERPRINT input_retirement=asian+handicap legacy_ref=$LEGACY_BUILDER_REF"
