@@ -182,8 +182,11 @@ jobs:
 
           for attempt in 1 2 3; do
             git fetch origin main
-            if ! git rebase origin/main; then
-              echo "Live settlement ownership conflict detected during rebase."
+            # This commit contains only freshly regenerated settlement artifacts. If another
+            # canonical writer advanced main after checkout, replay this newer settlement commit
+            # on top and prefer the replayed artifact content for generated-file conflicts.
+            if ! git rebase -X theirs origin/main; then
+              echo "Live settlement ownership conflict could not be resolved during rebase."
               git rebase --abort || true
               exit 1
             fi
