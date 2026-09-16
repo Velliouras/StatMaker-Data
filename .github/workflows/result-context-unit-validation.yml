@@ -17,15 +17,48 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
+      - name: Checkout Data validation source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
       - name: Checkout UAT StatMaker source
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          ref: agent/fix-result-market-context-20260916
+          ref: uat-result-context-20260916
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 1
           persist-credentials: false
+
+      - name: Validate publisher script syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/preflight_app_ready_pipeline.py \
+            scripts/patch_app_ready_producer.py \
+            scripts/patch_prepared_publisher_diagnostics.py \
+            scripts/patch_prepared_publisher_bulk.py \
+            scripts/build_app_ready_from_device.py \
+            scripts/materialize_app_ready_pattern_candidates.py \
+            scripts/materialize_prepared_fixture_index.py \
+            scripts/audit_result_context_generation.py
+          bash -n scripts/stage_app_ready_producer.sh
+          bash -n scripts/run_app_ready_emulator.sh
+
+      - name: Stage UAT publisher source without emulator
+        shell: bash
+        run: bash scripts/stage_app_ready_producer.sh statmaker-private
+
+      - name: Validate result-context source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/preflight_app_ready_pipeline.py \
+            --mode source \
+            --private-root statmaker-private
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -44,7 +77,7 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" \
             -Pkotlin.compiler.execution.strategy=in-process \
             -Pkotlin.incremental=false \
-            -Dorg.gradle.workers.max=1 \
+            --max-workers=1 \
             testDebugUnitTest \
             --tests com.statmaker.app.ResultMarketContextRegressionTest \
             --tests com.statmaker.app.DomesticOpponentAdjustedProbabilityResolverTest \
