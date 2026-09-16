@@ -101,7 +101,7 @@ def patch_pattern_matcher_regex_reuse() -> None:
     elif "PUBLISHER_COMBINING_MARKS_REGEX" not in text:
         raise SystemExit("Could not locate PatternOddsMatcher normalizeTeamName regex block")
 
-    if "PUBLISHER_COMBINING_MARKS_REGEX" not in text:
+    if "private val PUBLISHER_COMBINING_MARKS_REGEX" not in text:
         normalize_marker = "private fun normalizeTeamName(value: String): String {"
         normalize_index = text.find(normalize_marker)
         class_index = text.find("class PatternOddsMatcher(")
