@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
 
-path = Path("scripts/run_app_ready_emulator.sh")
+path = Path(os.environ["GITHUB_WORKSPACE"]) / "scripts/run_app_ready_emulator.sh"
 text = path.read_text(encoding="utf-8")
 
 # Same-generation checkpoints are accepted ONLY when both canonical source
