@@ -99,6 +99,5 @@ fi
 git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
 python "${GITHUB_WORKSPACE}/scripts/patch_app_ready_producer.py"
 python "${GITHUB_WORKSPACE}/scripts/patch_prepared_publisher_diagnostics.py"
-python "${GITHUB_WORKSPACE}/scripts/patch_app_ready_clean_current_data.py"
 
 echo "APP_READY_PRODUCER_STAGED saturday_engine=$SATURDAY_ENGINE_COMMIT input_retirement=asian+handicap legacy_ref=$LEGACY_BUILDER_REF"
