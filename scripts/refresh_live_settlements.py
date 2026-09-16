@@ -38,6 +38,7 @@ APP_READY_MANIFEST = APP_READY_DIR / "update_manifest.json"
 CACHE_PATH = ROOT / "data" / "api_football" / "live_settlement_cache.json"
 FEED_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"
 UEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"
+DOMESTIC_ALIAS_PATH = ROOT / "mappings" / "domestic_team_aliases.json"
 CANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
 
 SCHEMA_VERSION = 2
@@ -217,7 +218,55 @@ def normalize_team(value: Any) -> str:
     return " ".join(tokens)
 
 
+def normalize_league_code(value: Any) -> str:
+    code = str(value or "").strip().upper()
+    return {"ROM": "ROU"}.get(code, code)
+
+
+def league_codes_compatible(left: Any, right: Any) -> bool:
+    a = normalize_league_code(left)
+    b = normalize_league_code(right)
+    if not a or not b or a == b:
+        return True
+    return {a, b} <= {"CONF", "UECL"}
+
+
+_DOMESTIC_EXACT_IDENTITY_CACHE: Optional[Dict[str, Dict[str, str]]] = None
 _UEFA_EXACT_IDENTITY_CACHE: Optional[Dict[str, str]] = None
+
+
+def _domestic_exact_identity_map() -> Dict[str, Dict[str, str]]:
+    global _DOMESTIC_EXACT_IDENTITY_CACHE
+    if _DOMESTIC_EXACT_IDENTITY_CACHE is not None:
+        return _DOMESTIC_EXACT_IDENTITY_CACHE
+
+    root = load_json(DOMESTIC_ALIAS_PATH, {})
+    aliases_root = root.get("aliases", {}) if isinstance(root, dict) else {}
+    by_league: Dict[str, Dict[str, str]] = {}
+    for raw_code, mapping in aliases_root.items() if isinstance(aliases_root, dict) else []:
+        if not isinstance(mapping, dict):
+            continue
+        league_code = normalize_league_code(raw_code)
+        claims: Dict[str, Set[str]] = {}
+        for canonical, aliases in mapping.items():
+            canonical_key = normalize_team(canonical)
+            if not canonical_key:
+                continue
+            values = [canonical]
+            if isinstance(aliases, list):
+                values.extend(aliases)
+            for value in values:
+                alias_key = normalize_team(value)
+                if alias_key:
+                    claims.setdefault(alias_key, set()).add(canonical_key)
+        by_league[league_code] = {
+            alias: next(iter(owners))
+            for alias, owners in claims.items()
+            if len(owners) == 1
+        }
+
+    _DOMESTIC_EXACT_IDENTITY_CACHE = by_league
+    return by_league
 
 
 def _uefa_exact_identity_map() -> Dict[str, str]:
@@ -250,12 +299,20 @@ def _uefa_exact_identity_map() -> Dict[str, str]:
     return claims
 
 
-def team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:
+def team_matches(
+    provider_name: str,
+    accepted_names: Sequence[str],
+    league_code: str = "",
+) -> bool:
     provider = normalize_team(provider_name)
     if not provider:
         return False
-    exact_map = _uefa_exact_identity_map()
-    provider_canonical = exact_map.get(provider, provider)
+
+    domestic_map = _domestic_exact_identity_map().get(normalize_league_code(league_code), {})
+    provider_domestic = domestic_map.get(provider)
+    uefa_map = _uefa_exact_identity_map()
+    provider_uefa = uefa_map.get(provider, provider)
+
     for candidate in accepted_names:
         key = normalize_team(candidate)
         if not key:
@@ -266,9 +323,14 @@ def team_matches(provider_name: str, accepted_names: Sequence[str]) -> bool:
         c_tokens = key.split()
         if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):
             return True
+
+        candidate_domestic = domestic_map.get(key)
+        if provider_domestic is not None and candidate_domestic is not None and provider_domestic == candidate_domestic:
+            return True
+
         # UEFA naming differences are accepted only through the checked-in exact alias registry.
         # No substring, edit-distance or arbitrary first-match fallback is permitted.
-        if provider_canonical == exact_map.get(key, key) and (provider in exact_map or key in exact_map):
+        if provider_uefa == uefa_map.get(key, key) and (provider in uefa_map or key in uefa_map):
             return True
     return False
 
@@ -589,11 +651,10 @@ def requirements_for_fixture(
         distance = _date_distance(row.local_date, date_text)
         if distance is None or distance > 1:
             continue
-        if row.league_code and league_code and row.league_code != league_code:
-            # UEFA historical aliases can differ only for Conference; name identity still fails closed.
-            if not ({row.league_code, league_code} <= {"CONF", "UECL"}):
-                continue
-        if team_matches(home, row.home_names) and team_matches(away, row.away_names):
+        if not league_codes_compatible(row.league_code, league_code):
+            continue
+        identity_code = row.league_code or league_code
+        if team_matches(home, row.home_names, identity_code) and team_matches(away, row.away_names, identity_code):
             matched.append(row)
     return matched
 
