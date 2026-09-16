@@ -41,6 +41,10 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            -Pkotlin.incremental=false \
+            -Dorg.gradle.workers.max=1 \
             testDebugUnitTest \
             --tests com.statmaker.app.ResultMarketContextRegressionTest \
             --tests com.statmaker.app.DomesticOpponentAdjustedProbabilityResolverTest \
