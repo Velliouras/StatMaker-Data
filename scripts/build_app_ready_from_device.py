@@ -77,7 +77,7 @@ out = Path(sys.argv[2] if len(sys.argv) > 2 else "app-ready-export/out")
 source = Path(sys.argv[3] if len(sys.argv) > 3 else "app-ready-export/source")
 out.mkdir(parents=True, exist_ok=True)
 
-PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
+PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-result-context-v1"
 PREPARED_PATTERN_SCHEMA_VERSION = 12
 PREPARED_PATTERN_COMPETITIONS = (
     "domestic",
@@ -639,6 +639,36 @@ def validate_generated_betting(source_exact_markets):
                 raise SystemExit(f"Opponent model/profile mismatch: model={opponent_model_count} profile={modifier_profile_count}")
             if opponent_model_count > 0 and favorite_shadow_count <= 0:
                 raise SystemExit("Modifier Engine produced opponent models but no Favorite counterfactuals")
+
+            result_context_violations = int(
+                connection.execute(
+                    """
+                    SELECT COUNT(*)
+                    FROM prepared_pattern_candidates c
+                    JOIN prepared_selections s
+                      ON s.competition_id=c.competition_id
+                     AND s.snapshot_version=c.snapshot_version
+                     AND s.selection_key=c.selection_key
+                    WHERE c.generation_id=?
+                      AND c.recommendation_eligible=1
+                      AND c.competition_id='domestic'
+                      AND s.identity_sub_market_key IN (
+                        'RESULT_1X2','RESULT_DOUBLE_CHANCE',
+                        'HT_RESULT_1X2','HT_RESULT_DOUBLE_CHANCE'
+                      )
+                      AND (
+                        COALESCE(s.opponent_adjusted_required,0) <> 1
+                        OR s.opponent_model_probability IS NULL
+                      )
+                    """,
+                    (generation_id,),
+                ).fetchone()[0]
+            )
+            if result_context_violations:
+                raise SystemExit(
+                    "Domestic result-market recommendations are missing required matchup context: "
+                    f"invalid={result_context_violations}"
+                )
 
             pattern_meta = {
                 "generationId": generation_id,
