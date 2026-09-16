@@ -46,7 +46,9 @@ jobs:
             scripts/patch_prepared_publisher_bulk.py \
             scripts/build_app_ready_from_device.py \
             scripts/materialize_app_ready_pattern_candidates.py \
-            scripts/materialize_prepared_fixture_index.py
+            scripts/materialize_prepared_fixture_index.py \
+            scripts/audit_result_context_generation.py \
+            scripts/patch_app_ready_clean_current_data.py
           bash -n scripts/stage_app_ready_producer.sh
           bash -n scripts/run_app_ready_emulator.sh
 
@@ -82,11 +84,11 @@ jobs:
           TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
-      - name: Checkout current StatMaker production source
+      - name: Checkout result-context UAT StatMaker source
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          ref: main
+          ref: uat-result-context-20260916
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -103,150 +105,3 @@ jobs:
           python scripts/preflight_app_ready_pipeline.py \
             --mode source \
             --private-root statmaker-private
-
-
-      - name: Compare Saturday retired-market impact
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin 5480af5d0636eb37b8b5aec84e6ee576a7195587
-          git show 5480af5d0636eb37b8b5aec84e6ee576a7195587:data/statmaker/app_ready/app_ready_betting_bundle-8fb26ad587037355a319637fe8cb77c35b12f8f3ce14d82dde1a517d4622ef40.zip > /tmp/saturday_app_ready_betting.zip
-          python - <<'PY'
-          import json
-          import sqlite3
-          import tempfile
-          import zipfile
-          from pathlib import Path
-
-          RETIRED = {
-              "RESULT_ASIAN_HANDICAP",
-              "HT_RESULT_ASIAN_HANDICAP",
-              "ASIAN_MATCH_GOALS_TOTAL",
-              "ASIAN_FIRST_HALF_GOALS_TOTAL",
-              "ASIAN_MATCH_CORNERS_TOTAL",
-              "ASIAN_CORNER_HANDICAP",
-              "CORNER_HANDICAP",
-          }
-
-          manifest = json.loads(
-              Path("data/statmaker/app_ready/update_manifest.json").read_text(encoding="utf-8")
-          )
-          current = Path(next(
-              row["path"] for row in manifest["artifacts"]
-              if row["id"] == "app_ready_betting_bundle"
-          ))
-          saturday = Path("/tmp/saturday_app_ready_betting.zip")
-
-          def open_db(bundle, tmp):
-              with zipfile.ZipFile(bundle) as zf:
-                  names = [
-                      n for n in zf.namelist()
-                      if n.endswith("databases/statmaker_prepared_betting.db")
-                  ]
-                  if len(names) != 1:
-                      raise SystemExit(f"{bundle}: expected one prepared DB, got {names}")
-                  zf.extract(names[0], tmp)
-                  return Path(tmp) / names[0]
-
-          for label, bundle in (("saturday", saturday), ("current", current)):
-              if not bundle.is_file():
-                  raise SystemExit(f"Missing {label} bundle: {bundle}")
-              with tempfile.TemporaryDirectory() as tmp:
-                  db = open_db(bundle, tmp)
-                  con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
-                  try:
-                      placeholders = ",".join("?" for _ in RETIRED)
-                      total = int(con.execute(
-                          "SELECT COUNT(*) FROM prepared_selections WHERE competition_id='domestic'"
-                      ).fetchone()[0])
-                      retired = int(con.execute(
-                          f"""
-                          SELECT COUNT(*)
-                          FROM prepared_selections
-                          WHERE competition_id='domestic'
-                            AND COALESCE(identity_sub_market_key,'') IN ({placeholders})
-                          """,
-                          tuple(sorted(RETIRED)),
-                      ).fetchone()[0])
-                      non_retired = total - retired
-                      print(
-                          "SATURDAY_RETIREMENT_IMPACT",
-                          f"label={label}",
-                          f"total={total}",
-                          f"retired={retired}",
-                          f"non_retired={non_retired}",
-                          f"retired_pct={(100.0*retired/total if total else 0.0):.1f}",
-                      )
-                      rows = con.execute(
-                          f"""
-                          SELECT COALESCE(identity_sub_market_key,'<none>'), COUNT(*)
-                          FROM prepared_selections
-                          WHERE competition_id='domestic'
-                            AND COALESCE(identity_sub_market_key,'') IN ({placeholders})
-                          GROUP BY COALESCE(identity_sub_market_key,'<none>')
-                          ORDER BY COUNT(*) DESC
-                          """,
-                          tuple(sorted(RETIRED)),
-                      ).fetchall()
-                      for sub, count in rows:
-                          print(
-                              "SATURDAY_RETIREMENT_MARKET",
-                              f"label={label}",
-                              f"sub={sub}",
-                              f"count={count}",
-                          )
-
-
-                      generation = con.execute(
-                          """
-                          SELECT generation_id
-                          FROM prepared_pattern_generation
-                          WHERE state='ready'
-                          ORDER BY built_at_ms DESC
-                          LIMIT 1
-                          """
-                      ).fetchone()
-                      if generation:
-                          gid = str(generation[0])
-                          strong_total = int(con.execute(
-                              """
-                              SELECT COUNT(*)
-                              FROM prepared_pattern_candidates c
-                              JOIN prepared_selections s
-                                ON s.competition_id=c.competition_id
-                               AND s.snapshot_version=c.snapshot_version
-                               AND s.selection_key=c.selection_key
-                              WHERE c.generation_id=?
-                                AND c.recommendation_eligible=1
-                                AND c.value_tier='STRONG_VALUE'
-                                AND c.selection_odd>=1.50
-                              """,
-                              (gid,),
-                          ).fetchone()[0])
-                          strong_retired = int(con.execute(
-                              f"""
-                              SELECT COUNT(*)
-                              FROM prepared_pattern_candidates c
-                              JOIN prepared_selections s
-                                ON s.competition_id=c.competition_id
-                               AND s.snapshot_version=c.snapshot_version
-                               AND s.selection_key=c.selection_key
-                              WHERE c.generation_id=?
-                                AND c.recommendation_eligible=1
-                                AND c.value_tier='STRONG_VALUE'
-                                AND c.selection_odd>=1.50
-                                AND COALESCE(s.identity_sub_market_key,'') IN ({placeholders})
-                              """,
-                              (gid, *tuple(sorted(RETIRED))),
-                          ).fetchone()[0])
-                          print(
-                              "SATURDAY_STRONG_RETIREMENT_IMPACT",
-                              f"label={label}",
-                              f"strong_total={strong_total}",
-                              f"strong_retired={strong_retired}",
-                              f"strong_non_retired={strong_total-strong_retired}",
-                              f"retired_pct={(100.0*strong_retired/strong_total if strong_total else 0.0):.1f}",
-                          )
-                  finally:
-                      con.close()
-          PY

@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v6-probability-parity-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-result-context-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -103,25 +103,6 @@ CANONICAL_LABEL = {
     "asian corner totals": "Asian Corners",
     "asian corner handicap": "Asian Corner Handicap",
     "asian corners handicap": "Asian Corner Handicap",
-}
-FAMILY_ORDER = {
-    "1X2": 0,
-    "Double Chance": 1,
-    "Asian Handicap": 2,
-    "Asian Handicap 1H": 3,
-    "BTTS": 4,
-    "Match Goals": 5,
-    "Asian Goals": 6,
-    "Asian Goals 1H": 7,
-    "Team Goals": 8,
-    "Shots": 9,
-    "Shots on Target": 10,
-    "Corners": 11,
-    "Asian Corners": 12,
-    "Asian Corner Handicap": 13,
-    "Cards": 14,
-    "Fouls": 15,
-    "Half-time Goals": 16,
 }
 
 COUNTRY_CONTINENT = {}
@@ -415,10 +396,14 @@ def sane_exact_odd(identity_family, selection_side, line, odd):
     return True
 
 
-def selection_score(identity_family, sub_market_key, selection_side, odd, sample, hits, posterior, reliability, positive_edge):
-    family = canonical_label(market_family(identity_family))
-    rank = FAMILY_ORDER.get(family, 99)
-    family_rank = 1.0 if rank <= 0 else 1.0 / float(rank)
+def selection_score(odd, sample, hits, posterior, reliability, positive_edge, value_tier, value_ranking_score):
+    # Exact parity with PreparedPatternRecommendationPublisher:
+    # persisted Value rows keep the canonical Value ranking score; non-Value rows
+    # use the market-neutral PatternBetsEngine fallback score.
+    if value_tier is not None:
+        if value_ranking_score is None:
+            raise SystemExit("Persisted Value row is missing value_signal_ranking_score")
+        return float(value_ranking_score)
     if odd <= 1.80:
         price_score = 0.86
     elif odd <= 2.60:
@@ -428,24 +413,11 @@ def selection_score(identity_family, sub_market_key, selection_side, odd, sample
     else:
         price_score = 0.45
     bookmaker_score = posterior * 0.78 + reliability * 0.12 + positive_edge * 0.10
-    result_bonus = 0.0
-    if sub_market_key == "RESULT_1X2":
-        if selection_side in {"HOME", "AWAY"}:
-            result_bonus = 0.075
-        elif selection_side == "DRAW":
-            result_bonus = 0.045
-        else:
-            result_bonus = 0.05
-    elif sub_market_key == "RESULT_DOUBLE_CHANCE":
-        result_bonus = -0.06
     return (
-        bookmaker_score * 0.72
+        bookmaker_score * 0.76
         + price_score * 0.08
-        + family_rank * 0.04
         + min(sample, 20) / 20.0 * 0.08
         + min(hits, 15) / 15.0 * 0.08
-        + result_bonus
-        + (-0.08 if sub_market_key == "RESULT_DOUBLE_CHANCE" else 0.0)
     )
 
 
@@ -692,6 +664,15 @@ def materialize(checkpoint_root, raw_root):
                         f"{competition_id}:{selection_key}"
                     )
 
+            result_market = str(sub_market_key) in {
+                "RESULT_1X2", "RESULT_DOUBLE_CHANCE",
+                "HT_RESULT_1X2", "HT_RESULT_DOUBLE_CHANCE",
+            }
+            if competition_id == "domestic" and result_market and opponent_model_probability is None:
+                raise SystemExit(
+                    f"Domestic result-market candidate is missing required matchup model: "
+                    f"{competition_id}:{selection_key}:{sub_market_key}"
+                )
             eligible = odd >= 1.20 and sane_exact_odd(
                 str(identity_family),
                 str(selection_side),
@@ -735,15 +716,14 @@ def materialize(checkpoint_root, raw_root):
                     odd,
                     exact_key,
                     selection_score(
-                        str(identity_family),
-                        str(sub_market_key),
-                        str(selection_side),
                         odd,
                         sample,
                         hits,
                         posterior_probability,
                         sample_reliability,
                         normalized_positive_edge,
+                        value_signal_tier,
+                        value_signal_ranking_score,
                     ),
                     evidence_score,
                     order,
