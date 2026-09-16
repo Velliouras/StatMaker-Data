@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-16T01:33:20Z",
+  "generated_at": "2026-09-16T08:48:56Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/colombia/primera-a/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-15T08:56:36Z",
+    "cache_generated_at": "2026-09-16T08:48:39Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 284,
-    "fixtures_with_any_stats": 283,
-    "fixtures_with_bb_core_stats": 274,
+    "completed_fixtures": 285,
+    "fixtures_with_any_stats": 284,
+    "fixtures_with_bb_core_stats": 275,
     "any_stats_coverage": 0.9965,
-    "bb_core_coverage": 0.9648,
+    "bb_core_coverage": 0.9649,
     "group_counts": {
-      "shots_total": 282,
-      "shots_on_target": 282,
-      "corners": 281,
-      "fouls": 282,
-      "yellow_cards": 274,
-      "red_cards": 110,
-      "possession": 281,
-      "passes": 281,
+      "shots_total": 283,
+      "shots_on_target": 283,
+      "corners": 282,
+      "fouls": 283,
+      "yellow_cards": 275,
+      "red_cards": 111,
+      "possession": 282,
+      "passes": 282,
       "xg": 218
     },
     "group_coverage": {
       "shots_total": 0.993,
       "shots_on_target": 0.993,
-      "corners": 0.9894,
+      "corners": 0.9895,
       "fouls": 0.993,
-      "yellow_cards": 0.9648,
-      "red_cards": 0.3873,
-      "possession": 0.9894,
-      "passes": 0.9894,
-      "xg": 0.7676
+      "yellow_cards": 0.9649,
+      "red_cards": 0.3895,
+      "possession": 0.9895,
+      "passes": 0.9895,
+      "xg": 0.7649
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -23918,6 +23918,90 @@
         "fulltime": {
           "home": 0,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1549705,
+      "date_utc": "2026-09-16T00:30:00+00:00",
+      "country": "Colombia",
+      "league": "Primera A",
+      "league_code": "COL",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 239,
+      "round": "Clausura - 3",
+      "home_team": "Chico",
+      "away_team": "Alianza Valledupar",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 5,
+        "HST": 2,
+        "AST": 4,
+        "HC": 11,
+        "AC": 2,
+        "HF": 9,
+        "AF": 6,
+        "HY": 3,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 2,
+        "ASaves": 1,
+        "HPasses": 474,
+        "APasses": 279,
+        "HPassesAccurate": 404,
+        "APassesAccurate": 200,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 2,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
