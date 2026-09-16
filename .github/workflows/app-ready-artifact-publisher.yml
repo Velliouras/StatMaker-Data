@@ -66,6 +66,14 @@ jobs:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
 
+      - name: Overlay current canonical Data main inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+          git checkout refs/remotes/origin/main -- data odds mappings
+          echo "APP_READY_CANONICAL_DATA_MAIN=$(git rev-parse refs/remotes/origin/main)"
+
       - name: Check source versions
         id: preflight
         shell: bash
