@@ -395,6 +395,26 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
+      - name: Bind App-Ready artifact URLs to publish branch
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        env:
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path('app-ready-export/out/update_manifest.json')
+          manifest=json.loads(path.read_text(encoding='utf-8'))
+          branch=os.environ['PUBLISH_BRANCH']
+          for item in manifest.get('artifacts',[]):
+              rel=str(item.get('path') or '').lstrip('/')
+              item['url']=f'https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{branch}/{rel}'
+          path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('APP_READY_ARTIFACT_URL_BRANCH_OK',branch)
+          PY
+
       - name: Revalidate canonical source versions
         id: source_guard
         if: steps.preflight.outputs.generate == 'true'
