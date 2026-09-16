@@ -204,7 +204,7 @@ jobs:
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true' && false
+        if: steps.preflight.outputs.generate == 'true'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -265,7 +265,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && false
+        if: steps.preflight.outputs.generate == 'true' && steps.checkpoint_lookup.outputs.run_id != ''
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -274,9 +274,9 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ steps.checkpoint_lookup.outputs.run_id }}
 
-      - name: Confirm clean current-data generation mode
+      - name: Confirm resumable exact-contract generation mode
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        run: echo "APP_READY_CLEAN_CURRENT_DATA_MODE no cross-generation checkpoint restore"
+        run: echo "APP_READY_RESUME_MODE exact-source checkpoint + compatible published seed"
 
       - name: Materialize v10 candidates host-side from checkpoint
         if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')
@@ -311,7 +311,7 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
-          APP_READY_CLEAN_CURRENT_DATA_BUILD: "true"
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
@@ -355,7 +355,7 @@ jobs:
           name: statmaker-app-ready-prepared-checkpoint
           path: app-ready-checkpoint
           if-no-files-found: ignore
-          retention-days: 3
+          retention-days: 7
           compression-level: 6
           overwrite: true
 
@@ -394,6 +394,25 @@ jobs:
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
+
+      - name: Stamp exact engine contract
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        env:
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          path=Path('app-ready-export/out/update_manifest.json')
+          manifest=json.loads(path.read_text(encoding='utf-8'))
+          metadata=manifest.setdefault('metadata',{})
+          metadata['engineContract']=os.environ['APP_READY_ENGINE_CONTRACT']
+          metadata['inputRetirementContract']='asian-countries-and-all-asian-handicap-markets-before-engine-v1'
+          path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          print('APP_READY_ENGINE_CONTRACT_STAMPED',metadata['engineContract'])
+          PY
 
       - name: Revalidate canonical source versions
         id: source_guard
