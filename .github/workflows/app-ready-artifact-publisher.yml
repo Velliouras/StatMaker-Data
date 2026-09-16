@@ -76,7 +76,7 @@ jobs:
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
-          import json, os, subprocess
+          import json, subprocess
           from pathlib import Path
           rollback_lock=Path('.github/app-ready-rollback-lock')
           if rollback_lock.is_file():
@@ -133,6 +133,23 @@ jobs:
           python scripts/preflight_app_ready_pipeline.py \
             --mode source \
             --private-root statmaker-private
+
+      - name: Refresh canonical current inputs from production main
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
+          git checkout refs/remotes/origin/main -- \
+            data/statmaker/update_manifest.json \
+            data/statmaker/domestic_enriched \
+            data/statmaker/domestic_proposal_readiness.json \
+            data/statmaker/uefa_support_history.json \
+            data/statmaker/uefa_team_support_history.json \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            mappings/domestic_team_aliases.json \
+            odds/odds_api_io/domestic_odds.json
+          echo "APP_READY_CANONICAL_MAIN_INPUTS_OK $(git rev-parse refs/remotes/origin/main)"
 
       - name: Apply exact Saturday current-data input retirement
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
@@ -422,10 +439,9 @@ jobs:
         shell: bash
         env:
           HOST_RECOVERY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
-          TARGET_BRANCH: ${{ github.event_name == 'workflow_run' && 'main' || github.ref_name }}
         run: |
           set -euo pipefail
-          git fetch --no-tags --depth=1 origin "+refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
+          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
@@ -436,7 +452,7 @@ jobs:
           expected_main=str(metadata.get('mainContentVersion') or '')
           expected_uefa=str(metadata.get('uefaContentVersion') or '')
           current_main=json.loads(subprocess.check_output(
-              ['git','show',f"refs/remotes/origin/{os.environ['TARGET_BRANCH']}:data/statmaker/update_manifest.json"],
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
               text=True,
           ))
           current_uefa=json.loads(subprocess.check_output(
@@ -578,6 +594,7 @@ jobs:
             published=false
             for attempt in 1 2 3 4 5; do
               git fetch --no-tags origin "+refs/heads/$PUBLISH_BRANCH:refs/remotes/origin/$PUBLISH_BRANCH"
+              git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
               git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
 
               # Keep the strict source contract on every retry. A live-settlement-only commit
@@ -591,7 +608,7 @@ jobs:
           expected_main=str(metadata.get('mainContentVersion') or '')
           expected_uefa=str(metadata.get('uefaContentVersion') or '')
           current_main=json.loads(subprocess.check_output(
-              ['git','show',f"refs/remotes/origin/{os.environ['PUBLISH_BRANCH']}:data/statmaker/update_manifest.json"],
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
               text=True,
           ))
           current_uefa=json.loads(subprocess.check_output(
