@@ -144,11 +144,7 @@ def _chunks(values: Sequence[int], size: int) -> List[List[int]]:
 
 
 def _league_compatible(left: str, right: str) -> bool:
-    a = str(left or "").strip().upper()
-    b = str(right or "").strip().upper()
-    if not a or not b or a == b:
-        return True
-    return {a, b} <= {"CONF", "UECL"}
+    return live.league_codes_compatible(left, right)
 
 
 def _provider_fixture_matches(
@@ -165,7 +161,7 @@ def _provider_fixture_matches(
     provider_league = str(registry_row.get("leagueCode") or "").strip().upper()
     if not _league_compatible(requirement.league_code, provider_league):
         return False
-    return live.team_matches(home, requirement.home_names) and live.team_matches(away, requirement.away_names)
+    return live.team_matches(home, requirement.home_names, requirement.league_code) and live.team_matches(away, requirement.away_names, requirement.league_code)
 
 
 def _cached_row_satisfies(
@@ -182,9 +178,9 @@ def _cached_row_satisfies(
     for requirement in requirements:
         if not _league_compatible(requirement.league_code, league):
             return False
-        if not live.team_matches(home, requirement.home_names):
+        if not live.team_matches(home, requirement.home_names, requirement.league_code):
             return False
-        if not live.team_matches(away, requirement.away_names):
+        if not live.team_matches(away, requirement.away_names, requirement.league_code):
             return False
     required_kinds = {r.required_kind for r in requirements if r.required_kind in live.REQUIRED_FIELDS}
     return not live.missing_required_kinds(row.get("normalizedStats"), required_kinds)
