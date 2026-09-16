@@ -141,6 +141,13 @@ jobs:
           python scripts/app_ready_input_retirement.py --root .
           python scripts/app_ready_input_retirement.py --root . --check-only
 
+      - name: Apply resume-only runner patch after parity preflight
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/patch_app_ready_clean_current_data.py
+
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
