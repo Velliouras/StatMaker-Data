@@ -31,6 +31,7 @@ on:
   push:
     branches:
       - main
+      - agent/result-context-app-ready-20260916
     paths:
       - 'data/statmaker/update_manifest.json'
       - 'odds/odds_api_io/domestic_odds.json'
@@ -41,6 +42,7 @@ on:
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - '.github/app-ready-rebuild-trigger'
+      - '.github/app-ready-uat-trigger'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -121,7 +123,7 @@ jobs:
           repository: Velliouras/StatMaker
           # Production App-Ready artifacts must be generated from the production StatMaker branch.
           # workflow_dispatch may explicitly override the ref for controlled testing only.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || github.ref_name == 'agent/result-context-app-ready-20260916' && 'agent/fix-result-market-context-20260916' || 'main' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -505,8 +507,14 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current != 'true'
         run: echo "Canonical source changed while app-ready was building; stale generation was intentionally not published."
 
+      - name: Report validated UAT generation
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true' && github.ref_name != 'main'
+        run: |
+          echo "APP_READY_UAT_VALIDATED branch=${{ github.ref_name }} statmaker_ref=agent/fix-result-market-context-20260916"
+          echo "No canonical Data main artifacts were published by this UAT run."
+
       - name: Publish current and previous generations
-        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true' && github.ref_name == 'main'
         shell: bash
         env:
           RECOVERY_PUBLISH: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
@@ -675,7 +683,7 @@ jobs:
           fi
 
       - name: Verify published generation
-        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true' && github.ref_name == 'main'
         shell: bash
         run: |
           set -euo pipefail
