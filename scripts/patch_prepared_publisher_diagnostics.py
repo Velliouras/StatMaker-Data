@@ -284,8 +284,17 @@ def main() -> None:
                     "matches=${leagueFeed.matches.size} " +
                     "markets=${leagueFeed.matches.sumOf { it.markets.size }}"
             )
+            val leagueMatcher = PatternOddsMatcher(db) { league, team, limit ->
+                historySupport.teamMatchesWithPromotionHistory(
+                    preferredSeason = league.season,
+                    leagueCode = league.code,
+                    team = team,
+                    limit = limit,
+                    scope = "All matches"
+                )
+            }
             return try {
-                matcher.findPatternBackedSelections(
+                leagueMatcher.findPatternBackedSelections(
                     league = source,
                     oddsFeed = leagueFeed,
                     selectedFilters = "prepared-snapshot"
@@ -298,8 +307,9 @@ def main() -> None:
                     )
                 }
             } finally {
-                // Publisher-only memory boundary: no future league needs this matcher history.
-                matcher.clearHistoryCache()
+                // Publisher-only process boundary per league: no matcher/history state survives
+                // into the next league, preventing cumulative heap/ICU pressure.
+                leagueMatcher.clearHistoryCache()
                 System.gc()
             }
         }
