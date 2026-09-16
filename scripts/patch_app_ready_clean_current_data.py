@@ -19,13 +19,16 @@ old_exact = '''exact = (
     and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
 )'''
 new_exact = '''engine_contract = os.environ.get("APP_READY_ENGINE_CONTRACT", "")
+engine_commit = os.environ.get("APP_READY_STATMAKER_COMMIT", "")
 ready_count = int(checkpoint.get("preparedReadyCount", 0) or 0)
 exact = (
     bool(engine_contract)
+    and bool(engine_commit)
     and 0 <= ready_count <= 4
     and checkpoint.get("mainContentVersion") == main.get("contentVersion")
     and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
     and checkpoint.get("engineContract") == engine_contract
+    and checkpoint.get("statmakerCommit") == engine_commit
 )'''
 if text.count(old_exact) != 1:
     raise SystemExit("Could not locate checkpoint exact-match contract")
@@ -48,6 +51,7 @@ old_checkpoint_tail = '''    "complete_for_target="+str(complete_for_target).low
 PY'''
 new_checkpoint_tail = '''    "complete_for_target="+str(complete_for_target).lower(),
     "engine_contract="+str(checkpoint.get("engineContract","")),
+    "statmaker_commit="+str(checkpoint.get("statmakerCommit",""))[:12],
 )
 raise SystemExit(0 if exact else 1)
 PY'''
@@ -81,8 +85,13 @@ if [[ -n "$SEED_COMMIT" ]]; then
 import json, os, sys
 manifest=json.loads(open(sys.argv[1], encoding="utf-8").read())
 expected=os.environ.get("APP_READY_ENGINE_CONTRACT", "")
-actual=str((manifest.get("metadata") or {}).get("engineContract") or "")
-raise SystemExit(0 if expected and actual == expected else 1)
+expected_commit=os.environ.get("APP_READY_STATMAKER_COMMIT", "")
+metadata=manifest.get("metadata") or {}
+actual=str(metadata.get("engineContract") or "")
+actual_commit=str(metadata.get("statmakerCommit") or "")
+raise SystemExit(
+    0 if expected and expected_commit and actual == expected and actual_commit == expected_commit else 1
+)
 PY
   then
     SEED_COMPATIBLE=1
@@ -156,6 +165,7 @@ payload_marker = ''' "uefaContentVersion":uefa.get("contentVersion",""),
  "completeForTarget":complete_for_target,'''
 payload_replacement = ''' "uefaContentVersion":uefa.get("contentVersion",""),
  "engineContract":os.environ.get("APP_READY_ENGINE_CONTRACT",""),
+ "statmakerCommit":os.environ.get("APP_READY_STATMAKER_COMMIT",""),
  "completeForTarget":bool(complete_for_target and len(ready) == 4),'''
 if text.count(payload_marker) != 1:
     raise SystemExit("Could not locate checkpoint payload contract")
