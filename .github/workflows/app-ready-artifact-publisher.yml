@@ -31,6 +31,7 @@ on:
   push:
     branches:
       - main
+      - uat-exact-saturday-current-data-20260916
     paths:
       - 'data/statmaker/update_manifest.json'
       - 'odds/odds_api_io/domestic_odds.json'
@@ -399,7 +400,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
-          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_run' && 'main' || github.ref_name }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -421,7 +422,7 @@ jobs:
         shell: bash
         env:
           HOST_RECOVERY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
-          TARGET_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
+          TARGET_BRANCH: ${{ github.event_name == 'workflow_run' && 'main' || github.ref_name }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin "+refs/heads/$TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH"
@@ -471,7 +472,7 @@ jobs:
         shell: bash
         env:
           RECOVERY_PUBLISH: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
-          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_run' && 'main' || github.ref_name }}
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -640,7 +641,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         env:
-          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_dispatch' && github.ref_name || 'main' }}
+          PUBLISH_BRANCH: ${{ github.event_name == 'workflow_run' && 'main' || github.ref_name }}
         run: |
           set -euo pipefail
           local_sha="$(git rev-parse HEAD)"
