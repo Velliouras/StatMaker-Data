@@ -82,7 +82,7 @@ jobs:
               with open(os.environ['GITHUB_OUTPUT'],'a') as f:
                   f.write("generate=false\n")
                   f.write("contract_migration=false\n")
-              print('APP_READY_ROLLBACK_LOCK_ACTIVE exact_saturday_snapshot')
+              print('APP_READY_ROLLBACK_LOCK_ACTIVE')
               raise SystemExit(0)
           main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
           uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
@@ -133,7 +133,7 @@ jobs:
             --mode source \
             --private-root statmaker-private
 
-      - name: Apply exact Saturday current-data input retirement
+      - name: Apply current-data Asian and Handicap retirement
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
@@ -347,13 +347,32 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Verify exact Saturday retirement postflight
+      - name: Audit result-context generated SQLite
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/audit_result_context_generation.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
+
+      - name: Verify Asian and Handicap retirement postflight
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
           set -euo pipefail
           python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
+
+      - name: Preserve generated prepared SQLite for UAT audit
+        if: always() && steps.preflight.outputs.generate == 'true' && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: statmaker-result-context-prepared-db
+          path: app-ready-export/raw/databases/statmaker_prepared_betting.db
+          if-no-files-found: ignore
+          retention-days: 3
+          compression-level: 6
+          overwrite: true
 
       - name: Persist resumable prepared checkpoint
         if: always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
