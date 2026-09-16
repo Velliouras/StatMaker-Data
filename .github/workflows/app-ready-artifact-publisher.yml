@@ -133,6 +133,14 @@ jobs:
             --mode source \
             --private-root statmaker-private
 
+      - name: Apply exact Saturday current-data input retirement
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/app_ready_input_retirement.py --root .
+          python scripts/app_ready_input_retirement.py --root . --check-only
+
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
@@ -193,16 +201,6 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: 33283282657
-
-      - name: Restore exact successful Saturday checkpoint for rollback
-        if: steps.preflight.outputs.generate == 'true'
-        uses: actions/download-artifact@v4
-        with:
-          name: statmaker-app-ready-prepared-checkpoint
-          path: app-ready-checkpoint-incoming
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: 34699462130
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
@@ -276,14 +274,9 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ steps.checkpoint_lookup.outputs.run_id }}
 
-      - name: Aggregate checkpoint compatibility preflight
+      - name: Confirm clean current-data generation mode
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/preflight_app_ready_pipeline.py \
-            --mode checkpoint \
-            --checkpoint-root app-ready-checkpoint-incoming
+        run: echo "APP_READY_CLEAN_CURRENT_DATA_MODE no cross-generation checkpoint restore"
 
       - name: Materialize v10 candidates host-side from checkpoint
         if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')
@@ -318,6 +311,7 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
+          APP_READY_CLEAN_CURRENT_DATA_BUILD: "true"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
@@ -344,6 +338,14 @@ jobs:
             app-ready-export/raw \
             app-ready-export/source
           python scripts/materialize_prepared_fixture_index.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
+
+      - name: Verify exact Saturday retirement postflight
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
       - name: Persist resumable prepared checkpoint
