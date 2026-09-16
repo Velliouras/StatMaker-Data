@@ -60,6 +60,17 @@ jobs:
             --mode source \
             --private-root statmaker-private
 
+      - name: Limit unit source set to result-context regressions
+        shell: bash
+        working-directory: statmaker-private
+        run: |
+          set -euo pipefail
+          find app/src/test/java -type f -name '*.kt' \
+            ! -name 'ResultMarketContextRegressionTest.kt' \
+            ! -name 'DomesticOpponentAdjustedProbabilityResolverTest.kt' \
+            ! -name 'BettingValueSignalPolicyTest.kt' \
+            -delete
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
