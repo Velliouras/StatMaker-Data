@@ -4,11 +4,6 @@ name: StatMaker App-Ready Artifact Publisher
 on:
   workflow_dispatch:
     inputs:
-      statmaker_ref:
-        description: "Private StatMaker ref"
-        required: true
-        default: "main"
-        type: string
       force:
         description: "Force generation"
         required: true
@@ -79,26 +74,12 @@ jobs:
         shell: bash
         env:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
-          MIGRATION_TRIGGER: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Trigger result-context main App-Ready generation') && 'true' || 'false' }}
-          MANUAL_DISPATCH: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
-          migration_lock=Path('.github/app-ready-result-context-migration')
-          migration_allowed=(
-              os.environ.get('MIGRATION_TRIGGER','false').lower()=='true' or
-              os.environ.get('MANUAL_DISPATCH','false').lower()=='true'
-          )
-          if migration_lock.is_file() and not migration_allowed:
-              with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-                  f.write("generate=false\n")
-                  f.write("contract_migration=true\n")
-              print('APP_READY_RESULT_CONTEXT_MIGRATION_LOCK_NOOP')
-              raise SystemExit(0)
-
           rollback_lock=Path('.github/app-ready-rollback-lock')
           if rollback_lock.is_file():
               with open(os.environ['GITHUB_OUTPUT'],'a') as f:
@@ -111,7 +92,7 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v7-result-context-v1'
+          expected_rules='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
           expected_schema=12
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
@@ -133,9 +114,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          # Production App-Ready artifacts must be generated from the production StatMaker branch.
-          # workflow_dispatch may explicitly override the ref for controlled testing only.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Trigger result-context main App-Ready generation') && 'uat-result-context-20260916' || 'main' }}
+          # Production source discovery is always main. The off-device recommendation producer
+          # is then pinned and hash-verified by stage_app_ready_producer.sh.
+          ref: main
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -155,7 +136,7 @@ jobs:
             --mode source \
             --private-root statmaker-private
 
-      - name: Apply current-data Asian and Handicap retirement
+      - name: Apply exact Saturday current-data input retirement
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
@@ -340,7 +321,7 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
-          APP_READY_ENGINE_CONTRACT: "result-context-v1-current-main-retire-asian-handicap"
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
@@ -369,15 +350,7 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Audit result-context generated SQLite
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/audit_result_context_generation.py \
-            app-ready-export/raw/databases/statmaker_prepared_betting.db
-
-      - name: Verify Asian and Handicap retirement postflight
+      - name: Verify exact Saturday retirement postflight
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         run: |
@@ -385,11 +358,11 @@ jobs:
           python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Preserve generated prepared SQLite for UAT audit
+      - name: Preserve generated prepared SQLite for controlled audit
         if: always() && steps.preflight.outputs.generate == 'true' && github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: statmaker-result-context-prepared-db
+          name: statmaker-saturday-prepared-db
           path: app-ready-export/raw/databases/statmaker_prepared_betting.db
           if-no-files-found: ignore
           retention-days: 3
@@ -447,7 +420,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
-          APP_READY_ENGINE_CONTRACT: "result-context-v1-current-main-retire-asian-handicap"
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -709,9 +682,9 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v7-result-context-v1'
-          assert metadata.get('engineContract') == 'result-context-v1-current-main-retire-asian-handicap'
-          assert str(metadata.get('statmakerCommit') or '').strip()
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-parity-v1'
+          assert metadata.get('engineContract') == 'exact-saturday-d06364ab-current-main-retire-asian-handicap-v1'
+          assert metadata.get('statmakerCommit') == 'd06364ab2625815aeafcb48ae93d6a328f7d6ac5'
           assert status.get('statmakerCommit') == metadata.get('statmakerCommit')
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
