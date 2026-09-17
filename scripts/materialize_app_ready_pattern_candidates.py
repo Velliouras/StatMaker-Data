@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v7-result-context-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -103,6 +103,25 @@ CANONICAL_LABEL = {
     "asian corner totals": "Asian Corners",
     "asian corner handicap": "Asian Corner Handicap",
     "asian corners handicap": "Asian Corner Handicap",
+}
+FAMILY_ORDER = {
+    "1X2": 0,
+    "Double Chance": 1,
+    "Asian Handicap": 2,
+    "Asian Handicap 1H": 3,
+    "BTTS": 4,
+    "Match Goals": 5,
+    "Asian Goals": 6,
+    "Asian Goals 1H": 7,
+    "Team Goals": 8,
+    "Shots": 9,
+    "Shots on Target": 10,
+    "Corners": 11,
+    "Asian Corners": 12,
+    "Asian Corner Handicap": 13,
+    "Cards": 14,
+    "Fouls": 15,
+    "Half-time Goals": 16,
 }
 
 COUNTRY_CONTINENT = {}
@@ -396,14 +415,10 @@ def sane_exact_odd(identity_family, selection_side, line, odd):
     return True
 
 
-def selection_score(odd, sample, hits, posterior, reliability, positive_edge, value_tier, value_ranking_score):
-    # Exact parity with PreparedPatternRecommendationPublisher:
-    # persisted Value rows keep the canonical Value ranking score; non-Value rows
-    # use the market-neutral PatternBetsEngine fallback score.
-    if value_tier is not None:
-        if value_ranking_score is None:
-            raise SystemExit("Persisted Value row is missing value_signal_ranking_score")
-        return float(value_ranking_score)
+def selection_score(identity_family, sub_market_key, selection_side, odd, sample, hits, posterior, reliability, positive_edge):
+    family = canonical_label(market_family(identity_family))
+    rank = FAMILY_ORDER.get(family, 99)
+    family_rank = 1.0 if rank <= 0 else 1.0 / float(rank)
     if odd <= 1.80:
         price_score = 0.86
     elif odd <= 2.60:
@@ -413,21 +428,65 @@ def selection_score(odd, sample, hits, posterior, reliability, positive_edge, va
     else:
         price_score = 0.45
     bookmaker_score = posterior * 0.78 + reliability * 0.12 + positive_edge * 0.10
+    result_bonus = 0.0
+    if sub_market_key == "RESULT_1X2":
+        if selection_side in {"HOME", "AWAY"}:
+            result_bonus = 0.075
+        elif selection_side == "DRAW":
+            result_bonus = 0.045
+        else:
+            result_bonus = 0.05
+    elif sub_market_key == "RESULT_DOUBLE_CHANCE":
+        result_bonus = -0.06
     return (
-        bookmaker_score * 0.76
+        bookmaker_score * 0.72
         + price_score * 0.08
+        + family_rank * 0.04
         + min(sample, 20) / 20.0 * 0.08
         + min(hits, 15) / 15.0 * 0.08
+        + result_bonus
+        + (-0.08 if sub_market_key == "RESULT_DOUBLE_CHANCE" else 0.0)
     )
 
 
+def value_tier(market_probability, posterior, sample_reliability, odd):
+    if market_probability is None or posterior is None:
+        return None
+    if not (0.01 <= market_probability <= 0.99 and 0.01 <= posterior <= 0.99):
+        return None
+    edge = posterior - market_probability
+    expected_value = posterior * odd - 1.0
+    if edge < 0.04 or expected_value < 0.05:
+        return None
+    reliability = max(0.0, min(1.0, sample_reliability)) * 0.55 + 0.21
+    low_odds_penalty = 0.0
+    if odd < 1.50:
+        low_odds_penalty = max(0.0, min(1.0, (1.50 - odd) / (1.50 - 1.20))) * 0.12
+    normalized_ev = max(0.0, min(1.0, (expected_value - 0.05) / 0.25))
+    normalized_edge = max(0.0, min(1.0, (edge - 0.04) / 0.12))
+    ranking_score = max(
+        0.0,
+        min(
+            1.0,
+            normalized_ev * 0.42
+            + normalized_edge * 0.30
+            + reliability * 0.28
+            - low_odds_penalty,
+        ),
+    )
+    if ranking_score >= 0.66 and reliability >= 0.60:
+        return "STRONG_VALUE"
+    if ranking_score >= 0.42:
+        return "VALUE"
+    return "LEAN_VALUE"
 
-def policy_decision(match, probability, maturity, eligible):
+
+def policy_decision(match, posterior, maturity, eligible):
     if not eligible:
         return False, None
     is_world_cup = "world cup" in str(match.get("competition") or "").lower() or str(match.get("leagueCode") or "").lower() == "wc"
     if is_world_cup:
-        if probability is not None and probability >= 0.65:
+        if posterior is not None and posterior >= 0.65:
             return True, None
         return False, "REJECTED_POLICY_V2_PROBABILITY_LT_65"
     if maturity is None:
@@ -437,9 +496,9 @@ def policy_decision(match, probability, maturity, eligible):
     minimum_sample = min(home_total, away_total)
     if minimum_sample <= 3:
         return False, "REJECTED_POLICY_V2_SEASON_SAMPLE_0_3"
-    if minimum_sample <= 6 and (probability is None or probability < 0.70):
+    if minimum_sample <= 6 and (posterior is None or posterior < 0.70):
         return False, "REJECTED_POLICY_V2_SEASON_SAMPLE_4_6_PROB_LT_70"
-    if probability is None or probability < 0.65:
+    if posterior is None or posterior < 0.65:
         return False, "REJECTED_POLICY_V2_PROBABILITY_LT_65"
     return True, None
 
@@ -484,14 +543,14 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 12:
-        raise SystemExit("Prepared checkpoint schema is below v12")
+    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 11:
+        raise SystemExit("Prepared checkpoint schema is below v11")
 
     selection_columns = {
         str(row[1])
         for row in connection.execute("PRAGMA table_info(prepared_selections)").fetchall()
     }
-    required_v12_columns = {
+    required_v11_columns = {
         "opponent_adjusted_required",
         "opponent_model_probability",
         "opponent_base_model_probability",
@@ -503,21 +562,12 @@ def materialize(checkpoint_root, raw_root):
         "opponent_without_formation_probability",
         "opponent_without_squad_turnover_probability",
         "opponent_modifier_profile",
-        "value_signal_tier",
-        "value_signal_market_probability",
-        "value_signal_conservative_probability",
-        "value_signal_edge",
-        "value_signal_expected_value",
-        "value_signal_reliability",
-        "value_signal_low_odds_penalty",
-        "value_signal_market_movement",
-        "value_signal_ranking_score",
     }
-    missing_v12 = sorted(required_v12_columns - selection_columns)
-    if missing_v12:
+    missing_v11 = sorted(required_v11_columns - selection_columns)
+    if missing_v11:
         raise SystemExit(
-            "Prepared checkpoint is missing v12 exact Value Signal columns: "
-            + ", ".join(missing_v12)
+            "Prepared checkpoint is missing v11 performance/shadow columns: "
+            + ", ".join(missing_v11)
         )
 
     versions = {
@@ -566,12 +616,6 @@ def materialize(checkpoint_root, raw_root):
                bm_empirical_probability, bm_posterior_probability, bm_market_edge,
                bm_sample_reliability, bm_normalized_positive_edge, bm_raw_implied_probability,
                bm_market_overround, bm_bookmaker_margin,
-               opponent_model_probability,
-               value_signal_tier, value_signal_market_probability,
-               value_signal_conservative_probability, value_signal_edge,
-               value_signal_expected_value, value_signal_reliability,
-               value_signal_low_odds_penalty, value_signal_market_movement,
-               value_signal_ranking_score,
                identity_broad_group, identity_family, identity_sub_market_key,
                identity_team_side, identity_line, identity_selection_side,
                identity_source_market, identity_team, identity_selection_token,
@@ -606,12 +650,6 @@ def materialize(checkpoint_root, raw_root):
                 _empirical_probability, posterior_probability, _market_edge,
                 sample_reliability, normalized_positive_edge, _raw_implied_probability,
                 _market_overround, _bookmaker_margin,
-                opponent_model_probability,
-                value_signal_tier, value_signal_market_probability,
-                value_signal_conservative_probability, value_signal_edge,
-                value_signal_expected_value, value_signal_reliability,
-                value_signal_low_odds_penalty, value_signal_market_movement,
-                value_signal_ranking_score,
                 broad_group, identity_family, sub_market_key,
                 _team_side, identity_line, selection_side,
                 _source_market, identity_team, selection_token,
@@ -647,32 +685,6 @@ def materialize(checkpoint_root, raw_root):
             normalized_positive_edge = float(normalized_positive_edge)
             evidence_score = float(evidence_score)
 
-            if value_signal_tier is not None:
-                required_signal = (
-                    value_signal_market_probability,
-                    value_signal_conservative_probability,
-                    value_signal_edge,
-                    value_signal_expected_value,
-                    value_signal_reliability,
-                    value_signal_low_odds_penalty,
-                    value_signal_market_movement,
-                    value_signal_ranking_score,
-                )
-                if any(value is None for value in required_signal):
-                    raise SystemExit(
-                        f"Prepared PATTERN row has incomplete persisted Value Signal: "
-                        f"{competition_id}:{selection_key}"
-                    )
-
-            result_market = str(sub_market_key) in {
-                "RESULT_1X2", "RESULT_DOUBLE_CHANCE",
-                "HT_RESULT_1X2", "HT_RESULT_DOUBLE_CHANCE",
-            }
-            if competition_id == "domestic" and result_market and opponent_model_probability is None:
-                raise SystemExit(
-                    f"Domestic result-market candidate is missing required matchup model: "
-                    f"{competition_id}:{selection_key}:{sub_market_key}"
-                )
             eligible = odd >= 1.20 and sane_exact_odd(
                 str(identity_family),
                 str(selection_side),
@@ -685,13 +697,8 @@ def materialize(checkpoint_root, raw_root):
                 if runtime_match_key not in maturity_by_match:
                     maturity_by_match[runtime_match_key] = maturity_index.resolve(match)
                 maturity = maturity_by_match[runtime_match_key]
-            policy_probability = (
-                float(opponent_model_probability)
-                if opponent_model_probability is not None
-                else posterior_probability
-            )
             premium, rejection_reason = policy_decision(
-                match, policy_probability, maturity, eligible
+                match, posterior_probability, maturity, eligible
             )
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
 
@@ -716,20 +723,26 @@ def materialize(checkpoint_root, raw_root):
                     odd,
                     exact_key,
                     selection_score(
+                        str(identity_family),
+                        str(sub_market_key),
+                        str(selection_side),
                         odd,
                         sample,
                         hits,
                         posterior_probability,
                         sample_reliability,
                         normalized_positive_edge,
-                        value_signal_tier,
-                        value_signal_ranking_score,
                     ),
                     evidence_score,
                     order,
                     hit_rate,
                     sample,
-                    str(value_signal_tier) if value_signal_tier is not None else None,
+                    value_tier(
+                        float(market_probability),
+                        posterior_probability,
+                        sample_reliability,
+                        odd,
+                    ),
                     1 if eligible else 0,
                     1 if premium else 0,
                     rejection_reason,

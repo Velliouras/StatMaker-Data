@@ -1,4 +1,3 @@
-# v12 rollback publisher trigger: pinned Saturday compatible checkpoint
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -19,7 +18,6 @@ if [[ "$APP_ID" != "$COMPILED_APP_ID" ]]; then
   echo "APP_READY_APP_ID_NORMALIZED workflow=$APP_ID compiled=$COMPILED_APP_ID"
 fi
 APP_ID="$COMPILED_APP_ID"
-APP_READY_STATS_PRODUCER_CONTRACT="domestic-authoritative-snapshot-v1"
 
 UEFA_REF=origin/build/uefa-qualifier-feed-20260720
 u="$GITHUB_WORKSPACE/__uefa__"
@@ -121,23 +119,6 @@ PY
       adb shell run-as "$APP_ID" cp "$tmp" "$rel"
       adb shell rm -f "$tmp"
     done
-
-    # Prepared betting state may remain reusable across producer changes, but the Domestic
-    # stats DB must only be reused when it was built with the same authoritative snapshot
-    # semantics. Old checkpoints used upsert-only imports and can contain deleted fixtures.
-    if python3 - "$CHECKPOINT_IN/checkpoint.json" "$APP_READY_STATS_PRODUCER_CONTRACT" <<'PY'
-import json, sys
-checkpoint=json.loads(open(sys.argv[1], encoding="utf-8").read())
-expected=sys.argv[2]
-raise SystemExit(0 if checkpoint.get("statsProducerContract") == expected else 1)
-PY
-    then
-      echo "APP_READY_STATS_CHECKPOINT_REUSED contract=$APP_READY_STATS_PRODUCER_CONTRACT"
-    else
-      adb shell run-as "$APP_ID" rm -f databases/statmaker.db
-      echo "APP_READY_STATS_CHECKPOINT_INVALIDATED contract=$APP_READY_STATS_PRODUCER_CONTRACT"
-    fi
-
     CHECKPOINT_RESTORED=1
     echo "APP_READY_CHECKPOINT_RESTORED_AS_SEED"
   else
@@ -323,13 +304,12 @@ export_checkpoint() {
     adb exec-out run-as "$APP_ID" cat "shared_prefs/$pref.xml" > "$target/shared_prefs/$pref.xml"
   done
 
-  python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" "$APP_READY_STATS_PRODUCER_CONTRACT" <<'PY'
+  python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" <<'PY'
 import hashlib, json, sqlite3, sys
 from datetime import datetime, timezone
 from pathlib import Path
 workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2]); root=Path(sys.argv[3])
 complete_for_target=sys.argv[4].strip().lower()=="true"
-stats_producer_contract=sys.argv[5].strip()
 db_path=root/"databases/statmaker_prepared_betting.db"
 con=sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
 try:
@@ -353,7 +333,6 @@ payload={
  "mainContentVersion":main.get("contentVersion",""),
  "uefaContentVersion":uefa.get("contentVersion",""),
  "completeForTarget":complete_for_target,
- "statsProducerContract":stats_producer_contract,
  "preparedReadyCount":len(ready),
  "preparedDbSha256":digest,
  "preparedSnapshots":[
@@ -586,8 +565,8 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version < 12:
-                raise SystemExit(f"Prepared DB schema must be >=12; got {user_version}")
+            if user_version < 11:
+                raise SystemExit(f"Prepared DB schema must be >=11; got {user_version}")
 
             tables = {
                 row[0]
@@ -602,7 +581,7 @@ for raw in sys.argv[1:]:
             missing_tables = sorted(required_tables - tables)
             if missing_tables:
                 raise SystemExit(
-                    "Prepared DB missing v12 recommendation tables: " + ", ".join(missing_tables)
+                    "Prepared DB missing v11 recommendation tables: " + ", ".join(missing_tables)
                 )
 
             indexes = {
@@ -620,14 +599,14 @@ for raw in sys.argv[1:]:
             missing_indexes = sorted(required_indexes - indexes)
             if missing_indexes:
                 raise SystemExit(
-                    "Prepared DB missing v12 recommendation indexes: " + ", ".join(missing_indexes)
+                    "Prepared DB missing v11 recommendation indexes: " + ", ".join(missing_indexes)
                 )
 
             selection_columns = {
                 row[1]
                 for row in connection.execute("PRAGMA table_info(prepared_selections)").fetchall()
             }
-            required_v12_columns = {
+            required_v11_columns = {
                 "opponent_adjusted_required",
                 "opponent_model_probability",
                 "opponent_base_model_probability",
@@ -639,20 +618,11 @@ for raw in sys.argv[1:]:
                 "opponent_without_formation_probability",
                 "opponent_without_squad_turnover_probability",
                 "opponent_modifier_profile",
-                "value_signal_tier",
-                "value_signal_market_probability",
-                "value_signal_conservative_probability",
-                "value_signal_edge",
-                "value_signal_expected_value",
-                "value_signal_reliability",
-                "value_signal_low_odds_penalty",
-                "value_signal_market_movement",
-                "value_signal_ranking_score",
             }
-            missing_v12_columns = sorted(required_v12_columns - selection_columns)
-            if missing_v12_columns:
+            missing_v11_columns = sorted(required_v11_columns - selection_columns)
+            if missing_v11_columns:
                 raise SystemExit(
-                    "Prepared DB missing v12 performance/value-signal columns: " + ", ".join(missing_v12_columns)
+                    "Prepared DB missing v11 performance/shadow columns: " + ", ".join(missing_v11_columns)
                 )
             domestic_context = connection.execute(
                 """
@@ -670,9 +640,9 @@ for raw in sys.argv[1:]:
             opponent_models = int(domestic_context[1] or 0)
             favorite_shadow = int(domestic_context[2] or 0)
             if required_context > 0 and opponent_models <= 0:
-                raise SystemExit("Prepared v12 Domestic snapshot has required opponent context but no model probabilities")
+                raise SystemExit("Prepared v11 Domestic snapshot has required opponent context but no model probabilities")
             if opponent_models > 0 and favorite_shadow <= 0:
-                raise SystemExit("Prepared v12 Domestic snapshot has opponent models but no Favorite shadow")
+                raise SystemExit("Prepared v11 Domestic snapshot has opponent models but no Favorite shadow")
 
             generation = connection.execute(
                 """
@@ -688,7 +658,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v6-probability-parity-v1":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )

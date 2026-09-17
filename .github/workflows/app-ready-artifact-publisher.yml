@@ -4,6 +4,11 @@ name: StatMaker App-Ready Artifact Publisher
 on:
   workflow_dispatch:
     inputs:
+      statmaker_ref:
+        description: "Private StatMaker ref"
+        required: true
+        default: "main"
+        type: string
       force:
         description: "Force generation"
         required: true
@@ -35,7 +40,14 @@ on:
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
-      - '.github/app-ready-rebuild-trigger'
+      - 'scripts/patch_app_ready_producer.py'
+      - 'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt'
+      - 'scripts/patch_prepared_publisher_diagnostics.py'
+      - 'scripts/patch_prepared_publisher_bulk.py'
+      - 'scripts/run_app_ready_emulator.sh'
+      - 'scripts/build_app_ready_from_device.py'
+      - 'scripts/materialize_app_ready_pattern_candidates.py'
+      - 'scripts/materialize_prepared_fixture_index.py'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -61,13 +73,8 @@ jobs:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
 
-      - name: Overlay current canonical Data main inputs
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
-          git checkout refs/remotes/origin/main -- data odds mappings
-          echo "APP_READY_CANONICAL_DATA_MAIN=$(git rev-parse refs/remotes/origin/main)"
+      - name: Validate canonical Domestic provider identity
+        run: python scripts/validate_domestic_cache_provider_identity.py
 
       - name: Check source versions
         id: preflight
@@ -80,20 +87,13 @@ jobs:
           python - <<'PY'
           import json, os, subprocess
           from pathlib import Path
-          rollback_lock=Path('.github/app-ready-rollback-lock')
-          if rollback_lock.is_file():
-              with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-                  f.write("generate=false\n")
-                  f.write("contract_migration=false\n")
-              print('APP_READY_ROLLBACK_LOCK_ACTIVE')
-              raise SystemExit(0)
           main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
           uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
-          expected_schema=12
+          expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
+          expected_schema=11
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
@@ -114,9 +114,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          # Production source discovery is always main. The off-device recommendation producer
-          # is then pinned and hash-verified by stage_app_ready_producer.sh.
-          ref: main
+          # Production App-Ready artifacts must be generated from the production StatMaker branch.
+          # workflow_dispatch may explicitly override the ref for controlled testing only.
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
@@ -125,59 +125,35 @@ jobs:
       - name: Stage off-device legacy builder
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
-        run: bash scripts/stage_app_ready_producer.sh statmaker-private
-
-      - name: Aggregate source and producer preflight
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
         run: |
           set -euo pipefail
-          python scripts/preflight_app_ready_pipeline.py \
-            --mode source \
-            --private-root statmaker-private
+          cd statmaker-private
+          LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
+          LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
+          LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"
 
-      - name: Apply exact Saturday current-data input retirement
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/app_ready_input_retirement.py --root .
-          python scripts/app_ready_input_retirement.py --root . --check-only
+          if ! git rev-parse --verify --quiet "${LEGACY_BUILDER_REF}^{commit}" >/dev/null; then
+            echo "Pinned legacy builder ref is unavailable in checkout: ${LEGACY_BUILDER_REF}" >&2
+            exit 1
+          fi
 
-      - name: Apply resume-only runner patch after parity preflight
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/patch_app_ready_clean_current_data.py
+          ACTUAL_BLOB="$(git rev-parse "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}")"
+          if [[ "${ACTUAL_BLOB}" != "${LEGACY_BUILDER_BLOB}" ]]; then
+            echo "Pinned legacy builder blob mismatch." >&2
+            echo "Expected: ${LEGACY_BUILDER_BLOB}" >&2
+            echo "Actual:   ${ACTUAL_BLOB}" >&2
+            exit 1
+          fi
+
+          git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
+          python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"
+          python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
 
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
-      - name: Verify preinstalled Android SDK
+      - uses: android-actions/setup-android@v3
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "${ANDROID_HOME:-}" || { echo 'ANDROID_HOME is not set on this runner' >&2; exit 1; }
-          test -d "$ANDROID_HOME" || { echo "ANDROID_HOME does not exist: $ANDROID_HOME" >&2; exit 1; }
-
-          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
-          if [[ -z "$SDKMANAGER" && -x "$ANDROID_HOME/tools/bin/sdkmanager" ]]; then
-            SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
-          fi
-          test -n "$SDKMANAGER" || {
-            echo "sdkmanager was not found under $ANDROID_HOME" >&2
-            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager -print 2>/dev/null || true
-            exit 1
-          }
-
-          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
-          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
-          echo "Using preinstalled Android SDK: $ANDROID_HOME"
-          echo "Using sdkmanager: $SDKMANAGER"
-          "$SDKMANAGER" --version
       - uses: gradle/actions/setup-gradle@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
 
@@ -214,7 +190,7 @@ jobs:
 
       - name: Locate resumable prepared checkpoint
         id: checkpoint_lookup
-        if: steps.preflight.outputs.generate == 'true'
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -275,7 +251,7 @@ jobs:
           PY
 
       - name: Restore resumable prepared checkpoint
-        if: steps.preflight.outputs.generate == 'true' && steps.checkpoint_lookup.outputs.run_id != ''
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && steps.checkpoint_lookup.outputs.run_id != ''
         uses: actions/download-artifact@v4
         with:
           name: statmaker-app-ready-prepared-checkpoint
@@ -283,10 +259,6 @@ jobs:
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
           run-id: ${{ steps.checkpoint_lookup.outputs.run_id }}
-
-      - name: Confirm resumable exact-contract generation mode
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        run: echo "APP_READY_RESUME_MODE exact-source checkpoint + compatible published seed"
 
       - name: Materialize v10 candidates host-side from checkpoint
         if: steps.preflight.outputs.generate == 'true' && github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')
@@ -321,7 +293,6 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
-          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
@@ -350,25 +321,6 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Verify exact Saturday retirement postflight
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/validate_app_ready_retirement_contract.py \
-            app-ready-export/raw/databases/statmaker_prepared_betting.db
-
-      - name: Preserve generated prepared SQLite for controlled audit
-        if: always() && steps.preflight.outputs.generate == 'true' && github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-saturday-prepared-db
-          path: app-ready-export/raw/databases/statmaker_prepared_betting.db
-          if-no-files-found: ignore
-          retention-days: 3
-          compression-level: 6
-          overwrite: true
-
       - name: Persist resumable prepared checkpoint
         if: always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         uses: actions/upload-artifact@v4
@@ -376,7 +328,7 @@ jobs:
           name: statmaker-app-ready-prepared-checkpoint
           path: app-ready-checkpoint
           if-no-files-found: ignore
-          retention-days: 7
+          retention-days: 3
           compression-level: 6
           overwrite: true
 
@@ -402,45 +354,9 @@ jobs:
           test -s "$s/europa_league.json"
           test -s "$s/conference_league.json"
 
-      - name: Aggregate generated read-model postflight
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/preflight_app_ready_pipeline.py \
-            --mode generated \
-            --generated-root app-ready-export/raw \
-            --source-root app-ready-export/source
-
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
-
-      - name: Stamp exact engine contract
-        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        shell: bash
-        env:
-          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1"
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          path=Path('app-ready-export/out/update_manifest.json')
-          manifest=json.loads(path.read_text(encoding='utf-8'))
-          metadata=manifest.setdefault('metadata',{})
-          metadata['engineContract']=os.environ['APP_READY_ENGINE_CONTRACT']
-          metadata['statmakerCommit']=os.environ.get('APP_READY_STATMAKER_COMMIT','')
-          metadata['inputRetirementContract']='asian-countries-and-all-asian-handicap-markets-before-engine-v1'
-          if not metadata['statmakerCommit']:
-              raise SystemExit('APP_READY_STATMAKER_COMMIT is missing')
-          path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-          print(
-              'APP_READY_ENGINE_CONTRACT_STAMPED',
-              metadata['engineContract'],
-              'statmaker_commit='+metadata['statmakerCommit'][:12],
-          )
-          PY
 
       - name: Revalidate canonical source versions
         id: source_guard
@@ -493,7 +409,7 @@ jobs:
         run: echo "Canonical source changed while app-ready was building; stale generation was intentionally not published."
 
       - name: Publish current and previous generations
-        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true' && github.ref_name == 'main'
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         env:
           RECOVERY_PUBLISH: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
@@ -539,7 +455,7 @@ jobs:
               'artifactCount':len(artifacts),
               'mainContentVersion':incoming.get('metadata',{}).get('mainContentVersion',''),
               'uefaContentVersion':incoming.get('metadata',{}).get('uefaContentVersion',''),
-              'statmakerCommit':incoming.get('metadata',{}).get('statmakerCommit',''),
+              'statmakerCommit':subprocess.check_output(['git','-C','statmaker-private','rev-parse','HEAD'],text=True).strip(),
               'preparedBettingSchemaVersion':incoming.get('metadata',{}).get('preparedBettingSchemaVersion',0),
               'preparedPatternRulesFingerprint':incoming.get('metadata',{}).get('preparedPatternRulesFingerprint',''),
               'preparedPatternGenerationId':incoming.get('metadata',{}).get('preparedPatternGenerationId',''),
@@ -662,7 +578,7 @@ jobs:
           fi
 
       - name: Verify published generation
-        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true' && github.ref_name == 'main'
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -681,11 +597,8 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-parity-v1'
-          assert metadata.get('engineContract') == 'exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1'
-          assert metadata.get('statmakerCommit') == 'd06364ab2625815aeafcb48ae93d6a328f7d6ac5'
-          assert status.get('statmakerCommit') == metadata.get('statmakerCommit')
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 11
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)

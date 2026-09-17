@@ -1,453 +1,95 @@
 #!/usr/bin/env python3
-import os
-import re
-import shutil
+from __future__ import annotations
+
 import subprocess
 import sys
+import tempfile
+import urllib.request
 from pathlib import Path
 
-MAIN_RAW = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main"
-UEFA_RAW = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/build/uefa-qualifier-feed-20260720"
-LOCAL_MAIN = "http://127.0.0.1:8765"
-LOCAL_UEFA = "http://127.0.0.1:8765/__uefa__"
+ENGINE_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
+EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+APP_DIR = Path("app/src/main/java/com/statmaker/app")
+LEGACY_REF = "origin/automation/app-ready-v2-bootstrap-20260817"
+LEGACY_PATH = "app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
+LEGACY_BLOB = "b329ef56878dc991d797b17f64c4f127c71f6e63"
 
 
-def replace_repository_urls() -> None:
-    root = Path("app/src/main/java/com/statmaker/app")
-    main_replacements = 0
-    uefa_replacements = 0
-    for source in root.glob("*.kt"):
-        text = source.read_text(encoding="utf-8")
-        updated = text.replace(UEFA_RAW, LOCAL_UEFA)
-        uefa_replacements += text.count(UEFA_RAW)
-        main_replacements += updated.count(MAIN_RAW)
-        updated = updated.replace(MAIN_RAW, LOCAL_MAIN)
-        if updated != text:
-            source.write_text(updated, encoding="utf-8")
-    if main_replacements == 0:
-        raise SystemExit("Expected at least one StatMaker-Data main URL in producer sources")
-    if uefa_replacements == 0:
-        raise SystemExit("Expected at least one StatMaker-Data UEFA URL in producer sources")
-    print(f"APP_READY_LOCAL_URLS_OK main={main_replacements} uefa={uefa_replacements}")
+def run(*args: str) -> None:
+    subprocess.run(list(args), check=True)
 
 
-def tune_runner_manifest() -> None:
-    manifest = Path("app/src/main/AndroidManifest.xml")
-    text = manifest.read_text(encoding="utf-8")
-    needle = '        android:allowBackup="true"\n'
-    additions = []
-    if 'android:usesCleartextTraffic="true"' not in text:
-        additions.append('        android:usesCleartextTraffic="true"\n')
-    if 'android:largeHeap="true"' not in text:
-        additions.append('        android:largeHeap="true"\n')
-    if additions:
-        if text.count(needle) != 1:
-            raise SystemExit("Could not locate Android application allowBackup attribute")
-        text = text.replace(needle, needle + "".join(additions), 1)
-        manifest.write_text(text, encoding="utf-8")
-    print("APP_READY_RUNNER_MANIFEST_OK")
+def output(*args: str) -> str:
+    return subprocess.check_output(list(args), text=True).strip()
 
 
+# Pin the complete producer package to the exact pre-v6 Saturday source.
+run("git", "fetch", "--no-tags", "origin", ENGINE_COMMIT)
+run("git", "checkout", ENGINE_COMMIT, "--", str(APP_DIR))
+if output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR)):
+    raise SystemExit("Pre-v6 engine checkout is not exact")
 
-def register_recommendation_publisher_activity() -> None:
-    manifest = Path("app/src/main/AndroidManifest.xml")
-    text = manifest.read_text(encoding="utf-8")
-    if 'android:name=".AppReadyPatternPublisherActivity"' in text:
-        print("APP_READY_PATTERN_ACTIVITY_OK already-registered")
-        return
+# Reapply the immutable off-device builder after the package checkout.
+if subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{LEGACY_REF}^{{commit}}"], stdout=subprocess.DEVNULL).returncode != 0:
+    run("git", "fetch", "--no-tags", "origin", "automation/app-ready-v2-bootstrap-20260817:refs/remotes/origin/automation/app-ready-v2-bootstrap-20260817")
+actual_legacy_blob = output("git", "rev-parse", f"{LEGACY_REF}:{LEGACY_PATH}")
+if actual_legacy_blob != LEGACY_BLOB:
+    raise SystemExit(f"Legacy builder blob mismatch: {actual_legacy_blob} != {LEGACY_BLOB}")
+Path(LEGACY_PATH).write_bytes(subprocess.check_output(["git", "show", f"{LEGACY_REF}:{LEGACY_PATH}"]))
 
-    marker = '''        <activity
-            android:name=".StatMakerWelcomeActivity"
-'''
-    addition = '''        <activity
-            android:name=".AppReadyPatternPublisherActivity"
-            android:exported="true"
-            android:noHistory="true"
-            android:theme="@android:style/Theme.NoDisplay" />
+# Execute the exact historical v5/schema11 producer patch, not the later v6 patch.
+url = f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{HISTORICAL_DATA_COMMIT}/scripts/patch_app_ready_producer.py"
+with urllib.request.urlopen(url, timeout=60) as response:
+    historical = response.read()
+with tempfile.NamedTemporaryFile(prefix="statmaker-v5-producer-", suffix=".py", delete=False) as tmp:
+    tmp.write(historical)
+    tmp_path = Path(tmp.name)
+try:
+    run(sys.executable, str(tmp_path))
+finally:
+    tmp_path.unlink(missing_ok=True)
 
-        <activity
-            android:name=".StatMakerWelcomeActivity"
-'''
-    if text.count(marker) != 1:
-        raise SystemExit("Could not locate Welcome activity manifest marker")
-    manifest.write_text(text.replace(marker, addition, 1), encoding="utf-8")
-    print("APP_READY_PATTERN_ACTIVITY_OK registered")
-
-
-
-def bundle_normalized_snapshot() -> None:
-    workspace = Path(os.environ["GITHUB_WORKSPACE"])
-    source = workspace / "data/api_football/domestic_normalized_fixture_stats.json"
-    builder = workspace / "scripts/build_domestic_normalized_snapshot.py"
-    target = Path("app/src/main/assets/app_ready/domestic_normalized_stats_v2.bin")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run([sys.executable, str(builder), str(source), str(target)], check=True)
-    if not target.is_file() or target.stat().st_size <= 12:
-        raise SystemExit("Prebuilt Domestic normalized snapshot is missing/empty")
-    print(f"APP_READY_NORMALIZED_ASSET_OK bytes={target.stat().st_size}")
-
-
-def patch_normalized_repository() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/DomesticNormalizedStatsRepository.kt")
-    text = source.read_text(encoding="utf-8")
-    marker = '''        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val storedHash = prefs.getString(HASH_KEY, "").orEmpty()
-'''
-    replacement = '''        val prefs = context.applicationContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (!target.isFile || target.length() <= 12L) {
-            target.parentFile?.mkdirs()
-            context.applicationContext.assets.open("app_ready/domestic_normalized_stats_v2.bin").use { input ->
-                target.outputStream().buffered().use { output -> input.copyTo(output) }
-            }
-            check(prefs.edit().putString(HASH_KEY, expectedHash).commit()) {
-                "Could not persist prebuilt Domestic normalized stats hash"
-            }
-        }
-        val storedHash = prefs.getString(HASH_KEY, "").orEmpty()
-'''
-    if text.count(marker) != 1:
-        raise SystemExit("Could not locate normalized-stats preferences block")
-    text = text.replace(marker, replacement, 1)
-    old_fast_path = '''        if (!force && target.isFile && target.length() > 12L &&
-            (expectedHash.isBlank() || expectedHash == storedHash)
-'''
-    new_fast_path = '''        if (target.isFile && target.length() > 12L &&
-            (expectedHash.isBlank() || expectedHash == storedHash)
-'''
-    if text.count(old_fast_path) != 1:
-        raise SystemExit("Could not locate normalized-stats fast path")
-    text = text.replace(old_fast_path, new_fast_path, 1)
-    source.write_text(text, encoding="utf-8")
-    print("APP_READY_NORMALIZED_REPOSITORY_OK")
-
-
-def harden_download(path: str, label: str) -> None:
-    source = Path(path)
-    text = source.read_text(encoding="utf-8")
-    pattern = re.compile(
-        r"    private fun downloadText\(urlString: String\): String \{.*?^    \}\n",
-        re.MULTILINE | re.DOTALL,
+# Reliability-only delta: cache four constant ICU regex objects once.
+# This changes allocation behaviour only; regex text, ordering and matching semantics remain identical.
+normalizer = APP_DIR / "RepositoryBackedCompetitionBettingProvider.kt"
+text = normalizer.read_text(encoding="utf-8")
+anchor = '''    private val providerLocationSuffixes = setOf(
+        "athens", "istanbul", "amsterdam", "dublin", "belgrade", "thessaloniki", "piraeus"
     )
-    matches = list(pattern.finditer(text))
-    if len(matches) != 1:
-        raise SystemExit(f"Expected exactly one downloadText block in {source}; found {len(matches)}")
-    replacement = '''    private fun downloadText(urlString: String): String {
-        var lastFailure: Throwable? = null
-        repeat(3) { attempt ->
-            val connection = (URL(urlString).openConnection() as HttpURLConnection).apply {
-                connectTimeout = 30000
-                readTimeout = 60000
-                requestMethod = "GET"
-                useCaches = false
-                setRequestProperty("User-Agent", "StatMaker AppReady Publisher")
-                setRequestProperty("Connection", "close")
-            }
-            try {
-                val code = connection.responseCode
-                if (code !in 200..299) throw IllegalStateException("HTTP $code while downloading __LABEL__")
-                return BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
-            } catch (error: Throwable) {
-                lastFailure = error
-                if (attempt < 2) Thread.sleep(2000L * (attempt + 1))
-            } finally {
-                connection.disconnect()
-            }
-        }
-        throw IllegalStateException("Failed to download __LABEL__ after 3 attempts: $urlString", lastFailure)
+'''
+if "private val combiningMarksRegex" not in text:
+    replacement = anchor + '''    private val combiningMarksRegex = Regex("\\\\p{Mn}+")
+    private val olympiakosRegex = Regex("\\\\bolympiakos\\\\b")
+    private val nonIdentityCharacterRegex = Regex("[^a-z0-9]+")
+    private val whitespaceRegex = Regex("\\\\s+")
+'''
+    if text.count(anchor) != 1:
+        raise SystemExit("Could not locate identity normalizer anchor")
+    text = text.replace(anchor, replacement, 1)
+    replacements = {
+        '.replace(Regex("\\\\p{Mn}+"), "")': '.replace(combiningMarksRegex, "")',
+        '.replace(Regex("\\\\bolympiakos\\\\b"), "olympiacos")': '.replace(olympiakosRegex, "olympiacos")',
+        '.replace(Regex("[^a-z0-9]+"), " ")': '.replace(nonIdentityCharacterRegex, " ")',
+        'ascii.split(Regex("\\\\s+"))': 'ascii.split(whitespaceRegex)',
     }
-'''.replace("__LABEL__", label)
-    source.write_text(pattern.sub(replacement, text, count=1), encoding="utf-8")
-    print(f"APP_READY_PRODUCER_PATCH_OK {source}")
+    for old, new in replacements.items():
+        if text.count(old) != 1:
+            raise SystemExit(f"Could not locate exact regex expression: {old}")
+        text = text.replace(old, new, 1)
+    normalizer.write_text(text, encoding="utf-8")
 
+# Fail fast before the expensive emulator step if any v6/schema12 recommendation contract leaked in.
+models = (APP_DIR / "PreparedPatternRecommendationModels.kt").read_text(encoding="utf-8")
+store = (APP_DIR / "PreparedBettingSnapshotStore.kt").read_text(encoding="utf-8")
+if EXPECTED_RULES not in models:
+    raise SystemExit("Expected v5 rules fingerprint is missing from producer source")
+if "pattern-policy-v2-final-read-model-v6-probability-parity-v1" in models:
+    raise SystemExit("v6 rules fingerprint leaked into pre-v6 producer")
+if "private const val DATABASE_VERSION = 11" not in store:
+    raise SystemExit("Prepared DB schema is not v11")
+if "private const val DATABASE_VERSION = 12" in store:
+    raise SystemExit("schema12 leaked into pre-v6 producer")
 
-
-def patch_domestic_authoritative_scope_replace() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt")
-    text = source.read_text(encoding="utf-8")
-    marker = '''        val (inserted, duplicates) = db.upsertImportedMatches(rows)
-        return ImportResult(imported, inserted, duplicates, skipped)
-'''
-    replacement = '''        // Repository Domestic artifacts are authoritative full snapshots for one
-        // league+season scope. Remove rows that disappeared from the canonical artifact
-        // before inserting the current snapshot, otherwise resumable checkpoints retain
-        // stale fixtures forever after provider corrections or fixture reclassification.
-        db.deleteMatchesForLeague(seasonCode, league.leagueCode)
-        val (inserted, duplicates) = db.upsertImportedMatches(rows)
-        return ImportResult(imported, inserted, duplicates, skipped)
-'''
-    if text.count(marker) == 1:
-        source.write_text(text.replace(marker, replacement, 1), encoding="utf-8")
-        print("APP_READY_DOMESTIC_AUTHORITATIVE_SCOPE_OK patched")
-        return
-    if "Repository Domestic artifacts are authoritative full snapshots" in text:
-        print("APP_READY_DOMESTIC_AUTHORITATIVE_SCOPE_OK source-already-authoritative")
-        return
-    raise SystemExit("Could not locate Domestic artifact upsert boundary")
-
-def patch_domestic_multi_season_index() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt")
-    text = source.read_text(encoding="utf-8")
-    old = '''        val duplicateCodes = index.leagues
-            .groupBy { it.leagueCode }
-            .filterValues { it.size > 1 }
-            .keys
-            .sorted()
-        if (duplicateCodes.isNotEmpty()) {
-            errors += "Duplicate Domestic league codes: ${duplicateCodes.joinToString(", ")}"
-        }
-'''
-    new = '''        val duplicateScopes = index.leagues
-            .groupBy { "${it.leagueCode}|${it.appSeason}" }
-            .filterValues { it.size > 1 }
-            .keys
-            .sorted()
-        if (duplicateScopes.isNotEmpty()) {
-            errors += "Duplicate Domestic league code+season rows: ${duplicateScopes.joinToString(", ")}"
-        }
-'''
-    if text.count(old) == 1:
-        source.write_text(text.replace(old, new, 1), encoding="utf-8")
-        print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK patched")
-        return
-    if "Duplicate Domestic league code+season rows:" in text:
-        print("APP_READY_MULTI_SEASON_DOMESTIC_INDEX_OK source-already-multi-season")
-        return
-    raise SystemExit("Could not locate a supported Domestic registry duplicate validation contract")
-
-
-def patch_empty_uefa_ready_snapshots() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotCoordinator.kt")
-    text = source.read_text(encoding="utf-8")
-    old = '                val availableFeed = feed?.takeIf { it.matches.isNotEmpty() } ?: return\n'
-    new = '''                // Production requires a READY snapshot for every UEFA competition.
-                // An empty canonical feed is still a valid immutable 0/0 snapshot.
-                val availableFeed = feed ?: return
-'''
-    if text.count(old) != 1:
-        raise SystemExit("Could not locate UEFA empty-feed skip")
-    source.write_text(text.replace(old, new, 1), encoding="utf-8")
-    print("APP_READY_EMPTY_UEFA_READY_OK")
-
-
-
-def install_prepared_pattern_bridge() -> None:
-    workspace = Path(os.environ["GITHUB_WORKSPACE"])
-    source = workspace / "scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"
-    target = Path("app/src/main/java/com/statmaker/app/AppReadyPatternPublisherBridge.kt")
-    if not source.is_file() or source.stat().st_size <= 0:
-        raise SystemExit(f"Missing prepared recommendation bridge: {source}")
-    shutil.copy2(source, target)
-    print(f"APP_READY_PATTERN_BRIDGE_OK bytes={target.stat().st_size}")
-
-
-def patch_prepared_store_v12() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt")
-    text = source.read_text(encoding="utf-8")
-
-    native_v12_schema = (
-        "createPatternReadModelSchema(db)" in text
-        and "CREATE TABLE IF NOT EXISTS prepared_pattern_generation" in text
-        and "CREATE TABLE IF NOT EXISTS prepared_pattern_candidates" in text
-        and "opponent_without_favorite_probability REAL" in text
-        and "opponent_without_squad_turnover_probability REAL" in text
-        and "value_signal_conservative_probability REAL" in text
-        and "value_signal_ranking_score REAL" in text
-        and "private const val DATABASE_VERSION = 12" in text
-    )
-
-    if not native_v12_schema:
-        raise SystemExit(
-            "App-Ready v12 requires the native UAT PreparedBettingSnapshotStore v12 probability-parity contract"
-        )
-    print("APP_READY_PREPARED_SCHEMA_V12_OK source-native")
-
-    catalog_start_marker = "    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {"
-    catalog_end_marker = """\n    /**
-     * Publishes the compact, filter-only catalogue"""
-    catalog_start = text.find(catalog_start_marker)
-    catalog_end = text.find(catalog_end_marker, catalog_start)
-    if catalog_start < 0 or catalog_end < 0:
-        raise SystemExit("Could not locate PreparedBettingSnapshotStore loadLatestCatalog block")
-
-    safe_catalog_reader = '''    fun loadLatestCatalog(competitionId: String): PreparedBettingCatalog? {
-        if (competitionId.isBlank()) return null
-
-        // Do not read catalog_payload through Android CursorWindow. Domestic catalogues can exceed
-        // the per-row CursorWindow limit after league expansion and throw SQLiteBlobTooBigException.
-        // Rebuild the compact filter feed from normalized prepared rows instead.
-        val snapshotVersion = readableDatabase.rawQuery(
-            """
-            SELECT snapshot_version
-            FROM prepared_snapshot_meta
-            WHERE competition_id=? AND state='ready'
-            ORDER BY built_at_ms DESC
-            LIMIT 1
-            """.trimIndent(),
-            arrayOf(competitionId)
-        ).use { cursor ->
-            if (cursor.moveToFirst()) cursor.getString(0) else null
-        } ?: return null
-
-        PreparedBettingCatalogMemoryCache.get(competitionId, snapshotVersion)?.let { return it }
-
-        val feed = rebuildCatalogFromStoredMatches(competitionId, snapshotVersion)
-            ?: return null
-
-        return PreparedBettingCatalog(
-            competitionId = competitionId,
-            snapshotVersion = snapshotVersion,
-            feed = feed
-        ).also(PreparedBettingCatalogMemoryCache::publish)
-    }
-'''
-    existing_catalog = text[catalog_start:catalog_end]
-    if "SELECT snapshot_version, catalog_payload" in existing_catalog:
-        text = text[:catalog_start] + safe_catalog_reader + text[catalog_end:]
-        print("APP_READY_PREPARED_CATALOG_CURSORWINDOW_OK patched")
-    elif "rebuildCatalogFromStoredMatches(competitionId, snapshotVersion)" in existing_catalog:
-        print("APP_READY_PREPARED_CATALOG_CURSORWINDOW_OK source-already-safe")
-    else:
-        raise SystemExit("Unsupported PreparedBettingSnapshotStore loadLatestCatalog contract")
-
-    # The current UAT store may expose candidate-key helpers before loadForFeed.
-    # Anchor publisher compatibility code to a stable method declaration instead of comments/order.
-    publisher_load_marker = "    fun loadForSelectionKeys("
-    publisher_load_fallback_marker = "    fun loadForFeed("
-    publisher_load_method = '''    /**
-     * Publisher-only full PATTERN read that avoids prepared_snapshot_meta.catalog_payload.
-     *
-     * The compact catalogue can exceed Android CursorWindow limits after league expansion.
-     * Final recommendation materialization only needs the persisted prepared match rows plus
-     * PATTERN selections, so hydrate those rows directly and never read the giant catalogue blob.
-     */
-    fun loadAllPatternSelectionsForPublisher(
-        competitionId: String,
-        snapshotVersion: String
-    ): PreparedSnapshotLoadResult? {
-        if (!hasReadySnapshot(competitionId, snapshotVersion)) return null
-
-        val requestedMatches = readableDatabase.rawQuery(
-            """
-            SELECT match_key, payload
-            FROM prepared_matches
-            WHERE competition_id=? AND snapshot_version=?
-            ORDER BY local_date, match_key
-            """.trimIndent(),
-            arrayOf(competitionId, snapshotVersion)
-        ).use { cursor ->
-            buildMap<String, OddsMatch> {
-                while (cursor.moveToNext()) {
-                    val matchKey = cursor.getString(0)
-                    val match = runCatching {
-                        JSONObject(cursor.getString(1)).toPreparedOddsMatch()
-                    }.getOrNull() ?: continue
-                    put(matchKey, match)
-                }
-            }
-        }
-
-        if (requestedMatches.isEmpty()) {
-            return PreparedSnapshotLoadResult(
-                selections = emptyList(),
-                selectionCount = 0,
-                snapshotVersion = snapshotVersion
-            )
-        }
-
-        val dates = requestedMatches.values
-            .asSequence()
-            .map(::bettingLocalDate)
-            .filter(String::isNotBlank)
-            .toSet()
-
-        val selections = loadSelections(
-            competitionId = competitionId,
-            snapshotVersion = snapshotVersion,
-            dates = dates,
-            requestedMatches = requestedMatches,
-            purpose = PreparedSelectionPurpose.PATTERN
-        )
-
-        return PreparedSnapshotLoadResult(
-            selections = selections,
-            selectionCount = selections.size,
-            snapshotVersion = snapshotVersion
-        )
-    }
-
-'''
-    if "fun loadAllPatternSelectionsForPublisher(" not in text:
-        marker = publisher_load_marker if text.count(publisher_load_marker) == 1 else publisher_load_fallback_marker
-        if text.count(marker) != 1:
-            raise SystemExit("Could not locate PreparedBettingSnapshotStore publisher insertion boundary")
-        text = text.replace(marker, publisher_load_method + marker, 1)
-    else:
-        print("APP_READY_PREPARED_PUBLISHER_READ_OK source-already-compatible")
-
-    if text.count("    fun loadAllPatternSelectionsForPublisher(") != 1:
-        raise SystemExit("PreparedBettingSnapshotStore publisher read method count mismatch")
-    if text.count("    fun loadForSelectionKeys(") != 1:
-        raise SystemExit("PreparedBettingSnapshotStore candidate-key read method count mismatch")
-    if text.count("    fun loadForFeed(") != 1:
-        raise SystemExit("PreparedBettingSnapshotStore loadForFeed method count mismatch")
-
-    source.write_text(text, encoding="utf-8")
-    print("APP_READY_PREPARED_STORE_V12_OK")
-
-
-
-def add_producer_diagnostics() -> None:
-    source = Path("app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt")
-    text = source.read_text(encoding="utf-8")
-    if "import android.util.Log" not in text:
-        text = text.replace("import android.content.Context\n", "import android.content.Context\nimport android.util.Log\n", 1)
-    old = '                result.error?.let { warnings += "${result.label}: ${it.message.orEmpty()}" }\n'
-    new = '''                result.error?.let {
-                    Log.e("StatMakerAppReady", "${result.label}: ${it.message.orEmpty()}", it)
-                    warnings += "${result.label}: ${it.message.orEmpty()}"
-                }
-'''
-    if text.count(old) != 1:
-        raise SystemExit("Could not locate Welcome task error handler")
-    text = text.replace(old, new, 1)
-    replacements = [
-        ("            val domestic = resolve(domesticFuture)\n", "            val domestic = resolve(domesticFuture)\n" + '            Log.i("StatMakerAppReady", "stage=domestic_resolved matches=${db.totalMatchCount()} ok=${domestic != null}")\n'),
-        ("            val normalizedResult = resolve(normalizedFuture)\n", "            val normalizedResult = resolve(normalizedFuture)\n" + '            Log.i("StatMakerAppReady", "stage=normalized_resolved refreshed=${normalizedResult?.refreshed == true}")\n'),
-        ("            val domesticOdds = resolve(domesticOddsFuture)\n", "            val domesticOdds = resolve(domesticOddsFuture)\n" + '            Log.i("StatMakerAppReady", "stage=domestic_odds_resolved matches=${domesticOdds?.matches?.size ?: 0}")\n'),
-        ("            val champions = resolve(championsFuture)\n", "            val champions = resolve(championsFuture)\n" + '            Log.i("StatMakerAppReady", "stage=champions_odds_resolved matches=${champions?.matches?.size ?: 0}")\n'),
-        ("            val europa = resolve(europaFuture)\n", "            val europa = resolve(europaFuture)\n" + '            Log.i("StatMakerAppReady", "stage=europa_odds_resolved matches=${europa?.matches?.size ?: 0}")\n'),
-        ("            val conference = resolve(conferenceFuture)\n", "            val conference = resolve(conferenceFuture)\n" + '            Log.i("StatMakerAppReady", "stage=conference_odds_resolved matches=${conference?.matches?.size ?: 0}")\n'),
-        ("            val supportResults = supportFutures.map(::resolve)\n", "            val supportResults = supportFutures.map(::resolve)\n" + '            Log.i("StatMakerAppReady", "stage=support_resolved ready=${supportResults.count { it != null }}")\n'),
-        ("            val logosUpdated = resolve(logosFuture) == true\n", "            val logosUpdated = resolve(logosFuture) == true\n" + '            Log.i("StatMakerAppReady", "stage=all_futures_resolved")\n'),
-        ('            val prepared = trace.measure("prepared_coordinator") {\n', '            Log.i("StatMakerAppReady", "stage=prepared_begin")\n            val prepared = trace.measure("prepared_coordinator") {\n'),
-        ("            warnings += prepared.warnings\n", '''            Log.i("StatMakerAppReady", "stage=prepared_complete ready=${prepared.readyCompetitions.size} requested=${prepared.requestedCompetitions.size}")
-            check(prepared.requestedCompetitions.size == 4 && prepared.readyCompetitions.size == 4) {
-                "App-ready publisher requires 4/4 prepared source snapshots"
-            }
-            // Final v10 recommendation candidates are materialized host-side from the frozen
-            // prepared checkpoint. Do not start the heavy publisher in the Welcome process:
-            // run_app_ready_emulator.sh intentionally stops the app immediately after 4/4 READY.
-            warnings += prepared.warnings
-'''),
-    ]
-    for old_marker, new_marker in replacements:
-        if text.count(old_marker) != 1:
-            raise SystemExit(f"Could not locate producer diagnostic marker: {old_marker.strip()}")
-        text = text.replace(old_marker, new_marker, 1)
-    source.write_text(text, encoding="utf-8")
-    print("APP_READY_DIAGNOSTICS_OK")
-
-
-replace_repository_urls()
-tune_runner_manifest()
-register_recommendation_publisher_activity()
-bundle_normalized_snapshot()
-patch_normalized_repository()
-harden_download("app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt", "Domestic API artifact")
-patch_domestic_authoritative_scope_replace()
-harden_download("app/src/main/java/com/statmaker/app/DomesticApiRegistry.kt", "Domestic API registry")
-patch_domestic_multi_season_index()
-patch_empty_uefa_ready_snapshots()
-install_prepared_pattern_bridge()
-patch_prepared_store_v12()
-add_producer_diagnostics()
+print("APP_READY_PRE_V6_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
+print("APP_READY_IDENTITY_REGEX_CACHE_OK patterns=4 semantics=unchanged")
