@@ -40,6 +40,7 @@ on:
       - 'mappings/domestic_team_aliases.json'
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
+      - '.github/app-ready-rebuild-trigger'
       - 'scripts/patch_app_ready_producer.py'
       - 'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt'
       - 'scripts/patch_prepared_publisher_diagnostics.py'
@@ -67,7 +68,7 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     # The prepared source phase has its own explicit 90-minute ceiling and failure checkpoint.
-    # Keep the job ceiling above that so GitHub never kills the runner before the checkpoint trap.
+    # Keep the job ceiling above that so GitHub never killss the runner before the checkpoint trap.
     timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
@@ -140,8 +141,8 @@ jobs:
           ACTUAL_BLOB="$(git rev-parse "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}")"
           if [[ "${ACTUAL_BLOB}" != "${LEGACY_BUILDER_BLOB}" ]]; then
             echo "Pinned legacy builder blob mismatch." >&2
-            echo "Expected: ${LEGACY_BUILDER_BLOB}" >&2
-            echo "Actual:   ${ACTUAL_BLOB}" >&2
+            echo "Expected: $LEGACY_BUILDER_BLOB" >&2
+            echo "Actual:   $ACTUAL_BLOB" >&2
             exit 1
           fi
 
@@ -152,8 +153,32 @@ jobs:
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         with: {distribution: temurin, java-version: '17'}
-      - uses: android-actions/setup-android@v3
+
+      - name: Verify preinstalled Android SDK
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}" || { echo 'ANDROID_HOME is not set on this runner' >&2; exit 1; }
+          test -d "$ANDROID_HOME" || { echo "ANDROID_HOME does not exist: $ANDROID_HOME" >&2; exit 1; }
+
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
+          if [[ -z "$SDKMANAGER" && -x "$ANDROID_HOME/tools/bin/sdkmanager" ]]; then
+            SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+          fi
+          test -n "$SDKMANAGER" || {
+            echo "sdkmanager was not found under $ANDROID_HOME" >&2
+            find "$ANDROID_HOME" -maxdepth 4 -type f -name sdkmanager -print 2>/dev/null || true
+            exit 1
+          }
+
+          SDKMANAGER_DIR="$(dirname "$SDKMANAGER")"
+          echo "$SDKMANAGER_DIR" >> "$GITHUB_PATH"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "Using preinstalled Android SDK: $ANDROID_HOME"
+          echo "Using sdkmanager: $SDKMANAGER"
+          "$SDKMANAGER" --version
+
       - uses: gradle/actions/setup-gradle@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
 
