@@ -6,11 +6,11 @@ PRIVATE_ROOT="${1:-statmaker-private}"
 cd "$PRIVATE_ROOT"
 
 # Product contract:
-#   - recommendation semantics are pinned bit-for-bit to the verified Saturday baseline
+#   - recommendation semantics are pinned to the verified pre-v6 Saturday producer
 #   - Asian countries/leagues and Asian/handicap markets are retired before engine execution
 #     by the Data-repo input policy, never by modifying the pinned recommendation code.
-SATURDAY_ENGINE_COMMIT="d06364ab2625815aeafcb48ae93d6a328f7d6ac5"
-EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v6-probability-parity-v1"
+SATURDAY_ENGINE_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 APP_DIR="app/src/main/java/com/statmaker/app"
 
 ensure_commit() {
@@ -23,28 +23,26 @@ ensure_commit() {
 
 ensure_commit "$SATURDAY_ENGINE_COMMIT"
 
-# Restore the complete app package from the exact production commit that generated the
-# verified Saturday schema-12 App-Ready bundle. Modern application UI stays on main;
-# only this off-device producer checkout is pinned.
+# Restore the complete app package from the exact StatMaker commit recorded by the
+# verified 2026-09-12 schema-11/v5 App-Ready manifest. Modern application UI stays
+# on main; only this off-device producer checkout is pinned.
 git checkout "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR"
 
-# Fail closed on any recommendation-source delta from Saturday. Product retirement is
-# intentionally enforced in canonical inputs before this exact engine sees them.
+# Fail closed on any recommendation-source delta from the verified producer source.
 mapfile -t actual_engine_delta < <(
   git diff --name-only "$SATURDAY_ENGINE_COMMIT" -- "$APP_DIR" | sort
 )
 if (( ${#actual_engine_delta[@]} != 0 )); then
-  echo "Unexpected App-Ready engine drift from exact Saturday baseline." >&2
+  echo "Unexpected App-Ready engine drift from verified pre-v6 Saturday baseline." >&2
   printf '  %s\n' "${actual_engine_delta[@]}" >&2
   exit 1
 fi
 
 echo "APP_READY_EXACT_SATURDAY_ENGINE_SOURCE_OK baseline=$SATURDAY_ENGINE_COMMIT"
 
-# The verified engine recompiles these four constant ICU patterns on every team-name lookup.
-# Current canonical data now drives enough lookups to exhaust ICU native allocation during the
-# off-device build. Cache the exact same patterns once; matching semantics and call order stay
-# unchanged. This patch is limited to the temporary producer checkout.
+# Cache the same four constant ICU regex patterns in the temporary producer checkout.
+# Matching semantics and call order remain unchanged; this is only a native-allocation
+# reliability patch for the larger current canonical input set.
 NORMALIZER_FILE="$APP_DIR/RepositoryBackedCompetitionBettingProvider.kt"
 python - "$NORMALIZER_FILE" <<'PY'
 import sys
@@ -78,19 +76,20 @@ path.write_text(text, encoding="utf-8")
 print("APP_READY_IDENTITY_REGEX_CACHE_PATCH_OK patterns=4 semantics=unchanged")
 PY
 
-# Pin the Data-side files that define candidate materialization semantics. Infrastructure,
-# checkpoint and publish code can evolve, but recommendation construction cannot drift.
-DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"
+# Pin the Data-side files that actually produced the verified schema-11/v5 snapshot.
+# Current checkpoint/publish infrastructure stays in place; recommendation construction
+# is restored from the immutable historical Data commit.
+DATA_SATURDAY_COMMIT="17fa84485df5e1f46d9a35c919b1a33255a69961"
 declare -A SATURDAY_PIPELINE_BLOBS=(
-  ["scripts/patch_app_ready_producer.py"]="5afbac5eb556e70ff996070fab22f259c979eca1"
+  ["scripts/patch_app_ready_producer.py"]="8ea67c8d26b1ffce0437ff3c17642ddec13ebd03"
   ["scripts/patch_prepared_publisher_diagnostics.py"]="66e368fcb6c8d6cd5bcbe1b27b44df95f24d5be0"
   ["scripts/patch_prepared_publisher_bulk.py"]="3f6bb21fa2115b18868d746ec052f58bb6fcb40c"
-  ["scripts/run_app_ready_emulator.sh"]="e5e5903d60ac2afc074c5b47930ec8aeb697f0c1"
-  ["scripts/build_app_ready_from_device.py"]="54d74c42ae3a58c6cf850f9860cf525e63a2e78c"
-  ["scripts/materialize_app_ready_pattern_candidates.py"]="530f0ffb7a364121f13c1be2d4d02b6833f47269"
+  ["scripts/run_app_ready_emulator.sh"]="2f2c58cab6a6603d3757f7213ae95f6a1b76f289"
+  ["scripts/build_app_ready_from_device.py"]="f26932a59ef8b15133d6bee89077e9b39edc94ee"
+  ["scripts/materialize_app_ready_pattern_candidates.py"]="8e327185cfd84fb91df5b85a923341b3fe9cd1ef"
   ["scripts/materialize_prepared_fixture_index.py"]="5516b8d09bf91a2033feaa1133b90ef443d3c476"
   ["scripts/validate_domestic_cache_provider_identity.py"]="4d572254d9f6c315baeaf11c2ab113866d6a986f"
-  ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="2e1a2d1d5804772ed2788d756d3dff6017a3848c"
+  ["scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt"]="26577cc624f83dc9bd851166ebd8e40fe62c8c86"
 )
 
 for file in "${!SATURDAY_PIPELINE_BLOBS[@]}"; do
@@ -108,6 +107,41 @@ for file in "${!SATURDAY_PIPELINE_BLOBS[@]}"; do
 done
 
 echo "APP_READY_EXACT_SATURDAY_DATA_PIPELINE_OK baseline=$DATA_SATURDAY_COMMIT files=${#SATURDAY_PIPELINE_BLOBS[@]}"
+
+# Keep the modern aggregate/checkpoint preflight implementation, but bind its product
+# contract to the exact v5/schema-11 producer staged above. This file is changed only in
+# the runner workspace; the repository copy remains the modern infrastructure source.
+PREFLIGHT_FILE="$GITHUB_WORKSPACE/scripts/preflight_app_ready_pipeline.py"
+python - "$PREFLIGHT_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+replacements = {
+    "SATURDAY_RULES='pattern-policy-v2-final-read-model-v6-probability-parity-v1'":
+        "SATURDAY_RULES='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'",
+    "PREPARED_SCHEMA=12": "PREPARED_SCHEMA=11",
+    "d06364ab2625815aeafcb48ae93d6a328f7d6ac5": "561e152bc8302bb8240131cefc65b5350522c180",
+    "'scripts/patch_app_ready_producer.py':'5afbac5eb556e70ff996070fab22f259c979eca1'":
+        "'scripts/patch_app_ready_producer.py':'8ea67c8d26b1ffce0437ff3c17642ddec13ebd03'",
+    "'scripts/run_app_ready_emulator.sh':'e5e5903d60ac2afc074c5b47930ec8aeb697f0c1'":
+        "'scripts/run_app_ready_emulator.sh':'2f2c58cab6a6603d3757f7213ae95f6a1b76f289'",
+    "'scripts/build_app_ready_from_device.py':'54d74c42ae3a58c6cf850f9860cf525e63a2e78c'":
+        "'scripts/build_app_ready_from_device.py':'f26932a59ef8b15133d6bee89077e9b39edc94ee'",
+    "'scripts/materialize_app_ready_pattern_candidates.py':'530f0ffb7a364121f13c1be2d4d02b6833f47269'":
+        "'scripts/materialize_app_ready_pattern_candidates.py':'8e327185cfd84fb91df5b85a923341b3fe9cd1ef'",
+    "'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt':'2e1a2d1d5804772ed2788d756d3dff6017a3848c'":
+        "'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt':'26577cc624f83dc9bd851166ebd8e40fe62c8c86'",
+}
+for old, new in replacements.items():
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f"Preflight contract patch expected exactly one match for {old!r}, got {count}")
+    text = text.replace(old, new, 1)
+path.write_text(text, encoding="utf-8")
+print("APP_READY_PREFLIGHT_V5_SCHEMA11_CONTRACT_OK")
+PY
 
 {
   echo "APP_READY_STATMAKER_COMMIT=$SATURDAY_ENGINE_COMMIT"
