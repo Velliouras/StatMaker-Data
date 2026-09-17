@@ -41,6 +41,15 @@ BASE_IDENTITY_PRIORITY = 0
 CONFIGURED_ALIAS_PRIORITY = 100
 VERIFIED_ALIAS_PRIORITY = 200
 
+# Repository-level cross-provider bridges for canonical names that are known to differ
+# by spelling between Odds-API.io and API-Football. Keep this list small, explicit and
+# league-scoped. These claims have the same priority as the verified ingestion aliases.
+VERIFIED_CROSS_PROVIDER_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    "EGY": {
+        "Ghazl El Mehalla": ("Ghazl El Mahallah",),
+    },
+}
+
 
 def normalize_text(value: Any) -> str:
     text = unicodedata.normalize("NFKD", str(value or "").strip())
@@ -255,6 +264,15 @@ def domestic_indexes(
         for canonical, aliases in teams.items():
             index.add_canonical(canonical)
             for alias in aliases or []:
+                index.add_alias(alias, canonical, priority=VERIFIED_ALIAS_PRIORITY)
+
+    # Apply repository-level bridges after imported alias sources so a known, verified
+    # cross-provider spelling wins deterministically over stale/generated claims.
+    for code, teams in VERIFIED_CROSS_PROVIDER_ALIASES.items():
+        index = indexes.setdefault(str(code).upper(), CanonicalIdentityIndex(scope=str(code).upper()))
+        for canonical, aliases in teams.items():
+            index.add_canonical(canonical)
+            for alias in aliases:
                 index.add_alias(alias, canonical, priority=VERIFIED_ALIAS_PRIORITY)
 
     return indexes
