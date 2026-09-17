@@ -5,9 +5,11 @@ from pathlib import Path
 path = Path(os.environ["GITHUB_WORKSPACE"]) / "scripts/run_app_ready_emulator.sh"
 text = path.read_text(encoding="utf-8")
 
-# Same-generation checkpoints are accepted ONLY when both canonical source
-# content versions and the exact engine contract match. Old/stale checkpoints
-# are ignored rather than used as approximate seeds.
+# A prepared checkpoint is an immutable engine snapshot, not a snapshot of one exact
+# Data contentVersion. Reuse it across newer Data generations when (and only when)
+# the producer code + recommendation contract are identical. The restored old
+# manifests/odds then give StatMaker's existing incremental coordinator the baseline
+# it needs to patch only changed matches/stats instead of rebuilding every league.
 text = text.replace(
     "import json, sys\nfrom pathlib import Path\nworkspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2])",
     "import json, os, sys\nfrom pathlib import Path\nworkspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2])",
@@ -20,15 +22,22 @@ old_exact = '''exact = (
 )'''
 new_exact = '''engine_contract = os.environ.get("APP_READY_ENGINE_CONTRACT", "")
 rules_fingerprint = os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "")
+statmaker_commit = os.environ.get("APP_READY_STATMAKER_COMMIT", "")
 ready_count = int(checkpoint.get("preparedReadyCount", 0) or 0)
-exact = (
+compatible = (
     bool(engine_contract)
     and bool(rules_fingerprint)
-    and 0 <= ready_count <= 4
-    and checkpoint.get("mainContentVersion") == main.get("contentVersion")
-    and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
+    and bool(statmaker_commit)
+    and 1 <= ready_count <= 4
     and checkpoint.get("engineContract") == engine_contract
     and checkpoint.get("patternRulesFingerprint") == rules_fingerprint
+    and checkpoint.get("statmakerCommit") == statmaker_commit
+)
+exact = (
+    compatible
+    and complete_for_target
+    and checkpoint.get("mainContentVersion") == main.get("contentVersion")
+    and checkpoint.get("uefaContentVersion") == uefa.get("contentVersion")
 )'''
 if text.count(old_exact) != 1:
     raise SystemExit("Could not locate checkpoint exact-match contract")
@@ -45,7 +54,6 @@ if text.count(partial_guard_old) != 1:
     raise SystemExit("Could not locate checkpoint ready-count guard")
 text = text.replace(partial_guard_old, partial_guard_new, 1)
 
-
 old_checkpoint_tail = '''    "complete_for_target="+str(complete_for_target).lower(),
 )
 PY'''
@@ -53,13 +61,13 @@ new_checkpoint_tail = '''    "complete_for_target="+str(complete_for_target).low
     "engine_contract="+str(checkpoint.get("engineContract","")),
     "rules="+str(checkpoint.get("patternRulesFingerprint","")),
     "statmaker_commit="+str(checkpoint.get("statmakerCommit",""))[:12],
+    "compatible="+str(compatible).lower(),
 )
-raise SystemExit(0 if exact else 1)
+raise SystemExit(0 if compatible else 1)
 PY'''
 if text.count(old_checkpoint_tail) < 1:
     raise SystemExit("Could not locate checkpoint validation tail")
 text = text.replace(old_checkpoint_tail, new_checkpoint_tail, 1)
-
 
 restore_required = '''      test -s "$CHECKPOINT_IN/$rel"
       dir="$(dirname "$rel")"
@@ -74,8 +82,8 @@ if text.count(restore_required) != 1:
     raise SystemExit("Could not locate checkpoint restore file guard")
 text = text.replace(restore_required, restore_optional, 1)
 
-# Only use the previous published App-Ready generation as an incremental seed
-# when it was produced by this exact engine/input-retirement contract.
+# A published generation is also a valid incremental seed only when its exact
+# producer commit + engine/rules contract match the producer selected for this run.
 seed_marker = '''SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
 if [[ "$CHECKPOINT_RESTORED" -eq 0 && -n "$SEED_COMMIT" ]]; then'''
 seed_replacement = '''SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
@@ -87,16 +95,23 @@ import json, os, sys
 manifest=json.loads(open(sys.argv[1], encoding="utf-8").read())
 expected=os.environ.get("APP_READY_ENGINE_CONTRACT", "")
 expected_rules=os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "")
+expected_statmaker=os.environ.get("APP_READY_STATMAKER_COMMIT", "")
 metadata=manifest.get("metadata") or {}
 actual=str(metadata.get("engineContract") or "")
 actual_rules=str(metadata.get("preparedPatternRulesFingerprint") or "")
+actual_statmaker=str(metadata.get("statmakerCommit") or "")
 raise SystemExit(
-    0 if expected and expected_rules and actual == expected and actual_rules == expected_rules else 1
+    0 if (
+        expected and expected_rules and expected_statmaker
+        and actual == expected
+        and actual_rules == expected_rules
+        and actual_statmaker == expected_statmaker
+    ) else 1
 )
 PY
   then
     SEED_COMPATIBLE=1
-    echo "APP_READY_COMPATIBLE_PUBLISHED_SEED commit=$SEED_COMMIT contract=$APP_READY_ENGINE_CONTRACT"
+    echo "APP_READY_COMPATIBLE_PUBLISHED_SEED commit=$SEED_COMMIT contract=$APP_READY_ENGINE_CONTRACT statmaker=$APP_READY_STATMAKER_COMMIT"
   else
     echo "APP_READY_PUBLISHED_SEED_INCOMPATIBLE ignored commit=$SEED_COMMIT"
   fi
@@ -105,7 +120,6 @@ if [[ "$CHECKPOINT_RESTORED" -eq 0 && "$SEED_COMPATIBLE" -eq 1 && -n "$SEED_COMM
 if text.count(seed_marker) != 1:
     raise SystemExit("Could not locate published seed guard")
 text = text.replace(seed_marker, seed_replacement, 1)
-
 
 export_files_old = '''  adb exec-out run-as "$APP_ID" cat databases/statmaker.db > "$target/databases/statmaker.db"
   adb exec-out run-as "$APP_ID" cat databases/statmaker_prepared_betting.db > "$target/databases/statmaker_prepared_betting.db"
@@ -148,7 +162,6 @@ if text.count(export_import) != 1:
     raise SystemExit("Could not locate checkpoint export import")
 text = text.replace(export_import, "import hashlib, json, os, sqlite3, sys\n", 1)
 
-
 ready_guard_old = '''expected={"domestic","champions_league","europa_league","conference_league"}
 if {str(r[0]) for r in ready} != expected:
     raise SystemExit(f"Checkpoint requires exact 4/4 READY snapshots; got {[r[0] for r in ready]}")'''
@@ -174,4 +187,4 @@ if text.count(payload_marker) != 1:
 text = text.replace(payload_marker, payload_replacement, 1)
 
 path.write_text(text, encoding="utf-8")
-print("APP_READY_RESUME_CONTRACT_PATCH_OK")
+print("APP_READY_RESUME_CONTRACT_PATCH_OK compatible-data-generation-reuse")
