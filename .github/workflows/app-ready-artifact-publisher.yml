@@ -41,14 +41,6 @@ on:
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - '.github/app-ready-rebuild-trigger'
-      - 'scripts/patch_app_ready_producer.py'
-      - 'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt'
-      - 'scripts/patch_prepared_publisher_diagnostics.py'
-      - 'scripts/patch_prepared_publisher_bulk.py'
-      - 'scripts/run_app_ready_emulator.sh'
-      - 'scripts/build_app_ready_from_device.py'
-      - 'scripts/materialize_app_ready_pattern_candidates.py'
-      - 'scripts/materialize_prepared_fixture_index.py'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -97,7 +89,7 @@ jobs:
           expected_schema=11
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
-              int(m.get('preparedBettingSchemaVersion') or 0) < expected_schema
+              int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema
           )
           generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
@@ -126,29 +118,7 @@ jobs:
       - name: Stage off-device legacy builder
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
-        run: |
-          set -euo pipefail
-          cd statmaker-private
-          LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
-          LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
-          LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"
-
-          if ! git rev-parse --verify --quiet "${LEGACY_BUILDER_REF}^{commit}" >/dev/null; then
-            echo "Pinned legacy builder ref is unavailable in checkout: ${LEGACY_BUILDER_REF}" >&2
-            exit 1
-          fi
-
-          ACTUAL_BLOB="$(git rev-parse "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}")"
-          if [[ "${ACTUAL_BLOB}" != "${LEGACY_BUILDER_BLOB}" ]]; then
-            echo "Pinned legacy builder blob mismatch." >&2
-            echo "Expected: $LEGACY_BUILDER_BLOB" >&2
-            echo "Actual:   $ACTUAL_BLOB" >&2
-            exit 1
-          fi
-
-          git show "${LEGACY_BUILDER_REF}:${LEGACY_BUILDER_PATH}" > "${LEGACY_BUILDER_PATH}"
-          python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"
-          python "$GITHUB_WORKSPACE/scripts/patch_prepared_publisher_diagnostics.py"
+        run: bash "$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh" "$GITHUB_WORKSPACE/statmaker-private"
 
       - uses: actions/setup-java@v4
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
@@ -316,6 +286,9 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat.local
+          APP_READY_STATMAKER_COMMIT: "561e152bc8302bb8240131cefc65b5350522c180"
+          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+          APP_READY_PREPARED_SCHEMA_VERSION: "11"
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
@@ -480,7 +453,7 @@ jobs:
               'artifactCount':len(artifacts),
               'mainContentVersion':incoming.get('metadata',{}).get('mainContentVersion',''),
               'uefaContentVersion':incoming.get('metadata',{}).get('uefaContentVersion',''),
-              'statmakerCommit':subprocess.check_output(['git','-C','statmaker-private','rev-parse','HEAD'],text=True).strip(),
+              'statmakerCommit':incoming.get('metadata',{}).get('statmakerCommit',''),
               'preparedBettingSchemaVersion':incoming.get('metadata',{}).get('preparedBettingSchemaVersion',0),
               'preparedPatternRulesFingerprint':incoming.get('metadata',{}).get('preparedPatternRulesFingerprint',''),
               'preparedPatternGenerationId':incoming.get('metadata',{}).get('preparedPatternGenerationId',''),
@@ -622,8 +595,11 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 11
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 11
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
+          assert metadata.get('statmakerCommit') == '561e152bc8302bb8240131cefc65b5350522c180'
+          assert metadata.get('engineContract') == 'pre-v6-schema11-v5-performance-shadow-retired-inputs-v1'
+          assert metadata.get('inputRetirementContract') == 'asian-countries-and-all-asian-handicap-markets-before-engine-v1'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
@@ -640,6 +616,7 @@ jobs:
           assert int(status.get('preparedPerformanceRowCount') or 0) == performance_rows
           assert int(status.get('preparedOpponentModelCount') or 0) == opponent_models
           assert int(status.get('preparedFavoriteShadowCount') or 0) == favorite_shadow
+          assert status.get('statmakerCommit') == metadata.get('statmakerCommit')
           print(
               'APP_READY_PUBLISH_OK',
               status['contentVersion'],

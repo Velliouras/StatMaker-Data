@@ -543,8 +543,8 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) < 11:
-        raise SystemExit("Prepared checkpoint schema is below v11")
+    if int(connection.execute("PRAGMA user_version").fetchone()[0]) != 11:
+        raise SystemExit("Prepared checkpoint schema must be exactly v11")
 
     selection_columns = {
         str(row[1])

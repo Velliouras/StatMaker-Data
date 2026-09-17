@@ -1,280 +1,306 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import argparse, hashlib, json, os, sqlite3, subprocess, sys
+
+import argparse
+import json
+import sqlite3
+import subprocess
+import sys
 from pathlib import Path
 
-STATS_CONTRACT='domestic-authoritative-snapshot-v1'
-SATURDAY_ROLLBACK_CONTRACT='saturday-2026-09-12-v12-retired-only-v1'
-SATURDAY_ENGINE_CONTRACT='exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1'
-SATURDAY_RULES='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
-SATURDAY_PIPELINE_BLOBS={
-    'scripts/patch_app_ready_producer.py':'5afbac5eb556e70ff996070fab22f259c979eca1',
-    'scripts/patch_prepared_publisher_diagnostics.py':'66e368fcb6c8d6cd5bcbe1b27b44df95f24d5be0',
-    'scripts/patch_prepared_publisher_bulk.py':'3f6bb21fa2115b18868d746ec052f58bb6fcb40c',
-    'scripts/run_app_ready_emulator.sh':'e5e5903d60ac2afc074c5b47930ec8aeb697f0c1',
-    'scripts/build_app_ready_from_device.py':'54d74c42ae3a58c6cf850f9860cf525e63a2e78c',
-    'scripts/materialize_app_ready_pattern_candidates.py':'530f0ffb7a364121f13c1be2d4d02b6833f47269',
-    'scripts/materialize_prepared_fixture_index.py':'5516b8d09bf91a2033feaa1133b90ef443d3c476',
-    'scripts/validate_domestic_cache_provider_identity.py':'4d572254d9f6c315baeaf11c2ab113866d6a986f',
-    'scripts/app_ready_v10/AppReadyPatternPublisherBridge.kt':'2e1a2d1d5804772ed2788d756d3dff6017a3848c',
+
+EXPECTED_SCHEMA = 11
+EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+FORBIDDEN_TARGET_MARKERS = (
+    "d06364ab2625815aeafcb48ae93d6a328f7d6ac5",
+    "pattern-policy-v2-final-read-model-v6-probability-parity-v1",
+    "54e9bd4e28b29a0eb6313f4d16da4c99f27490b9",
+)
+COMPETITIONS = {
+    "domestic",
+    "champions_league",
+    "europa_league",
+    "conference_league",
 }
-PREPARED_SCHEMA=12
-COMPETITIONS={'domestic','champions_league','europa_league','conference_league'}
-PATTERN_TABLES={'prepared_pattern_generation','prepared_pattern_candidates'}
-PATTERN_INDEXES={'idx_prepared_pattern_generation_ready','idx_prepared_pattern_candidates_scope','idx_prepared_pattern_candidates_rank','idx_prepared_pattern_candidates_competition_rank'}
-SOURCE_FILES={'main_manifest.json','domestic_enriched_index.json','domestic.json','uefa_manifest.json','champions_league.json','europa_league.json','conference_league.json'}
 
-def load(path): return json.loads(path.read_text(encoding='utf-8-sig'))
-
-def git_blob_sha(path):
-    data=path.read_bytes()
-    return hashlib.sha1(b'blob '+str(len(data)).encode('ascii')+b'\0'+data).hexdigest()
-
-def saturday_pipeline_status(root):
-    missing=[]; mismatch=[]
-    for rel,expected in SATURDAY_PIPELINE_BLOBS.items():
-        p=root/rel
-        if not p.is_file():
-            missing.append(rel); continue
-        actual=git_blob_sha(p)
-        if actual!=expected:
-            mismatch.append(f'{rel}:{actual}!={expected}')
-    return missing,mismatch
-
-def validate_enriched_outputs(root,r):
-    p=root/'data/statmaker/domestic_enriched/index.json'
-    try: rows=load(p).get('leagues',[])
-    except Exception as e:
-        r.error(f'enriched index invalid: {e}'); return
-    checked=0; bad=[]
-    for row in rows:
-        output=str(row.get('output_path') or '').strip()
-        if not output: continue
-        target=Path(output)
-        if not target.is_absolute(): target=root/target
-        if not target.is_file() or target.stat().st_size<=0:
-            bad.append(f"{row.get('league_code') or '?'}:missing_output"); continue
-        try: payload=load(target)
-        except Exception:
-            bad.append(f"{row.get('league_code') or '?'}:invalid_output"); continue
-        matches=payload.get('matches',[]) if isinstance(payload,dict) else []
-        actual=len(matches) if isinstance(matches,list) else -1
-        completed=int(row.get('completed_fixtures',0) or 0)
-        checked+=1
-        if actual!=completed:
-            bad.append(f"{row.get('league_code') or '?'}:{completed}!={actual}")
-    if bad: r.error('enriched index/output mismatch: '+','.join(bad[:20]))
-    else: r.note(f'enriched index outputs={checked} consistent')
-def code(v):
-    v=str(v or '').strip().upper(); return 'ROU' if v=='ROM' else v
-def season(v):
-    v=str(v or '').strip(); return {'2025-2026':'2526','2025 - 2026':'2526','25/26':'2526','2024-2025':'2425','2024 - 2025':'2425','24/25':'2425','2023-2024':'2324','2023 - 2024':'2324','23/24':'2324'}.get(v,v or '2526')
 
 class Report:
-    def __init__(self,mode): self.mode=mode; self.errors=[]; self.warnings=[]; self.info=[]
-    def error(self,x): self.errors.append(x)
-    def warn(self,x): self.warnings.append(x)
-    def note(self,x): self.info.append(x)
-    def finish(self):
-        print(f'APP_READY_AGGREGATE_{self.mode.upper()}_REPORT')
-        for x in self.errors: print('ERROR:',x)
-        for x in self.warnings: print('WARN:',x)
-        for x in self.info: print('INFO:',x)
-        print('APP_READY_AGGREGATE_SUMMARY',f'mode={self.mode}',f'errors={len(self.errors)}',f'warnings={len(self.warnings)}',f'info={len(self.info)}')
+    def __init__(self, mode: str) -> None:
+        self.mode = mode
+        self.errors: list[str] = []
+        self.info: list[str] = []
+
+    def error(self, message: str) -> None:
+        self.errors.append(message)
+
+    def note(self, message: str) -> None:
+        self.info.append(message)
+
+    def finish(self) -> int:
+        print(f"APP_READY_AGGREGATE_{self.mode.upper()}_REPORT")
+        for message in self.errors:
+            print("ERROR:", message)
+        for message in self.info:
+            print("INFO:", message)
+        print(
+            "APP_READY_AGGREGATE_SUMMARY",
+            f"mode={self.mode}",
+            f"errors={len(self.errors)}",
+            f"info={len(self.info)}",
+        )
         return 1 if self.errors else 0
 
-def expected_scopes(root,r):
-    p=root/'data/statmaker/domestic_enriched/index.json'
-    try: rows=load(p).get('leagues',[])
-    except Exception as e: r.error(f'invalid Domestic enriched index: {e}'); return {}
-    out={}; seen=set()
-    for row in rows:
-        c=code(row.get('league_code')); ss=season(row.get('app_season')); n=int(row.get('completed_fixtures',0) or 0); key=(ss,c)
-        if key in seen: r.error(f'duplicate scope {c}@{ss}'); continue
-        seen.add(key)
-        if n>0: out[key]=n
-    r.note(f'canonical scopes={len(out)} matches={sum(out.values())}')
-    return out
 
-def run_validator(root,cmd,label,r):
-    try: p=subprocess.run(cmd,cwd=root,text=True,capture_output=True,timeout=180)
-    except Exception as e: r.error(f'{label}: could not run: {e}'); return
-    text=' | '.join(x.strip() for x in (p.stdout+'\n'+p.stderr).splitlines() if x.strip())
-    if p.returncode: r.error(f'{label}: {text or "failed"}')
-    else: r.note(f'{label}: {text.split(" | ")[-1] if text else "ok"}')
+def read_text(path: Path, report: Report) -> str:
+    if not path.is_file():
+        report.error(f"missing file: {path}")
+        return ""
+    return path.read_text(encoding="utf-8")
 
-def stats_counts(path,r,label):
-    if not path.is_file() or path.stat().st_size<=0: r.error(f'{label}: missing/empty {path}'); return {}
-    try:
-        con=sqlite3.connect(f'file:{path}?mode=ro',uri=True)
-        try:
-            q=con.execute('PRAGMA quick_check').fetchone()
-            if not q or q[0]!='ok': r.error(f'{label}: quick_check={q}')
-            rows=con.execute('SELECT season,division,COUNT(*) FROM matches GROUP BY season,division').fetchall()
-        finally: con.close()
-    except sqlite3.Error as e: r.error(f'{label}: invalid DB: {e}'); return {}
-    return {(str(s),code(d)):int(n) for s,d,n in rows}
 
-def compare(expected,actual):
-    p=[]; missing=sorted(set(expected)-set(actual)); extra=sorted(set(actual)-set(expected)); mismatch=sorted(k for k in expected.keys()&actual.keys() if expected[k]!=actual[k])
-    if missing: p.append('missing='+','.join(f'{c}@{s}' for s,c in missing[:30]))
-    if extra: p.append('unexpected='+','.join(f'{c}@{s}' for s,c in extra[:30]))
-    if mismatch: p.append('count_mismatch='+','.join(f'{c}@{s}:{expected[k]}!={actual[k]}' for k in mismatch[:30] for s,c in [k]))
-    return p
+def require_markers(text: str, markers: tuple[str, ...], label: str, report: Report) -> None:
+    missing = [marker for marker in markers if marker not in text]
+    if missing:
+        report.error(f"{label} missing markers: {missing}")
 
-def prepared(path,r,label,require_patterns=True):
-    if not path.is_file() or path.stat().st_size<=0: r.error(f'{label}: missing/empty {path}'); return
-    try:
-        con=sqlite3.connect(f'file:{path}?mode=ro',uri=True)
-        try:
-            q=con.execute('PRAGMA quick_check').fetchone()
-            if not q or q[0]!='ok': r.error(f'{label}: quick_check={q}')
-            v=int(con.execute('PRAGMA user_version').fetchone()[0])
-            if v<PREPARED_SCHEMA: r.error(f'{label}: schema {v} < {PREPARED_SCHEMA}')
-            ready=con.execute("SELECT competition_id,match_count,selection_count FROM prepared_snapshot_meta WHERE state='ready'").fetchall(); names={str(x[0]) for x in ready}
-            if names!=COMPETITIONS: r.error(f'{label}: READY={sorted(names)} expected={sorted(COMPETITIONS)}')
-            if require_patterns:
-                tables={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}; indexes={x[0] for x in con.execute("SELECT name FROM sqlite_master WHERE type='index'")}
-                if PATTERN_TABLES-tables: r.error(f'{label}: missing tables {sorted(PATTERN_TABLES-tables)}')
-                if PATTERN_INDEXES-indexes: r.error(f'{label}: missing indexes {sorted(PATTERN_INDEXES-indexes)}')
-                if 'prepared_pattern_candidates' in tables:
-                    n=int(con.execute('SELECT COUNT(*) FROM prepared_pattern_candidates').fetchone()[0]);
-                    if n<=0: r.error(f'{label}: prepared_pattern_candidates empty')
-                    else: r.note(f'{label}: candidates={n}')
-            r.note(f'{label}: schema={v} ready='+','.join(f'{a}:{b}/{c}' for a,b,c in sorted(ready)))
-        finally: con.close()
-    except sqlite3.Error as e: r.error(f'{label}: invalid DB: {e}')
 
-def source_mode(root,private,r):
-    missing,mismatch=saturday_pipeline_status(root)
-    exact_rollback=not missing and not mismatch
-    if missing: r.error('Saturday pipeline missing: '+','.join(missing))
-    if mismatch: r.error('Saturday pipeline drift: '+' '.join(mismatch))
-    if exact_rollback:
-        r.note(
-            f'rollback contract={SATURDAY_ROLLBACK_CONTRACT} '
-            f'engine={SATURDAY_ENGINE_CONTRACT} rules={SATURDAY_RULES} '
-            f'pipeline_files={len(SATURDAY_PIPELINE_BLOBS)}'
-        )
+def validate_source(root: Path, private_root: Path | None, report: Report) -> None:
+    stage = read_text(root / "scripts/stage_app_ready_producer.sh", report)
+    workflow = read_text(root / ".github/workflows/app-ready-artifact-publisher.yml", report)
+    runner = read_text(root / "scripts/run_app_ready_emulator.sh", report)
+    materializer = read_text(root / "scripts/materialize_app_ready_pattern_candidates.py", report)
+    builder = read_text(root / "scripts/build_app_ready_from_device.py", report)
+    provider_validator = read_text(
+        root / "scripts/validate_domestic_cache_provider_identity.py", report
+    )
 
-    resume_patch=(root/'scripts/patch_app_ready_clean_current_data.py').read_text(encoding='utf-8')
-    stage_script=(root/'scripts/stage_app_ready_producer.sh').read_text(encoding='utf-8')
-    for marker in (
-        'd06364ab2625815aeafcb48ae93d6a328f7d6ac5',
-        SATURDAY_RULES,
-        'APP_READY_STATMAKER_COMMIT',
-        'APP_READY_PATTERN_RULES_FINGERPRINT',
+    active_contract_files = {
+        "stage": stage,
+        "workflow": workflow,
+        "runner": runner,
+        "materializer": materializer,
+        "builder": builder,
+    }
+    for label, text in active_contract_files.items():
+        leaked = [marker for marker in FORBIDDEN_TARGET_MARKERS if marker in text]
+        if leaked:
+            report.error(f"{label} contains post-v6 target markers: {leaked}")
+
+    require_markers(
+        stage,
+        (EXPECTED_STATMAKER_COMMIT, EXPECTED_RULES, 'PREPARED_SCHEMA="11"'),
+        "producer stage",
+        report,
+    )
+    require_markers(
+        workflow,
+        (
+            "bash \"$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh\"",
+            "APP_READY_PREPARED_SCHEMA_VERSION: \"11\"",
+            f'APP_READY_PATTERN_RULES_FINGERPRINT: "{EXPECTED_RULES}"',
+            f'APP_READY_STATMAKER_COMMIT: "{EXPECTED_STATMAKER_COMMIT}"',
+        ),
+        "publisher workflow",
+        report,
+    )
+    require_markers(
+        runner,
+        (
+            "validate_app_ready_prepared_contract.py",
+            "--kind checkpoint",
+            "--kind seed",
+            'if user_version != 11:',
+            '"preparedBettingSchemaVersion":user_version',
+            '"preparedPatternRulesFingerprint":expected_rules',
+            '"statmakerCommit":expected_statmaker_commit',
+        ),
+        "emulator runner",
+        report,
+    )
+    require_markers(
+        materializer,
+        (
+            f'RULES_FINGERPRINT = "{EXPECTED_RULES}"',
+            'if int(connection.execute("PRAGMA user_version").fetchone()[0]) != 11:',
+            "edge = posterior - market_probability",
+            "expected_value = posterior * odd - 1.0",
+            "def policy_decision(match, posterior, maturity, eligible):",
+        ),
+        "host materializer",
+        report,
+    )
+    require_markers(
+        builder,
+        (
+            f'EXPECTED_RULES = "{EXPECTED_RULES}"',
+            "if version != 11:",
+            "APP_READY_PRE_V6_POSTFLIGHT_OK",
+        ),
+        "bundle builder",
+        report,
+    )
+
+    retirement_call = 'run(sys.executable, str(retirement), "--root", ".")'
+    engine_patch_call = 'python "$GITHUB_WORKSPACE/scripts/patch_app_ready_producer.py"'
+    if retirement_call not in provider_validator:
+        report.error("provider preflight does not retire Asian/Handicap inputs")
+    if workflow.find("Validate canonical Domestic provider identity") > workflow.find(
+        "Stage off-device legacy builder"
     ):
-        if marker not in stage_script:
-            r.error(f'Saturday producer staging is missing contract marker: {marker}')
-    if 'APP_READY_PATTERN_RULES_FINGERPRINT' not in resume_patch or 'patternRulesFingerprint' not in resume_patch:
-        r.error('checkpoint compatibility is not bound to the exact rules fingerprint')
-    if 'APP_READY_STATMAKER_COMMIT' not in resume_patch or 'statmakerCommit' not in resume_patch:
-        r.error('checkpoint audit metadata does not record the exact StatMaker commit')
+        report.error("input retirement is not ordered before producer staging")
+    if engine_patch_call not in stage:
+        report.error("producer stage does not invoke the pinned pre-v6 patch")
 
-    run_validator(root,[sys.executable,'scripts/validate_domestic_cache_provider_identity.py'],'provider identity',r)
-    validate_enriched_outputs(root,r)
-    for rel in ['data/statmaker/update_manifest.json','odds/odds_api_io/domestic_odds.json','mappings/domestic_team_aliases.json','data/api_football/domestic_normalized_fixture_stats.json']:
-        p=root/rel
-        if not p.is_file() or p.stat().st_size<=0: r.error(f'missing/empty {rel}'); continue
-        try: load(p)
-        except Exception as e: r.error(f'invalid JSON {rel}: {e}')
+    trigger_section = ""
+    try:
+        trigger_section = workflow.split("  push:", 1)[1].split("  schedule:", 1)[0]
+    except IndexError:
+        report.error("could not isolate heavy publisher push trigger")
+    forbidden_trigger_paths = (
+        "scripts/stage_app_ready_producer.sh",
+        "scripts/run_app_ready_emulator.sh",
+        "scripts/validate_app_ready_prepared_contract.py",
+        "scripts/materialize_app_ready_pattern_candidates.py",
+    )
+    leaked_triggers = [path for path in forbidden_trigger_paths if path in trigger_section]
+    if leaked_triggers:
+        report.error(f"pipeline code still self-triggers heavy publisher: {leaked_triggers}")
 
-    if private:
-        p=private/'app/src/main/java/com/statmaker/app/DomesticApiArtifactImporter.kt'
-        text=p.read_text() if p.is_file() else ''
-        delete_marker='db.deleteMatchesForLeague(seasonCode, league.leagueCode)'
-        upsert_marker='db.upsertImportedMatches(rows)'
-        if exact_rollback:
-            if delete_marker in text: r.error('Saturday rollback importer unexpectedly contains authoritative delete-before-upsert')
-            elif upsert_marker not in text: r.error('Saturday rollback importer missing canonical upsert boundary')
-            else: r.note('staged Domestic importer=Saturday upsert-only semantics')
-        else:
-            d=text.find(delete_marker); u=text.find(upsert_marker)
-            if d<0 or u<0 or d>u: r.error('staged Domestic importer is not authoritative replace-by-scope')
-            else: r.note('staged Domestic importer=authoritative replace-by-scope')
-
-        normalizer=private/'app/src/main/java/com/statmaker/app/RepositoryBackedCompetitionBettingProvider.kt'
-        normalizer_text=normalizer.read_text(encoding='utf-8') if normalizer.is_file() else ''
-        cached_patterns=(
-            'private val combiningMarksRegex',
-            'private val olympiakosRegex',
-            'private val nonIdentityCharacterRegex',
-            'private val whitespaceRegex',
+    if private_root:
+        models = read_text(
+            private_root
+            / "app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt",
+            report,
         )
-        if not all(marker in normalizer_text for marker in cached_patterns):
-            r.error('Saturday producer is missing the verified identity regex cache patch')
-        elif any(expression in normalizer_text for expression in (
-            '.replace(Regex("\\\\p{Mn}+"), "")',
-            '.replace(Regex("\\\\bolympiakos\\\\b"), "olympiacos")',
-            '.replace(Regex("[^a-z0-9]+"), " ")',
-            'ascii.split(Regex("\\\\s+"))',
-        )):
-            r.error('Saturday producer still recompiles identity regex patterns per lookup')
-        else:
-            r.note('Saturday identity normalization semantics unchanged; four regex patterns cached')
-
-    runner=(root/'scripts/run_app_ready_emulator.sh').read_text()
-    if exact_rollback:
-        if STATS_CONTRACT in runner: r.error('Saturday rollback runner unexpectedly contains post-Saturday stats contract')
-        else: r.note('runner=Saturday checkpoint semantics')
-    elif STATS_CONTRACT not in runner:
-        r.error(f'runner missing stats contract {STATS_CONTRACT}')
-    else:
-        r.note(f'stats contract={STATS_CONTRACT}')
-
-def checkpoint_mode(root,expected,r):
-    if not root.exists(): r.note('no checkpoint restored; clean rebuild'); return
-    p=root/'checkpoint.json'
-    if not p.is_file(): r.error('checkpoint directory exists without checkpoint.json'); return
-    try: meta=load(p)
-    except Exception as e: r.error(f'invalid checkpoint.json: {e}'); return
-    if int(meta.get('preparedReadyCount',0) or 0)!=4: r.error(f'checkpoint preparedReadyCount={meta.get("preparedReadyCount")} expected=4')
-    prepared(root/'databases/statmaker_prepared_betting.db',r,'checkpoint prepared DB',require_patterns=False)
-    expected_engine=os.environ.get('APP_READY_ENGINE_CONTRACT','')
-    expected_rules=os.environ.get('APP_READY_PATTERN_RULES_FINGERPRINT','')
-    expected_commit=os.environ.get('APP_READY_STATMAKER_COMMIT','')
-    if expected_engine and str(meta.get('engineContract') or '') != expected_engine:
-        r.error(f'checkpoint engine contract={meta.get("engineContract") or "<legacy>"} expected={expected_engine}')
-    if expected_rules and str(meta.get('patternRulesFingerprint') or '') != expected_rules:
-        r.error(
-            f'checkpoint rules={meta.get("patternRulesFingerprint") or "<legacy>"} expected={expected_rules}'
+        store = read_text(
+            private_root
+            / "app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt",
+            report,
         )
-    if expected_commit and str(meta.get('statmakerCommit') or '') != expected_commit:
-        r.error(f'checkpoint StatMaker commit={meta.get("statmakerCommit") or "<legacy>"} expected={expected_commit}')
-    contract=str(meta.get('statsProducerContract') or '')
-    if contract!=STATS_CONTRACT: r.warn(f'checkpoint stats contract={contract or "<legacy>"}; stats DB will rebuild')
-    else:
-        actual=stats_counts(root/'databases/statmaker.db',r,'checkpoint stats DB'); problems=compare(expected,actual)
-        if problems: r.error('checkpoint claims current stats contract but '+ ' '.join(problems))
-        elif actual: r.note(f'checkpoint stats DB matches canonical scopes={len(expected)}')
+        require_markers(models, (EXPECTED_RULES,), "staged recommendation models", report)
+        require_markers(
+            store,
+            ("private const val DATABASE_VERSION = 11",),
+            "staged prepared store",
+            report,
+        )
+        if "private const val DATABASE_VERSION = 12" in store:
+            report.error("staged producer contains schema 12")
 
-def generated_mode(root,source,expected,r,repository_root):
-    missing,mismatch=saturday_pipeline_status(repository_root)
-    exact_rollback=not missing and not mismatch
-    actual=stats_counts(root/'databases/statmaker.db',r,'generated stats DB')
-    if exact_rollback:
-        if actual: r.note(f'generated stats DB Saturday semantics scopes={len(actual)} matches={sum(actual.values())}')
-    else:
-        problems=compare(expected,actual)
-        if problems: r.error('generated stats scopes: '+' '.join(problems))
-        elif actual: r.note(f'generated stats DB scopes={len(actual)} matches={sum(actual.values())}')
-    prepared(root/'databases/statmaker_prepared_betting.db',r,'generated prepared DB')
-    for name in SOURCE_FILES:
-        p=source/name
-        if not p.is_file() or p.stat().st_size<=0: r.error(f'source staging missing/empty {name}'); continue
-        try: load(p)
-        except Exception as e: r.error(f'source staging invalid {name}: {e}')
+    for rel in (
+        "data/statmaker/update_manifest.json",
+        "odds/odds_api_io/domestic_odds.json",
+        "mappings/domestic_team_aliases.json",
+    ):
+        path = root / rel
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8-sig"))
+            if not isinstance(payload, dict):
+                raise ValueError("root is not an object")
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            report.error(f"invalid canonical JSON {rel}: {exc}")
 
-def main():
-    a=argparse.ArgumentParser(); a.add_argument('--mode',choices=['source','checkpoint','generated'],required=True); a.add_argument('--repository-root',default='.'); a.add_argument('--private-root'); a.add_argument('--checkpoint-root'); a.add_argument('--generated-root'); a.add_argument('--source-root'); x=a.parse_args()
-    root=Path(x.repository_root).resolve(); r=Report(x.mode); expected=expected_scopes(root,r)
-    if x.mode=='source': source_mode(root,Path(x.private_root).resolve() if x.private_root else None,r)
-    elif x.mode=='checkpoint':
-        if not x.checkpoint_root: r.error('--checkpoint-root required')
-        else: checkpoint_mode(Path(x.checkpoint_root).resolve(),expected,r)
+    if not report.errors:
+        report.note(
+            "contract=pre-v6 schema=11 rules=" + EXPECTED_RULES
+        )
+        report.note("old posterior/value-tier materializer semantics present")
+        report.note("Asian/Handicap retirement ordered before producer")
+        report.note("checkpoint and published seed compatibility gates active")
+
+
+def validate_checkpoint(root: Path, metadata: Path, report: Report) -> None:
+    command = [
+        sys.executable,
+        str(Path(__file__).with_name("validate_app_ready_prepared_contract.py")),
+        str(root),
+        "--metadata",
+        str(metadata),
+        "--kind",
+        "checkpoint",
+    ]
+    completed = subprocess.run(command, text=True, capture_output=True)
+    output = " | ".join(
+        line.strip()
+        for line in (completed.stdout + "\n" + completed.stderr).splitlines()
+        if line.strip()
+    )
+    if completed.returncode:
+        report.error(output or "checkpoint contract validation failed")
     else:
-        if not x.generated_root or not x.source_root: r.error('--generated-root and --source-root required')
-        else: generated_mode(Path(x.generated_root).resolve(),Path(x.source_root).resolve(),expected,r,root)
-    raise SystemExit(r.finish())
-if __name__=='__main__': main()
+        report.note(output or "checkpoint contract valid")
+
+
+def validate_generated(root: Path, report: Report) -> None:
+    db_path = root / "databases/statmaker_prepared_betting.db"
+    if not db_path.is_file() or db_path.stat().st_size <= 16:
+        report.error(f"missing generated prepared DB: {db_path}")
+        return
+    con = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
+    try:
+        quick = con.execute("PRAGMA quick_check").fetchone()
+        schema = int(con.execute("PRAGMA user_version").fetchone()[0])
+        ready = {
+            str(row[0])
+            for row in con.execute(
+                "SELECT competition_id FROM prepared_snapshot_meta WHERE state='ready'"
+            )
+        }
+        rules = {
+            str(row[0])
+            for row in con.execute(
+                "SELECT DISTINCT rules_fingerprint FROM prepared_pattern_generation WHERE state='ready'"
+            )
+        }
+    except sqlite3.Error as exc:
+        report.error(f"invalid generated prepared DB: {exc}")
+        return
+    finally:
+        con.close()
+    if not quick or quick[0] != "ok":
+        report.error(f"generated DB quick_check failed: {quick}")
+    if schema != EXPECTED_SCHEMA:
+        report.error(f"generated schema {schema} != {EXPECTED_SCHEMA}")
+    if ready != COMPETITIONS:
+        report.error(f"generated READY snapshots {sorted(ready)} != {sorted(COMPETITIONS)}")
+    if rules != {EXPECTED_RULES}:
+        report.error(f"generated rules {sorted(rules)} != {[EXPECTED_RULES]}")
+    if not report.errors:
+        report.note(f"generated schema={schema} rules={EXPECTED_RULES} ready=4")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=("source", "checkpoint", "generated"), required=True)
+    parser.add_argument("--repository-root", default=".")
+    parser.add_argument("--private-root")
+    parser.add_argument("--checkpoint-root")
+    parser.add_argument("--checkpoint-metadata")
+    parser.add_argument("--generated-root")
+    args = parser.parse_args()
+
+    root = Path(args.repository_root).resolve()
+    report = Report(args.mode)
+    if args.mode == "source":
+        private = Path(args.private_root).resolve() if args.private_root else None
+        validate_source(root, private, report)
+    elif args.mode == "checkpoint":
+        if not args.checkpoint_root or not args.checkpoint_metadata:
+            report.error("--checkpoint-root and --checkpoint-metadata are required")
+        else:
+            validate_checkpoint(
+                Path(args.checkpoint_root).resolve(),
+                Path(args.checkpoint_metadata).resolve(),
+                report,
+            )
+    else:
+        if not args.generated_root:
+            report.error("--generated-root is required")
+        else:
+            validate_generated(Path(args.generated_root).resolve(), report)
+    return report.finish()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

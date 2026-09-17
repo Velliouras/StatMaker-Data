@@ -3,6 +3,19 @@ set -euo pipefail
 
 : "${GITHUB_WORKSPACE:?GITHUB_WORKSPACE is required}"
 : "${APP_ID:?APP_ID is required}"
+: "${APP_READY_STATMAKER_COMMIT:?APP_READY_STATMAKER_COMMIT is required}"
+: "${APP_READY_PATTERN_RULES_FINGERPRINT:?APP_READY_PATTERN_RULES_FINGERPRINT is required}"
+: "${APP_READY_PREPARED_SCHEMA_VERSION:?APP_READY_PREPARED_SCHEMA_VERSION is required}"
+
+EXPECTED_STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+EXPECTED_PREPARED_SCHEMA="11"
+if [[ "$APP_READY_STATMAKER_COMMIT" != "$EXPECTED_STATMAKER_COMMIT" ||
+      "$APP_READY_PATTERN_RULES_FINGERPRINT" != "$EXPECTED_RULES_FINGERPRINT" ||
+      "$APP_READY_PREPARED_SCHEMA_VERSION" != "$EXPECTED_PREPARED_SCHEMA" ]]; then
+  echo "App-Ready producer environment does not match the pre-v6 schema11/v5 contract" >&2
+  exit 1
+fi
 
 # Keep the publisher aligned with the applicationId that was actually compiled from StatMaker UAT.
 # The workflow's APP_ID is only an expectation; stale hard-coding must not make adb target a package
@@ -69,15 +82,18 @@ adb install -r "$APK"
 CHECKPOINT_IN="$GITHUB_WORKSPACE/app-ready-checkpoint-incoming"
 CHECKPOINT_RESTORED=0
 if [[ -s "$CHECKPOINT_IN/checkpoint.json" ]]; then
-  if python3 - "$GITHUB_WORKSPACE" "$u" "$CHECKPOINT_IN/checkpoint.json" <<'PY'
+  if python3 "$GITHUB_WORKSPACE/scripts/validate_app_ready_prepared_contract.py" \
+      "$CHECKPOINT_IN" \
+      --metadata "$CHECKPOINT_IN/checkpoint.json" \
+      --kind checkpoint
+  then
+    python3 - "$GITHUB_WORKSPACE" "$u" "$CHECKPOINT_IN/checkpoint.json" <<'PY'
 import json, sys
 from pathlib import Path
 workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2])
 checkpoint=json.loads(Path(sys.argv[3]).read_text(encoding="utf-8"))
 main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(encoding="utf-8"))
 uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
-if int(checkpoint.get("preparedReadyCount",0)) != 4:
-    raise SystemExit(1)
 complete_for_target = bool(checkpoint.get("completeForTarget", True))
 exact = (
     complete_for_target
@@ -94,7 +110,6 @@ print(
     "complete_for_target="+str(complete_for_target).lower(),
 )
 PY
-  then
     for rel in \
       databases/statmaker.db \
       databases/statmaker_prepared_betting.db \
@@ -108,8 +123,7 @@ PY
       files/app_ready_odds/conference_league.json \
       shared_prefs/statmaker_prepared_data_versions.xml \
       shared_prefs/statmaker_data_manifests.xml \
-      shared_prefs/statmaker_uefa_support_history.xml \
-      shared_prefs/statmaker_app_ready_artifacts.xml
+      shared_prefs/statmaker_uefa_support_history.xml
     do
       test -s "$CHECKPOINT_IN/$rel"
       dir="$(dirname "$rel")"
@@ -119,10 +133,17 @@ PY
       adb shell run-as "$APP_ID" cp "$tmp" "$rel"
       adb shell rm -f "$tmp"
     done
+    if [[ -s "$CHECKPOINT_IN/shared_prefs/statmaker_app_ready_artifacts.xml" ]]; then
+      adb push "$CHECKPOINT_IN/shared_prefs/statmaker_app_ready_artifacts.xml" \
+        /data/local/tmp/statmaker_app_ready_artifacts.xml >/dev/null
+      adb shell run-as "$APP_ID" cp /data/local/tmp/statmaker_app_ready_artifacts.xml \
+        shared_prefs/statmaker_app_ready_artifacts.xml
+      adb shell rm -f /data/local/tmp/statmaker_app_ready_artifacts.xml
+    fi
     CHECKPOINT_RESTORED=1
     echo "APP_READY_CHECKPOINT_RESTORED_AS_SEED"
   else
-    echo "APP_READY_CHECKPOINT_INVALID ignored"
+    echo "APP_READY_CHECKPOINT_INCOMPATIBLE ignored"
   fi
 fi
 
@@ -133,11 +154,12 @@ mkdir -p "$SEED_ROOT"
 
 git -C "$GITHUB_WORKSPACE" fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
 SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
+SEED_COMPATIBLE=0
 if [[ "$CHECKPOINT_RESTORED" -eq 0 && -n "$SEED_COMMIT" ]]; then
   echo "APP_READY_SEED_COMMIT $SEED_COMMIT"
   git -C "$GITHUB_WORKSPACE" show "$SEED_COMMIT:data/statmaker/app_ready/update_manifest.json" > "$SEED_ROOT/update_manifest.json"
 
-  python3 - "$GITHUB_WORKSPACE" "$SEED_ROOT" "$SEED_COMMIT" <<'PY'
+  if python3 - "$GITHUB_WORKSPACE" "$SEED_ROOT" "$SEED_COMMIT" <<'PY'
 import html
 import json
 import subprocess
@@ -241,7 +263,23 @@ print(
     f"betting_sha={str(betting.get('sha256') or '')[:12]}",
 )
 PY
+  then
+    if python3 "$GITHUB_WORKSPACE/scripts/validate_app_ready_prepared_contract.py" \
+        "$SEED_ROOT/bundle" \
+        --metadata "$SEED_ROOT/update_manifest.json" \
+        --kind seed
+    then
+      SEED_COMPATIBLE=1
+      echo "APP_READY_PUBLISHED_SEED_COMPATIBLE commit=$SEED_COMMIT"
+    else
+      echo "APP_READY_PUBLISHED_SEED_INCOMPATIBLE ignored commit=$SEED_COMMIT"
+    fi
+  else
+    echo "APP_READY_PUBLISHED_SEED_UNAVAILABLE ignored commit=$SEED_COMMIT"
+  fi
+fi
 
+if [[ "$CHECKPOINT_RESTORED" -eq 0 && "$SEED_COMPATIBLE" -eq 1 ]]; then
   adb shell run-as "$APP_ID" mkdir -p databases files/app_ready_odds shared_prefs
 
   adb push "$SEED_ROOT/bundle/databases/statmaker_prepared_betting.db" /data/local/tmp/statmaker_prepared_betting.db >/dev/null
@@ -262,7 +300,7 @@ PY
 
   echo "APP_READY_SEED_INSTALLED"
 elif [[ "$CHECKPOINT_RESTORED" -eq 0 ]]; then
-  echo "APP_READY_SEED_UNAVAILABLE rebuilding from scratch"
+  echo "APP_READY_NO_COMPATIBLE_SEED clean-schema11-v5-generation"
 fi
 
 # Do not depend on the emulator-specific 10.0.2.2 host route. The temporary publisher APK uses
@@ -300,12 +338,16 @@ export_checkpoint() {
   cp "$u/odds/odds_api_io/europa_league_odds.json" "$target/files/app_ready_odds/europa_league.json"
   cp "$u/odds/odds_api_io/conference_league_odds.json" "$target/files/app_ready_odds/conference_league.json"
 
-  for pref in statmaker_prepared_data_versions statmaker_data_manifests statmaker_uefa_support_history statmaker_app_ready_artifacts; do
+  for pref in statmaker_prepared_data_versions statmaker_data_manifests statmaker_uefa_support_history; do
     adb exec-out run-as "$APP_ID" cat "shared_prefs/$pref.xml" > "$target/shared_prefs/$pref.xml"
   done
+  if adb shell run-as "$APP_ID" test -s shared_prefs/statmaker_app_ready_artifacts.xml; then
+    adb exec-out run-as "$APP_ID" cat shared_prefs/statmaker_app_ready_artifacts.xml \
+      > "$target/shared_prefs/statmaker_app_ready_artifacts.xml"
+  fi
 
   python3 - "$GITHUB_WORKSPACE" "$u" "$target" "$complete_for_target" <<'PY'
-import hashlib, json, sqlite3, sys
+import hashlib, json, os, sqlite3, sys
 from datetime import datetime, timezone
 from pathlib import Path
 workspace=Path(sys.argv[1]); uefa_root=Path(sys.argv[2]); root=Path(sys.argv[3])
@@ -315,15 +357,32 @@ con=sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
 try:
     quick=con.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0]!="ok": raise SystemExit(f"Checkpoint quick_check failed: {quick}")
+    user_version=int(con.execute("PRAGMA user_version").fetchone()[0])
+    if user_version != 11:
+        raise SystemExit(f"Checkpoint prepared schema must be exactly 11; got {user_version}")
     ready=con.execute("""
       SELECT competition_id,snapshot_version,match_count,selection_count
       FROM prepared_snapshot_meta WHERE state='ready' ORDER BY competition_id
     """).fetchall()
+    tables={str(row[0]) for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    generation_rules=set()
+    if "prepared_pattern_generation" in tables:
+        generation_rules={
+            str(row[0])
+            for row in con.execute("""
+              SELECT DISTINCT rules_fingerprint FROM prepared_pattern_generation
+              WHERE state='ready' AND TRIM(COALESCE(rules_fingerprint,''))<>''
+            """)
+        }
 finally:
     con.close()
 expected={"domestic","champions_league","europa_league","conference_league"}
 if {str(r[0]) for r in ready} != expected:
     raise SystemExit(f"Checkpoint requires exact 4/4 READY snapshots; got {[r[0] for r in ready]}")
+expected_rules=os.environ["APP_READY_PATTERN_RULES_FINGERPRINT"]
+expected_statmaker_commit=os.environ["APP_READY_STATMAKER_COMMIT"]
+if generation_rules - {expected_rules}:
+    raise SystemExit(f"Checkpoint has incompatible READY generation rules: {sorted(generation_rules)}")
 main=json.loads((workspace/"data/statmaker/update_manifest.json").read_text(encoding="utf-8"))
 uefa=json.loads((uefa_root/"data/statmaker/uefa_update_manifest.json").read_text(encoding="utf-8"))
 digest=hashlib.sha256(db_path.read_bytes()).hexdigest()
@@ -332,6 +391,9 @@ payload={
  "createdAt":datetime.now(timezone.utc).isoformat().replace("+00:00","Z"),
  "mainContentVersion":main.get("contentVersion",""),
  "uefaContentVersion":uefa.get("contentVersion",""),
+ "preparedBettingSchemaVersion":user_version,
+ "preparedPatternRulesFingerprint":expected_rules,
+ "statmakerCommit":expected_statmaker_commit,
  "completeForTarget":complete_for_target,
  "preparedReadyCount":len(ready),
  "preparedDbSha256":digest,
@@ -342,9 +404,15 @@ payload={
 }
 (root/"checkpoint.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 print("APP_READY_CHECKPOINT_EXPORTED",f"db_bytes={db_path.stat().st_size}",f"db_sha={digest[:12]}",
+      f"schema={user_version}",f"rules={expected_rules}",
       f"complete_for_target={str(complete_for_target).lower()}",
       "snapshots="+",".join(f"{r[0]}:{r[2]}/{r[3]}" for r in ready))
 PY
+
+  python3 "$GITHUB_WORKSPACE/scripts/validate_app_ready_prepared_contract.py" \
+    "$target" \
+    --metadata "$target/checkpoint.json" \
+    --kind checkpoint
 
   for name in domestic champions_league europa_league conference_league; do
     adb push "$target/files/app_ready_odds/$name.json" "/data/local/tmp/$name.json" >/dev/null
@@ -565,8 +633,8 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version < 11:
-                raise SystemExit(f"Prepared DB schema must be >=11; got {user_version}")
+            if user_version != 11:
+                raise SystemExit(f"Prepared DB schema must be exactly 11; got {user_version}")
 
             tables = {
                 row[0]

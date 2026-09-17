@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import sqlite3
 import subprocess
 import sys
@@ -10,6 +11,9 @@ from pathlib import Path
 
 HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
 EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+ENGINE_CONTRACT = "pre-v6-schema11-v5-performance-shadow-retired-inputs-v1"
+RETIREMENT_CONTRACT = "asian-countries-and-all-asian-handicap-markets-before-engine-v1"
 
 
 def run(*args: str) -> None:
@@ -81,5 +85,18 @@ try:
         raise SystemExit(f"Retired Asian/Handicap markets leaked into prepared DB: {retired_hits}")
 finally:
     con.close()
+
+if len(sys.argv) < 3:
+    raise SystemExit("Expected immutable output root argument")
+manifest_path = Path(sys.argv[2]) / "update_manifest.json"
+manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+metadata = manifest.setdefault("metadata", {})
+metadata["statmakerCommit"] = EXPECTED_STATMAKER_COMMIT
+metadata["engineContract"] = ENGINE_CONTRACT
+metadata["inputRetirementContract"] = RETIREMENT_CONTRACT
+manifest_path.write_text(
+    json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
 
 print("APP_READY_PRE_V6_POSTFLIGHT_OK", f"schema={version}", f"rules={EXPECTED_RULES}", f"candidates={candidate_count}", "retired_markets=0")
