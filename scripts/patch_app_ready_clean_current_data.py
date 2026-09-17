@@ -186,5 +186,104 @@ if text.count(payload_marker) != 1:
     raise SystemExit("Could not locate checkpoint payload contract")
 text = text.replace(payload_marker, payload_replacement, 1)
 
+# Never throw away a completed generation merely because a canonical producer advanced
+# main while the emulator was running. Catch up inside the same booted emulator, using
+# the just-exported checkpoint as the incremental baseline. Require a short quiet window
+# before returning control to host-side materialization.
+prepared_phase_old = '''else
+  # Phase 1: expensive immutable source preparation.
+  # Any non-zero exit during this phase first exports the current 4/4 DB state as a resumable
+  # seed. A partial seed is explicitly marked non-exact and may only be reused as input.
+  checkpoint_failure_export_enabled=1
+  adb logcat -c
+  adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+  monitor_phase "prepared" "true"
+  checkpoint_failure_export_enabled=0
+
+  # Freeze and persist 4/4 READY work before final recommendation materialization.
+  export_checkpoint true
+
+  if [[ "${APP_READY_SOURCE_ONLY:-false}" == "true" ]]; then
+    echo "APP_READY_SOURCE_PHASE_ONLY_COMPLETE"
+    exit 0
+  fi
+fi'''
+prepared_phase_new = '''else
+  # Phase 1: build once, then incrementally catch up if canonical Data advances while we run.
+  # The app already knows how to patch odds/stats/affected matches from the restored baseline;
+  # do not discard that work and restart all leagues.
+  prepared_catchup_attempt=0
+  prepared_catchup_max=4
+  while true; do
+    prepared_catchup_attempt=$((prepared_catchup_attempt + 1))
+    echo "APP_READY_PREPARED_ATTEMPT attempt=$prepared_catchup_attempt max=$prepared_catchup_max"
+
+    checkpoint_failure_export_enabled=1
+    adb logcat -c
+    adb shell am force-stop "$APP_ID" >/dev/null 2>&1 || true
+    adb shell am start -W -n "$APP_ID/com.statmaker.app.StatMakerWelcomeActivity"
+    monitor_phase "prepared" "true"
+    checkpoint_failure_export_enabled=0
+
+    # Freeze every completed pass immediately. If another canonical generation landed during
+    # the pass, this becomes the baseline for the next incremental pass in the SAME emulator.
+    export_checkpoint true
+
+    local_main_version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1],encoding="utf-8")).get("contentVersion",""))' "$GITHUB_WORKSPACE/data/statmaker/update_manifest.json")"
+    local_uefa_version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1],encoding="utf-8")).get("contentVersion",""))' "$u/data/statmaker/uefa_update_manifest.json")"
+
+    git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+    git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+    remote_main_version="$(git -C "$GITHUB_WORKSPACE" show refs/remotes/origin/main:data/statmaker/update_manifest.json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("contentVersion",""))')"
+    remote_uefa_version="$(git -C "$GITHUB_WORKSPACE" show refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("contentVersion",""))')"
+
+    if [[ "$local_main_version" == "$remote_main_version" && "$local_uefa_version" == "$remote_uefa_version" ]]; then
+      # Close the common producer race at the end of a long pass. We only leave the emulator
+      # after the same canonical versions survive a quiet window and a second fetch.
+      sleep 20
+      git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+      git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+      quiet_main_version="$(git -C "$GITHUB_WORKSPACE" show refs/remotes/origin/main:data/statmaker/update_manifest.json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("contentVersion",""))')"
+      quiet_uefa_version="$(git -C "$GITHUB_WORKSPACE" show refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json | python3 -c 'import json,sys; print(json.load(sys.stdin).get("contentVersion",""))')"
+      if [[ "$local_main_version" == "$quiet_main_version" && "$local_uefa_version" == "$quiet_uefa_version" ]]; then
+        echo "APP_READY_CANONICAL_QUIET main=${local_main_version:0:12} uefa=${local_uefa_version:0:12}"
+        break
+      fi
+      remote_main_version="$quiet_main_version"
+      remote_uefa_version="$quiet_uefa_version"
+    fi
+
+    if (( prepared_catchup_attempt >= prepared_catchup_max )); then
+      echo "Canonical Data kept moving after $prepared_catchup_max incremental passes; preserving latest checkpoint and failing instead of publishing stale data." >&2
+      exit 1
+    fi
+
+    echo "APP_READY_INCREMENTAL_CATCHUP main=${local_main_version:0:12}->${remote_main_version:0:12} uefa=${local_uefa_version:0:12}->${remote_uefa_version:0:12}"
+
+    # Advance only canonical inputs. Keep the built APK and restored DB/checkpoint state alive.
+    git -C "$GITHUB_WORKSPACE" checkout refs/remotes/origin/main -- data odds mappings
+    git -C "$GITHUB_WORKSPACE" show refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$u/data/statmaker/uefa_update_manifest.json"
+    for c in champions_league europa_league conference_league; do
+      git -C "$GITHUB_WORKSPACE" show "refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/${c}_odds.json" > "$u/odds/odds_api_io/${c}_odds.json"
+    done
+
+    # The first pass retired these inputs before the engine. Reapply the exact same deterministic
+    # retirement after refreshing canonical files so Asian + handicap exclusions cannot regress.
+    (
+      cd "$GITHUB_WORKSPACE"
+      python scripts/app_ready_input_retirement.py --root .
+      python scripts/app_ready_input_retirement.py --root . --check-only
+    )
+  done
+
+  if [[ "${APP_READY_SOURCE_ONLY:-false}" == "true" ]]; then
+    echo "APP_READY_SOURCE_PHASE_ONLY_COMPLETE"
+    exit 0
+  fi
+fi'''
+if text.count(prepared_phase_old) != 1:
+    raise SystemExit("Could not locate prepared source phase for incremental catch-up patch")
+text = text.replace(prepared_phase_old, prepared_phase_new, 1)
+
 path.write_text(text, encoding="utf-8")
-print("APP_READY_RESUME_CONTRACT_PATCH_OK compatible-data-generation-reuse")
+print("APP_READY_RESUME_CONTRACT_PATCH_OK compatible-data-generation-reuse incremental-catchup")
