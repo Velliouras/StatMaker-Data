@@ -5,7 +5,7 @@ from pathlib import Path
 
 STATS_CONTRACT='domestic-authoritative-snapshot-v1'
 SATURDAY_ROLLBACK_CONTRACT='saturday-2026-09-12-v12-retired-only-v1'
-SATURDAY_ENGINE_CONTRACT='exact-saturday-d06364ab-current-main-retire-asian-handicap-v1'
+SATURDAY_ENGINE_CONTRACT='exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1'
 SATURDAY_RULES='pattern-policy-v2-final-read-model-v6-probability-parity-v1'
 SATURDAY_PIPELINE_BLOBS={
     'scripts/patch_app_ready_producer.py':'5afbac5eb556e70ff996070fab22f259c979eca1',
@@ -193,6 +193,26 @@ def source_mode(root,private,r):
             d=text.find(delete_marker); u=text.find(upsert_marker)
             if d<0 or u<0 or d>u: r.error('staged Domestic importer is not authoritative replace-by-scope')
             else: r.note('staged Domestic importer=authoritative replace-by-scope')
+
+        normalizer=private/'app/src/main/java/com/statmaker/app/RepositoryBackedCompetitionBettingProvider.kt'
+        normalizer_text=normalizer.read_text(encoding='utf-8') if normalizer.is_file() else ''
+        cached_patterns=(
+            'private val combiningMarksRegex',
+            'private val olympiakosRegex',
+            'private val nonIdentityCharacterRegex',
+            'private val whitespaceRegex',
+        )
+        if not all(marker in normalizer_text for marker in cached_patterns):
+            r.error('Saturday producer is missing the verified identity regex cache patch')
+        elif any(expression in normalizer_text for expression in (
+            '.replace(Regex("\\\\p{Mn}+"), "")',
+            '.replace(Regex("\\\\bolympiakos\\\\b"), "olympiacos")',
+            '.replace(Regex("[^a-z0-9]+"), " ")',
+            'ascii.split(Regex("\\\\s+"))',
+        )):
+            r.error('Saturday producer still recompiles identity regex patterns per lookup')
+        else:
+            r.note('Saturday identity normalization semantics unchanged; four regex patterns cached')
 
     runner=(root/'scripts/run_app_ready_emulator.sh').read_text()
     if exact_rollback:

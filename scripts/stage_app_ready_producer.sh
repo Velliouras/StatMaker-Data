@@ -41,6 +41,43 @@ fi
 
 echo "APP_READY_EXACT_SATURDAY_ENGINE_SOURCE_OK baseline=$SATURDAY_ENGINE_COMMIT"
 
+# The verified engine recompiles these four constant ICU patterns on every team-name lookup.
+# Current canonical data now drives enough lookups to exhaust ICU native allocation during the
+# off-device build. Cache the exact same patterns once; matching semantics and call order stay
+# unchanged. This patch is limited to the temporary producer checkout.
+NORMALIZER_FILE="$APP_DIR/RepositoryBackedCompetitionBettingProvider.kt"
+python - "$NORMALIZER_FILE" <<'PY'
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+anchor = '''    private val providerLocationSuffixes = setOf(
+        "athens", "istanbul", "amsterdam", "dublin", "belgrade", "thessaloniki", "piraeus"
+    )
+'''
+replacement = anchor + '''    private val combiningMarksRegex = Regex("\\\\p{Mn}+")
+    private val olympiakosRegex = Regex("\\\\bolympiakos\\\\b")
+    private val nonIdentityCharacterRegex = Regex("[^a-z0-9]+")
+    private val whitespaceRegex = Regex("\\\\s+")
+'''
+if text.count(anchor) != 1:
+    raise SystemExit("Could not locate Saturday identity normalizer anchor")
+text = text.replace(anchor, replacement, 1)
+replacements = {
+    '.replace(Regex("\\\\p{Mn}+"), "")': '.replace(combiningMarksRegex, "")',
+    '.replace(Regex("\\\\bolympiakos\\\\b"), "olympiacos")': '.replace(olympiakosRegex, "olympiacos")',
+    '.replace(Regex("[^a-z0-9]+"), " ")': '.replace(nonIdentityCharacterRegex, " ")',
+    'ascii.split(Regex("\\\\s+"))': 'ascii.split(whitespaceRegex)',
+}
+for old, new in replacements.items():
+    if text.count(old) != 1:
+        raise SystemExit(f"Could not locate exact Saturday regex expression: {old}")
+    text = text.replace(old, new, 1)
+path.write_text(text, encoding="utf-8")
+print("APP_READY_IDENTITY_REGEX_CACHE_PATCH_OK patterns=4 semantics=unchanged")
+PY
+
 # Pin the Data-side files that define candidate materialization semantics. Infrastructure,
 # checkpoint and publish code can evolve, but recommendation construction cannot drift.
 DATA_SATURDAY_COMMIT="54e9bd4e28b29a0eb6313f4d16da4c99f27490b9"

@@ -321,7 +321,7 @@ jobs:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
-          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
@@ -420,7 +420,7 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
         env:
-          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-current-main-retire-asian-handicap-v1"
+          APP_READY_ENGINE_CONTRACT: "exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1"
         run: |
           set -euo pipefail
           python - <<'PY'
@@ -683,7 +683,7 @@ jobs:
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) >= 12
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-parity-v1'
-          assert metadata.get('engineContract') == 'exact-saturday-d06364ab-current-main-retire-asian-handicap-v1'
+          assert metadata.get('engineContract') == 'exact-saturday-d06364ab-regex-cache-v1-current-main-retire-asian-handicap-v1'
           assert metadata.get('statmakerCommit') == 'd06364ab2625815aeafcb48ae93d6a328f7d6ac5'
           assert status.get('statmakerCommit') == metadata.get('statmakerCommit')
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
