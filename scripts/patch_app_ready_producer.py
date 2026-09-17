@@ -7,6 +7,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
+# Trigger after the pre-v6 validator path fix; recommendation semantics are unchanged.
 ENGINE_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
 HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
 EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
