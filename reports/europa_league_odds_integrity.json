@@ -6,14 +6,14 @@
   ],
   "matchesChecked": 45,
   "mixedBookmakerGroupsResolved": 109,
-  "incompleteRowsPruned": 40,
+  "incompleteRowsPruned": 38,
   "groupsDropped": 9,
   "matches": [
     {
       "matchId": "74172932",
       "fixture": "OFI Crete - TSG Hoffenheim",
-      "before": 164,
-      "after": 82,
+      "before": 161,
+      "after": 80,
       "groups": [
         {
           "market": "1X2",
@@ -65,19 +65,23 @@
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Unibet": 1
+          }
         },
         {
           "market": "MATCH_CARDS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365",
+          "bookmaker": "Unibet",
           "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {},
+          "rejected": {
+            "Bet365": "integrity"
+          },
           "prunedIncompleteRows": {}
         },
         {
@@ -190,7 +194,7 @@
           "team": "TSG Hoffenheim",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 8,
+          "rows": 6,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -455,7 +459,7 @@
     {
       "matchId": "74172936",
       "fixture": "Besiktas Istanbul - Olympique Marseille",
-      "before": 182,
+      "before": 184,
       "after": 94,
       "groups": [
         {
@@ -714,8 +718,8 @@
     {
       "matchId": "74172938",
       "fixture": "Celtic Glasgow - Ferencvarosi Budapest",
-      "before": 163,
-      "after": 82,
+      "before": 143,
+      "after": 76,
       "groups": [
         {
           "market": "1X2",
@@ -787,7 +791,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 18,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
@@ -903,15 +907,13 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Celtic Glasgow",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 8,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1,
             "Unibet": 1
           }
         },
@@ -919,15 +921,13 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Ferencvarosi Budapest",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1,
             "Unibet": 1
           }
         }
@@ -936,7 +936,7 @@
     {
       "matchId": "74172940",
       "fixture": "Crystal Palace - KKS Lech Poznan",
-      "before": 194,
+      "before": 199,
       "after": 72,
       "groups": [
         {
@@ -1192,8 +1192,7 @@
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1,
-            "Unibet": 1
+            "Bet365": 1
           }
         }
       ]
@@ -1201,8 +1200,8 @@
     {
       "matchId": "74172944",
       "fixture": "Juventus Turin - NEC Nijmegen",
-      "before": 170,
-      "after": 94,
+      "before": 194,
+      "after": 102,
       "groups": [
         {
           "market": "1X2",
@@ -1297,8 +1296,7 @@
             "Unibet": "integrity"
           },
           "prunedIncompleteRows": {
-            "Bet365": 1,
-            "Unibet": 1
+            "Bet365": 1
           }
         },
         {
@@ -1380,7 +1378,7 @@
           "team": "Juventus Turin",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 4,
+          "rows": 6,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -1392,7 +1390,7 @@
           "team": "NEC Nijmegen",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 2,
+          "rows": 4,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -1427,13 +1425,15 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Juventus Turin",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 12,
+          "bookmaker": "Bet365",
+          "rows": 14,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
+            "Bet365": 1,
             "Unibet": 1
           }
         },
@@ -1441,9 +1441,10 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "NEC Nijmegen",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1646,20 +1647,7 @@
           "team": "Lillestroem SK",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 12,
-          "candidateBookmakers": [
-            "Bet365",
-            "Unibet"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "SCU Torreense",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
+          "rows": 10,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
@@ -1668,13 +1656,26 @@
           "prunedIncompleteRows": {
             "Bet365": 1
           }
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "SCU Torreense",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
         }
       ]
     },
     {
       "matchId": "74172948",
       "fixture": "Real Sociedad San Sebastian - AFC Bournemouth",
-      "before": 200,
+      "before": 203,
       "after": 76,
       "groups": [
         {
@@ -1913,7 +1914,9 @@
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Unibet": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -1936,7 +1939,7 @@
     {
       "matchId": "74172942",
       "fixture": "Viktoria Plzeň - Union Saint-Gilloise",
-      "before": 156,
+      "before": 157,
       "after": 78,
       "groups": [
         {
@@ -2133,8 +2136,7 @@
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1,
-            "Unibet": 1
+            "Bet365": 1
           }
         },
         {
