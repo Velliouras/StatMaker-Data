@@ -1,0 +1,149 @@
+name: UAT Pending Settlement Repair
+
+on:
+  push:
+    branches:
+      - uat-pending-settlement-20260918
+    paths:
+      - '.github/workflows/uat-pending-settlement-repair.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-uat-pending-settlement-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout UAT branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Validate settlement code and identity contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/canonical_team_identity.py \
+            scripts/refresh_live_settlements.py \
+            scripts/reconcile_canonical_ledger_identity.py
+          PYTHONPATH=scripts python - <<'PY'
+          import datetime as dt
+          import refresh_live_settlements as live
+
+          checks = [
+              ('Omonia Nicosia', ('AC Omonia Nicosia',), 'EL'),
+              ('Celta Vigo', ('RC Celta de Vigo',), 'EL'),
+              ('AC Milan', ('AC Milan',), 'EL'),
+              ('Benfica', ('SL Benfica',), 'EL'),
+              ('Bayer Leverkusen', ('Bayer Leverkusen',), 'EL'),
+              ('Celje', ('NK Celje',), 'EL'),
+              ('Crystal Palace', ('Crystal Palace',), 'EL'),
+              ('Lech Poznan', ('KKS Lech Poznan',), 'EL'),
+              ('Real Sociedad', ('Real Sociedad San Sebastian',), 'EL'),
+              ('Bournemouth', ('AFC Bournemouth',), 'EL'),
+          ]
+          failed = [item for item in checks if not live.team_matches(item[0], item[1], item[2])]
+          if failed:
+              raise SystemExit(f'UAT_SETTLEMENT_IDENTITY_FAILED {failed!r}')
+          if live.team_matches('Real Madrid', ('Real Sociedad San Sebastian',), 'EL'):
+              raise SystemExit('UAT_SETTLEMENT_IDENTITY_FALSE_POSITIVE')
+
+          requirements = live.requirements_from_canonical_ledger()
+          dates = live.settlement_poll_dates(requirements, dt.date(2026, 9, 18))
+          if '2026-09-16' not in dates or len(dates) > 3:
+              raise SystemExit(f'UAT_SETTLEMENT_BACKFILL_DATES_INVALID {dates!r}')
+          print('UAT_SETTLEMENT_IDENTITY_OK', f'pollDates={dates}')
+          PY
+
+      - name: Refresh only the bounded settlement feed
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_DAILY_RESERVE: '1500'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/refresh_live_settlements.py --max-requests 12
+          python scripts/reconcile_canonical_ledger_identity.py
+
+      - name: Verify the five stuck recommendations converged
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=scripts python - <<'PY'
+          import json
+          from pathlib import Path
+
+          ledger = json.loads(Path('data/statmaker/canonical_recommendation_ledger.json').read_text(encoding='utf-8-sig'))
+          feed = json.loads(Path('data/statmaker/live_settlements.json').read_text(encoding='utf-8-sig'))
+
+          targets = {
+              '760410d8ac66a72b875254a3ed514d2aa50f46edb2cb5148b767b44ec7f11ed5': 'corners',
+              '91d2f4a541eb4cf33070e802364822195308bd9c658f392af99fbdb59566510a': 'corners',
+              '29ab00dc9839659337e4e6fd325a7648e5b4130e4c7aa57f40cf71490cb53948': 'score',
+              'e7d4c3dc6b0cf6205db19e21d9b008095aff0a8baf9f64d913827d6aecfff90b': 'shots_on_target',
+              'cf9a8cb2b17e2782a80a9f9aecb154341ec244bf75f5dd7a7a3443b7408a14f0': 'corners',
+          }
+          entries = {
+              str(row.get('selectionKey') or ''): row
+              for row in ledger.get('entries', [])
+              if isinstance(row, dict)
+          }
+          fixtures = {
+              int(row.get('fixtureId')): row
+              for row in feed.get('fixtures', [])
+              if isinstance(row, dict) and row.get('fixtureId') is not None
+          }
+
+          failures = []
+          for selection_key, required_kind in targets.items():
+              row = entries.get(selection_key)
+              if row is None:
+                  failures.append((selection_key, 'ledger-row-missing'))
+                  continue
+              fixture_id = int(row.get('apiFixtureId') or 0)
+              if fixture_id <= 0:
+                  failures.append((selection_key, 'fixture-id-missing', row.get('matchKey')))
+                  continue
+              fixture = fixtures.get(fixture_id)
+              if fixture is None:
+                  failures.append((selection_key, 'feed-fixture-missing', fixture_id))
+                  continue
+              if str(fixture.get('status') or '').upper() not in {'FT', 'AET', 'PEN'}:
+                  failures.append((selection_key, 'not-final', fixture_id, fixture.get('status')))
+                  continue
+              missing = set(str(x) for x in fixture.get('missingRequiredStats', []) or [])
+              if required_kind != 'score' and required_kind in missing:
+                  failures.append((selection_key, 'required-stat-missing', fixture_id, required_kind))
+
+          if failures:
+              raise SystemExit('UAT_PENDING_SETTLEMENT_NOT_CONVERGED ' + repr(failures))
+          print('UAT_PENDING_SETTLEMENT_CONVERGED', f'targets={len(targets)}')
+          PY
+
+      - name: Publish UAT settlement artifacts only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add \
+            data/statmaker/live_settlements.json \
+            data/api_football/live_settlement_cache.json \
+            data/statmaker/canonical_recommendation_ledger.json
+          if git diff --cached --quiet; then
+            echo 'No UAT settlement artifact changes.'
+            exit 0
+          fi
+          git commit -m 'UAT: publish repaired pending settlements'
+          git push origin HEAD:uat-pending-settlement-20260918
