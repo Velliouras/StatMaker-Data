@@ -26,10 +26,25 @@ def output(*args: str) -> str:
 
 
 # Pin the complete producer package to the exact pre-v6 Saturday source.
+#
+# Important: "git checkout <commit> -- <directory>" only overwrites paths that exist in the
+# target commit; it does NOT delete newer tracked files that were added later under the same
+# directory. That broke App-Ready staging as soon as production added new My Bets source files.
+# Remove the current package from both index and worktree first, then restore the exact engine
+# package from ENGINE_COMMIT. This keeps the producer contract immutable as intended.
 run("git", "fetch", "--no-tags", "origin", ENGINE_COMMIT)
+subprocess.run(
+    ["git", "rm", "-r", "-f", "--ignore-unmatch", "--", str(APP_DIR)],
+    check=True,
+    stdout=subprocess.DEVNULL,
+)
+if APP_DIR.exists():
+    import shutil
+    shutil.rmtree(APP_DIR)
 run("git", "checkout", ENGINE_COMMIT, "--", str(APP_DIR))
-if output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR)):
-    raise SystemExit("Pre-v6 engine checkout is not exact")
+unexpected = output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR))
+if unexpected:
+    raise SystemExit(f"Pre-v6 engine checkout is not exact: {unexpected}")
 
 # Reapply the immutable off-device builder after the package checkout.
 if subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{LEGACY_REF}^{{commit}}"], stdout=subprocess.DEVNULL).returncode != 0:
