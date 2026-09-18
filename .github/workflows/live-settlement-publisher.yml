@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - main
+      - uat-pending-settlement-20260918
     paths:
       - '.github/workflows/live-settlement-publisher.yml'
       - 'scripts/refresh_live_settlements.py'
@@ -32,7 +33,7 @@ permissions:
 concurrency:
   # Settlement writes canonical main artifacts, so it must share the same writer lock as
   # every other canonical producer. This prevents rebase conflicts on the ledger/cache/feed.
-  group: statmaker-canonical-main-writer
+  group: statmaker-canonical-${{ github.ref_name }}-writer
   cancel-in-progress: false
 
 jobs:
@@ -123,6 +124,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          if [[ "${GITHUB_REF_NAME}" == "uat-pending-settlement-20260918" ]]; then
+            python scripts/refresh_live_settlements.py --max-requests 12
+            python scripts/reconcile_canonical_ledger_identity.py
+            exit 0
+          fi
+
           total="${INPUT_MAX_REQUESTS:-80}"
           if ! [[ "$total" =~ ^[0-9]+$ ]] || (( total < 2 )); then total=80; fi
 
@@ -180,17 +188,17 @@ jobs:
 
           git commit -m "Refresh live settlement and fixture validity"
 
+          target_branch="${GITHUB_REF_NAME}"
           for attempt in 1 2 3; do
-            git fetch origin main
-            # This commit contains only freshly regenerated settlement artifacts. If another
-            # canonical writer advanced main after checkout, replay this newer settlement commit
-            # on top and prefer the replayed artifact content for generated-file conflicts.
-            if ! git rebase -X theirs origin/main; then
+            git fetch origin "${target_branch}"
+            # This commit contains only freshly regenerated settlement artifacts. Replay it on top
+            # of the branch that triggered this workflow; UAT must never publish into main.
+            if ! git rebase -X theirs "origin/${target_branch}"; then
               echo "Live settlement ownership conflict could not be resolved during rebase."
               git rebase --abort || true
               exit 1
             fi
-            if git push origin HEAD:main; then
+            if git push origin "HEAD:${target_branch}"; then
               exit 0
             fi
             echo "Live settlement push attempt ${attempt} lost a remote race; retrying."
