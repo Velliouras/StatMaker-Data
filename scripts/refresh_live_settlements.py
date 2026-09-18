@@ -30,6 +30,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 import api_football_daily_quota_guard as quota_guard
 import api_football_fetch_fixture_stats as stats_fetch
+import canonical_team_identity
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
@@ -47,6 +48,9 @@ DEFAULT_MAX_REQUESTS = 80
 RETENTION_DAYS = 14
 MAX_STATS_ATTEMPTS = 6
 COMPLETED = {"FT", "AET", "PEN"}
+IDENTITY_BACKFILL_LOOKBACK_DAYS = 3
+MAX_IDENTITY_BACKFILL_DATES_PER_RUN = 1
+UEFA_LEAGUE_CODES = {"CL", "EL", "CONF", "UECL"}
 
 # Retry delays after each failed detailed-stat attempt. Targeted calls are cheap enough to keep
 # trying for several hours, but never hammer the API every 15 minutes indefinitely.
@@ -234,6 +238,7 @@ def league_codes_compatible(left: Any, right: Any) -> bool:
 
 _DOMESTIC_EXACT_IDENTITY_CACHE: Optional[Dict[str, Dict[str, str]]] = None
 _UEFA_EXACT_IDENTITY_CACHE: Optional[Dict[str, str]] = None
+_GLOBAL_SETTLEMENT_IDENTITY_CACHE: Optional[canonical_team_identity.CanonicalIdentityIndex] = None
 
 
 def _domestic_exact_identity_map() -> Dict[str, Dict[str, str]]:
@@ -300,6 +305,66 @@ def _uefa_exact_identity_map() -> Dict[str, str]:
     return claims
 
 
+def _global_settlement_identity_index() -> canonical_team_identity.CanonicalIdentityIndex:
+    """Build one deterministic club-identity graph for cross-competition settlement matching.
+
+    Domestic aliases remain league-scoped for normal ingestion, but a club does not change identity
+    when it plays in UEFA. The settlement fallback therefore combines only checked-in exact alias
+    claims from Domestic + UEFA configuration. Fuzzy edit-distance matching is never used.
+    """
+    global _GLOBAL_SETTLEMENT_IDENTITY_CACHE
+    if _GLOBAL_SETTLEMENT_IDENTITY_CACHE is not None:
+        return _GLOBAL_SETTLEMENT_IDENTITY_CACHE
+
+    index = canonical_team_identity.CanonicalIdentityIndex(scope="SETTLEMENT_GLOBAL")
+
+    domestic_root = load_json(DOMESTIC_ALIAS_PATH, {})
+    aliases_root = domestic_root.get("aliases", {}) if isinstance(domestic_root, dict) else {}
+    for mapping in aliases_root.values() if isinstance(aliases_root, dict) else []:
+        if not isinstance(mapping, dict):
+            continue
+        for canonical, aliases in mapping.items():
+            index.add_canonical(canonical)
+            for alias in aliases if isinstance(aliases, list) else []:
+                index.add_alias(alias, canonical)
+
+    uefa_root = load_json(UEFA_CONFIG_PATH, {})
+    for competition in uefa_root.get("competitions", []) if isinstance(uefa_root, dict) else []:
+        if not isinstance(competition, dict):
+            continue
+        for canonical in competition.get("canonicalTeams", []) or []:
+            index.add_canonical(canonical)
+        aliases = competition.get("aliases", {})
+        for alias, canonical in aliases.items() if isinstance(aliases, dict) else []:
+            index.add_alias(alias, canonical)
+
+    _GLOBAL_SETTLEMENT_IDENTITY_CACHE = index
+    return index
+
+
+def _canonical_settlement_identity(value: Any) -> Optional[str]:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+
+    index = _global_settlement_identity_index()
+    current = raw
+    seen: Set[str] = set()
+    # Follow configured alias chains such as provider -> domestic canonical -> UEFA canonical.
+    for _ in range(4):
+        key = canonical_team_identity.identity_key(current)
+        if not key or key in seen:
+            break
+        seen.add(key)
+        canonical, _method, _candidates = index.resolve(current)
+        if canonical is None:
+            return None
+        if canonical_team_identity.equivalent(current, canonical):
+            return canonical
+        current = canonical
+    return current if canonical_team_identity.identity_key(current) else None
+
+
 def team_matches(
     provider_name: str,
     accepted_names: Sequence[str],
@@ -309,17 +374,25 @@ def team_matches(
     if not provider:
         return False
 
-    domestic_map = _domestic_exact_identity_map().get(normalize_league_code(league_code), {})
+    identity_code = normalize_league_code(league_code)
+    domestic_map = _domestic_exact_identity_map().get(identity_code, {})
     provider_domestic = domestic_map.get(provider)
     uefa_map = _uefa_exact_identity_map()
     provider_uefa = uefa_map.get(provider, provider)
+    provider_global = _canonical_settlement_identity(provider_name) if identity_code in UEFA_LEAGUE_CODES else None
 
     for candidate in accepted_names:
         key = normalize_team(candidate)
         if not key:
             continue
+
+        # First accept only harmless identity normalization (diacritics, punctuation and club
+        # decoration such as AC/AFC/NK). This also covers UEFA participants absent from a registry.
+        if canonical_team_identity.equivalent(provider_name, candidate):
+            return True
         if provider == key:
             return True
+
         p_tokens = provider.split()
         c_tokens = key.split()
         if len(p_tokens) >= 2 and len(c_tokens) >= 2 and set(p_tokens) == set(c_tokens):
@@ -329,10 +402,16 @@ def team_matches(
         if provider_domestic is not None and candidate_domestic is not None and provider_domestic == candidate_domestic:
             return True
 
-        # UEFA naming differences are accepted only through the checked-in exact alias registry.
-        # No substring, edit-distance or arbitrary first-match fallback is permitted.
+        # Preserve the existing explicit UEFA alias registry.
         if provider_uefa == uefa_map.get(key, key) and (provider in uefa_map or key in uefa_map):
             return True
+
+        # UEFA settlement may involve a club whose canonical alias is stored under its domestic
+        # league. Resolve both sides through the checked-in cross-competition identity graph.
+        if provider_global is not None:
+            candidate_global = _canonical_settlement_identity(candidate)
+            if candidate_global is not None and canonical_team_identity.equivalent(provider_global, candidate_global):
+                return True
     return False
 
 
@@ -931,6 +1010,35 @@ def fetch_required_stats(
     return True
 
 
+def settlement_poll_dates(
+    requirements: Sequence[SettlementRequirement],
+    utc_today: dt.date,
+) -> List[str]:
+    """Poll today/yesterday plus at most one recent date blocked by missing fixture identity.
+
+    The extra scoreboard request is bounded and disappears automatically once reconciliation writes
+    the exact apiFixtureId back into the canonical ledger.
+    """
+    base = [
+        (utc_today - dt.timedelta(days=1)).isoformat(),
+        utc_today.isoformat(),
+    ]
+    candidates: Set[str] = set()
+    for row in requirements:
+        if row.api_fixture_id is not None:
+            continue
+        try:
+            day = dt.date.fromisoformat(row.local_date[:10])
+        except ValueError:
+            continue
+        age = (utc_today - day).days
+        if 0 <= age <= IDENTITY_BACKFILL_LOOKBACK_DAYS and day.isoformat() not in base:
+            candidates.add(day.isoformat())
+
+    recovery = sorted(candidates, reverse=True)[:MAX_IDENTITY_BACKFILL_DATES_PER_RUN]
+    return [*base, *recovery]
+
+
 def fetch_fixture_dates(
     api_key: str,
     dates: Iterable[str],
@@ -996,7 +1104,7 @@ def main() -> int:
     prune_cache(cache, utc_today)
 
     request_state = {"count": 0}
-    poll_dates = [(utc_today - dt.timedelta(days=1)).isoformat(), utc_today.isoformat()]
+    poll_dates = settlement_poll_dates(requirements, utc_today)
     fixtures = fetch_fixture_dates(api_key, poll_dates, request_state, args.max_requests)
 
     in_scope_completed = 0
