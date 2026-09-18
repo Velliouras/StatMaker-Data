@@ -103,8 +103,8 @@ def matching_finals(row: Dict[str, Any], finals: Sequence[Dict[str, Any]]) -> Li
         fixture for fixture in finals
         if fixture.get("_athensDate") == date
         and compatible_league(league, fixture.get("leagueCode"))
-        and live.team_matches(str(fixture.get("homeTeam") or ""), home_names)
-        and live.team_matches(str(fixture.get("awayTeam") or ""), away_names)
+        and live.team_matches(str(fixture.get("homeTeam") or ""), home_names, league)
+        and live.team_matches(str(fixture.get("awayTeam") or ""), away_names, league)
     ]
 
 
@@ -147,10 +147,11 @@ def repair_row(row: Dict[str, Any], fixture: Dict[str, Any]) -> Tuple[Dict[str, 
     result["matchKey"] = f"{source_date}|{new_home}|{new_away}"
 
     team = str(row.get("team") or "").strip()
+    league_code = str(row.get("leagueCode") or "").strip().upper()
     if team:
-        if live.team_matches(team, old_home_names) or live.normalize_team(team) == live.normalize_team(old_home):
+        if live.team_matches(team, old_home_names, league_code) or live.normalize_team(team) == live.normalize_team(old_home):
             result["team"] = new_home
-        elif live.team_matches(team, old_away_names) or live.normalize_team(team) == live.normalize_team(old_away):
+        elif live.team_matches(team, old_away_names, league_code) or live.normalize_team(team) == live.normalize_team(old_away):
             result["team"] = new_away
 
     return result, result != row
