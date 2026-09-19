@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-19T08:20:01Z",
+  "generated_at": "2026-09-19T17:23:42Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-19T08:02:59Z",
+    "cache_generated_at": "2026-09-19T17:21:58Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 71,
-    "fixtures_with_any_stats": 71,
-    "fixtures_with_bb_core_stats": 70,
+    "completed_fixtures": 72,
+    "fixtures_with_any_stats": 72,
+    "fixtures_with_bb_core_stats": 71,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9859,
+    "bb_core_coverage": 0.9861,
     "group_counts": {
-      "shots_total": 71,
-      "shots_on_target": 71,
-      "corners": 71,
-      "fouls": 71,
-      "yellow_cards": 70,
-      "red_cards": 30,
-      "possession": 71,
-      "passes": 71,
+      "shots_total": 72,
+      "shots_on_target": 72,
+      "corners": 72,
+      "fouls": 72,
+      "yellow_cards": 71,
+      "red_cards": 31,
+      "possession": 72,
+      "passes": 72,
       "xg": 46
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9859,
-      "red_cards": 0.4225,
+      "yellow_cards": 0.9861,
+      "red_cards": 0.4306,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.6479
+      "xg": 0.6389
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -6026,6 +6026,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1553175,
+      "date_utc": "2026-09-19T12:45:00+00:00",
+      "country": "Poland",
+      "league": "Ekstraklasa",
+      "league_code": "POL",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 106,
+      "round": "Regular Season - 9",
+      "home_team": "Korona Kielce",
+      "away_team": "Raków Częstochowa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 23,
+        "AS": 19,
+        "HST": 11,
+        "AST": 6,
+        "HC": 7,
+        "AC": 5,
+        "HF": 6,
+        "AF": 16,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 42,
+        "APossession": 58,
+        "HSaves": 4,
+        "ASaves": 8,
+        "HPasses": 322,
+        "APasses": 472,
+        "HPassesAccurate": 265,
+        "APassesAccurate": 399,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 2
         },
         "extratime": {
           "home": null,
