@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-18T08:32:47Z",
+  "generated_at": "2026-09-19T01:21:33Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-18T08:16:07Z",
+    "cache_generated_at": "2026-09-19T01:20:12Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 36,
-    "fixtures_with_any_stats": 36,
-    "fixtures_with_bb_core_stats": 35,
+    "completed_fixtures": 37,
+    "fixtures_with_any_stats": 37,
+    "fixtures_with_bb_core_stats": 36,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9722,
+    "bb_core_coverage": 0.973,
     "group_counts": {
-      "shots_total": 36,
-      "shots_on_target": 36,
-      "corners": 36,
-      "fouls": 36,
-      "yellow_cards": 35,
-      "red_cards": 15,
-      "possession": 36,
-      "passes": 36,
+      "shots_total": 37,
+      "shots_on_target": 37,
+      "corners": 37,
+      "fouls": 37,
+      "yellow_cards": 36,
+      "red_cards": 16,
+      "possession": 37,
+      "passes": 37,
       "xg": 27
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9722,
-      "red_cards": 0.4167,
+      "yellow_cards": 0.973,
+      "red_cards": 0.4324,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.75
+      "xg": 0.7297
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -3086,6 +3086,90 @@
         "fulltime": {
           "home": 2,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1561935,
+      "date_utc": "2026-09-18T17:30:00+00:00",
+      "country": "Austria",
+      "league": "Bundesliga",
+      "league_code": "AUT",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 218,
+      "round": "Regular Season - 7",
+      "home_team": "Rapid Vienna",
+      "away_team": "WSG Wattens",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 17,
+        "AS": 5,
+        "HST": 7,
+        "AST": 1,
+        "HC": 6,
+        "AC": 3,
+        "HF": 6,
+        "AF": 13,
+        "HY": 4,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 57,
+        "APossession": 43,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 555,
+        "APasses": 411,
+        "HPassesAccurate": 476,
+        "APassesAccurate": 344,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
         },
         "extratime": {
           "home": null,
