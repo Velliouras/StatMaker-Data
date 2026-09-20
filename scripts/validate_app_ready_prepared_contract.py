@@ -10,7 +10,8 @@ from pathlib import Path
 
 
 EXPECTED_SCHEMA = 11
-EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+EXPECTED_SOURCE_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
 EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
 EXPECTED_COMPETITIONS = {
     "domestic",
@@ -125,11 +126,6 @@ def inspect_database(root: Path) -> tuple[int, int, set[str]]:
                     """
                 )
             }
-            unexpected = generation_rules - {EXPECTED_RULES}
-            if unexpected:
-                raise ContractError(
-                    "incompatible READY generation rules: " + ", ".join(sorted(unexpected))
-                )
         return schema, len(ready), generation_rules
     finally:
         con.close()
@@ -146,10 +142,27 @@ def validate(root: Path, metadata_path: Path, kind: str) -> None:
             f"metadata prepared schema {metadata_schema} != {EXPECTED_SCHEMA}"
         )
     metadata_rules = str(metadata.get("preparedPatternRulesFingerprint") or "")
-    if metadata_rules != EXPECTED_RULES:
-        raise ContractError(
-            f"metadata rules {metadata_rules or '<missing>'} != {EXPECTED_RULES}"
-        )
+    if kind == "checkpoint":
+        allowed_rules = {EXPECTED_SOURCE_RULES, EXPECTED_RULES}
+        if metadata_rules not in allowed_rules:
+            raise ContractError(
+                f"checkpoint metadata rules {metadata_rules or '<missing>'} not in {sorted(allowed_rules)}"
+            )
+        unexpected_generation_rules = generation_rules - allowed_rules
+        if unexpected_generation_rules:
+            raise ContractError(
+                "checkpoint has incompatible READY generation rules: " +
+                ", ".join(sorted(unexpected_generation_rules))
+            )
+    else:
+        if metadata_rules != EXPECTED_RULES:
+            raise ContractError(
+                f"seed metadata rules {metadata_rules or '<missing>'} != {EXPECTED_RULES}"
+            )
+        if generation_rules != {EXPECTED_RULES}:
+            raise ContractError(
+                f"seed READY generation rules {sorted(generation_rules)} != {[EXPECTED_RULES]}"
+            )
 
     if kind == "checkpoint":
         metadata_commit = str(metadata.get("statmakerCommit") or "")
@@ -239,7 +252,7 @@ def self_check() -> None:
         metadata = create_fixture(
             root,
             EXPECTED_SCHEMA,
-            EXPECTED_RULES,
+            EXPECTED_SOURCE_RULES,
             EXPECTED_STATMAKER_COMMIT,
         )
         validate(root, metadata, "checkpoint")
