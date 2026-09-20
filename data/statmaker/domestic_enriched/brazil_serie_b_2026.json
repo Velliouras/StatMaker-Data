@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-20T17:35:10Z",
+  "generated_at": "2026-09-20T22:36:15Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-20T17:34:46Z",
+    "cache_generated_at": "2026-09-20T22:35:58Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,20 +40,20 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 286,
-    "fixtures_with_any_stats": 286,
-    "fixtures_with_bb_core_stats": 280,
+    "completed_fixtures": 287,
+    "fixtures_with_any_stats": 287,
+    "fixtures_with_bb_core_stats": 281,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.979,
+    "bb_core_coverage": 0.9791,
     "group_counts": {
-      "shots_total": 285,
-      "shots_on_target": 285,
-      "corners": 283,
-      "fouls": 284,
-      "yellow_cards": 281,
-      "red_cards": 91,
-      "possession": 284,
-      "passes": 281,
+      "shots_total": 286,
+      "shots_on_target": 286,
+      "corners": 284,
+      "fouls": 285,
+      "yellow_cards": 282,
+      "red_cards": 92,
+      "possession": 285,
+      "passes": 282,
       "xg": 240
     },
     "group_coverage": {
@@ -61,11 +61,11 @@
       "shots_on_target": 0.9965,
       "corners": 0.9895,
       "fouls": 0.993,
-      "yellow_cards": 0.9825,
-      "red_cards": 0.3182,
+      "yellow_cards": 0.9826,
+      "red_cards": 0.3206,
       "possession": 0.993,
-      "passes": 0.9825,
-      "xg": 0.8392
+      "passes": 0.9826,
+      "xg": 0.8362
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -24086,6 +24086,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1520884,
+      "date_utc": "2026-09-20T19:00:00+00:00",
+      "country": "Brazil",
+      "league": "Serie B",
+      "league_code": "BRA2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 72,
+      "round": "Regular Season - 29",
+      "home_team": "Goias",
+      "away_team": "Avai",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 26,
+        "AS": 7,
+        "HST": 7,
+        "AST": 2,
+        "HC": 8,
+        "AC": 3,
+        "HF": 14,
+        "AF": 15,
+        "HY": 4,
+        "AY": 4,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 58,
+        "APossession": 42,
+        "HSaves": 1,
+        "ASaves": 5,
+        "HPasses": 501,
+        "APasses": 362,
+        "HPassesAccurate": 438,
+        "APassesAccurate": 293,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,

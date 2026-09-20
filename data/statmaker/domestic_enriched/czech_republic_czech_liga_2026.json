@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-09-20T17:35:10Z",
+  "generated_at": "2026-09-20T22:36:15Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/czech-republic/czech-liga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-09-20T17:34:51Z",
+    "cache_generated_at": "2026-09-20T22:35:56Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 70,
-    "fixtures_with_any_stats": 69,
-    "fixtures_with_bb_core_stats": 67,
-    "any_stats_coverage": 0.9857,
-    "bb_core_coverage": 0.9571,
+    "completed_fixtures": 71,
+    "fixtures_with_any_stats": 71,
+    "fixtures_with_bb_core_stats": 69,
+    "any_stats_coverage": 1.0,
+    "bb_core_coverage": 0.9718,
     "group_counts": {
-      "shots_total": 68,
-      "shots_on_target": 68,
-      "corners": 68,
-      "fouls": 69,
-      "yellow_cards": 67,
+      "shots_total": 70,
+      "shots_on_target": 70,
+      "corners": 70,
+      "fouls": 71,
+      "yellow_cards": 69,
       "red_cards": 33,
-      "possession": 69,
-      "passes": 69,
-      "xg": 48
+      "possession": 71,
+      "passes": 71,
+      "xg": 50
     },
     "group_coverage": {
-      "shots_total": 0.9714,
-      "shots_on_target": 0.9714,
-      "corners": 0.9714,
-      "fouls": 0.9857,
-      "yellow_cards": 0.9571,
-      "red_cards": 0.4714,
-      "possession": 0.9857,
-      "passes": 0.9857,
-      "xg": 0.6857
+      "shots_total": 0.9859,
+      "shots_on_target": 0.9859,
+      "corners": 0.9859,
+      "fouls": 1.0,
+      "yellow_cards": 0.9718,
+      "red_cards": 0.4648,
+      "possession": 1.0,
+      "passes": 1.0,
+      "xg": 0.7042
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -5884,42 +5884,42 @@
       "away_team": "Sparta Praha",
       "status": "FT",
       "normalized_stats": {
-        "HS": null,
-        "AS": null,
-        "HST": null,
-        "AST": null,
-        "HC": null,
-        "AC": null,
-        "HF": null,
-        "AF": null,
-        "HY": null,
-        "AY": null,
+        "HS": 12,
+        "AS": 21,
+        "HST": 4,
+        "AST": 5,
+        "HC": 3,
+        "AC": 7,
+        "HF": 9,
+        "AF": 10,
+        "HY": 1,
+        "AY": 1,
         "HR": null,
         "AR": null,
-        "HPossession": null,
-        "APossession": null,
-        "HSaves": null,
-        "ASaves": null,
-        "HPasses": null,
-        "APasses": null,
-        "HPassesAccurate": null,
-        "APassesAccurate": null,
-        "HxG": null,
-        "AxG": null
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 369,
+        "APasses": 407,
+        "HPassesAccurate": 300,
+        "APassesAccurate": 352,
+        "HxG": 0.86,
+        "AxG": 1.91
       },
       "quality": {
-        "has_any_stats": false,
-        "has_bb_core_stats": false,
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
         "groups": {
-          "shots_total": false,
-          "shots_on_target": false,
-          "corners": false,
-          "fouls": false,
-          "yellow_cards": false,
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
           "red_cards": false,
-          "possession": false,
-          "passes": false,
-          "xg": false
+          "possession": true,
+          "passes": true,
+          "xg": true
         }
       },
       "home_goals": 0,
@@ -5942,6 +5942,90 @@
         "fulltime": {
           "home": 0,
           "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1560031,
+      "date_utc": "2026-09-20T16:00:00+00:00",
+      "country": "Czech Republic",
+      "league": "Czech Liga",
+      "league_code": "CZE",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 345,
+      "round": "Regular Season - 9",
+      "home_team": "Slavia Praha",
+      "away_team": "Plzen",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 21,
+        "AS": 12,
+        "HST": 5,
+        "AST": 4,
+        "HC": 9,
+        "AC": 4,
+        "HF": 13,
+        "AF": 9,
+        "HY": 1,
+        "AY": 3,
+        "HR": null,
+        "AR": null,
+        "HPossession": 64,
+        "APossession": 36,
+        "HSaves": 3,
+        "ASaves": 3,
+        "HPasses": 525,
+        "APasses": 298,
+        "HPassesAccurate": 446,
+        "APassesAccurate": 215,
+        "HxG": 1.53,
+        "AxG": 0.82
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": false,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,
