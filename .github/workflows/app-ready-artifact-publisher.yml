@@ -85,7 +85,7 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
+          expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1'
           expected_schema=11
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
@@ -287,7 +287,7 @@ jobs:
         env:
           APP_ID: com.statmaker.app.uat.local
           APP_READY_STATMAKER_COMMIT: "561e152bc8302bb8240131cefc65b5350522c180"
-          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
           APP_READY_PREPARED_SCHEMA_VERSION: "11"
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
@@ -596,7 +596,7 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 11
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1'
           assert metadata.get('statmakerCommit') == '561e152bc8302bb8240131cefc65b5350522c180'
           assert metadata.get('engineContract') == 'pre-v6-schema11-v5-performance-shadow-retired-inputs-v1'
           assert metadata.get('inputRetirementContract') == 'asian-countries-and-all-asian-handicap-markets-before-engine-v1'
