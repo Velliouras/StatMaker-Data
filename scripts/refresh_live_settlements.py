@@ -761,6 +761,34 @@ def missing_required_kinds(stats: Any, required_kinds: Iterable[str]) -> List[st
     ]
 
 
+def normalize_completed_card_zeros(row: Dict[str, Any]) -> bool:
+    """Treat provider null Red Cards as zero only for completed fixtures with known yellow-card stats.
+
+    API-Football commonly represents a zero red-card count as null in fixture statistics. Once a
+    fixture is explicitly final and both yellow-card counters are present, keeping HR/AR as null
+    incorrectly blocks MATCH/TEAM CARDS settlement forever. Do not infer zero when the yellow-card
+    statistics themselves are unavailable.
+    """
+    if str(row.get("status") or "").upper() not in COMPLETED:
+        return False
+    stats = row.get("normalizedStats")
+    if not isinstance(stats, dict):
+        return False
+    if stats.get("HY") is None or stats.get("AY") is None:
+        return False
+
+    changed = False
+    for field in ("HR", "AR"):
+        if stats.get(field) is None:
+            stats[field] = 0
+            changed = True
+    if changed:
+        row["normalizedStats"] = stats
+        required = row.get("requiredStats") if isinstance(row.get("requiredStats"), list) else []
+        row["statsFetched"] = normalized_stats_ready_for(stats, required)
+    return changed
+
+
 def merge_normalized_stats(existing: Any, incoming: Any) -> Dict[str, Any]:
     merged: Dict[str, Any] = dict(existing) if isinstance(existing, dict) else {}
     if isinstance(incoming, dict):
@@ -1154,6 +1182,11 @@ def main() -> int:
         if fetch_required_stats(api_key, fixture, row, request_state, args.max_requests):
             stats_requests += 1
 
+    normalized_card_zeroes = 0
+    for row in cache.values():
+        if normalize_completed_card_zeros(row):
+            normalized_card_zeroes += 1
+
     ordered = sorted(
         cache.values(),
         key=lambda item: (str(item.get("dateUtc") or ""), int(item.get("fixtureId") or 0)),
@@ -1209,7 +1242,8 @@ def main() -> int:
         f"canonicalRequirements={len(requirements)} canonicalCompleted={canonical_completed} "
         f"skippedNoRecommendation={skipped_no_recommendation} statsRequests={stats_requests} "
         f"feedFixtures={len(feed_rows)} requests={request_state['count']} "
-        f"cacheChanged={cache_changed} feedChanged={feed_changed} quota={json.dumps(quota_guard.status())}"
+        f"cardNullsNormalized={normalized_card_zeroes} cacheChanged={cache_changed} " +
+        f"feedChanged={feed_changed} quota={json.dumps(quota_guard.status())}"
     )
     return 0
 
