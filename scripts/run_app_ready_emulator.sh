@@ -73,8 +73,15 @@ fi
 
 echo "APP_READY_HTTP_OK pid=$server_pid"
 
-APK="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug/app-debug.apk"
-test -s "$APK"
+APK_DIR="$GITHUB_WORKSPACE/statmaker-private/app/build/outputs/apk/debug"
+mapfile -t APK_CANDIDATES < <(find "$APK_DIR" -maxdepth 1 -type f -name '*.apk' -size +0c -print | sort)
+if [[ "${#APK_CANDIDATES[@]}" -ne 1 ]]; then
+  echo "Expected exactly one debug APK under $APK_DIR; found ${#APK_CANDIDATES[@]}" >&2
+  printf ' - %s\n' "${APK_CANDIDATES[@]}" >&2
+  exit 1
+fi
+APK="${APK_CANDIDATES[0]}"
+echo "APP_READY_APK_RESOLVED $APK"
 adb install -r "$APK"
 
 ## RESUMABLE_CHECKPOINT_SEED
