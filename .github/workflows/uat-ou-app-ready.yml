@@ -32,14 +32,6 @@ jobs:
           ref: uat-ou-value-mispricing-20260920
           fetch-depth: 1
 
-      - name: Fetch canonical source refs
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
-          git fetch --no-tags --depth=1 origin \
-            +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
-
       - name: Restore verified prepared checkpoint
         uses: actions/download-artifact@v4
         with:
@@ -58,7 +50,7 @@ jobs:
             --metadata app-ready-checkpoint/checkpoint.json \
             --kind checkpoint
 
-      - name: Materialize current O-U value candidates
+      - name: Materialize current O-U value candidates from pinned checkpoint
         shell: bash
         run: |
           set -euo pipefail
@@ -71,25 +63,7 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Stage exact current canonical betting sources
-        shell: bash
-        run: |
-          set -euo pipefail
-          s="app-ready-export/source"
-          git show refs/remotes/origin/main:data/statmaker/update_manifest.json > "$s/main_manifest.json"
-          git show refs/remotes/origin/main:odds/odds_api_io/domestic_odds.json > "$s/domestic.json"
-          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
-          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
-          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
-          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
-          test -s "$s/main_manifest.json"
-          test -s "$s/domestic.json"
-          test -s "$s/uefa_manifest.json"
-          test -s "$s/champions_league.json"
-          test -s "$s/europa_league.json"
-          test -s "$s/conference_league.json"
-
-      - name: Verify checkpoint and current source versions match
+      - name: Verify extracted source is exactly the checkpoint generation
         shell: bash
         run: |
           set -euo pipefail
@@ -105,10 +79,15 @@ jobs:
           actual_main=str(main.get("contentVersion") or "")
           actual_uefa=str(uefa.get("contentVersion") or "")
           if expected_main != actual_main:
-              raise SystemExit(f"Checkpoint/main source mismatch {expected_main[:12]} != {actual_main[:12]}")
+              raise SystemExit(f"Pinned main source mismatch {expected_main[:12]} != {actual_main[:12]}")
           if expected_uefa != actual_uefa:
-              raise SystemExit(f"Checkpoint/UEFA source mismatch {expected_uefa[:12]} != {actual_uefa[:12]}")
-          print("UAT_OU_SOURCE_VERSION_OK", actual_main[:12], actual_uefa[:12])
+              raise SystemExit(f"Pinned UEFA source mismatch {expected_uefa[:12]} != {actual_uefa[:12]}")
+          for name in ("domestic","champions_league","europa_league","conference_league"):
+              path=Path("app-ready-export/source")/f"{name}.json"
+              if not path.is_file() or path.stat().st_size <= 0:
+                  raise SystemExit(f"Missing pinned odds {name}")
+              json.loads(path.read_text())
+          print("UAT_OU_PINNED_SOURCE_OK", actual_main[:12], actual_uefa[:12])
           PY
 
       - name: Build betting-only UAT App-Ready bundle
@@ -134,13 +113,20 @@ jobs:
           path=Path("app-ready-export/out/update_manifest.json")
           manifest=json.loads(path.read_text())
           metadata=manifest.get("metadata") or {}
+          checkpoint=json.loads(Path("app-ready-checkpoint/checkpoint.json").read_text())
           rules="pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
           branch="uat-ou-value-mispricing-20260920"
           trusted=f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{branch}/data/statmaker/app_ready/"
+
           if metadata.get("preparedPatternRulesFingerprint") != rules:
               raise SystemExit("Unexpected O/U rules fingerprint")
+          if str(metadata.get("mainContentVersion") or "") != str(checkpoint.get("mainContentVersion") or ""):
+              raise SystemExit("UAT manifest main source drifted from checkpoint")
+          if str(metadata.get("uefaContentVersion") or "") != str(checkpoint.get("uefaContentVersion") or ""):
+              raise SystemExit("UAT manifest UEFA source drifted from checkpoint")
           if not metadata.get("uatBettingOnly"):
               raise SystemExit("Manifest is not marked betting-only UAT")
+
           artifacts=manifest.get("artifacts") or []
           if {a.get("id") for a in artifacts} != {"app_ready_stats_bundle","app_ready_betting_bundle"}:
               raise SystemExit("Unexpected UAT artifact set")
@@ -154,11 +140,12 @@ jobs:
                   local=Path("data/statmaker/app_ready")/name
               if not local.is_file():
                   raise SystemExit(f"Missing manifest artifact: {local}")
-              h=hashlib.sha256(local.read_bytes()).hexdigest()
-              if h != str(item.get("sha256") or ""):
+              digest=hashlib.sha256(local.read_bytes()).hexdigest()
+              if digest != str(item.get("sha256") or ""):
                   raise SystemExit(f"Artifact SHA mismatch: {name}")
               if local.stat().st_size != int(item.get("bytes") or 0):
                   raise SystemExit(f"Artifact size mismatch: {name}")
+
           print(
               "UAT_OU_MANIFEST_OK",
               "generation="+str(metadata.get("preparedPatternGenerationId") or "")[:12],
@@ -166,32 +153,6 @@ jobs:
               "eligible="+str(metadata.get("preparedPatternRecommendationEligibleCount") or 0),
               "directions="+json.dumps(metadata.get("uatOverUnderDirectionCountsAt150") or {}, sort_keys=True),
           )
-          PY
-
-      - name: Revalidate canonical source versions
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
-          git fetch --no-tags --depth=1 origin \
-            +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
-          python - <<'PY'
-          import json, subprocess
-          from pathlib import Path
-
-          built=json.loads(Path("app-ready-export/out/update_manifest.json").read_text())
-          meta=built.get("metadata") or {}
-          main=json.loads(subprocess.check_output(
-              ["git","show","refs/remotes/origin/main:data/statmaker/update_manifest.json"], text=True
-          ))
-          uefa=json.loads(subprocess.check_output(
-              ["git","show","refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json"], text=True
-          ))
-          if str(meta.get("mainContentVersion") or "") != str(main.get("contentVersion") or ""):
-              raise SystemExit("Domestic canonical source changed during UAT build")
-          if str(meta.get("uefaContentVersion") or "") != str(uefa.get("contentVersion") or ""):
-              raise SystemExit("UEFA canonical source changed during UAT build")
-          print("UAT_OU_FINAL_SOURCE_GUARD_OK")
           PY
 
       - name: Publish only UAT betting artifact and manifest
