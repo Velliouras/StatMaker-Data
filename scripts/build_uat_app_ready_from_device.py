@@ -71,6 +71,32 @@ try:
     if version != 11:
         raise SystemExit(f"Expected prepared schema 11, got {version}")
 
+    fixture_tables = {
+        str(row[0])
+        for row in con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name IN ('prepared_fixture_matches','prepared_fixture_markets')"
+        )
+    }
+    required_fixture_tables = {'prepared_fixture_matches','prepared_fixture_markets'}
+    missing_fixture_tables = required_fixture_tables - fixture_tables
+    if missing_fixture_tables:
+        raise SystemExit(
+            "UAT prepared fixture read model is missing: "
+            + ",".join(sorted(missing_fixture_tables))
+        )
+    fixture_match_count = int(
+        con.execute("SELECT COUNT(*) FROM prepared_fixture_matches").fetchone()[0]
+    )
+    fixture_market_count = int(
+        con.execute("SELECT COUNT(*) FROM prepared_fixture_markets").fetchone()[0]
+    )
+    if fixture_match_count <= 0 or fixture_market_count <= 0:
+        raise SystemExit(
+            "UAT prepared fixture read model is empty: "
+            f"matches={fixture_match_count} markets={fixture_market_count}"
+        )
+
     rules = {
         str(row[0] or "").strip()
         for row in con.execute(
@@ -169,4 +195,6 @@ print(
     f"pairs={checked_pairs}",
     f"rules={EXPECTED_RULES}",
     f"statmaker={EXPECTED_STATMAKER_COMMIT}",
+    f"fixture_matches={fixture_match_count}",
+    f"fixture_markets={fixture_market_count}",
 )
