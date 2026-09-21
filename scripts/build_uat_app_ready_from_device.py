@@ -38,25 +38,6 @@ if historical.count(needle) != 1:
     raise SystemExit("Historical builder rules anchor changed")
 historical = historical.replace(needle, replacement, 1)
 
-# The clean checkpoint was built from the exact Data-main index blob present in the triggering
-# checkout. Its embedded main manifest carries stale index bytes/hash metadata, so UAT packaging
-# validates the actual index JSON structurally and then still runs validate_generated_stats()
-# against the generated stats DB. All odds artifacts remain strict manifest-hash validated.
-old_index_validation = '''domestic_index = validate_source(
-    source / "domestic_enriched_index.json",
-    artifact_by_id(main, "domestic_enriched_index"),
-    "Domestic enriched index",
-)
-'''
-new_index_validation = '''_, domestic_index = read_json(
-    source / "domestic_enriched_index.json",
-    "Domestic enriched index",
-)
-'''
-if historical.count(old_index_validation) != 1:
-    raise SystemExit("Historical builder Domestic index validation anchor changed")
-historical = historical.replace(old_index_validation, new_index_validation, 1)
-
 with tempfile.NamedTemporaryFile(
     prefix="statmaker-uat-builder-",
     suffix=".py",

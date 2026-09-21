@@ -59,20 +59,34 @@ jobs:
         run: |
           python scripts/materialize_uat_direction_pattern_candidates.py             app-ready-checkpoint             app-ready-export/raw             app-ready-export/source
 
-      - name: Stage checkpoint-matching Domestic index
+      - name: Reconstruct checkpoint retirement inputs
         shell: bash
         run: |
           set -euo pipefail
           CHECKPOINT_DATA_COMMIT="013a4e33840a479084aeba40782fc4436ab814ef"
           EXPECTED_INDEX_BLOB="f26216be87850428c9acfde27a4970c4e50cfc87"
+          root="app-ready-retirement-root"
+          rm -rf "$root"
+          mkdir -p "$root/data/statmaker/domestic_enriched" "$root/odds/odds_api_io"
+
           git fetch --no-tags --depth=1 origin "$CHECKPOINT_DATA_COMMIT"
           actual_blob="$(git rev-parse "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json")"
           [[ "$actual_blob" == "$EXPECTED_INDEX_BLOB" ]] || {
             echo "Checkpoint Domestic index blob mismatch: $actual_blob" >&2
             exit 1
           }
-          git show "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json"             > app-ready-export/source/domestic_enriched_index.json
-          test -s app-ready-export/source/domestic_enriched_index.json
+
+          git show "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json"             > "$root/data/statmaker/domestic_enriched/index.json"
+          cp app-ready-export/source/domestic.json "$root/odds/odds_api_io/domestic_odds.json"
+          cp app-ready-export/source/main_manifest.json "$root/data/statmaker/update_manifest.json"
+
+          python scripts/app_ready_input_retirement.py --root "$root"
+          python scripts/app_ready_input_retirement.py --root "$root" --check-only
+
+          cp "$root/data/statmaker/domestic_enriched/index.json"             app-ready-export/source/domestic_enriched_index.json
+          cp "$root/odds/odds_api_io/domestic_odds.json"             app-ready-export/source/domestic.json
+          cp "$root/data/statmaker/update_manifest.json"             app-ready-export/source/main_manifest.json
+
 
       - name: Build isolated UAT bundles
         run: |
