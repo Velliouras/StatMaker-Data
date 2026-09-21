@@ -59,6 +59,41 @@ jobs:
         run: |
           python scripts/materialize_uat_direction_pattern_candidates.py             app-ready-checkpoint             app-ready-export/raw             app-ready-export/source
 
+      - name: Materialize prepared fixture read model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/materialize_prepared_fixture_index.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
+
+      - name: Verify prepared fixture read model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sqlite3
+          from pathlib import Path
+          db=Path('app-ready-export/raw/databases/statmaker_prepared_betting.db')
+          con=sqlite3.connect(f'file:{db}?mode=ro', uri=True)
+          try:
+              required={'prepared_fixture_matches','prepared_fixture_markets'}
+              found={
+                  row[0] for row in con.execute(
+                      "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('prepared_fixture_matches','prepared_fixture_markets')"
+                  )
+              }
+              missing=required-found
+              if missing:
+                  raise SystemExit('Missing prepared fixture tables: '+','.join(sorted(missing)))
+              matches=int(con.execute('SELECT COUNT(*) FROM prepared_fixture_matches').fetchone()[0])
+              markets=int(con.execute('SELECT COUNT(*) FROM prepared_fixture_markets').fetchone()[0])
+              if matches <= 0 or markets <= 0:
+                  raise SystemExit(f'Prepared fixture read model is empty: matches={matches} markets={markets}')
+              print('APP_READY_FIXTURE_READ_MODEL_OK',f'matches={matches}',f'markets={markets}')
+          finally:
+              con.close()
+          PY
+
       - name: Stage exact checkpoint Domestic index
         shell: bash
         run: |
