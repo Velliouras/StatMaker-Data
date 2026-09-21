@@ -16,6 +16,8 @@ on:
       - 'scripts/patch_prepared_publisher_bulk.py'
       - 'scripts/run_app_ready_emulator.sh'
       - 'scripts/validate_app_ready_prepared_contract.py'
+      - 'scripts/app_ready_input_retirement.py'
+      - 'scripts/validate_app_ready_retirement_contract.py'
       - 'scripts/build_app_ready_from_device.py'
       - 'scripts/materialize_app_ready_pattern_candidates.py'
       - 'scripts/materialize_prepared_fixture_index.py'
@@ -49,6 +51,7 @@ jobs:
             scripts/materialize_app_ready_pattern_candidates.py \
             scripts/materialize_prepared_fixture_index.py \
             scripts/validate_app_ready_prepared_contract.py \
+            scripts/app_ready_input_retirement.py \
             scripts/audit_result_context_generation.py \
             scripts/validate_app_ready_retirement_contract.py
           bash -n scripts/stage_app_ready_producer.sh
@@ -56,6 +59,9 @@ jobs:
 
       - name: Validate checkpoint compatibility contract
         run: python scripts/validate_app_ready_prepared_contract.py --self-check
+
+      - name: Validate market-only retirement contract
+        run: python scripts/app_ready_input_retirement.py --self-check
 
       - name: Enforce heavy publisher trigger separation
         shell: bash
