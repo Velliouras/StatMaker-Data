@@ -740,7 +740,10 @@ def materialize(checkpoint_root, raw_root):
             source_order += 1
             count += 1
 
-            direct_ou = is_direct_ou(str(sub_market_key), str(selection_side))
+            direct_ou = (
+                identity_line is not None
+                and is_direct_ou(str(sub_market_key), str(selection_side))
+            )
             if not bool(qualifies_pattern) and not direct_ou:
                 continue
 
@@ -785,8 +788,17 @@ def materialize(checkpoint_root, raw_root):
                 and direct_signal[0] in {"STRONG_VALUE", "VALUE"}
                 and direct_ou_maturity_and_price_ok(str(sub_market_key), sample, odd)
             )
+            if direct_ou:
+                if not direct_value_rescue:
+                    continue
+                base_recommendation_eligible = True
+            else:
+                if not bool(qualifies_pattern):
+                    continue
+                base_recommendation_eligible = True
+
             eligible = (
-                (bool(qualifies_pattern) or direct_value_rescue)
+                base_recommendation_eligible
                 and odd >= 1.20
                 and sane_exact_odd(
                     str(identity_family),
@@ -841,7 +853,7 @@ def materialize(checkpoint_root, raw_root):
                             normalized_positive_edge,
                         )
                     ),
-                    evidence_score,
+                    (direct_signal[1] if direct_signal is not None else evidence_score),
                     order,
                     hit_rate,
                     sample,

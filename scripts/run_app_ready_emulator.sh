@@ -8,7 +8,7 @@ set -euo pipefail
 : "${APP_READY_PREPARED_SCHEMA_VERSION:?APP_READY_PREPARED_SCHEMA_VERSION is required}"
 
 EXPECTED_STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
-EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
+EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-ou-value-v1"
 EXPECTED_PREPARED_SCHEMA="11"
 if [[ "$APP_READY_STATMAKER_COMMIT" != "$EXPECTED_STATMAKER_COMMIT" ||
       "$APP_READY_PATTERN_RULES_FINGERPRINT" != "$EXPECTED_RULES_FINGERPRINT" ||
@@ -733,7 +733,7 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1":
+            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1":
                 raise SystemExit(
                     f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
                 )
