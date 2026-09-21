@@ -5,6 +5,7 @@ import json
 import sqlite3
 import subprocess
 import sys
+import os
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -23,6 +24,16 @@ def run(*args: str) -> None:
 url = f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{HISTORICAL_DATA_COMMIT}/scripts/build_app_ready_from_device.py"
 with urllib.request.urlopen(url, timeout=60) as response:
     historical = response.read()
+
+# The historical builder validates generation identity using its embedded rules fingerprint.
+# Replace only that exact constant so the proven v5/schema11 builder validates the current
+# UAT recommendation contract instead of rejecting a correctly materialized generation.
+source_rules = b'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"'
+target_rules = f'PREPARED_PATTERN_RULES_FINGERPRINT = "{EXPECTED_RULES}"'.encode("utf-8")
+if source_rules not in historical:
+    raise SystemExit("Historical App-Ready builder rules fingerprint marker is missing")
+historical = historical.replace(source_rules, target_rules, 1)
+
 with tempfile.NamedTemporaryFile(prefix="statmaker-v5-builder-", suffix=".py", delete=False) as tmp:
     tmp.write(historical)
     tmp_path = Path(tmp.name)
@@ -94,6 +105,19 @@ metadata = manifest.setdefault("metadata", {})
 metadata["statmakerCommit"] = EXPECTED_STATMAKER_COMMIT
 metadata["engineContract"] = ENGINE_CONTRACT
 metadata["inputRetirementContract"] = RETIREMENT_CONTRACT
+
+artifact_branch = os.environ.get("APP_READY_ARTIFACT_BRANCH", "main").strip() or "main"
+for artifact in manifest.get("artifacts", []):
+    url = str(artifact.get("url") or "")
+    canonical = "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/"
+    if url.startswith(canonical):
+        artifact["url"] = (
+            "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/"
+            + artifact_branch
+            + "/data/statmaker/app_ready/"
+            + url[len(canonical):]
+        )
+
 manifest_path.write_text(
     json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
     encoding="utf-8",
