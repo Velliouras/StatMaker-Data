@@ -63,7 +63,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp data/statmaker/domestic_enriched/index.json app-ready-export/source/domestic_enriched_index.json
+          CHECKPOINT_DATA_COMMIT="013a4e33840a479084aeba40782fc4436ab814ef"
+          git fetch --no-tags --depth=1 origin "$CHECKPOINT_DATA_COMMIT"
+          git show "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json"             > app-ready-export/source/domestic_enriched_index.json
+          test -s app-ready-export/source/domestic_enriched_index.json
 
       - name: Build isolated UAT bundles
         run: |
