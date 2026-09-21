@@ -593,6 +593,24 @@ def row_name(row: Dict[str, Any]) -> str:
     return str(row.get("name") or row.get("selection") or row.get("label") or row.get("side") or "").strip()
 
 
+def total_direction_token(value: Any) -> Optional[str]:
+    """Return an explicit Over/Under token without matching inside team names.
+
+    Examples: "Seattle Sounders Over 3.5" -> "over";
+    "Hannover Under 3.5" -> "under"; "Seattle Sounders" -> None.
+    """
+    tokens = {
+        token
+        for token in re.findall(r"[a-z]+", normalize_text(value))
+        if token in {"over", "under"}
+    }
+    if tokens == {"over"}:
+        return "over"
+    if tokens == {"under"}:
+        return "under"
+    return None
+
+
 def row_line(row: Dict[str, Any]) -> Optional[float]:
     explicit = line_float(row.get("line") or row.get("point") or row.get("points") or row.get("handicap") or row.get("hdp") or row.get("max"))
     if explicit is not None:
@@ -846,16 +864,18 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
         if over_price is not None or under_price is not None:
             add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", over_price, bookmaker, line=line, team=team)
             add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", under_price, bookmaker, line=line, team=team)
-        elif "under" in n:
-            add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
-        elif "over" in n:
-            add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
         else:
-            side = normalize_text(row.get("side"))
-            if side == "under":
+            direction = total_direction_token(name)
+            if direction == "under":
                 add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
-            elif side == "over":
+            elif direction == "over":
                 add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
+            else:
+                side = normalize_text(row.get("side"))
+                if side == "under":
+                    add_market(out, base_market, "Under" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Under {line:g}", row_price(row), bookmaker, line=line, team=team)
+                elif side == "over":
+                    add_market(out, base_market, "Over" if base_market in {"MATCH_GOALS", "FIRST_HALF_GOALS"} else f"{label_prefix} Over {line:g}", row_price(row), bookmaker, line=line, team=team)
     return out
 
 

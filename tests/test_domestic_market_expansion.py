@@ -19,6 +19,14 @@ expansion.install(odds, pipeline)
 
 
 class DomesticMarketExpansionTest(unittest.TestCase):
+    def test_total_direction_token_ignores_team_name_substrings(self):
+        self.assertEqual("over", odds.total_direction_token("Seattle Sounders Over 3.5"))
+        self.assertEqual("under", odds.total_direction_token("Seattle Sounders Under 3.5"))
+        self.assertEqual("under", odds.total_direction_token("Hannover Under 3.5"))
+        self.assertEqual("over", odds.total_direction_token("Hannover Over 3.5"))
+        self.assertIsNone(odds.total_direction_token("Seattle Sounders"))
+        self.assertIsNone(odds.total_direction_token("Hannover 96"))
+
     def test_double_chance_is_supported(self):
         result = audit.classify_provider_market("Double Chance")
         self.assertEqual("DOUBLE_CHANCE", result["family"])
