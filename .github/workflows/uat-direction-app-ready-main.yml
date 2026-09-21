@@ -37,11 +37,18 @@ jobs:
         run: |
           set -euo pipefail
           ref="${DISPATCH_REF}"
+          resume_run_id=""
           if [[ -z "$ref" ]]; then
-            ref="$(head -n 1 .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
+            ref="$(sed -n '1p' .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
+            resume_run_id="$(sed -n '2p' .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
           fi
           [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid StatMaker ref: $ref" >&2; exit 1; }
+          if [[ -n "$resume_run_id" && ! "$resume_run_id" =~ ^[0-9]+$ ]]; then
+            echo "Invalid resume run id: $resume_run_id" >&2
+            exit 1
+          fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "resume_run_id=$resume_run_id" >> "$GITHUB_OUTPUT"
           echo "APP_READY_UAT_REF=$ref" >> "$GITHUB_ENV"
 
       - name: Validate canonical Domestic provider identity
@@ -113,13 +120,23 @@ jobs:
           sudo chmod 600 /dev/kvm
           test -r /dev/kvm -a -w /dev/kvm
 
+      - name: Restore clean UAT checkpoint
+        if: steps.source.outputs.resume_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: statmaker-uat-direction-checkpoint
+          path: app-ready-checkpoint-incoming
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.source.outputs.resume_run_id }}
+
       - name: Produce clean UAT read model
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat
           APP_READY_UAT_SOURCE: "true"
-          APP_READY_DISABLE_SEED: "true"
-          APP_READY_RECOMMENDATION_ONLY: "false"
+          APP_READY_DISABLE_SEED: ${{ steps.source.outputs.resume_run_id == '' && 'true' || 'false' }}
+          APP_READY_RECOMMENDATION_ONLY: ${{ steps.source.outputs.resume_run_id != '' && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "false"
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:

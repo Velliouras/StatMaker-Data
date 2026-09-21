@@ -4,14 +4,24 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sqlite3
 import tempfile
 from pathlib import Path
 
 
 EXPECTED_SCHEMA = 11
-EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+PROD_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+PROD_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+UAT_SOURCE = os.environ.get("APP_READY_UAT_SOURCE", "false").lower() == "true"
+if UAT_SOURCE:
+    EXPECTED_RULES = os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "").strip()
+    EXPECTED_STATMAKER_COMMIT = os.environ.get("APP_READY_STATMAKER_COMMIT", "").strip()
+    if not EXPECTED_RULES or not EXPECTED_STATMAKER_COMMIT:
+        raise SystemExit("UAT prepared contract requires rules fingerprint and StatMaker commit")
+else:
+    EXPECTED_RULES = PROD_RULES
+    EXPECTED_STATMAKER_COMMIT = PROD_STATMAKER_COMMIT
 EXPECTED_COMPETITIONS = {
     "domestic",
     "champions_league",
