@@ -1,0 +1,254 @@
+name: StatMaker UAT Direction App-Ready Main
+
+on:
+  workflow_dispatch:
+    inputs:
+      statmaker_ref:
+        description: "StatMaker UAT ref"
+        required: true
+        default: "uat-ou-value-mispricing-20260920"
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/app-ready-uat-direction-trigger'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-uat-direction-app-ready-main
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve UAT source ref
+        id: source
+        shell: bash
+        env:
+          DISPATCH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || '' }}
+        run: |
+          set -euo pipefail
+          ref="${DISPATCH_REF}"
+          if [[ -z "$ref" ]]; then
+            ref="$(head -n 1 .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
+          fi
+          [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid StatMaker ref: $ref" >&2; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "APP_READY_UAT_REF=$ref" >> "$GITHUB_ENV"
+
+      - name: Validate canonical Domestic provider identity
+        run: python scripts/validate_domestic_cache_provider_identity.py
+
+      - name: Fetch canonical UEFA source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+
+      - name: Require private read token
+        env:
+          TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
+
+      - name: Checkout StatMaker UAT source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ${{ steps.source.outputs.ref }}
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Stage current UAT app-ready producer
+        shell: bash
+        env:
+          APP_READY_UAT_SOURCE: "true"
+        run: bash "$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh" "$GITHUB_WORKSPACE/statmaker-private"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify preinstalled Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}" || { echo 'ANDROID_HOME is not set' >&2; exit 1; }
+          test -d "$ANDROID_HOME" || { echo "ANDROID_HOME missing: $ANDROID_HOME" >&2; exit 1; }
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
+          if [[ -z "$SDKMANAGER" && -x "$ANDROID_HOME/tools/bin/sdkmanager" ]]; then
+            SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+          fi
+          test -n "$SDKMANAGER" || { echo 'sdkmanager not found' >&2; exit 1; }
+          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+          "$SDKMANAGER" --version
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compile current UAT producer
+        working-directory: statmaker-private
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace             -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8"             -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Enable KVM acceleration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm || { echo '/dev/kvm unavailable' >&2; exit 1; }
+          sudo chown "$USER" /dev/kvm
+          sudo chmod 600 /dev/kvm
+          test -r /dev/kvm -a -w /dev/kvm
+
+      - name: Produce clean UAT read model
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          APP_ID: com.statmaker.app.uat
+          APP_READY_UAT_SOURCE: "true"
+          APP_READY_DISABLE_SEED: "true"
+          APP_READY_RECOMMENDATION_ONLY: "false"
+          APP_READY_SOURCE_ONLY: "false"
+          APP_READY_PREPARED_MAX_SECONDS: "5400"
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 4
+          ram-size: 5120M
+          heap-size: 1536M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
+
+      - name: Preserve failure checkpoint for diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: statmaker-uat-direction-checkpoint
+          path: app-ready-checkpoint
+          if-no-files-found: ignore
+          retention-days: 2
+          compression-level: 6
+          overwrite: true
+
+      - name: Stage canonical repository inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          s="app-ready-export/source"
+          mkdir -p "$s"
+          cp data/statmaker/update_manifest.json "$s/main_manifest.json"
+          cp data/statmaker/domestic_enriched/index.json "$s/domestic_enriched_index.json"
+          cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
+          git show origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
+          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
+          test -s "$s/main_manifest.json"
+          test -s "$s/domestic_enriched_index.json"
+          test -s "$s/uefa_manifest.json"
+          test -s "$s/domestic.json"
+          test -s "$s/champions_league.json"
+          test -s "$s/europa_league.json"
+          test -s "$s/conference_league.json"
+
+      - name: Build isolated UAT bundles
+        env:
+          APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/ou-direction-v2
+        run: python scripts/build_uat_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
+
+      - name: Revalidate source versions
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
+          m=incoming.get('metadata',{})
+          current_main=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'], text=True
+          ))
+          current_uefa=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'], text=True
+          ))
+          if str(m.get('mainContentVersion') or '') != str(current_main.get('contentVersion') or ''):
+              raise SystemExit('Domestic source changed during UAT build')
+          if str(m.get('uefaContentVersion') or '') != str(current_uefa.get('contentVersion') or ''):
+              raise SystemExit('UEFA source changed during UAT build')
+          PY
+
+      - name: Publish isolated UAT artifacts to Data main
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="app-ready-export/out"
+          rel="data/statmaker/app_ready_uat/ou-direction-v2"
+          staging="$(mktemp -d)"
+          mkdir -p "$staging/payload"
+          cp "$src"/app_ready_*_bundle-*.zip "$staging/payload/"
+          cp "$src/update_manifest.json" "$staging/payload/update_manifest.json"
+
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            rm -rf "$rel"
+            mkdir -p "$(dirname "$rel")"
+            cp -a "$staging/payload" "$rel"
+            git add "$rel"
+            if git diff --cached --quiet; then
+              echo "APP_READY_UAT_ALREADY_PUBLISHED"
+              published=true
+              break
+            fi
+            git config user.name "StatMaker UAT Artifact Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git commit -m "Publish isolated UAT direction app-ready artifacts"
+            if git push origin HEAD:main; then
+              echo "APP_READY_UAT_PUBLISH_OK attempt=$attempt"
+              published=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$published" == "true" ]] || { echo "UAT artifact publish failed" >&2; exit 1; }
+
+      - name: Verify published UAT manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git show refs/remotes/origin/main:data/statmaker/app_ready_uat/ou-direction-v2/update_manifest.json > /tmp/uat_manifest.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          m=json.loads(Path('/tmp/uat_manifest.json').read_text())
+          md=m.get('metadata',{})
+          assert m.get('profile') == 'app_ready_uat'
+          assert md.get('uatProfile') == 'ou-direction-v2'
+          assert md.get('statmakerCommit') == os.environ['APP_READY_STATMAKER_COMMIT']
+          assert md.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
+          assert len(m.get('artifacts',[])) == 2
+          for item in m['artifacts']:
+              assert item['url'].startswith(
+                  'https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready_uat/ou-direction-v2/'
+              )
+          print('APP_READY_UAT_REMOTE_OK', md.get('statmakerCommit'), md.get('preparedPatternRulesFingerprint'))
+          PY

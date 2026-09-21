@@ -7,9 +7,24 @@ set -euo pipefail
 : "${APP_READY_PATTERN_RULES_FINGERPRINT:?APP_READY_PATTERN_RULES_FINGERPRINT is required}"
 : "${APP_READY_PREPARED_SCHEMA_VERSION:?APP_READY_PREPARED_SCHEMA_VERSION is required}"
 
-EXPECTED_STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
-EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 EXPECTED_PREPARED_SCHEMA="11"
+if [[ "${APP_READY_UAT_SOURCE:-false}" == "true" ]]; then
+  EXPECTED_STATMAKER_COMMIT="$(git -C "$GITHUB_WORKSPACE/statmaker-private" rev-parse HEAD)"
+  EXPECTED_RULES_FINGERPRINT="$(python3 - <<'PY'
+import re
+from pathlib import Path
+root=Path(__import__("os").environ["GITHUB_WORKSPACE"])/"statmaker-private"
+text=(root/"app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt").read_text(encoding="utf-8")
+match=re.search(r'PREPARED_PATTERN_RULES_FINGERPRINT\s*=\s*"([^"]+)"', text)
+if not match:
+    raise SystemExit("Could not resolve UAT rules fingerprint")
+print(match.group(1))
+PY
+)"
+else
+  EXPECTED_STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+  EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+fi
 if [[ "$APP_READY_STATMAKER_COMMIT" != "$EXPECTED_STATMAKER_COMMIT" ||
       "$APP_READY_PATTERN_RULES_FINGERPRINT" != "$EXPECTED_RULES_FINGERPRINT" ||
       "$APP_READY_PREPARED_SCHEMA_VERSION" != "$EXPECTED_PREPARED_SCHEMA" ]]; then
@@ -88,7 +103,7 @@ adb install -r "$APK"
 # Prefer an exact resumable checkpoint from a previous failed/cancelled publisher.
 CHECKPOINT_IN="$GITHUB_WORKSPACE/app-ready-checkpoint-incoming"
 CHECKPOINT_RESTORED=0
-if [[ -s "$CHECKPOINT_IN/checkpoint.json" ]]; then
+if [[ "${APP_READY_DISABLE_SEED:-false}" != "true" && -s "$CHECKPOINT_IN/checkpoint.json" ]]; then
   if python3 "$GITHUB_WORKSPACE/scripts/validate_app_ready_prepared_contract.py" \
       "$CHECKPOINT_IN" \
       --metadata "$CHECKPOINT_IN/checkpoint.json" \
@@ -162,7 +177,7 @@ mkdir -p "$SEED_ROOT"
 git -C "$GITHUB_WORKSPACE" fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
 SEED_COMMIT="$(git -C "$GITHUB_WORKSPACE" log -1 --format=%H -- data/statmaker/app_ready/update_manifest.json || true)"
 SEED_COMPATIBLE=0
-if [[ "$CHECKPOINT_RESTORED" -eq 0 && -n "$SEED_COMMIT" ]]; then
+if [[ "${APP_READY_DISABLE_SEED:-false}" != "true" && "$CHECKPOINT_RESTORED" -eq 0 && -n "$SEED_COMMIT" ]]; then
   echo "APP_READY_SEED_COMMIT $SEED_COMMIT"
   git -C "$GITHUB_WORKSPACE" show "$SEED_COMMIT:data/statmaker/app_ready/update_manifest.json" > "$SEED_ROOT/update_manifest.json"
 
@@ -286,7 +301,7 @@ PY
   fi
 fi
 
-if [[ "$CHECKPOINT_RESTORED" -eq 0 && "$SEED_COMPATIBLE" -eq 1 ]]; then
+if [[ "${APP_READY_DISABLE_SEED:-false}" != "true" && "$CHECKPOINT_RESTORED" -eq 0 && "$SEED_COMPATIBLE" -eq 1 ]]; then
   adb shell run-as "$APP_ID" mkdir -p databases files/app_ready_odds shared_prefs
 
   adb push "$SEED_ROOT/bundle/databases/statmaker_prepared_betting.db" /data/local/tmp/statmaker_prepared_betting.db >/dev/null
@@ -733,9 +748,11 @@ for raw in sys.argv[1:]:
             generation_id, candidate_count, rules_fingerprint = generation
             if int(candidate_count) <= 0:
                 raise SystemExit("Prepared recommendation generation has 0 candidates")
-            if rules_fingerprint != "pattern-policy-v2-final-read-model-v5-performance-shadow-v1":
+            import os
+            expected_rules = os.environ["APP_READY_PATTERN_RULES_FINGERPRINT"]
+            if rules_fingerprint != expected_rules:
                 raise SystemExit(
-                    f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint}"
+                    f"Unexpected prepared recommendation rules fingerprint: {rules_fingerprint} != {expected_rules}"
                 )
             actual_candidates = int(
                 connection.execute(

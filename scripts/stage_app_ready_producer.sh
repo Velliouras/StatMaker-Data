@@ -9,9 +9,27 @@ cd "$PRIVATE_ROOT"
 # is pinned to the verified pre-v6 source while current UI/application code remains
 # untouched. Asian scopes and all Asian/Handicap markets are retired from the Data
 # inputs before this producer executes.
-STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
-RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+UAT_SOURCE="${APP_READY_UAT_SOURCE:-false}"
 PREPARED_SCHEMA="11"
+if [[ "$UAT_SOURCE" == "true" ]]; then
+  STATMAKER_COMMIT="$(git rev-parse HEAD)"
+  RULES_FINGERPRINT="$(python3 - <<'PY'
+import re
+from pathlib import Path
+text=Path("app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt").read_text(encoding="utf-8")
+match=re.search(r'PREPARED_PATTERN_RULES_FINGERPRINT\s*=\s*"([^"]+)"', text)
+if not match:
+    raise SystemExit("Could not resolve UAT prepared rules fingerprint")
+print(match.group(1))
+PY
+)"
+else
+  STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+  RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
+fi
+export APP_READY_STATMAKER_COMMIT="$STATMAKER_COMMIT"
+export APP_READY_PATTERN_RULES_FINGERPRINT="$RULES_FINGERPRINT"
+export APP_READY_PREPARED_SCHEMA_VERSION="$PREPARED_SCHEMA"
 LEGACY_BUILDER_REF="origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_BUILDER_PATH="app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
 LEGACY_BUILDER_BLOB="b329ef56878dc991d797b17f64c4f127c71f6e63"

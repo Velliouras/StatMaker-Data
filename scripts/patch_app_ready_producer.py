@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import tempfile
@@ -15,6 +16,7 @@ APP_DIR = Path("app/src/main/java/com/statmaker/app")
 LEGACY_REF = "origin/automation/app-ready-v2-bootstrap-20260817"
 LEGACY_PATH = "app/src/main/java/com/statmaker/app/WelcomeDataUpdater.kt"
 LEGACY_BLOB = "b329ef56878dc991d797b17f64c4f127c71f6e63"
+UAT_SOURCE = os.environ.get("APP_READY_UAT_SOURCE", "false").lower() == "true"
 
 
 def run(*args: str) -> None:
@@ -25,26 +27,25 @@ def output(*args: str) -> str:
     return subprocess.check_output(list(args), text=True).strip()
 
 
-# Pin the complete producer package to the exact pre-v6 Saturday source.
-#
-# Important: "git checkout <commit> -- <directory>" only overwrites paths that exist in the
-# target commit; it does NOT delete newer tracked files that were added later under the same
-# directory. That broke App-Ready staging as soon as production added new My Bets source files.
-# Remove the current package from both index and worktree first, then restore the exact engine
-# package from ENGINE_COMMIT. This keeps the producer contract immutable as intended.
-run("git", "fetch", "--no-tags", "origin", ENGINE_COMMIT)
-subprocess.run(
-    ["git", "rm", "-r", "-f", "--ignore-unmatch", "--", str(APP_DIR)],
-    check=True,
-    stdout=subprocess.DEVNULL,
-)
-if APP_DIR.exists():
-    import shutil
-    shutil.rmtree(APP_DIR)
-run("git", "checkout", ENGINE_COMMIT, "--", str(APP_DIR))
-unexpected = output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR))
-if unexpected:
-    raise SystemExit(f"Pre-v6 engine checkout is not exact: {unexpected}")
+# Production keeps the exact pre-v6 engine lock. Controlled UAT publishing is the only
+# opt-in mode allowed to preserve the checked-out current source so regression fixes can be
+# validated without silently rolling the engine back before compilation.
+if UAT_SOURCE:
+    print("APP_READY_UAT_CURRENT_ENGINE_OK", output("git", "rev-parse", "HEAD"))
+else:
+    run("git", "fetch", "--no-tags", "origin", ENGINE_COMMIT)
+    subprocess.run(
+        ["git", "rm", "-r", "-f", "--ignore-unmatch", "--", str(APP_DIR)],
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    if APP_DIR.exists():
+        import shutil
+        shutil.rmtree(APP_DIR)
+    run("git", "checkout", ENGINE_COMMIT, "--", str(APP_DIR))
+    unexpected = output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR))
+    if unexpected:
+        raise SystemExit(f"Pre-v6 engine checkout is not exact: {unexpected}")
 
 # Reapply the immutable off-device builder after the package checkout.
 if subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{LEGACY_REF}^{{commit}}"], stdout=subprocess.DEVNULL).returncode != 0:
@@ -95,17 +96,25 @@ if "private val combiningMarksRegex" not in text:
         text = text.replace(old, new, 1)
     normalizer.write_text(text, encoding="utf-8")
 
-# Fail fast before the expensive emulator step if any v6/schema12 recommendation contract leaked in.
+# Fail fast before the expensive emulator step if the selected contract does not match source.
 models = (APP_DIR / "PreparedPatternRecommendationModels.kt").read_text(encoding="utf-8")
 store = (APP_DIR / "PreparedBettingSnapshotStore.kt").read_text(encoding="utf-8")
-if EXPECTED_RULES not in models:
-    raise SystemExit("Expected v5 rules fingerprint is missing from producer source")
-if "pattern-policy-v2-final-read-model-v6-probability-parity-v1" in models:
+expected_rules = (
+    os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "").strip()
+    if UAT_SOURCE
+    else EXPECTED_RULES
+)
+if not expected_rules or expected_rules not in models:
+    raise SystemExit(f"Expected rules fingerprint is missing from producer source: {expected_rules!r}")
+if not UAT_SOURCE and "pattern-policy-v2-final-read-model-v6-probability-parity-v1" in models:
     raise SystemExit("v6 rules fingerprint leaked into pre-v6 producer")
 if "private const val DATABASE_VERSION = 11" not in store:
     raise SystemExit("Prepared DB schema is not v11")
 if "private const val DATABASE_VERSION = 12" in store:
-    raise SystemExit("schema12 leaked into pre-v6 producer")
+    raise SystemExit("schema12 leaked into schema11 producer")
 
-print("APP_READY_PRE_V6_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
+if UAT_SOURCE:
+    print("APP_READY_UAT_ENGINE_SOURCE_OK", output("git", "rev-parse", "HEAD"), expected_rules, "schema=11")
+else:
+    print("APP_READY_PRE_V6_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
 print("APP_READY_IDENTITY_REGEX_CACHE_OK patterns=4 semantics=unchanged")
