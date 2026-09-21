@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "aa825da70fd0fe6ef6bd45d24d8dd25c8c10a3378b411cfe216e091ab19b1319",
-  "generatedAt": "2026-09-21T15:56:32Z",
+  "contentVersion": "5538c1fdc9a71bb949151b27f8037058179bb1c011563723b7c50d75b13f4a7c",
+  "generatedAt": "2026-09-21T19:36:16.212221Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "fa279588365522c30183737ca8bbf11eda57e8b80e05a2effc705807ff1cd516",
-      "bytes": 119251,
-      "generatedAt": "2026-09-21T14:34:35Z"
+      "sha256": "ca53dadf11da6b09d9514bb41988fe2ef2b780054f0e955366bbb5fd11731ac8",
+      "bytes": 119252,
+      "generatedAt": "2026-09-21T19:36:11Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "11023e63c7dda4d376dd7ecf7e67e2ed7cf97328a3a4bdda4857e45b21017c87",
-      "bytes": 26838709,
+      "sha256": "5efa129788d5db0bcf9626a99ad36acf9d5d494acb1ba03588d1c9f020244683",
+      "bytes": 26839978,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "20498a818ed2ac1497dd0da979a223caa2bfd9d170306746ffbb0ebe4bb41a02",
-      "bytes": 8314864,
-      "generatedAt": "2026-09-21T13:16:44.841091Z"
+      "sha256": "1fd9dca1d42a412faeec6572526db0d801b4fa5afe8ab103d2a45b5e782bc64a",
+      "bytes": 8322434,
+      "generatedAt": "2026-09-21T19:36:16.212221Z"
     },
     {
       "id": "uefa_team_logos",
@@ -79,5 +79,71 @@
       "bytes": 293700,
       "generatedAt": ""
     }
-  ]
+  ],
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "5efa129788d5db0bcf9626a99ad36acf9d5d494acb1ba03588d1c9f020244683",
+    "transitions": [
+      {
+        "fromSha256": "11023e63c7dda4d376dd7ecf7e67e2ed7cf97328a3a4bdda4857e45b21017c87",
+        "toSha256": "5efa129788d5db0bcf9626a99ad36acf9d5d494acb1ba03588d1c9f020244683",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1565259,
+            "league_id": 283,
+            "league_code": "ROU",
+            "country": "Romania",
+            "league": "Liga I",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-09-21",
+            "home_team": "Oţelul",
+            "away_team": "Corvinul Hunedoara",
+            "stats": {
+              "HS": 25,
+              "AS": 18,
+              "HST": 7,
+              "AST": 7,
+              "HC": 8,
+              "AC": 8,
+              "HF": 11,
+              "AF": 23,
+              "HY": 5,
+              "AY": 6,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 60,
+              "APossession": 40,
+              "HSaves": 4,
+              "ASaves": 5,
+              "HPasses": 432,
+              "APasses": 279,
+              "HPassesAccurate": 355,
+              "APassesAccurate": 207,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 12,
+              "AShotsOffGoal": 7,
+              "HBlockedShots": 6,
+              "ABlockedShots": 4,
+              "HShotsInsideBox": 14,
+              "AShotsInsideBox": 13,
+              "HShotsOutsideBox": 11,
+              "AShotsOutsideBox": 5,
+              "HOffsides": null,
+              "AOffsides": null,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 23,
+              "AFreeKicks": 11
+            }
+          }
+        ]
+      }
+    ]
+  }
 }
