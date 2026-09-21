@@ -599,7 +599,7 @@ jobs:
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
           assert metadata.get('statmakerCommit') == '561e152bc8302bb8240131cefc65b5350522c180'
           assert metadata.get('engineContract') == 'pre-v6-schema11-v5-performance-shadow-retired-inputs-v1'
-          assert metadata.get('inputRetirementContract') == 'asian-countries-and-all-asian-handicap-markets-before-engine-v1'
+          assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
