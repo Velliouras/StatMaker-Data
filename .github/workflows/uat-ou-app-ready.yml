@@ -1,0 +1,175 @@
+name: StatMaker UAT O-U App-Ready
+
+on:
+  push:
+    branches:
+      - uat-ou-value-mispricing-20260920
+    paths:
+      - '.github/uat-ou-app-ready-trigger'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: statmaker-uat-ou-app-ready
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      UAT_BRANCH: uat-ou-value-mispricing-20260920
+      CHECKPOINT_RUN_ID: "35568142167"
+      APP_READY_PATTERN_RULES_FINGERPRINT: pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1
+      APP_READY_PREPARED_SCHEMA_VERSION: "11"
+      APP_READY_STATMAKER_COMMIT: "561e152bc8302bb8240131cefc65b5350522c180"
+      APP_READY_ARTIFACT_BRANCH: uat-ou-value-mispricing-20260920
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: uat-ou-value-mispricing-20260920
+          fetch-depth: 1
+
+      - name: Fetch canonical UEFA source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin \
+            +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+
+      - name: Restore verified prepared checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: statmaker-app-ready-prepared-checkpoint
+          path: app-ready-checkpoint
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.CHECKPOINT_RUN_ID }}
+
+      - name: Validate checkpoint contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_app_ready_prepared_contract.py \
+            app-ready-checkpoint \
+            --metadata app-ready-checkpoint/checkpoint.json \
+            --kind checkpoint
+
+      - name: Materialize O-U value candidates host-side
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf app-ready-export
+          mkdir -p app-ready-export/source
+          python scripts/materialize_app_ready_pattern_candidates.py \
+            app-ready-checkpoint \
+            app-ready-export/raw \
+            app-ready-export/source
+          python scripts/materialize_prepared_fixture_index.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
+
+      - name: Stage exact canonical source inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          s="app-ready-export/source"
+          cp data/statmaker/update_manifest.json "$s/main_manifest.json"
+          cp data/statmaker/domestic_enriched/index.json "$s/domestic_enriched_index.json"
+          cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
+          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
+          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
+          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
+          git show refs/remotes/origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
+
+      - name: Build immutable UAT bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/build_app_ready_from_device.py \
+            app-ready-export/raw \
+            app-ready-export/out \
+            app-ready-export/source
+
+      - name: Validate UAT bundle contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path=Path("app-ready-export/out/update_manifest.json")
+          manifest=json.loads(path.read_text(encoding="utf-8"))
+          metadata=manifest.get("metadata") or {}
+          expected_rules="pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
+          expected_branch="uat-ou-value-mispricing-20260920"
+          if metadata.get("preparedPatternRulesFingerprint") != expected_rules:
+              raise SystemExit("Unexpected O/U rules fingerprint")
+          if int(metadata.get("preparedPatternCandidateCount") or 0) <= 0:
+              raise SystemExit("UAT candidate generation is empty")
+          if int(metadata.get("preparedPatternRecommendationEligibleCount") or 0) <= 0:
+              raise SystemExit("UAT eligible recommendation set is empty")
+          artifacts=manifest.get("artifacts") or []
+          if len(artifacts) != 2:
+              raise SystemExit("Expected exactly two App-Ready artifacts")
+          trusted=f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{expected_branch}/data/statmaker/app_ready/"
+          bad=[str(item.get("url") or "") for item in artifacts if not str(item.get("url") or "").startswith(trusted)]
+          if bad:
+              raise SystemExit("UAT artifact URL isolation failed: " + ",".join(bad))
+          print(
+              "UAT_OU_BUNDLE_OK",
+              "generation="+str(metadata.get("preparedPatternGenerationId") or "")[:12],
+              "candidates="+str(metadata.get("preparedPatternCandidateCount") or 0),
+              "eligible="+str(metadata.get("preparedPatternRecommendationEligibleCount") or 0),
+          )
+          PY
+
+      - name: Verify canonical sources did not change
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+          git fetch --no-tags --depth=1 origin \
+            +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+          python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+
+          built=json.loads(Path("app-ready-export/out/update_manifest.json").read_text())
+          meta=built.get("metadata") or {}
+          current_main=json.loads(subprocess.check_output(
+              ["git","show","refs/remotes/origin/main:data/statmaker/update_manifest.json"],
+              text=True,
+          ))
+          current_uefa=json.loads(subprocess.check_output(
+              ["git","show","refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json"],
+              text=True,
+          ))
+          if str(meta.get("mainContentVersion") or "") != str(current_main.get("contentVersion") or ""):
+              raise SystemExit("Domestic source changed during UAT build")
+          if str(meta.get("uefaContentVersion") or "") != str(current_uefa.get("contentVersion") or ""):
+              raise SystemExit("UEFA source changed during UAT build")
+          print("UAT_OU_SOURCE_GUARD_OK")
+          PY
+
+      - name: Publish only to UAT data branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          dst="data/statmaker/app_ready"
+          mkdir -p "$dst"
+          cp app-ready-export/out/app_ready_*_bundle-*.zip "$dst/"
+          cp app-ready-export/out/update_manifest.json "$dst/update_manifest.json"
+
+          git config user.name "StatMaker UAT Artifact Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/statmaker/app_ready
+          if git diff --cached --quiet; then
+            echo "UAT_OU_ALREADY_PUBLISHED"
+            exit 0
+          fi
+          git commit -m "Publish UAT O-U value App-Ready read models"
+          git push origin HEAD:uat-ou-value-mispricing-20260920
