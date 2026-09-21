@@ -59,33 +59,44 @@ jobs:
         run: |
           python scripts/materialize_uat_direction_pattern_candidates.py             app-ready-checkpoint             app-ready-export/raw             app-ready-export/source
 
-      - name: Reconstruct checkpoint retirement inputs
+      - name: Stage exact checkpoint Domestic index
         shell: bash
         run: |
           set -euo pipefail
-          CHECKPOINT_DATA_COMMIT="013a4e33840a479084aeba40782fc4436ab814ef"
-          EXPECTED_INDEX_BLOB="f26216be87850428c9acfde27a4970c4e50cfc87"
-          root="app-ready-retirement-root"
-          rm -rf "$root"
-          mkdir -p "$root/data/statmaker/domestic_enriched" "$root/odds/odds_api_io"
-
+          CHECKPOINT_DATA_COMMIT="0f83f0cb850c11472bb71a38ee171d9d324be531"
+          EXPECTED_INDEX_BLOB="b4b2391744be26a5d7998322676364f80a434218"
           git fetch --no-tags --depth=1 origin "$CHECKPOINT_DATA_COMMIT"
           actual_blob="$(git rev-parse "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json")"
           [[ "$actual_blob" == "$EXPECTED_INDEX_BLOB" ]] || {
             echo "Checkpoint Domestic index blob mismatch: $actual_blob" >&2
             exit 1
           }
+          git show "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json" \
+            > app-ready-export/source/domestic_enriched_index.json
 
-          git show "$CHECKPOINT_DATA_COMMIT:data/statmaker/domestic_enriched/index.json"             > "$root/data/statmaker/domestic_enriched/index.json"
-          cp app-ready-export/source/domestic.json "$root/odds/odds_api_io/domestic_odds.json"
-          cp app-ready-export/source/main_manifest.json "$root/data/statmaker/update_manifest.json"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('app-ready-export/source/domestic_enriched_index.json').read_text(encoding='utf-8'))
+          rows=payload.get('leagues',[])
+          codes={
+              str(row.get('leagueCode') or row.get('league_code') or '').strip().upper()
+              for row in rows if isinstance(row,dict)
+          }
+          required={'CHN','JPN','KOR','SAU','UAE'}
+          missing=sorted(required-codes)
+          if missing:
+              raise SystemExit('Checkpoint index lost Asian competitions: '+','.join(missing))
+          print('APP_READY_HOST_ASIAN_COMPETITIONS_PRESERVED_OK',','.join(sorted(required)))
+          PY
 
-          python scripts/app_ready_input_retirement.py --root "$root"
-          python scripts/app_ready_input_retirement.py --root "$root" --check-only
+      - name: Validate materialized market-only retirement contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_app_ready_retirement_contract.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-          cp "$root/data/statmaker/domestic_enriched/index.json"             app-ready-export/source/domestic_enriched_index.json
-          cp "$root/odds/odds_api_io/domestic_odds.json"             app-ready-export/source/domestic.json
-          cp "$root/data/statmaker/update_manifest.json"             app-ready-export/source/main_manifest.json
 
 
       - name: Build isolated UAT bundles
