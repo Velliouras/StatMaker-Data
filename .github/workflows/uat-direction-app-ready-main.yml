@@ -54,6 +54,26 @@ jobs:
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
 
+      - name: Verify Asian competitions remain in scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          rows=payload.get('leagues',[])
+          codes={
+              str(row.get('leagueCode') or row.get('league_code') or '').strip().upper()
+              for row in rows if isinstance(row,dict)
+          }
+          required={'CHN','JPN','KOR','SAU','UAE'}
+          missing=sorted(required-codes)
+          if missing:
+              raise SystemExit('Asian competitions were removed from App-Ready scope: '+','.join(missing))
+          print('APP_READY_ASIAN_COMPETITIONS_PRESERVED_OK',','.join(sorted(required)))
+          PY
+
       - name: Fetch canonical UEFA source
         shell: bash
         run: |
@@ -161,6 +181,16 @@ jobs:
           retention-days: 2
           compression-level: 6
           overwrite: true
+
+      - name: Verify clean UAT prepared retirement contract
+        if: steps.source.outputs.resume_run_id == ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_app_ready_retirement_contract.py \
+            app-ready-checkpoint/databases/statmaker_prepared_betting.db
+          python scripts/verify_uat_direction_evidence.py \
+            app-ready-checkpoint/databases/statmaker_prepared_betting.db
 
       - name: Materialize corrected UAT recommendations host-side
         if: steps.source.outputs.resume_run_id == ''
