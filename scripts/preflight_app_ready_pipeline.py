@@ -10,8 +10,7 @@ from pathlib import Path
 
 
 EXPECTED_SCHEMA = 11
-EXPECTED_SOURCE_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
+EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
 FORBIDDEN_TARGET_MARKERS = (
     "d06364ab2625815aeafcb48ae93d6a328f7d6ac5",
@@ -90,7 +89,7 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
 
     require_markers(
         stage,
-        (EXPECTED_STATMAKER_COMMIT, EXPECTED_SOURCE_RULES, 'PREPARED_SCHEMA="11"'),
+        (EXPECTED_STATMAKER_COMMIT, EXPECTED_RULES, 'PREPARED_SCHEMA="11"'),
         "producer stage",
         report,
     )
@@ -179,7 +178,7 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
             / "app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt",
             report,
         )
-        require_markers(models, (EXPECTED_SOURCE_RULES,), "staged recommendation models", report)
+        require_markers(models, (EXPECTED_RULES,), "staged recommendation models", report)
         require_markers(
             store,
             ("private const val DATABASE_VERSION = 11",),
@@ -204,7 +203,7 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
 
     if not report.errors:
         report.note(
-            "source=pre-v6 schema=11 source_rules=" + EXPECTED_SOURCE_RULES + " final_rules=" + EXPECTED_RULES
+            "contract=pre-v6 schema=11 rules=" + EXPECTED_RULES
         )
         report.note("old posterior/value-tier materializer semantics present")
         report.note("Asian/Handicap retirement ordered before producer")

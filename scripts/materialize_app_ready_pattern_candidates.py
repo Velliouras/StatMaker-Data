@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -123,49 +123,6 @@ FAMILY_ORDER = {
     "Fouls": 15,
     "Half-time Goals": 16,
 }
-
-DIRECT_OU_SUB_MARKETS = {
-    "FULL_TIME_MATCH_TOTAL",
-    "HOME_TEAM_TOTAL", "AWAY_TEAM_TOTAL", "TEAM_TOTAL",
-    "FIRST_HALF_MATCH_TOTAL",
-    "HOME_TEAM_1H_TOTAL", "AWAY_TEAM_1H_TOTAL", "TEAM_1H_TOTAL",
-    "SECOND_HALF_MATCH_TOTAL",
-    "HOME_TEAM_2H_TOTAL", "AWAY_TEAM_2H_TOTAL", "TEAM_2H_TOTAL",
-    "MATCH_CORNERS_TOTAL",
-    "HOME_TEAM_CORNERS", "AWAY_TEAM_CORNERS", "TEAM_CORNERS",
-    "MATCH_CARDS_TOTAL",
-    "HOME_TEAM_CARDS", "AWAY_TEAM_CARDS", "TEAM_CARDS",
-    "MATCH_YELLOW_CARDS_TOTAL",
-    "HOME_TEAM_YELLOW_CARDS", "AWAY_TEAM_YELLOW_CARDS", "TEAM_YELLOW_CARDS",
-    "MATCH_SHOTS_TOTAL",
-    "HOME_TEAM_SHOTS", "AWAY_TEAM_SHOTS", "TEAM_SHOTS",
-    "MATCH_SOT_TOTAL",
-    "HOME_TEAM_SOT", "AWAY_TEAM_SOT", "TEAM_SOT",
-    "MATCH_FOULS_TOTAL",
-    "HOME_TEAM_FOULS", "AWAY_TEAM_FOULS", "TEAM_FOULS",
-}
-DIRECT_OU_MIN_SAMPLE = {
-    "HOME_TEAM_1H_TOTAL": 6,
-    "AWAY_TEAM_1H_TOTAL": 6,
-    "TEAM_1H_TOTAL": 6,
-    "SECOND_HALF_MATCH_TOTAL": 6,
-    "HOME_TEAM_2H_TOTAL": 6,
-    "AWAY_TEAM_2H_TOTAL": 6,
-    "TEAM_2H_TOTAL": 6,
-    "MATCH_YELLOW_CARDS_TOTAL": 7,
-    "HOME_TEAM_YELLOW_CARDS": 7,
-    "AWAY_TEAM_YELLOW_CARDS": 7,
-    "TEAM_YELLOW_CARDS": 7,
-}
-
-
-def is_direct_ou(sub_market_key, selection_side):
-    return selection_side in {"OVER", "UNDER"} and sub_market_key in DIRECT_OU_SUB_MARKETS
-
-
-def direct_ou_maturity_and_price_ok(sub_market_key, sample, odd):
-    return sample >= DIRECT_OU_MIN_SAMPLE.get(sub_market_key, 5) and odd <= 10.0
-
 
 COUNTRY_CONTINENT = {}
 for value in (
@@ -492,41 +449,6 @@ def selection_score(identity_family, sub_market_key, selection_side, odd, sample
     )
 
 
-def bookmaker_mispricing_signal(market_probability, posterior, sample_reliability, odd):
-    if market_probability is None or posterior is None:
-        return None
-    if not (0.01 <= market_probability <= 0.99 and 0.01 <= posterior <= 0.99):
-        return None
-    edge = posterior - market_probability
-    expected_value = posterior * odd - 1.0
-    if edge < 0.04 or expected_value < 0.05:
-        return None
-    # Keep the exact reliability shape already used by the existing App-Ready Value tier.
-    reliability = max(0.0, min(1.0, sample_reliability)) * 0.55 + 0.21
-    low_odds_penalty = 0.0
-    if odd < 1.50:
-        low_odds_penalty = max(0.0, min(1.0, (1.50 - odd) / (1.50 - 1.20))) * 0.12
-    normalized_ev = max(0.0, min(1.0, (expected_value - 0.05) / 0.25))
-    normalized_edge = max(0.0, min(1.0, (edge - 0.04) / 0.12))
-    ranking_score = max(
-        0.0,
-        min(
-            1.0,
-            normalized_ev * 0.42
-            + normalized_edge * 0.30
-            + reliability * 0.28
-            - low_odds_penalty,
-        ),
-    )
-    if ranking_score >= 0.66 and reliability >= 0.60:
-        tier = "STRONG_VALUE"
-    elif ranking_score >= 0.42:
-        tier = "VALUE"
-    else:
-        tier = "LEAN_VALUE"
-    return tier, ranking_score
-
-
 def value_tier(market_probability, posterior, sample_reliability, odd):
     if market_probability is None or posterior is None:
         return None
@@ -699,10 +621,9 @@ def materialize(checkpoint_root, raw_root):
                identity_source_market, identity_team, identity_selection_token,
                score_value, score_tier, score_bookmaker_base,
                score_model_adjustment, score_trend_adjustment,
-               qualifies_pattern, qualifies_builder
+               qualifies_builder
         FROM prepared_selections
-        WHERE competition_id=? AND snapshot_version=?
-          AND (qualifies_pattern=1 OR identity_selection_side IN ('OVER','UNDER'))
+        WHERE competition_id=? AND snapshot_version=? AND qualifies_pattern=1
         ORDER BY rowid
     """
 
@@ -734,15 +655,11 @@ def materialize(checkpoint_root, raw_root):
                 _source_market, identity_team, selection_token,
                 evidence_score, _score_tier, _score_bookmaker_base,
                 _score_model_adjustment, _score_trend_adjustment,
-                qualifies_pattern, _qualifies_builder,
+                _qualifies_builder,
             ) = row
             order = source_order
             source_order += 1
             count += 1
-
-            direct_ou = is_direct_ou(str(sub_market_key), str(selection_side))
-            if not bool(qualifies_pattern) and not direct_ou:
-                continue
 
             required = (
                 hits, sample, hit_rate, market_probability, posterior_probability,
@@ -750,11 +667,9 @@ def materialize(checkpoint_root, raw_root):
                 identity_family, sub_market_key, selection_side, evidence_score,
             )
             if any(value is None for value in required):
-                if bool(qualifies_pattern):
-                    raise SystemExit(
-                        f"Prepared PATTERN row is missing persisted scalar evidence: {competition_id}:{selection_key}"
-                    )
-                continue
+                raise SystemExit(
+                    f"Prepared PATTERN row is missing persisted scalar evidence: {competition_id}:{selection_key}"
+                )
 
             match = matches.get(str(prepared_match_key))
             if match is None:
@@ -770,30 +685,11 @@ def materialize(checkpoint_root, raw_root):
             normalized_positive_edge = float(normalized_positive_edge)
             evidence_score = float(evidence_score)
 
-            direct_signal = (
-                bookmaker_mispricing_signal(
-                    float(market_probability),
-                    posterior_probability,
-                    sample_reliability,
-                    odd,
-                )
-                if direct_ou
-                else None
-            )
-            direct_value_rescue = (
-                direct_signal is not None
-                and direct_signal[0] in {"STRONG_VALUE", "VALUE"}
-                and direct_ou_maturity_and_price_ok(str(sub_market_key), sample, odd)
-            )
-            eligible = (
-                (bool(qualifies_pattern) or direct_value_rescue)
-                and odd >= 1.20
-                and sane_exact_odd(
-                    str(identity_family),
-                    str(selection_side),
-                    None if identity_line is None else float(identity_line),
-                    odd,
-                )
+            eligible = odd >= 1.20 and sane_exact_odd(
+                str(identity_family),
+                str(selection_side),
+                None if identity_line is None else float(identity_line),
+                odd,
             )
             runtime_match_key = f"{match.get('date', '')}|{match.get('homeTeam', '')}|{match.get('awayTeam', '')}"
             maturity = None
@@ -826,34 +722,26 @@ def materialize(checkpoint_root, raw_root):
                     market_filter_label(str(identity_family)),
                     odd,
                     exact_key,
-                    (
-                        direct_signal[1]
-                        if direct_signal is not None
-                        else selection_score(
-                            str(identity_family),
-                            str(sub_market_key),
-                            str(selection_side),
-                            odd,
-                            sample,
-                            hits,
-                            posterior_probability,
-                            sample_reliability,
-                            normalized_positive_edge,
-                        )
+                    selection_score(
+                        str(identity_family),
+                        str(sub_market_key),
+                        str(selection_side),
+                        odd,
+                        sample,
+                        hits,
+                        posterior_probability,
+                        sample_reliability,
+                        normalized_positive_edge,
                     ),
                     evidence_score,
                     order,
                     hit_rate,
                     sample,
-                    (
-                        direct_signal[0]
-                        if direct_signal is not None
-                        else value_tier(
-                            float(market_probability),
-                            posterior_probability,
-                            sample_reliability,
-                            odd,
-                        )
+                    value_tier(
+                        float(market_probability),
+                        posterior_probability,
+                        sample_reliability,
+                        odd,
                     ),
                     1 if eligible else 0,
                     1 if premium else 0,
