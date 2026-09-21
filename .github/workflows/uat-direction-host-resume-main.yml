@@ -1,0 +1,135 @@
+name: StatMaker UAT Direction Host Resume Main
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/app-ready-uat-direction-host-trigger'
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: statmaker-uat-direction-host-resume-main
+  cancel-in-progress: false
+
+env:
+  APP_READY_UAT_SOURCE: "true"
+  APP_READY_STATMAKER_COMMIT: "1f0ca22bfab9d45aacadd1bf27de16b9b0420565"
+  APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2"
+  APP_READY_PREPARED_SCHEMA_VERSION: "11"
+  APP_READY_PUBLISH_SUBDIR: "data/statmaker/app_ready_uat/ou-direction-v2"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve checkpoint run
+        id: checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id="$(sed -n '1p' .github/app-ready-uat-direction-host-trigger | tr -d '\r\n')"
+          [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "Invalid checkpoint run id: $run_id" >&2; exit 1; }
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+
+      - name: Restore clean prepared checkpoint
+        uses: actions/download-artifact@v4
+        with:
+          name: statmaker-uat-direction-checkpoint
+          path: app-ready-checkpoint
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ steps.checkpoint.outputs.run_id }}
+
+      - name: Validate clean checkpoint contract
+        run: |
+          python scripts/validate_app_ready_prepared_contract.py             app-ready-checkpoint             --metadata app-ready-checkpoint/checkpoint.json             --kind checkpoint
+
+      - name: Verify corrected Seattle direction evidence
+        run: python scripts/verify_uat_direction_evidence.py app-ready-checkpoint/databases/statmaker_prepared_betting.db
+
+      - name: Materialize UAT recommendations host-side
+        run: |
+          python scripts/materialize_uat_direction_pattern_candidates.py             app-ready-checkpoint             app-ready-export/raw             app-ready-export/source
+
+      - name: Stage checkpoint-matching Domestic index
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp data/statmaker/domestic_enriched/index.json app-ready-export/source/domestic_enriched_index.json
+
+      - name: Build isolated UAT bundles
+        run: |
+          python scripts/build_uat_app_ready_from_device.py             app-ready-export/raw             app-ready-export/out             app-ready-export/source
+
+      - name: Publish isolated UAT artifacts to Data main
+        shell: bash
+        run: |
+          set -euo pipefail
+          src="app-ready-export/out"
+          rel="$APP_READY_PUBLISH_SUBDIR"
+          staging="$(mktemp -d)"
+          mkdir -p "$staging/payload"
+          cp "$src"/app_ready_*_bundle-*.zip "$staging/payload/"
+          cp "$src/update_manifest.json" "$staging/payload/update_manifest.json"
+
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            rm -rf "$rel"
+            mkdir -p "$(dirname "$rel")"
+            cp -a "$staging/payload" "$rel"
+            git add "$rel"
+            if git diff --cached --quiet; then
+              echo "APP_READY_UAT_HOST_ALREADY_PUBLISHED"
+              published=true
+              break
+            fi
+            git config user.name "StatMaker UAT Artifact Bot"
+            git config user.email "actions@users.noreply.github.com"
+            git commit -m "Publish corrected UAT direction app-ready artifacts"
+            if git push origin HEAD:main; then
+              echo "APP_READY_UAT_HOST_PUBLISH_OK attempt=$attempt"
+              published=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$published" == "true" ]] || { echo "UAT host artifact publish failed" >&2; exit 1; }
+
+      - name: Verify published manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git show refs/remotes/origin/main:"$APP_READY_PUBLISH_SUBDIR/update_manifest.json" > /tmp/uat_manifest.json
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          m=json.loads(Path('/tmp/uat_manifest.json').read_text())
+          md=m.get('metadata',{})
+          assert m.get('profile') == 'app_ready_uat'
+          assert md.get('uatProfile') == 'ou-direction-v2'
+          assert md.get('statmakerCommit') == os.environ['APP_READY_STATMAKER_COMMIT']
+          assert md.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
+          assert int(md.get('preparedPatternCandidateCount') or 0) > 0
+          assert int(md.get('preparedPatternRecommendationEligibleCount') or 0) > 0
+          assert len(m.get('artifacts',[])) == 2
+          prefix='https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready_uat/ou-direction-v2/'
+          assert all(str(x.get('url') or '').startswith(prefix) for x in m['artifacts'])
+          print(
+              'APP_READY_UAT_HOST_REMOTE_OK',
+              md.get('statmakerCommit'),
+              md.get('preparedPatternRulesFingerprint'),
+              'candidates='+str(md.get('preparedPatternCandidateCount')),
+              'eligible='+str(md.get('preparedPatternRecommendationEligibleCount')),
+          )
+          PY
