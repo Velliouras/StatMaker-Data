@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2-ou-quality-gate-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -783,13 +783,15 @@ def materialize(checkpoint_root, raw_root):
                 if direct_ou
                 else None
             )
-            direct_value_rescue = (
-                direct_signal is not None
+            direct_value_eligible = (
+                bool(qualifies_pattern)
+                and evidence_score >= 0.54
+                and direct_signal is not None
                 and direct_signal[0] in {"STRONG_VALUE", "VALUE"}
                 and direct_ou_maturity_and_price_ok(str(sub_market_key), sample, odd)
             )
             if direct_ou:
-                if not direct_value_rescue:
+                if not direct_value_eligible:
                     continue
                 base_recommendation_eligible = True
             else:
@@ -853,7 +855,7 @@ def materialize(checkpoint_root, raw_root):
                             normalized_positive_edge,
                         )
                     ),
-                    (direct_signal[1] if direct_signal is not None else evidence_score),
+                    evidence_score,
                     order,
                     hit_rate,
                     sample,
@@ -943,8 +945,31 @@ def materialize(checkpoint_root, raw_root):
             (generation_id,),
         ).fetchone()[0]
     )
+    invalid_direct_quality = int(
+        connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM prepared_pattern_candidates c
+            JOIN prepared_selections s
+              ON s.competition_id=c.competition_id
+             AND s.snapshot_version=c.snapshot_version
+             AND s.selection_key=c.selection_key
+            WHERE c.generation_id=?
+              AND c.recommendation_eligible=1
+              AND s.identity_selection_side IN ('OVER','UNDER')
+              AND s.identity_line IS NOT NULL
+              AND c.evidence_score < 0.54
+            """,
+            (generation_id,),
+        ).fetchone()[0]
+    )
     quick = connection.execute("PRAGMA quick_check").fetchone()
     connection.close()
+    if invalid_direct_quality:
+        raise SystemExit(
+            "Direct O/U quality regression: "
+            f"{invalid_direct_quality} eligible rows have evidence_score < 0.54"
+        )
     if actual != len(candidates) or not quick or quick[0] != "ok":
         raise SystemExit(
             f"Host candidate materialization validation failed: expected={len(candidates)} actual={actual} quick={quick}"
