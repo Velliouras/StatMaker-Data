@@ -180,7 +180,7 @@ for item in artifacts:
 
 metadata = manifest.setdefault("metadata", {})
 metadata["statmakerCommit"] = EXPECTED_STATMAKER_COMMIT
-metadata["engineContract"] = "uat-current-source-direction-token-v2"
+metadata["engineContract"] = "uat-current-source-direction-token-v2-ou-quality-gate-v1"
 metadata["inputRetirementContract"] = "asian-and-handicap-market-types-only-before-engine-v2"
 metadata["uatProfile"] = "ou-direction-v2"
 manifest["profile"] = "app_ready_uat"
