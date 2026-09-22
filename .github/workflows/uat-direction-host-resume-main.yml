@@ -16,8 +16,8 @@ concurrency:
 
 env:
   APP_READY_UAT_SOURCE: "true"
-  APP_READY_STATMAKER_COMMIT: "1f0ca22bfab9d45aacadd1bf27de16b9b0420565"
-  APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2"
+  APP_READY_STATMAKER_COMMIT: "79a3726fdbad69737bfc2570619ceec3357b3f09"
+  APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2-ou-quality-gate-v1"
   APP_READY_PREPARED_SCHEMA_VERSION: "11"
   APP_READY_PUBLISH_SUBDIR: "data/statmaker/app_ready_uat/ou-direction-v2"
 
@@ -49,6 +49,9 @@ jobs:
           run-id: ${{ steps.checkpoint.outputs.run_id }}
 
       - name: Validate clean checkpoint contract
+        env:
+          APP_READY_STATMAKER_COMMIT: "1f0ca22bfab9d45aacadd1bf27de16b9b0420565"
+          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2"
         run: |
           python scripts/validate_app_ready_prepared_contract.py             app-ready-checkpoint             --metadata app-ready-checkpoint/checkpoint.json             --kind checkpoint
 
