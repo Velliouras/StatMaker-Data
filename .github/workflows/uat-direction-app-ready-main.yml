@@ -171,17 +171,6 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
 
-      - name: Preserve failure checkpoint for diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-uat-direction-checkpoint
-          path: app-ready-checkpoint
-          if-no-files-found: ignore
-          retention-days: 2
-          compression-level: 6
-          overwrite: true
-
       - name: Verify clean UAT prepared retirement contract
         if: steps.source.outputs.resume_run_id == ''
         shell: bash
