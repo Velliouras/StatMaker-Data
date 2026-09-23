@@ -288,7 +288,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat.local
-          APP_READY_STATMAKER_COMMIT: "561e152bc8302bb8240131cefc65b5350522c180"
+          # Must match the approved PROD engine staged above; do not pin this step to an older engine.
+          APP_READY_STATMAKER_COMMIT: "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
           APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
           APP_READY_PREPARED_SCHEMA_VERSION: "11"
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
@@ -588,7 +589,7 @@ jobs:
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 11
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
-          assert metadata.get('statmakerCommit') == '561e152bc8302bb8240131cefc65b5350522c180'
+          assert metadata.get('statmakerCommit') == '5b7483d772a4cafc5715d5434bc3cdcf82cc1959'
           assert metadata.get('engineContract') == 'pre-v6-schema11-v5-performance-shadow-retired-inputs-v1'
           assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
