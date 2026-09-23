@@ -319,17 +319,6 @@ jobs:
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Persist resumable prepared checkpoint
-        if: always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-app-ready-prepared-checkpoint
-          path: app-ready-checkpoint
-          if-no-files-found: ignore
-          retention-days: 3
-          compression-level: 6
-          overwrite: true
-
       - name: Stage canonical repository inputs
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         shell: bash
