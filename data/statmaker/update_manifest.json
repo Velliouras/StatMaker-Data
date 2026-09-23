@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "34ff4311441d23bd99d67b0a584280447826b773ab663584afc14dbd5f45b6e3",
-  "generatedAt": "2026-09-22T23:38:27Z",
+  "contentVersion": "3efe7874cb5fd69a08c29551c438503f2198d63a782243d4da7f176ecf1cd752",
+  "generatedAt": "2026-09-23T01:36:59.929194Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "d4cb3f4a2b0fc2092418e9942b1125a18da332de62cf707c3cdb62e0a544fb5e",
+      "sha256": "5f9fef3e263f75d6e3ee7d34e20ef7d4b4fd8907fb1ea762279534b7e8d3ba5c",
       "bytes": 119253,
-      "generatedAt": "2026-09-22T22:27:09Z"
+      "generatedAt": "2026-09-23T01:36:53Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "8fe74fd52e0bd311c90cc9958fd05e6f7e4aef87a08eaa827a3c3c8ac490ecdc",
-      "bytes": 26848929,
+      "sha256": "276b0f8909a79bc43baf009ee3f2483e8bb5be984fbb73baa56cc044d24fd5d7",
+      "bytes": 26850180,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "376764c07811ff568f82702f52007a2deeb7efc225716606e99ec81a7842cf02",
-      "bytes": 8323043,
-      "generatedAt": "2026-09-22T12:02:48.162261Z"
+      "sha256": "264efc1c6eb8c59f3b9fa009883369396358abfce5810642f661123955262699",
+      "bytes": 8323095,
+      "generatedAt": "2026-09-23T01:36:59.929194Z"
     },
     {
       "id": "uefa_team_logos",
@@ -79,5 +79,71 @@
       "bytes": 293700,
       "generatedAt": ""
     }
-  ]
+  ],
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "276b0f8909a79bc43baf009ee3f2483e8bb5be984fbb73baa56cc044d24fd5d7",
+    "transitions": [
+      {
+        "fromSha256": "8fe74fd52e0bd311c90cc9958fd05e6f7e4aef87a08eaa827a3c3c8ac490ecdc",
+        "toSha256": "276b0f8909a79bc43baf009ee3f2483e8bb5be984fbb73baa56cc044d24fd5d7",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1520882,
+            "league_id": 72,
+            "league_code": "BRA2",
+            "country": "Brazil",
+            "league": "Serie B",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-09-22",
+            "home_team": "Criciuma",
+            "away_team": "Operario-PR",
+            "stats": {
+              "HS": 26,
+              "AS": 5,
+              "HST": 4,
+              "AST": 2,
+              "HC": 17,
+              "AC": 2,
+              "HF": 17,
+              "AF": 13,
+              "HY": 3,
+              "AY": 2,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 67,
+              "APossession": 33,
+              "HSaves": 0,
+              "ASaves": 5,
+              "HPasses": 493,
+              "APasses": 255,
+              "HPassesAccurate": 416,
+              "APassesAccurate": 170,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 15,
+              "AShotsOffGoal": 2,
+              "HBlockedShots": 7,
+              "ABlockedShots": 1,
+              "HShotsInsideBox": 15,
+              "AShotsInsideBox": 2,
+              "HShotsOutsideBox": 11,
+              "AShotsOutsideBox": 3,
+              "HOffsides": 3,
+              "AOffsides": 0,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 13,
+              "AFreeKicks": 17
+            }
+          }
+        ]
+      }
+    ]
+  }
 }
