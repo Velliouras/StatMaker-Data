@@ -87,9 +87,11 @@ jobs:
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
           expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
           expected_schema=11
+          expected_statmaker_commit='5b7483d772a4cafc5715d5434bc3cdcf82cc1959'
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
-              int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema
+              int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema or
+              str(m.get('statmakerCommit') or '') != expected_statmaker_commit
           )
           generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
