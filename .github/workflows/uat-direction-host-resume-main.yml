@@ -141,16 +141,6 @@ jobs:
         run: |
           python scripts/build_uat_app_ready_from_device.py             app-ready-export/raw             app-ready-export/out             app-ready-export/source
 
-      - name: Upload diagnostic UAT bundles
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-uat-direction-built-bundles
-          path: app-ready-export/out
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
-          overwrite: true
-
       - name: Publish isolated UAT artifacts to Data main
         shell: bash
         run: |
