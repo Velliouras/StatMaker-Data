@@ -6,9 +6,9 @@ PRIVATE_ROOT="${1:-statmaker-private}"
 cd "$PRIVATE_ROOT"
 
 # This is the only supported App-Ready producer contract. The temporary checkout
-# is pinned to the verified pre-v6 source while current UI/application code remains
-# untouched. Asian scopes and all Asian/Handicap markets are retired from the Data
-# inputs before this producer executes.
+# is pinned to the approved PROD 0.1.5/schema11 source so App-Ready generation uses
+# the same approved recommendation fixes as the installed production app. Asian scopes
+# and all Asian/Handicap markets are retired from the Data inputs before this producer executes.
 UAT_SOURCE="${APP_READY_UAT_SOURCE:-false}"
 PREPARED_SCHEMA="11"
 if [[ "$UAT_SOURCE" == "true" ]]; then
@@ -24,7 +24,7 @@ print(match.group(1))
 PY
 )"
 else
-  STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+  STATMAKER_COMMIT="5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
   RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 fi
 export APP_READY_STATMAKER_COMMIT="$STATMAKER_COMMIT"
