@@ -22,7 +22,7 @@ print(match.group(1))
 PY
 )"
 else
-  EXPECTED_STATMAKER_COMMIT="561e152bc8302bb8240131cefc65b5350522c180"
+  EXPECTED_STATMAKER_COMMIT="5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
   EXPECTED_RULES_FINGERPRINT="pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 fi
 if [[ "$APP_READY_STATMAKER_COMMIT" != "$EXPECTED_STATMAKER_COMMIT" ||
