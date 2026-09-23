@@ -11,7 +11,7 @@ from pathlib import Path
 
 HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
 EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+EXPECTED_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
 ENGINE_CONTRACT = "pre-v6-schema11-v5-performance-shadow-retired-inputs-v1"
 RETIREMENT_CONTRACT = "asian-and-handicap-market-types-only-before-engine-v2"
 
