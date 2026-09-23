@@ -1,0 +1,36 @@
+name: One-time Actions Artifact Cleanup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/artifact-cleanup-trigger'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Delete all repository Actions artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo="${GITHUB_REPOSITORY}"
+          deleted=0
+          while :; do
+            ids="$(gh api "/repos/$repo/actions/artifacts?per_page=100&page=1" --jq '.artifacts[].id')"
+            [[ -n "$ids" ]] || break
+            for id in $ids; do
+              gh api --method DELETE "/repos/$repo/actions/artifacts/$id"
+              deleted=$((deleted + 1))
+            done
+          done
+          remaining="$(gh api "/repos/$repo/actions/artifacts?per_page=1" --jq '.total_count')"
+          echo "ARTIFACT_CLEANUP deleted=$deleted remaining=$remaining"
+          [[ "$remaining" == "0" ]]
