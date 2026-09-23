@@ -56,10 +56,3 @@ jobs:
           done
           printf '%s\n' "$(cd statmaker-private && git rev-parse HEAD)" > export/UAT_HEAD.txt
 
-      - name: Upload source-only artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-uat-model-performance-sources
-          path: export
-          if-no-files-found: error
-          retention-days: 1
