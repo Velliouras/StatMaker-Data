@@ -12,7 +12,7 @@ from pathlib import Path
 
 EXPECTED_SCHEMA = 11
 PROD_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-PROD_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+PROD_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
 UAT_SOURCE = os.environ.get("APP_READY_UAT_SOURCE", "false").lower() == "true"
 if UAT_SOURCE:
     EXPECTED_RULES = os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "").strip()
