@@ -8,8 +8,9 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-# Trigger after the pre-v6 validator path fix; recommendation semantics are unchanged.
-ENGINE_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+# Approved PROD 0.1.5/schema11 source. Keep App-Ready generation pinned to the
+# exact production release so recommendation evidence cannot silently regress to an older engine.
+ENGINE_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
 HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
 EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 APP_DIR = Path("app/src/main/java/com/statmaker/app")
@@ -27,9 +28,9 @@ def output(*args: str) -> str:
     return subprocess.check_output(list(args), text=True).strip()
 
 
-# Production keeps the exact pre-v6 engine lock. Controlled UAT publishing is the only
-# opt-in mode allowed to preserve the checked-out current source so regression fixes can be
-# validated without silently rolling the engine back before compilation.
+# Production keeps an exact approved PROD/schema11 engine lock. Controlled UAT publishing is the only
+# opt-in mode allowed to preserve the checked-out current source. The production pin must never point
+# behind approved recommendation fixes, otherwise App-Ready rows can disagree with the installed app.
 if UAT_SOURCE:
     print("APP_READY_UAT_CURRENT_ENGINE_OK", output("git", "rev-parse", "HEAD"))
 else:
@@ -45,7 +46,7 @@ else:
     run("git", "checkout", ENGINE_COMMIT, "--", str(APP_DIR))
     unexpected = output("git", "diff", "--name-only", ENGINE_COMMIT, "--", str(APP_DIR))
     if unexpected:
-        raise SystemExit(f"Pre-v6 engine checkout is not exact: {unexpected}")
+        raise SystemExit(f"Approved PROD engine checkout is not exact: {unexpected}")
 
 # Reapply the immutable off-device builder after the package checkout.
 if subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{LEGACY_REF}^{{commit}}"], stdout=subprocess.DEVNULL).returncode != 0:
@@ -113,8 +114,23 @@ if "private const val DATABASE_VERSION = 11" not in store:
 if "private const val DATABASE_VERSION = 12" in store:
     raise SystemExit("schema12 leaked into schema11 producer")
 
+# Regression guard: the approved Seattle Sounders/Hannover direction fix and the two
+# approved direct O/U gates must be present in the source that actually builds App-Ready.
+market_identity = (APP_DIR / "MarketIdentity.kt").read_text(encoding="utf-8")
+pattern_matcher = (APP_DIR / "PatternOddsMatcher.kt").read_text(encoding="utf-8")
+value_policy = (APP_DIR / "BettingValueSignalPolicy.kt").read_text(encoding="utf-8")
+evidence_score = (APP_DIR / "BettingEvidenceScore.kt").read_text(encoding="utf-8")
+if "internal fun marketTotalDirectionToken(value: String): MarketSelectionSide?" not in market_identity:
+    raise SystemExit("Approved O/U direction-token regression fix is missing from App-Ready producer")
+if "isUnderMarketSelection(selectionText)" not in pattern_matcher:
+    raise SystemExit("Approved O/U matcher direction fix is missing from App-Ready producer")
+if "internal fun bookmakerMispricingSignal(" not in value_policy:
+    raise SystemExit("Approved direct O/U bookmaker-mispricing logic is missing from App-Ready producer")
+if "return score.qualifiesForPattern &&" not in evidence_score:
+    raise SystemExit("Approved direct O/U Strong quality gate is missing from App-Ready producer")
+
 if UAT_SOURCE:
     print("APP_READY_UAT_ENGINE_SOURCE_OK", output("git", "rev-parse", "HEAD"), expected_rules, "schema=11")
 else:
-    print("APP_READY_PRE_V6_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
+    print("APP_READY_APPROVED_PROD_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
 print("APP_READY_IDENTITY_REGEX_CACHE_OK patterns=4 semantics=unchanged")
