@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T01:36:43Z",
+  "generatedAt": "2026-09-23T23:05:27Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,7 +15,7 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 2,
+  "requestsUsed": 1,
   "registryLeagueCount": 1,
   "polledLeagueCount": 1,
   "incompleteBefore": 0,
@@ -23,20 +23,20 @@
   "incompleteAfter": 0,
   "allocations": [
     {
-      "phase": "tier3_restored26",
-      "priorityTier": "tier3_restored26",
-      "leagueCode": "BRA2",
-      "country": "Brazil",
-      "league": "Serie B",
+      "phase": "tier2_core27",
+      "priorityTier": "tier2_core27",
+      "leagueCode": "DNK",
+      "country": "Denmark",
+      "league": "Superliga",
       "lifecycle": "active",
       "allocatedRequests": 120,
-      "usedRequests": 2,
+      "usedRequests": 1,
       "before": {
-        "leagueCode": "BRA2",
-        "priorityTier": "tier3_restored26",
-        "completed": 289,
-        "withStats": 289,
-        "withScores": 289,
+        "leagueCode": "DNK",
+        "priorityTier": "tier2_core27",
+        "completed": 54,
+        "withStats": 54,
+        "withScores": 54,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -44,11 +44,11 @@
         "complete": true
       },
       "after": {
-        "leagueCode": "BRA2",
-        "priorityTier": "tier3_restored26",
-        "completed": 290,
-        "withStats": 290,
-        "withScores": 290,
+        "leagueCode": "DNK",
+        "priorityTier": "tier2_core27",
+        "completed": 54,
+        "withStats": 54,
+        "withScores": 54,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -59,11 +59,11 @@
   ],
   "progress": [
     {
-      "leagueCode": "BRA2",
-      "priorityTier": "tier3_restored26",
-      "completed": 290,
-      "withStats": 290,
-      "withScores": 290,
+      "leagueCode": "DNK",
+      "priorityTier": "tier2_core27",
+      "completed": 54,
+      "withStats": 54,
+      "withScores": 54,
       "missingStats": 0,
       "missingScores": 0,
       "coverage": 1.0,
@@ -73,12 +73,14 @@
   ],
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
-    "BRA2"
+    "DNK"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
   "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
-  "historicalSkippedFrozen": [],
+  "historicalSkippedFrozen": [
+    "DNK:2025"
+  ],
   "historicalNewlyFrozen": [],
   "historicalVerificationPending": [],
   "historicalSnapshotCount": 45,
@@ -88,7 +90,7 @@
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 7453,
+    "dailyRemaining": 5584,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
