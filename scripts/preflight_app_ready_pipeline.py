@@ -11,7 +11,7 @@ from pathlib import Path
 
 EXPECTED_SCHEMA = 11
 EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_STATMAKER_COMMIT = "561e152bc8302bb8240131cefc65b5350522c180"
+EXPECTED_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
 FORBIDDEN_TARGET_MARKERS = (
     "d06364ab2625815aeafcb48ae93d6a328f7d6ac5",
     "pattern-policy-v2-final-read-model-v6-probability-parity-v1",
