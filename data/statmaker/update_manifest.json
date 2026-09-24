@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "de55b2d1fbce13733b6c54738ab5c01eb78e915badd4248fa17c8108b0f2d7d4",
-  "generatedAt": "2026-09-24T22:46:16Z",
+  "contentVersion": "60bcce8a51e6c41d711c28eb63ff96104e3a549dc67272fbb38b2a7c00f4cf7b",
+  "generatedAt": "2026-09-24T23:18:19.024191Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "86c98b701478c31c79a9ec81b854aff91fe4ccfbe9b8a4bceedc27c3998569bd",
+      "sha256": "046d6c15dfaa0ed15476ea7d5a8a3b2603504faf27915d457612e15c061c5a00",
       "bytes": 118112,
-      "generatedAt": "2026-09-24T22:46:16Z"
+      "generatedAt": "2026-09-24T23:18:12Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "74bd232666e60eb5789c7f3bbb39d647d7db116d07e96e77673503d2b72d8cf1",
-      "bytes": 26529778,
+      "sha256": "b29af905885c9d2884a5dbff3b7a31aca3c5b9b3ce18f444d136ee6552cca769",
+      "bytes": 26531116,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "9ffd3977ee58a35e86c2c0123439cc24b26c11893a801d007f6148b1551ee67f",
+      "sha256": "99d8ab37a14d357ade5c027e9a0aa8c4a6b3c857ad826750b91e931b39251859",
       "bytes": 8325460,
-      "generatedAt": "2026-09-24T12:10:09.157176Z"
+      "generatedAt": "2026-09-24T23:18:19.024191Z"
     },
     {
       "id": "uefa_team_logos",
@@ -79,5 +79,71 @@
       "bytes": 293700,
       "generatedAt": ""
     }
-  ]
+  ],
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "b29af905885c9d2884a5dbff3b7a31aca3c5b9b3ce18f444d136ee6552cca769",
+    "transitions": [
+      {
+        "fromSha256": "74bd232666e60eb5789c7f3bbb39d647d7db116d07e96e77673503d2b72d8cf1",
+        "toSha256": "b29af905885c9d2884a5dbff3b7a31aca3c5b9b3ce18f444d136ee6552cca769",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1636662,
+            "league_id": 200,
+            "league_code": "MAR",
+            "country": "Morocco",
+            "league": "Botola Pro",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-09-24",
+            "home_team": "Amal Tiznit",
+            "away_team": "Ittihad Tanger",
+            "stats": {
+              "HS": null,
+              "AS": null,
+              "HST": null,
+              "AST": null,
+              "HC": null,
+              "AC": null,
+              "HF": null,
+              "AF": null,
+              "HY": null,
+              "AY": null,
+              "HR": null,
+              "AR": null,
+              "HPossession": null,
+              "APossession": null,
+              "HSaves": null,
+              "ASaves": null,
+              "HPasses": null,
+              "APasses": null,
+              "HPassesAccurate": null,
+              "APassesAccurate": null,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": null,
+              "AShotsOffGoal": null,
+              "HBlockedShots": null,
+              "ABlockedShots": null,
+              "HShotsInsideBox": null,
+              "AShotsInsideBox": null,
+              "HShotsOutsideBox": null,
+              "AShotsOutsideBox": null,
+              "HOffsides": null,
+              "AOffsides": null,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      }
+    ]
+  }
 }

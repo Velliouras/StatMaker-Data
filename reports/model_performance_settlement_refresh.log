@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T01:32:58Z",
+  "generatedAt": "2026-09-24T23:18:03Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,82 +15,80 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 1,
+  "requestsUsed": 2,
   "registryLeagueCount": 1,
   "polledLeagueCount": 1,
-  "incompleteBefore": 0,
-  "completeAfter": 1,
-  "incompleteAfter": 0,
+  "incompleteBefore": 1,
+  "completeAfter": 0,
+  "incompleteAfter": 1,
   "allocations": [
     {
-      "phase": "tier2_core27",
-      "priorityTier": "tier2_core27",
-      "leagueCode": "DNK",
-      "country": "Denmark",
-      "league": "Superliga",
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "MAR",
+      "country": "Morocco",
+      "league": "Botola Pro",
       "lifecycle": "active",
       "allocatedRequests": 120,
-      "usedRequests": 1,
+      "usedRequests": 2,
       "before": {
-        "leagueCode": "DNK",
-        "priorityTier": "tier2_core27",
-        "completed": 54,
-        "withStats": 54,
-        "withScores": 54,
+        "leagueCode": "MAR",
+        "priorityTier": "tier3_restored26",
+        "completed": 0,
+        "withStats": 0,
+        "withScores": 0,
         "missingStats": 0,
         "missingScores": 0,
-        "coverage": 1.0,
-        "scoreCoverage": 1.0,
-        "complete": true
+        "coverage": 0.0,
+        "scoreCoverage": 0.0,
+        "complete": false
       },
       "after": {
-        "leagueCode": "DNK",
-        "priorityTier": "tier2_core27",
-        "completed": 54,
-        "withStats": 54,
-        "withScores": 54,
-        "missingStats": 0,
+        "leagueCode": "MAR",
+        "priorityTier": "tier3_restored26",
+        "completed": 1,
+        "withStats": 0,
+        "withScores": 1,
+        "missingStats": 1,
         "missingScores": 0,
-        "coverage": 1.0,
+        "coverage": 0.0,
         "scoreCoverage": 1.0,
-        "complete": true
+        "complete": false
       }
     }
   ],
   "progress": [
     {
-      "leagueCode": "DNK",
-      "priorityTier": "tier2_core27",
-      "completed": 54,
-      "withStats": 54,
-      "withScores": 54,
-      "missingStats": 0,
+      "leagueCode": "MAR",
+      "priorityTier": "tier3_restored26",
+      "completed": 1,
+      "withStats": 0,
+      "withScores": 1,
+      "missingStats": 1,
       "missingScores": 0,
-      "coverage": 1.0,
+      "coverage": 0.0,
       "scoreCoverage": 1.0,
-      "complete": true
+      "complete": false
     }
   ],
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
-    "DNK"
+    "MAR"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
   "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
-  "historicalSkippedFrozen": [
-    "DNK:2025"
-  ],
+  "historicalSkippedFrozen": [],
   "historicalNewlyFrozen": [],
   "historicalVerificationPending": [],
-  "historicalSnapshotCount": 45,
+  "historicalSnapshotCount": 44,
   "historicalPendingBefore": [],
   "historicalPendingAfter": [],
-  "historicalFrozenSnapshotCount": 45,
+  "historicalFrozenSnapshotCount": 44,
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 7452,
+    "dailyRemaining": 5551,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
