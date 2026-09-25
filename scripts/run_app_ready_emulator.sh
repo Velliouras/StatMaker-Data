@@ -635,6 +635,7 @@ grep -q "domestic_history_fingerprint" "$r/shared_prefs/statmaker_prepared_data_
 grep -q "uefa_support_fingerprint" "$r/shared_prefs/statmaker_prepared_data_versions.xml"
 
 python3 - "$r/databases/statmaker.db" "$r/databases/statmaker_prepared_betting.db" <<'PY'
+import os
 import sqlite3
 import sys
 from pathlib import Path
