@@ -1,8 +1,10 @@
 {
-  "generatedAt": "2026-09-25T20:31:06Z",
+  "generatedAt": "2026-09-25T23:59:40Z",
   "registryLeagueCount": 69,
   "requestedLeagueCodes": [
-    "BRA2",
+    "ARG",
+    "BRA",
+    "CHL",
     "MEX",
     "FIN2",
     "SP2",
@@ -10,17 +12,17 @@
     "E3",
     "EC",
     "MAR",
+    "BRA2",
     "USA",
     "KOR",
     "IRL",
-    "BGR",
-    "ROM",
-    "SRB",
-    "SVN",
-    "DNK"
+    "CRO",
+    "SC1"
   ],
   "processedLeagueCodes": [
-    "BRA2",
+    "ARG",
+    "BRA",
+    "CHL",
     "MEX",
     "FIN2",
     "SP2",
@@ -28,29 +30,27 @@
     "E3",
     "EC",
     "MAR",
+    "BRA2",
     "USA",
     "KOR",
     "IRL",
-    "BGR",
-    "ROM",
-    "SRB",
-    "SVN",
-    "DNK"
+    "CRO",
+    "SC1"
   ],
   "deferredByRateLimit": false,
   "rateLimitRemaining": 69,
   "validation": {
     "leagueCount": 69,
-    "matchCount": 80,
-    "marketCount": 19706,
+    "matchCount": 83,
+    "marketCount": 20861,
     "scheduleOnlyExternalLeagueCount": 0,
     "scheduleOnlyExternalLeagueCodes": [],
-    "scheduleOnlyInRegistryMatchCount": 25
+    "scheduleOnlyInRegistryMatchCount": 22
   },
   "providerArchiveValidation": {
     "leagueCount": 69,
     "matchCount": 83,
-    "marketPayloadCount": 6050
+    "marketPayloadCount": 6141
   },
   "cornerArchiveRebuild": {
     "source": "exact archived Odds-API.io provider payloads",
@@ -62,12 +62,12 @@
     "canonicalFixturesMissingProviderArchive": 22,
     "fixturesRebuilt": 66,
     "fixturesClearedWithoutVerifiedFullTimeCorners": 0,
-    "removedCanonicalCornerSelections": 1670,
-    "rebuiltFullTimeCornerSelections": 1556,
-    "addedOrReplacedSelections": 1380,
-    "totalCanonicalCornerSelections": 1556,
+    "removedCanonicalCornerSelections": 1672,
+    "rebuiltFullTimeCornerSelections": 1548,
+    "addedOrReplacedSelections": 1374,
+    "totalCanonicalCornerSelections": 1548,
     "rebuiltByMarket": {
-      "MATCH_CORNERS": 790,
+      "MATCH_CORNERS": 782,
       "TEAM_CORNERS": 766
     },
     "examples": [
@@ -152,30 +152,12 @@
         "rebuiltFullTimeCorners": [
           {
             "market": "MATCH_CORNERS",
-            "selection": "Corners Over 10",
-            "odds": 1.9,
-            "bookmaker": "Bet365",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 10.0
-          },
-          {
-            "market": "MATCH_CORNERS",
             "selection": "Corners Over 10.5",
             "odds": 2.1,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 10.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Under 10",
-            "odds": 1.9,
-            "bookmaker": "Bet365",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 10.0
           },
           {
             "market": "MATCH_CORNERS",
@@ -221,6 +203,24 @@
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 8.5
+          },
+          {
+            "market": "MATCH_CORNERS",
+            "selection": "Corners Over 9.5",
+            "odds": 1.63,
+            "bookmaker": "Unibet",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 9.5
+          },
+          {
+            "market": "MATCH_CORNERS",
+            "selection": "Corners Under 10.5",
+            "odds": 1.72,
+            "bookmaker": "Unibet",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 10.5
           }
         ]
       },
@@ -467,12 +467,30 @@
           },
           {
             "market": "MATCH_CORNERS",
+            "selection": "Corners Over 11",
+            "odds": 1.975,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 11.0
+          },
+          {
+            "market": "MATCH_CORNERS",
             "selection": "Corners Under 10.5",
             "odds": 2.0,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 10.5
+          },
+          {
+            "market": "MATCH_CORNERS",
+            "selection": "Corners Under 11",
+            "odds": 1.825,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 11.0
           },
           {
             "market": "MATCH_CORNERS",
@@ -509,24 +527,6 @@
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 13.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Over 8.5",
-            "odds": 1.25,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 8.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Over 9.5",
-            "odds": 1.42,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 9.5
           }
         ]
       },
@@ -583,7 +583,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Under 9.5",
-            "odds": 2.0,
+            "odds": 1.909,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -621,7 +621,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Under 9.5",
-            "odds": 2.0,
+            "odds": 1.909,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -926,12 +926,30 @@
           },
           {
             "market": "MATCH_CORNERS",
+            "selection": "Corners Over 9",
+            "odds": 2.0,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 9.0
+          },
+          {
+            "market": "MATCH_CORNERS",
             "selection": "Corners Under 8.5",
             "odds": 2.0,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 8.5
+          },
+          {
+            "market": "MATCH_CORNERS",
+            "selection": "Corners Under 9",
+            "odds": 1.8,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 9.0
           },
           {
             "market": "MATCH_CORNERS",
@@ -968,24 +986,6 @@
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 10.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Under 11.5",
-            "odds": 1.21,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 11.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Under 9.5",
-            "odds": 1.58,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 9.5
           }
         ]
       },
@@ -1042,7 +1042,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Under 9.5",
-            "odds": 1.909,
+            "odds": 2.0,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -1080,7 +1080,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Under 9.5",
-            "odds": 1.909,
+            "odds": 2.0,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -1376,12 +1376,30 @@
         "rebuiltFullTimeCorners": [
           {
             "market": "MATCH_CORNERS",
+            "selection": "Corners Over 10",
+            "odds": 1.8,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 10.0
+          },
+          {
+            "market": "MATCH_CORNERS",
             "selection": "Corners Over 10.5",
             "odds": 2.0,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 10.5
+          },
+          {
+            "market": "MATCH_CORNERS",
+            "selection": "Corners Under 10",
+            "odds": 2.0,
+            "bookmaker": "Bet365",
+            "confidence": "high",
+            "exactBookmakerOdds": true,
+            "line": 10.0
           },
           {
             "market": "MATCH_CORNERS",
@@ -1427,24 +1445,6 @@
             "confidence": "high",
             "exactBookmakerOdds": true,
             "line": 10.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Under 11.5",
-            "odds": 1.41,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 11.5
-          },
-          {
-            "market": "MATCH_CORNERS",
-            "selection": "Corners Under 9.5",
-            "odds": 2.0,
-            "bookmaker": "Unibet",
-            "confidence": "high",
-            "exactBookmakerOdds": true,
-            "line": 9.5
           }
         ]
       },
@@ -1474,7 +1474,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Over 9.5",
-            "odds": 2.0,
+            "odds": 1.909,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -1530,7 +1530,7 @@
           {
             "market": "MATCH_CORNERS",
             "selection": "Corners Over 9.5",
-            "odds": 2.0,
+            "odds": 1.909,
             "bookmaker": "Bet365",
             "confidence": "high",
             "exactBookmakerOdds": true,
@@ -1605,62 +1605,62 @@
   },
   "expandedMarketArchiveRebuild": {
     "version": "domestic-market-expansion-v16",
-    "generatedAt": "2026-09-25T20:31:04Z",
+    "generatedAt": "2026-09-25T23:59:37Z",
     "syntheticOdds": false,
     "leaguesVisited": 69,
     "matchesVisited": 105,
     "matchesWithArchive": 83,
-    "providerPayloadsVisited": 5833,
-    "expandedSelections": 13135,
-    "marketsRemovedBeforeRebuild": 12587,
+    "providerPayloadsVisited": 5924,
+    "expandedSelections": 13410,
+    "marketsRemovedBeforeRebuild": 12843,
     "families": {
-      "ASIAN_CORNERS": 54,
-      "ASIAN_CORNER_HANDICAP": 154,
-      "ASIAN_GOALS": 978,
-      "ASIAN_GOALS_1H": 200,
-      "ASIAN_HANDICAP": 1430,
-      "ASIAN_HANDICAP_1H": 122,
-      "CORNER_HANDICAP": 172,
-      "CORRECT_SCORE": 4510,
+      "ASIAN_CORNERS": 44,
+      "ASIAN_CORNER_HANDICAP": 134,
+      "ASIAN_GOALS": 930,
+      "ASIAN_GOALS_1H": 208,
+      "ASIAN_HANDICAP": 1648,
+      "ASIAN_HANDICAP_1H": 116,
+      "CORNER_HANDICAP": 160,
+      "CORRECT_SCORE": 4507,
       "DRAW_NO_BET": 262,
-      "EUROPEAN_HANDICAP": 978,
-      "GOAL_BANDS": 282,
+      "EUROPEAN_HANDICAP": 999,
+      "GOAL_BANDS": 299,
       "HALF_TIME_1X2": 393,
       "HALF_TIME_DOUBLE_CHANCE": 240,
-      "HALF_TIME_FULL_TIME": 1098,
-      "MATCH_YELLOW_CARDS": 120,
+      "HALF_TIME_FULL_TIME": 1134,
+      "MATCH_YELLOW_CARDS": 130,
       "MOST_SHOTS_ON_TARGET": 48,
-      "ODD_EVEN_GOALS": 480,
-      "SECOND_HALF_GOALS": 894,
-      "WINNING_MARGIN": 720
+      "ODD_EVEN_GOALS": 504,
+      "SECOND_HALF_GOALS": 924,
+      "WINNING_MARGIN": 730
     },
     "missingArchiveMatches": 22,
     "changed": true,
     "normalizationWarnings": [],
     "expandedExactMarketCounts": {
       "DRAW_NO_BET": 262,
-      "ASIAN_HANDICAP": 2222,
-      "ASIAN_GOALS": 978,
-      "ODD_EVEN_GOALS": 706,
+      "ASIAN_HANDICAP": 2562,
+      "ASIAN_GOALS": 930,
+      "ODD_EVEN_GOALS": 738,
       "HALF_TIME_1X2": 393,
-      "ASIAN_GOALS_1H": 200,
-      "HALF_TIME_FULL_TIME": 1098,
-      "CORNER_HANDICAP": 172,
-      "ASIAN_CORNER_HANDICAP": 154,
-      "ASIAN_CORNERS": 54,
-      "SECOND_HALF_GOALS": 894,
-      "CORRECT_SCORE": 4510,
+      "ASIAN_GOALS_1H": 208,
+      "HALF_TIME_FULL_TIME": 1134,
+      "ASIAN_CORNERS": 44,
+      "WINNING_MARGIN": 730,
       "HALF_TIME_DOUBLE_CHANCE": 240,
-      "WINNING_MARGIN": 720,
-      "GOAL_BANDS": 282,
-      "EUROPEAN_HANDICAP": 978,
-      "ASIAN_HANDICAP_1H": 122,
-      "MATCH_YELLOW_CARDS": 120,
+      "SECOND_HALF_GOALS": 924,
+      "CORRECT_SCORE": 4507,
+      "GOAL_BANDS": 299,
+      "EUROPEAN_HANDICAP": 999,
+      "CORNER_HANDICAP": 160,
+      "ASIAN_CORNER_HANDICAP": 134,
+      "ASIAN_HANDICAP_1H": 116,
+      "MATCH_YELLOW_CARDS": 130,
       "MOST_SHOTS_ON_TARGET": 48
     }
   },
   "archiveBettingRehydrate": {
-    "generatedAt": "2026-09-25T20:31:06Z",
+    "generatedAt": "2026-09-25T23:59:40Z",
     "source": "exact Odds-API.io provider archive",
     "providerCalls": 0,
     "syntheticOdds": false,
@@ -1668,57 +1668,66 @@
     "archiveMatchesVisited": 83,
     "matchesConsidered": 3,
     "matchesWithArchive": 3,
-    "matchesRehydrated": 0,
-    "matchesResolvedByCurrentSchedule": 0,
+    "matchesRehydrated": 3,
+    "matchesResolvedByCurrentSchedule": 3,
     "matchesCreatedFromArchive": 0,
-    "matchesRepairedExisting": 0,
+    "matchesRepairedExisting": 3,
     "healthyMatchesPreserved": 80,
     "expiredArchiveMatchesSkipped": 0,
     "archiveMatchesWithoutCanonicalMarkets": 0,
-    "marketsRehydrated": 0,
-    "unresolvedHistoricalTeams": [
+    "marketsRehydrated": 804,
+    "unresolvedHistoricalTeams": [],
+    "rejectedOutsideCurrentRoster": [],
+    "rehydratedMatches": [
       {
         "leagueCode": "SC1",
         "matchId": "72202660",
-        "providerHomeTeam": "Arbroath FC",
-        "providerAwayTeam": "Queens Park FC",
-        "homeResolved": "Arbroath",
-        "awayResolved": null
+        "homeTeam": "Arbroath",
+        "awayTeam": "Queen's Park",
+        "homeMappingPolicy": "exact_historical_alias",
+        "awayMappingPolicy": "unique_current_schedule_identity",
+        "marketCount": 226,
+        "createdFromArchive": false
       },
       {
         "leagueCode": "SC1",
         "matchId": "72202662",
-        "providerHomeTeam": "Ayr United FC",
-        "providerAwayTeam": "Stenhousemuir FC",
-        "homeResolved": null,
-        "awayResolved": "Stenhousemuir"
+        "homeTeam": "Ayr Utd",
+        "awayTeam": "Stenhousemuir",
+        "homeMappingPolicy": "unique_current_schedule_identity",
+        "awayMappingPolicy": "exact_historical_alias",
+        "marketCount": 291,
+        "createdFromArchive": false
       },
       {
         "leagueCode": "SC1",
         "matchId": "72202666",
-        "providerHomeTeam": "Inverness Caledonian Thistle FC",
-        "providerAwayTeam": "Greenock Morton FC",
-        "homeResolved": null,
-        "awayResolved": "Morton"
+        "homeTeam": "Inverness CT",
+        "awayTeam": "Morton",
+        "homeMappingPolicy": "unique_current_schedule_identity",
+        "awayMappingPolicy": "unique_historical_token_containment",
+        "marketCount": 287,
+        "createdFromArchive": false
       }
     ],
-    "rejectedOutsideCurrentRoster": [],
-    "rehydratedMatches": [],
     "normalizationWarnings": []
   },
   "oddsLeaguesWithMatches": 13,
   "recanonicalizedPreviousMatches": 0,
   "providerArchiveLeaguesWithMatches": 11,
-  "nextCursor": 38,
+  "nextCursor": 54,
   "warnings": [],
   "scheduleCoverage": {
     "source": "Odds-API.io global events endpoint",
     "syntheticOdds": false,
-    "globalEventsFetched": 3656,
-    "domesticEventsMatched": 100,
-    "domesticLeagueCount": 11,
+    "globalEventsFetched": 3666,
+    "domesticEventsMatched": 104,
+    "domesticLeagueCount": 14,
     "domesticLeagueCodes": [
+      "ARG",
+      "BRA",
       "BRA2",
+      "CHL",
       "E2",
       "E3",
       "EC",
@@ -1731,7 +1740,9 @@
       "USA"
     ],
     "priorityLeagueCodes": [
-      "BRA2",
+      "ARG",
+      "BRA",
+      "CHL",
       "MEX",
       "FIN2",
       "SP2",
@@ -1739,19 +1750,22 @@
       "E3",
       "EC",
       "MAR",
+      "BRA2",
       "USA",
       "KOR",
       "IRL"
     ],
-    "scheduleOnlyMatchesAdded": 9,
-    "existingMatchesUpdated": 91,
+    "scheduleOnlyMatchesAdded": 15,
+    "existingMatchesUpdated": 89,
     "existingBettableMatchesConfirmed": 79,
-    "scheduleMatchesWithoutHistoricalMapping": 4,
+    "scheduleMatchesWithoutHistoricalMapping": 6,
     "exactOddsEventHorizonDays": 7,
     "globalEventWarnings": []
   },
   "priorityLeagueCodes": [
-    "BRA2",
+    "ARG",
+    "BRA",
+    "CHL",
     "MEX",
     "FIN2",
     "SP2",
@@ -1759,6 +1773,7 @@
     "E3",
     "EC",
     "MAR",
+    "BRA2",
     "USA",
     "KOR",
     "IRL"
