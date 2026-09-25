@@ -7,7 +7,7 @@ set -euo pipefail
 : "${APP_READY_PATTERN_RULES_FINGERPRINT:?APP_READY_PATTERN_RULES_FINGERPRINT is required}"
 : "${APP_READY_PREPARED_SCHEMA_VERSION:?APP_READY_PREPARED_SCHEMA_VERSION is required}"
 
-EXPECTED_PREPARED_SCHEMA="11"
+EXPECTED_PREPARED_SCHEMA="${APP_READY_PREPARED_SCHEMA_VERSION}"
 if [[ "${APP_READY_UAT_SOURCE:-false}" == "true" ]]; then
   EXPECTED_STATMAKER_COMMIT="$(git -C "$GITHUB_WORKSPACE/statmaker-private" rev-parse HEAD)"
   EXPECTED_RULES_FINGERPRINT="$(python3 - <<'PY'
@@ -380,8 +380,8 @@ try:
     quick=con.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0]!="ok": raise SystemExit(f"Checkpoint quick_check failed: {quick}")
     user_version=int(con.execute("PRAGMA user_version").fetchone()[0])
-    if user_version != 11:
-        raise SystemExit(f"Checkpoint prepared schema must be exactly 11; got {user_version}")
+    if user_version != int(os.environ["APP_READY_PREPARED_SCHEMA_VERSION"]):
+        raise SystemExit(f"Checkpoint prepared schema must match staged contract; got {user_version}")
     ready=con.execute("""
       SELECT competition_id,snapshot_version,match_count,selection_count
       FROM prepared_snapshot_meta WHERE state='ready' ORDER BY competition_id
@@ -655,8 +655,8 @@ for raw in sys.argv[1:]:
 
         if path.name == "statmaker_prepared_betting.db":
             user_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
-            if user_version != 11:
-                raise SystemExit(f"Prepared DB schema must be exactly 11; got {user_version}")
+            if user_version != int(os.environ["APP_READY_PREPARED_SCHEMA_VERSION"]):
+                raise SystemExit(f"Prepared DB schema must match staged contract; got {user_version}")
 
             tables = {
                 row[0]
