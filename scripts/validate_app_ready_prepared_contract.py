@@ -15,10 +15,11 @@ PROD_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
 PROD_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
 UAT_SOURCE = os.environ.get("APP_READY_UAT_SOURCE", "false").lower() == "true"
 if UAT_SOURCE:
+    EXPECTED_SCHEMA = int(os.environ.get("APP_READY_PREPARED_SCHEMA_VERSION", "0") or "0")
     EXPECTED_RULES = os.environ.get("APP_READY_PATTERN_RULES_FINGERPRINT", "").strip()
     EXPECTED_STATMAKER_COMMIT = os.environ.get("APP_READY_STATMAKER_COMMIT", "").strip()
-    if not EXPECTED_RULES or not EXPECTED_STATMAKER_COMMIT:
-        raise SystemExit("UAT prepared contract requires rules fingerprint and StatMaker commit")
+    if EXPECTED_SCHEMA <= 0 or not EXPECTED_RULES or not EXPECTED_STATMAKER_COMMIT:
+        raise SystemExit("UAT prepared contract requires schema, rules fingerprint and StatMaker commit")
 else:
     EXPECTED_RULES = PROD_RULES
     EXPECTED_STATMAKER_COMMIT = PROD_STATMAKER_COMMIT
@@ -255,7 +256,7 @@ def self_check() -> None:
         validate(root, metadata, "checkpoint")
 
         invalid_cases = (
-            (12, EXPECTED_RULES, EXPECTED_STATMAKER_COMMIT, "schema12"),
+            (EXPECTED_SCHEMA + 1, EXPECTED_RULES, EXPECTED_STATMAKER_COMMIT, "wrong-schema"),
             (
                 EXPECTED_SCHEMA,
                 "pattern-policy-v2-final-read-model-v6-probability-parity-v1",
