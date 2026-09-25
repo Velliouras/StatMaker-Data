@@ -1,4 +1,4 @@
-name: StatMaker UAT Direction App-Ready Main
+name: StatMaker UAT Probability-First App-Ready Main
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
       statmaker_ref:
         description: "StatMaker UAT ref"
         required: true
-        default: "uat-ou-value-mispricing-20260920"
+        default: "uat-remove-bb-move-update-20260923"
         type: string
   push:
     branches: [main]
@@ -17,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: statmaker-uat-direction-app-ready-main
+  group: statmaker-uat-probability-first-app-ready-main
   cancel-in-progress: false
 
 jobs:
@@ -144,7 +144,7 @@ jobs:
         if: steps.source.outputs.resume_run_id != ''
         uses: actions/download-artifact@v4
         with:
-          name: statmaker-uat-direction-checkpoint
+          name: statmaker-uat-probability-first-checkpoint
           path: app-ready-checkpoint-incoming
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
@@ -157,7 +157,7 @@ jobs:
           APP_READY_UAT_SOURCE: "true"
           APP_READY_DISABLE_SEED: ${{ steps.source.outputs.resume_run_id == '' && 'true' || 'false' }}
           APP_READY_RECOMMENDATION_ONLY: ${{ steps.source.outputs.resume_run_id != '' && 'true' || 'false' }}
-          APP_READY_SOURCE_ONLY: ${{ steps.source.outputs.resume_run_id == '' && 'true' || 'false' }}
+          APP_READY_SOURCE_ONLY: "false"
           APP_READY_PREPARED_MAX_SECONDS: "5400"
         with:
           api-level: 35
@@ -171,25 +171,12 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
 
-      - name: Verify clean UAT prepared retirement contract
-        if: steps.source.outputs.resume_run_id == ''
+      - name: Verify UAT prepared retirement contract
         shell: bash
         run: |
           set -euo pipefail
           python scripts/validate_app_ready_retirement_contract.py \
-            app-ready-checkpoint/databases/statmaker_prepared_betting.db
-          python scripts/verify_uat_direction_evidence.py \
-            app-ready-checkpoint/databases/statmaker_prepared_betting.db
-
-      - name: Materialize corrected UAT recommendations host-side
-        if: steps.source.outputs.resume_run_id == ''
-        shell: bash
-        run: |
-          set -euo pipefail
-          python scripts/materialize_uat_direction_pattern_candidates.py \
-            app-ready-checkpoint \
-            app-ready-export/raw \
-            app-ready-export/source
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
@@ -216,7 +203,7 @@ jobs:
 
       - name: Build isolated UAT bundles
         env:
-          APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/ou-direction-v2
+          APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/probability-first-v1
         run: python scripts/build_uat_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
       - name: Revalidate source versions
@@ -247,7 +234,7 @@ jobs:
         run: |
           set -euo pipefail
           src="app-ready-export/out"
-          rel="data/statmaker/app_ready_uat/ou-direction-v2"
+          rel="data/statmaker/app_ready_uat/probability-first-v1"
           staging="$(mktemp -d)"
           mkdir -p "$staging/payload"
           cp "$src"/app_ready_*_bundle-*.zip "$staging/payload/"
@@ -268,7 +255,7 @@ jobs:
             fi
             git config user.name "StatMaker UAT Artifact Bot"
             git config user.email "actions@users.noreply.github.com"
-            git commit -m "Publish isolated UAT direction app-ready artifacts"
+            git commit -m "Publish isolated UAT probability-first app-ready artifacts"
             if git push origin HEAD:main; then
               echo "APP_READY_UAT_PUBLISH_OK attempt=$attempt"
               published=true
@@ -283,20 +270,20 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --no-tags origin +main:refs/remotes/origin/main
-          git show refs/remotes/origin/main:data/statmaker/app_ready_uat/ou-direction-v2/update_manifest.json > /tmp/uat_manifest.json
+          git show refs/remotes/origin/main:data/statmaker/app_ready_uat/probability-first-v1/update_manifest.json > /tmp/uat_manifest.json
           python - <<'PY'
           import json, os
           from pathlib import Path
           m=json.loads(Path('/tmp/uat_manifest.json').read_text())
           md=m.get('metadata',{})
           assert m.get('profile') == 'app_ready_uat'
-          assert md.get('uatProfile') == 'ou-direction-v2'
+          assert md.get('uatProfile') == 'probability-first-v1'
           assert md.get('statmakerCommit') == os.environ['APP_READY_STATMAKER_COMMIT']
           assert md.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
           assert len(m.get('artifacts',[])) == 2
           for item in m['artifacts']:
               assert item['url'].startswith(
-                  'https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready_uat/ou-direction-v2/'
+                  'https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready_uat/probability-first-v1/'
               )
           print('APP_READY_UAT_REMOTE_OK', md.get('statmakerCommit'), md.get('preparedPatternRulesFingerprint'))
           PY
