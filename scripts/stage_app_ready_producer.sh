@@ -12,6 +12,16 @@ cd "$PRIVATE_ROOT"
 UAT_SOURCE="${APP_READY_UAT_SOURCE:-false}"
 PREPARED_SCHEMA="11"
 if [[ "$UAT_SOURCE" == "true" ]]; then
+  PREPARED_SCHEMA="$(python3 - <<\'PY\'
+import re
+from pathlib import Path
+text=Path("app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt").read_text(encoding="utf-8")
+match=re.search(r\'private const val DATABASE_VERSION\\s*=\\s*(\\d+)\', text)
+if not match:
+    raise SystemExit("Could not resolve UAT prepared DB version")
+print(match.group(1))
+PY
+)"
   STATMAKER_COMMIT="$(git rev-parse HEAD)"
   RULES_FINGERPRINT="$(python3 - <<'PY'
 import re
