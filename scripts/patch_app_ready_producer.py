@@ -71,8 +71,8 @@ if UAT_SOURCE:
     historical_text = historical.decode("utf-8")
     schema_guard = 'and "private const val DATABASE_VERSION = 11" in text'
     schema_replacement = (
-        'and f"private const val DATABASE_VERSION = '
-        + '{os.environ[\\"APP_READY_PREPARED_SCHEMA_VERSION\\"]}" in text'
+        "and f\"private const val DATABASE_VERSION = "
+        "{os.environ['APP_READY_PREPARED_SCHEMA_VERSION']}\" in text"
     )
     if historical_text.count(schema_guard) != 1:
         raise SystemExit("Could not locate historical UAT prepared-schema guard")
