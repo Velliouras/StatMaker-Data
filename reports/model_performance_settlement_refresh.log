@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-25T18:47:12Z",
+  "generatedAt": "2026-09-25T23:24:00Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,12 +15,12 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 120,
-  "registryLeagueCount": 1,
-  "polledLeagueCount": 1,
-  "incompleteBefore": 1,
-  "completeAfter": 0,
-  "incompleteAfter": 1,
+  "requestsUsed": 69,
+  "registryLeagueCount": 4,
+  "polledLeagueCount": 4,
+  "incompleteBefore": 3,
+  "completeAfter": 1,
+  "incompleteAfter": 3,
   "allocations": [
     {
       "phase": "tier3_restored26",
@@ -29,15 +29,15 @@
       "country": "Finland",
       "league": "Ykkösliiga",
       "lifecycle": "active",
-      "allocatedRequests": 120,
-      "usedRequests": 120,
+      "allocatedRequests": 30,
+      "usedRequests": 30,
       "before": {
         "leagueCode": "FIN2",
         "priorityTier": "tier3_restored26",
-        "completed": 120,
+        "completed": 122,
         "withStats": 0,
-        "withScores": 120,
-        "missingStats": 120,
+        "withScores": 122,
+        "missingStats": 122,
         "missingScores": 0,
         "coverage": 0.0,
         "scoreCoverage": 1.0,
@@ -55,9 +55,123 @@
         "scoreCoverage": 1.0,
         "complete": false
       }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "SC1",
+      "country": "Scotland",
+      "league": "Championship",
+      "lifecycle": "active",
+      "allocatedRequests": 30,
+      "usedRequests": 30,
+      "before": {
+        "leagueCode": "SC1",
+        "priorityTier": "tier3_restored26",
+        "completed": 35,
+        "withStats": 0,
+        "withScores": 35,
+        "missingStats": 35,
+        "missingScores": 0,
+        "coverage": 0.0,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "SC1",
+        "priorityTier": "tier3_restored26",
+        "completed": 39,
+        "withStats": 0,
+        "withScores": 39,
+        "missingStats": 39,
+        "missingScores": 0,
+        "coverage": 0.0,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "IRL",
+      "country": "Ireland",
+      "league": "Premier Division",
+      "lifecycle": "active",
+      "allocatedRequests": 30,
+      "usedRequests": 7,
+      "before": {
+        "leagueCode": "IRL",
+        "priorityTier": "tier3_restored26",
+        "completed": 158,
+        "withStats": 153,
+        "withScores": 158,
+        "missingStats": 5,
+        "missingScores": 0,
+        "coverage": 0.968354,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "IRL",
+        "priorityTier": "tier3_restored26",
+        "completed": 159,
+        "withStats": 154,
+        "withScores": 159,
+        "missingStats": 5,
+        "missingScores": 0,
+        "coverage": 0.968553,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "SP2",
+      "country": "Spain",
+      "league": "Segunda División",
+      "lifecycle": "active",
+      "allocatedRequests": 53,
+      "usedRequests": 2,
+      "before": {
+        "leagueCode": "SP2",
+        "priorityTier": "tier3_restored26",
+        "completed": 66,
+        "withStats": 66,
+        "withScores": 66,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      },
+      "after": {
+        "leagueCode": "SP2",
+        "priorityTier": "tier3_restored26",
+        "completed": 67,
+        "withStats": 67,
+        "withScores": 67,
+        "missingStats": 0,
+        "missingScores": 0,
+        "coverage": 1.0,
+        "scoreCoverage": 1.0,
+        "complete": true
+      }
     }
   ],
   "progress": [
+    {
+      "leagueCode": "IRL",
+      "priorityTier": "tier3_restored26",
+      "completed": 159,
+      "withStats": 154,
+      "withScores": 159,
+      "missingStats": 5,
+      "missingScores": 0,
+      "coverage": 0.968553,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
     {
       "leagueCode": "FIN2",
       "priorityTier": "tier3_restored26",
@@ -69,16 +183,46 @@
       "coverage": 0.0,
       "scoreCoverage": 1.0,
       "complete": false
+    },
+    {
+      "leagueCode": "SC1",
+      "priorityTier": "tier3_restored26",
+      "completed": 39,
+      "withStats": 0,
+      "withScores": 39,
+      "missingStats": 39,
+      "missingScores": 0,
+      "coverage": 0.0,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
+    {
+      "leagueCode": "SP2",
+      "priorityTier": "tier3_restored26",
+      "completed": 67,
+      "withStats": 67,
+      "withScores": 67,
+      "missingStats": 0,
+      "missingScores": 0,
+      "coverage": 1.0,
+      "scoreCoverage": 1.0,
+      "complete": true
     }
   ],
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
-    "FIN2"
+    "IRL",
+    "FIN2",
+    "SC1",
+    "SP2"
   ],
   "targetedMode": true,
   "historicalOnlyMode": false,
   "historicalFreezePolicy": "historical season closes only after exact league+season fixture discovery, complete score cache, and one statistics-endpoint attempt per completed fixture",
-  "historicalSkippedFrozen": [],
+  "historicalSkippedFrozen": [
+    "SC1:2025",
+    "SP2:2025"
+  ],
   "historicalNewlyFrozen": [],
   "historicalVerificationPending": [],
   "historicalSnapshotCount": 41,
@@ -88,7 +232,7 @@
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 5744,
+    "dailyRemaining": 5393,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
