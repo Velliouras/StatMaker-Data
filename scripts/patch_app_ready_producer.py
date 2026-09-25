@@ -60,6 +60,25 @@ Path(LEGACY_PATH).write_bytes(subprocess.check_output(["git", "show", f"{LEGACY_
 url = f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{HISTORICAL_DATA_COMMIT}/scripts/patch_app_ready_producer.py"
 with urllib.request.urlopen(url, timeout=60) as response:
     historical = response.read()
+
+# The historical patcher owns the approved schema11 App-Ready mechanics. For a controlled UAT
+# source, preserve those mechanics but validate the checked-out UAT store against the explicitly
+# staged UAT schema contract instead of forcing its DATABASE_VERSION back to 11.
+if UAT_SOURCE:
+    expected_uat_schema = os.environ.get("APP_READY_PREPARED_SCHEMA_VERSION", "").strip()
+    if not expected_uat_schema.isdigit():
+        raise SystemExit("UAT App-Ready staging has no valid prepared schema contract")
+    historical_text = historical.decode("utf-8")
+    schema_guard = 'and "private const val DATABASE_VERSION = 11" in text'
+    schema_replacement = (
+        'and f"private const val DATABASE_VERSION = '
+        + '{os.environ[\\"APP_READY_PREPARED_SCHEMA_VERSION\\"]}" in text'
+    )
+    if historical_text.count(schema_guard) != 1:
+        raise SystemExit("Could not locate historical UAT prepared-schema guard")
+    historical_text = historical_text.replace(schema_guard, schema_replacement, 1)
+    historical = historical_text.encode("utf-8")
+
 with tempfile.NamedTemporaryFile(prefix="statmaker-v5-producer-", suffix=".py", delete=False) as tmp:
     tmp.write(historical)
     tmp_path = Path(tmp.name)
@@ -109,10 +128,19 @@ if not expected_rules or expected_rules not in models:
     raise SystemExit(f"Expected rules fingerprint is missing from producer source: {expected_rules!r}")
 if not UAT_SOURCE and "pattern-policy-v2-final-read-model-v6-probability-parity-v1" in models:
     raise SystemExit("v6 rules fingerprint leaked into pre-v6 producer")
-if "private const val DATABASE_VERSION = 11" not in store:
-    raise SystemExit("Prepared DB schema is not v11")
-if "private const val DATABASE_VERSION = 12" in store:
-    raise SystemExit("schema12 leaked into schema11 producer")
+expected_schema = (
+    os.environ.get("APP_READY_PREPARED_SCHEMA_VERSION", "").strip()
+    if UAT_SOURCE
+    else "11"
+)
+if not expected_schema.isdigit():
+    raise SystemExit(f"Invalid prepared DB schema contract: {expected_schema!r}")
+if f"private const val DATABASE_VERSION = {expected_schema}" not in store:
+    raise SystemExit(
+        f"Prepared DB schema does not match selected producer contract: expected={expected_schema}"
+    )
+if not UAT_SOURCE and "private const val DATABASE_VERSION = 12" in store:
+    raise SystemExit("schema12 leaked into schema11 PROD producer")
 
 # Regression guard: the approved Seattle Sounders/Hannover direction fix and the two
 # approved direct O/U gates must be present in the source that actually builds App-Ready.
@@ -130,7 +158,12 @@ if "return score.qualifiesForPattern &&" not in evidence_score:
     raise SystemExit("Approved direct O/U Strong quality gate is missing from App-Ready producer")
 
 if UAT_SOURCE:
-    print("APP_READY_UAT_ENGINE_SOURCE_OK", output("git", "rev-parse", "HEAD"), expected_rules, "schema=11")
+    print(
+        "APP_READY_UAT_ENGINE_SOURCE_OK",
+        output("git", "rev-parse", "HEAD"),
+        expected_rules,
+        f"schema={expected_schema}",
+    )
 else:
     print("APP_READY_APPROVED_PROD_ENGINE_LOCK_OK", ENGINE_COMMIT, EXPECTED_RULES, "schema=11")
 print("APP_READY_IDENTITY_REGEX_CACHE_OK patterns=4 semantics=unchanged")
