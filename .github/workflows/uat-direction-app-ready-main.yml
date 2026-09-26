@@ -208,16 +208,34 @@ jobs:
           item=next((x for x in main.get('artifacts',[]) if x.get('id')=='domestic_enriched_index'),None)
           if not item:
               raise SystemExit('Cloned PROD manifest missing domestic_enriched_index')
-          url=str(item.get('url') or '')
+          path=str(item.get('path') or '')
           expected=str(item.get('sha256') or '')
-          if not url or not expected:
+          if not path or not expected:
               raise SystemExit('Cloned PROD domestic_enriched_index contract incomplete')
-          data=urllib.request.urlopen(url,timeout=60).read()
+
+          # The manifest URL points at mutable main. Resolve the immutable repository commit
+          # whose file matches the exact SHA recorded by the cloned PROD manifest instead.
+          import subprocess
+          commits=subprocess.check_output(
+              ['git','log','--format=%H','--',path],
+              text=True,
+          ).splitlines()
+          data=None
+          resolved_commit=None
+          for commit in commits:
+              try:
+                  candidate=subprocess.check_output(['git','show',f'{commit}:{path}'])
+              except subprocess.CalledProcessError:
+                  continue
+              if hashlib.sha256(candidate).hexdigest() == expected:
+                  data=candidate
+                  resolved_commit=commit
+                  break
+          if data is None:
+              raise SystemExit('Exact PROD domestic_enriched_index revision not found in repository history')
           actual=hashlib.sha256(data).hexdigest()
-          if actual != expected:
-              raise SystemExit(f'Exact PROD domestic_enriched_index hash mismatch: {actual} != {expected}')
           (source/'domestic_enriched_index.json').write_bytes(data)
-          print('UAT_EXACT_PROD_DOMESTIC_INDEX_OK', actual[:12])
+          print('UAT_EXACT_PROD_DOMESTIC_INDEX_OK', actual[:12], resolved_commit[:12])
           PY
 
       - name: Build isolated UAT bundles
