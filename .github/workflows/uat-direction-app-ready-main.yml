@@ -23,7 +23,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 110
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,24 +37,16 @@ jobs:
         run: |
           set -euo pipefail
           ref="${DISPATCH_REF}"
-          resume_run_id=""
           if [[ -z "$ref" ]]; then
             ref="$(sed -n '1p' .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
-            resume_run_id="$(sed -n '2p' .github/app-ready-uat-direction-trigger | tr -d '\r\n')"
           fi
           [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid StatMaker ref: $ref" >&2; exit 1; }
-          if [[ -n "$resume_run_id" && ! "$resume_run_id" =~ ^[0-9]+$ ]]; then
-            echo "Invalid resume run id: $resume_run_id" >&2
-            exit 1
-          fi
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
-          echo "resume_run_id=$resume_run_id" >> "$GITHUB_OUTPUT"
-          echo "APP_READY_UAT_REF=$ref" >> "$GITHUB_ENV"
 
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
 
-      - name: Verify Asian competitions remain in scope
+      - name: Verify Asian competitions remain in PROD scope
         shell: bash
         run: |
           set -euo pipefail
@@ -62,116 +54,121 @@ jobs:
           import json
           from pathlib import Path
           payload=json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
-          rows=payload.get('leagues',[])
           codes={
               str(row.get('leagueCode') or row.get('league_code') or '').strip().upper()
-              for row in rows if isinstance(row,dict)
+              for row in payload.get('leagues',[]) if isinstance(row,dict)
           }
           required={'CHN','JPN','KOR','SAU','UAE'}
           missing=sorted(required-codes)
           if missing:
-              raise SystemExit('Asian competitions were removed from App-Ready scope: '+','.join(missing))
-          print('APP_READY_ASIAN_COMPETITIONS_PRESERVED_OK',','.join(sorted(required)))
+              raise SystemExit('Asian competitions were removed from PROD data scope: '+','.join(missing))
+          print('PROD_ASIAN_COMPETITIONS_PRESERVED_OK',','.join(sorted(required)))
           PY
-
-      - name: Fetch canonical UEFA source
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
 
       - name: Require private read token
         env:
           TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
-      - name: Checkout StatMaker UAT source
+      - name: Checkout exact StatMaker UAT engine
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
           ref: ${{ steps.source.outputs.ref }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: false
 
-      - name: Stage current UAT app-ready producer
-        shell: bash
-        env:
-          APP_READY_UAT_SOURCE: "true"
-        run: bash "$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh" "$GITHUB_WORKSPACE/statmaker-private"
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      - name: Verify preinstalled Android SDK
+      - name: Resolve UAT engine contract
         shell: bash
         run: |
           set -euo pipefail
-          test -n "${ANDROID_HOME:-}" || { echo 'ANDROID_HOME is not set' >&2; exit 1; }
-          test -d "$ANDROID_HOME" || { echo "ANDROID_HOME missing: $ANDROID_HOME" >&2; exit 1; }
-          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
-          if [[ -z "$SDKMANAGER" && -x "$ANDROID_HOME/tools/bin/sdkmanager" ]]; then
-            SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
-          fi
-          test -n "$SDKMANAGER" || { echo 'sdkmanager not found' >&2; exit 1; }
-          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
-          "$SDKMANAGER" --version
+          python - <<'PY'
+          import os, re
+          from pathlib import Path
+          models=Path('statmaker-private/app/src/main/java/com/statmaker/app/PreparedPatternRecommendationModels.kt').read_text()
+          store=Path('statmaker-private/app/src/main/java/com/statmaker/app/PreparedBettingSnapshotStore.kt').read_text()
+          rules=re.search(r'PREPARED_PATTERN_RULES_FINGERPRINT\s*=\s*"([^"]+)"', models)
+          schema=re.search(r'DATABASE_VERSION\s*=\s*(\d+)', store)
+          if not rules or not schema:
+              raise SystemExit('Could not resolve UAT prepared contract')
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as out:
+              out.write('APP_READY_PATTERN_RULES_FINGERPRINT='+rules.group(1)+'\n')
+              out.write('APP_READY_PREPARED_SCHEMA_VERSION='+schema.group(1)+'\n')
+          PY
+          echo "APP_READY_STATMAKER_COMMIT=$(git -C statmaker-private rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - uses: gradle/actions/setup-gradle@v4
-
-      - name: Compile current UAT producer
-        working-directory: statmaker-private
+      - name: Clone exact PROD App-Ready snapshot
         shell: bash
         run: |
           set -euo pipefail
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace             -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8"             -Pkotlin.compiler.execution.strategy=in-process
+          python - <<'PY'
+          import json, shutil, zipfile
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
 
-      - name: Enable KVM acceleration
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -e /dev/kvm || { echo '/dev/kvm unavailable' >&2; exit 1; }
-          sudo chown "$USER" /dev/kvm
-          sudo chmod 600 /dev/kvm
-          test -r /dev/kvm -a -w /dev/kvm
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text(encoding='utf-8'))
+          root=Path('app-ready-checkpoint')
+          shutil.rmtree(root, ignore_errors=True)
+          root.mkdir(parents=True)
 
-      - name: Restore clean UAT checkpoint
-        if: steps.source.outputs.resume_run_id != ''
-        uses: actions/download-artifact@v4
-        with:
-          name: statmaker-uat-probability-first-checkpoint
-          path: app-ready-checkpoint-incoming
-          github-token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          run-id: ${{ steps.source.outputs.resume_run_id }}
+          for artifact in manifest.get('artifacts',[]):
+              path=Path(str(artifact.get('path') or ''))
+              if not path.is_file():
+                  raise SystemExit(f'Missing PROD App-Ready artifact: {path}')
+              with zipfile.ZipFile(path) as bundle:
+                  for info in bundle.infolist():
+                      if info.filename == 'bundle_manifest.json':
+                          continue
+                      target=(root / info.filename).resolve()
+                      if root.resolve() not in target.parents and target != root.resolve():
+                          raise SystemExit(f'Unsafe bundle path: {info.filename}')
+                      bundle.extract(info, root)
 
-      - name: Produce clean UAT read model
-        uses: reactivecircus/android-emulator-runner@v2
-        env:
-          APP_ID: com.statmaker.app.uat
-          APP_READY_UAT_SOURCE: "true"
-          APP_READY_DISABLE_SEED: ${{ steps.source.outputs.resume_run_id == '' && 'true' || 'false' }}
-          APP_READY_RECOMMENDATION_ONLY: ${{ steps.source.outputs.resume_run_id != '' && 'true' || 'false' }}
-          APP_READY_SOURCE_ONLY: "true"
-          APP_READY_PREPARED_MAX_SECONDS: "5400"
-        with:
-          api-level: 35
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          cores: 4
-          ram-size: 5120M
-          heap-size: 1536M
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
-          script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
+          md=manifest.get('metadata',{})
+          main_raw=str(md.get('mainManifestRaw') or '')
+          uefa_raw=str(md.get('uefaManifestRaw') or '')
+          if not main_raw or not uefa_raw:
+              raise SystemExit('PROD App-Ready manifest is missing exact source manifests')
 
-      - name: Materialize Probability-First recommendations host-side
+          prefs=root/'shared_prefs'
+          prefs.mkdir(parents=True, exist_ok=True)
+          xml_root=ET.Element('map')
+          for name,value in (
+              ('main_manifest_raw',main_raw),
+              ('uefa_manifest_raw',uefa_raw),
+          ):
+              node=ET.SubElement(xml_root,'string',{'name':name})
+              node.text=value
+          ET.ElementTree(xml_root).write(
+              prefs/'statmaker_data_manifests.xml',
+              encoding='utf-8',
+              xml_declaration=True,
+          )
+
+          required=[
+              root/'databases/statmaker.db',
+              root/'databases/statmaker_prepared_betting.db',
+              root/'files/app_ready_odds/domestic.json',
+              root/'files/app_ready_odds/champions_league.json',
+              root/'files/app_ready_odds/europa_league.json',
+              root/'files/app_ready_odds/conference_league.json',
+          ]
+          missing=[str(p) for p in required if not p.is_file()]
+          if missing:
+              raise SystemExit('PROD App-Ready clone incomplete: '+','.join(missing))
+
+          print(
+              'UAT_EXACT_PROD_APP_READY_CLONED',
+              manifest.get('contentVersion'),
+              manifest.get('generatedAt'),
+              md.get('mainContentVersion'),
+              md.get('uefaContentVersion'),
+          )
+          PY
+
+      - name: Materialize Probability-First candidates host-side
         shell: bash
         run: |
           set -euo pipefail
@@ -181,62 +178,37 @@ jobs:
             app-ready-export/source
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
-
-      - name: Verify UAT prepared retirement contract
-        shell: bash
-        run: |
-          set -euo pipefail
           python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Stage canonical repository inputs
+      - name: Fetch exact Domestic enriched index from cloned PROD manifest
         shell: bash
         run: |
           set -euo pipefail
-          s="app-ready-export/source"
-          mkdir -p "$s"
-          cp data/statmaker/update_manifest.json "$s/main_manifest.json"
-          cp data/statmaker/domestic_enriched/index.json "$s/domestic_enriched_index.json"
-          cp odds/odds_api_io/domestic_odds.json "$s/domestic.json"
-          git show origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json > "$s/uefa_manifest.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/champions_league_odds.json > "$s/champions_league.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/europa_league_odds.json > "$s/europa_league.json"
-          git show origin/build/uefa-qualifier-feed-20260720:odds/odds_api_io/conference_league_odds.json > "$s/conference_league.json"
-          test -s "$s/main_manifest.json"
-          test -s "$s/domestic_enriched_index.json"
-          test -s "$s/uefa_manifest.json"
-          test -s "$s/domestic.json"
-          test -s "$s/champions_league.json"
-          test -s "$s/europa_league.json"
-          test -s "$s/conference_league.json"
+          python - <<'PY'
+          import hashlib, json, urllib.request
+          from pathlib import Path
+          source=Path('app-ready-export/source')
+          main=json.loads((source/'main_manifest.json').read_text(encoding='utf-8'))
+          item=next((x for x in main.get('artifacts',[]) if x.get('id')=='domestic_enriched_index'),None)
+          if not item:
+              raise SystemExit('Cloned PROD manifest missing domestic_enriched_index')
+          url=str(item.get('url') or '')
+          expected=str(item.get('sha256') or '')
+          if not url or not expected:
+              raise SystemExit('Cloned PROD domestic_enriched_index contract incomplete')
+          data=urllib.request.urlopen(url,timeout=60).read()
+          actual=hashlib.sha256(data).hexdigest()
+          if actual != expected:
+              raise SystemExit(f'Exact PROD domestic_enriched_index hash mismatch: {actual} != {expected}')
+          (source/'domestic_enriched_index.json').write_bytes(data)
+          print('UAT_EXACT_PROD_DOMESTIC_INDEX_OK', actual[:12])
+          PY
 
       - name: Build isolated UAT bundles
         env:
           APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/probability-first-v1
         run: python scripts/build_uat_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
-
-      - name: Revalidate source versions
-        shell: bash
-        run: |
-          set -euo pipefail
-          git fetch --no-tags origin +main:refs/remotes/origin/main
-          git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
-          python - <<'PY'
-          import json, subprocess
-          from pathlib import Path
-          incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
-          m=incoming.get('metadata',{})
-          current_main=json.loads(subprocess.check_output(
-              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'], text=True
-          ))
-          current_uefa=json.loads(subprocess.check_output(
-              ['git','show','refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'], text=True
-          ))
-          if str(m.get('mainContentVersion') or '') != str(current_main.get('contentVersion') or ''):
-              raise SystemExit('Domestic source changed during UAT build')
-          if str(m.get('uefaContentVersion') or '') != str(current_uefa.get('contentVersion') or ''):
-              raise SystemExit('UEFA source changed during UAT build')
-          PY
 
       - name: Publish isolated UAT artifacts to Data main
         shell: bash
@@ -254,8 +226,8 @@ jobs:
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
             rm -rf "$rel"
-            mkdir -p "$(dirname "$rel")"
-            cp -a "$staging/payload" "$rel"
+            mkdir -p "$rel"
+            cp -a "$staging/payload/." "$rel/"
             git add "$rel"
             if git diff --cached --quiet; then
               echo "APP_READY_UAT_ALREADY_PUBLISHED"
@@ -289,10 +261,14 @@ jobs:
           assert md.get('uatProfile') == 'probability-first-v1'
           assert md.get('statmakerCommit') == os.environ['APP_READY_STATMAKER_COMMIT']
           assert md.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
-          assert len(m.get('artifacts',[])) == 2
-          for item in m['artifacts']:
-              assert item['url'].startswith(
-                  'https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready_uat/probability-first-v1/'
-              )
-          print('APP_READY_UAT_REMOTE_OK', md.get('statmakerCommit'), md.get('preparedPatternRulesFingerprint'))
+          assert md.get('engineContract') == 'uat-probability-first-v1-prod-source-data'
+          assert int(md.get('preparedPatternCandidateCount') or 0) > 0
+          print(
+              'APP_READY_UAT_REMOTE_OK',
+              md.get('statmakerCommit'),
+              md.get('preparedPatternRulesFingerprint'),
+              md.get('preparedPatternCandidateCount'),
+              md.get('mainContentVersion'),
+              md.get('uefaContentVersion'),
+          )
           PY
