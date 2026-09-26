@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import sqlite3
@@ -881,6 +882,8 @@ def materialize(checkpoint_root, raw_root):
             "DELETE FROM prepared_pattern_generation WHERE generation_id<>?",
             (generation_id,),
         )
+        target_schema = int(os.environ.get("APP_READY_PREPARED_SCHEMA_VERSION", schema_version))
+        connection.execute(f"PRAGMA user_version={target_schema}")
         connection.commit()
     except Exception:
         connection.rollback()
