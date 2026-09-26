@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=6
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=7
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
 # persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
@@ -65,28 +65,206 @@ def current_bundles():
     p=[x for x in APP.glob('app_ready_betting_bundle-*.zip') if x.is_file()]
     return sorted(p,key=lambda x:(x.name!=current,-x.stat().st_mtime))[:2]
 
+def _clamp01(value):
+    return max(0.0,min(1.0,float(value)))
+
+def _valid_probability(value):
+    x=num(value)
+    return x!=float('-inf') and 0.01<=x<=0.99
+
+def _probability_first_rank(row):
+    probability=num(row.get('opponent_model_probability'))
+    market_probability=num(row.get('bm_market_probability'))
+    odd=num(row.get('selection_odd'))
+    if not (_valid_probability(probability) and _valid_probability(market_probability) and odd>1.0):
+        return None
+
+    edge=probability-market_probability
+    expected_value=probability*odd-1.0
+    if edge<=0.0 or expected_value<=0.0:
+        return None
+
+    overall=_clamp01(row.get('strict_hit_rate') or row.get('bm_hit_rate') or 0.0)
+    bits=''.join(ch for ch in str(row.get('historical_outcomes_bits') or '') if ch in '01')
+    recent_size=min(10,len(bits))
+    if recent_size:
+        recent_bits=bits[-recent_size:]
+        recent=sum(ch=='1' for ch in recent_bits)/recent_size
+    else:
+        recent=overall
+    if len(bits)>recent_size and recent_size:
+        prior_bits=bits[:-recent_size]
+        prior=sum(ch=='1' for ch in prior_bits)/len(prior_bits)
+    else:
+        prior=overall
+
+    trend_adjustment=num(row.get('score_trend_adjustment'),0.0)
+    direction_adjustment=0.025 if trend_adjustment>0 else (-0.025 if trend_adjustment<0 else 0.0)
+    recent_direction=max(-0.05,min(0.05,(recent-prior)*0.18))
+    trend_support=_clamp01(recent*0.58+overall*0.42+direction_adjustment+recent_direction)
+
+    sample=max(0,intval(row.get('strict_sample') or row.get('bm_sample')))
+    sample_maturity=sample/(sample+12.0)
+    reliability=_clamp01(_clamp01(row.get('bm_sample_reliability') or 0.0)*0.65+sample_maturity*0.35)
+
+    context_values=[
+        row.get('opponent_without_favorite_probability'),
+        row.get('opponent_without_xg_probability'),
+        row.get('opponent_without_fatigue_probability'),
+        row.get('opponent_without_injuries_probability'),
+        row.get('opponent_without_lineup_probability'),
+        row.get('opponent_without_formation_probability'),
+        row.get('opponent_without_squad_turnover_probability'),
+    ]
+    coverage=sum(1 for value in context_values if _valid_probability(value))/7.0
+    base=row.get('opponent_base_model_probability')
+    shift=probability-num(base) if _valid_probability(base) else 0.0
+    direction_support=_clamp01(0.50+shift/0.16)
+    context_support=_clamp01(0.62+coverage*0.25+direction_support*0.13)
+
+    normalized_edge=_clamp01((edge-0.04)/0.12)
+    normalized_ev=_clamp01((expected_value-0.05)/0.25)
+    value_support=_clamp01(normalized_ev*0.55+normalized_edge*0.45)
+
+    ranking_score=_clamp01(
+        probability*0.60+
+        trend_support*0.18+
+        reliability*0.10+
+        context_support*0.08+
+        value_support*0.04
+    )
+    return (
+        ranking_score,
+        probability,
+        trend_support,
+        reliability,
+    )
+
 def final_candidates(db,gid):
-    # Model Performance measures the exact default Singles product, not the broad candidate universe:
-    # Strong Value only, minimum quoted odd 1.50, then one deterministic MAIN selection per match.
+    # Canonical Performance/Daily Outcomes must measure the same Strong Singles contract as UAT:
+    # existing Strong quality benchmark first (sample >=10, hit rate >=70%, Pattern score >=0.54),
+    # then likely market side, fixture model, positive edge/EV, and probability-first MAIN choice.
     src=rows(
         db,
-        "SELECT * FROM prepared_pattern_candidates "
-        "WHERE generation_id=? AND recommendation_eligible=1 "
-        "AND UPPER(TRIM(COALESCE(value_tier,'')))='STRONG_VALUE' "
-        "AND selection_odd>=1.50 "
-        "ORDER BY evidence_score DESC,source_order ASC",
+        """
+        SELECT c.*,
+               s.match_key AS prepared_match_key,
+               s.qualifies_pattern,
+               s.bm_market_probability,
+               s.bm_hit_rate,
+               s.bm_sample,
+               s.bm_sample_reliability,
+               s.historical_outcomes_bits,
+               s.score_trend_adjustment,
+               s.identity_sub_market_key,
+               s.identity_selection_side,
+               s.opponent_adjusted_required,
+               s.opponent_model_probability,
+               s.opponent_base_model_probability,
+               s.opponent_without_favorite_probability,
+               s.opponent_without_xg_probability,
+               s.opponent_without_fatigue_probability,
+               s.opponent_without_injuries_probability,
+               s.opponent_without_lineup_probability,
+               s.opponent_without_formation_probability,
+               s.opponent_without_squad_turnover_probability
+        FROM prepared_pattern_candidates c
+        JOIN prepared_selections s
+          ON s.competition_id=c.competition_id
+         AND s.snapshot_version=c.snapshot_version
+         AND s.selection_key=c.selection_key
+        WHERE c.generation_id=?
+          AND s.qualifies_pattern=1
+          AND c.selection_odd>=1.50
+          AND c.strict_sample>=10
+          AND c.strict_hit_rate>=0.70
+          AND c.evidence_score>=0.54
+        ORDER BY c.source_order ASC
+        """,
         (gid,),
     )
-    exact={}
+
+    three_way={
+        'RESULT_1X2','HT_RESULT_1X2','CORNER_RESULT_1X2',
+        'SHOTS_RESULT_1X2','SOT_RESULT_1X2'
+    }
+    favorite_side={}
+    contests={
+        (
+            str(r.get('competition_id') or ''),
+            str(r.get('snapshot_version') or ''),
+            str(r.get('prepared_match_key') or ''),
+            str(r.get('identity_sub_market_key') or ''),
+        )
+        for r in src
+        if str(r.get('identity_sub_market_key') or '') in three_way
+    }
+    for comp,snap,match_key,sub in contests:
+        market_rows=rows(
+            db,
+            """
+            SELECT identity_selection_side, selection_odd
+            FROM prepared_selections
+            WHERE competition_id=? AND snapshot_version=? AND match_key=?
+              AND identity_sub_market_key=?
+              AND selection_odd>1.01
+            """,
+            (comp,snap,match_key,sub),
+        )
+        market_rows=[
+            r for r in market_rows
+            if str(r.get('identity_selection_side') or '') in {'HOME','DRAW','AWAY'}
+            and num(r.get('selection_odd'))!=float('-inf')
+        ]
+        if len({str(r.get('identity_selection_side') or '') for r in market_rows})>=3:
+            favorite_side[(comp,snap,match_key,sub)]=str(
+                min(market_rows,key=lambda r:num(r.get('selection_odd'))).get('identity_selection_side') or ''
+            )
+
+    eligible=[]
     for r in src:
-        k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''),str(r.get('exact_recommendation_key') or ''))
-        if k not in exact or num(r.get('selection_score'))>num(exact[k].get('selection_score')): exact[k]=r
+        sub=str(r.get('identity_sub_market_key') or '')
+        side=str(r.get('identity_selection_side') or '')
+        market_probability=num(r.get('bm_market_probability'))
+        model_probability=num(r.get('opponent_model_probability'))
+        if not (_valid_probability(market_probability) and _valid_probability(model_probability)):
+            continue
+        if sub in three_way:
+            key=(
+                str(r.get('competition_id') or ''),
+                str(r.get('snapshot_version') or ''),
+                str(r.get('prepared_match_key') or ''),
+                sub,
+            )
+            if favorite_side.get(key)!=side:
+                continue
+        elif market_probability<0.50:
+            continue
+        rank=_probability_first_rank(r)
+        if rank is None:
+            continue
+        rr=dict(r)
+        rr['_probability_first_rank']=rank
+        rr['value_tier']='STRONG_VALUE'
+        eligible.append(rr)
+
+    exact={}
+    for r in eligible:
+        k=(
+            str(r.get('competition_id') or ''),
+            str(r.get('match_key') or ''),
+            str(r.get('exact_recommendation_key') or ''),
+        )
+        old=exact.get(k)
+        if old is None or r['_probability_first_rank']>old['_probability_first_rank']:
+            exact[k]=r
+
     best={}
     for r in exact.values():
         k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''))
-        rank=(num(r.get('selection_score')),num(r.get('strict_hit_rate')),intval(r.get('strict_sample')),num(r.get('selection_odd')))
-        old=best.get(k); oldrank=None if old is None else (num(old.get('selection_score')),num(old.get('strict_hit_rate')),intval(old.get('strict_sample')),num(old.get('selection_odd')))
-        if old is None or rank>oldrank: best[k]=r
+        old=best.get(k)
+        if old is None or r['_probability_first_rank']>old['_probability_first_rank']:
+            best[k]=r
     return list(best.values())
 
 def runtime_match_key(match):
@@ -238,9 +416,8 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v6 keeps the default-Singles performance contract and adds canonical kickoff identity. Never carry forward v4 rows selected
-    # from the broad recommendation universe; they are re-materialized from immutable pre-match
-    # bundles after Strong Value + minimum odd 1.50 are applied before MAIN selection.
+    # Schema v7 re-materializes the full retained history with the same probability-first Strong
+    # Singles contract used by UAT. Never carry forward v6 Strong-Value identities.
     existing=[]
     if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
         for r in old.get('entries',[]):
@@ -272,12 +449,12 @@ def main():
         if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
         and not retired_market(r.get('market'), r.get('subMarketKey'))
     ]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-default-singles-ledger-v6','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-probability-first-strong-singles-ledger-v7','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v6 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v7 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
