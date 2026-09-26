@@ -147,6 +147,21 @@ jobs:
               xml_declaration=True,
           )
 
+          versions_root=ET.Element('map')
+          for name,value in (
+              ('domestic_history_fingerprint',str(md.get('domesticHistoryFingerprint') or '')),
+              ('uefa_support_fingerprint',str(md.get('uefaSupportFingerprint') or '')),
+          ):
+              if not value:
+                  raise SystemExit(f'PROD App-Ready manifest missing {name}')
+              node=ET.SubElement(versions_root,'string',{'name':name})
+              node.text=value
+          ET.ElementTree(versions_root).write(
+              prefs/'statmaker_prepared_data_versions.xml',
+              encoding='utf-8',
+              xml_declaration=True,
+          )
+
           required=[
               root/'databases/statmaker.db',
               root/'databases/statmaker_prepared_betting.db',
