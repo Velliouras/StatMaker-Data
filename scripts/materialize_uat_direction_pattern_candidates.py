@@ -13,7 +13,7 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-ou-value-v1-direction-token-v2-ou-quality-gate-v1"
+RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-probability-first-v1"
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -621,8 +621,9 @@ def materialize(checkpoint_root, raw_root):
     quick = connection.execute("PRAGMA quick_check").fetchone()
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared checkpoint quick_check failed: {quick}")
-    if int(connection.execute("PRAGMA user_version").fetchone()[0]) != 11:
-        raise SystemExit("Prepared checkpoint schema must be exactly v11")
+    schema_version = int(connection.execute("PRAGMA user_version").fetchone()[0])
+    if schema_version < 11:
+        raise SystemExit(f"Prepared checkpoint schema must be at least v11, got v{schema_version}")
 
     selection_columns = {
         str(row[1])
@@ -679,8 +680,8 @@ def materialize(checkpoint_root, raw_root):
         return generation_id, int(existing[0])
 
     started = time.monotonic()
-    maturity_index = MaturityIndex(history_db, snapshot_dir)
-    maturity_by_match = {}
+    # Final Probability-First structural/value checks run in the UAT app.
+    # Here we only build the broad indexed candidate universe off-device.
     candidates = []
     source_order = 0
     rejection_counts = Counter()
@@ -702,7 +703,6 @@ def materialize(checkpoint_root, raw_root):
                qualifies_pattern, qualifies_builder
         FROM prepared_selections
         WHERE competition_id=? AND snapshot_version=?
-          AND (qualifies_pattern=1 OR identity_selection_side IN ('OVER','UNDER'))
         ORDER BY rowid
     """
 
@@ -740,29 +740,18 @@ def materialize(checkpoint_root, raw_root):
             source_order += 1
             count += 1
 
-            direct_ou = (
-                identity_line is not None
-                and is_direct_ou(str(sub_market_key), str(selection_side))
-            )
-            if not bool(qualifies_pattern) and not direct_ou:
-                continue
-
             required = (
                 hits, sample, hit_rate, market_probability, posterior_probability,
                 sample_reliability, normalized_positive_edge, broad_group,
                 identity_family, sub_market_key, selection_side, evidence_score,
             )
             if any(value is None for value in required):
-                if bool(qualifies_pattern):
-                    raise SystemExit(
-                        f"Prepared PATTERN row is missing persisted scalar evidence: {competition_id}:{selection_key}"
-                    )
                 continue
 
             match = matches.get(str(prepared_match_key))
             if match is None:
                 raise SystemExit(
-                    f"Prepared PATTERN row has no prepared match: {competition_id}:{prepared_match_key}"
+                    f"Prepared selection has no prepared match: {competition_id}:{prepared_match_key}"
                 )
             odd = float(odd)
             hits = int(hits)
@@ -773,35 +762,19 @@ def materialize(checkpoint_root, raw_root):
             normalized_positive_edge = float(normalized_positive_edge)
             evidence_score = float(evidence_score)
 
-            direct_signal = (
-                bookmaker_mispricing_signal(
-                    float(market_probability),
-                    posterior_probability,
-                    sample_reliability,
-                    odd,
+            retired_text = " ".join(
+                str(value or "")
+                for value in (
+                    _selection_market, identity_family, sub_market_key, _source_market
                 )
-                if direct_ou
-                else None
-            )
-            direct_value_eligible = (
-                bool(qualifies_pattern)
-                and evidence_score >= 0.54
-                and direct_signal is not None
-                and direct_signal[0] in {"STRONG_VALUE", "VALUE"}
-                and direct_ou_maturity_and_price_ok(str(sub_market_key), sample, odd)
-            )
-            if direct_ou:
-                if not direct_value_eligible:
-                    continue
-                base_recommendation_eligible = True
-            else:
-                if not bool(qualifies_pattern):
-                    continue
-                base_recommendation_eligible = True
+            ).upper()
+            if "ASIAN" in retired_text or "HANDICAP" in retired_text:
+                continue
 
             eligible = (
-                base_recommendation_eligible
-                and odd >= 1.20
+                odd >= 1.20
+                and odd <= 10.0
+                and sample > 0
                 and sane_exact_odd(
                     str(identity_family),
                     str(selection_side),
@@ -809,16 +782,13 @@ def materialize(checkpoint_root, raw_root):
                     odd,
                 )
             )
+            if not eligible:
+                continue
+
             runtime_match_key = f"{match.get('date', '')}|{match.get('homeTeam', '')}|{match.get('awayTeam', '')}"
-            maturity = None
-            if eligible:
-                if runtime_match_key not in maturity_by_match:
-                    maturity_by_match[runtime_match_key] = maturity_index.resolve(match)
-                maturity = maturity_by_match[runtime_match_key]
-            premium, rejection_reason = policy_decision(
-                match, posterior_probability, maturity, eligible
-            )
-            rejection_counts[rejection_reason or "ELIGIBLE"] += 1
+            premium = False
+            rejection_reason = None
+            rejection_counts["ELIGIBLE"] += 1
 
             line_text = "" if identity_line is None else str(float(identity_line))
             exact_key = (
@@ -840,37 +810,14 @@ def materialize(checkpoint_root, raw_root):
                     market_filter_label(str(identity_family)),
                     odd,
                     exact_key,
-                    (
-                        direct_signal[1]
-                        if direct_signal is not None
-                        else selection_score(
-                            str(identity_family),
-                            str(sub_market_key),
-                            str(selection_side),
-                            odd,
-                            sample,
-                            hits,
-                            posterior_probability,
-                            sample_reliability,
-                            normalized_positive_edge,
-                        )
-                    ),
+                    evidence_score,
                     evidence_score,
                     order,
                     hit_rate,
                     sample,
-                    (
-                        direct_signal[0]
-                        if direct_signal is not None
-                        else value_tier(
-                            float(market_probability),
-                            posterior_probability,
-                            sample_reliability,
-                            odd,
-                        )
-                    ),
-                    1 if eligible else 0,
-                    1 if premium else 0,
+                    None,
+                    1,
+                    0,
                     rejection_reason,
                 )
             )
@@ -945,7 +892,7 @@ def materialize(checkpoint_root, raw_root):
             (generation_id,),
         ).fetchone()[0]
     )
-    invalid_direct_quality = int(
+    expanded = int(
         connection.execute(
             """
             SELECT COUNT(*)
@@ -954,32 +901,26 @@ def materialize(checkpoint_root, raw_root):
               ON s.competition_id=c.competition_id
              AND s.snapshot_version=c.snapshot_version
              AND s.selection_key=c.selection_key
-            WHERE c.generation_id=?
-              AND c.recommendation_eligible=1
-              AND s.identity_selection_side IN ('OVER','UNDER')
-              AND s.identity_line IS NOT NULL
-              AND c.evidence_score < 0.54
+            WHERE c.generation_id=? AND s.qualifies_pattern=0
             """,
             (generation_id,),
         ).fetchone()[0]
     )
     quick = connection.execute("PRAGMA quick_check").fetchone()
     connection.close()
-    if invalid_direct_quality:
-        raise SystemExit(
-            "Direct O/U quality regression: "
-            f"{invalid_direct_quality} eligible rows have evidence_score < 0.54"
-        )
+    if expanded <= 0:
+        raise SystemExit("Probability-First UAT universe did not expand beyond PROD pattern gate")
     if actual != len(candidates) or not quick or quick[0] != "ok":
         raise SystemExit(
             f"Host candidate materialization validation failed: expected={len(candidates)} actual={actual} quick={quick}"
         )
 
     print(
-        "APP_READY_HOST_PATTERN_OK",
+        "APP_READY_HOST_PROBABILITY_FIRST_OK",
         f"generation={generation_id}",
         f"candidates={len(candidates)}",
         f"premium={rejection_counts['ELIGIBLE']}",
+        f"expanded_beyond_prod_gate={expanded}",
         "rejections=" + ",".join(
             f"{key}:{value}"
             for key, value in sorted(rejection_counts.items())
