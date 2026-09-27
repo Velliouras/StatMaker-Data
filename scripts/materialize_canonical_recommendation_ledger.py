@@ -650,6 +650,21 @@ def main():
     current.extend(same_day_rows)
 
     allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
+
+    # One-shot PROD history repair for dates that were previously marked backfilled while
+    # carrying zero ledger rows. Replay only their immutable PROD manifest history; do not
+    # change recommendation rules, thresholds, current Singles or any already-populated day.
+    if MODE_LABEL=='prod':
+        for iso in ('2026-09-22','2026-09-23','2026-09-24'):
+            day=dt.date.fromisoformat(iso)
+            if not (low<=day<today):
+                continue
+            repaired,n=history(day)
+            allr=[x for x in allr if str(x.get('localDate') or '')[:10]!=iso]
+            allr.extend(repaired)
+            hb+=n; hr+=len(repaired); done.add(iso); processed.append(iso)
+            print(f"CANONICAL_LEDGER_TARGETED_HISTORY_REPAIR date={iso} bundles={n} rows={len(repaired)}")
+
     for off in range(1,RETENTION+1):
         if len(processed)>=limit:break
         day=today-dt.timedelta(days=off); iso=day.isoformat()
