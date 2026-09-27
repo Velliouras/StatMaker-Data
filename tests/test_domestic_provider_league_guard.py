@@ -45,7 +45,7 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
             'country': 'Brazil',
             'competition': 'Serie A',
             'providerLeagueSlug': 'brazil-brasileiro-serie-a',
-            'searchTerms': ['brazil serie a', 'brasileirao', 'campeonato brasileiro serie a'],
+            'searchTerms': ['brazil serie a', 'brasil serie a', 'brasileirao', 'campeonato brasileiro serie a'],
         }
         providers = [
             {
@@ -54,14 +54,14 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
                 'eventsCount': 8,
             },
             {
-                'name': 'Brazil - Serie A',
-                'slug': 'brazil-serie-a',
+                'name': 'Brasil - Serie A',
+                'slug': 'brasil-serie-a',
                 'eventsCount': 10,
             },
         ]
         matched = odds.match_provider_league(configured, providers)
         self.assertIsNotNone(matched)
-        self.assertEqual('brazil-serie-a', matched['slug'])
+        self.assertEqual('brasil-serie-a', matched['slug'])
 
     def test_stale_configured_slug_does_not_cross_country_on_fallback(self):
         configured = {
@@ -77,6 +77,37 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
             'eventsCount': 8,
         }]
         self.assertIsNone(odds.match_provider_league(configured, providers))
+
+    def test_j1_search_does_not_match_j3(self):
+        configured = {
+            'leagueCode': 'JPN',
+            'country': 'Japan',
+            'competition': 'J1 League',
+            'providerLeagueSlug': None,
+            'searchTerms': ['japan j1 league', 'j1 league', 'j league division 1'],
+        }
+        providers = [{
+            'name': 'Japan - J3 League',
+            'slug': 'japan-j3-league',
+            'eventsCount': 100,
+        }]
+        self.assertIsNone(odds.match_provider_league(configured, providers))
+
+    def test_j1_search_prefers_exact_division_token(self):
+        configured = {
+            'leagueCode': 'JPN',
+            'country': 'Japan',
+            'competition': 'J1 League',
+            'providerLeagueSlug': None,
+            'searchTerms': ['japan j1 league', 'j1 league', 'j league division 1'],
+        }
+        providers = [
+            {'name': 'Japan - J3 League', 'slug': 'japan-j3-league', 'eventsCount': 100},
+            {'name': 'Japan - J1 League', 'slug': 'japan-j1-league', 'eventsCount': 50},
+        ]
+        matched = odds.match_provider_league(configured, providers)
+        self.assertIsNotNone(matched)
+        self.assertEqual('japan-j1-league', matched['slug'])
 
     def test_rejects_configured_simulated_slug_too(self):
         configured = dict(self.t1)
