@@ -104,7 +104,7 @@ COUNTRY_ALIASES = {
     "greece": ["greece", "greek"],
     "argentina": ["argentina", "argentine"],
     "austria": ["austria", "austrian"],
-    "brazil": ["brazil", "brasileirao", "brasileiro"],
+    "brazil": ["brazil", "brasil", "brasileirao", "brasileiro"],
     "china": ["china", "chinese"],
     "denmark": ["denmark", "danish"],
     "finland": ["finland", "finnish"],
@@ -478,7 +478,12 @@ def match_provider_league(config_league: Dict[str, Any], provider_leagues: Seque
             if term in haystack:
                 score = max(score, 100 + len(term))
             else:
-                words = [w for w in term.split() if len(w) > 2]
+                # Keep short alphanumeric division tokens such as J1/J2/J3.
+                # Dropping them makes "Japan J1 League" indistinguishable from J3.
+                words = [
+                    w for w in term.split()
+                    if len(w) > 2 or any(ch.isdigit() for ch in w)
+                ]
                 hits = sum(1 for w in words if w in haystack)
                 if words and hits == len(words):
                     score = max(score, 70 + hits)
@@ -487,6 +492,27 @@ def match_provider_league(config_league: Dict[str, Any], provider_leagues: Seque
         if score > best[0]:
             best = (score, item)
     return best[1] if best[0] >= 50 else None
+
+
+def provider_country_candidates(
+    config_league: Dict[str, Any],
+    provider_leagues: Sequence[Dict[str, Any]],
+    limit: int = 12,
+) -> List[Dict[str, Any]]:
+    """Return safe same-country provider candidates for diagnostics only."""
+    rows = [
+        provider_league_summary(item)
+        for item in provider_leagues
+        if provider_country_matches(config_league, item)
+        and not provider_has_unrequested_qualifier(config_league, item)
+    ]
+    rows.sort(
+        key=lambda item: (
+            -(int(item.get("eventsCount") or 0) if str(item.get("eventsCount") or "").isdigit() else 0),
+            str(item.get("name") or ""),
+        )
+    )
+    return rows[:max(1, limit)]
 
 
 def iso_window(horizon_days: int) -> Tuple[str, str]:
@@ -975,6 +1001,7 @@ def build_output(config: Dict[str, Any], selected: List[Dict[str, Any]], api_key
                     "competition": league.get("competition"),
                     "apiFootballLeagueId": league.get("apiFootballLeagueId"),
                     "reason": "provider league slug not found with strict country guard",
+                    "providerCountryCandidates": provider_country_candidates(league, provider_leagues),
                 })
                 continue
             slug = str(provider.get("slug") or "")
