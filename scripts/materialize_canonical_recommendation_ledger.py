@@ -198,94 +198,146 @@ def _probability_first_rank(row, market_preferred):
     )
 
 def final_candidates(db,gid,target=None):
-    # Canonical Performance/Daily Outcomes must start from the same expanded prepared-selection
-    # universe as UAT Strong Singles, not the narrower PROD prepared_pattern_candidates table.
-    meta=first(
-        db,
-        "SELECT source_fingerprint FROM prepared_pattern_generation WHERE generation_id=? LIMIT 1",
-        (gid,),
-    ) or {}
-    # All READY snapshots are eligible; this mirrors the UAT materializer's 4-snapshot universe.
-    snapshots=rows(
-        db,
-        "SELECT competition_id, snapshot_version FROM prepared_snapshot_meta WHERE state='ready'",
-    )
-    snapshot_map={str(r.get('competition_id') or ''):str(r.get('snapshot_version') or '') for r in snapshots}
-
-    src=[]
-    for comp,snap in snapshot_map.items():
-        match_payloads={}
-        for match_row in rows(
-            db,
-            """
-            SELECT match_key,payload
-            FROM prepared_matches
-            WHERE competition_id=? AND snapshot_version=?
-            """,
-            (comp,snap),
-        ):
-            try:
-                match_payloads[str(match_row.get('match_key') or '')]=json.loads(str(match_row.get('payload') or '{}'))
-            except Exception:
-                pass
-
-        date_clause=" AND s.local_date=?" if target else ""
-        selection_args=(comp,snap,target) if target else (comp,snap)
-        selection_rows=rows(
+    # UAT Performance/Daily Outcomes must start from the exact same prepared_pattern_candidates
+    # generation consumed by the Android probability-first Strong query. The UAT App-Ready bundle
+    # already contains the expanded candidate universe; never reconstruct it from prepared_selections.
+    if MODE_LABEL=='uat':
+        date_clause=" AND c.local_date=?" if target else ""
+        args=(gid,target) if target else (gid,)
+        src=rows(
             db,
             f"""
-            SELECT s.*,
-                   s.match_key AS prepared_match_key
-            FROM prepared_selections s
-            WHERE s.competition_id=? AND s.snapshot_version=?
+            SELECT c.*,
+                   s.match_key AS prepared_match_key,
+                   s.selection_market,
+                   s.selection_name,
+                   s.selection_team,
+                   s.selection_line,
+                   s.bm_market_probability,
+                   s.bm_hit_rate,
+                   s.bm_sample,
+                   s.bm_posterior_probability,
+                   s.bm_sample_reliability,
+                   s.historical_outcomes_bits,
+                   s.score_value,
+                   s.score_tier,
+                   s.score_trend_adjustment,
+                   s.identity_broad_group,
+                   s.identity_family,
+                   s.identity_sub_market_key,
+                   s.identity_team_side,
+                   s.identity_line,
+                   s.identity_selection_side,
+                   s.identity_source_market,
+                   s.identity_team,
+                   s.identity_selection_token,
+                   s.opponent_adjusted_required,
+                   s.opponent_model_probability,
+                   s.opponent_base_model_probability,
+                   s.opponent_without_favorite_probability,
+                   s.opponent_without_xg_probability,
+                   s.opponent_without_fatigue_probability,
+                   s.opponent_without_injuries_probability,
+                   s.opponent_without_lineup_probability,
+                   s.opponent_without_formation_probability,
+                   s.opponent_without_squad_turnover_probability
+            FROM prepared_pattern_candidates c
+            JOIN prepared_selections s
+              ON s.competition_id=c.competition_id
+             AND s.snapshot_version=c.snapshot_version
+             AND s.selection_key=c.selection_key
+            WHERE c.generation_id=?
               {date_clause}
-              AND s.selection_odd>=1.50
-              AND s.bm_sample>=10
-              AND s.bm_hit_rate>=0.70
-              AND s.score_value>=0.54
-            ORDER BY s.rowid ASC
+              AND c.selection_odd>=1.50
+              AND c.strict_sample>=10
+              AND c.strict_hit_rate>=0.70
+              AND c.evidence_score>=0.54
+              AND c.recommendation_eligible=1
+            ORDER BY c.source_order ASC
             """,
-            selection_args,
+            args,
         )
-        for r in selection_rows:
-            odd=num(r.get('selection_odd'))
-            family=str(r.get('identity_family') or '')
-            side=str(r.get('identity_selection_side') or '')
-            line=nullable(r.get('identity_line'))
-            retired_text=" ".join(
-                str(r.get(k) or "")
-                for k in ("selection_market","identity_family","identity_sub_market_key","identity_source_market")
-            ).upper()
-            if "ASIAN" in retired_text or "HANDICAP" in retired_text:
-                continue
-            if odd>10.0 or not sane_exact_odd(family,side,line,odd):
-                continue
-            # Shape the row like the UAT prepared candidate so downstream extraction is identical.
-            payload=match_payloads.get(str(r.get('prepared_match_key') or ''))
-            if not payload:
-                continue
-            runtime_key=runtime_match_key(payload)
-            if not runtime_key:
-                continue
-            line_text="" if line is None else str(float(line))
-            rr=dict(r)
-            rr.update({
-                'competition_id':comp,
-                'snapshot_version':snap,
-                'selection_key':str(r.get('selection_key') or ''),
-                'match_key':runtime_key,
-                'local_date':str(r.get('local_date') or payload.get('date') or '')[:10],
-                'league_code':str(payload.get('leagueCode') or payload.get('competition') or ''),
-                'selection_odd':odd,
-                'strict_sample':intval(r.get('bm_sample')),
-                'strict_hit_rate':num(r.get('bm_hit_rate')),
-                'evidence_score':num(r.get('score_value')),
-                'exact_recommendation_key':(
-                    f"{r.get('identity_broad_group') or ''}|{r.get('identity_sub_market_key') or ''}|"
-                    f"{side}|{line_text}|{r.get('identity_team') or ''}|{r.get('identity_selection_token') or ''}"
-                ),
-            })
-            src.append(rr)
+    else:
+        # PROD keeps its own canonical source contract. This branch is intentionally separate from
+        # UAT so testing a UAT engine never changes the production Performance cohort.
+        snapshots=rows(
+            db,
+            "SELECT competition_id, snapshot_version FROM prepared_snapshot_meta WHERE state='ready'",
+        )
+        snapshot_map={str(r.get('competition_id') or ''):str(r.get('snapshot_version') or '') for r in snapshots}
+        src=[]
+        for comp,snap in snapshot_map.items():
+            match_payloads={}
+            for match_row in rows(
+                db,
+                """
+                SELECT match_key,payload
+                FROM prepared_matches
+                WHERE competition_id=? AND snapshot_version=?
+                """,
+                (comp,snap),
+            ):
+                try:
+                    match_payloads[str(match_row.get('match_key') or '')]=json.loads(str(match_row.get('payload') or '{}'))
+                except Exception:
+                    pass
+
+            date_clause=" AND s.local_date=?" if target else ""
+            selection_args=(comp,snap,target) if target else (comp,snap)
+            selection_rows=rows(
+                db,
+                f"""
+                SELECT s.*,
+                       s.match_key AS prepared_match_key
+                FROM prepared_selections s
+                WHERE s.competition_id=? AND s.snapshot_version=?
+                  {date_clause}
+                  AND s.selection_odd>=1.50
+                  AND s.bm_sample>=10
+                  AND s.bm_hit_rate>=0.70
+                  AND s.score_value>=0.54
+                ORDER BY s.rowid ASC
+                """,
+                selection_args,
+            )
+            for r in selection_rows:
+                odd=num(r.get('selection_odd'))
+                family=str(r.get('identity_family') or '')
+                side=str(r.get('identity_selection_side') or '')
+                line=nullable(r.get('identity_line'))
+                retired_text=" ".join(
+                    str(r.get(k) or "")
+                    for k in ("selection_market","identity_family","identity_sub_market_key","identity_source_market")
+                ).upper()
+                if "ASIAN" in retired_text or "HANDICAP" in retired_text:
+                    continue
+                if odd>10.0 or not sane_exact_odd(family,side,line,odd):
+                    continue
+                payload=match_payloads.get(str(r.get('prepared_match_key') or ''))
+                if not payload:
+                    continue
+                runtime_key=runtime_match_key(payload)
+                if not runtime_key:
+                    continue
+                line_text="" if line is None else str(float(line))
+                rr=dict(r)
+                rr.update({
+                    'competition_id':comp,
+                    'snapshot_version':snap,
+                    'selection_key':str(r.get('selection_key') or ''),
+                    'match_key':runtime_key,
+                    'local_date':str(r.get('local_date') or payload.get('date') or '')[:10],
+                    'league_code':str(payload.get('leagueCode') or payload.get('competition') or ''),
+                    'selection_odd':odd,
+                    'strict_sample':intval(r.get('bm_sample')),
+                    'strict_hit_rate':num(r.get('bm_hit_rate')),
+                    'evidence_score':num(r.get('score_value')),
+                    'exact_recommendation_key':(
+                        f"{r.get('identity_broad_group') or ''}|{r.get('identity_sub_market_key') or ''}|"
+                        f"{side}|{line_text}|{r.get('identity_team') or ''}|{r.get('identity_selection_token') or ''}"
+                    ),
+                })
+                src.append(rr)
 
     three_way={
         'RESULT_1X2','HT_RESULT_1X2','CORNER_RESULT_1X2',
