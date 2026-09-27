@@ -621,9 +621,9 @@ def materialize(checkpoint_root, raw_root):
                identity_source_market, identity_team, identity_selection_token,
                score_value, score_tier, score_bookmaker_base,
                score_model_adjustment, score_trend_adjustment,
-               qualifies_builder
+               qualifies_pattern, qualifies_builder
         FROM prepared_selections
-        WHERE competition_id=? AND snapshot_version=? AND qualifies_pattern=1
+        WHERE competition_id=? AND snapshot_version=?
         ORDER BY rowid
     """
 
@@ -655,7 +655,7 @@ def materialize(checkpoint_root, raw_root):
                 _source_market, identity_team, selection_token,
                 evidence_score, _score_tier, _score_bookmaker_base,
                 _score_model_adjustment, _score_trend_adjustment,
-                _qualifies_builder,
+                qualifies_pattern, _qualifies_builder,
             ) = row
             order = source_order
             source_order += 1
@@ -667,9 +667,11 @@ def materialize(checkpoint_root, raw_root):
                 identity_family, sub_market_key, selection_side, evidence_score,
             )
             if any(value is None for value in required):
-                raise SystemExit(
-                    f"Prepared PATTERN row is missing persisted scalar evidence: {competition_id}:{selection_key}"
-                )
+                if int(qualifies_pattern or 0) == 1:
+                    raise SystemExit(
+                        f"Prepared PATTERN row is missing persisted scalar evidence: {competition_id}:{selection_key}"
+                    )
+                continue
 
             match = matches.get(str(prepared_match_key))
             if match is None:
@@ -685,21 +687,50 @@ def materialize(checkpoint_root, raw_root):
             normalized_positive_edge = float(normalized_positive_edge)
             evidence_score = float(evidence_score)
 
-            eligible = odd >= 1.20 and sane_exact_odd(
-                str(identity_family),
-                str(selection_side),
-                None if identity_line is None else float(identity_line),
-                odd,
+            retired_text = " ".join(
+                str(value or "")
+                for value in (
+                    _selection_market, identity_family, sub_market_key, _source_market
+                )
+            ).upper()
+            retired_market = "ASIAN" in retired_text or "HANDICAP" in retired_text
+            prod_eligible = (
+                int(qualifies_pattern or 0) == 1
+                and odd >= 1.20
+                and sane_exact_odd(
+                    str(identity_family),
+                    str(selection_side),
+                    None if identity_line is None else float(identity_line),
+                    odd,
+                )
             )
+            structural_eligible = (
+                not retired_market
+                and odd >= 1.20
+                and odd <= 10.0
+                and sample > 0
+                and sane_exact_odd(
+                    str(identity_family),
+                    str(selection_side),
+                    None if identity_line is None else float(identity_line),
+                    odd,
+                )
+            )
+            if not prod_eligible and not structural_eligible:
+                continue
+
             runtime_match_key = f"{match.get('date', '')}|{match.get('homeTeam', '')}|{match.get('awayTeam', '')}"
             maturity = None
-            if eligible:
+            if prod_eligible:
                 if runtime_match_key not in maturity_by_match:
                     maturity_by_match[runtime_match_key] = maturity_index.resolve(match)
                 maturity = maturity_by_match[runtime_match_key]
-            premium, rejection_reason = policy_decision(
-                match, posterior_probability, maturity, eligible
-            )
+            if prod_eligible:
+                premium, rejection_reason = policy_decision(
+                    match, posterior_probability, maturity, prod_eligible
+                )
+            else:
+                premium, rejection_reason = False, "STRUCTURAL_ONLY"
             rejection_counts[rejection_reason or "ELIGIBLE"] += 1
 
             line_text = "" if identity_line is None else str(float(identity_line))
@@ -742,8 +773,8 @@ def materialize(checkpoint_root, raw_root):
                         posterior_probability,
                         sample_reliability,
                         odd,
-                    ),
-                    1 if eligible else 0,
+                    ) if prod_eligible else None,
+                    1 if prod_eligible else 0,
                     1 if premium else 0,
                     rejection_reason,
                 )
