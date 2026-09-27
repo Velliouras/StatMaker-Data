@@ -33,6 +33,11 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      APP_READY_UAT_SOURCE: "true"
+      APP_READY_STATMAKER_COMMIT: "c9d9d90803b3409a655e7aee59b35f31ba49b70e"
+      APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v6-probability-first-prod"
+      APP_READY_PREPARED_SCHEMA_VERSION: "12"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,7 +53,7 @@ jobs:
             scripts/patch_prepared_publisher_diagnostics.py \
             scripts/patch_prepared_publisher_bulk.py \
             scripts/build_app_ready_from_device.py \
-            scripts/materialize_app_ready_pattern_candidates.py \
+            scripts/materialize_uat_direction_pattern_candidates.py \
             scripts/materialize_prepared_fixture_index.py \
             scripts/validate_app_ready_prepared_contract.py \
             scripts/app_ready_input_retirement.py \
@@ -82,7 +87,7 @@ jobs:
               'scripts/run_app_ready_emulator.sh',
               'scripts/validate_app_ready_prepared_contract.py',
               'scripts/build_app_ready_from_device.py',
-              'scripts/materialize_app_ready_pattern_candidates.py',
+              'scripts/materialize_uat_direction_pattern_candidates.py',
               'scripts/materialize_prepared_fixture_index.py',
           ]
           leaked=[item for item in forbidden if item in push]
@@ -96,11 +101,11 @@ jobs:
           TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
-      - name: Checkout result-context UAT StatMaker source
+      - name: Checkout current PROD StatMaker source
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          ref: uat-result-context-20260916
+          ref: main
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
