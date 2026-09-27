@@ -14,7 +14,12 @@ from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
-RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1-probability-first-v1"
+RULES_FINGERPRINT = os.environ.get(
+    "APP_READY_PATTERN_RULES_FINGERPRINT",
+    "pattern-policy-v2-final-read-model-v6-probability-first-prod",
+).strip()
+if not RULES_FINGERPRINT:
+    raise SystemExit("APP_READY_PATTERN_RULES_FINGERPRINT is required")
 COMPETITIONS = ("domestic", "champions_league", "europa_league", "conference_league")
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
