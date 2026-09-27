@@ -317,7 +317,7 @@ jobs:
           set -euo pipefail
           rm -rf app-ready-export
           mkdir -p app-ready-export/source
-          python scripts/materialize_app_ready_pattern_candidates.py \
+          python scripts/materialize_uat_direction_pattern_candidates.py \
             app-ready-checkpoint \
             app-ready-export/raw \
             app-ready-export/source
