@@ -243,7 +243,6 @@ def final_candidates(db,gid,target=None):
               AND s.bm_sample>=10
               AND s.bm_hit_rate>=0.70
               AND s.score_value>=0.54
-              AND s.qualifies_pattern=1
             ORDER BY s.rowid ASC
             """,
             selection_args,
