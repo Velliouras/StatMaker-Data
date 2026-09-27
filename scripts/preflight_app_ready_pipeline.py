@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 
 
-EXPECTED_SCHEMA = 11
-EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
+EXPECTED_SCHEMA = 12
+EXPECTED_RULES = "pattern-policy-v2-final-read-model-v6-probability-first-prod"
+EXPECTED_STATMAKER_COMMIT = "c9d9d90803b3409a655e7aee59b35f31ba49b70e"
 FORBIDDEN_TARGET_MARKERS = (
     "d06364ab2625815aeafcb48ae93d6a328f7d6ac5",
     "pattern-policy-v2-final-read-model-v6-probability-parity-v1",
@@ -69,7 +69,7 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
     stage = read_text(root / "scripts/stage_app_ready_producer.sh", report)
     workflow = read_text(root / ".github/workflows/app-ready-artifact-publisher.yml", report)
     runner = read_text(root / "scripts/run_app_ready_emulator.sh", report)
-    materializer = read_text(root / "scripts/materialize_app_ready_pattern_candidates.py", report)
+    materializer = read_text(root / "scripts/materialize_uat_direction_pattern_candidates.py", report)
     builder = read_text(root / "scripts/build_app_ready_from_device.py", report)
     provider_validator = read_text(
         root / "scripts/validate_domestic_cache_provider_identity.py", report
@@ -89,7 +89,12 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
 
     require_markers(
         stage,
-        (EXPECTED_STATMAKER_COMMIT, EXPECTED_RULES, 'PREPARED_SCHEMA="11"'),
+        (
+            'APP_READY_UAT_SOURCE',
+            'STATMAKER_COMMIT="$(git rev-parse HEAD)"',
+            'APP_READY_PATTERN_RULES_FINGERPRINT',
+            'APP_READY_PREPARED_SCHEMA_VERSION',
+        ),
         "producer stage",
         report,
     )
@@ -97,7 +102,8 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         workflow,
         (
             "bash \"$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh\"",
-            "APP_READY_PREPARED_SCHEMA_VERSION: \"11\"",
+            'APP_READY_UAT_SOURCE: "true"',
+            "APP_READY_PREPARED_SCHEMA_VERSION: \"12\"",
             f'APP_READY_PATTERN_RULES_FINGERPRINT: "{EXPECTED_RULES}"',
             f'APP_READY_STATMAKER_COMMIT: "{EXPECTED_STATMAKER_COMMIT}"',
         ),
@@ -122,21 +128,24 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
     require_markers(
         materializer,
         (
-            f'RULES_FINGERPRINT = "{EXPECTED_RULES}"',
-            'if int(connection.execute("PRAGMA user_version").fetchone()[0]) != 11:',
-            "edge = posterior - market_probability",
-            "expected_value = posterior * odd - 1.0",
-            "def policy_decision(match, posterior, maturity, eligible):",
+            'RULES_FINGERPRINT = os.environ.get(',
+            'APP_READY_PATTERN_RULES_FINGERPRINT',
+            'APP_READY_PREPARED_SCHEMA_VERSION',
+            'opponent_model_probability',
+            'positive_value_ok',
+            'likely_pre_1x2_ok',
+            'APP_READY_HOST_PROBABILITY_FIRST_OK',
         ),
-        "host materializer",
+        "host probability-first materializer",
         report,
     )
     require_markers(
         builder,
         (
-            f'EXPECTED_RULES = "{EXPECTED_RULES}"',
-            "if version != 11:",
-            "APP_READY_PRE_V6_POSTFLIGHT_OK",
+            'APP_READY_PATTERN_RULES_FINGERPRINT',
+            'APP_READY_PREPARED_SCHEMA_VERSION',
+            'if version != EXPECTED_SCHEMA:',
+            'APP_READY_PROD_CURRENT_POSTFLIGHT_OK',
         ),
         "bundle builder",
         report,
@@ -182,12 +191,10 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         require_markers(models, (EXPECTED_RULES,), "staged recommendation models", report)
         require_markers(
             store,
-            ("private const val DATABASE_VERSION = 11",),
+            ("private const val DATABASE_VERSION = 12",),
             "staged prepared store",
             report,
         )
-        if "private const val DATABASE_VERSION = 12" in store:
-            report.error("staged producer contains schema 12")
 
     for rel in (
         "data/statmaker/update_manifest.json",
@@ -204,9 +211,9 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
 
     if not report.errors:
         report.note(
-            "contract=pre-v6 schema=11 rules=" + EXPECTED_RULES
+            "contract=probability-first-prod schema=12 rules=" + EXPECTED_RULES
         )
-        report.note("old posterior/value-tier materializer semantics present")
+        report.note("probability-first host materializer semantics present")
         report.note("Asian/Handicap retirement ordered before producer")
         report.note("checkpoint and published seed compatibility gates active")
 
