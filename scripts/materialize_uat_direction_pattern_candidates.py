@@ -910,6 +910,98 @@ def materialize(checkpoint_root, raw_root):
         ).fetchone()[0]
     )
     quick = connection.execute("PRAGMA quick_check").fetchone()
+
+    diagnostic_sql = """
+        WITH base AS (
+            SELECT
+                c.match_key,
+                c.selection_odd,
+                c.strict_sample,
+                c.strict_hit_rate,
+                c.evidence_score,
+                s.qualifies_pattern,
+                s.identity_sub_market_key,
+                s.identity_selection_side,
+                s.bm_market_probability,
+                s.opponent_model_probability,
+                CASE
+                    WHEN s.opponent_model_probability IS NOT NULL
+                     AND s.opponent_model_probability BETWEEN 0.01 AND 0.99
+                    THEN 1 ELSE 0
+                END AS has_model,
+                CASE
+                    WHEN s.bm_market_probability IS NOT NULL
+                     AND s.bm_market_probability BETWEEN 0.01 AND 0.99
+                    THEN 1 ELSE 0
+                END AS has_market_probability
+            FROM prepared_pattern_candidates c
+            JOIN prepared_selections s
+              ON s.competition_id=c.competition_id
+             AND s.snapshot_version=c.snapshot_version
+             AND s.selection_key=c.selection_key
+            WHERE c.generation_id=?
+        ),
+        staged AS (
+            SELECT *,
+                CASE
+                    WHEN strict_sample>=10
+                     AND strict_hit_rate>=0.70
+                     AND evidence_score>=0.54
+                     AND selection_odd>=1.50
+                    THEN 1 ELSE 0
+                END AS quality_ok,
+                CASE
+                    WHEN qualifies_pattern=1 THEN 1 ELSE 0
+                END AS pattern_ok,
+                CASE
+                    WHEN has_model=1
+                     AND has_market_probability=1
+                     AND opponent_model_probability>bm_market_probability
+                     AND opponent_model_probability*selection_odd>1.0
+                    THEN 1 ELSE 0
+                END AS positive_value_ok
+            FROM base
+        )
+        SELECT
+            COUNT(*) AS total_rows,
+            SUM(quality_ok) AS quality_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 THEN match_key END) AS quality_matches,
+            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 THEN 1 ELSE 0 END) AS pattern_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 THEN match_key END) AS pattern_matches,
+            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 THEN 1 ELSE 0 END) AS model_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 THEN match_key END) AS model_matches,
+            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1 THEN 1 ELSE 0 END) AS positive_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1 THEN match_key END) AS positive_matches,
+            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1
+                     AND (
+                         (identity_sub_market_key='RESULT_1X2')
+                         OR (identity_sub_market_key<>'RESULT_1X2' AND bm_market_probability>=0.50)
+                     )
+                     THEN 1 ELSE 0 END) AS likely_pre_1x2_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1
+                     AND (
+                         (identity_sub_market_key='RESULT_1X2')
+                         OR (identity_sub_market_key<>'RESULT_1X2' AND bm_market_probability>=0.50)
+                     )
+                     THEN match_key END) AS likely_pre_1x2_matches
+        FROM staged
+    """
+    diag = connection.execute(diagnostic_sql, (generation_id,)).fetchone()
+    print(
+        "APP_READY_UAT_STRONG_FUNNEL",
+        f"total_rows={int(diag[0] or 0)}",
+        f"quality_rows={int(diag[1] or 0)}",
+        f"quality_matches={int(diag[2] or 0)}",
+        f"pattern_rows={int(diag[3] or 0)}",
+        f"pattern_matches={int(diag[4] or 0)}",
+        f"model_rows={int(diag[5] or 0)}",
+        f"model_matches={int(diag[6] or 0)}",
+        f"positive_rows={int(diag[7] or 0)}",
+        f"positive_matches={int(diag[8] or 0)}",
+        f"likely_pre_1x2_rows={int(diag[9] or 0)}",
+        f"likely_pre_1x2_matches={int(diag[10] or 0)}",
+    )
+
     connection.close()
     if expanded <= 0:
         raise SystemExit("Probability-First UAT universe did not expand beyond PROD pattern gate")
