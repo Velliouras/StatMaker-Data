@@ -951,39 +951,35 @@ def materialize(checkpoint_root, raw_root):
                     THEN 1 ELSE 0
                 END AS quality_ok,
                 CASE
-                    WHEN qualifies_pattern=1 THEN 1 ELSE 0
-                END AS pattern_ok,
-                CASE
                     WHEN has_model=1
                      AND has_market_probability=1
                      AND opponent_model_probability>bm_market_probability
                      AND opponent_model_probability*selection_odd>1.0
                     THEN 1 ELSE 0
-                END AS positive_value_ok
+                END AS positive_value_ok,
+                CASE
+                    WHEN identity_sub_market_key IN (
+                        'RESULT_1X2','HT_RESULT_1X2','CORNER_RESULT_1X2',
+                        'SHOTS_RESULT_1X2','SOT_RESULT_1X2'
+                    ) THEN 1
+                    WHEN bm_market_probability>=0.50 THEN 1
+                    ELSE 0
+                END AS likely_pre_1x2_ok
             FROM base
         )
         SELECT
             COUNT(*) AS total_rows,
             SUM(quality_ok) AS quality_rows,
             COUNT(DISTINCT CASE WHEN quality_ok=1 THEN match_key END) AS quality_matches,
-            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 THEN 1 ELSE 0 END) AS pattern_rows,
-            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 THEN match_key END) AS pattern_matches,
-            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 THEN 1 ELSE 0 END) AS model_rows,
-            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 THEN match_key END) AS model_matches,
-            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1 THEN 1 ELSE 0 END) AS positive_rows,
-            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1 THEN match_key END) AS positive_matches,
-            SUM(CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1
-                     AND (
-                         (identity_sub_market_key='RESULT_1X2')
-                         OR (identity_sub_market_key<>'RESULT_1X2' AND bm_market_probability>=0.50)
-                     )
-                     THEN 1 ELSE 0 END) AS likely_pre_1x2_rows,
-            COUNT(DISTINCT CASE WHEN quality_ok=1 AND pattern_ok=1 AND has_model=1 AND positive_value_ok=1
-                     AND (
-                         (identity_sub_market_key='RESULT_1X2')
-                         OR (identity_sub_market_key<>'RESULT_1X2' AND bm_market_probability>=0.50)
-                     )
-                     THEN match_key END) AS likely_pre_1x2_matches
+            SUM(CASE WHEN quality_ok=1 AND has_model=1 THEN 1 ELSE 0 END) AS model_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND has_model=1 THEN match_key END) AS model_matches,
+            SUM(CASE WHEN quality_ok=1 AND has_model=1 AND positive_value_ok=1 THEN 1 ELSE 0 END) AS positive_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND has_model=1 AND positive_value_ok=1 THEN match_key END) AS positive_matches,
+            SUM(CASE WHEN quality_ok=1 AND has_model=1 AND positive_value_ok=1 AND likely_pre_1x2_ok=1
+                     THEN 1 ELSE 0 END) AS likely_rows,
+            COUNT(DISTINCT CASE WHEN quality_ok=1 AND has_model=1 AND positive_value_ok=1 AND likely_pre_1x2_ok=1
+                     THEN match_key END) AS likely_matches,
+            SUM(CASE WHEN quality_ok=1 AND qualifies_pattern=1 THEN 1 ELSE 0 END) AS legacy_pattern_rows
         FROM staged
     """
     diag = connection.execute(diagnostic_sql, (generation_id,)).fetchone()
@@ -992,14 +988,13 @@ def materialize(checkpoint_root, raw_root):
         f"total_rows={int(diag[0] or 0)}",
         f"quality_rows={int(diag[1] or 0)}",
         f"quality_matches={int(diag[2] or 0)}",
-        f"pattern_rows={int(diag[3] or 0)}",
-        f"pattern_matches={int(diag[4] or 0)}",
-        f"model_rows={int(diag[5] or 0)}",
-        f"model_matches={int(diag[6] or 0)}",
-        f"positive_rows={int(diag[7] or 0)}",
-        f"positive_matches={int(diag[8] or 0)}",
-        f"likely_pre_1x2_rows={int(diag[9] or 0)}",
-        f"likely_pre_1x2_matches={int(diag[10] or 0)}",
+        f"model_rows={int(diag[3] or 0)}",
+        f"model_matches={int(diag[4] or 0)}",
+        f"positive_rows={int(diag[5] or 0)}",
+        f"positive_matches={int(diag[6] or 0)}",
+        f"likely_rows={int(diag[7] or 0)}",
+        f"likely_matches={int(diag[8] or 0)}",
+        f"legacy_pattern_rows={int(diag[9] or 0)}",
     )
 
     connection.close()
