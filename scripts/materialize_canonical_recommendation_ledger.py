@@ -646,9 +646,8 @@ def main():
     # anti-leakage cutoff for each historical generation. This recovers valid earlier Strong
     # picks without admitting any recommendation first created after kickoff.
     same_day_rows=[]; same_day_bundles=0
-    if MODE_LABEL=='uat':
-        same_day_rows,same_day_bundles=history_from_manifest(today,MANIFEST_REL)
-        current.extend(same_day_rows)
+    same_day_rows,same_day_bundles=history_from_manifest(today,MANIFEST_REL)
+    current.extend(same_day_rows)
 
     allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
     for off in range(1,RETENTION+1):
