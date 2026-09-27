@@ -405,12 +405,19 @@ def expanded_build_output(
         try:
             provider = odds_module.match_provider_league(league, provider_leagues)
             if not provider:
+                candidates_fn = getattr(odds_module, "provider_country_candidates", None)
+                provider_candidates = (
+                    candidates_fn(league, provider_leagues)
+                    if callable(candidates_fn)
+                    else []
+                )
                 debug.setdefault("leaguesMissing", []).append({
                     "leagueCode": league_code,
                     "country": league.get("country"),
                     "competition": league.get("competition"),
                     "apiFootballLeagueId": league.get("apiFootballLeagueId"),
                     "reason": "verified provider league slug not found",
+                    "providerCountryCandidates": provider_candidates,
                 })
                 continue
             slug = str(provider.get("slug") or "")
