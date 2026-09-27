@@ -54,14 +54,28 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
                 'eventsCount': 8,
             },
             {
-                'name': 'Brasil - Serie A',
-                'slug': 'brasil-serie-a',
+                'name': 'Brazil - Serie A',
+                'slug': 'brazil-serie-a',
                 'eventsCount': 10,
             },
         ]
         matched = odds.match_provider_league(configured, providers)
         self.assertIsNotNone(matched)
-        self.assertEqual('brasil-serie-a', matched['slug'])
+        self.assertEqual('brazil-serie-a', matched['slug'])
+
+    def test_brazil_country_guard_accepts_brasil_spelling(self):
+        configured = {
+            'leagueCode': 'BRA',
+            'country': 'Brazil',
+            'competition': 'Serie A',
+            'searchTerms': ['brasil serie a'],
+        }
+        provider = {
+            'name': 'Brasil - Serie A',
+            'slug': 'brasil-serie-a',
+            'eventsCount': 10,
+        }
+        self.assertTrue(odds.provider_country_matches(configured, provider))
 
     def test_stale_configured_slug_does_not_cross_country_on_fallback(self):
         configured = {
