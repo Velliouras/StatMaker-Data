@@ -42,6 +42,19 @@ ENGLAND_CASES = {
     },
 }
 
+NOR2_CASES = {
+    "Egersunds IK": "Egersund",
+    "Stroemmen IF": "Strommen",
+    "Hoedd IL": "hodd",
+    "Odds BK": "ODD Ballklubb",
+    "Stroemsgodset IF": "Stromsgodset",
+    "Aasane Fotball": "Asane",
+}
+
+PER_CASES = {
+    "Los Chankas CYC": "Club Deportivo Los Chankas",
+}
+
 CASES = {'CA Aldosivi': 'Aldosivi', 'Argentinos Juniors': 'Argentinos JRS', 'CA Banfield': 'Banfield', 'CA Barracas Central': 'Barracas Central', 'CA Belgrano de Cordoba': 'Belgrano Cordoba', 'CA Central Cordoba SE': 'Central Cordoba de Santiago', 'Deportivo Riestra AFBC': 'Deportivo Riestra', 'Estudiantes de La Plata': 'Estudiantes L.P.', 'Estudiantes Rio Cuarto': 'Estudiantes de Rio Cuarto', 'Gimnasia y Esgrima La Plata': 'Gimnasia L.P.', 'Gimnasia y Esgrima Mendoza': 'Gimnasia M.', 'CA Huracan': 'Huracan', 'Independiente Rivadavia': 'Independ. Rivadavia', 'CA Independiente Avellaneda': 'Independiente', 'CA Lanus': 'Lanus', "Newell's Old Boys": 'Newells Old Boys', 'CA Platense': 'Platense', 'Racing Club Avellaneda': 'Racing Club', 'CA River Plate (ARG)': 'River Plate', 'CA Rosario Central': 'Rosario Central', 'CA San Lorenzo de Almagro': 'San Lorenzo', 'CA Sarmiento Junin': 'Sarmiento Junin', 'CA Talleres de Cordoba': 'Talleres Cordoba', 'CA Tigre': 'Tigre', 'Union de Santa Fe': 'Union Santa Fe'}
 
 class EnglandCurrentMembershipProviderAliasTest(unittest.TestCase):
@@ -69,6 +82,29 @@ class EnglandCurrentMembershipProviderAliasTest(unittest.TestCase):
         schedule_priority._install_conservative_team_mapping()
 
         for league_code, cases in ENGLAND_CASES.items():
+            for provider_team, expected in cases.items():
+                with self.subTest(league=league_code, provider_team=provider_team):
+                    debug = {}
+                    mapped, canonical = schedule_priority.target.odds_fetch.canonical_team_info(
+                        provider_team, league_code, aliases, debug
+                    )
+                    self.assertEqual(expected, mapped)
+                    self.assertEqual(expected, canonical)
+                    self.assertFalse(debug.get("unmatchedTeams"))
+
+
+
+class RegionalProviderAliasTest(unittest.TestCase):
+    def test_observed_norway2_and_peru_provider_names_map_exactly(self):
+        registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
+        schedule_priority.target.domestic_odds_expansion.install(
+            schedule_priority.target.odds_fetch,
+            pipeline,
+        )
+        aliases = pipeline.generated_aliases(registry)
+        schedule_priority._install_conservative_team_mapping()
+
+        for league_code, cases in {"NOR2": NOR2_CASES, "PER": PER_CASES}.items():
             for provider_team, expected in cases.items():
                 with self.subTest(league=league_code, provider_team=provider_team):
                     debug = {}
