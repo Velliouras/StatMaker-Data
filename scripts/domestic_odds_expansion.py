@@ -237,7 +237,7 @@ def strict_provider_league_match(
             for value in VERIFIED_PROVIDER_COUNTRY_ALIASES.get(code, ())
             if odds_module.normalize_text(value)
         )
-        return next(
+        exact_verified = next(
             (
                 item for item in provider_leagues
                 if str(item.get("slug") or "") == verified_slug
@@ -253,6 +253,13 @@ def strict_provider_league_match(
             ),
             None,
         )
+        if exact_verified is not None:
+            return exact_verified
+        # "Verified" means preferred, not immortal. Odds-API.io can rename a
+        # league slug between seasons/stages. If the stored slug disappears,
+        # fall back to the base resolver, which still enforces strict country
+        # and qualifier guards. Failing here used to make BRA/BRA2 vanish even
+        # while the provider still advertised the competition under a new slug.
     result = original_matcher(config_league, provider_leagues)
     if result is None:
         return None
