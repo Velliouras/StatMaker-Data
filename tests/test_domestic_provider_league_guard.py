@@ -4,6 +4,7 @@ from pathlib import Path
 
 sys.path.insert(0, str((Path(__file__).resolve().parents[1] / 'scripts').resolve()))
 import update_domestic_odds_api_io as odds
+import domestic_odds_expansion as expansion
 
 
 class DomesticProviderLeagueGuardTest(unittest.TestCase):
@@ -62,6 +63,28 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
         matched = odds.match_provider_league(configured, providers)
         self.assertIsNotNone(matched)
         self.assertEqual('brazil-serie-a', matched['slug'])
+
+    def test_verified_slug_layer_falls_back_when_provider_renames_brazil(self):
+        configured = {
+            'leagueCode': 'BRA',
+            'country': 'Brazil',
+            'competition': 'Serie A',
+            'providerLeagueSlug': 'brazil-brasileiro-serie-a',
+            'searchTerms': ['brazil serie a', 'brasil serie a', 'brasileirao'],
+        }
+        providers = [{
+            'name': 'Brasil - Serie A',
+            'slug': 'brasil-serie-a',
+            'eventsCount': 10,
+        }]
+        matched = expansion.strict_provider_league_match(
+            odds,
+            odds.match_provider_league,
+            configured,
+            providers,
+        )
+        self.assertIsNotNone(matched)
+        self.assertEqual('brasil-serie-a', matched['slug'])
 
     def test_brazil_country_guard_accepts_brasil_spelling(self):
         configured = {
