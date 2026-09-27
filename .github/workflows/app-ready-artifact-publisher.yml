@@ -59,6 +59,8 @@ jobs:
   publish:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
+    env:
+      APP_READY_UAT_SOURCE: "true"
     # The prepared source phase has its own explicit 90-minute ceiling and failure checkpoint.
     # Keep the job ceiling above that so GitHub never killss the runner before the checkpoint trap.
     timeout-minutes: 110
@@ -85,9 +87,9 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
-          expected_schema=11
-          expected_statmaker_commit='5b7483d772a4cafc5715d5434bc3cdcf82cc1959'
+          expected_rules='pattern-policy-v2-final-read-model-v6-probability-first-prod'
+          expected_schema=12
+          expected_statmaker_commit='c9d9d90803b3409a655e7aee59b35f31ba49b70e'
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema or
@@ -289,9 +291,9 @@ jobs:
         env:
           APP_ID: com.statmaker.app.uat.local
           # Must match the approved PROD engine staged above; do not pin this step to an older engine.
-          APP_READY_STATMAKER_COMMIT: "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
-          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-          APP_READY_PREPARED_SCHEMA_VERSION: "11"
+          APP_READY_STATMAKER_COMMIT: "c9d9d90803b3409a655e7aee59b35f31ba49b70e"
+          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v6-probability-first-prod"
+          APP_READY_PREPARED_SCHEMA_VERSION: "12"
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
@@ -587,10 +589,10 @@ jobs:
           assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
-          assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 11
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v5-performance-shadow-v1'
-          assert metadata.get('statmakerCommit') == '5b7483d772a4cafc5715d5434bc3cdcf82cc1959'
-          assert metadata.get('engineContract') == 'pre-v6-schema11-v5-performance-shadow-retired-inputs-v1'
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 12
+          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-first-prod'
+          assert metadata.get('statmakerCommit') == 'c9d9d90803b3409a655e7aee59b35f31ba49b70e'
+          assert metadata.get('engineContract') == 'probability-first-prod-schema12-v6-retired-inputs-v1'
           assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
