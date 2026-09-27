@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
 import subprocess
 import sys
@@ -10,9 +11,16 @@ import urllib.request
 from pathlib import Path
 
 HISTORICAL_DATA_COMMIT = "17fa84485df5e1f46d9a35c919b1a33255a69961"
-EXPECTED_RULES = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"
-EXPECTED_STATMAKER_COMMIT = "5b7483d772a4cafc5715d5434bc3cdcf82cc1959"
-ENGINE_CONTRACT = "pre-v6-schema11-v5-performance-shadow-retired-inputs-v1"
+EXPECTED_RULES = os.environ.get(
+    "APP_READY_PATTERN_RULES_FINGERPRINT",
+    "pattern-policy-v2-final-read-model-v6-probability-first-prod",
+).strip()
+EXPECTED_STATMAKER_COMMIT = os.environ.get(
+    "APP_READY_STATMAKER_COMMIT",
+    "c9d9d90803b3409a655e7aee59b35f31ba49b70e",
+).strip()
+EXPECTED_SCHEMA = int(os.environ.get("APP_READY_PREPARED_SCHEMA_VERSION", "12"))
+ENGINE_CONTRACT = "probability-first-prod-schema12-v6-retired-inputs-v1"
 RETIREMENT_CONTRACT = "asian-and-handicap-market-types-only-before-engine-v2"
 
 
@@ -22,8 +30,27 @@ def run(*args: str) -> None:
 # Run the exact builder that produced the known-good Saturday v5/schema11 artifact.
 url = f"https://raw.githubusercontent.com/Velliouras/StatMaker-Data/{HISTORICAL_DATA_COMMIT}/scripts/build_app_ready_from_device.py"
 with urllib.request.urlopen(url, timeout=60) as response:
-    historical = response.read()
-with tempfile.NamedTemporaryFile(prefix="statmaker-v5-builder-", suffix=".py", delete=False) as tmp:
+    historical = response.read().decode("utf-8")
+
+old_rules = 'PREPARED_PATTERN_RULES_FINGERPRINT = "pattern-policy-v2-final-read-model-v5-performance-shadow-v1"'
+new_rules = f'PREPARED_PATTERN_RULES_FINGERPRINT = "{EXPECTED_RULES}"'
+if historical.count(old_rules) != 1:
+    raise SystemExit("Historical builder rules anchor changed")
+historical = historical.replace(old_rules, new_rules, 1)
+
+old_schema = "PREPARED_PATTERN_SCHEMA_VERSION = 11"
+new_schema = f"PREPARED_PATTERN_SCHEMA_VERSION = {EXPECTED_SCHEMA}"
+if historical.count(old_schema) != 1:
+    raise SystemExit("Historical builder schema anchor changed")
+historical = historical.replace(old_schema, new_schema, 1)
+
+with tempfile.NamedTemporaryFile(
+    prefix="statmaker-current-builder-",
+    suffix=".py",
+    mode="w",
+    encoding="utf-8",
+    delete=False,
+) as tmp:
     tmp.write(historical)
     tmp_path = Path(tmp.name)
 try:
@@ -44,8 +71,8 @@ try:
     if not quick or quick[0] != "ok":
         raise SystemExit(f"Prepared DB quick_check failed: {quick}")
     version = int(con.execute("PRAGMA user_version").fetchone()[0])
-    if version != 11:
-        raise SystemExit(f"Expected exact prepared schema 11, got {version}")
+    if version != EXPECTED_SCHEMA:
+        raise SystemExit(f"Expected exact prepared schema {EXPECTED_SCHEMA}, got {version}")
 
     tables = {row[0] for row in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     if "prepared_pattern_candidates" not in tables:
@@ -99,4 +126,11 @@ manifest_path.write_text(
     encoding="utf-8",
 )
 
-print("APP_READY_PRE_V6_POSTFLIGHT_OK", f"schema={version}", f"rules={EXPECTED_RULES}", f"candidates={candidate_count}", "retired_markets=0")
+print(
+    "APP_READY_PROD_CURRENT_POSTFLIGHT_OK",
+    f"schema={version}",
+    f"rules={EXPECTED_RULES}",
+    f"statmaker={EXPECTED_STATMAKER_COMMIT}",
+    f"candidates={candidate_count}",
+    "retired_markets=0",
+)
