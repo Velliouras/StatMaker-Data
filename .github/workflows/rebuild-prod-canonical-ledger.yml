@@ -1,0 +1,42 @@
+name: Rebuild PROD Canonical Ledger
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rebuild-prod-canonical-ledger.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Rebuild PROD canonical recommendation ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/materialize_canonical_recommendation_ledger.py
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 0
+      - name: Commit rebuilt PROD ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/canonical_recommendation_ledger.json
+          if git diff --cached --quiet; then
+            echo "CANONICAL_LEDGER_ALREADY_CURRENT"
+            exit 0
+          fi
+          git commit -m "Rebuild PROD canonical ledger with same-day pre-kickoff history"
+          git pull --rebase origin main
+          git push origin HEAD:main
