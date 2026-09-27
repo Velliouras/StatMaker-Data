@@ -459,7 +459,9 @@ def match_provider_league(config_league: Dict[str, Any], provider_leagues: Seque
                 and not provider_has_unrequested_qualifier(config_league, item)
             ):
                 return item
-        return None
+        # Provider slugs are not stable identifiers. If a previously verified slug
+        # disappears, keep the same strict country/qualifier guards and fall back
+        # to the configured search terms instead of dropping the league entirely.
 
     search_terms = [normalize_text(x) for x in config_league.get("searchTerms", [])]
     best: Tuple[int, Optional[Dict[str, Any]]] = (0, None)
