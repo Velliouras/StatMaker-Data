@@ -197,7 +197,7 @@ def _probability_first_rank(row, market_preferred):
         -abs(odd-2.0),
     )
 
-def final_candidates(db,gid):
+def final_candidates(db,gid,target=None):
     # Canonical Performance/Daily Outcomes must start from the same expanded prepared-selection
     # universe as UAT Strong Singles, not the narrower PROD prepared_pattern_candidates table.
     meta=first(
@@ -214,13 +214,31 @@ def final_candidates(db,gid):
 
     src=[]
     for comp,snap in snapshot_map.items():
-        selection_rows=rows(
+        match_payloads={}
+        for match_row in rows(
             db,
             """
+            SELECT match_key,payload
+            FROM prepared_matches
+            WHERE competition_id=? AND snapshot_version=?
+            """,
+            (comp,snap),
+        ):
+            try:
+                match_payloads[str(match_row.get('match_key') or '')]=json.loads(str(match_row.get('payload') or '{}'))
+            except Exception:
+                pass
+
+        date_clause=" AND s.local_date=?" if target else ""
+        selection_args=(comp,snap,target) if target else (comp,snap)
+        selection_rows=rows(
+            db,
+            f"""
             SELECT s.*,
                    s.match_key AS prepared_match_key
             FROM prepared_selections s
             WHERE s.competition_id=? AND s.snapshot_version=?
+              {date_clause}
               AND s.selection_odd>=1.50
               AND s.bm_sample>=10
               AND s.bm_hit_rate>=0.70
@@ -228,7 +246,7 @@ def final_candidates(db,gid):
               AND s.qualifies_pattern=1
             ORDER BY s.rowid ASC
             """,
-            (comp,snap),
+            selection_args,
         )
         for r in selection_rows:
             odd=num(r.get('selection_odd'))
@@ -244,21 +262,8 @@ def final_candidates(db,gid):
             if odd>10.0 or not sane_exact_odd(family,side,line,odd):
                 continue
             # Shape the row like the UAT prepared candidate so downstream extraction is identical.
-            match=first(
-                db,
-                """
-                SELECT payload
-                FROM prepared_matches
-                WHERE competition_id=? AND snapshot_version=? AND match_key=?
-                LIMIT 1
-                """,
-                (comp,snap,str(r.get('prepared_match_key') or '')),
-            )
-            if not match:
-                continue
-            try:
-                payload=json.loads(str(match.get('payload') or '{}'))
-            except Exception:
+            payload=match_payloads.get(str(r.get('prepared_match_key') or ''))
+            if not payload:
                 continue
             runtime_key=runtime_match_key(payload)
             if not runtime_key:
@@ -422,7 +427,7 @@ def extract(bundle,target=None):
             if not g:return []
             gid=str(g.get('generation_id') or ''); built=intval(g.get('built_at_ms'))
             out=[]
-            for c in final_candidates(db,gid):
+            for c in final_candidates(db,gid,target):
                 day=str(c.get('local_date') or '')[:10]
                 if target and day!=target:continue
                 comp=str(c.get('competition_id') or ''); snap=str(c.get('snapshot_version') or ''); sk=str(c.get('selection_key') or '')
