@@ -603,7 +603,7 @@ def history(day):
     return fallback_rows,bundles+fallback_bundles
 
 def main():
-    global APP,LEDGER,MANIFEST_REL,LEDGER_SOURCE,MODE_LABEL
+    global APP,LEDGER,MANIFEST_REL,LEDGER_SOURCE,MODE_LABEL,SCHEMA_VERSION
     ap=argparse.ArgumentParser()
     ap.add_argument('--backfill-dates',type=int,default=30)
     ap.add_argument('--uat',action='store_true')
@@ -612,8 +612,9 @@ def main():
         APP=APP_UAT
         LEDGER=LEDGER_UAT
         MANIFEST_REL='data/statmaker/app_ready_uat/probability-first-v1/update_manifest.json'
-        LEDGER_SOURCE='canonical-uat-app-ready-probability-first-strong-singles-ledger-v9'
+        LEDGER_SOURCE='canonical-uat-app-ready-probability-first-strong-singles-ledger-v10'
         MODE_LABEL='uat'
+        SCHEMA_VERSION=10
     limit=max(0,min(30,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
@@ -638,6 +639,17 @@ def main():
     done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
+
+    # Today's Daily Outcomes must represent recommendations that were genuinely available
+    # before kickoff across the whole day, not only the latest snapshot. UAT snapshots are
+    # versioned in git, so replay today's manifest history and let extract() enforce the same
+    # anti-leakage cutoff for each historical generation. This recovers valid earlier Strong
+    # picks without admitting any recommendation first created after kickoff.
+    same_day_rows=[]; same_day_bundles=0
+    if MODE_LABEL=='uat':
+        same_day_rows,same_day_bundles=history_from_manifest(today,MANIFEST_REL)
+        current.extend(same_day_rows)
+
     allr=[r for r in [*existing,*current] if str(r.get('matchKey') or '').strip() not in invalidated]; processed=[]; hb=hr=0
     for off in range(1,RETENTION+1):
         if len(processed)>=limit:break
@@ -659,6 +671,6 @@ def main():
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-{MODE_LABEL}-v9 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-{MODE_LABEL}-v{SCHEMA_VERSION} currentBundles={len(cb)} currentRows={len(merge(current))} sameDayHistoryBundles={same_day_bundles} sameDayHistoryRows={len(same_day_rows)} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
