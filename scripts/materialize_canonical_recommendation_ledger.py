@@ -7,7 +7,7 @@ import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
 APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=8
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
 # persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
@@ -71,6 +71,36 @@ def _clamp01(value):
 def _valid_probability(value):
     x=num(value)
     return x!=float('-inf') and 0.01<=x<=0.99
+
+def sane_exact_odd(identity_family, selection_side, line, odd):
+    if odd <= 1.0 or odd > 100.0:
+        return False
+    if identity_family in {"MATCH_GOALS", "ASIAN_GOALS"}:
+        if selection_side == "OVER" and line is not None and line <= 1.5 and odd >= 5.0:
+            return False
+        if selection_side == "OVER" and line is not None and line <= 2.5 and odd >= 8.0:
+            return False
+        if selection_side == "UNDER" and line is not None and line >= 4.5 and odd >= 8.0:
+            return False
+    elif identity_family == "TEAM_GOALS":
+        if selection_side == "OVER" and line is not None and line <= 0.5 and odd >= 5.0:
+            return False
+        if selection_side == "OVER" and line is not None and line <= 1.5 and odd >= 10.0:
+            return False
+    elif identity_family == "BTTS":
+        return odd < 8.0
+    elif identity_family in {"FIRST_HALF_GOALS", "TEAM_FIRST_HALF_GOALS", "ASIAN_GOALS_1H"}:
+        if selection_side == "OVER" and line is not None and line <= 0.5 and odd >= 6.0:
+            return False
+    elif identity_family in {"MATCH_CORNERS", "ASIAN_CORNERS"}:
+        if line is not None and line <= 8.5 and selection_side == "OVER" and odd >= 8.0:
+            return False
+    elif identity_family == "TEAM_CORNERS":
+        if line is not None and line <= 3.5 and selection_side == "OVER" and odd >= 8.0:
+            return False
+    elif identity_family in {"Correct Score", "Half-time / Full-time", "Winning Margin"}:
+        return odd <= 40.0
+    return True
 
 def _probability_first_rank(row, market_preferred):
     market_probability=num(row.get('bm_market_probability'))
@@ -159,48 +189,90 @@ def _probability_first_rank(row, market_preferred):
     )
 
 def final_candidates(db,gid):
-    # Canonical Performance/Daily Outcomes measure the current UAT Strong Singles contract:
-    # existing Strong quality benchmark first (sample >=10, hit rate >=70%, Pattern score >=0.54),
-    # then likely market side, fixture model when available or the same reliable posterior fallback,
-    # positive edge/EV, and probability-first MAIN choice.
-    src=rows(
+    # Canonical Performance/Daily Outcomes must start from the same expanded prepared-selection
+    # universe as UAT Strong Singles, not the narrower PROD prepared_pattern_candidates table.
+    meta=first(
         db,
-        """
-        SELECT c.*,
-               s.match_key AS prepared_match_key,
-               s.qualifies_pattern,
-               s.bm_market_probability,
-               s.bm_hit_rate,
-               s.bm_sample,
-               s.bm_sample_reliability,
-               s.historical_outcomes_bits,
-               s.score_trend_adjustment,
-               s.identity_sub_market_key,
-               s.identity_selection_side,
-               s.opponent_adjusted_required,
-               s.opponent_model_probability,
-               s.opponent_base_model_probability,
-               s.opponent_without_favorite_probability,
-               s.opponent_without_xg_probability,
-               s.opponent_without_fatigue_probability,
-               s.opponent_without_injuries_probability,
-               s.opponent_without_lineup_probability,
-               s.opponent_without_formation_probability,
-               s.opponent_without_squad_turnover_probability
-        FROM prepared_pattern_candidates c
-        JOIN prepared_selections s
-          ON s.competition_id=c.competition_id
-         AND s.snapshot_version=c.snapshot_version
-         AND s.selection_key=c.selection_key
-        WHERE c.generation_id=?
-          AND c.selection_odd>=1.50
-          AND c.strict_sample>=10
-          AND c.strict_hit_rate>=0.70
-          AND c.evidence_score>=0.54
-        ORDER BY c.source_order ASC
-        """,
+        "SELECT source_fingerprint FROM prepared_pattern_generation WHERE generation_id=? LIMIT 1",
         (gid,),
+    ) or {}
+    # All READY snapshots are eligible; this mirrors the UAT materializer's 4-snapshot universe.
+    snapshots=rows(
+        db,
+        "SELECT competition_id, snapshot_version FROM prepared_snapshot_meta WHERE state='ready'",
     )
+    snapshot_map={str(r.get('competition_id') or ''):str(r.get('snapshot_version') or '') for r in snapshots}
+
+    src=[]
+    for comp,snap in snapshot_map.items():
+        selection_rows=rows(
+            db,
+            """
+            SELECT s.*,
+                   s.match_key AS prepared_match_key
+            FROM prepared_selections s
+            WHERE s.competition_id=? AND s.snapshot_version=?
+              AND s.selection_odd>=1.50
+              AND s.bm_sample>=10
+              AND s.bm_hit_rate>=0.70
+              AND s.score_value>=0.54
+              AND s.qualifies_pattern=1
+            ORDER BY s.rowid ASC
+            """,
+            (comp,snap),
+        )
+        for r in selection_rows:
+            odd=num(r.get('selection_odd'))
+            family=str(r.get('identity_family') or '')
+            side=str(r.get('identity_selection_side') or '')
+            line=nullable(r.get('identity_line'))
+            retired_text=" ".join(
+                str(r.get(k) or "")
+                for k in ("selection_market","identity_family","identity_sub_market_key","identity_source_market")
+            ).upper()
+            if "ASIAN" in retired_text or "HANDICAP" in retired_text:
+                continue
+            if odd>10.0 or not sane_exact_odd(family,side,line,odd):
+                continue
+            # Shape the row like the UAT prepared candidate so downstream extraction is identical.
+            match=first(
+                db,
+                """
+                SELECT payload
+                FROM prepared_matches
+                WHERE competition_id=? AND snapshot_version=? AND match_key=?
+                LIMIT 1
+                """,
+                (comp,snap,str(r.get('prepared_match_key') or '')),
+            )
+            if not match:
+                continue
+            try:
+                payload=json.loads(str(match.get('payload') or '{}'))
+            except Exception:
+                continue
+            runtime_key=runtime_match_key(payload)
+            if not runtime_key:
+                continue
+            line_text="" if line is None else str(float(line))
+            rr=dict(r)
+            rr.update({
+                'competition_id':comp,
+                'snapshot_version':snap,
+                'selection_key':str(r.get('selection_key') or ''),
+                'match_key':runtime_key,
+                'local_date':str(r.get('local_date') or payload.get('date') or '')[:10],
+                'league_code':str(payload.get('leagueCode') or payload.get('competition') or ''),
+                'selection_odd':odd,
+                'strict_sample':intval(r.get('bm_sample')),
+                'strict_hit_rate':num(r.get('bm_hit_rate')),
+                'evidence_score':num(r.get('score_value')),
+                'exact_recommendation_key':(
+                    f"{r.get('identity_broad_group') or ''}|{r.get('identity_sub_market_key') or ''}|"
+                    f"{side}|{line_text}|{r.get('identity_team') or ''}|{r.get('identity_selection_token') or ''}"
+                ),
+            })
+            src.append(rr)
 
     three_way={
         'RESULT_1X2','HT_RESULT_1X2','CORNER_RESULT_1X2',
@@ -434,7 +506,7 @@ def main():
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
 
-    # Schema v8 re-materializes the full retained history with the current probability-first
+    # Schema v9 re-materializes the full retained history with the current probability-first
     # Strong Singles contract, including the reliable posterior fallback. Never carry forward
     # v7 identities because the recommendation universe can change under the new contract.
     existing=[]
@@ -468,12 +540,12 @@ def main():
         if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
         and not retired_market(r.get('market'), r.get('subMarketKey'))
     ]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-probability-first-strong-singles-ledger-v8','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-probability-first-strong-singles-ledger-v9','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v8 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-v9 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
