@@ -1,0 +1,69 @@
+name: Diagnose Strong Today
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/diagnose-strong-today.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Count PROD probability-first Strong for 2026-09-27
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=scripts python - <<'PY'
+          import datetime as dt
+          import materialize_canonical_recommendation_ledger as m
+
+          target='2026-09-27'
+          bundle=m.current_bundles()[0]
+          rows=m.extract(bundle,target=target)
+          now=dt.datetime.now(dt.timezone.utc)
+          now_ms=int(now.timestamp()*1000)
+
+          future=[]
+          started=[]
+          unknown=[]
+          for row in rows:
+              ko=row.get('kickoffEpochMillis')
+              if ko is None:
+                  unknown.append(row)
+              elif int(ko) > now_ms:
+                  future.append(row)
+              else:
+                  started.append(row)
+
+          print('DIAG_NOW_UTC', now.isoformat())
+          print('DIAG_TARGET', target)
+          print('DIAG_BUNDLE', bundle.name)
+          print('DIAG_PREKICKOFF_STRONG_TOTAL', len(rows))
+          print('DIAG_NOT_STARTED_NOW', len(future))
+          print('DIAG_STARTED_OR_FINISHED_NOW', len(started))
+          print('DIAG_UNKNOWN_KICKOFF', len(unknown))
+
+          def emit(tag, seq):
+              for row in sorted(seq,key=lambda r:(r.get('kickoffEpochMillis') or 10**30,str(r.get('homeTeam') or ''))):
+                  ko=row.get('kickoffEpochMillis')
+                  ko_text=dt.datetime.fromtimestamp(int(ko)/1000, tz=dt.timezone.utc).isoformat() if ko else 'UNKNOWN'
+                  print(
+                      tag,
+                      ko_text,
+                      f"{row.get('homeTeam')} - {row.get('awayTeam')}",
+                      f"{row.get('market')} / {row.get('selection')}",
+                      f"odd={row.get('odd')}",
+                  )
+          emit('DIAG_FUTURE',future)
+          emit('DIAG_STARTED',started)
+          emit('DIAG_UNKNOWN',unknown)
+          PY
