@@ -6,7 +6,16 @@ from zoneinfo import ZoneInfo
 import refresh_live_settlements as live
 
 ROOT=Path(__file__).resolve().parents[1]
-APP=ROOT/'data/statmaker/app_ready'; LEDGER=ROOT/'data/statmaker/canonical_recommendation_ledger.json'; VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
+APP_PROD=ROOT/'data/statmaker/app_ready'
+APP_UAT=ROOT/'data/statmaker/app_ready_uat/probability-first-v1'
+LEDGER_PROD=ROOT/'data/statmaker/canonical_recommendation_ledger.json'
+LEDGER_UAT=ROOT/'data/statmaker/canonical_recommendation_ledger_uat.json'
+VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
+APP=APP_PROD
+LEDGER=LEDGER_PROD
+MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
+LEDGER_SOURCE='canonical-app-ready-probability-first-strong-singles-ledger-v9'
+MODE_LABEL='prod'
 ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
@@ -484,24 +493,55 @@ def git_show(commit,path,out=None):
         return subprocess.run(['git','show',f'{commit}:{path}'],cwd=ROOT,check=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL).stdout
     except Exception:return None
 
-def history(day):
+def history_from_manifest(day, manifest_rel):
     start=(day-dt.timedelta(days=1)).isoformat()+'T00:00:00Z'; end=day.isoformat()+'T23:59:59Z'
-    try: commits=subprocess.run(['git','log','--format=%H',f'--since={start}',f'--until={end}','--','data/statmaker/app_ready/update_manifest.json'],cwd=ROOT,check=True,text=True,stdout=subprocess.PIPE).stdout.splitlines()[:24]
-    except Exception:return [],0
+    try:
+        commits=subprocess.run(
+            ['git','log','--format=%H',f'--since={start}',f'--until={end}','--',manifest_rel],
+            cwd=ROOT,check=True,text=True,stdout=subprocess.PIPE
+        ).stdout.splitlines()[:24]
+    except Exception:
+        return [],0
     out=[]; n=0
     for commit in commits:
-        raw=git_show(commit,'data/statmaker/app_ready/update_manifest.json')
+        raw=git_show(commit,manifest_rel)
         if not raw:continue
-        try: man=json.loads(raw.decode()); path=next(str(a.get('path')) for a in man.get('artifacts',[]) if a.get('id')=='app_ready_betting_bundle')
-        except Exception:continue
+        try:
+            man=json.loads(raw.decode())
+            path=next(str(a.get('path')) for a in man.get('artifacts',[]) if a.get('id')=='app_ready_betting_bundle')
+        except Exception:
+            continue
         with tempfile.TemporaryDirectory() as td:
             z=Path(td)/'b.zip'
             if git_show(commit,path,z) is None:continue
             n+=1; out.extend(extract(z,day.isoformat()))
     return merge(out),n
 
+def history(day):
+    rows_for_day,bundles=history_from_manifest(day,MANIFEST_REL)
+    if rows_for_day or MODE_LABEL!='uat':
+        return rows_for_day,bundles
+    # Before the UAT-specific snapshot existed, reconstruct the same current Strong contract
+    # from the historical PROD prepared snapshots rather than inventing or carrying old rows.
+    fallback_rows,fallback_bundles=history_from_manifest(
+        day,
+        'data/statmaker/app_ready/update_manifest.json'
+    )
+    return fallback_rows,bundles+fallback_bundles
+
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument('--backfill-dates',type=int,default=30); a=ap.parse_args(); limit=max(0,min(30,a.backfill_dates))
+    global APP,LEDGER,MANIFEST_REL,LEDGER_SOURCE,MODE_LABEL
+    ap=argparse.ArgumentParser()
+    ap.add_argument('--backfill-dates',type=int,default=30)
+    ap.add_argument('--uat',action='store_true')
+    a=ap.parse_args()
+    if a.uat:
+        APP=APP_UAT
+        LEDGER=LEDGER_UAT
+        MANIFEST_REL='data/statmaker/app_ready_uat/probability-first-v1/update_manifest.json'
+        LEDGER_SOURCE='canonical-uat-app-ready-probability-first-strong-singles-ledger-v9'
+        MODE_LABEL='uat'
+    limit=max(0,min(30,a.backfill_dates))
     today=dt.datetime.now(dt.timezone.utc).astimezone(ATHENS).date(); low=today-dt.timedelta(days=RETENTION); high=today+dt.timedelta(days=14)
     old=load(LEDGER,{})
     invalidated=invalidated_match_keys(low,high)
@@ -540,12 +580,12 @@ def main():
         if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
         and not retired_market(r.get('market'), r.get('subMarketKey'))
     ]
-    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':'canonical-app-ready-probability-first-strong-singles-ledger-v9','backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':LEDGER_SOURCE,'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':sorted(invalidated),'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
     counts={}
     for r in entries:counts[str(r.get('localDate') or '')[:10]]=counts.get(str(r.get('localDate') or '')[:10],0)+1
-    print(f"canonical-ledger-v9 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
+    print(f"canonical-ledger-{MODE_LABEL}-v9 currentBundles={len(cb)} currentRows={len(merge(current))} backfilledDates={','.join(processed) or '-'} historyBundles={hb} historyRows={hr} ledgerRows={len(entries)} changed={changed} dateCounts={json.dumps(counts,sort_keys=True)}")
     return 0
 if __name__=='__main__':raise SystemExit(main())
