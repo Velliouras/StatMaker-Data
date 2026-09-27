@@ -256,6 +256,7 @@ def main() -> int:
     nonfinal = 0
     missing_provider = 0
     provider_identity_rejected = 0
+    detected_dispositions: List[Dict[str, Any]] = []
 
     for id_chunk in _chunks(ordered_ids, MAX_IDS_PER_REQUEST):
         if request_state["count"] >= max_requests:
@@ -279,15 +280,14 @@ def main() -> int:
                 continue
             if stats_fetch.fixture_status_short(fixture).upper() not in live.COMPLETED:
                 nonfinal += 1
-                summary = stats_fetch.fixture_summary(fixture)
-                print(
-                    "canonical-settlement-exact NONFINAL "
-                    f"fixtureId={fixture_id} status={stats_fetch.fixture_status_short(fixture)} "
-                    f"provider={summary.get('home_team')} vs {summary.get('away_team')} "
-                    f"canonical=" + ";".join(
-                        f"{r.home_names[0]} vs {r.away_names[0]}" for r in pending_by_id.get(fixture_id, [])
-                    )
-                )
+                # Exact-id lookup already has the authoritative provider fixture in hand.
+                # Publish explicit PST/CANC/ABD/AWD/WO (or an explicit date move) immediately
+                # instead of leaving a past canonical recommendation PENDING until the separate
+                # bounded validity rotator eventually reaches this fixture.
+                for requirement in pending_by_id.get(fixture_id, []):
+                    disposition = validity.explicit_disposition(requirement, fixture)
+                    if disposition is not None:
+                        detected_dispositions.append(disposition)
                 continue
             registry_row = live.choose_registry_row(fixture, rows_by_provider)
             candidate_requirements = pending_by_id.get(fixture_id, [])
@@ -349,10 +349,26 @@ def main() -> int:
     })
     feed_changed = live.write_json_if_changed(live.FEED_PATH, feed_payload, "fixtures")
 
+    validity_changed = False
+    disposition_feed_changed = False
+    disposition_count = 0
+    if detected_dispositions:
+        existing_validity = validity.load_json(validity.VALIDITY_PATH, {})
+        if not isinstance(existing_validity, dict):
+            existing_validity = {}
+        dispositions = validity.merge_dispositions(existing_validity, detected_dispositions)
+        disposition_count = len(dispositions)
+        validity_changed = validity.write_validity(dispositions)
+        # Keep the same live feed as the Android resolver source. The later validity stage
+        # reasserts the same dispositions after the broader date-driven settlement refresh.
+        disposition_feed_changed = validity.ensure_feed_dispositions(dispositions)
+
     print(
         "canonical-settlement-exact "
         f"canonicalExact={len(requirements)} pendingExact={len(pending_by_id)} captured={captured} "
-        f"nonFinal={nonfinal} missingProvider={missing_provider} "
+        f"nonFinal={nonfinal} dispositionsDetected={len(detected_dispositions)} "
+        f"dispositions={disposition_count} validityChanged={validity_changed} "
+        f"dispositionFeedChanged={disposition_feed_changed} missingProvider={missing_provider} "
         f"identityRejected={cache_identity_rejected + provider_identity_rejected} "
         f"statsRequests={stats_requests} feedFixtures={len(feed_rows)} requests={request_state['count']} "
         f"cacheChanged={cache_changed} feedChanged={feed_changed} quota={json.dumps(quota_guard.status())}"
