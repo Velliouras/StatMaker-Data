@@ -473,6 +473,10 @@ def extract(bundle,target=None):
         except Exception:return []
         db=sqlite3.connect(f'file:{dbp}?mode=ro',uri=True)
         rejected_identity=0
+        diagnostic_pre_by_day={}
+        diagnostic_after_safety_by_day={}
+        diagnostic_after_kickoff_by_day={}
+        diagnostic_missing_kickoff_by_day={}
         try:
             g=first(db,"SELECT * FROM prepared_pattern_generation WHERE state='ready' ORDER BY built_at_ms DESC LIMIT 1")
             if not g:return []
@@ -481,6 +485,7 @@ def extract(bundle,target=None):
             for c in final_candidates(db,gid,target):
                 day=str(c.get('local_date') or '')[:10]
                 if target and day!=target:continue
+                diagnostic_pre_by_day[day]=diagnostic_pre_by_day.get(day,0)+1
                 comp=str(c.get('competition_id') or ''); snap=str(c.get('snapshot_version') or ''); sk=str(c.get('selection_key') or '')
                 s=first(db,"SELECT * FROM prepared_selections WHERE competition_id=? AND snapshot_version=? AND selection_key=? LIMIT 1",(comp,snap,sk))
                 if not s:continue
@@ -502,10 +507,14 @@ def extract(bundle,target=None):
                 day=day or str(m.get('date') or '')[:10]
                 if target and day!=target:continue
                 ko=kickoff_ms(m)
-                if ko is not None and built>=ko-SAFETY_MS:continue
+                if ko is not None and built>=ko-SAFETY_MS:
+                    diagnostic_after_kickoff_by_day[day]=diagnostic_after_kickoff_by_day.get(day,0)+1
+                    continue
                 if ko is None:
+                    diagnostic_missing_kickoff_by_day[day]=diagnostic_missing_kickoff_by_day.get(day,0)+1
                     gd=dt.datetime.fromtimestamp(built/1000,tz=dt.timezone.utc).astimezone(ATHENS).date().isoformat() if built else ''
                     if not day or day<=gd:continue
+                diagnostic_after_safety_by_day[day]=diagnostic_after_safety_by_day.get(day,0)+1
                 sub=str(s.get('identity_sub_market_key') or '')
                 if retired_market(s.get('selection_market'), sub):
                     continue
@@ -528,6 +537,14 @@ def extract(bundle,target=None):
                   'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':'OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR','requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
             if rejected_identity:
                 print(f"CANONICAL_LEDGER_IDENTITY_REJECTED bundle={bundle.name} rows={rejected_identity}")
+            print(
+                "CANONICAL_LEDGER_EXTRACT_FUNNEL",
+                f"bundle={bundle.name}",
+                "pre="+json.dumps(diagnostic_pre_by_day,sort_keys=True),
+                "afterSafety="+json.dumps(diagnostic_after_safety_by_day,sort_keys=True),
+                "startedAtBuild="+json.dumps(diagnostic_after_kickoff_by_day,sort_keys=True),
+                "missingKickoff="+json.dumps(diagnostic_missing_kickoff_by_day,sort_keys=True),
+            )
             return out
         except sqlite3.Error:return []
         finally:db.close()
