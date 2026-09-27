@@ -279,6 +279,15 @@ def main() -> int:
                 continue
             if stats_fetch.fixture_status_short(fixture).upper() not in live.COMPLETED:
                 nonfinal += 1
+                summary = stats_fetch.fixture_summary(fixture)
+                print(
+                    "canonical-settlement-exact NONFINAL "
+                    f"fixtureId={fixture_id} status={stats_fetch.fixture_status_short(fixture)} "
+                    f"provider={summary.get('home_team')} vs {summary.get('away_team')} "
+                    f"canonical=" + ";".join(
+                        f"{r.home_names[0]} vs {r.away_names[0]}" for r in pending_by_id.get(fixture_id, [])
+                    )
+                )
                 continue
             registry_row = live.choose_registry_row(fixture, rows_by_provider)
             candidate_requirements = pending_by_id.get(fixture_id, [])
