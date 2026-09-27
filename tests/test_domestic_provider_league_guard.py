@@ -39,6 +39,45 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
         self.assertIsNotNone(matched)
         self.assertEqual('turkey-super-lig', matched['slug'])
 
+    def test_stale_configured_slug_falls_back_to_strict_search_terms(self):
+        configured = {
+            'leagueCode': 'BRA',
+            'country': 'Brazil',
+            'competition': 'Serie A',
+            'providerLeagueSlug': 'brazil-brasileiro-serie-a',
+            'searchTerms': ['brazil serie a', 'brasileirao', 'campeonato brasileiro serie a'],
+        }
+        providers = [
+            {
+                'name': 'Argentina - Serie A',
+                'slug': 'argentina-serie-a',
+                'eventsCount': 8,
+            },
+            {
+                'name': 'Brazil - Serie A',
+                'slug': 'brazil-serie-a',
+                'eventsCount': 10,
+            },
+        ]
+        matched = odds.match_provider_league(configured, providers)
+        self.assertIsNotNone(matched)
+        self.assertEqual('brazil-serie-a', matched['slug'])
+
+    def test_stale_configured_slug_does_not_cross_country_on_fallback(self):
+        configured = {
+            'leagueCode': 'BRA',
+            'country': 'Brazil',
+            'competition': 'Serie A',
+            'providerLeagueSlug': 'brazil-brasileiro-serie-a',
+            'searchTerms': ['serie a'],
+        }
+        providers = [{
+            'name': 'Argentina - Serie A',
+            'slug': 'argentina-serie-a',
+            'eventsCount': 8,
+        }]
+        self.assertIsNone(odds.match_provider_league(configured, providers))
+
     def test_rejects_configured_simulated_slug_too(self):
         configured = dict(self.t1)
         configured['providerLeagueSlug'] = 'simulated-reality-league-turkey-super-lig-srl'
