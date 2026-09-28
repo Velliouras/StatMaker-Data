@@ -37,6 +37,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # Push/schedule runs can wait behind the canonical writer lock. Always
+          # start from the latest main instead of the stale trigger SHA so the
+          # generated large JSON artifacts do not hit avoidable rebase conflicts.
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python
