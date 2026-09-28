@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "068ca12d7809dab7adf44a94c9ba11c44f63374655ff475129aee171f0841811",
-  "generatedAt": "2026-09-27T23:50:28Z",
+  "contentVersion": "380236ab549db580d1cceb1dc0cbd61d43015a96df46e4068e3bd20bc7542790",
+  "generatedAt": "2026-09-28T01:48:19.965275Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "b1d5b3ebf6e54052528a375cb82c03b6ef996aa6f2f0de76e637645bbd0f111a",
+      "sha256": "af0eeb5f1d768dc1dd058892c81ae7d0cb831560f2b2bef8cc362c1914542085",
       "bytes": 113912,
-      "generatedAt": "2026-09-27T23:10:42Z"
+      "generatedAt": "2026-09-28T01:48:14Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "0c76e62e4442298a8fe93e46e8a8af26ec0e93f8745a1cc327a2901c112c6ed1",
-      "bytes": 25269126,
+      "sha256": "2646cc7e9438a7b30446dd212ee0979f4dabb8f3932c0cabf8b07cbaba21541c",
+      "bytes": 25271640,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "fb05c9a03c53797c7ad62a1f991152d94793497fe14928ecea9f4b5c0e422fb7",
-      "bytes": 8417708,
-      "generatedAt": "2026-09-27T23:10:48.169148Z"
+      "sha256": "22203b344bccc40b1a999351305c7a1f6fc3070202ce20a1c42e1dc4eabddbc5",
+      "bytes": 8417865,
+      "generatedAt": "2026-09-28T01:48:19.965275Z"
     },
     {
       "id": "uefa_team_logos",
@@ -83,7 +83,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "0c76e62e4442298a8fe93e46e8a8af26ec0e93f8745a1cc327a2901c112c6ed1",
+    "targetSha256": "2646cc7e9438a7b30446dd212ee0979f4dabb8f3932c0cabf8b07cbaba21541c",
     "transitions": [
       {
         "fromSha256": "481702d1b30afe86a886b971ab99542be4eed0d640c31d098385f53bc5d239c7",
@@ -824,6 +824,117 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 12,
               "AFreeKicks": 7
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "0c76e62e4442298a8fe93e46e8a8af26ec0e93f8745a1cc327a2901c112c6ed1",
+        "toSha256": "2646cc7e9438a7b30446dd212ee0979f4dabb8f3932c0cabf8b07cbaba21541c",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1490510,
+            "league_id": 253,
+            "league_code": "USA",
+            "country": "USA",
+            "league": "Major League Soccer",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-09-27",
+            "home_team": "Columbus Crew",
+            "away_team": "Inter Miami",
+            "stats": {
+              "HS": 14,
+              "AS": 5,
+              "HST": 6,
+              "AST": 3,
+              "HC": 9,
+              "AC": 1,
+              "HF": 18,
+              "AF": 17,
+              "HY": 5,
+              "AY": 5,
+              "HR": 0,
+              "AR": 1,
+              "HPossession": 44,
+              "APossession": 56,
+              "HSaves": 2,
+              "ASaves": 4,
+              "HPasses": 390,
+              "APasses": 524,
+              "HPassesAccurate": 345,
+              "APassesAccurate": 465,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 6,
+              "AShotsOffGoal": 2,
+              "HBlockedShots": 2,
+              "ABlockedShots": 0,
+              "HShotsInsideBox": 6,
+              "AShotsInsideBox": 2,
+              "HShotsOutsideBox": 8,
+              "AShotsOutsideBox": 3,
+              "HOffsides": 1,
+              "AOffsides": 4,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 17,
+              "AFreeKicks": 18
+            }
+          },
+          {
+            "fixture_id": 1520894,
+            "league_id": 72,
+            "league_code": "BRA2",
+            "country": "Brazil",
+            "league": "Serie B",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-09-27",
+            "home_team": "Fortaleza EC",
+            "away_team": "Athletic Club",
+            "stats": {
+              "HS": 16,
+              "AS": 6,
+              "HST": 7,
+              "AST": 3,
+              "HC": 5,
+              "AC": 1,
+              "HF": 15,
+              "AF": 16,
+              "HY": 0,
+              "AY": 0,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 68,
+              "APossession": 32,
+              "HSaves": 1,
+              "ASaves": 5,
+              "HPasses": 615,
+              "APasses": 293,
+              "HPassesAccurate": 548,
+              "APassesAccurate": 217,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 6,
+              "AShotsOffGoal": 3,
+              "HBlockedShots": 3,
+              "ABlockedShots": 0,
+              "HShotsInsideBox": 7,
+              "AShotsInsideBox": 3,
+              "HShotsOutsideBox": 9,
+              "AShotsOutsideBox": 3,
+              "HOffsides": 2,
+              "AOffsides": 0,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 15,
+              "AFreeKicks": 14
             }
           }
         ]
