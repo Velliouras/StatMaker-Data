@@ -115,6 +115,23 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
         }]
         self.assertIsNone(odds.match_provider_league(configured, providers))
 
+    def test_j1_configured_slug_selects_provider_jleague_not_j2_or_j3(self):
+        configured = {
+            'leagueCode': 'JPN',
+            'country': 'Japan',
+            'competition': 'J1 League',
+            'providerLeagueSlug': 'japan-jleague',
+            'searchTerms': ['japan j1 league', 'japan jleague', 'j1 league'],
+        }
+        providers = [
+            {'name': 'Japan - J-League 3', 'slug': 'japan-j-league-3', 'eventsCount': 140},
+            {'name': 'Japan - J.League 2', 'slug': 'japan-jleague-2', 'eventsCount': 140},
+            {'name': 'Japan - J.League', 'slug': 'japan-jleague', 'eventsCount': 119},
+        ]
+        matched = odds.match_provider_league(configured, providers)
+        self.assertIsNotNone(matched)
+        self.assertEqual('japan-jleague', matched['slug'])
+
     def test_j1_search_does_not_match_j3(self):
         configured = {
             'leagueCode': 'JPN',
