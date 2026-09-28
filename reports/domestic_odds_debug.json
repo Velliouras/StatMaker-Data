@@ -1,5 +1,7 @@
 {
-  "warnings": [],
+  "warnings": [
+    "Stopped after league discovery because rateLimitRemaining is below guard."
+  ],
   "apiCalls": [
     {
       "path": "/leagues",
@@ -9,88 +11,20 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 167,
+      "durationMs": 131,
       "bodyLength": 209689,
-      "rateLimitRemaining": 98,
+      "rateLimitRemaining": 42,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 78}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 65}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 16}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 90}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Centre-East\", \"slug\": \"algeria-ligue-2-centre-east\", \"eventsCount\": 16}, {\"name\": \"Algeria - Ligue 2, Centre-West\", \"slug\": \"algeria-ligue-2-centre-west\", \"eventsCount\": 0}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 30}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Segona Divisio\", \"slug\": \"andorra-segona-divisio\", \"eventsCount\": 24}, {\"name\": \"Andorra - Supercopa\", \"slug\": \"andorra-supercopa\", \"eventsCount\": 0}, {\"name\": \"Angola - Gir..."
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "republic-of-korea-k-league-1",
-        "status": "pending,live",
-        "from": "2026-09-28T06:50:49Z",
-        "to": "2026-10-05T06:50:49Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 170,
-      "bodyLength": 2,
-      "rateLimitRemaining": 97,
-      "sample": []
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "china-chinese-super-league",
-        "status": "pending,live",
-        "from": "2026-09-28T06:50:50Z",
-        "to": "2026-10-05T06:50:50Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 150,
-      "bodyLength": 2,
-      "rateLimitRemaining": 96,
-      "sample": []
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "saudi-arabia-saudi-professional-league",
-        "status": "pending,live",
-        "from": "2026-09-28T06:50:50Z",
-        "to": "2026-10-05T06:50:50Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 157,
-      "bodyLength": 2,
-      "rateLimitRemaining": 95,
-      "sample": []
-    },
-    {
-      "path": "/events",
-      "params": {
-        "apiKey": "***",
-        "sport": "football",
-        "league": "united-arab-emirates-pro-league",
-        "status": "pending,live",
-        "from": "2026-09-28T06:50:50Z",
-        "to": "2026-10-05T06:50:50Z",
-        "limit": 500
-      },
-      "status": 200,
-      "durationMs": 166,
-      "bodyLength": 2,
-      "rateLimitRemaining": 94,
-      "sample": []
     }
   ],
-  "generatedAt": "2026-09-28T06:50:49Z",
+  "generatedAt": "2026-09-28T06:59:52Z",
   "scriptVersion": "domestic-odds-api-io-v5-strict-provider-country-market-audit",
   "registry": {
     "registryVersion": 6,
-    "registryLeagueCount": 5,
-    "enabledLeagueCount": 5,
-    "enabledForOddsCount": 5,
-    "enabledForBettingCount": 5,
+    "registryLeagueCount": 1,
+    "enabledLeagueCount": 1,
+    "enabledForOddsCount": 1,
+    "enabledForBettingCount": 1,
     "csvImport": "inactive_archive_only",
     "statsSource": "api-football",
     "oddsSource": "odds-api-io"
@@ -101,11 +35,7 @@
     "Unibet"
   ],
   "leaguesRequested": [
-    "KOR",
-    "CHN",
-    "JPN",
-    "SAU",
-    "UAE"
+    "JPN"
   ],
   "marketAuditPolicy": {
     "auditOnlyFamilies": [
@@ -133,7 +63,7 @@
   "unsupportedMarketExamples": {},
   "rateLimitLimit": "100",
   "rateLimitReset": "2026-09-28T07:50:48Z",
-  "rateLimitRemaining": 94,
+  "rateLimitRemaining": 42,
   "providerLeagueCount": 1977,
   "providerLeagueSample": [
     {
@@ -437,159 +367,13 @@
       "eventsCount": 0
     }
   ],
-  "leaguesMatched": [
-    {
-      "leagueCode": "KOR",
-      "country": "South Korea",
-      "competition": "K League 1",
-      "apiFootballLeagueId": 292,
-      "providerLeagueSlug": "republic-of-korea-k-league-1",
-      "providerName": "Republic of Korea - K-League 1"
-    },
-    {
-      "leagueCode": "CHN",
-      "country": "China",
-      "competition": "Super League",
-      "apiFootballLeagueId": 169,
-      "providerLeagueSlug": "china-chinese-super-league",
-      "providerName": "China - Chinese Super League"
-    },
-    {
-      "leagueCode": "SAU",
-      "country": "Saudi Arabia",
-      "competition": "Pro League",
-      "apiFootballLeagueId": 307,
-      "providerLeagueSlug": "saudi-arabia-saudi-professional-league",
-      "providerName": "Saudi Arabia - Saudi Professional League"
-    },
-    {
-      "leagueCode": "UAE",
-      "country": "United Arab Emirates",
-      "competition": "Pro League",
-      "apiFootballLeagueId": 301,
-      "providerLeagueSlug": "united-arab-emirates-pro-league",
-      "providerName": "United Arab Emirates - Pro League"
-    }
-  ],
-  "leagueReports": [
-    {
-      "leagueCode": "KOR",
-      "country": "South Korea",
-      "competition": "K League 1",
-      "apiFootballLeagueId": 292,
-      "providerLeagueSlug": "republic-of-korea-k-league-1",
-      "eventsFetched": 0,
-      "eventsWithOddsResponse": 0,
-      "eventsWithoutMappedMarkets": 0,
-      "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 0,
-      "marketsEmitted": 0,
-      "providerMatchesArchived": 0,
-      "providerMarketPayloadsArchived": 0,
-      "matchedTeamPairs": 0,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    },
-    {
-      "leagueCode": "CHN",
-      "country": "China",
-      "competition": "Super League",
-      "apiFootballLeagueId": 169,
-      "providerLeagueSlug": "china-chinese-super-league",
-      "eventsFetched": 0,
-      "eventsWithOddsResponse": 0,
-      "eventsWithoutMappedMarkets": 0,
-      "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 0,
-      "marketsEmitted": 0,
-      "providerMatchesArchived": 0,
-      "providerMarketPayloadsArchived": 0,
-      "matchedTeamPairs": 0,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    },
-    {
-      "leagueCode": "SAU",
-      "country": "Saudi Arabia",
-      "competition": "Pro League",
-      "apiFootballLeagueId": 307,
-      "providerLeagueSlug": "saudi-arabia-saudi-professional-league",
-      "eventsFetched": 0,
-      "eventsWithOddsResponse": 0,
-      "eventsWithoutMappedMarkets": 0,
-      "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 0,
-      "marketsEmitted": 0,
-      "providerMatchesArchived": 0,
-      "providerMarketPayloadsArchived": 0,
-      "matchedTeamPairs": 0,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    },
-    {
-      "leagueCode": "UAE",
-      "country": "United Arab Emirates",
-      "competition": "Pro League",
-      "apiFootballLeagueId": 301,
-      "providerLeagueSlug": "united-arab-emirates-pro-league",
-      "eventsFetched": 0,
-      "eventsWithOddsResponse": 0,
-      "eventsWithoutMappedMarkets": 0,
-      "eventsWithMarketsButUnmatchedTeams": 0,
-      "matchesEmitted": 0,
-      "marketsEmitted": 0,
-      "providerMatchesArchived": 0,
-      "providerMarketPayloadsArchived": 0,
-      "matchedTeamPairs": 0,
-      "partialTeamPairs": 0,
-      "unmatchedTeamPairs": 0
-    }
-  ],
-  "leaguesMissing": [
-    {
-      "leagueCode": "JPN",
-      "country": "Japan",
-      "competition": "J1 League",
-      "apiFootballLeagueId": 98,
-      "reason": "verified provider league slug not found",
-      "providerCountryCandidates": [
-        {
-          "name": "Japan - J-League 3",
-          "slug": "japan-j-league-3",
-          "sport": null,
-          "eventsCount": 140
-        },
-        {
-          "name": "Japan - J.League 2",
-          "slug": "japan-jleague-2",
-          "sport": null,
-          "eventsCount": 140
-        },
-        {
-          "name": "Japan - J.League",
-          "slug": "japan-jleague",
-          "sport": null,
-          "eventsCount": 119
-        },
-        {
-          "name": "Japan - Japan Football League",
-          "slug": "japan-japan-football-league",
-          "sport": null,
-          "eventsCount": 96
-        },
-        {
-          "name": "Japan - WE-League",
-          "slug": "japan-we-league",
-          "sport": null,
-          "eventsCount": 47
-        },
-        {
-          "name": "Japan - J3 League",
-          "slug": "japan-j3-league",
-          "sport": null,
-          "eventsCount": 0
-        }
-      ]
-    }
-  ]
+  "rateLimitWait": {
+    "status": "skipped",
+    "reason": "reset_outside_wait_window",
+    "remainingBefore": 42,
+    "reset": "2026-09-28T07:50:48Z",
+    "secondsToReset": 3055.465,
+    "calculatedWaitSeconds": 3058,
+    "maxWaitSeconds": 420
+  }
 }
