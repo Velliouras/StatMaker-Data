@@ -55,6 +55,14 @@ PER_CASES = {
     "Los Chankas CYC": "Club Deportivo Los Chankas",
 }
 
+BRA2_CASES = {
+    "America FC MG": "America Mineiro",
+    "SC Recife PE": "Sport Recife",
+    "CR Brasil AL": "CRB",
+    "Nautico PE": "Nautico Recife",
+    "AC Goianiense GO": "Atletico Goianiense",
+}
+
 CASES = {'CA Aldosivi': 'Aldosivi', 'Argentinos Juniors': 'Argentinos JRS', 'CA Banfield': 'Banfield', 'CA Barracas Central': 'Barracas Central', 'CA Belgrano de Cordoba': 'Belgrano Cordoba', 'CA Central Cordoba SE': 'Central Cordoba de Santiago', 'Deportivo Riestra AFBC': 'Deportivo Riestra', 'Estudiantes de La Plata': 'Estudiantes L.P.', 'Estudiantes Rio Cuarto': 'Estudiantes de Rio Cuarto', 'Gimnasia y Esgrima La Plata': 'Gimnasia L.P.', 'Gimnasia y Esgrima Mendoza': 'Gimnasia M.', 'CA Huracan': 'Huracan', 'Independiente Rivadavia': 'Independ. Rivadavia', 'CA Independiente Avellaneda': 'Independiente', 'CA Lanus': 'Lanus', "Newell's Old Boys": 'Newells Old Boys', 'CA Platense': 'Platense', 'Racing Club Avellaneda': 'Racing Club', 'CA River Plate (ARG)': 'River Plate', 'CA Rosario Central': 'Rosario Central', 'CA San Lorenzo de Almagro': 'San Lorenzo', 'CA Sarmiento Junin': 'Sarmiento Junin', 'CA Talleres de Cordoba': 'Talleres Cordoba', 'CA Tigre': 'Tigre', 'Union de Santa Fe': 'Union Santa Fe'}
 
 class EnglandCurrentMembershipProviderAliasTest(unittest.TestCase):
@@ -104,7 +112,7 @@ class RegionalProviderAliasTest(unittest.TestCase):
         aliases = pipeline.generated_aliases(registry)
         schedule_priority._install_conservative_team_mapping()
 
-        for league_code, cases in {"NOR2": NOR2_CASES, "PER": PER_CASES}.items():
+        for league_code, cases in {"NOR2": NOR2_CASES, "PER": PER_CASES, "BRA2": BRA2_CASES}.items():
             for provider_team, expected in cases.items():
                 with self.subTest(league=league_code, provider_team=provider_team):
                     debug = {}
