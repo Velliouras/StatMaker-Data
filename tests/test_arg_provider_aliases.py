@@ -55,6 +55,11 @@ PER_CASES = {
     "Los Chankas CYC": "Club Deportivo Los Chankas",
 }
 
+BRA_CASES = {
+    "Sao Paulo FC SP": "Sao Paulo",
+    "São Paulo FC": "Sao Paulo",
+}
+
 BRA2_CASES = {
     "America FC MG": "America Mineiro",
     "SC Recife PE": "Sport Recife",
@@ -112,7 +117,7 @@ class RegionalProviderAliasTest(unittest.TestCase):
         aliases = pipeline.generated_aliases(registry)
         schedule_priority._install_conservative_team_mapping()
 
-        for league_code, cases in {"NOR2": NOR2_CASES, "PER": PER_CASES, "BRA2": BRA2_CASES}.items():
+        for league_code, cases in {"NOR2": NOR2_CASES, "PER": PER_CASES, "BRA": BRA_CASES, "BRA2": BRA2_CASES}.items():
             for provider_team, expected in cases.items():
                 with self.subTest(league=league_code, provider_team=provider_team):
                     debug = {}
