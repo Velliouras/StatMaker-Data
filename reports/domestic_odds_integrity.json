@@ -5,8 +5,8 @@
     "Unibet"
   ],
   "matchesChecked": 255,
-  "mixedBookmakerGroupsResolved": 411,
-  "incompleteRowsPruned": 401,
+  "mixedBookmakerGroupsResolved": 412,
+  "incompleteRowsPruned": 361,
   "groupsDropped": 11,
   "matches": [
     {
@@ -58,14 +58,6 @@
       "leagueCode": "ARG"
     },
     {
-      "matchId": "73265374",
-      "fixture": "Argentinos JRS - Tigre",
-      "before": 0,
-      "after": 0,
-      "groups": [],
-      "leagueCode": "ARG"
-    },
-    {
       "matchId": "73265366",
       "fixture": "Huracan - Aldosivi",
       "before": 0,
@@ -76,6 +68,14 @@
     {
       "matchId": "73265346",
       "fixture": "Talleres Cordoba - Belgrano Cordoba",
+      "before": 0,
+      "after": 0,
+      "groups": [],
+      "leagueCode": "ARG"
+    },
+    {
+      "matchId": "73265374",
+      "fixture": "Argentinos JRS - Tigre",
       "before": 0,
       "after": 0,
       "groups": [],
@@ -124,8 +124,8 @@
     {
       "matchId": "74752886",
       "fixture": "Sao Paulo - Santos",
-      "before": 348,
-      "after": 311,
+      "before": 341,
+      "after": 290,
       "groups": [
         {
           "market": "1X2",
@@ -183,9 +183,10 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 16,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -314,8 +315,8 @@
     {
       "matchId": "68823306",
       "fixture": "Botafogo SP - Ponte Preta",
-      "before": 405,
-      "after": 317,
+      "before": 411,
+      "after": 315,
       "groups": [
         {
           "market": "1X2",
@@ -374,13 +375,16 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 4,
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Unibet": 1,
+            "Bet365": 1
+          }
         },
         {
           "market": "MATCH_GOALS",
@@ -451,19 +455,14 @@
           "market": "TEAM_CORNERS",
           "team": "Botafogo SP",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "no complete over/under line"
-          },
-          "prunedIncompleteRows": {
-            "Unibet": 1,
-            "Bet365": 1
-          }
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
@@ -564,8 +563,8 @@
     {
       "matchId": "68823330",
       "fixture": "Athletic Club - Sport Recife",
-      "before": 297,
-      "after": 261,
+      "before": 345,
+      "after": 277,
       "groups": [
         {
           "market": "1X2",
@@ -623,15 +622,13 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 14,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "no complete over/under line"
-          },
+          "rejected": {},
           "prunedIncompleteRows": {
             "Bet365": 1,
             "Unibet": 1
@@ -654,12 +651,25 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "MATCH_SHOTS_ON_TARGET",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -697,12 +707,37 @@
           }
         },
         {
+          "market": "TEAM_SHOTS",
+          "team": "Athletic Club",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "Sport Recife",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Athletic Club",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -712,9 +747,10 @@
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Sport Recife",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -750,7 +786,7 @@
     {
       "matchId": "68823340",
       "fixture": "Novorizontino - Goias",
-      "before": 331,
+      "before": 349,
       "after": 295,
       "groups": [
         {
@@ -840,12 +876,25 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "MATCH_SHOTS_ON_TARGET",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -883,12 +932,37 @@
           "prunedIncompleteRows": {}
         },
         {
+          "market": "TEAM_SHOTS",
+          "team": "Goias",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "Novorizontino",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Goias",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -898,9 +972,10 @@
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Novorizontino",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -936,8 +1011,8 @@
     {
       "matchId": "68823328",
       "fixture": "São Bernardo - CRB",
-      "before": 383,
-      "after": 332,
+      "before": 387,
+      "after": 324,
       "groups": [
         {
           "market": "1X2",
@@ -1025,6 +1100,18 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "MATCH_SHOTS_ON_TARGET",
           "team": null,
           "status": "kept",
@@ -1073,12 +1160,37 @@
           }
         },
         {
+          "market": "TEAM_SHOTS",
+          "team": "CRB",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "São Bernardo",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "CRB",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1088,9 +1200,10 @@
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "São Bernardo",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1132,8 +1245,8 @@
     {
       "matchId": "68823332",
       "fixture": "Londrina - Criciuma",
-      "before": 337,
-      "after": 305,
+      "before": 314,
+      "after": 262,
       "groups": [
         {
           "market": "1X2",
@@ -1222,12 +1335,25 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "MATCH_SHOTS_ON_TARGET",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1270,12 +1396,37 @@
           }
         },
         {
+          "market": "TEAM_SHOTS",
+          "team": "Criciuma",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "Londrina",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Criciuma",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1285,9 +1436,10 @@
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Londrina",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1323,8 +1475,8 @@
     {
       "matchId": "68823344",
       "fixture": "Juventude - Operario-PR",
-      "before": 350,
-      "after": 298,
+      "before": 372,
+      "after": 308,
       "groups": [
         {
           "market": "1X2",
@@ -1413,6 +1565,18 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "MATCH_SHOTS_ON_TARGET",
           "team": null,
           "status": "kept",
@@ -1456,12 +1620,37 @@
           "prunedIncompleteRows": {}
         },
         {
+          "market": "TEAM_SHOTS",
+          "team": "Juventude",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "Operario-PR",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Juventude",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1471,9 +1660,10 @@
           "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Operario-PR",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1515,8 +1705,8 @@
     {
       "matchId": "68823334",
       "fixture": "Fortaleza EC - Nautico Recife",
-      "before": 359,
-      "after": 295,
+      "before": 361,
+      "after": 297,
       "groups": [
         {
           "market": "1X2",
@@ -1710,8 +1900,8 @@
     {
       "matchId": "68823338",
       "fixture": "Avai - Ceara",
-      "before": 341,
-      "after": 309,
+      "before": 325,
+      "after": 260,
       "groups": [
         {
           "market": "1X2",
@@ -1769,15 +1959,13 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 16,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "no complete over/under line"
-          },
+          "rejected": {},
           "prunedIncompleteRows": {
             "Bet365": 1,
             "Unibet": 1
@@ -1875,21 +2063,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Avai",
           "status": "kept",
-          "bookmaker": "Unibet",
+          "bookmaker": "Bet365",
           "rows": 8,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Ceara",
           "status": "kept",
-          "bookmaker": "Unibet",
+          "bookmaker": "Bet365",
           "rows": 8,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1901,8 +2093,8 @@
     {
       "matchId": "68823336",
       "fixture": "Atletico Goianiense - America Mineiro",
-      "before": 258,
-      "after": 237,
+      "before": 375,
+      "after": 332,
       "groups": [
         {
           "market": "1X2",
@@ -1947,9 +2139,10 @@
           "market": "FIRST_HALF_GOALS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 8,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2046,9 +2239,10 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "America Mineiro",
           "status": "kept",
-          "bookmaker": "Unibet",
+          "bookmaker": "Bet365",
           "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2058,9 +2252,10 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Atletico Goianiense",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 10,
+          "bookmaker": "Bet365",
+          "rows": 12,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2414,8 +2609,8 @@
     {
       "matchId": "72341222",
       "fixture": "Burton Albion - Huddersfield",
-      "before": 332,
-      "after": 294,
+      "before": 326,
+      "after": 280,
       "groups": [
         {
           "market": "1X2",
@@ -2473,19 +2668,14 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 10,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "no complete over/under line"
-          },
-          "prunedIncompleteRows": {
-            "Unibet": 1,
-            "Bet365": 1
-          }
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
@@ -2567,8 +2757,8 @@
     {
       "matchId": "72341224",
       "fixture": "Leyton Orient - Plymouth",
-      "before": 337,
-      "after": 290,
+      "before": 281,
+      "after": 234,
       "groups": [
         {
           "market": "1X2",
@@ -2725,8 +2915,8 @@
     {
       "matchId": "72341232",
       "fixture": "Reading - Bradford",
-      "before": 293,
-      "after": 268,
+      "before": 295,
+      "after": 270,
       "groups": [
         {
           "market": "1X2",
@@ -2938,8 +3128,8 @@
     {
       "matchId": "72342102",
       "fixture": "Chesterfield - Tranmere",
-      "before": 328,
-      "after": 299,
+      "before": 266,
+      "after": 237,
       "groups": [
         {
           "market": "1X2",
@@ -3185,7 +3375,7 @@
     {
       "matchId": "72342094",
       "fixture": "Accrington ST - Cheltenham",
-      "before": 303,
+      "before": 292,
       "after": 267,
       "groups": [
         {
@@ -3308,10 +3498,9 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Accrington ST",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -3321,16 +3510,13 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Cheltenham",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "E3"
@@ -3338,8 +3524,8 @@
     {
       "matchId": "72342110",
       "fixture": "Crewe - Bristol Rovers",
-      "before": 307,
-      "after": 257,
+      "before": 296,
+      "after": 261,
       "groups": [
         {
           "market": "1X2",
@@ -3460,15 +3646,12 @@
           "team": "Bristol Rovers",
           "status": "dropped",
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {
-            "Bet365": "no complete over/under line",
             "Unibet": "no complete over/under line"
           },
           "prunedIncompleteRows": {
-            "Bet365": 10,
             "Unibet": 6
           }
         },
@@ -3476,16 +3659,13 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Crewe",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "E3"
@@ -3493,8 +3673,8 @@
     {
       "matchId": "72342114",
       "fixture": "Exeter City - Rotherham",
-      "before": 317,
-      "after": 277,
+      "before": 298,
+      "after": 272,
       "groups": [
         {
           "market": "1X2",
@@ -3620,31 +3800,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Exeter City",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Rotherham",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "E3"
@@ -3652,8 +3826,8 @@
     {
       "matchId": "72342118",
       "fixture": "Gillingham - Newport County",
-      "before": 300,
-      "after": 265,
+      "before": 262,
+      "after": 227,
       "groups": [
         {
           "market": "1X2",
@@ -3808,8 +3982,8 @@
     {
       "matchId": "72342122",
       "fixture": "Grimsby - Shrewsbury",
-      "before": 292,
-      "after": 258,
+      "before": 321,
+      "after": 287,
       "groups": [
         {
           "market": "1X2",
@@ -3961,7 +4135,7 @@
       "matchId": "72342130",
       "fixture": "Rochdale - Swindon Town",
       "before": 328,
-      "after": 287,
+      "after": 289,
       "groups": [
         {
           "market": "1X2",
@@ -4019,14 +4193,19 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
+          "rejected": {
+            "Bet365": "no complete over/under line"
+          },
+          "prunedIncompleteRows": {
+            "Unibet": 1,
+            "Bet365": 1
+          }
         },
         {
           "market": "MATCH_GOALS",
@@ -4114,8 +4293,8 @@
     {
       "matchId": "72342132",
       "fixture": "Salford City - Fleetwood Town",
-      "before": 311,
-      "after": 284,
+      "before": 313,
+      "after": 286,
       "groups": [
         {
           "market": "1X2",
@@ -4292,1058 +4471,10 @@
       "leagueCode": "E3"
     },
     {
-      "matchId": "72740664",
-      "fixture": "Boreham Wood - Kidderminster Harriers",
-      "before": 226,
-      "after": 223,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Boreham Wood",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 12,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Kidderminster Harriers",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740646",
-      "fixture": "AFC Fylde - Carlisle",
-      "before": 228,
-      "after": 226,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 16,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "AFC Fylde",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Carlisle",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740658",
-      "fixture": "AFC Hornchurch - Aldershot Town",
-      "before": 215,
-      "after": 212,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 4,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "AFC Hornchurch",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Aldershot Town",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740648",
-      "fixture": "Barrow - Scunthorpe",
-      "before": 221,
-      "after": 218,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Barrow",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Scunthorpe",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740650",
-      "fixture": "FC Halifax Town - Boston United",
-      "before": 210,
-      "after": 207,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 4,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Boston United",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "FC Halifax Town",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740652",
-      "fixture": "Forest Green - Wealdstone",
-      "before": 210,
-      "after": 209,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 4,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 16,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740654",
-      "fixture": "Gateshead - Altrincham",
-      "before": 222,
-      "after": 220,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Altrincham",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Gateshead",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740656",
-      "fixture": "Hartlepool - Harrogate Town",
-      "before": 218,
-      "after": 216,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Harrogate Town",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Hartlepool",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740660",
-      "fixture": "Woking - Solihull Moors",
-      "before": 222,
-      "after": 219,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 14,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Solihull Moors",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Woking",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
-      "matchId": "72740662",
-      "fixture": "Yeovil Town - Worthing",
-      "before": 195,
-      "after": 194,
-      "groups": [
-        {
-          "market": "1X2",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "BTTS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "DOUBLE_CHANCE",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 3,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "FIRST_HALF_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_CORNERS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "MATCH_GOALS",
-          "team": null,
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 16,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        }
-      ],
-      "leagueCode": "EC"
-    },
-    {
       "matchId": "72740666",
       "fixture": "Eastleigh - Southend",
-      "before": 187,
-      "after": 186,
+      "before": 218,
+      "after": 215,
       "groups": [
         {
           "market": "1X2",
@@ -5411,6 +4542,34 @@
           "status": "kept",
           "bookmaker": "Bet365",
           "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Eastleigh",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Southend",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
             "Bet365"
           ],
@@ -5425,8 +4584,8 @@
     {
       "matchId": "72740668",
       "fixture": "Tamworth - Sutton Utd",
-      "before": 209,
-      "after": 207,
+      "before": 210,
+      "after": 208,
       "groups": [
         {
           "market": "1X2",
@@ -5534,8 +4693,8 @@
     {
       "matchId": "72740670",
       "fixture": "Aldershot Town - Carlisle",
-      "before": 206,
-      "after": 203,
+      "before": 191,
+      "after": 190,
       "groups": [
         {
           "market": "1X2",
@@ -5598,34 +4757,6 @@
           "prunedIncompleteRows": {
             "Bet365": 1
           }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Aldershot Town",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Carlisle",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
         }
       ],
       "leagueCode": "EC"
@@ -5633,8 +4764,8 @@
     {
       "matchId": "72740672",
       "fixture": "Barrow - Wealdstone",
-      "before": 219,
-      "after": 216,
+      "before": 217,
+      "after": 214,
       "groups": [
         {
           "market": "1X2",
@@ -5732,8 +4863,8 @@
     {
       "matchId": "72740674",
       "fixture": "Boreham Wood - Altrincham",
-      "before": 226,
-      "after": 223,
+      "before": 224,
+      "after": 221,
       "groups": [
         {
           "market": "1X2",
@@ -5831,8 +4962,8 @@
     {
       "matchId": "72740676",
       "fixture": "Eastleigh - Woking",
-      "before": 211,
-      "after": 209,
+      "before": 191,
+      "after": 190,
       "groups": [
         {
           "market": "1X2",
@@ -5895,32 +5026,6 @@
           "prunedIncompleteRows": {
             "Bet365": 1
           }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Eastleigh",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Woking",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "EC"
@@ -5999,8 +5104,8 @@
     {
       "matchId": "72740680",
       "fixture": "Harrogate Town - AFC Hornchurch",
-      "before": 205,
-      "after": 202,
+      "before": 196,
+      "after": 195,
       "groups": [
         {
           "market": "1X2",
@@ -6063,34 +5168,6 @@
           "prunedIncompleteRows": {
             "Bet365": 1
           }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "AFC Hornchurch",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Harrogate Town",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
         }
       ],
       "leagueCode": "EC"
@@ -6098,8 +5175,8 @@
     {
       "matchId": "72740682",
       "fixture": "Hartlepool - Tamworth",
-      "before": 201,
-      "after": 198,
+      "before": 185,
+      "after": 182,
       "groups": [
         {
           "market": "1X2",
@@ -6197,8 +5274,8 @@
     {
       "matchId": "72740684",
       "fixture": "Kidderminster Harriers - Sutton Utd",
-      "before": 194,
-      "after": 190,
+      "before": 184,
+      "after": 180,
       "groups": [
         {
           "market": "1X2",
@@ -6296,8 +5373,8 @@
     {
       "matchId": "72740688",
       "fixture": "Solihull Moors - FC Halifax Town",
-      "before": 193,
-      "after": 192,
+      "before": 181,
+      "after": 180,
       "groups": [
         {
           "market": "1X2",
@@ -6367,8 +5444,8 @@
     {
       "matchId": "72740690",
       "fixture": "Southend - AFC Fylde",
-      "before": 198,
-      "after": 197,
+      "before": 179,
+      "after": 178,
       "groups": [
         {
           "market": "1X2",
@@ -6438,8 +5515,8 @@
     {
       "matchId": "72740692",
       "fixture": "Yeovil Town - Boston United",
-      "before": 208,
-      "after": 206,
+      "before": 196,
+      "after": 194,
       "groups": [
         {
           "market": "1X2",
@@ -6533,10 +5610,892 @@
       "leagueCode": "EC"
     },
     {
+      "matchId": "72740664",
+      "fixture": "Boreham Wood - Kidderminster Harriers",
+      "before": 221,
+      "after": 221,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Boreham Wood",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 12,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Kidderminster Harriers",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 6,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740646",
+      "fixture": "AFC Fylde - Carlisle",
+      "before": 224,
+      "after": 224,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 16,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "AFC Fylde",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Carlisle",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740658",
+      "fixture": "AFC Hornchurch - Aldershot Town",
+      "before": 208,
+      "after": 208,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "AFC Hornchurch",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Aldershot Town",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740648",
+      "fixture": "Barrow - Scunthorpe",
+      "before": 216,
+      "after": 216,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Barrow",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Scunthorpe",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740650",
+      "fixture": "FC Halifax Town - Boston United",
+      "before": 203,
+      "after": 203,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Boston United",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "FC Halifax Town",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740652",
+      "fixture": "Forest Green - Wealdstone",
+      "before": 205,
+      "after": 205,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 16,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740654",
+      "fixture": "Gateshead - Altrincham",
+      "before": 218,
+      "after": 218,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Altrincham",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Gateshead",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740656",
+      "fixture": "Hartlepool - Harrogate Town",
+      "before": 214,
+      "after": 214,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Harrogate Town",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Hartlepool",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740660",
+      "fixture": "Woking - Solihull Moors",
+      "before": 217,
+      "after": 217,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 14,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Solihull Moors",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "Woking",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 10,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
+      "matchId": "72740662",
+      "fixture": "Yeovil Town - Worthing",
+      "before": 192,
+      "after": 192,
+      "groups": [
+        {
+          "market": "1X2",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "BTTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "DOUBLE_CHANCE",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 3,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "FIRST_HALF_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_GOALS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 16,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        }
+      ],
+      "leagueCode": "EC"
+    },
+    {
       "matchId": "66854208",
       "fixture": "Dundalk - Bohemians",
-      "before": 336,
-      "after": 293,
+      "before": 309,
+      "after": 282,
       "groups": [
         {
           "market": "1X2",
@@ -6594,14 +6553,19 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
+          "rejected": {
+            "Bet365": "no complete over/under line"
+          },
+          "prunedIncompleteRows": {
+            "Unibet": 1,
+            "Bet365": 1
+          }
         },
         {
           "market": "MATCH_GOALS",
@@ -6658,31 +6622,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Bohemians",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Dundalk",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "IRL"
@@ -6746,8 +6704,8 @@
     {
       "matchId": "67018202",
       "fixture": "Ranheim - Egersund",
-      "before": 349,
-      "after": 309,
+      "before": 277,
+      "after": 249,
       "groups": [
         {
           "market": "1X2",
@@ -6864,31 +6822,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Egersund",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Ranheim",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "NOR2"
@@ -6896,8 +6848,8 @@
     {
       "matchId": "67018206",
       "fixture": "Strommen - Sandnes ULF",
-      "before": 336,
-      "after": 292,
+      "before": 311,
+      "after": 280,
       "groups": [
         {
           "market": "1X2",
@@ -7016,10 +6968,9 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Sandnes ULF",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -7029,16 +6980,13 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Strommen",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "NOR2"
@@ -7046,8 +6994,8 @@
     {
       "matchId": "67018196",
       "fixture": "Haugesund - Stabaek",
-      "before": 349,
-      "after": 306,
+      "before": 318,
+      "after": 288,
       "groups": [
         {
           "market": "1X2",
@@ -7119,14 +7067,14 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 14,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 3
+            "Bet365": 2
           }
         },
         {
@@ -7164,31 +7112,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Haugesund",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 12,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Stabaek",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "NOR2"
@@ -7196,8 +7138,8 @@
     {
       "matchId": "67018208",
       "fixture": "Stromsgodset - Asane",
-      "before": 357,
-      "after": 313,
+      "before": 321,
+      "after": 291,
       "groups": [
         {
           "market": "1X2",
@@ -7313,31 +7255,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Asane",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Stromsgodset",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 16,
+          "bookmaker": "Unibet",
+          "rows": 8,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "NOR2"
@@ -7345,8 +7281,8 @@
     {
       "matchId": "67018198",
       "fixture": "hodd - ODD Ballklubb",
-      "before": 330,
-      "after": 299,
+      "before": 360,
+      "after": 315,
       "groups": [
         {
           "market": "1X2",
@@ -7421,14 +7357,14 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 16,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 2
           }
         },
         {
@@ -7470,21 +7406,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "ODD Ballklubb",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 12,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "hodd",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -7496,8 +7436,8 @@
     {
       "matchId": "67018194",
       "fixture": "Bryne - Lyn",
-      "before": 345,
-      "after": 302,
+      "before": 326,
+      "after": 283,
       "groups": [
         {
           "market": "1X2",
@@ -7651,8 +7591,8 @@
     {
       "matchId": "67018200",
       "fixture": "Moss - Kongsvinger",
-      "before": 329,
-      "after": 299,
+      "before": 302,
+      "after": 272,
       "groups": [
         {
           "market": "1X2",
@@ -7795,8 +7735,8 @@
     {
       "matchId": "74272460",
       "fixture": "Cienciano - Club Deportivo Los Chankas",
-      "before": 264,
-      "after": 237,
+      "before": 314,
+      "after": 287,
       "groups": [
         {
           "market": "1X2",
@@ -7855,7 +7795,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 2,
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365"
           ],
@@ -7907,8 +7847,8 @@
     {
       "matchId": "72202672",
       "fixture": "Livingston - Ayr Utd",
-      "before": 284,
-      "after": 259,
+      "before": 296,
+      "after": 271,
       "groups": [
         {
           "market": "1X2",
@@ -8047,8 +7987,8 @@
     {
       "matchId": "72202670",
       "fixture": "Morton - Raith Rovers",
-      "before": 280,
-      "after": 246,
+      "before": 299,
+      "after": 250,
       "groups": [
         {
           "market": "1X2",
@@ -8120,14 +8060,14 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 12,
+          "rows": 14,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 2
+            "Bet365": 1
           }
         },
         {
@@ -8160,26 +8100,32 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Morton",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Raith Rovers",
           "status": "dropped",
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {
-            "Unibet": "no complete over/under line"
+            "Unibet": "no complete over/under line",
+            "Bet365": "no complete over/under line"
           },
           "prunedIncompleteRows": {
-            "Unibet": 6
+            "Unibet": 6,
+            "Bet365": 11
           }
         }
       ],
@@ -8188,8 +8134,8 @@
     {
       "matchId": "72202674",
       "fixture": "Partick - Arbroath",
-      "before": 287,
-      "after": 262,
+      "before": 305,
+      "after": 268,
       "groups": [
         {
           "market": "1X2",
@@ -8302,25 +8248,31 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Arbroath",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Partick",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC1"
@@ -8328,8 +8280,8 @@
     {
       "matchId": "72203916",
       "fixture": "Airdrie United - Montrose",
-      "before": 202,
-      "after": 202,
+      "before": 203,
+      "after": 200,
       "groups": [
         {
           "market": "1X2",
@@ -8401,7 +8353,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8413,7 +8367,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8425,7 +8381,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC2"
@@ -8433,8 +8391,8 @@
     {
       "matchId": "72203918",
       "fixture": "East Fife - East Kilbride",
-      "before": 189,
-      "after": 189,
+      "before": 184,
+      "after": 181,
       "groups": [
         {
           "market": "1X2",
@@ -8506,7 +8464,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8518,7 +8478,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8530,7 +8492,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC2"
@@ -8538,8 +8502,8 @@
     {
       "matchId": "72203922",
       "fixture": "Queen of the South - Cove Rangers",
-      "before": 207,
-      "after": 207,
+      "before": 178,
+      "after": 175,
       "groups": [
         {
           "market": "1X2",
@@ -8594,7 +8558,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 4,
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365"
           ],
@@ -8611,7 +8575,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8623,7 +8589,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8635,7 +8603,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC2"
@@ -8643,8 +8613,8 @@
     {
       "matchId": "72203924",
       "fixture": "Ross County - Alloa Athletic",
-      "before": 202,
-      "after": 202,
+      "before": 194,
+      "after": 191,
       "groups": [
         {
           "market": "1X2",
@@ -8716,7 +8686,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 2
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -8740,7 +8712,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC2"
@@ -8748,8 +8722,8 @@
     {
       "matchId": "72203920",
       "fixture": "Hamilton Academical - Peterhead",
-      "before": 211,
-      "after": 211,
+      "before": 162,
+      "after": 161,
       "groups": [
         {
           "market": "1X2",
@@ -8821,31 +8795,9 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Hamilton Academical",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 12,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
-        },
-        {
-          "market": "TEAM_TOTAL_GOALS",
-          "team": "Peterhead",
-          "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
-          "candidateBookmakers": [
-            "Bet365"
-          ],
-          "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SC2"
@@ -8853,7 +8805,7 @@
     {
       "matchId": "72204284",
       "fixture": "Annan Athletic - Stirling Albion",
-      "before": 181,
+      "before": 179,
       "after": 179,
       "groups": [
         {
@@ -8926,9 +8878,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 2
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SC3"
@@ -8936,7 +8886,7 @@
     {
       "matchId": "72204286",
       "fixture": "Dumbarton - Forfar Athletic",
-      "before": 200,
+      "before": 198,
       "after": 198,
       "groups": [
         {
@@ -9009,9 +8959,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -9035,9 +8983,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SC3"
@@ -9045,7 +8991,7 @@
     {
       "matchId": "72204288",
       "fixture": "Elgin City - Clyde",
-      "before": 173,
+      "before": 171,
       "after": 171,
       "groups": [
         {
@@ -9118,9 +9064,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 2
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SC3"
@@ -9128,7 +9072,7 @@
     {
       "matchId": "72204292",
       "fixture": "Spartans - Kelty Hearts",
-      "before": 199,
+      "before": 197,
       "after": 197,
       "groups": [
         {
@@ -9201,9 +9145,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 2
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SC3"
@@ -9211,7 +9153,7 @@
     {
       "matchId": "72204290",
       "fixture": "Stranraer - Edinburgh City",
-      "before": 212,
+      "before": 209,
       "after": 209,
       "groups": [
         {
@@ -9284,9 +9226,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -9298,9 +9238,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
@@ -9312,9 +9250,7 @@
             "Bet365"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SC3"
@@ -9322,8 +9258,8 @@
     {
       "matchId": "72477460",
       "fixture": "Eldense - Oviedo",
-      "before": 297,
-      "after": 264,
+      "before": 291,
+      "after": 258,
       "groups": [
         {
           "market": "1X2",
@@ -9477,8 +9413,8 @@
     {
       "matchId": "72477450",
       "fixture": "Albacete - Eibar",
-      "before": 311,
-      "after": 266,
+      "before": 282,
+      "after": 247,
       "groups": [
         {
           "market": "1X2",
@@ -9598,31 +9534,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Albacete",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Eibar",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SP2"
@@ -9631,7 +9561,7 @@
       "matchId": "72477452",
       "fixture": "Almeria - Burgos",
       "before": 299,
-      "after": 254,
+      "after": 266,
       "groups": [
         {
           "market": "1X2",
@@ -9756,31 +9686,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Almeria",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Burgos",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SP2"
@@ -9788,8 +9712,8 @@
     {
       "matchId": "72477454",
       "fixture": "Cadiz - Leganes",
-      "before": 295,
-      "after": 252,
+      "before": 284,
+      "after": 249,
       "groups": [
         {
           "market": "1X2",
@@ -9847,13 +9771,15 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 2,
+          "bookmaker": "Unibet",
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {},
+          "rejected": {
+            "Bet365": "no complete over/under line"
+          },
           "prunedIncompleteRows": {
             "Unibet": 1,
             "Bet365": 1
@@ -9941,8 +9867,8 @@
     {
       "matchId": "72477468",
       "fixture": "Sabadell - FC Andorra",
-      "before": 301,
-      "after": 265,
+      "before": 314,
+      "after": 272,
       "groups": [
         {
           "market": "1X2",
@@ -10000,19 +9926,14 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "no complete over/under line"
-          },
-          "prunedIncompleteRows": {
-            "Unibet": 1,
-            "Bet365": 1
-          }
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "MATCH_GOALS",
@@ -10099,8 +10020,8 @@
     {
       "matchId": "72477466",
       "fixture": "Real Sociedad II - Granada CF",
-      "before": 291,
-      "after": 248,
+      "before": 313,
+      "after": 270,
       "groups": [
         {
           "market": "1X2",
@@ -10252,8 +10173,8 @@
     {
       "matchId": "72477470",
       "fixture": "Sporting Gijon - Celta de Vigo II",
-      "before": 318,
-      "after": 283,
+      "before": 302,
+      "after": 277,
       "groups": [
         {
           "market": "1X2",
@@ -10380,31 +10301,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Celta de Vigo II",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Sporting Gijon",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ],
       "leagueCode": "SP2"
@@ -10412,8 +10327,8 @@
     {
       "matchId": "72477456",
       "fixture": "Castellón - AD Ceuta FC",
-      "before": 321,
-      "after": 292,
+      "before": 325,
+      "after": 284,
       "groups": [
         {
           "market": "1X2",
@@ -10535,25 +10450,31 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "AD Ceuta FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Castellón",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 14,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ],
       "leagueCode": "SP2"
@@ -10561,8 +10482,8 @@
     {
       "matchId": "72477464",
       "fixture": "Las Palmas - Valladolid",
-      "before": 280,
-      "after": 255,
+      "before": 285,
+      "after": 260,
       "groups": [
         {
           "market": "1X2",
@@ -10715,8 +10636,8 @@
     {
       "matchId": "72477462",
       "fixture": "Girona - Mallorca",
-      "before": 325,
-      "after": 280,
+      "before": 317,
+      "after": 272,
       "groups": [
         {
           "market": "1X2",
@@ -10873,8 +10794,8 @@
     {
       "matchId": "72477458",
       "fixture": "Cordoba - Tenerife",
-      "before": 297,
-      "after": 271,
+      "before": 285,
+      "after": 259,
       "groups": [
         {
           "market": "1X2",
@@ -11179,8 +11100,8 @@
     {
       "matchId": "75066650",
       "fixture": "New York Red Bulls - St. Louis City",
-      "before": 439,
-      "after": 393,
+      "before": 412,
+      "after": 384,
       "groups": [
         {
           "market": "1X2",
@@ -11368,31 +11289,26 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "New York Red Bulls",
           "status": "kept",
-          "bookmaker": "Bet365",
+          "bookmaker": "Unibet",
           "rows": 8,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "St. Louis City",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 10,
+          "bookmaker": "Unibet",
+          "rows": 8,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Unibet": 1,
-            "Bet365": 1
+            "Unibet": 1
           }
         }
       ],
@@ -11401,8 +11317,8 @@
     {
       "matchId": "71915038",
       "fixture": "Seattle Sounders - Sporting Kansas City",
-      "before": 436,
-      "after": 389,
+      "before": 353,
+      "after": 324,
       "groups": [
         {
           "market": "1X2",
@@ -11566,31 +11482,27 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "Seattle Sounders",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 12,
+          "bookmaker": "Unibet",
+          "rows": 10,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Unibet": 1,
-            "Bet365": 1
+            "Unibet": 1
           }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Sporting Kansas City",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 8,
+          "bookmaker": "Unibet",
+          "rows": 6,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1,
             "Unibet": 1
           }
         }
