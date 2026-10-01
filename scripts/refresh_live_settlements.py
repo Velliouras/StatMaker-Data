@@ -42,6 +42,7 @@ UEFA_CONFIG_PATH = ROOT / "config" / "uefa_club_competitions.json"
 DOMESTIC_ALIAS_PATH = ROOT / "mappings" / "domestic_team_aliases.json"
 ENRICHED_INDEX_PATH = ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
 CANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
+HYBRID_UAT_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger_uat_hybrid.json"
 
 SCHEMA_VERSION = 2
 DEFAULT_MAX_REQUESTS = 80
@@ -655,8 +656,11 @@ def _ledger_names(item: Dict[str, Any], list_key: str, fallback_key: str) -> Tup
     return tuple(result)
 
 
-def requirements_from_canonical_ledger() -> List[SettlementRequirement]:
-    root = load_json(CANONICAL_LEDGER_PATH, {})
+def requirements_from_canonical_ledger(
+    path: Path = CANONICAL_LEDGER_PATH,
+    fallback_generation: str = "canonical-ledger-v5",
+) -> List[SettlementRequirement]:
+    root = load_json(path, {})
     if not isinstance(root, dict) or as_int(root.get("schemaVersion")) is None or int(root.get("schemaVersion") or 0) < 4:
         return []
     invalidated = {str(value).strip() for value in root.get("invalidatedMatchKeys", []) or [] if str(value).strip()}
@@ -673,7 +677,7 @@ def requirements_from_canonical_ledger() -> List[SettlementRequirement]:
         if not match_key or match_key in invalidated or not local_date or not required or not home_names or not away_names:
             continue
         result.append(SettlementRequirement(
-            generation_id=str(item.get("generationId") or "canonical-ledger-v5").strip(),
+            generation_id=str(item.get("generationId") or fallback_generation).strip(),
             competition_id=str(item.get("competitionId") or "").strip(),
             match_key=match_key,
             local_date=local_date,
@@ -694,10 +698,17 @@ def canonical_requirements() -> List[SettlementRequirement]:
             key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
             merged[key] = row
     # Historical canonical rows remain settlement requirements after their odds disappear from the
-    # current App-Ready bundles. This is the convergence source for null-fixture-id recommendations.
-    for row in requirements_from_canonical_ledger():
-        key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
-        merged[key] = row
+    # current App-Ready bundles. PROD and Hybrid UAT share one settlement feed: adding the Hybrid
+    # ledger here only broadens which completed fixture statistics are retained/fetched. It does
+    # not change PROD recommendations, because PROD still reads its own canonical ledger.
+    ledger_sources = (
+        (CANONICAL_LEDGER_PATH, "canonical-ledger-v5"),
+        (HYBRID_UAT_LEDGER_PATH, "canonical-uat-hybrid-v11"),
+    )
+    for path, fallback_generation in ledger_sources:
+        for row in requirements_from_canonical_ledger(path, fallback_generation):
+            key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
+            merged[key] = row
     return list(merged.values())
 
 
