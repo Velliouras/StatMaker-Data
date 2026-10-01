@@ -136,6 +136,7 @@ jobs:
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
+          python scripts/reconcile_canonical_ledger_identity.py --uat-hybrid
 
           gap_cap=$((total - validity - 2))
           if (( gap_cap > 8 )); then gap_cap=8; fi
@@ -161,6 +162,7 @@ jobs:
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
           python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 2
           python scripts/reconcile_canonical_ledger_identity.py
+          python scripts/reconcile_canonical_ledger_identity.py --uat-hybrid
 
       - name: Publish latency-critical settlement artifacts
         run: |
