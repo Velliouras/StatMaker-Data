@@ -63,6 +63,7 @@ jobs:
             scripts/materialize_canonical_recommendation_ledger.py \
             scripts/apply_fixture_disposition_overrides.py
           python -m unittest discover -s tests -p 'test_hybrid_ledger_selector.py'
+          python -m unittest discover -s tests -p 'test_hybrid_settlement_coverage.py'
 
       - name: Validate settlement registry identity
         shell: bash
