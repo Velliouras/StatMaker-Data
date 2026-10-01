@@ -22,6 +22,7 @@ import refresh_live_settlements as live
 
 ATHENS = ZoneInfo("Europe/Athens")
 LEDGER_PATH = live.ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
+HYBRID_LEDGER_PATH = live.ROOT / "data" / "statmaker" / "canonical_recommendation_ledger_uat_hybrid.json"
 MAX_IDS_PER_REQUEST = 20
 
 
@@ -47,39 +48,51 @@ def _names(item: Dict[str, Any], list_key: str, fallback_key: str) -> Tuple[str,
 
 
 def ledger_requirements(today: dt.date) -> List[live.SettlementRequirement]:
-    root = live.load_json(LEDGER_PATH, {})
-    if not isinstance(root, dict) or int(root.get("schemaVersion") or 0) < 4:
-        return []
     cutoff = today - dt.timedelta(days=live.RETENTION_DAYS)
-    result: List[live.SettlementRequirement] = []
-    for item in root.get("entries", []) or []:
-        if not isinstance(item, dict):
+    merged: Dict[Tuple[str, str, str, str, int], live.SettlementRequirement] = {}
+
+    for ledger_path in (LEDGER_PATH, HYBRID_LEDGER_PATH):
+        root = live.load_json(ledger_path, {})
+        if not isinstance(root, dict) or int(root.get("schemaVersion") or 0) < 4:
             continue
-        day_text = str(item.get("localDate") or "").strip()[:10]
-        try:
-            day = dt.date.fromisoformat(day_text)
-        except ValueError:
-            continue
-        # Exact-id reconciliation is authoritative for both same-day and past canonical rows.
-        # Future fixtures are not settlement candidates.
-        if day < cutoff or day > today:
-            continue
-        fixture_id = live.as_int(item.get("apiFixtureId"))
-        if fixture_id is None:
-            continue
-        home_names = _names(item, "homeNames", "homeTeam")
-        away_names = _names(item, "awayNames", "awayTeam")
-        if not _identity_valid(home_names, away_names):
-            continue
-        sub_market = str(item.get("subMarketKey") or "").strip()
-        required = str(item.get("requiredKind") or live.SUBMARKET_REQUIREMENT.get(sub_market, "unsupported")).strip()
-        if required == "unsupported":
-            continue
-        result.append(
-            live.SettlementRequirement(
+        invalidated = {
+            str(value).strip()
+            for value in root.get("invalidatedMatchKeys", []) or []
+            if str(value).strip()
+        }
+        for item in root.get("entries", []) or []:
+            if not isinstance(item, dict):
+                continue
+            match_key = str(item.get("matchKey") or "").strip()
+            if not match_key or match_key in invalidated:
+                continue
+            day_text = str(item.get("localDate") or "").strip()[:10]
+            try:
+                day = dt.date.fromisoformat(day_text)
+            except ValueError:
+                continue
+            # Exact-id reconciliation is authoritative for both same-day and past canonical rows.
+            # Future fixtures are not settlement candidates.
+            if day < cutoff or day > today:
+                continue
+            fixture_id = live.as_int(item.get("apiFixtureId"))
+            if fixture_id is None:
+                continue
+            home_names = _names(item, "homeNames", "homeTeam")
+            away_names = _names(item, "awayNames", "awayTeam")
+            if not _identity_valid(home_names, away_names):
+                continue
+            sub_market = str(item.get("subMarketKey") or "").strip()
+            required = str(
+                item.get("requiredKind")
+                or live.SUBMARKET_REQUIREMENT.get(sub_market, "unsupported")
+            ).strip()
+            if required == "unsupported":
+                continue
+            row = live.SettlementRequirement(
                 generation_id=str(item.get("generationId") or "").strip(),
                 competition_id=str(item.get("competitionId") or "").strip(),
-                match_key=str(item.get("matchKey") or "").strip(),
+                match_key=match_key,
                 local_date=day_text,
                 league_code=str(item.get("leagueCode") or "").strip().upper(),
                 api_fixture_id=fixture_id,
@@ -88,8 +101,16 @@ def ledger_requirements(today: dt.date) -> List[live.SettlementRequirement]:
                 required_kind=required,
                 sub_market_key=sub_market,
             )
-        )
-    return result
+            key = (
+                row.competition_id,
+                row.match_key,
+                row.sub_market_key,
+                row.required_kind,
+                fixture_id,
+            )
+            merged[key] = row
+
+    return list(merged.values())
 
 
 def _disposed_keys(feed: Dict[str, Any]) -> set[Tuple[str, str, str, str]]:
