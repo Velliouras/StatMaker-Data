@@ -12,6 +12,7 @@ before re-grading them.
 """
 from __future__ import annotations
 
+import argparse
 import datetime as dt
 import json
 from pathlib import Path
@@ -22,6 +23,7 @@ import refresh_live_settlements as live
 
 ROOT = Path(__file__).resolve().parents[1]
 LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
+LEDGER_HYBRID_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger_uat_hybrid.json"
 LIVE_PATH = ROOT / "data" / "statmaker" / "live_settlements.json"
 ATHENS = ZoneInfo("Europe/Athens")
 COMPLETED = {"FT", "AET", "PEN"}
@@ -158,7 +160,13 @@ def repair_row(row: Dict[str, Any], fixture: Dict[str, Any]) -> Tuple[Dict[str, 
 
 
 def main() -> int:
-    ledger = load(LEDGER_PATH, {})
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--uat-hybrid", action="store_true")
+    args = parser.parse_args()
+    ledger_path = LEDGER_HYBRID_PATH if args.uat_hybrid else LEDGER_PATH
+    mode = "uat-hybrid" if args.uat_hybrid else "prod"
+
+    ledger = load(ledger_path, {})
     final_root = load(LIVE_PATH, {})
     if not isinstance(ledger, dict) or int(ledger.get("schemaVersion") or 0) < 4:
         raise SystemExit("CANONICAL_LEDGER_IDENTITY_RECONCILE_INVALID_LEDGER")
@@ -231,12 +239,12 @@ def main() -> int:
             "generatedAt": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
             **semantic,
         }
-        temp = LEDGER_PATH.with_suffix(".json.tmp")
+        temp = ledger_path.with_suffix(".json.tmp")
         temp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        temp.replace(LEDGER_PATH)
+        temp.replace(ledger_path)
 
     print(
-        "canonical-ledger-identity-reconcile",
+        f"canonical-ledger-identity-reconcile-{mode}",
         f"finalFixtures={len(finals)}",
         f"finishedMatches={eligible_finished}",
         f"repaired={repaired}",
