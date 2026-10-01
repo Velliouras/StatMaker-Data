@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-29T23:51:26Z",
+  "generatedAt": "2026-10-01T00:01:33Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,12 +15,12 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 120,
-  "registryLeagueCount": 1,
-  "polledLeagueCount": 1,
-  "incompleteBefore": 1,
+  "requestsUsed": 63,
+  "registryLeagueCount": 2,
+  "polledLeagueCount": 2,
+  "incompleteBefore": 2,
   "completeAfter": 0,
-  "incompleteAfter": 1,
+  "incompleteAfter": 2,
   "allocations": [
     {
       "phase": "tier3_restored26",
@@ -29,21 +29,9 @@
       "country": "England",
       "league": "National League",
       "lifecycle": "active",
-      "allocatedRequests": 120,
-      "usedRequests": 120,
+      "allocatedRequests": 60,
+      "usedRequests": 60,
       "before": {
-        "leagueCode": "EC",
-        "priorityTier": "tier3_restored26",
-        "completed": 120,
-        "withStats": 0,
-        "withScores": 120,
-        "missingStats": 120,
-        "missingScores": 0,
-        "coverage": 0.0,
-        "scoreCoverage": 1.0,
-        "complete": false
-      },
-      "after": {
         "leagueCode": "EC",
         "priorityTier": "tier3_restored26",
         "completed": 130,
@@ -54,17 +42,75 @@
         "coverage": 0.0,
         "scoreCoverage": 1.0,
         "complete": false
+      },
+      "after": {
+        "leagueCode": "EC",
+        "priorityTier": "tier3_restored26",
+        "completed": 132,
+        "withStats": 0,
+        "withScores": 132,
+        "missingStats": 132,
+        "missingScores": 0,
+        "coverage": 0.0,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "PER",
+      "country": "Peru",
+      "league": "Primera División",
+      "lifecycle": "active",
+      "allocatedRequests": 60,
+      "usedRequests": 3,
+      "before": {
+        "leagueCode": "PER",
+        "priorityTier": "tier3_restored26",
+        "completed": 242,
+        "withStats": 241,
+        "withScores": 242,
+        "missingStats": 1,
+        "missingScores": 0,
+        "coverage": 0.995868,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "PER",
+        "priorityTier": "tier3_restored26",
+        "completed": 243,
+        "withStats": 242,
+        "withScores": 243,
+        "missingStats": 1,
+        "missingScores": 0,
+        "coverage": 0.995885,
+        "scoreCoverage": 1.0,
+        "complete": false
       }
     }
   ],
   "progress": [
     {
+      "leagueCode": "PER",
+      "priorityTier": "tier3_restored26",
+      "completed": 243,
+      "withStats": 242,
+      "withScores": 243,
+      "missingStats": 1,
+      "missingScores": 0,
+      "coverage": 0.995885,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
+    {
       "leagueCode": "EC",
       "priorityTier": "tier3_restored26",
-      "completed": 130,
+      "completed": 132,
       "withStats": 0,
-      "withScores": 130,
-      "missingStats": 130,
+      "withScores": 132,
+      "missingStats": 132,
       "missingScores": 0,
       "coverage": 0.0,
       "scoreCoverage": 1.0,
@@ -73,6 +119,7 @@
   ],
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
+    "PER",
     "EC"
   ],
   "targetedMode": true,
@@ -90,7 +137,7 @@
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 5452,
+    "dailyRemaining": 7465,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
