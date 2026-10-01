@@ -46,6 +46,7 @@ HYBRID_UAT_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation
 
 SCHEMA_VERSION = 2
 DEFAULT_MAX_REQUESTS = 80
+# Match the canonical 30-day Performance/Hybrid retrospective window.
 RETENTION_DAYS = 30
 MAX_STATS_ATTEMPTS = 6
 COMPLETED = {"FT", "AET", "PEN"}
