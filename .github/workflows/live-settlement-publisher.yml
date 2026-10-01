@@ -38,7 +38,7 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -133,6 +133,7 @@ jobs:
           # Rebuild recommendation history first, then repair stale historical team/fixture identity
           # from the already-published explicit-final feed. Both steps are repository-only.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
+          python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 30
           python scripts/reconcile_canonical_ledger_identity.py
 
           gap_cap=$((total - validity - 2))
@@ -157,6 +158,7 @@ jobs:
           # Re-materialization may restore an old historical row from an immutable pre-match bundle;
           # immediately re-apply the same unique-final identity reconciliation before publication.
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 30
+          python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 2
           python scripts/reconcile_canonical_ledger_identity.py
 
       - name: Publish latency-critical settlement artifacts
@@ -171,7 +173,8 @@ jobs:
             data/statmaker/live_settlements.json \
             data/api_football/live_settlement_cache.json \
             data/statmaker/fixture_validity.json \
-            data/statmaker/canonical_recommendation_ledger.json
+            data/statmaker/canonical_recommendation_ledger.json \
+            data/statmaker/canonical_recommendation_ledger_uat_hybrid.json
 
           if git diff --cached --quiet; then
             echo "No new completed fixtures, settlement statistics, canonical ledger rows or fixture dispositions."
