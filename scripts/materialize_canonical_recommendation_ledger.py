@@ -10,6 +10,7 @@ APP_PROD=ROOT/'data/statmaker/app_ready'
 APP_UAT=ROOT/'data/statmaker/app_ready_uat/probability-first-v1'
 LEDGER_PROD=ROOT/'data/statmaker/canonical_recommendation_ledger.json'
 LEDGER_UAT=ROOT/'data/statmaker/canonical_recommendation_ledger_uat.json'
+LEDGER_UAT_HYBRID=ROOT/'data/statmaker/canonical_recommendation_ledger_uat_hybrid.json'
 VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
 APP=APP_PROD
 LEDGER=LEDGER_PROD
@@ -197,7 +198,231 @@ def _probability_first_rank(row, market_preferred):
         -abs(odd-2.0),
     )
 
+def _hybrid_rank(row, market_preferred, three_way_result):
+    odd=num(row.get('selection_odd'))
+    market_probability=num(row.get('bm_market_probability'))
+    posterior=num(row.get('bm_posterior_probability'))
+    reliability=_clamp01(num(row.get('bm_sample_reliability'),0.0))
+    if not (odd>1.01 and _valid_probability(market_probability) and _valid_probability(posterior)):
+        return None
+
+    fixture_probability=num(row.get('opponent_model_probability'))
+    model_backed=_valid_probability(fixture_probability)
+    probability=fixture_probability if model_backed else posterior
+    if not _valid_probability(probability):
+        return None
+
+    edge=probability-market_probability
+    expected_value=probability*odd-1.0
+    legacy_support=_clamp01(num(row.get('selection_score'),0.0))
+    hit_rate=_clamp01(num(row.get('strict_hit_rate') or row.get('bm_hit_rate'),0.0))
+
+    if odd>4.50 or market_probability<0.18:
+        return None
+
+    consensus=max(probability,market_probability) if market_preferred else probability
+    if three_way_result and not market_preferred and odd>2.75:
+        if not (
+            model_backed
+            and probability >= (0.43 if odd>3.50 else 0.40)
+            and edge>=0.02
+            and reliability>=0.50
+        ):
+            return None
+    elif odd>4.00:
+        if not (probability>=0.38 and reliability>=0.55 and edge>=0.02):
+            return None
+    elif odd>3.50:
+        if not (consensus>=0.36 and reliability>=0.50 and edge>=-0.01):
+            return None
+    elif odd>3.00:
+        if not (consensus>=0.34 and reliability>=0.45 and edge>=-0.03):
+            return None
+    elif consensus<0.32:
+        return None
+
+    longshot_penalty=(
+        0.18 if odd>3.50 else
+        0.08 if odd>3.00 else
+        0.03 if odd>2.50 else
+        0.0
+    )
+    positive_edge=_clamp01(max(edge,0.0)/0.12)
+    positive_ev=_clamp01(max(expected_value,0.0)/0.25)
+    value_support=positive_edge*0.45+positive_ev*0.55
+    market_preference_penalty=0.08 if three_way_result and not market_preferred else 0.0
+    ranking=_clamp01(
+        consensus*0.45+
+        legacy_support*0.30+
+        hit_rate*0.10+
+        reliability*0.10+
+        value_support*0.05-
+        longshot_penalty-
+        market_preference_penalty
+    )
+    return (ranking,probability,legacy_support,reliability,-odd)
+
+
+def final_candidates_hybrid(db,gid,target=None):
+    date_clause=" AND c.local_date=?" if target else ""
+    args=(gid,target) if target else (gid,)
+    src=rows(
+        db,
+        f"""
+        SELECT c.*,
+               s.match_key AS prepared_match_key,
+               s.selection_market,
+               s.selection_name,
+               s.selection_team,
+               s.selection_line,
+               s.bm_market_probability,
+               s.bm_hit_rate,
+               s.bm_sample,
+               s.bm_posterior_probability,
+               s.bm_sample_reliability,
+               s.historical_outcomes_bits,
+               s.score_value,
+               s.score_tier,
+               s.score_trend_adjustment,
+               s.identity_broad_group,
+               s.identity_family,
+               s.identity_sub_market_key,
+               s.identity_team_side,
+               s.identity_line,
+               s.identity_selection_side,
+               s.identity_source_market,
+               s.identity_team,
+               s.identity_selection_token,
+               s.opponent_adjusted_required,
+               s.opponent_model_probability,
+               s.opponent_base_model_probability,
+               s.opponent_without_favorite_probability,
+               s.opponent_without_xg_probability,
+               s.opponent_without_fatigue_probability,
+               s.opponent_without_injuries_probability,
+               s.opponent_without_lineup_probability,
+               s.opponent_without_formation_probability,
+               s.opponent_without_squad_turnover_probability
+        FROM prepared_pattern_candidates c
+        JOIN prepared_selections s
+          ON s.competition_id=c.competition_id
+         AND s.snapshot_version=c.snapshot_version
+         AND s.selection_key=c.selection_key
+        WHERE c.generation_id=?
+          {date_clause}
+          AND c.selection_odd>=1.50
+          AND c.recommendation_eligible=1
+        ORDER BY c.source_order ASC
+        """,
+        args,
+    )
+
+    three_way={
+        'RESULT_1X2','HT_RESULT_1X2','CORNER_RESULT_1X2',
+        'SHOTS_RESULT_1X2','SOT_RESULT_1X2'
+    }
+    fixture_result={'RESULT_1X2','RESULT_DOUBLE_CHANCE'}
+
+    filtered=[]
+    for r in src:
+        sub=str(r.get('identity_sub_market_key') or '')
+        odd=num(r.get('selection_odd'))
+        family=str(r.get('identity_family') or '')
+        side=str(r.get('identity_selection_side') or '')
+        line=nullable(r.get('identity_line'))
+        if retired_market(r.get('selection_market'),sub):
+            continue
+        if not sane_exact_odd(family,side,line,odd):
+            continue
+        if live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')=='unsupported':
+            continue
+        if sub in fixture_result and intval(r.get('policy_premium_eligible'))!=1:
+            continue
+        filtered.append(r)
+    src=filtered
+
+    favorite_side={}
+    contests={
+        (
+            str(r.get('competition_id') or ''),
+            str(r.get('snapshot_version') or ''),
+            str(r.get('prepared_match_key') or ''),
+            str(r.get('identity_sub_market_key') or ''),
+        )
+        for r in src
+        if str(r.get('identity_sub_market_key') or '') in three_way
+    }
+    for comp,snap,match_key,sub in contests:
+        market_rows=rows(
+            db,
+            """
+            SELECT identity_selection_side, selection_odd
+            FROM prepared_selections
+            WHERE competition_id=? AND snapshot_version=? AND match_key=?
+              AND identity_sub_market_key=?
+              AND selection_odd>1.01
+            """,
+            (comp,snap,match_key,sub),
+        )
+        market_rows=[
+            x for x in market_rows
+            if str(x.get('identity_selection_side') or '') in {'HOME','DRAW','AWAY'}
+            and num(x.get('selection_odd'))!=float('-inf')
+        ]
+        if len({str(x.get('identity_selection_side') or '') for x in market_rows})>=3:
+            favorite_side[(comp,snap,match_key,sub)]=str(
+                min(market_rows,key=lambda x:num(x.get('selection_odd'))).get('identity_selection_side') or ''
+            )
+
+    eligible=[]
+    for r in src:
+        sub=str(r.get('identity_sub_market_key') or '')
+        side=str(r.get('identity_selection_side') or '')
+        market_probability=num(r.get('bm_market_probability'))
+        if not _valid_probability(market_probability):
+            continue
+        three_way_result=sub in three_way
+        if three_way_result:
+            key=(
+                str(r.get('competition_id') or ''),
+                str(r.get('snapshot_version') or ''),
+                str(r.get('prepared_match_key') or ''),
+                sub,
+            )
+            market_preferred=(favorite_side.get(key)==side)
+        else:
+            market_preferred=(market_probability>=0.50)
+        rank=_hybrid_rank(r,market_preferred,three_way_result)
+        if rank is None:
+            continue
+        rr=dict(r)
+        rr['_hybrid_rank']=rank
+        rr['value_tier']='STRONG_VALUE'
+        eligible.append(rr)
+
+    exact={}
+    for r in eligible:
+        k=(
+            str(r.get('competition_id') or ''),
+            str(r.get('match_key') or ''),
+            str(r.get('exact_recommendation_key') or ''),
+        )
+        old=exact.get(k)
+        if old is None or r['_hybrid_rank']>old['_hybrid_rank']:
+            exact[k]=r
+
+    best={}
+    for r in exact.values():
+        k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''))
+        old=best.get(k)
+        if old is None or r['_hybrid_rank']>old['_hybrid_rank']:
+            best[k]=r
+    return list(best.values())
+
+
 def final_candidates(db,gid,target=None):
+    if MODE_LABEL=='uat-hybrid':
+        return final_candidates_hybrid(db,gid,target)
     # UAT Performance/Daily Outcomes must start from the exact same prepared_pattern_candidates
     # generation consumed by the Android probability-first Strong query. The UAT App-Ready bundle
     # already contains the expanded candidate universe; never reconstruct it from prepared_selections.
@@ -607,8 +832,18 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument('--backfill-dates',type=int,default=30)
     ap.add_argument('--uat',action='store_true')
+    ap.add_argument('--uat-hybrid',action='store_true')
     a=ap.parse_args()
-    if a.uat:
+    if a.uat and a.uat_hybrid:
+        raise SystemExit('Choose only one of --uat or --uat-hybrid')
+    if a.uat_hybrid:
+        APP=APP_PROD
+        LEDGER=LEDGER_UAT_HYBRID
+        MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
+        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v11'
+        MODE_LABEL='uat-hybrid'
+        SCHEMA_VERSION=11
+    elif a.uat:
         APP=APP_UAT
         LEDGER=LEDGER_UAT
         MANIFEST_REL='data/statmaker/app_ready_uat/probability-first-v1/update_manifest.json'
