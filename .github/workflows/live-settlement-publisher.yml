@@ -140,7 +140,10 @@ jobs:
           python scripts/reconcile_canonical_ledger_identity.py --uat-hybrid
 
           gap_cap=$((total - validity - 2))
-          if (( gap_cap > 8 )); then gap_cap=8; fi
+          # A 30-day retrospective Performance window can create a one-time exact-fixture backlog.
+          # Allow a bounded catch-up burst while preserving room for live settlement + validity.
+          # Once caught up, the reconciler exits early and uses only the requests it actually needs.
+          if (( gap_cap > 60 )); then gap_cap=60; fi
           if (( gap_cap < 0 )); then gap_cap=0; fi
           gap_log="$(mktemp)"
           python scripts/reconcile_canonical_settlement_gaps.py --max-requests "$gap_cap" | tee "$gap_log"
