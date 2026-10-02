@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-02T19:32:38Z",
+  "generated_at": "2026-10-02T23:55:34Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/ireland/premier-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-02T09:59:18Z",
+    "cache_generated_at": "2026-10-02T23:55:26Z",
     "api_football_season": "2026",
     "csv_import": "inactive_archive_only"
   },
@@ -40,32 +40,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 159,
-    "fixtures_with_any_stats": 154,
-    "fixtures_with_bb_core_stats": 152,
-    "any_stats_coverage": 0.9686,
-    "bb_core_coverage": 0.956,
+    "completed_fixtures": 160,
+    "fixtures_with_any_stats": 155,
+    "fixtures_with_bb_core_stats": 153,
+    "any_stats_coverage": 0.9688,
+    "bb_core_coverage": 0.9563,
     "group_counts": {
-      "shots_total": 154,
-      "shots_on_target": 154,
-      "corners": 154,
-      "fouls": 154,
-      "yellow_cards": 152,
-      "red_cards": 41,
-      "possession": 154,
-      "passes": 149,
+      "shots_total": 155,
+      "shots_on_target": 155,
+      "corners": 155,
+      "fouls": 155,
+      "yellow_cards": 153,
+      "red_cards": 42,
+      "possession": 155,
+      "passes": 150,
       "xg": 98
     },
     "group_coverage": {
-      "shots_total": 0.9686,
-      "shots_on_target": 0.9686,
-      "corners": 0.9686,
-      "fouls": 0.9686,
-      "yellow_cards": 0.956,
-      "red_cards": 0.2579,
-      "possession": 0.9686,
-      "passes": 0.9371,
-      "xg": 0.6164
+      "shots_total": 0.9688,
+      "shots_on_target": 0.9688,
+      "corners": 0.9688,
+      "fouls": 0.9688,
+      "yellow_cards": 0.9563,
+      "red_cards": 0.2625,
+      "possession": 0.9688,
+      "passes": 0.9375,
+      "xg": 0.6125
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -13418,6 +13418,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1492777,
+      "date_utc": "2026-10-02T18:45:00+00:00",
+      "country": "Ireland",
+      "league": "Premier Division",
+      "league_code": "IRL",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 357,
+      "round": "Regular Season - 33",
+      "home_team": "Dundalk",
+      "away_team": "Bohemians",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 12,
+        "HST": 5,
+        "AST": 3,
+        "HC": 2,
+        "AC": 4,
+        "HF": 13,
+        "AF": 18,
+        "HY": 1,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 48,
+        "APossession": 52,
+        "HSaves": 1,
+        "ASaves": 4,
+        "HPasses": 372,
+        "APasses": 413,
+        "HPassesAccurate": 256,
+        "APassesAccurate": 315,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
