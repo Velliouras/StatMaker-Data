@@ -72,6 +72,39 @@ def main() -> None:
         else:
             raise SystemExit("Could not locate supported prepared evidence block")
 
+    rich_evidence = '''        val sharedEvidenceBySelectionKey = uniqueSelections.associate { selection ->
+            val fallback = baseEvidenceByAuditKey[PatternTrendCoverageAudit.selectionKey(selection)]
+            val resolved = resolveSharedEvidence?.let { resolver ->
+                runCatching { resolver(selection) }.getOrNull()
+            } ?: fallback
+            preparedSelectionKey(selection) to resolved
+        }
+'''
+    rich_evidence_instrumented = '''        Log.i("StatMakerAppReady", "stage=store_${competitionId}_rich_evidence_begin selections=${uniqueSelections.size}")
+        val sharedEvidenceBySelectionKey = linkedMapOf<String, SharedBettingEvidence?>()
+        uniqueSelections.forEachIndexed { evidenceIndex, selection ->
+            val fallback = baseEvidenceByAuditKey[PatternTrendCoverageAudit.selectionKey(selection)]
+            val resolved = resolveSharedEvidence?.let { resolver ->
+                runCatching { resolver(selection) }.getOrNull()
+            } ?: fallback
+            sharedEvidenceBySelectionKey[preparedSelectionKey(selection)] = resolved
+            val completed = evidenceIndex + 1
+            if (completed % 500 == 0 || completed == uniqueSelections.size) {
+                Log.i(
+                    "StatMakerAppReady",
+                    "stage=store_${competitionId}_rich_evidence_rows completed=$completed total=${uniqueSelections.size}"
+                )
+            }
+        }
+        Log.i("StatMakerAppReady", "stage=store_${competitionId}_rich_evidence_complete entries=${sharedEvidenceBySelectionKey.size}")
+'''
+    if 'stage=store_${competitionId}_rich_evidence_begin' not in text:
+        text = replace_once(
+            text,
+            rich_evidence,
+            rich_evidence_instrumented,
+            "rich Domestic evidence progress",
+        )
     text = replace_once(
         text,
         '''        val decisionsBySelectionKey = uniqueSelections.associate { selection ->
