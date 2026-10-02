@@ -53,9 +53,8 @@ class HybridCanonicalLedgerSelectorTest(unittest.TestCase):
             )
         )
 
-    def test_ordinary_negative_edge_pick_can_remain_strong_developing_candidate(self):
-        # Strong visibility and confidence tiering are intentionally separate. A normal-priced
-        # candidate may remain in the Strong pool while its negative edge keeps it Developing.
+    def test_ordinary_negative_edge_pick_is_not_strong(self):
+        # Strong v2 never uses Developing as a home for a negative-edge/negative-EV pick.
         ranked = target._hybrid_rank(
             row(
                 selection_odd=1.57,
@@ -64,6 +63,22 @@ class HybridCanonicalLedgerSelectorTest(unittest.TestCase):
                 opponent_model_probability=None,
                 bm_sample_reliability=0.775,
                 strict_hit_rate=0.60,
+            ),
+            market_preferred=True,
+            three_way_result=False,
+        )
+        self.assertIsNone(ranked)
+
+    def test_positive_value_mature_candidate_passes_strong_core(self):
+        ranked = target._hybrid_rank(
+            row(
+                selection_odd=1.83,
+                bm_market_probability=0.50,
+                bm_posterior_probability=0.681,
+                opponent_model_probability=None,
+                bm_sample_reliability=0.892,
+                selection_score=0.78,
+                strict_hit_rate=0.846,
             ),
             market_preferred=True,
             three_way_result=False,
