@@ -251,7 +251,7 @@ def _hybrid_rank(row, market_preferred, three_way_result):
         0.0
     )
 
-    # Strong v2 core gate. Safety alone is not a recommendation.
+    # Strong v2 core gate. Safety alone is not a recommendation; keep Android/Data parity.
     # Developing can be evidence-immature, but never negative-edge / negative-EV.
     mature_fallback=(
         reliability>=0.70
