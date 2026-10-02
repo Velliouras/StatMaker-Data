@@ -18,6 +18,9 @@ MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
 LEDGER_SOURCE='canonical-app-ready-probability-first-strong-singles-ledger-v9'
 MODE_LABEL='prod'
 ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
+# Clean audit epoch for the redesigned UAT Strong contract.
+# 2026-10-02 11:45:00Z (14:45 Greece).
+UAT_HYBRID_STRONG_V2_EPOCH_MS=1790941500000
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
 # persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
@@ -247,6 +250,26 @@ def _hybrid_rank(row, market_preferred, three_way_result):
         0.03 if odd>2.50 else
         0.0
     )
+
+    # Strong v2 core gate. Safety alone is not a recommendation.
+    # Developing can be evidence-immature, but never negative-edge / negative-EV.
+    mature_fallback=(
+        reliability>=0.70
+        and legacy_support>=0.70
+        and hit_rate>=0.65
+    )
+    if not (
+        probability>=0.56
+        and reliability>=0.58
+        and legacy_support>=0.60
+        and hit_rate>=0.60
+        and edge>=0.01
+        and expected_value>=0.015
+        and longshot_penalty<=0.08
+        and (model_backed or mature_fallback)
+    ):
+        return None
+
     positive_edge=_clamp01(max(edge,0.0)/0.12)
     positive_ev=_clamp01(max(expected_value,0.0)/0.25)
     value_support=positive_edge*0.45+positive_ev*0.55
@@ -840,9 +863,9 @@ def main():
         APP=APP_PROD
         LEDGER=LEDGER_UAT_HYBRID
         MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
-        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v11'
+        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v12-strong-v2'
         MODE_LABEL='uat-hybrid'
-        SCHEMA_VERSION=11
+        SCHEMA_VERSION=12
     elif a.uat:
         APP=APP_UAT
         LEDGER=LEDGER_UAT
@@ -867,6 +890,10 @@ def main():
                 and low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
                 and valid_fixture_identity(r)
                 and not retired_market(r.get('market'), r.get('subMarketKey'))
+                and (
+                    MODE_LABEL!='uat-hybrid'
+                    or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_STRONG_V2_EPOCH_MS
+                )
             ):
                 existing.append(dict(r))
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
@@ -900,6 +927,10 @@ def main():
         r for r in merge(allr)
         if low.isoformat()<=str(r.get('localDate') or '')[:10]<=high.isoformat()
         and not retired_market(r.get('market'), r.get('subMarketKey'))
+        and (
+            MODE_LABEL!='uat-hybrid'
+            or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_STRONG_V2_EPOCH_MS
+        )
     ]
     sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':LEDGER_SOURCE,'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':[],'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
