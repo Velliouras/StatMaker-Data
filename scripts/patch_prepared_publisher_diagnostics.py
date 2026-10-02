@@ -128,13 +128,18 @@ def patch_pattern_matcher_regex_reuse() -> None:
 def limit_publisher_domestic_parallelism() -> None:
     text = SOURCE.read_text(encoding="utf-8")
     old = "    private const val MAX_DOMESTIC_WORKERS = 4"
-    new = "    private const val MAX_DOMESTIC_WORKERS = 2"
+    new = "    private const val MAX_DOMESTIC_WORKERS = 1"
     if old in text:
         text = text.replace(old, new, 1)
     elif new not in text:
-        raise SystemExit("Could not locate MAX_DOMESTIC_WORKERS")
+        # Older staged source may already carry the previous reliability cap.
+        previous = "    private const val MAX_DOMESTIC_WORKERS = 2"
+        if previous in text:
+            text = text.replace(previous, new, 1)
+        else:
+            raise SystemExit("Could not locate MAX_DOMESTIC_WORKERS")
     SOURCE.write_text(text, encoding="utf-8")
-    print("APP_READY_DOMESTIC_WORKERS_OK workers=2")
+    print("APP_READY_DOMESTIC_WORKERS_OK workers=1")
 
 
 
