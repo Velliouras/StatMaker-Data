@@ -853,7 +853,14 @@ def extract(bundle,target=None):
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'kickoffEpochMillis':ko,'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
-                  'marketProbability':nullable(s.get('bm_market_probability')),'modelProbability':mp if mp is not None else post,'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
+                  'marketProbability':nullable(s.get('bm_market_probability')),
+                  'modelProbability':nullable(c.get('_hybrid_probability')) if MODE_LABEL=='uat-hybrid' else (mp if mp is not None else post),
+                  'simulationProbability':nullable(c.get('_hybrid_simulation_probability')) if MODE_LABEL=='uat-hybrid' else None,
+                  'simulationEdge':nullable(c.get('_hybrid_simulation_edge')) if MODE_LABEL=='uat-hybrid' else None,
+                  'simulationAgreement':nullable(c.get('_hybrid_simulation_agreement')) if MODE_LABEL=='uat-hybrid' else None,
+                  'simulationRuns':intval(c.get('simulation_runs')) if MODE_LABEL=='uat-hybrid' else 0,
+                  'simulationModel':c.get('simulation_model') if MODE_LABEL=='uat-hybrid' else None,
+                  'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
@@ -938,9 +945,9 @@ def main():
         APP=APP_PROD
         LEDGER=LEDGER_UAT_HYBRID
         MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
-        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v12-strong-v2'
+        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v13-simulation-v1'
         MODE_LABEL='uat-hybrid'
-        SCHEMA_VERSION=12
+        SCHEMA_VERSION=13
     elif a.uat:
         APP=APP_UAT
         LEDGER=LEDGER_UAT
@@ -967,7 +974,7 @@ def main():
                 and not retired_market(r.get('market'), r.get('subMarketKey'))
                 and (
                     MODE_LABEL!='uat-hybrid'
-                    or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_STRONG_V2_EPOCH_MS
+                    or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_SIMULATION_V1_EPOCH_MS
                 )
             ):
                 existing.append(dict(r))
@@ -1004,7 +1011,7 @@ def main():
         and not retired_market(r.get('market'), r.get('subMarketKey'))
         and (
             MODE_LABEL!='uat-hybrid'
-            or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_STRONG_V2_EPOCH_MS
+            or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_SIMULATION_V1_EPOCH_MS
         )
     ]
     sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':LEDGER_SOURCE,'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':[],'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
