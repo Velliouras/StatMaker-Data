@@ -101,5 +101,32 @@ class HybridCanonicalLedgerSelectorTest(unittest.TestCase):
         self.assertGreater(ranked[0], 0.0)
 
 
+    def test_simulation_is_active_thirty_percent_of_probability(self):
+        ranked = target._hybrid_rank(
+            row(
+                bm_posterior_probability=0.68,
+                simulation_probability=0.58,
+            ),
+            market_preferred=True,
+            three_way_result=False,
+        )
+        self.assertIsNotNone(ranked)
+        self.assertAlmostEqual(ranked[1], 0.65, places=9)
+        self.assertAlmostEqual(ranked[5], 0.68, places=9)
+        self.assertAlmostEqual(ranked[6], 0.58, places=9)
+
+    def test_negative_simulation_can_reject_otherwise_strong_pick(self):
+        ranked = target._hybrid_rank(
+            row(
+                bm_market_probability=0.50,
+                bm_posterior_probability=0.68,
+                simulation_probability=0.45,
+            ),
+            market_preferred=True,
+            three_way_result=False,
+        )
+        self.assertIsNone(ranked)
+
+
 if __name__ == "__main__":
     unittest.main()
