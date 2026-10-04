@@ -70,12 +70,26 @@ def main() -> int:
             cwd=ROOT,
             check=True,
         )
+        subprocess.run(
+            [
+                "python",
+                str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
+                str(db_path),
+                "--runs",
+                "10000",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
 
         con = sqlite3.connect(db_path)
         try:
             rows = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
             match_rows = int(con.execute("SELECT COUNT(*) FROM prepared_match_simulations").fetchone()[0])
             runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations").fetchone()[0])
+            league_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_simulation_meta").fetchone()[0])
+            league_team_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_team_simulations").fetchone()[0])
+            league_runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta").fetchone()[0])
             quick = con.execute("PRAGMA quick_check").fetchone()
             if not quick or quick[0] != "ok":
                 raise SystemExit(f"Hot-patched DB quick_check failed: {quick}")
@@ -85,6 +99,11 @@ def main() -> int:
         if rows <= 0 or match_rows <= 0 or runs < 10000:
             raise SystemExit(
                 f"Invalid hot-patched simulation rows={rows} match_rows={match_rows} runs={runs}"
+            )
+        if league_rows <= 0 or league_team_rows <= 0 or league_runs < 10000:
+            raise SystemExit(
+                "Invalid league simulation "
+                f"leagues={league_rows} teams={league_team_rows} runs={league_runs}"
             )
 
         bundle_manifest = json.loads(bundle_manifest_path.read_text(encoding="utf-8"))
@@ -120,11 +139,19 @@ def main() -> int:
     metadata["preparedSimulationRowCount"] = rows
     metadata["preparedSimulationRuns"] = runs
     metadata["preparedMatchSimulationCount"] = match_rows
+    metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v1"
+    metadata["preparedLeagueSimulationCount"] = league_rows
+    metadata["preparedLeagueSimulationTeamCount"] = league_team_rows
+    metadata["preparedLeagueSimulationRuns"] = league_runs
     metadata["simulationHotPublish"] = True
 
     payload["generatedAt"] = now
     seed = "|".join(
-        [str(payload.get("contentVersion") or ""), new_sha, str(rows), str(match_rows), str(runs), now]
+        [
+            str(payload.get("contentVersion") or ""), new_sha,
+            str(rows), str(match_rows), str(runs),
+            str(league_rows), str(league_team_rows), str(league_runs), now
+        ]
     )
     payload["contentVersion"] = hashlib.sha256(seed.encode("utf-8")).hexdigest()
     MANIFEST.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -134,6 +161,9 @@ def main() -> int:
         f"rows={rows}",
         f"match_rows={match_rows}",
         f"runs={runs}",
+        f"league_rows={league_rows}",
+        f"league_team_rows={league_team_rows}",
+        f"league_runs={league_runs}",
         f"bundle={new_name}",
         f"sha256={new_sha}",
     )
