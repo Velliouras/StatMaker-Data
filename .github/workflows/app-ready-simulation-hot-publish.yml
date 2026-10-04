@@ -40,7 +40,7 @@ jobs:
           assert metadata.get('preparedTeamEloContract') == 'team-elo-v1'
           assert int(metadata.get('preparedTeamEloCount') or 0) > 0
           assert int(metadata.get('preparedTeamEloLeagueCount') or 0) > 0
-          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v2-elo'
+          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v3-all-domestic-elo'
           assert int(metadata.get('preparedLeagueSimulationCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationTeamCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationRuns') or 0) >= 10000
