@@ -81,6 +81,18 @@ try:
     if candidate_count <= 0:
         raise SystemExit("prepared_pattern_candidates is empty")
 
+    simulation_count = 0
+    simulation_runs = 0
+    if "prepared_simulations" in tables:
+        simulation_count = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
+        simulation_runs = int(
+            con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations").fetchone()[0]
+        )
+        if simulation_count <= 0:
+            raise SystemExit("prepared_simulations exists but is empty")
+        if simulation_runs < 1000:
+            raise SystemExit(f"prepared_simulations has invalid run count: {simulation_runs}")
+
     if "prepared_pattern_generation" in tables:
         columns = [row[1] for row in con.execute("PRAGMA table_info(prepared_pattern_generation)")]
         if "rules_fingerprint" in columns:
@@ -121,6 +133,9 @@ metadata = manifest.setdefault("metadata", {})
 metadata["statmakerCommit"] = EXPECTED_STATMAKER_COMMIT
 metadata["engineContract"] = ENGINE_CONTRACT
 metadata["inputRetirementContract"] = RETIREMENT_CONTRACT
+metadata["preparedSimulationContract"] = "monte-carlo-v1-prod-data-uat-engine"
+metadata["preparedSimulationRowCount"] = simulation_count
+metadata["preparedSimulationRuns"] = simulation_runs
 manifest_path.write_text(
     json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
     encoding="utf-8",
@@ -132,5 +147,7 @@ print(
     f"rules={EXPECTED_RULES}",
     f"statmaker={EXPECTED_STATMAKER_COMMIT}",
     f"candidates={candidate_count}",
+    f"simulation_rows={simulation_count}",
+    f"simulation_runs={simulation_runs}",
     "retired_markets=0",
 )
