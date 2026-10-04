@@ -331,6 +331,8 @@ jobs:
           python scripts/materialize_prepared_simulations.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db \
             --runs 10000
+          python scripts/materialize_prepared_team_elo.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db
           python scripts/materialize_prepared_league_simulations.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db \
             --runs 10000
@@ -387,23 +389,45 @@ jobs:
                       db.write_bytes(src.read())
               con=sqlite3.connect(f'file:{db}?mode=ro',uri=True)
               try:
+                  expected_tables={
+                      'prepared_simulations',
+                      'prepared_match_simulations',
+                      'prepared_team_elo',
+                      'prepared_team_elo_meta',
+                      'prepared_league_simulation_meta',
+                      'prepared_league_team_simulations',
+                  }
                   tables={
                       row[0] for row in con.execute(
-                          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('prepared_simulations','prepared_match_simulations')"
+                          "SELECT name FROM sqlite_master WHERE type='table'"
                       )
+                      if row[0] in expected_tables
                   }
-                  if tables != {'prepared_simulations','prepared_match_simulations'}:
-                      raise SystemExit(f'Immutable App-Ready bundle is missing simulation tables: {tables}')
+                  if tables != expected_tables:
+                      raise SystemExit(f'Immutable App-Ready bundle is missing simulation/Elo tables: {tables}')
                   rows=int(con.execute('SELECT COUNT(*) FROM prepared_simulations').fetchone()[0])
                   match_rows=int(con.execute('SELECT COUNT(*) FROM prepared_match_simulations').fetchone()[0])
                   runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations').fetchone()[0])
+                  elo_rows=int(con.execute('SELECT COUNT(*) FROM prepared_team_elo').fetchone()[0])
+                  elo_meta_rows=int(con.execute('SELECT COUNT(*) FROM prepared_team_elo_meta').fetchone()[0])
+                  league_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_simulation_meta').fetchone()[0])
+                  league_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_team_simulations').fetchone()[0])
+                  league_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta').fetchone()[0])
                   if rows<=0 or match_rows<=0 or runs<1000:
                       raise SystemExit(
                           f'Invalid prepared simulation bundle rows={rows} match_rows={match_rows} runs={runs}'
                       )
+                  if elo_rows<=0 or elo_meta_rows<=0:
+                      raise SystemExit(f'Invalid prepared Elo bundle rows={elo_rows} meta_rows={elo_meta_rows}')
+                  if league_rows<=0 or league_team_rows<=0 or league_runs<1000:
+                      raise SystemExit(
+                          f'Invalid league simulation bundle leagues={league_rows} teams={league_team_rows} runs={league_runs}'
+                      )
                   print(
                       'APP_READY_SIMULATION_BUNDLE_OK',
-                      f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}'
+                      f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}',
+                      f'elo_rows={elo_rows}', f'league_rows={league_rows}',
+                      f'league_team_rows={league_team_rows}', f'league_runs={league_runs}'
                   )
               finally:
                   con.close()
