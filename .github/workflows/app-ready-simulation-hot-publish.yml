@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Hot-patch current App-Ready betting bundle
         run: python scripts/hotpatch_app_ready_simulation.py
