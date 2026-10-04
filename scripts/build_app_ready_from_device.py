@@ -84,6 +84,11 @@ try:
     simulation_count = 0
     simulation_runs = 0
     match_simulation_count = 0
+    elo_count = 0
+    elo_league_count = 0
+    league_simulation_count = 0
+    league_simulation_team_count = 0
+    league_simulation_runs = 0
     if "prepared_simulations" in tables:
         simulation_count = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
         simulation_runs = int(
@@ -99,6 +104,37 @@ try:
         )
         if match_simulation_count <= 0:
             raise SystemExit("prepared_match_simulations exists but is empty")
+
+    if "prepared_team_elo" in tables or "prepared_team_elo_meta" in tables:
+        required_elo = {"prepared_team_elo", "prepared_team_elo_meta"}
+        if not required_elo.issubset(tables):
+            raise SystemExit(f"Incomplete Elo tables: {required_elo - tables}")
+        elo_count = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo").fetchone()[0])
+        elo_league_count = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo_meta").fetchone()[0])
+        if elo_count <= 0 or elo_league_count <= 0:
+            raise SystemExit(
+                f"Prepared Elo is empty: rows={elo_count} leagues={elo_league_count}"
+            )
+
+    if "prepared_league_simulation_meta" in tables or "prepared_league_team_simulations" in tables:
+        required_league = {"prepared_league_simulation_meta", "prepared_league_team_simulations"}
+        if not required_league.issubset(tables):
+            raise SystemExit(f"Incomplete league simulation tables: {required_league - tables}")
+        league_simulation_count = int(
+            con.execute("SELECT COUNT(*) FROM prepared_league_simulation_meta").fetchone()[0]
+        )
+        league_simulation_team_count = int(
+            con.execute("SELECT COUNT(*) FROM prepared_league_team_simulations").fetchone()[0]
+        )
+        league_simulation_runs = int(
+            con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta").fetchone()[0]
+        )
+        if league_simulation_count <= 0 or league_simulation_team_count <= 0 or league_simulation_runs < 1000:
+            raise SystemExit(
+                "Prepared league simulation is invalid: "
+                f"leagues={league_simulation_count} teams={league_simulation_team_count} "
+                f"runs={league_simulation_runs}"
+            )
 
     if "prepared_pattern_generation" in tables:
         columns = [row[1] for row in con.execute("PRAGMA table_info(prepared_pattern_generation)")]
@@ -144,6 +180,13 @@ metadata["preparedSimulationContract"] = "monte-carlo-v1-prod-data-uat-engine"
 metadata["preparedSimulationRowCount"] = simulation_count
 metadata["preparedSimulationRuns"] = simulation_runs
 metadata["preparedMatchSimulationCount"] = match_simulation_count
+metadata["preparedTeamEloContract"] = "team-elo-v1"
+metadata["preparedTeamEloCount"] = elo_count
+metadata["preparedTeamEloLeagueCount"] = elo_league_count
+metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v2-elo"
+metadata["preparedLeagueSimulationCount"] = league_simulation_count
+metadata["preparedLeagueSimulationTeamCount"] = league_simulation_team_count
+metadata["preparedLeagueSimulationRuns"] = league_simulation_runs
 manifest_path.write_text(
     json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
     encoding="utf-8",
@@ -158,5 +201,10 @@ print(
     f"simulation_rows={simulation_count}",
     f"simulation_runs={simulation_runs}",
     f"match_simulations={match_simulation_count}",
+    f"elo_rows={elo_count}",
+    f"elo_leagues={elo_league_count}",
+    f"league_simulations={league_simulation_count}",
+    f"league_simulation_teams={league_simulation_team_count}",
+    f"league_simulation_runs={league_simulation_runs}",
     "retired_markets=0",
 )
