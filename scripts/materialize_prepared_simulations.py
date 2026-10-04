@@ -418,6 +418,7 @@ def main() -> int:
 
         con.executescript(
             """
+            DROP TABLE IF EXISTS prepared_match_simulations;
             DROP TABLE IF EXISTS prepared_simulations;
             CREATE TABLE prepared_simulations (
                 competition_id TEXT NOT NULL,
@@ -439,6 +440,26 @@ def main() -> int:
             );
             CREATE INDEX idx_prepared_simulations_match
               ON prepared_simulations(competition_id, snapshot_version, match_key);
+
+            CREATE TABLE prepared_match_simulations (
+                competition_id TEXT NOT NULL,
+                snapshot_version TEXT NOT NULL,
+                match_key TEXT NOT NULL,
+                simulation_runs INTEGER NOT NULL,
+                simulation_model TEXT NOT NULL,
+                home_win_probability REAL NOT NULL,
+                draw_probability REAL NOT NULL,
+                away_win_probability REAL NOT NULL,
+                expected_home_goals REAL NOT NULL,
+                expected_away_goals REAL NOT NULL,
+                history_home_sample INTEGER NOT NULL DEFAULT 0,
+                history_away_sample INTEGER NOT NULL DEFAULT 0,
+                history_league_sample INTEGER NOT NULL DEFAULT 0,
+                generated_at_ms INTEGER NOT NULL,
+                PRIMARY KEY (competition_id, snapshot_version, match_key)
+            );
+            CREATE INDEX idx_prepared_match_simulations_scope
+              ON prepared_match_simulations(competition_id, snapshot_version, match_key);
             """
         )
 
@@ -474,6 +495,7 @@ def main() -> int:
         history_cache: dict[str, LeagueHistory] = {}
         generated_at_ms = int(time.time() * 1000)
         inserted = 0
+        match_summaries = 0
         simulated_matches = 0
         unsupported = 0
 
@@ -500,8 +522,9 @@ def main() -> int:
                 for row in rows
                 if (metric := metric_for_submarket(str(row["identity_sub_market_key"] or ""))) is not None
             }
-            if not needed_metrics:
-                continue
+            # Match-level Simulation Explorer always needs goals so 1/X/2 is available
+            # independently of whether a specific 1X2 betting row exists.
+            needed_metrics.add("goals")
 
             seed_material = "|".join(match_key) + f"|{runs}|{MODEL_VERSION}"
             rng = random.Random(int(hashlib.sha256(seed_material.encode("utf-8")).hexdigest()[:16], 16))
@@ -540,6 +563,34 @@ def main() -> int:
             if not simulated:
                 continue
             simulated_matches += 1
+
+            if "goals" in simulated:
+                goal_home, goal_away, goal_expected, goal_model = simulated["goals"]
+                home_wins = sum(1 for h, a in zip(goal_home, goal_away) if h > a)
+                draws = sum(1 for h, a in zip(goal_home, goal_away) if h == a)
+                away_wins = runs - home_wins - draws
+                home_mean, away_mean, home_sample, away_sample, league_sample = goal_expected
+                con.execute(
+                    """
+                    INSERT OR REPLACE INTO prepared_match_simulations(
+                        competition_id,snapshot_version,match_key,
+                        simulation_runs,simulation_model,
+                        home_win_probability,draw_probability,away_win_probability,
+                        expected_home_goals,expected_away_goals,
+                        history_home_sample,history_away_sample,history_league_sample,
+                        generated_at_ms
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        match_key[0], match_key[1], match_key[2],
+                        runs, f"{MODEL_VERSION}:{goal_model}",
+                        home_wins / runs, draws / runs, away_wins / runs,
+                        home_mean, away_mean,
+                        home_sample, away_sample, league_sample,
+                        generated_at_ms,
+                    ),
+                )
+                match_summaries += 1
 
             for row in rows:
                 metric = metric_for_submarket(str(row["identity_sub_market_key"] or ""))
@@ -581,6 +632,7 @@ def main() -> int:
             "PREPARED_SIMULATION_OK",
             f"runs={runs}",
             f"matches={simulated_matches}",
+            f"match_summaries={match_summaries}",
             f"rows={inserted}",
             f"eligible_rows={total}",
             f"coverage={coverage:.4f}",
