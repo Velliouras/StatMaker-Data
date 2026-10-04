@@ -23,21 +23,32 @@ NEW_TEAM_PENALTY = 55.0
 # Ratings are globally comparable enough for promotion/relegation carry-over because
 # lower divisions start below their country's top-flight baseline.
 LEAGUE_BASELINES = {
+    "AUT": 1500.0, "AUT2": 1400.0,
+    "B1": 1500.0,
+    "CRO": 1500.0,
+    "CYP": 1500.0,
+    "EGY": 1500.0,
     "E0": 1500.0, "E1": 1400.0, "E2": 1325.0, "E3": 1260.0, "EC": 1200.0,
-    "D1": 1500.0, "D2": 1400.0,
-    "I1": 1500.0, "I2": 1400.0,
-    "SP1": 1500.0, "SP2": 1400.0,
     "F1": 1500.0, "F2": 1400.0,
+    "D1": 1500.0, "D2": 1400.0,
+    "G1": 1500.0,
+    "ISR": 1500.0,
+    "I1": 1500.0, "I2": 1400.0,
+    "JPN": 1500.0,
     "N1": 1500.0,
     "P1": 1500.0,
+    "SAU": 1500.0,
+    "SC0": 1500.0, "SC1": 1400.0, "SC2": 1325.0, "SC3": 1260.0,
+    "RSA": 1500.0,
+    "SP1": 1500.0, "SP2": 1400.0,
     "T1": 1500.0,
-    "POL": 1500.0,
-    "RUS": 1500.0,
+    "UKR": 1500.0,
+    # Already-supported calendar-year / additional scopes retained for continuity.
+    "POL": 1500.0, "RUS": 1500.0,
     "SWE": 1500.0, "SWE2": 1400.0,
     "NOR": 1500.0, "NOR2": 1400.0,
     "BRA": 1500.0, "BRA2": 1400.0,
     "CHN": 1500.0,
-    "JPN": 1500.0,
 }
 
 
@@ -64,15 +75,30 @@ def load_payload(entry: dict[str, Any]) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
-def completed_fixtures(payload: dict[str, Any]) -> list[dict[str, Any]]:
-    rows = [
-        row for row in (payload.get("fixtures") or [])
-        if isinstance(row, dict)
-        and str(row.get("status") or "").upper() in FINISHED_STATUSES
-        and finite(row.get("home_goals")) is not None
-        and finite(row.get("away_goals")) is not None
-    ]
-    rows.sort(key=lambda row: (str(row.get("date") or ""), int(row.get("fixture_id") or 0)))
+def fixture_date(row: dict[str, Any]) -> str:
+    return str(row.get("date") or row.get("date_utc") or "")[:10]
+
+
+def completed_fixtures(
+    payload: dict[str, Any],
+    start_date: str = "",
+    end_date: str = "",
+) -> list[dict[str, Any]]:
+    rows = []
+    for row in (payload.get("fixtures") or []):
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("status") or "").upper() not in FINISHED_STATUSES:
+            continue
+        if finite(row.get("home_goals")) is None or finite(row.get("away_goals")) is None:
+            continue
+        date = fixture_date(row)
+        if start_date and date and date < start_date:
+            continue
+        if end_date and date and date > end_date:
+            continue
+        rows.append(row)
+    rows.sort(key=lambda row: (fixture_date(row), int(row.get("fixture_id") or 0)))
     return rows
 
 
@@ -111,11 +137,16 @@ def run_entry(
     previous_by_team: dict[str, RatingState],
     k_factor: float,
     new_team_penalty: bool,
+    current_season_only: bool = False,
 ) -> dict[str, RatingState]:
     payload = load_payload(entry)
     if payload is None:
         return {}
-    fixtures = completed_fixtures(payload)
+    fixtures = completed_fixtures(
+        payload,
+        start_date=str(entry.get("target_season_start") or "") if current_season_only else "",
+        end_date=str(entry.get("target_season_end") or "") if current_season_only else "",
+    )
     if not fixtures:
         return {}
 
@@ -306,6 +337,7 @@ def main() -> int:
                 previous_by_team=prior_by_team,
                 k_factor=CURRENT_K,
                 new_team_penalty=True,
+                current_season_only=True,
             )
             if not states:
                 continue
