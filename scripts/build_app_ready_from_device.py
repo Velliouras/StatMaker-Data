@@ -83,6 +83,7 @@ try:
 
     simulation_count = 0
     simulation_runs = 0
+    match_simulation_count = 0
     if "prepared_simulations" in tables:
         simulation_count = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
         simulation_runs = int(
@@ -92,6 +93,12 @@ try:
             raise SystemExit("prepared_simulations exists but is empty")
         if simulation_runs < 1000:
             raise SystemExit(f"prepared_simulations has invalid run count: {simulation_runs}")
+    if "prepared_match_simulations" in tables:
+        match_simulation_count = int(
+            con.execute("SELECT COUNT(*) FROM prepared_match_simulations").fetchone()[0]
+        )
+        if match_simulation_count <= 0:
+            raise SystemExit("prepared_match_simulations exists but is empty")
 
     if "prepared_pattern_generation" in tables:
         columns = [row[1] for row in con.execute("PRAGMA table_info(prepared_pattern_generation)")]
@@ -136,6 +143,7 @@ metadata["inputRetirementContract"] = RETIREMENT_CONTRACT
 metadata["preparedSimulationContract"] = "monte-carlo-v1-prod-data-uat-engine"
 metadata["preparedSimulationRowCount"] = simulation_count
 metadata["preparedSimulationRuns"] = simulation_runs
+metadata["preparedMatchSimulationCount"] = match_simulation_count
 manifest_path.write_text(
     json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
     encoding="utf-8",
@@ -149,5 +157,6 @@ print(
     f"candidates={candidate_count}",
     f"simulation_rows={simulation_count}",
     f"simulation_runs={simulation_runs}",
+    f"match_simulations={match_simulation_count}",
     "retired_markets=0",
 )
