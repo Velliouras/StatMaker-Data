@@ -18,7 +18,18 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_PATH = ROOT / "data/statmaker/domestic_enriched/index.json"
 DEFAULT_RUNS = 10_000
+# Keep MODEL_VERSION stable: prepared_simulations is consumed by the existing Hybrid/Betting
+# evidence path and must remain unchanged while Match Explorer is validated independently.
 MODEL_VERSION = "monte-carlo-v1"
+
+# UI-only single-match simulation contract. This uses the same canonical prepared_team_elo
+# signal and blend curve as League Simulation, without changing prepared_simulations.
+MATCH_MODEL_VERSION = "match-monte-carlo-v2-elo"
+ELO_MODEL_VERSION = "team-elo-v1"
+ELO_GOAL_LOG_COEFF = 0.55
+ELO_WEIGHT_EARLY = 0.65
+ELO_WEIGHT_FLOOR = 0.35
+ELO_WEIGHT_DECAY_PER_MATCH = 0.03
 
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
 METRICS = ("goals", "shots", "sot", "corners", "cards", "yellow_cards")
@@ -398,6 +409,99 @@ def load_history(entry: dict[str, Any], cache: dict[str, LeagueHistory]) -> Leag
     return history
 
 
+def load_match_elo(
+    con: sqlite3.Connection,
+    league_code: str,
+    season: str,
+    home_team: str,
+    away_team: str,
+) -> tuple[float, int, float, int, float, float] | None:
+    tables = {
+        row[0] for row in con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name IN ('prepared_team_elo','prepared_team_elo_meta')"
+        )
+    }
+    if tables != {"prepared_team_elo", "prepared_team_elo_meta"}:
+        return None
+
+    meta = con.execute(
+        """
+        SELECT model_version,rating_scale,home_advantage
+        FROM prepared_team_elo_meta
+        WHERE league_code=? AND season=?
+        """,
+        (league_code, season),
+    ).fetchone()
+    if meta is None or str(meta["model_version"] or "") != ELO_MODEL_VERSION:
+        return None
+
+    teams = {
+        str(row["team_key"]): row
+        for row in con.execute(
+            """
+            SELECT team_key,elo_rating,current_matches
+            FROM prepared_team_elo
+            WHERE league_code=? AND season=? AND team_key IN (?,?)
+            """,
+            (league_code, season, home_team, away_team),
+        )
+    }
+    home = teams.get(home_team)
+    away = teams.get(away_team)
+    if home is None or away is None:
+        return None
+    return (
+        float(home["elo_rating"]),
+        int(home["current_matches"]),
+        float(away["elo_rating"]),
+        int(away["current_matches"]),
+        float(meta["rating_scale"]),
+        float(meta["home_advantage"]),
+    )
+
+
+def match_elo_weight(home_matches: int, away_matches: int) -> float:
+    sample = min(home_matches, away_matches, 10)
+    return max(ELO_WEIGHT_FLOOR, ELO_WEIGHT_EARLY - ELO_WEIGHT_DECAY_PER_MATCH * sample)
+
+
+def elo_blended_goal_means(
+    stat_home_mean: float,
+    stat_away_mean: float,
+    league_home_mean: float,
+    league_away_mean: float,
+    home_elo: float,
+    home_matches: int,
+    away_elo: float,
+    away_matches: int,
+    rating_scale: float,
+    home_advantage: float,
+) -> tuple[float, float, float]:
+    scale = max(1.0, rating_scale)
+    rating_diff = (home_elo + home_advantage) - away_elo
+    normalized_diff = max(-1.5, min(1.5, rating_diff / scale))
+    log_shift = max(-0.85, min(0.85, ELO_GOAL_LOG_COEFF * normalized_diff))
+
+    elo_home_mean = max(0.05, league_home_mean * math.exp(log_shift))
+    elo_away_mean = max(0.05, league_away_mean * math.exp(-log_shift))
+    weight = match_elo_weight(home_matches, away_matches)
+
+    blended_home = math.exp(
+        (1.0 - weight) * math.log(max(0.05, stat_home_mean))
+        + weight * math.log(elo_home_mean)
+    )
+    blended_away = math.exp(
+        (1.0 - weight) * math.log(max(0.05, stat_away_mean))
+        + weight * math.log(elo_away_mean)
+    )
+    return (
+        min(5.5, max(0.05, blended_home)),
+        min(5.5, max(0.05, blended_away)),
+        weight,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
@@ -418,6 +522,7 @@ def main() -> int:
 
         con.executescript(
             """
+            DROP TABLE IF EXISTS prepared_match_explorer_simulations;
             DROP TABLE IF EXISTS prepared_match_simulations;
             DROP TABLE IF EXISTS prepared_simulations;
             CREATE TABLE prepared_simulations (
@@ -447,6 +552,10 @@ def main() -> int:
                 match_key TEXT NOT NULL,
                 simulation_runs INTEGER NOT NULL,
                 simulation_model TEXT NOT NULL,
+                elo_model_version TEXT NOT NULL,
+                home_elo_rating REAL NOT NULL,
+                away_elo_rating REAL NOT NULL,
+                elo_weight REAL NOT NULL,
                 home_win_probability REAL NOT NULL,
                 draw_probability REAL NOT NULL,
                 away_win_probability REAL NOT NULL,
@@ -460,6 +569,30 @@ def main() -> int:
             );
             CREATE INDEX idx_prepared_match_simulations_scope
               ON prepared_match_simulations(competition_id, snapshot_version, match_key);
+
+            CREATE TABLE prepared_match_explorer_simulations (
+                competition_id TEXT NOT NULL,
+                snapshot_version TEXT NOT NULL,
+                selection_key TEXT NOT NULL,
+                match_key TEXT NOT NULL,
+                simulation_probability REAL NOT NULL,
+                simulation_push_probability REAL NOT NULL DEFAULT 0,
+                simulation_runs INTEGER NOT NULL,
+                simulation_model TEXT NOT NULL,
+                metric_key TEXT NOT NULL,
+                expected_home_goals REAL NOT NULL,
+                expected_away_goals REAL NOT NULL,
+                elo_model_version TEXT NOT NULL,
+                home_elo_rating REAL NOT NULL,
+                away_elo_rating REAL NOT NULL,
+                elo_weight REAL NOT NULL,
+                generated_at_ms INTEGER NOT NULL,
+                PRIMARY KEY (competition_id, snapshot_version, selection_key)
+            );
+            CREATE INDEX idx_prepared_match_explorer_scope
+              ON prepared_match_explorer_simulations(
+                  competition_id, snapshot_version, match_key, metric_key
+              );
             """
         )
 
@@ -496,6 +629,7 @@ def main() -> int:
         generated_at_ms = int(time.time() * 1000)
         inserted = 0
         match_summaries = 0
+        match_explorer_rows = 0
         simulated_matches = 0
         unsupported = 0
 
@@ -568,32 +702,108 @@ def main() -> int:
             simulated_matches += 1
 
             if "goals" in simulated:
-                goal_home, goal_away, goal_expected, goal_model = simulated["goals"]
-                home_wins = sum(1 for h, a in zip(goal_home, goal_away) if h > a)
-                draws = sum(1 for h, a in zip(goal_home, goal_away) if h == a)
-                away_wins = runs - home_wins - draws
-                home_mean, away_mean, home_sample, away_sample, league_sample = goal_expected
-                con.execute(
-                    """
-                    INSERT OR REPLACE INTO prepared_match_simulations(
-                        competition_id,snapshot_version,match_key,
-                        simulation_runs,simulation_model,
-                        home_win_probability,draw_probability,away_win_probability,
-                        expected_home_goals,expected_away_goals,
-                        history_home_sample,history_away_sample,history_league_sample,
-                        generated_at_ms
-                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                    """,
-                    (
-                        match_key[0], match_key[1], match_key[2],
-                        runs, f"{MODEL_VERSION}:{goal_model}",
-                        home_wins / runs, draws / runs, away_wins / runs,
-                        home_mean, away_mean,
-                        home_sample, away_sample, league_sample,
-                        generated_at_ms,
-                    ),
+                # Match Explorer gets an Elo-backed goal model in its own tables. The legacy
+                # prepared_simulations rows below are intentionally left untouched so the
+                # existing Hybrid/Betting engine receives exactly the same evidence as before.
+                _, _, goal_expected, _ = simulated["goals"]
+                stat_home_mean, stat_away_mean, home_sample, away_sample, league_sample = goal_expected
+                elo = load_match_elo(
+                    con, league_code, season, home_team, away_team
                 )
-                match_summaries += 1
+                league_home_mean = history.mean(history.league_home.get("goals", []))
+                league_away_mean = history.mean(history.league_away.get("goals", []))
+                if elo is not None and league_home_mean is not None and league_away_mean is not None:
+                    (
+                        home_elo, home_elo_matches,
+                        away_elo, away_elo_matches,
+                        rating_scale, home_advantage,
+                    ) = elo
+                    home_mean, away_mean, elo_weight = elo_blended_goal_means(
+                        stat_home_mean=stat_home_mean,
+                        stat_away_mean=stat_away_mean,
+                        league_home_mean=league_home_mean,
+                        league_away_mean=league_away_mean,
+                        home_elo=home_elo,
+                        home_matches=home_elo_matches,
+                        away_elo=away_elo,
+                        away_matches=away_elo_matches,
+                        rating_scale=rating_scale,
+                        home_advantage=home_advantage,
+                    )
+                    elo_seed = seed_material + "|" + MATCH_MODEL_VERSION + "|goals"
+                    elo_rng = random.Random(
+                        int(hashlib.sha256(elo_seed.encode("utf-8")).hexdigest()[:16], 16)
+                    )
+                    elo_home_draws = simulate_counts(
+                        elo_rng, distribution_cdf(home_mean, None, 14), runs
+                    )
+                    elo_away_draws = simulate_counts(
+                        elo_rng, distribution_cdf(away_mean, None, 14), runs
+                    )
+                    home_wins = sum(
+                        1 for h, a in zip(elo_home_draws, elo_away_draws) if h > a
+                    )
+                    draws = sum(
+                        1 for h, a in zip(elo_home_draws, elo_away_draws) if h == a
+                    )
+                    away_wins = runs - home_wins - draws
+                    con.execute(
+                        """
+                        INSERT OR REPLACE INTO prepared_match_simulations(
+                            competition_id,snapshot_version,match_key,
+                            simulation_runs,simulation_model,
+                            elo_model_version,home_elo_rating,away_elo_rating,elo_weight,
+                            home_win_probability,draw_probability,away_win_probability,
+                            expected_home_goals,expected_away_goals,
+                            history_home_sample,history_away_sample,history_league_sample,
+                            generated_at_ms
+                        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        """,
+                        (
+                            match_key[0], match_key[1], match_key[2],
+                            runs, MATCH_MODEL_VERSION,
+                            ELO_MODEL_VERSION, home_elo, away_elo, elo_weight,
+                            home_wins / runs, draws / runs, away_wins / runs,
+                            home_mean, away_mean,
+                            home_sample, away_sample, league_sample,
+                            generated_at_ms,
+                        ),
+                    )
+                    match_summaries += 1
+
+                    for row in rows:
+                        if metric_for_submarket(
+                            str(row["identity_sub_market_key"] or "")
+                        ) != "goals":
+                            continue
+                        explorer_result = evaluate_selection(
+                            row, match, elo_home_draws, elo_away_draws
+                        )
+                        if explorer_result is None:
+                            continue
+                        explorer_probability, explorer_push = explorer_result
+                        con.execute(
+                            """
+                            INSERT OR REPLACE INTO prepared_match_explorer_simulations(
+                                competition_id,snapshot_version,selection_key,match_key,
+                                simulation_probability,simulation_push_probability,
+                                simulation_runs,simulation_model,metric_key,
+                                expected_home_goals,expected_away_goals,
+                                elo_model_version,home_elo_rating,away_elo_rating,elo_weight,
+                                generated_at_ms
+                            ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                            """,
+                            (
+                                row["competition_id"], row["snapshot_version"],
+                                row["selection_key"], row["match_key"],
+                                explorer_probability, explorer_push,
+                                runs, MATCH_MODEL_VERSION, "goals",
+                                home_mean, away_mean,
+                                ELO_MODEL_VERSION, home_elo, away_elo, elo_weight,
+                                generated_at_ms,
+                            ),
+                        )
+                        match_explorer_rows += 1
 
             for row in rows:
                 metric = metric_for_submarket(str(row["identity_sub_market_key"] or ""))
@@ -636,6 +846,8 @@ def main() -> int:
             f"runs={runs}",
             f"matches={simulated_matches}",
             f"match_summaries={match_summaries}",
+            f"match_model={MATCH_MODEL_VERSION}",
+            f"match_explorer_rows={match_explorer_rows}",
             f"rows={inserted}",
             f"eligible_rows={total}",
             f"coverage={coverage:.4f}",
