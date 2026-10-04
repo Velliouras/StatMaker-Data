@@ -73,6 +73,15 @@ def main() -> int:
         subprocess.run(
             [
                 "python",
+                str(ROOT / "scripts/materialize_prepared_team_elo.py"),
+                str(db_path),
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+        subprocess.run(
+            [
+                "python",
                 str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
                 str(db_path),
                 "--runs",
@@ -87,6 +96,8 @@ def main() -> int:
             rows = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
             match_rows = int(con.execute("SELECT COUNT(*) FROM prepared_match_simulations").fetchone()[0])
             runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations").fetchone()[0])
+            elo_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo").fetchone()[0])
+            elo_meta_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo_meta").fetchone()[0])
             league_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_simulation_meta").fetchone()[0])
             league_team_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_team_simulations").fetchone()[0])
             league_runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta").fetchone()[0])
@@ -99,6 +110,10 @@ def main() -> int:
         if rows <= 0 or match_rows <= 0 or runs < 10000:
             raise SystemExit(
                 f"Invalid hot-patched simulation rows={rows} match_rows={match_rows} runs={runs}"
+            )
+        if elo_rows <= 0 or elo_meta_rows <= 0:
+            raise SystemExit(
+                f"Invalid Elo rows={elo_rows} meta_rows={elo_meta_rows}"
             )
         if league_rows <= 0 or league_team_rows <= 0 or league_runs < 10000:
             raise SystemExit(
@@ -139,7 +154,10 @@ def main() -> int:
     metadata["preparedSimulationRowCount"] = rows
     metadata["preparedSimulationRuns"] = runs
     metadata["preparedMatchSimulationCount"] = match_rows
-    metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v1"
+    metadata["preparedTeamEloContract"] = "team-elo-v1"
+    metadata["preparedTeamEloCount"] = elo_rows
+    metadata["preparedTeamEloLeagueCount"] = elo_meta_rows
+    metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v2-elo"
     metadata["preparedLeagueSimulationCount"] = league_rows
     metadata["preparedLeagueSimulationTeamCount"] = league_team_rows
     metadata["preparedLeagueSimulationRuns"] = league_runs
@@ -150,6 +168,7 @@ def main() -> int:
         [
             str(payload.get("contentVersion") or ""), new_sha,
             str(rows), str(match_rows), str(runs),
+            str(elo_rows), str(elo_meta_rows),
             str(league_rows), str(league_team_rows), str(league_runs), now
         ]
     )
@@ -161,6 +180,8 @@ def main() -> int:
         f"rows={rows}",
         f"match_rows={match_rows}",
         f"runs={runs}",
+        f"elo_rows={elo_rows}",
+        f"elo_meta_rows={elo_meta_rows}",
         f"league_rows={league_rows}",
         f"league_team_rows={league_team_rows}",
         f"league_runs={league_runs}",
