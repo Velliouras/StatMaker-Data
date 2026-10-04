@@ -21,7 +21,7 @@ DEFAULT_RUNS = 10_000
 MODEL_VERSION = "monte-carlo-v1"
 
 FINISHED_STATUSES = {"FT", "AET", "PEN"}
-METRICS = ("goals", "shots", "sot", "corners", "cards")
+METRICS = ("goals", "shots", "sot", "corners", "cards", "yellow_cards")
 STAT_LABELS = {
     "shots": "Total Shots",
     "sot": "Shots on Goal",
@@ -93,6 +93,7 @@ def metric_values(fixture: dict[str, Any]) -> tuple[dict[str, float], dict[str, 
             "sot": stats.get(STAT_LABELS["sot"]),
             "corners": stats.get(STAT_LABELS["corners"]),
             "cards": cards,
+            "yellow_cards": yellow,
         }
         return {k: float(v) for k, v in values.items() if v is not None and v >= 0.0}
 
@@ -181,6 +182,7 @@ class LeagueHistory:
             "sot": (0.2, 13.0),
             "corners": (0.2, 16.0),
             "cards": (0.0, 11.0),
+            "yellow_cards": (0.0, 10.0),
         }
         lo, hi = bounds[metric]
         expected_home = min(hi, max(lo, expected_home))
@@ -251,10 +253,20 @@ def metric_for_submarket(submarket: str) -> str | None:
         return "shots"
     if "CORNER" in key:
         return "corners"
+    if "YELLOW_CARD" in key:
+        return "yellow_cards"
     if "CARD" in key:
         if "RED_CARD" in key:
             return None
         return "cards"
+    if key in {
+        "FULL_TIME_MATCH_TOTAL",
+        "MATCH_GOALS_TOTAL",
+        "HOME_TEAM_TOTAL",
+        "AWAY_TEAM_TOTAL",
+        "TEAM_TOTAL",
+    }:
+        return "goals"
     if "GOAL" in key or key.startswith("RESULT_") or key == "BTTS":
         return "goals"
     return None
@@ -500,6 +512,10 @@ def main() -> int:
                 if expected is None:
                     continue
                 home_mean, away_mean, home_sample, away_sample, league_sample = expected
+                # Simulation is an active engine input, so do not materialize league-only guesses.
+                # Both teams need a minimum recent sample and the league distribution must be mature.
+                if home_sample < 3 or away_sample < 3 or league_sample < 20:
+                    continue
                 size = history.dispersion_size(metric)
                 max_count = {
                     "goals": 14,
@@ -507,6 +523,7 @@ def main() -> int:
                     "sot": 30,
                     "corners": 35,
                     "cards": 25,
+                    "yellow_cards": 25,
                 }[metric]
                 home_cdf = distribution_cdf(home_mean, size, max_count)
                 away_cdf = distribution_cdf(away_mean, size, max_count)
