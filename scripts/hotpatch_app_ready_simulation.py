@@ -157,7 +157,7 @@ def main() -> int:
     metadata["preparedTeamEloContract"] = "team-elo-v1"
     metadata["preparedTeamEloCount"] = elo_rows
     metadata["preparedTeamEloLeagueCount"] = elo_meta_rows
-    metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v2-elo"
+    metadata["preparedLeagueSimulationContract"] = "league-season-monte-carlo-v3-all-domestic-elo"
     metadata["preparedLeagueSimulationCount"] = league_rows
     metadata["preparedLeagueSimulationTeamCount"] = league_team_rows
     metadata["preparedLeagueSimulationRuns"] = league_runs
