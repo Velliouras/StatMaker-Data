@@ -527,10 +527,13 @@ def main() -> int:
             needed_metrics.add("goals")
 
             seed_material = "|".join(match_key) + f"|{runs}|{MODEL_VERSION}"
-            rng = random.Random(int(hashlib.sha256(seed_material.encode("utf-8")).hexdigest()[:16], 16))
             simulated: dict[str, tuple[list[int], list[int], tuple[float, float, int, int, int], str]] = {}
 
-            for metric in needed_metrics:
+            for metric in sorted(needed_metrics):
+                metric_seed = seed_material + "|" + metric
+                rng = random.Random(
+                    int(hashlib.sha256(metric_seed.encode("utf-8")).hexdigest()[:16], 16)
+                )
                 expected = history.expected(home_team, away_team, metric)
                 if expected is None:
                     continue
