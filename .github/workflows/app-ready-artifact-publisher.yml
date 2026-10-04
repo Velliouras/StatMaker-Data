@@ -92,7 +92,7 @@ jobs:
           expected_statmaker_commit='c9d9d90803b3409a655e7aee59b35f31ba49b70e'
           expected_simulation_contract='monte-carlo-v1-prod-data-uat-engine'
           expected_elo_contract='team-elo-v1'
-          expected_league_simulation_contract='league-season-monte-carlo-v2-elo'
+          expected_league_simulation_contract='league-season-monte-carlo-v3-all-domestic-elo'
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema or
@@ -693,7 +693,7 @@ jobs:
           assert metadata.get('preparedTeamEloContract') == 'team-elo-v1'
           assert int(metadata.get('preparedTeamEloCount') or 0) > 0
           assert int(metadata.get('preparedTeamEloLeagueCount') or 0) > 0
-          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v2-elo'
+          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v3-all-domestic-elo'
           assert int(metadata.get('preparedLeagueSimulationCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationTeamCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationRuns') or 0) >= 10000
