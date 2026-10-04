@@ -21,6 +21,7 @@ on:
       - 'scripts/build_app_ready_from_device.py'
       - 'scripts/materialize_app_ready_pattern_candidates.py'
       - 'scripts/materialize_prepared_fixture_index.py'
+      - 'scripts/materialize_prepared_simulations.py'
 
 permissions:
   contents: read
@@ -55,6 +56,7 @@ jobs:
             scripts/build_app_ready_from_device.py \
             scripts/materialize_uat_direction_pattern_candidates.py \
             scripts/materialize_prepared_fixture_index.py \
+            scripts/materialize_prepared_simulations.py \
             scripts/validate_app_ready_prepared_contract.py \
             scripts/app_ready_input_retirement.py \
             scripts/audit_result_context_generation.py \
