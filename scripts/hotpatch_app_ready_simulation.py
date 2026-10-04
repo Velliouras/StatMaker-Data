@@ -59,13 +59,13 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
+        # Canonical Elo must be refreshed first. Match Simulation and League Simulation
+        # both consume the same prepared_team_elo contract from this exact DB snapshot.
         subprocess.run(
             [
                 "python",
-                str(ROOT / "scripts/materialize_prepared_simulations.py"),
+                str(ROOT / "scripts/materialize_prepared_team_elo.py"),
                 str(db_path),
-                "--runs",
-                "10000",
             ],
             cwd=ROOT,
             check=True,
@@ -73,8 +73,10 @@ def main() -> int:
         subprocess.run(
             [
                 "python",
-                str(ROOT / "scripts/materialize_prepared_team_elo.py"),
+                str(ROOT / "scripts/materialize_prepared_simulations.py"),
                 str(db_path),
+                "--runs",
+                "10000",
             ],
             cwd=ROOT,
             check=True,
@@ -95,6 +97,14 @@ def main() -> int:
         try:
             rows = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
             match_rows = int(con.execute("SELECT COUNT(*) FROM prepared_match_simulations").fetchone()[0])
+            match_elo_rows = int(con.execute(
+                "SELECT COUNT(*) FROM prepared_match_simulations "
+                "WHERE simulation_model='match-monte-carlo-v2-elo' "
+                "AND elo_model_version='team-elo-v1'"
+            ).fetchone()[0])
+            match_explorer_rows = int(con.execute(
+                "SELECT COUNT(*) FROM prepared_match_explorer_simulations"
+            ).fetchone()[0])
             runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations").fetchone()[0])
             elo_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo").fetchone()[0])
             elo_meta_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo_meta").fetchone()[0])
@@ -110,6 +120,12 @@ def main() -> int:
         if rows <= 0 or match_rows <= 0 or runs < 10000:
             raise SystemExit(
                 f"Invalid hot-patched simulation rows={rows} match_rows={match_rows} runs={runs}"
+            )
+        if match_elo_rows != match_rows or match_explorer_rows <= 0:
+            raise SystemExit(
+                "Invalid Elo-backed Match Simulation "
+                f"match_rows={match_rows} elo_match_rows={match_elo_rows} "
+                f"explorer_rows={match_explorer_rows}"
             )
         if elo_rows <= 0 or elo_meta_rows <= 0:
             raise SystemExit(
@@ -154,6 +170,9 @@ def main() -> int:
     metadata["preparedSimulationRowCount"] = rows
     metadata["preparedSimulationRuns"] = runs
     metadata["preparedMatchSimulationCount"] = match_rows
+    metadata["preparedMatchSimulationContract"] = "match-monte-carlo-v2-elo"
+    metadata["preparedMatchSimulationExplorerRowCount"] = match_explorer_rows
+    metadata["preparedMatchSimulationUsesPreparedElo"] = True
     metadata["preparedTeamEloContract"] = "team-elo-v1"
     metadata["preparedTeamEloCount"] = elo_rows
     metadata["preparedTeamEloLeagueCount"] = elo_meta_rows
@@ -167,7 +186,7 @@ def main() -> int:
     seed = "|".join(
         [
             str(payload.get("contentVersion") or ""), new_sha,
-            str(rows), str(match_rows), str(runs),
+            str(rows), str(match_rows), str(match_explorer_rows), str(runs),
             str(elo_rows), str(elo_meta_rows),
             str(league_rows), str(league_team_rows), str(league_runs), now
         ]
@@ -179,6 +198,8 @@ def main() -> int:
         "APP_READY_SIMULATION_HOT_PUBLISH_OK",
         f"rows={rows}",
         f"match_rows={match_rows}",
+        f"match_elo_rows={match_elo_rows}",
+        f"match_explorer_rows={match_explorer_rows}",
         f"runs={runs}",
         f"elo_rows={elo_rows}",
         f"elo_meta_rows={elo_meta_rows}",
