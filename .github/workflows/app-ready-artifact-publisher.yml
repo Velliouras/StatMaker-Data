@@ -41,6 +41,8 @@ on:
       - 'data/statmaker/domestic_enriched/**'
       - 'data/api_football/domestic_normalized_fixture_stats.json'
       - '.github/app-ready-rebuild-trigger'
+      - 'scripts/materialize_prepared_simulations.py'
+      - '.github/workflows/app-ready-artifact-publisher.yml'
   schedule:
     - cron: "20 2,6,10,14,18,22 * * *"
 
@@ -323,6 +325,9 @@ jobs:
             app-ready-export/source
           python scripts/materialize_prepared_fixture_index.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
+          python scripts/materialize_prepared_simulations.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db \
+            --runs 10000
 
       - name: Stage canonical repository inputs
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
