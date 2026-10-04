@@ -353,6 +353,46 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
 
+      - name: Verify prepared simulation survived immutable bundle
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+
+          out=Path('app-ready-export/out')
+          manifest=json.loads((out/'update_manifest.json').read_text(encoding='utf-8'))
+          artifact=next(
+              item for item in manifest.get('artifacts',[])
+              if item.get('id')=='app_ready_betting_bundle'
+          )
+          bundle=out/Path(str(artifact.get('path') or '')).name
+          if not bundle.is_file():
+              raise SystemExit(f'Prepared betting bundle missing: {bundle}')
+
+          with tempfile.TemporaryDirectory() as td:
+              db=Path(td)/'statmaker_prepared_betting.db'
+              with zipfile.ZipFile(bundle) as archive:
+                  with archive.open('databases/statmaker_prepared_betting.db') as src:
+                      db.write_bytes(src.read())
+              con=sqlite3.connect(f'file:{db}?mode=ro',uri=True)
+              try:
+                  table=con.execute(
+                      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='prepared_simulations'"
+                  ).fetchone()
+                  if not table:
+                      raise SystemExit('Immutable App-Ready bundle is missing prepared_simulations')
+                  rows=int(con.execute('SELECT COUNT(*) FROM prepared_simulations').fetchone()[0])
+                  runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations').fetchone()[0])
+                  if rows<=0 or runs<1000:
+                      raise SystemExit(f'Invalid prepared simulation bundle rows={rows} runs={runs}')
+                  print('APP_READY_SIMULATION_BUNDLE_OK', f'rows={rows}', f'runs={runs}')
+              finally:
+                  con.close()
+          PY
+
       - name: Revalidate canonical source versions
         id: source_guard
         if: steps.preflight.outputs.generate == 'true'
