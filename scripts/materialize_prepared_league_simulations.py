@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import random
 import sqlite3
 import time
@@ -23,13 +24,18 @@ from materialize_prepared_simulations import (
 )
 
 DEFAULT_RUNS = 10_000
-MODEL_VERSION = "league-season-monte-carlo-v1"
+MODEL_VERSION = "league-season-monte-carlo-v2-elo"
+ELO_MODEL_VERSION = "team-elo-v1"
 TIE_BREAK_MODEL = "POINTS_GD_GF"
 
-# v1 is intentionally limited to competitions whose championship can be represented
-# as a standard home/away double round-robin. Split leagues, championship groups,
-# Apertura/Clausura formats and playoff-title formats are excluded until their
-# competition rules are modeled explicitly.
+ELO_GOAL_LOG_COEFF = 0.55
+ELO_WEIGHT_EARLY = 0.65
+ELO_WEIGHT_FLOOR = 0.35
+ELO_WEIGHT_DECAY_PER_MATCH = 0.03
+
+# v2 remains intentionally limited to competitions whose championship can be
+# represented as a standard home/away double round-robin. Competition-specific
+# split/playoff rules will be added separately rather than approximated.
 SAFE_DOUBLE_ROUND_ROBIN_CODES = {
     "E0", "E1", "E2", "E3", "EC",
     "D1", "D2",
@@ -58,6 +64,20 @@ class TeamStanding:
     @property
     def goal_difference(self) -> int:
         return self.goals_for - self.goals_against
+
+
+@dataclass
+class EloTeam:
+    rating: float
+    current_matches: int
+
+
+@dataclass
+class EloScope:
+    model_version: str
+    rating_scale: float
+    home_advantage: float
+    teams: dict[str, EloTeam]
 
 
 def fixture_goals(fixture: dict[str, Any]) -> tuple[int, int] | None:
@@ -111,6 +131,48 @@ def load_fixture_payload(entry: dict[str, Any]) -> dict[str, Any] | None:
     except Exception:
         return None
     return payload if isinstance(payload, dict) else None
+
+
+def load_elo_scope(con: sqlite3.Connection, league_code: str, season: str) -> EloScope | None:
+    tables = {
+        row[0] for row in con.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' "
+            "AND name IN ('prepared_team_elo','prepared_team_elo_meta')"
+        )
+    }
+    if tables != {"prepared_team_elo", "prepared_team_elo_meta"}:
+        return None
+
+    meta = con.execute(
+        """
+        SELECT model_version,rating_scale,home_advantage
+        FROM prepared_team_elo_meta
+        WHERE league_code=? AND season=?
+        """,
+        (league_code, season),
+    ).fetchone()
+    if meta is None or str(meta[0] or "") != ELO_MODEL_VERSION:
+        return None
+
+    teams = {
+        str(row[0]): EloTeam(rating=float(row[1]), current_matches=int(row[2]))
+        for row in con.execute(
+            """
+            SELECT team_key,elo_rating,current_matches
+            FROM prepared_team_elo
+            WHERE league_code=? AND season=?
+            """,
+            (league_code, season),
+        )
+    }
+    if not teams:
+        return None
+    return EloScope(
+        model_version=str(meta[0]),
+        rating_scale=float(meta[1]),
+        home_advantage=float(meta[2]),
+        teams=teams,
+    )
 
 
 def build_current_table(fixtures: list[dict[str, Any]]) -> tuple[dict[str, TeamStanding], set[tuple[str, str]], bool]:
@@ -173,18 +235,62 @@ def current_ranking(teams: dict[str, TeamStanding]) -> list[str]:
     )
 
 
+def elo_weight(home_matches: int, away_matches: int) -> float:
+    sample = min(home_matches, away_matches, 10)
+    return max(ELO_WEIGHT_FLOOR, ELO_WEIGHT_EARLY - ELO_WEIGHT_DECAY_PER_MATCH * sample)
+
+
+def elo_blended_goal_means(
+    stat_home_mean: float,
+    stat_away_mean: float,
+    league_home_mean: float,
+    league_away_mean: float,
+    home_elo: EloTeam,
+    away_elo: EloTeam,
+    elo_scope: EloScope,
+) -> tuple[float, float, float]:
+    rating_scale = max(1.0, elo_scope.rating_scale)
+    rating_diff = (home_elo.rating + elo_scope.home_advantage) - away_elo.rating
+    normalized_diff = max(-1.5, min(1.5, rating_diff / rating_scale))
+    log_shift = max(-0.85, min(0.85, ELO_GOAL_LOG_COEFF * normalized_diff))
+
+    elo_home_mean = max(0.05, league_home_mean * math.exp(log_shift))
+    elo_away_mean = max(0.05, league_away_mean * math.exp(-log_shift))
+    weight = elo_weight(home_elo.current_matches, away_elo.current_matches)
+
+    # Geometric blend keeps goal means positive and treats Elo as a long-term prior,
+    # strongest early in the season and gradually yielding to current-season evidence.
+    blended_home = math.exp(
+        (1.0 - weight) * math.log(max(0.05, stat_home_mean))
+        + weight * math.log(elo_home_mean)
+    )
+    blended_away = math.exp(
+        (1.0 - weight) * math.log(max(0.05, stat_away_mean))
+        + weight * math.log(elo_away_mean)
+    )
+    return (
+        min(5.5, max(0.05, blended_home)),
+        min(5.5, max(0.05, blended_away)),
+        weight,
+    )
+
+
 def simulate_league(
     entry: dict[str, Any],
     fixtures: list[dict[str, Any]],
     runs: int,
+    elo_scope: EloScope,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]] | None:
     teams, completed_pairs, duplicate_pair = build_current_table(fixtures)
     if duplicate_pair or len(teams) < 8:
         return None
 
+    team_keys = sorted(teams)
+    if any(key not in elo_scope.teams for key in team_keys):
+        return None
+
     # A regular double round-robin has exactly one ordered home fixture for every
     # pair of distinct teams. Reconstruct the unplayed schedule from that invariant.
-    team_keys = sorted(teams)
     expected_total = len(team_keys) * (len(team_keys) - 1)
     if len(completed_pairs) >= expected_total:
         return None
@@ -199,8 +305,14 @@ def simulate_league(
         return None
 
     history = LeagueHistory(fixtures)
-    fixture_models: list[tuple[str, str, list[int], list[int], bool]] = []
+    league_home_mean = history.mean(history.league_home.get("goals", []))
+    league_away_mean = history.mean(history.league_away.get("goals", []))
+    if league_home_mean is None or league_away_mean is None:
+        return None
+
+    fixture_models: list[tuple[str, str, list[int], list[int], bool, float]] = []
     mature = 0
+    elo_weight_total = 0.0
 
     league_code = str(entry.get("league_code") or "")
     season = str(entry.get("app_season") or entry.get("target_app_season") or "")
@@ -208,12 +320,24 @@ def simulate_league(
         expected = history.expected(home, away, "goals")
         if expected is None:
             return None
-        home_mean, away_mean, home_sample, away_sample, league_sample = expected
+        stat_home_mean, stat_away_mean, home_sample, away_sample, league_sample = expected
         if league_sample < 20:
             return None
+
         is_mature = home_sample >= 3 and away_sample >= 3
         if is_mature:
             mature += 1
+
+        home_mean, away_mean, weight = elo_blended_goal_means(
+            stat_home_mean=stat_home_mean,
+            stat_away_mean=stat_away_mean,
+            league_home_mean=league_home_mean,
+            league_away_mean=league_away_mean,
+            home_elo=elo_scope.teams[home],
+            away_elo=elo_scope.teams[away],
+            elo_scope=elo_scope,
+        )
+        elo_weight_total += weight
 
         seed = f"{league_code}|{season}|{home}|{away}|{runs}|{MODEL_VERSION}"
         rng = random.Random(int(hashlib.sha256(seed.encode("utf-8")).hexdigest()[:16], 16))
@@ -221,13 +345,13 @@ def simulate_league(
         away_cdf = distribution_cdf(away_mean, None, 14)
         home_draws = simulate_counts(rng, home_cdf, runs)
         away_draws = simulate_counts(rng, away_cdf, runs)
-        fixture_models.append((home, away, home_draws, away_draws, is_mature))
+        fixture_models.append((home, away, home_draws, away_draws, is_mature, weight))
 
     points = {key: [teams[key].points] * runs for key in team_keys}
     goals_for = {key: [teams[key].goals_for] * runs for key in team_keys}
     goals_against = {key: [teams[key].goals_against] * runs for key in team_keys}
 
-    for home, away, home_draws, away_draws, _ in fixture_models:
+    for home, away, home_draws, away_draws, _, _ in fixture_models:
         hp = points[home]
         ap = points[away]
         hgf = goals_for[home]
@@ -283,6 +407,7 @@ def simulate_league(
                 "team_key": key,
                 "team_name": team.name,
                 "team_logo": team.logo,
+                "elo_rating": elo_scope.teams[key].rating,
                 "current_position": current_positions[key],
                 "current_played": team.played,
                 "current_points": team.points,
@@ -310,6 +435,8 @@ def simulate_league(
         "remaining_matches": len(remaining),
         "simulation_runs": runs,
         "model_version": MODEL_VERSION,
+        "elo_model_version": elo_scope.model_version,
+        "average_elo_weight": elo_weight_total / max(1, len(remaining)),
         "tie_break_model": TIE_BREAK_MODEL,
         "mature_fixture_count": mature,
         "total_simulated_fixtures": len(remaining),
@@ -347,6 +474,8 @@ def main() -> int:
                 remaining_matches INTEGER NOT NULL,
                 simulation_runs INTEGER NOT NULL,
                 model_version TEXT NOT NULL,
+                elo_model_version TEXT NOT NULL,
+                average_elo_weight REAL NOT NULL,
                 tie_break_model TEXT NOT NULL,
                 mature_fixture_count INTEGER NOT NULL,
                 total_simulated_fixtures INTEGER NOT NULL,
@@ -360,6 +489,7 @@ def main() -> int:
                 team_key TEXT NOT NULL,
                 team_name TEXT NOT NULL,
                 team_logo TEXT,
+                elo_rating REAL NOT NULL,
                 current_position INTEGER NOT NULL,
                 current_played INTEGER NOT NULL,
                 current_points INTEGER NOT NULL,
@@ -382,19 +512,27 @@ def main() -> int:
         league_count = 0
         team_count = 0
         skipped: list[str] = []
+        e0_rows: list[dict[str, Any]] = []
 
         for entry in current_entries(index):
+            league_code = str(entry.get("league_code") or "")
+            season = str(entry.get("app_season") or entry.get("target_app_season") or "")
+            elo_scope = load_elo_scope(con, league_code, season)
+            if elo_scope is None:
+                skipped.append(league_code + ":elo")
+                continue
+
             payload = load_fixture_payload(entry)
             if payload is None:
-                skipped.append(str(entry.get("league_code") or "?") + ":payload")
+                skipped.append(league_code + ":payload")
                 continue
             fixtures = [
                 row for row in (payload.get("fixtures") or [])
                 if isinstance(row, dict)
             ]
-            result = simulate_league(entry, fixtures, runs)
+            result = simulate_league(entry, fixtures, runs, elo_scope)
             if result is None:
-                skipped.append(str(entry.get("league_code") or "?") + ":contract")
+                skipped.append(league_code + ":contract")
                 continue
             meta, rows = result
 
@@ -403,32 +541,34 @@ def main() -> int:
                 INSERT INTO prepared_league_simulation_meta(
                     league_code,country,league_name,season,team_count,
                     current_completed_matches,remaining_matches,simulation_runs,
-                    model_version,tie_break_model,mature_fixture_count,
-                    total_simulated_fixtures,generated_at_ms
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    model_version,elo_model_version,average_elo_weight,
+                    tie_break_model,mature_fixture_count,total_simulated_fixtures,
+                    generated_at_ms
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     meta["league_code"], meta["country"], meta["league_name"], meta["season"],
                     meta["team_count"], meta["current_completed_matches"], meta["remaining_matches"],
-                    meta["simulation_runs"], meta["model_version"], meta["tie_break_model"],
+                    meta["simulation_runs"], meta["model_version"], meta["elo_model_version"],
+                    meta["average_elo_weight"], meta["tie_break_model"],
                     meta["mature_fixture_count"], meta["total_simulated_fixtures"], generated_at_ms,
                 ),
             )
             con.executemany(
                 """
                 INSERT INTO prepared_league_team_simulations(
-                    league_code,season,team_key,team_name,team_logo,
+                    league_code,season,team_key,team_name,team_logo,elo_rating,
                     current_position,current_played,current_points,
                     current_goal_difference,current_goals_for,
                     expected_position,expected_points,title_probability,
                     top2_probability,top4_probability,position_probabilities_json,
                     generated_at_ms
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 [
                     (
                         meta["league_code"], meta["season"], row["team_key"], row["team_name"], row["team_logo"],
-                        row["current_position"], row["current_played"], row["current_points"],
+                        row["elo_rating"], row["current_position"], row["current_played"], row["current_points"],
                         row["current_goal_difference"], row["current_goals_for"],
                         row["expected_position"], row["expected_points"], row["title_probability"],
                         row["top2_probability"], row["top4_probability"], row["position_probabilities_json"],
@@ -437,6 +577,8 @@ def main() -> int:
                     for row in rows
                 ],
             )
+            if meta["league_code"] == "E0":
+                e0_rows = rows
             league_count += 1
             team_count += len(rows)
 
@@ -449,11 +591,23 @@ def main() -> int:
 
         print(
             "PREPARED_LEAGUE_SIMULATION_OK",
+            f"model={MODEL_VERSION}",
+            f"elo={ELO_MODEL_VERSION}",
             f"runs={runs}",
             f"leagues={league_count}",
             f"teams={team_count}",
             "skipped=" + (",".join(skipped) if skipped else "none"),
         )
+        if e0_rows:
+            top = sorted(e0_rows, key=lambda row: row["title_probability"], reverse=True)[:10]
+            print(
+                "LEAGUE_E0_TITLE_TOP",
+                " | ".join(
+                    f'{row["team_name"]}={row["title_probability"] * 100.0:.1f}%'
+                    f'(Elo={row["elo_rating"]:.0f},expPts={row["expected_points"]:.1f})'
+                    for row in top
+                ),
+            )
     finally:
         con.close()
 
