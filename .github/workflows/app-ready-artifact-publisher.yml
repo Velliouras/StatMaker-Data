@@ -91,6 +91,8 @@ jobs:
           expected_schema=12
           expected_statmaker_commit='c9d9d90803b3409a655e7aee59b35f31ba49b70e'
           expected_simulation_contract='monte-carlo-v1-prod-data-uat-engine'
+          expected_elo_contract='team-elo-v1'
+          expected_league_simulation_contract='league-season-monte-carlo-v2-elo'
           contract_migration=(
               str(m.get('preparedPatternRulesFingerprint') or '') != expected_rules or
               int(m.get('preparedBettingSchemaVersion') or 0) != expected_schema or
@@ -98,7 +100,14 @@ jobs:
               str(m.get('preparedSimulationContract') or '') != expected_simulation_contract or
               int(m.get('preparedSimulationRowCount') or 0) <= 0 or
               int(m.get('preparedSimulationRuns') or 0) < 10000 or
-              int(m.get('preparedMatchSimulationCount') or 0) <= 0
+              int(m.get('preparedMatchSimulationCount') or 0) <= 0 or
+              str(m.get('preparedTeamEloContract') or '') != expected_elo_contract or
+              int(m.get('preparedTeamEloCount') or 0) <= 0 or
+              int(m.get('preparedTeamEloLeagueCount') or 0) <= 0 or
+              str(m.get('preparedLeagueSimulationContract') or '') != expected_league_simulation_contract or
+              int(m.get('preparedLeagueSimulationCount') or 0) <= 0 or
+              int(m.get('preparedLeagueSimulationTeamCount') or 0) <= 0 or
+              int(m.get('preparedLeagueSimulationRuns') or 0) < 10000
           )
           generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
@@ -681,6 +690,13 @@ jobs:
           assert int(metadata.get('preparedSimulationRowCount') or 0) > 0
           assert int(metadata.get('preparedSimulationRuns') or 0) >= 10000
           assert int(metadata.get('preparedMatchSimulationCount') or 0) > 0
+          assert metadata.get('preparedTeamEloContract') == 'team-elo-v1'
+          assert int(metadata.get('preparedTeamEloCount') or 0) > 0
+          assert int(metadata.get('preparedTeamEloLeagueCount') or 0) > 0
+          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v2-elo'
+          assert int(metadata.get('preparedLeagueSimulationCount') or 0) > 0
+          assert int(metadata.get('preparedLeagueSimulationTeamCount') or 0) > 0
+          assert int(metadata.get('preparedLeagueSimulationRuns') or 0) >= 10000
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
