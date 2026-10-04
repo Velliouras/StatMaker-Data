@@ -15,9 +15,9 @@ VALIDITY=ROOT/'data/statmaker/fixture_validity.json'
 APP=APP_PROD
 LEDGER=LEDGER_PROD
 MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
-LEDGER_SOURCE='canonical-app-ready-probability-first-strong-singles-ledger-v9'
-MODE_LABEL='prod'
-ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
+LEDGER_SOURCE='canonical-prod-hybrid-strong-singles-ledger-v14-simulation-v1'
+MODE_LABEL='prod-hybrid'
+ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=14
 # Clean audit epoch for the active Monte Carlo Hybrid contract.
 # 2026-10-04 07:45:00Z (10:45 Greece).
 UAT_HYBRID_SIMULATION_V1_EPOCH_MS=1791099900000
@@ -519,7 +519,7 @@ def final_candidates_hybrid(db,gid,target=None):
 
 
 def final_candidates(db,gid,target=None):
-    if MODE_LABEL=='uat-hybrid':
+    if MODE_LABEL in ('uat-hybrid','prod-hybrid'):
         return final_candidates_hybrid(db,gid,target)
     # UAT Performance/Daily Outcomes must start from the exact same prepared_pattern_candidates
     # generation consumed by the Android probability-first Strong query. The UAT App-Ready bundle
@@ -854,12 +854,12 @@ def extract(bundle,target=None):
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
                   'marketProbability':nullable(s.get('bm_market_probability')),
-                  'modelProbability':nullable(c.get('_hybrid_probability')) if MODE_LABEL=='uat-hybrid' else (mp if mp is not None else post),
-                  'simulationProbability':nullable(c.get('_hybrid_simulation_probability')) if MODE_LABEL=='uat-hybrid' else None,
-                  'simulationEdge':nullable(c.get('_hybrid_simulation_edge')) if MODE_LABEL=='uat-hybrid' else None,
-                  'simulationAgreement':nullable(c.get('_hybrid_simulation_agreement')) if MODE_LABEL=='uat-hybrid' else None,
-                  'simulationRuns':intval(c.get('simulation_runs')) if MODE_LABEL=='uat-hybrid' else 0,
-                  'simulationModel':c.get('simulation_model') if MODE_LABEL=='uat-hybrid' else None,
+                  'modelProbability':nullable(c.get('_hybrid_probability')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else (mp if mp is not None else post),
+                  'simulationProbability':nullable(c.get('_hybrid_simulation_probability')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else None,
+                  'simulationEdge':nullable(c.get('_hybrid_simulation_edge')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else None,
+                  'simulationAgreement':nullable(c.get('_hybrid_simulation_agreement')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else None,
+                  'simulationRuns':intval(c.get('simulation_runs')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else 0,
+                  'simulationModel':c.get('simulation_model') if MODE_LABEL in ('uat-hybrid','prod-hybrid') else None,
                   'reliability':nullable(s.get('bm_sample_reliability')),'valueTier':tier(c.get('value_tier')),
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
