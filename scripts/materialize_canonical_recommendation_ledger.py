@@ -18,9 +18,9 @@ MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
 LEDGER_SOURCE='canonical-app-ready-probability-first-strong-singles-ledger-v9'
 MODE_LABEL='prod'
 ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=9
-# Clean audit epoch for the redesigned UAT Strong contract.
-# 2026-10-02 11:45:00Z (14:45 Greece).
-UAT_HYBRID_STRONG_V2_EPOCH_MS=1790941500000
+# Clean audit epoch for the active Monte Carlo Hybrid contract.
+# 2026-10-04 07:45:00Z (10:45 Greece).
+UAT_HYBRID_SIMULATION_V1_EPOCH_MS=1791099900000
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
 # persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
@@ -211,12 +211,31 @@ def _hybrid_rank(row, market_preferred, three_way_result):
 
     fixture_probability=num(row.get('opponent_model_probability'))
     model_backed=_valid_probability(fixture_probability)
-    probability=fixture_probability if model_backed else posterior
-    if not _valid_probability(probability):
+    base_probability=fixture_probability if model_backed else posterior
+    if not _valid_probability(base_probability):
         return None
 
+    simulation_probability=nullable(row.get('simulation_probability'))
+    if simulation_probability is not None and not _valid_probability(simulation_probability):
+        simulation_probability=None
+
+    probability=(
+        base_probability*0.70+simulation_probability*0.30
+        if simulation_probability is not None
+        else base_probability
+    )
     edge=probability-market_probability
     expected_value=probability*odd-1.0
+    simulation_edge=(
+        simulation_probability-market_probability
+        if simulation_probability is not None
+        else None
+    )
+    simulation_agreement=(
+        1.0-_clamp01(abs(simulation_probability-base_probability)/0.20)
+        if simulation_probability is not None
+        else None
+    )
     legacy_support=_clamp01(num(row.get('selection_score'),0.0))
     hit_rate=_clamp01(num(row.get('strict_hit_rate') or row.get('bm_hit_rate'),0.0))
 
@@ -251,15 +270,21 @@ def _hybrid_rank(row, market_preferred, three_way_result):
         0.0
     )
 
-    # Strong v2 core gate. Safety alone is not a recommendation; keep Android/Data parity.
-    # Developing can be evidence-immature, but never negative-edge / negative-EV.
     mature_fallback=(
         reliability>=0.70
         and legacy_support>=0.70
         and hit_rate>=0.65
     )
+    simulation_accepts=(
+        simulation_probability is None
+        or (
+            simulation_probability>=0.50
+            and num(simulation_edge,0.0)>=-0.01
+        )
+    )
     if not (
-        probability>=0.56
+        simulation_accepts
+        and probability>=0.56
         and reliability>=0.58
         and legacy_support>=0.60
         and hit_rate>=0.60
@@ -274,21 +299,64 @@ def _hybrid_rank(row, market_preferred, three_way_result):
     positive_ev=_clamp01(max(expected_value,0.0)/0.25)
     value_support=positive_edge*0.45+positive_ev*0.55
     market_preference_penalty=0.08 if three_way_result and not market_preferred else 0.0
+    simulation_adjustment=0.0
+    if simulation_probability is not None:
+        edge_signal=max(-1.0,min(1.0,num(simulation_edge,0.0)/0.10))
+        agreement_signal=max(-1.0,min(1.0,((num(simulation_agreement,0.5)-0.5)*2.0)))
+        simulation_adjustment=edge_signal*0.025+agreement_signal*0.015
+
     ranking=_clamp01(
         consensus*0.45+
         legacy_support*0.30+
         hit_rate*0.10+
         reliability*0.10+
-        value_support*0.05-
+        value_support*0.05+
+        simulation_adjustment-
         longshot_penalty-
         market_preference_penalty
     )
-    return (ranking,probability,legacy_support,reliability,-odd)
+    return (
+        ranking,probability,legacy_support,reliability,-odd,
+        base_probability,simulation_probability,simulation_edge,simulation_agreement
+    )
 
 
 def final_candidates_hybrid(db,gid,target=None):
     date_clause=" AND c.local_date=?" if target else ""
     args=(gid,target) if target else (gid,)
+    simulation_table=first(
+        db,
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='prepared_simulations' LIMIT 1"
+    ) is not None
+    simulation_select="""
+               ,ps.simulation_probability
+               ,ps.simulation_push_probability
+               ,ps.simulation_runs
+               ,ps.simulation_model
+               ,ps.metric_key AS simulation_metric_key
+               ,ps.expected_home_count AS simulation_expected_home_count
+               ,ps.expected_away_count AS simulation_expected_away_count
+               ,ps.history_home_sample AS simulation_history_home_sample
+               ,ps.history_away_sample AS simulation_history_away_sample
+               ,ps.history_league_sample AS simulation_history_league_sample
+    """ if simulation_table else """
+               ,NULL AS simulation_probability
+               ,NULL AS simulation_push_probability
+               ,NULL AS simulation_runs
+               ,NULL AS simulation_model
+               ,NULL AS simulation_metric_key
+               ,NULL AS simulation_expected_home_count
+               ,NULL AS simulation_expected_away_count
+               ,NULL AS simulation_history_home_sample
+               ,NULL AS simulation_history_away_sample
+               ,NULL AS simulation_history_league_sample
+    """
+    simulation_join="""
+        LEFT JOIN prepared_simulations ps
+          ON ps.competition_id=c.competition_id
+         AND ps.snapshot_version=c.snapshot_version
+         AND ps.selection_key=c.selection_key
+    """ if simulation_table else ""
     src=rows(
         db,
         f"""
@@ -326,11 +394,13 @@ def final_candidates_hybrid(db,gid,target=None):
                s.opponent_without_lineup_probability,
                s.opponent_without_formation_probability,
                s.opponent_without_squad_turnover_probability
+               {simulation_select}
         FROM prepared_pattern_candidates c
         JOIN prepared_selections s
           ON s.competition_id=c.competition_id
          AND s.snapshot_version=c.snapshot_version
          AND s.selection_key=c.selection_key
+        {simulation_join}
         WHERE c.generation_id=?
           {date_clause}
           AND c.selection_odd>=1.50
@@ -420,6 +490,11 @@ def final_candidates_hybrid(db,gid,target=None):
             continue
         rr=dict(r)
         rr['_hybrid_rank']=rank
+        rr['_hybrid_probability']=rank[1]
+        rr['_hybrid_base_probability']=rank[5]
+        rr['_hybrid_simulation_probability']=rank[6]
+        rr['_hybrid_simulation_edge']=rank[7]
+        rr['_hybrid_simulation_agreement']=rank[8]
         rr['value_tier']='STRONG_VALUE'
         eligible.append(rr)
 
