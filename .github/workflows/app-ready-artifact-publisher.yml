@@ -97,7 +97,8 @@ jobs:
               str(m.get('statmakerCommit') or '') != expected_statmaker_commit or
               str(m.get('preparedSimulationContract') or '') != expected_simulation_contract or
               int(m.get('preparedSimulationRowCount') or 0) <= 0 or
-              int(m.get('preparedSimulationRuns') or 0) < 10000
+              int(m.get('preparedSimulationRuns') or 0) < 10000 or
+              int(m.get('preparedMatchSimulationCount') or 0) <= 0
           )
           generate=os.environ.get('FORCE','false').lower()=='true' or not old or changed or contract_migration
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
@@ -383,16 +384,24 @@ jobs:
                       db.write_bytes(src.read())
               con=sqlite3.connect(f'file:{db}?mode=ro',uri=True)
               try:
-                  table=con.execute(
-                      "SELECT 1 FROM sqlite_master WHERE type='table' AND name='prepared_simulations'"
-                  ).fetchone()
-                  if not table:
-                      raise SystemExit('Immutable App-Ready bundle is missing prepared_simulations')
+                  tables={
+                      row[0] for row in con.execute(
+                          "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('prepared_simulations','prepared_match_simulations')"
+                      )
+                  }
+                  if tables != {'prepared_simulations','prepared_match_simulations'}:
+                      raise SystemExit(f'Immutable App-Ready bundle is missing simulation tables: {tables}')
                   rows=int(con.execute('SELECT COUNT(*) FROM prepared_simulations').fetchone()[0])
+                  match_rows=int(con.execute('SELECT COUNT(*) FROM prepared_match_simulations').fetchone()[0])
                   runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations').fetchone()[0])
-                  if rows<=0 or runs<1000:
-                      raise SystemExit(f'Invalid prepared simulation bundle rows={rows} runs={runs}')
-                  print('APP_READY_SIMULATION_BUNDLE_OK', f'rows={rows}', f'runs={runs}')
+                  if rows<=0 or match_rows<=0 or runs<1000:
+                      raise SystemExit(
+                          f'Invalid prepared simulation bundle rows={rows} match_rows={match_rows} runs={runs}'
+                      )
+                  print(
+                      'APP_READY_SIMULATION_BUNDLE_OK',
+                      f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}'
+                  )
               finally:
                   con.close()
           PY
@@ -644,6 +653,7 @@ jobs:
           assert metadata.get('preparedSimulationContract') == 'monte-carlo-v1-prod-data-uat-engine'
           assert int(metadata.get('preparedSimulationRowCount') or 0) > 0
           assert int(metadata.get('preparedSimulationRuns') or 0) >= 10000
+          assert int(metadata.get('preparedMatchSimulationCount') or 0) > 0
           assert str(metadata.get('preparedPatternGenerationId') or '').strip()
           assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
           eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
