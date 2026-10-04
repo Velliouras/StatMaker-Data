@@ -1,0 +1,75 @@
+name: App-Ready Simulation Hot Publish
+
+on:
+  push:
+    paths:
+      - '.github/simulation-hotpatch-trigger'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-simulation-hot-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Hot-patch current App-Ready betting bundle
+        run: python scripts/hotpatch_app_ready_simulation.py
+
+      - name: Verify hot-patched bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+
+          root=Path('.')
+          manifest=json.loads((root/'data/statmaker/app_ready/update_manifest.json').read_text(encoding='utf-8'))
+          metadata=manifest.get('metadata',{})
+          assert metadata.get('preparedSimulationContract') == 'monte-carlo-v1-prod-data-uat-engine'
+          assert int(metadata.get('preparedSimulationRuns') or 0) >= 10000
+          assert int(metadata.get('preparedMatchSimulationCount') or 0) > 0
+          artifact=next(x for x in manifest['artifacts'] if x['id']=='app_ready_betting_bundle')
+          bundle=root/artifact['path']
+          with tempfile.TemporaryDirectory() as td:
+              out=Path(td)
+              with zipfile.ZipFile(bundle) as zf:
+                  zf.extract('databases/statmaker_prepared_betting.db', out)
+              db=out/'databases/statmaker_prepared_betting.db'
+              con=sqlite3.connect(db)
+              try:
+                  tables={r[0] for r in con.execute(
+                      "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('prepared_simulations','prepared_match_simulations')"
+                  )}
+                  assert tables == {'prepared_simulations','prepared_match_simulations'}
+                  rows=int(con.execute('SELECT COUNT(*) FROM prepared_simulations').fetchone()[0])
+                  match_rows=int(con.execute('SELECT COUNT(*) FROM prepared_match_simulations').fetchone()[0])
+                  runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations').fetchone()[0])
+                  assert rows>0 and match_rows>0 and runs>=10000
+                  print('HOT_PUBLISH_VERIFY_OK', f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}')
+              finally:
+                  con.close()
+          PY
+
+      - name: Commit published App-Ready simulation bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/app_ready/update_manifest.json
+          git add data/statmaker/app_ready/app_ready_betting_bundle-*.zip
+          if git diff --cached --quiet; then
+            echo "No App-Ready simulation changes to publish."
+            exit 0
+          fi
+          git commit -m "Publish match-level simulation App-Ready hotfix"
+          git push origin HEAD:main
