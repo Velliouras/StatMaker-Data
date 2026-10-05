@@ -521,4 +521,208 @@ def _argentina(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int,
 
 def _colombia(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int, elo_scope: Any, ctx: dict[str, Any]):
     phase = [f for f in fixtures if _date(ctx, f) >= COL_II_START]
-    table = ctx["build_table"](p
+    table = ctx["build_table"](phase)
+    if len(table) != 20:
+        return None
+    keys = sorted(table)
+    if any(k not in elo_scope.teams for k in keys):
+        return None
+    names = {k: table[k].name for k in keys}
+    schedule = ctx["remaining_stage_schedule"](keys, ctx["UNORDERED"], 1, phase)
+    history = ctx["LeagueHistory"](fixtures)
+    model = ctx["MatchModel"](history, elo_scope, "COL", "2026")
+    packed = _prepare_schedule(ctx, schedule, model, runs, "COL|2026|II")
+    if packed is None:
+        return None
+    prepared, weights, mature = packed
+    base_p, base_gf, base_ga = _state_from_table(table, keys)
+    position_counts, point_totals = _init_counts(keys)
+    rng = random.Random(2026100502)
+
+    for run_idx in range(runs):
+        points, gf, ga = dict(base_p), dict(base_gf), dict(base_ga)
+        _apply_prepared(ctx, prepared, run_idx, points, gf, ga)
+        regular = _rank(ctx, keys, points, gf, ga, names)
+        top8 = regular[:8]
+        others = top8[2:]
+        rng.shuffle(others)
+        group_a = [top8[0], *others[:3]]
+        group_b = [top8[1], *others[3:]]
+        group_winners: list[str] = []
+        group_runners: list[str] = []
+        for group, seed in ((group_a, top8[0]), (group_b, top8[1])):
+            gp, ggf, gga = _empty_state(group)
+            for home in group:
+                for away in group:
+                    if home == away:
+                        continue
+                    score = model.draw(home, away, rng)
+                    if score is None:
+                        return None
+                    ctx["apply_score"](home, away, score[0], score[1], gp, ggf, gga)
+            ranked = sorted(group, key=lambda k: (-gp[k], 0 if k == seed else 1, -(ggf[k] - gga[k]), -ggf[k], names[k].casefold()))
+            group_winners.append(ranked[0])
+            group_runners.append(ranked[1])
+        # Two-legged final; better regular-season seed hosts second leg.
+        a, b = group_winners
+        high, low = (a, b) if regular.index(a) < regular.index(b) else (b, a)
+        champion = _two_leg_points_winner(high, low, model, elo_scope, rng)
+        runner = low if champion == high else high
+        order = _unique_order([champion, runner, *group_runners], regular)
+        _record_run(order, keys, points, position_counts, point_totals)
+
+    return _rows_and_meta(
+        ctx, entry, fixtures, runs, elo_scope, table, keys, names,
+        position_counts, point_totals, weights, mature,
+        "Liga II: 19 rounds + two semifinal quadrangulars + two-leg final",
+        190, len(schedule) + 26,
+    )
+
+
+def _mexico(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int, elo_scope: Any, ctx: dict[str, Any]):
+    table = ctx["build_table"](fixtures)
+    if len(table) != 18:
+        return None
+    keys = sorted(table)
+    if any(k not in elo_scope.teams for k in keys):
+        return None
+    names = {k: table[k].name for k in keys}
+    schedule = ctx["remaining_stage_schedule"](keys, ctx["UNORDERED"], 1, fixtures)
+    history = ctx["LeagueHistory"](fixtures)
+    model = ctx["MatchModel"](history, elo_scope, "MEX", "2026")
+    packed = _prepare_schedule(ctx, schedule, model, runs, "MEX|2026|apertura")
+    if packed is None:
+        return None
+    prepared, weights, mature = packed
+    base_p, base_gf, base_ga = _state_from_table(table, keys)
+    position_counts, point_totals = _init_counts(keys)
+    rng = random.Random(2026100503)
+
+    for run_idx in range(runs):
+        points, gf, ga = dict(base_p), dict(base_gf), dict(base_ga)
+        _apply_prepared(ctx, prepared, run_idx, points, gf, ga)
+        regular = _rank(ctx, keys, points, gf, ga, names)
+        top8 = regular[:8]
+        q_pairs = [(top8[0], top8[7]), (top8[1], top8[6]), (top8[2], top8[5]), (top8[3], top8[4])]
+        q_winners, q_losers = [], []
+        for high, low in q_pairs:
+            winner = _two_leg_winner(high, low, model, elo_scope, rng, higher_seed_tie=True)
+            q_winners.append(winner)
+            q_losers.append(low if winner == high else high)
+        q_winners.sort(key=regular.index)
+        s_pairs = [(q_winners[0], q_winners[-1]), (q_winners[1], q_winners[2])]
+        s_winners, s_losers = [], []
+        for high, low in s_pairs:
+            winner = _two_leg_winner(high, low, model, elo_scope, rng, higher_seed_tie=True)
+            s_winners.append(winner)
+            s_losers.append(low if winner == high else high)
+        s_winners.sort(key=regular.index)
+        champion = _two_leg_winner(s_winners[0], s_winners[1], model, elo_scope, rng, higher_seed_tie=False)
+        runner = s_winners[1] if champion == s_winners[0] else s_winners[0]
+        order = _unique_order([champion, runner, *s_losers, *q_losers], regular)
+        _record_run(order, keys, points, position_counts, point_totals)
+
+    return _rows_and_meta(
+        ctx, entry, fixtures, runs, elo_scope, table, keys, names,
+        position_counts, point_totals, weights, mature,
+        "Apertura: 17 rounds + top-8 two-leg Liguilla",
+        153, len(schedule) + 14,
+    )
+
+
+def _peru(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int, elo_scope: Any, ctx: dict[str, Any]):
+    annual_table = ctx["build_table"](fixtures)
+    clausura = [f for f in fixtures if _date(ctx, f) >= PER_CLAUSURA_START]
+    clausura_table = ctx["build_table"](clausura)
+    if len(annual_table) != 18 or len(clausura_table) != 18:
+        return None
+    keys = sorted(annual_table)
+    if any(k not in elo_scope.teams for k in keys):
+        return None
+    names = {k: annual_table[k].name for k in keys}
+    apertura = _resolve_aliases(ctx, ("Alianza Lima",), keys, names)
+    if apertura is None:
+        return None
+    # Across Apertura+Clausura each ordered pairing occurs once (reverse venue in Clausura).
+    schedule = ctx["remaining_stage_schedule"](keys, ctx["ORDERED"], 1, fixtures)
+    history = ctx["LeagueHistory"](fixtures)
+    model = ctx["MatchModel"](history, elo_scope, "PER", "2026")
+    packed = _prepare_schedule(ctx, schedule, model, runs, "PER|2026|clausura")
+    if packed is None:
+        return None
+    prepared, weights, mature = packed
+    annual_p, annual_gf, annual_ga = _state_from_table(annual_table, keys)
+    cl_p, cl_gf, cl_ga = _state_from_table(clausura_table, keys)
+    position_counts, point_totals = _init_counts(keys)
+    rng = random.Random(2026100504)
+
+    for run_idx in range(runs):
+        points, gf, ga = dict(annual_p), dict(annual_gf), dict(annual_ga)
+        cp, cgf, cga = dict(cl_p), dict(cl_gf), dict(cl_ga)
+        for home, away, home_draws, away_draws in prepared:
+            hg, ag = home_draws[run_idx], away_draws[run_idx]
+            ctx["apply_score"](home, away, hg, ag, points, gf, ga)
+            ctx["apply_score"](home, away, hg, ag, cp, cgf, cga)
+        annual = _rank(ctx, keys, points, gf, ga, names)
+        clausura_rank = _rank(ctx, keys, cp, cgf, cga, names)
+        clausura_champ = clausura_rank[0]
+
+        if clausura_champ == apertura:
+            champion = apertura
+            # Regulation: same club wins both stages and is national champion. The remaining
+            # playoff structure determines runner-up; approximate its sporting order with the
+            # best three accumulated clubs, preserving the automatic champion exactly.
+            candidates = [k for k in annual if k != champion][:3]
+            if len(candidates) >= 2:
+                semi = _two_leg_points_winner(candidates[1], candidates[2], model, elo_scope, rng)
+                runner = _two_leg_points_winner(candidates[0], semi, model, elo_scope, rng)
+            else:
+                runner = annual[1]
+            order = _unique_order([champion, runner], annual)
+        else:
+            eligible_stage = [k for k in (apertura, clausura_champ) if annual.index(k) < 8]
+            playoff = []
+            for k in [annual[0], annual[1], *eligible_stage]:
+                if k not in playoff:
+                    playoff.append(k)
+            playoff.sort(key=annual.index)
+            if len(playoff) >= 4:
+                semis = [(playoff[0], playoff[-1]), (playoff[1], playoff[2])]
+                winners, losers = [], []
+                for high, low in semis:
+                    winner = _two_leg_points_winner(high, low, model, elo_scope, rng)
+                    winners.append(winner)
+                    losers.append(low if winner == high else high)
+                winners.sort(key=annual.index)
+                champion = _two_leg_winner(winners[0], winners[1], model, elo_scope, rng, False)
+                runner = winners[1] if champion == winners[0] else winners[0]
+                order = _unique_order([champion, runner, *losers], annual)
+            elif len(playoff) == 3:
+                direct = playoff[0]
+                semi = _two_leg_points_winner(playoff[1], playoff[2], model, elo_scope, rng)
+                high, low = (direct, semi) if annual.index(direct) < annual.index(semi) else (semi, direct)
+                champion = _two_leg_points_winner(high, low, model, elo_scope, rng)
+                runner = low if champion == high else high
+                order = _unique_order([champion, runner], annual)
+            else:
+                a, b = playoff[:2]
+                high, low = (a, b) if annual.index(a) < annual.index(b) else (b, a)
+                champion = _two_leg_points_winner(high, low, model, elo_scope, rng)
+                runner = low if champion == high else high
+                order = _unique_order([champion, runner], annual)
+        _record_run(order, keys, points, position_counts, point_totals)
+
+    return _rows_and_meta(
+        ctx, entry, fixtures, runs, elo_scope, annual_table, keys, names,
+        position_counts, point_totals, weights, mature,
+        "Apertura + Clausura + accumulated-table Play-Offs",
+        306, len(schedule) + 6,
+    )
+
+
+def _cross_schedule_mls(
+    ctx: dict[str, Any],
+    fixtures: list[dict[str, Any]],
+    east: list[str],
+    west: list[str],
+) -> list[tuple[str, s
