@@ -114,6 +114,52 @@ RULES: dict[str, LeagueRule] = {
     "SP2": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
     "T1": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
     "UKR": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+
+    # Cache-backed active leagues. These scopes use already-published current-season
+    # fixture caches and therefore require zero additional API-Football requests.
+    "BRA": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "BRA2": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "CHL": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "CHN": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "EST": LeagueRule(ORDERED, 2, format_label="Four-round league"),
+    "HUN": LeagueRule(UNORDERED, 3, format_label="33-round triple round-robin"),
+    "IRL": LeagueRule(ORDERED, 2, format_label="Four-round league"),
+    "LVA": LeagueRule(ORDERED, 2, format_label="Four-round league"),
+    "LTU": LeagueRule(ORDERED, 2, format_label="Four-round league"),
+    "NOR": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "NOR2": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "POL": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "RUS": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "SWE": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "SWE2": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+    "SVN": LeagueRule(ORDERED, 2, format_label="Four-round league"),
+    "UAE": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+}
+
+SIMULATION_CACHE_CURRENT_CODES = {
+    "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
+    "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
+}
+
+
+def is_simulation_current_entry(row: dict[str, Any]) -> bool:
+    code = str(row.get("league_code") or "")
+    role = str(row.get("stats_role") or "")
+    lifecycle = str(row.get("lifecycle") or "")
+    app_season = str(row.get("app_season") or "")
+    target_app_season = str(row.get("target_app_season") or "")
+    return (
+        lifecycle == "active"
+        and (
+            role == "current_target"
+            or (
+                code in SIMULATION_CACHE_CURRENT_CODES
+                and role == "historical_support"
+                and app_season
+                and app_season == target_app_season
+            )
+        )
+    )
 }
 
 # Semantic meaning of each post-regular-season group. These keys are persisted for the
@@ -195,9 +241,9 @@ def team_logo_from_fixture(fixture: dict[str, Any], team_key: str) -> str | None
 def current_entries(index: dict[str, Any]) -> list[dict[str, Any]]:
     all_current = [
         row for row in (index.get("leagues") or [])
-        if str(row.get("stats_role") or "") == "current_target"
-        and str(row.get("lifecycle") or "") == "active"
+        if is_simulation_current_entry(row)
         and (ROOT / str(row.get("cache_path") or "")).is_file()
+        and int(row.get("completed_fixtures") or 0) >= 10
     ]
     missing_rules = sorted({
         str(row.get("league_code") or "")
