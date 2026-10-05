@@ -67,6 +67,14 @@ LEAGUE_BASELINES = {
     "SVK": 1500.0,
     "KOR": 1500.0,
     "SWZ": 1500.0,
+    "ARG": 1500.0,
+    "COL": 1500.0,
+    "ECU": 1500.0,
+    "MEX": 1500.0,
+    "MAR": 1500.0,
+    "PER": 1500.0,
+    "USA": 1500.0,
+    "URU": 1500.0,
 }
 
 # Active same-season scopes that are already fully cached in StatMaker-Data but are
@@ -77,6 +85,13 @@ SIMULATION_CACHE_CURRENT_CODES = {
     "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
     "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
     "KOR", "SWZ",
+    "ARG", "COL", "ECU", "MEX", "MAR", "PER", "USA", "URU",
+}
+
+# Current participants that may not yet appear in a newly-started fixture cache.
+# Keep these explicit: they are part of the competition, not synthetic clubs.
+EXTRA_CURRENT_TEAMS: dict[str, tuple[str, ...]] = {
+    "MAR": ("FAR Rabat",),
 }
 
 
@@ -209,6 +224,11 @@ def run_entry(
             key = norm(name)
             if key:
                 names[key] = name
+
+    for extra_name in EXTRA_CURRENT_TEAMS.get(code, ()):
+        extra_key = norm(extra_name)
+        if extra_key:
+            names.setdefault(extra_key, extra_name)
 
     ratings: dict[str, float] = {
         key: season_start_rating(previous_by_team.get(key), baseline, new_team_penalty)
