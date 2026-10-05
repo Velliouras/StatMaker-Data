@@ -82,12 +82,16 @@ jobs:
                   league_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_simulation_meta').fetchone()[0])
                   league_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_team_simulations').fetchone()[0])
                   league_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta').fetchone()[0])
+                  league_meta_cols={row[1] for row in con.execute('PRAGMA table_info(prepared_league_simulation_meta)')}
+                  league_team_cols={row[1] for row in con.execute('PRAGMA table_info(prepared_league_team_simulations)')}
                   uefa_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_simulation_meta').fetchone()[0])
                   uefa_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_team_simulations').fetchone()[0])
                   uefa_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta').fetchone()[0])
                   assert rows>0 and match_rows>0 and runs>=10000
                   assert elo_rows>0 and elo_meta_rows>0
                   assert league_rows>0 and league_team_rows>0 and league_runs>=10000
+                  assert 'split_group_keys_json' in league_meta_cols
+                  assert 'split_group_probabilities_json' in league_team_cols
                   assert uefa_rows==3 and uefa_team_rows==108 and uefa_runs>=10000
                   print(
                       'HOT_PUBLISH_VERIFY_OK',
