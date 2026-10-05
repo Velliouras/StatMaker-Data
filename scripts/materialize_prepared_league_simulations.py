@@ -160,7 +160,6 @@ def is_simulation_current_entry(row: dict[str, Any]) -> bool:
             )
         )
     )
-}
 
 # Semantic meaning of each post-regular-season group. These keys are persisted for the
 # Android UAT UI so split leagues are not presented like ordinary round-robin leagues.
