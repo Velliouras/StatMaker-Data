@@ -65,6 +65,32 @@ class DomesticScheduleOnlyValidationTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             target.target.validate_feed(feed, self.registry(), dt.date(2026, 8, 14))
 
+    def test_resolved_slug_map_recovers_enabled_league_with_null_provider_slug(self):
+        registry = [{
+            "leagueCode": "T1",
+            "country": "Turkey",
+            "competition": "Süper Lig",
+            "providerLeagueSlug": None,
+            "enabledForOdds": True,
+            "searchTerms": [
+                "turkey super lig",
+                "turkish super lig",
+                "süper lig",
+                "super lig",
+            ],
+        }]
+        events = [{
+            "league": {
+                "slug": "turkey-super-lig",
+                "name": "Turkey - Super Lig",
+            },
+            "startTime": "2026-10-09T17:00:00Z",
+        }]
+
+        mapping = target._resolved_slug_map(events, registry)
+
+        self.assertEqual("T1", mapping["turkey-super-lig"])
+
     def test_imminent_priority_uses_oldest_exact_odds_refresh_first(self):
         events = [
             {"league": {"slug": "england-premier-league"}, "date": "2026-08-29T11:30:00Z"},
