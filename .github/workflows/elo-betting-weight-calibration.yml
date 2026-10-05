@@ -1,0 +1,54 @@
+name: Elo Betting Weight Calibration
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/elo-betting-weight-calibration-trigger"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  calibrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate calibration scripts
+        run: |
+          python -m py_compile scripts/backtest_elo_betting_ab.py
+          python -m py_compile scripts/calibrate_elo_betting_weight.py
+
+      - name: Run 30-day calibration with 7-day temporal holdout
+        run: |
+          python scripts/calibrate_elo_betting_weight.py             --days 30             --runs 10000             --snapshot-local-hour 11             --holdout-days 7
+          cat reports/elo_betting_weight_calibration.md
+
+      - name: Commit calibration report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add             reports/elo_betting_weight_calibration.json             reports/elo_betting_weight_calibration.md
+          if git diff --cached --quiet; then
+            echo "No calibration report changes to commit."
+          else
+            git commit -m "Publish Elo Betting weight calibration report"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
