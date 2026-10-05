@@ -76,12 +76,33 @@ jobs:
         shell: bash
         env:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+          STATMAKER_TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          STATMAKER_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
           python - <<'PY'
-          import json, os, subprocess
+          import json, os, subprocess, urllib.parse, urllib.request
           from pathlib import Path
+
+          token=str(os.environ.get('STATMAKER_TOKEN') or '').strip()
+          ref=str(os.environ.get('STATMAKER_REF') or 'main').strip() or 'main'
+          if not token:
+              raise SystemExit('Missing STATMAKER_PRIVATE_READ_TOKEN')
+          request=urllib.request.Request(
+              'https://api.github.com/repos/Velliouras/StatMaker/commits/' + urllib.parse.quote(ref, safe=''),
+              headers={
+                  'Authorization': f'Bearer {token}',
+                  'Accept': 'application/vnd.github+json',
+                  'X-GitHub-Api-Version': '2022-11-28',
+                  'User-Agent': 'statmaker-app-ready-publisher',
+              },
+          )
+          with urllib.request.urlopen(request, timeout=30) as response:
+              expected_statmaker_commit=str(json.load(response).get('sha') or '').strip()
+          if not expected_statmaker_commit:
+              raise SystemExit(f'Could not resolve StatMaker ref: {ref}')
+
           main=json.loads(Path('data/statmaker/update_manifest.json').read_text())
           uefa=json.loads(subprocess.check_output(['git','show','origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],text=True))
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
@@ -89,7 +110,6 @@ jobs:
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
           expected_rules='pattern-policy-v2-final-read-model-v6-probability-first-prod'
           expected_schema=12
-          expected_statmaker_commit='c9d9d90803b3409a655e7aee59b35f31ba49b70e'
           expected_simulation_contract='monte-carlo-v1-prod-data-uat-engine'
           expected_elo_contract='team-elo-v1'
           expected_league_simulation_contract='league-season-monte-carlo-v3-all-domestic-elo'
@@ -113,6 +133,7 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
               f.write(f"generate={'true' if generate else 'false'}\n")
               f.write(f"contract_migration={'true' if contract_migration else 'false'}\n")
+              f.write(f"statmaker_commit={expected_statmaker_commit}\n")
           PY
 
       - name: Require private read token
@@ -304,10 +325,7 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         env:
           APP_ID: com.statmaker.app.uat.local
-          # Must match the approved PROD engine staged above; do not pin this step to an older engine.
-          APP_READY_STATMAKER_COMMIT: "c9d9d90803b3409a655e7aee59b35f31ba49b70e"
-          APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v6-probability-first-prod"
-          APP_READY_PREPARED_SCHEMA_VERSION: "12"
+          # Producer contract values come from the freshly staged PROD source via GITHUB_ENV.
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
@@ -664,13 +682,15 @@ jobs:
       - name: Verify published generation
         if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
         shell: bash
+        env:
+          EXPECTED_STATMAKER_COMMIT: ${{ steps.preflight.outputs.statmaker_commit }}
         run: |
           set -euo pipefail
           local_sha="$(git rev-parse HEAD)"
           remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
           test "$local_sha" = "$remote_sha"
           python - <<'PY'
-          import json
+          import json, os
           from pathlib import Path
           status=json.loads(Path('data/statmaker/app_ready/publish_status.json').read_text())
           manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
@@ -683,7 +703,7 @@ jobs:
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 12
           assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-first-prod'
-          assert metadata.get('statmakerCommit') == 'c9d9d90803b3409a655e7aee59b35f31ba49b70e'
+          assert metadata.get('statmakerCommit') == os.environ.get('EXPECTED_STATMAKER_COMMIT')
           assert metadata.get('engineContract') == 'probability-first-prod-schema12-v6-retired-inputs-v1'
           assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
           assert metadata.get('preparedSimulationContract') == 'monte-carlo-v1-prod-data-uat-engine'
