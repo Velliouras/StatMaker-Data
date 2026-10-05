@@ -57,6 +57,16 @@ LEAGUE_BASELINES = {
     "LTU": 1500.0,
     "SVN": 1500.0,
     "UAE": 1500.0,
+    "BGR": 1500.0,
+    "CZE": 1500.0,
+    "DNK": 1500.0,
+    "FIN": 1500.0, "FIN2": 1400.0,
+    "ISL": 1500.0,
+    "ROM": 1500.0,
+    "SRB": 1500.0,
+    "SVK": 1500.0,
+    "KOR": 1500.0,
+    "SWZ": 1500.0,
 }
 
 # Active same-season scopes that are already fully cached in StatMaker-Data but are
@@ -65,6 +75,8 @@ LEAGUE_BASELINES = {
 SIMULATION_CACHE_CURRENT_CODES = {
     "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
     "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
+    "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
+    "KOR", "SWZ",
 }
 
 
