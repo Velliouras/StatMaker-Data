@@ -119,12 +119,18 @@ RULES: dict[str, LeagueRule] = {
 # Semantic meaning of each post-regular-season group. These keys are persisted for the
 # Android UAT UI so split leagues are not presented like ordinary round-robin leagues.
 SPLIT_GROUP_KEYS: dict[str, tuple[str, ...]] = {
-    "AUT": ("championship_group", "qualification_group"),
-    "CYP": ("championship_group", "relegation_group"),
-    "EGY": ("championship_group", "relegation_group"),
-    "G1": ("championship_group", "europe_group", "relegation_group"),
-    "ISR": ("championship_group", "relegation_group"),
-    "SC0": ("championship_group", "relegation_group"),
+    "AUT": ("aut_meistergruppe", "aut_qualifikationsgruppe"),
+    "CYP": ("cyp_top6", "cyp_bottom8"),
+    "EGY": ("egy_title_top6", "egy_survival_group"),
+    "G1": ("g1_playoffs_1_4", "g1_playoffs_5_8", "g1_playouts_9_14"),
+    "ISR": ("isr_championship_top6", "isr_lower_bottom8"),
+    "SC0": ("sc0_top6", "sc0_bottom6"),
+}
+
+# Competition-specific point carry rules for the second phase.
+# Greece 5-8 starts with half the regular-season points, rounded up.
+SPLIT_POINT_RULES: dict[str, tuple[tuple[int, bool], ...]] = {
+    "G1": ((1, False), (2, True), (1, False)),
 }
 
 
@@ -576,6 +582,32 @@ def apply_score(
         points[away] += 1
 
 
+def transformed_group_points(
+    league_code: str,
+    group_index: int,
+    value: int,
+) -> int:
+    rules = SPLIT_POINT_RULES.get(league_code)
+    if not rules or group_index >= len(rules):
+        return value
+    divisor, round_up = rules[group_index]
+    if divisor <= 1:
+        return value
+    if round_up:
+        return (value + divisor - 1) // divisor
+    return value // divisor
+
+
+def apply_points_only(home: str, away: str, hg: int, ag: int, points: dict[str, int]) -> None:
+    if hg > ag:
+        points[home] += 3
+    elif hg < ag:
+        points[away] += 3
+    else:
+        points[home] += 1
+        points[away] += 1
+
+
 def simulate_league(
     entry: dict[str, Any],
     fixtures: list[dict[str, Any]],
@@ -624,6 +656,7 @@ def simulate_league(
     current_group_keys: list[list[str]] | None = None
     current_group_specs: list[StageSpec] | None = None
     split_remaining_fixed: list[list[tuple[str, str]]] | None = None
+    split_base_points: dict[str, int] | None = None
 
     if rule.split_groups and regular_complete:
         reg_order = current_ranking(regular_table)
@@ -650,6 +683,33 @@ def simulate_league(
                 _, _, mature, weight = model
                 mature_future += 1 if mature else 0
                 model_weights.append(weight)
+
+        # Reconstruct second-phase points from the end of the regular season so competition
+        # specific carry rules are respected even after real split matches have already been played.
+        split_base_points = {}
+        for group_index, group in enumerate(current_group_keys):
+            for key in group:
+                split_base_points[key] = transformed_group_points(
+                    league_code,
+                    group_index,
+                    regular_table[key].points,
+                )
+            relevant_finished = [
+                fixture for fixture in post_regular_finished
+                if norm(fixture.get("home_team")) in group
+                and norm(fixture.get("away_team")) in group
+            ]
+            for fixture in relevant_finished:
+                goals = fixture_goals(fixture)
+                if goals is None:
+                    continue
+                apply_points_only(
+                    norm(fixture.get("home_team")),
+                    norm(fixture.get("away_team")),
+                    goals[0],
+                    goals[1],
+                    split_base_points,
+                )
 
     names = {key: current_table[key].name for key in team_keys}
     position_counts = {key: [0] * len(team_keys) for key in team_keys}
@@ -689,7 +749,11 @@ def simulate_league(
     )
 
     for run_idx in range(runs):
-        points = {key: base_table[key].points for key in team_keys}
+        points = (
+            dict(split_base_points)
+            if split_base_points is not None
+            else {key: base_table[key].points for key in team_keys}
+        )
         goals_for = {key: base_table[key].goals_for for key in team_keys}
         goals_against = {key: base_table[key].goals_against for key in team_keys}
 
@@ -719,6 +783,13 @@ def simulate_league(
                 for spec in specs:
                     groups.append(regular_order[cursor: cursor + spec.size])
                     cursor += spec.size
+                for group_index, group in enumerate(groups):
+                    for key in group:
+                        points[key] = transformed_group_points(
+                            league_code,
+                            group_index,
+                            points[key],
+                        )
                 schedules = [
                     full_hypothetical_stage_schedule(group, spec, split_rng)
                     for group, spec in zip(groups, specs)
