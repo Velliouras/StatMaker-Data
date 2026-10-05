@@ -19,6 +19,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import os
+from collections import defaultdict
 from typing import Any, Dict, Iterable, List, Sequence
 
 import domestic_live_july_pipeline as pipeline
@@ -123,6 +124,66 @@ def _existing_slug_map(registry: Sequence[Dict[str, Any]]) -> Dict[str, str]:
         code = str(league.get("leagueCode") or "").strip()
         if slug and code:
             mapping.setdefault(slug, code)
+    return mapping
+
+
+def _league_name(event: Dict[str, Any]) -> str:
+    league = event.get("league") if isinstance(event.get("league"), dict) else {}
+    return str(league.get("name") or "").strip()
+
+
+def _normalized_league_text(value: Any) -> str:
+    return target.odds_fetch.normalize_text(str(value or "").replace("-", " "), drop_suffixes=False)
+
+
+def _resolved_slug_map(
+    events: Sequence[Dict[str, Any]],
+    registry: Sequence[Dict[str, Any]],
+) -> Dict[str, str]:
+    """Resolve provider league slugs even when registry/provider slugs are missing or stale.
+
+    Exact stored providerLeagueSlug remains authoritative. For unknown slugs, use only
+    an unambiguous exact normalized match against registry searchTerms or the explicit
+    country + competition identity. This keeps the fallback conservative while allowing
+    active leagues such as Turkey Super Lig to re-enter imminent-priority rotation.
+    """
+    mapping = _existing_slug_map(registry)
+
+    candidates_by_identity: Dict[str, set[str]] = defaultdict(set)
+    for row in registry:
+        if not isinstance(row, dict) or not bool(row.get("enabledForOdds", True)):
+            continue
+        code = str(row.get("leagueCode") or "").strip()
+        if not code:
+            continue
+        identities = list(row.get("searchTerms", []) or [])
+        country = str(row.get("country") or "").strip()
+        competition = str(row.get("competition") or row.get("display_name") or "").strip()
+        if country and competition:
+            identities.append(f"{country} {competition}")
+        for identity in identities:
+            normalized = _normalized_league_text(identity)
+            if normalized:
+                candidates_by_identity[normalized].add(code)
+
+    for event in events:
+        slug = _league_slug(event)
+        if not slug or slug in mapping:
+            continue
+        identities = {
+            _normalized_league_text(_league_name(event)),
+            _normalized_league_text(slug),
+        }
+        resolved_codes: set[str] = set()
+        for identity in identities:
+            if not identity:
+                continue
+            codes = candidates_by_identity.get(identity, set())
+            if len(codes) == 1:
+                resolved_codes.update(codes)
+        if len(resolved_codes) == 1:
+            mapping[slug] = next(iter(resolved_codes))
+
     return mapping
 
 
@@ -446,7 +507,7 @@ def main() -> int:
     odds_days = _positive_int("STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS", DEFAULT_EXACT_ODDS_HORIZON_DAYS)
     global_debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     events = _global_imminent_events(api_key, schedule_days, global_debug)
-    slug_to_code = _existing_slug_map(registry)
+    slug_to_code = _resolved_slug_map(events, registry)
     state = pipeline.load_json(pipeline.STATE_PATH, {})
     last_refresh_by_code = state.get("oddsLastRefreshByLeague")
     if not isinstance(last_refresh_by_code, dict):
