@@ -116,6 +116,17 @@ RULES: dict[str, LeagueRule] = {
     "UKR": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
 }
 
+# Semantic meaning of each post-regular-season group. These keys are persisted for the
+# Android UAT UI so split leagues are not presented like ordinary round-robin leagues.
+SPLIT_GROUP_KEYS: dict[str, tuple[str, ...]] = {
+    "AUT": ("championship_group", "qualification_group"),
+    "CYP": ("championship_group", "relegation_group"),
+    "EGY": ("championship_group", "relegation_group"),
+    "G1": ("championship_group", "europe_group", "relegation_group"),
+    "ISR": ("championship_group", "relegation_group"),
+    "SC0": ("championship_group", "relegation_group"),
+}
+
 
 @dataclass
 class TeamStanding:
@@ -643,6 +654,16 @@ def simulate_league(
     names = {key: current_table[key].name for key in team_keys}
     position_counts = {key: [0] * len(team_keys) for key in team_keys}
     point_totals = {key: 0 for key in team_keys}
+    split_group_keys = SPLIT_GROUP_KEYS.get(league_code, ())
+    if rule.split_groups and len(split_group_keys) != len(rule.split_groups):
+        raise RuntimeError(
+            f"{league_code}: split group semantics mismatch "
+            f"keys={len(split_group_keys)} stages={len(rule.split_groups)}"
+        )
+    split_group_counts = {
+        key: [0] * len(split_group_keys)
+        for key in team_keys
+    }
 
     # Fixed regular-stage Monte Carlo draws are generated in vectors for speed.
     regular_models: list[tuple[str, str, list[int], list[int]]] = []
@@ -703,6 +724,10 @@ def simulate_league(
                     for group, spec in zip(groups, specs)
                 ]
 
+            for group_index, group in enumerate(groups):
+                for key in group:
+                    split_group_counts[key][group_index] += 1
+
             final_order = []
             for group, schedule in zip(groups, schedules):
                 for home, away in schedule:
@@ -750,6 +775,10 @@ def simulate_league(
                     [count / runs for count in counts],
                     separators=(",", ":"),
                 ),
+                "split_group_probabilities_json": json.dumps(
+                    [count / runs for count in split_group_counts[key]],
+                    separators=(",", ":"),
+                ),
             }
         )
 
@@ -778,6 +807,7 @@ def simulate_league(
         "format_label": rule.format_label,
         "regular_stage_target_matches": regular_target,
         "split_group_count": len(rule.split_groups),
+        "split_group_keys_json": json.dumps(split_group_keys, separators=(",", ":")),
     }
     return meta, team_rows
 
@@ -822,6 +852,7 @@ def main() -> int:
                 format_label TEXT NOT NULL,
                 regular_stage_target_matches INTEGER NOT NULL,
                 split_group_count INTEGER NOT NULL,
+                split_group_keys_json TEXT NOT NULL,
                 generated_at_ms INTEGER NOT NULL,
                 PRIMARY KEY (league_code, season)
             );
@@ -844,6 +875,7 @@ def main() -> int:
                 top2_probability REAL NOT NULL,
                 top4_probability REAL NOT NULL,
                 position_probabilities_json TEXT NOT NULL,
+                split_group_probabilities_json TEXT NOT NULL,
                 generated_at_ms INTEGER NOT NULL,
                 PRIMARY KEY (league_code, season, team_key)
             );
@@ -880,8 +912,8 @@ def main() -> int:
                     model_version,elo_model_version,average_elo_weight,
                     tie_break_model,mature_fixture_count,total_simulated_fixtures,
                     format_label,regular_stage_target_matches,split_group_count,
-                    generated_at_ms
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    split_group_keys_json,generated_at_ms
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 (
                     meta["league_code"], meta["country"], meta["league_name"], meta["season"],
@@ -890,7 +922,7 @@ def main() -> int:
                     meta["average_elo_weight"], meta["tie_break_model"],
                     meta["mature_fixture_count"], meta["total_simulated_fixtures"],
                     meta["format_label"], meta["regular_stage_target_matches"],
-                    meta["split_group_count"], generated_at_ms,
+                    meta["split_group_count"], meta["split_group_keys_json"], generated_at_ms,
                 ),
             )
             con.executemany(
@@ -901,8 +933,8 @@ def main() -> int:
                     current_goal_difference,current_goals_for,
                     expected_position,expected_points,title_probability,
                     top2_probability,top4_probability,position_probabilities_json,
-                    generated_at_ms
-                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    split_group_probabilities_json,generated_at_ms
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                 """,
                 [
                     (
@@ -911,7 +943,7 @@ def main() -> int:
                         row["current_goal_difference"], row["current_goals_for"],
                         row["expected_position"], row["expected_points"], row["title_probability"],
                         row["top2_probability"], row["top4_probability"], row["position_probabilities_json"],
-                        generated_at_ms,
+                        row["split_group_probabilities_json"], generated_at_ms,
                     )
                     for row in rows
                 ],
