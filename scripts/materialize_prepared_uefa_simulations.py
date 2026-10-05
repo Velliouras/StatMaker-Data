@@ -57,34 +57,84 @@ def response_items(payload: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def find_league_id(api_key: str, competition: dict[str, Any], season: int) -> int:
+    del season  # league IDs are stable; season is applied only on the fixtures request.
+    competition_id = str(competition.get("competitionId") or "")
     wanted = str(competition["name"])
+
+    preferred_names = {
+        "champions_league": {
+            "uefachampionsleague": 4.0,
+            "championsleague": 3.0,
+        },
+        "europa_league": {
+            "uefaeuropaleague": 4.0,
+            "europaleague": 3.0,
+        },
+        "conference_league": {
+            "uefaconferenceleague": 4.0,
+            "uefaeuropaconferenceleague": 4.0,
+            "conferenceleague": 3.0,
+            "europaconferenceleague": 3.0,
+        },
+    }
+    blocked_tokens = (
+        "ofc", "afc", "caf", "concacaf", "conmebol",
+        "women", "womens", "youth", "u19", "u20", "u21",
+    )
+
     candidates: list[tuple[float, int, str, str]] = []
+    seen_ids: set[int] = set()
     for term in competition.get("apiSearchTerms") or [wanted]:
         # API-Football does not allow search+season in the same leagues request.
-        # Resolve the stable v3 league id by name, then use season on the fixtures call.
         payload = api_get(api_key, "leagues", {"search": term})
         for row in response_items(payload):
             league = row.get("league") if isinstance(row.get("league"), dict) else {}
             country = row.get("country") if isinstance(row.get("country"), dict) else {}
             league_id = league.get("id")
-            name = str(league.get("name") or "")
-            country_name = str(country.get("name") or "")
-            if league_id is None:
+            name = str(league.get("name") or "").strip()
+            country_name = str(country.get("name") or "").strip()
+            if league_id is None or not name:
                 continue
-            score = SequenceMatcher(None, norm(wanted), norm(name)).ratio()
-            if "conference" in norm(wanted) and "conference" not in norm(name):
-                score -= 0.35
-            if "europa" in norm(wanted) and "conference" in norm(name):
-                score -= 0.35
-            if country_name.lower() in {"world", "europe"}:
-                score += 0.10
-            candidates.append((score, int(league_id), name, country_name))
+            league_id = int(league_id)
+            if league_id in seen_ids:
+                continue
+            seen_ids.add(league_id)
+
+            key = norm(name)
+            if any(token in key for token in blocked_tokens):
+                continue
+            if competition_id == "champions_league" and (
+                "europa" in key or "conference" in key
+            ):
+                continue
+            if competition_id == "europa_league" and (
+                "europa" not in key or "conference" in key
+            ):
+                continue
+            if competition_id == "conference_league" and "conference" not in key:
+                continue
+
+            preferred = preferred_names.get(competition_id, {}).get(key, 0.0)
+            similarity = SequenceMatcher(None, norm(wanted), key).ratio()
+            # Exact UEFA / canonical competition naming dominates fuzzy similarity.
+            score = preferred + similarity
+            candidates.append((score, league_id, name, country_name))
+
     if not candidates:
-        raise RuntimeError(f"{wanted}: API-Football league lookup returned no candidates")
+        raise RuntimeError(
+            f"{wanted}: no safe UEFA competition candidate returned by API-Football"
+        )
     candidates.sort(reverse=True)
     score, league_id, name, country = candidates[0]
-    if score < 0.65:
-        raise RuntimeError(f"{wanted}: unsafe API league match {name} ({country}) score={score:.3f}")
+    if score < 1.65:
+        detail = " | ".join(
+            f"{candidate_name}#{candidate_id}:{candidate_score:.3f}"
+            for candidate_score, candidate_id, candidate_name, _ in candidates[:8]
+        )
+        raise RuntimeError(
+            f"{wanted}: unsafe API league match {name} ({country}) "
+            f"score={score:.3f}; candidates={detail}"
+        )
     print("UEFA_API_LEAGUE", wanted, league_id, name, country, f"score={score:.3f}")
     return league_id
 
