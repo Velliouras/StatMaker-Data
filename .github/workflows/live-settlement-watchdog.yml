@@ -9,10 +9,9 @@ on:
       # Updating the keeper must bootstrap it immediately; no provider calls happen here.
       - '.github/workflows/live-settlement-watchdog.yml'
   schedule:
-    # GitHub scheduled events are best-effort and can be delayed/dropped. Run one keeper
-    # every four hours, away from common cron boundaries. Each keeper remains alive for
-    # almost six hours, so a delayed replacement does not create a settlement blind spot.
-    - cron: "13 0,4,8,12,16,20 * * *"
+    # One-shot health check every 15 minutes. Do not occupy a hosted runner for hours.
+    # Offset from the publisher schedule so this only fills genuine missed cadence gaps.
+    - cron: "8,23,38,53 * * * *"
 
 permissions:
   actions: write
@@ -25,7 +24,7 @@ concurrency:
 jobs:
   ensure-fresh-live-settlement:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
+    timeout-minutes: 5
     steps:
       - name: Maintain live settlement cadence
         env:
@@ -39,7 +38,6 @@ jobs:
           import datetime as dt
           import json
           import os
-          import time
           import urllib.error
           import urllib.request
 
@@ -95,9 +93,8 @@ jobs:
                       raise RuntimeError(f"Unexpected dispatch status: {response.status}")
               print("LIVE_SETTLEMENT_WATCHDOG_DISPATCHED", reason, flush=True)
 
-          # Check every three minutes for roughly 5h42m. The four-hour scheduled
-          # replacement normally cancels this keeper and starts a fresh one first.
-          for check in range(115):
+          # One-shot check: never hold a GitHub-hosted runner while idle.
+          for check in range(1):
               now = dt.datetime.now(dt.timezone.utc)
               try:
                   latest = latest_publisher()
@@ -134,13 +131,9 @@ jobs:
                       )
 
                       if status in {"queued", "in_progress", "waiting", "requested", "pending"}:
-                          # The publisher has an 8-minute job timeout. Allow extra queue/setup
-                          # time before replacing a genuinely stuck active run.
-                          if created_age > 22.0:
-                              should_dispatch = True
-                              reason = f"stale_active_{created_age:.1f}m"
-                          else:
-                              reason = "publisher_already_active"
+                          # Runner delays are infrastructure pressure, not a reason to
+                          # create duplicate settlement runs behind the same writer lock.
+                          reason = "publisher_already_active"
                       elif conclusion != "success":
                           should_dispatch = True
                           reason = f"latest_{conclusion or 'unknown'}"
@@ -158,7 +151,7 @@ jobs:
                       print("LIVE_SETTLEMENT_WATCHDOG_OK", reason, flush=True)
 
               except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, RuntimeError) as exc:
-                  # A transient GitHub API failure must not kill the long-lived keeper.
+                  # A transient GitHub API failure must not fail the one-shot guard.
                   print(
                       "LIVE_SETTLEMENT_WATCHDOG_TRANSIENT_ERROR",
                       type(exc).__name__,
@@ -166,6 +159,4 @@ jobs:
                       flush=True,
                   )
 
-              if check < 114:
-                  time.sleep(180)
           PY
