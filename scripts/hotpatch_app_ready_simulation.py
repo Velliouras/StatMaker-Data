@@ -92,6 +92,17 @@ def main() -> int:
             cwd=ROOT,
             check=True,
         )
+        subprocess.run(
+            [
+                "python",
+                str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
+                str(db_path),
+                "--runs",
+                "10000",
+            ],
+            cwd=ROOT,
+            check=True,
+        )
 
         con = sqlite3.connect(db_path)
         try:
@@ -111,6 +122,9 @@ def main() -> int:
             league_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_simulation_meta").fetchone()[0])
             league_team_rows = int(con.execute("SELECT COUNT(*) FROM prepared_league_team_simulations").fetchone()[0])
             league_runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta").fetchone()[0])
+            uefa_rows = int(con.execute("SELECT COUNT(*) FROM prepared_uefa_simulation_meta").fetchone()[0])
+            uefa_team_rows = int(con.execute("SELECT COUNT(*) FROM prepared_uefa_team_simulations").fetchone()[0])
+            uefa_runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta").fetchone()[0])
             quick = con.execute("PRAGMA quick_check").fetchone()
             if not quick or quick[0] != "ok":
                 raise SystemExit(f"Hot-patched DB quick_check failed: {quick}")
@@ -135,6 +149,11 @@ def main() -> int:
             raise SystemExit(
                 "Invalid league simulation "
                 f"leagues={league_rows} teams={league_team_rows} runs={league_runs}"
+            )
+        if uefa_rows != 3 or uefa_team_rows != 108 or uefa_runs < 10000:
+            raise SystemExit(
+                "Invalid UEFA simulation "
+                f"competitions={uefa_rows} teams={uefa_team_rows} runs={uefa_runs}"
             )
 
         bundle_manifest = json.loads(bundle_manifest_path.read_text(encoding="utf-8"))
@@ -180,6 +199,11 @@ def main() -> int:
     metadata["preparedLeagueSimulationCount"] = league_rows
     metadata["preparedLeagueSimulationTeamCount"] = league_team_rows
     metadata["preparedLeagueSimulationRuns"] = league_runs
+    metadata["preparedUefaSimulationContract"] = "uefa-club-monte-carlo-v1"
+    metadata["preparedUefaSimulationStrengthModel"] = "uefa-seeding-elo-v1"
+    metadata["preparedUefaSimulationCount"] = uefa_rows
+    metadata["preparedUefaSimulationTeamCount"] = uefa_team_rows
+    metadata["preparedUefaSimulationRuns"] = uefa_runs
     metadata["simulationHotPublish"] = True
 
     payload["generatedAt"] = now
@@ -188,7 +212,8 @@ def main() -> int:
             str(payload.get("contentVersion") or ""), new_sha,
             str(rows), str(match_rows), str(match_explorer_rows), str(runs),
             str(elo_rows), str(elo_meta_rows),
-            str(league_rows), str(league_team_rows), str(league_runs), now
+            str(league_rows), str(league_team_rows), str(league_runs),
+            str(uefa_rows), str(uefa_team_rows), str(uefa_runs), now
         ]
     )
     payload["contentVersion"] = hashlib.sha256(seed.encode("utf-8")).hexdigest()
@@ -206,6 +231,9 @@ def main() -> int:
         f"league_rows={league_rows}",
         f"league_team_rows={league_team_rows}",
         f"league_runs={league_runs}",
+        f"uefa_rows={uefa_rows}",
+        f"uefa_team_rows={uefa_team_rows}",
+        f"uefa_runs={uefa_runs}",
         f"bundle={new_name}",
         f"sha256={new_sha}",
     )
