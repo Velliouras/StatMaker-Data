@@ -1,0 +1,440 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-05T11:08:14Z",
+  "requestedDays": 30,
+  "processedDays": 27,
+  "processedDates": [
+    "2026-09-05",
+    "2026-09-06",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-12",
+    "2026-09-13",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-19",
+    "2026-09-20",
+    "2026-09-21",
+    "2026-09-24",
+    "2026-09-25",
+    "2026-09-26",
+    "2026-09-27",
+    "2026-09-28",
+    "2026-09-29",
+    "2026-09-30",
+    "2026-10-02",
+    "2026-10-03",
+    "2026-10-04"
+  ],
+  "skippedDays": [
+    {
+      "date": "2026-09-22",
+      "reason": "NO_TARGET_CANDIDATES"
+    },
+    {
+      "date": "2026-09-23",
+      "reason": "NO_TARGET_CANDIDATES"
+    },
+    {
+      "date": "2026-10-01",
+      "reason": "NO_TARGET_CANDIDATES"
+    }
+  ],
+  "window": {
+    "from": "2026-09-05",
+    "to": "2026-10-04"
+  },
+  "snapshotLocalHour": 11,
+  "simulationRuns": 10000,
+  "eloOverlayRowsApplied": 25311,
+  "weights": [
+    "0.00",
+    "0.15",
+    "0.20",
+    "0.25",
+    "0.30",
+    "0.35",
+    "0.40"
+  ],
+  "split": {
+    "trainingDates": [
+      "2026-09-05",
+      "2026-09-06",
+      "2026-09-07",
+      "2026-09-08",
+      "2026-09-09",
+      "2026-09-10",
+      "2026-09-11",
+      "2026-09-12",
+      "2026-09-13",
+      "2026-09-14",
+      "2026-09-15",
+      "2026-09-16",
+      "2026-09-17",
+      "2026-09-18",
+      "2026-09-19",
+      "2026-09-20",
+      "2026-09-21",
+      "2026-09-24",
+      "2026-09-25",
+      "2026-09-26"
+    ],
+    "holdoutDates": [
+      "2026-09-27",
+      "2026-09-28",
+      "2026-09-29",
+      "2026-09-30",
+      "2026-10-02",
+      "2026-10-03",
+      "2026-10-04"
+    ]
+  },
+  "contract": {
+    "thresholdsChanged": false,
+    "rankingCoefficientsChanged": false,
+    "onePickPerMatchChanged": false,
+    "onlyVariable": "base/simulation probability blend weight",
+    "legacyBaselineWeight": 0.3,
+    "eloModel": "team-elo-v1",
+    "eloSimulation": "match-monte-carlo-v2-elo"
+  },
+  "training": {
+    "legacy": {
+      "picks": 624,
+      "graded": 578,
+      "unresolved": 46,
+      "won": 351,
+      "lost": 225,
+      "void": 2,
+      "hitRate": 0.609375,
+      "roi": -0.005083044982699138,
+      "averageOdds": 1.6481072664359857,
+      "averageModelProbability": 0.7376911058231976,
+      "settlementCoverage": 0.9262820512820513
+    },
+    "elo": {
+      "0.00": {
+        "picks": 638,
+        "graded": 598,
+        "unresolved": 40,
+        "won": 360,
+        "lost": 235,
+        "void": 3,
+        "hitRate": 0.6050420168067226,
+        "roi": -0.00758193979933147,
+        "averageOdds": 1.6519331103678927,
+        "averageModelProbability": 0.7516853152687353,
+        "settlementCoverage": 0.9373040752351097
+      },
+      "0.15": {
+        "picks": 615,
+        "graded": 571,
+        "unresolved": 44,
+        "won": 347,
+        "lost": 222,
+        "void": 2,
+        "hitRate": 0.6098418277680141,
+        "roi": -0.0029176882661999426,
+        "averageOdds": 1.650252189141856,
+        "averageModelProbability": 0.7444890242099301,
+        "settlementCoverage": 0.9284552845528455
+      },
+      "0.20": {
+        "picks": 616,
+        "graded": 569,
+        "unresolved": 47,
+        "won": 345,
+        "lost": 222,
+        "void": 2,
+        "hitRate": 0.6084656084656085,
+        "roi": -0.004226713532513333,
+        "averageOdds": 1.6494253075571177,
+        "averageModelProbability": 0.7426596830394214,
+        "settlementCoverage": 0.9237012987012987
+      },
+      "0.25": {
+        "picks": 619,
+        "graded": 572,
+        "unresolved": 47,
+        "won": 348,
+        "lost": 222,
+        "void": 2,
+        "hitRate": 0.6105263157894737,
+        "roi": -0.0016188811188813956,
+        "averageOdds": 1.6477412587412585,
+        "averageModelProbability": 0.7394094581634817,
+        "settlementCoverage": 0.9240710823909531
+      },
+      "0.30": {
+        "picks": 619,
+        "graded": 572,
+        "unresolved": 47,
+        "won": 348,
+        "lost": 222,
+        "void": 2,
+        "hitRate": 0.6105263157894737,
+        "roi": -0.0019912587412589575,
+        "averageOdds": 1.6462779720279719,
+        "averageModelProbability": 0.7377918470407816,
+        "settlementCoverage": 0.9240710823909531
+      },
+      "0.35": {
+        "picks": 617,
+        "graded": 571,
+        "unresolved": 46,
+        "won": 345,
+        "lost": 224,
+        "void": 2,
+        "hitRate": 0.6063268892794376,
+        "roi": -0.009035026269702262,
+        "averageOdds": 1.6466479859894918,
+        "averageModelProbability": 0.7362799676496938,
+        "settlementCoverage": 0.9254457050243112
+      },
+      "0.40": {
+        "picks": 618,
+        "graded": 572,
+        "unresolved": 46,
+        "won": 344,
+        "lost": 226,
+        "void": 2,
+        "hitRate": 0.6035087719298246,
+        "roi": -0.01379370629370627,
+        "averageOdds": 1.6473304195804195,
+        "averageModelProbability": 0.7342544552625868,
+        "settlementCoverage": 0.9255663430420712
+      }
+    }
+  },
+  "holdout": {
+    "legacy": {
+      "picks": 14,
+      "graded": 14,
+      "unresolved": 0,
+      "won": 8,
+      "lost": 6,
+      "void": 0,
+      "hitRate": 0.5714285714285714,
+      "roi": -0.04749999999999994,
+      "averageOdds": 1.6884285714285714,
+      "averageModelProbability": 0.7245173591439279,
+      "settlementCoverage": 1.0
+    },
+    "elo": {
+      "0.00": {
+        "picks": 16,
+        "graded": 16,
+        "unresolved": 0,
+        "won": 10,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.625,
+        "roi": 0.07281250000000017,
+        "averageOdds": 1.71675,
+        "averageModelProbability": 0.7204966161857974,
+        "settlementCoverage": 1.0
+      },
+      "0.15": {
+        "picks": 15,
+        "graded": 15,
+        "unresolved": 0,
+        "won": 9,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.6,
+        "roi": -0.010999999999999944,
+        "averageOdds": 1.6758666666666666,
+        "averageModelProbability": 0.7240916301935503,
+        "settlementCoverage": 1.0
+      },
+      "0.20": {
+        "picks": 14,
+        "graded": 14,
+        "unresolved": 0,
+        "won": 8,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.5714285714285714,
+        "roi": -0.04749999999999994,
+        "averageOdds": 1.6884285714285714,
+        "averageModelProbability": 0.7264147211397377,
+        "settlementCoverage": 1.0
+      },
+      "0.25": {
+        "picks": 14,
+        "graded": 14,
+        "unresolved": 0,
+        "won": 8,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.5714285714285714,
+        "roi": -0.04749999999999994,
+        "averageOdds": 1.6884285714285714,
+        "averageModelProbability": 0.7254821115704041,
+        "settlementCoverage": 1.0
+      },
+      "0.30": {
+        "picks": 14,
+        "graded": 14,
+        "unresolved": 0,
+        "won": 8,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.5714285714285714,
+        "roi": -0.04749999999999994,
+        "averageOdds": 1.6884285714285714,
+        "averageModelProbability": 0.7245495020010707,
+        "settlementCoverage": 1.0
+      },
+      "0.35": {
+        "picks": 14,
+        "graded": 14,
+        "unresolved": 0,
+        "won": 8,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.5714285714285714,
+        "roi": -0.04749999999999994,
+        "averageOdds": 1.6884285714285714,
+        "averageModelProbability": 0.7236168924317373,
+        "settlementCoverage": 1.0
+      },
+      "0.40": {
+        "picks": 14,
+        "graded": 14,
+        "unresolved": 0,
+        "won": 8,
+        "lost": 6,
+        "void": 0,
+        "hitRate": 0.5714285714285714,
+        "roi": -0.025857142857142863,
+        "averageOdds": 1.7100714285714285,
+        "averageModelProbability": 0.7217326553307911,
+        "settlementCoverage": 1.0
+      }
+    }
+  },
+  "full": {
+    "legacy": {
+      "picks": 638,
+      "graded": 592,
+      "unresolved": 46,
+      "won": 359,
+      "lost": 231,
+      "void": 2,
+      "hitRate": 0.6084745762711864,
+      "roi": -0.006086148648648951,
+      "averageOdds": 1.64906081081081,
+      "averageModelProbability": 0.7373795645165935,
+      "settlementCoverage": 0.9278996865203761
+    },
+    "elo": {
+      "0.00": {
+        "picks": 654,
+        "graded": 614,
+        "unresolved": 40,
+        "won": 370,
+        "lost": 241,
+        "void": 3,
+        "hitRate": 0.6055646481178396,
+        "roi": -0.005486970684039505,
+        "averageOdds": 1.653622149837133,
+        "averageModelProbability": 0.7508725804392125,
+        "settlementCoverage": 0.9388379204892966
+      },
+      "0.15": {
+        "picks": 630,
+        "graded": 586,
+        "unresolved": 44,
+        "won": 356,
+        "lost": 228,
+        "void": 2,
+        "hitRate": 0.6095890410958904,
+        "roi": -0.003124573378840008,
+        "averageOdds": 1.6509078498293508,
+        "averageModelProbability": 0.7439669066156542,
+        "settlementCoverage": 0.9301587301587302
+      },
+      "0.20": {
+        "picks": 630,
+        "graded": 583,
+        "unresolved": 47,
+        "won": 353,
+        "lost": 228,
+        "void": 2,
+        "hitRate": 0.6075731497418244,
+        "roi": -0.005265866209262717,
+        "averageOdds": 1.6503619210977696,
+        "averageModelProbability": 0.7422695810383998,
+        "settlementCoverage": 0.9253968253968254
+      },
+      "0.25": {
+        "picks": 633,
+        "graded": 586,
+        "unresolved": 47,
+        "won": 356,
+        "lost": 228,
+        "void": 2,
+        "hitRate": 0.6095890410958904,
+        "roi": -0.002715017064846818,
+        "averageOdds": 1.6487133105802043,
+        "averageModelProbability": 0.7390767229206436,
+        "settlementCoverage": 0.9257503949447078
+      },
+      "0.30": {
+        "picks": 633,
+        "graded": 586,
+        "unresolved": 47,
+        "won": 356,
+        "lost": 228,
+        "void": 2,
+        "hitRate": 0.6095890410958904,
+        "roi": -0.003078498293515701,
+        "averageOdds": 1.6472849829351532,
+        "averageModelProbability": 0.7374754770227683,
+        "settlementCoverage": 0.9257503949447078
+      },
+      "0.35": {
+        "picks": 631,
+        "graded": 585,
+        "unresolved": 46,
+        "won": 353,
+        "lost": 230,
+        "void": 2,
+        "hitRate": 0.6054888507718696,
+        "roi": -0.009955555555555674,
+        "averageOdds": 1.6476478632478626,
+        "averageModelProbability": 0.7359769196957597,
+        "settlementCoverage": 0.9270998415213946
+      },
+      "0.40": {
+        "picks": 632,
+        "graded": 586,
+        "unresolved": 46,
+        "won": 352,
+        "lost": 232,
+        "void": 2,
+        "hitRate": 0.6027397260273972,
+        "roi": -0.014081911262798749,
+        "averageOdds": 1.6488293515358357,
+        "averageModelProbability": 0.733955299632817,
+        "settlementCoverage": 0.9272151898734177
+      }
+    }
+  },
+  "recommendation": {
+    "trainingSelectedWeight": 0.25,
+    "holdoutGraded": 14,
+    "enoughHoldout": false,
+    "beatsCurrent30OnHitRateAndRoi": true,
+    "beatsLegacyOnHitRateAndRoi": true,
+    "promoteWeightChange": false,
+    "reason": "holdout does not confirm a robust improvement on both hit-rate and ROI"
+  }
+}
