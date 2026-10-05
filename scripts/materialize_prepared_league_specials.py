@@ -725,4 +725,211 @@ def _cross_schedule_mls(
     fixtures: list[dict[str, Any]],
     east: list[str],
     west: list[str],
-) -> list[tuple[str, s
+) -> list[tuple[str, str]] | None:
+    ordered_counts, _, home_games = ctx["count_pairs"](fixtures)
+    used: set[tuple[str, str]] = set()
+    degree = {k: 0 for k in [*east, *west]}
+    for f in fixtures:
+        h, a = _norm(ctx, f.get("home_team")), _norm(ctx, f.get("away_team"))
+        if (h in east and a in west) or (h in west and a in east):
+            pair = tuple(sorted((h, a)))
+            if pair not in used:
+                used.add(pair)
+                degree[h] += 1
+                degree[a] += 1
+    if any(degree[k] > 6 for k in degree):
+        return None
+    schedule: list[tuple[str, str]] = []
+    # Greedy bipartite fill with retries under deterministic rotations.
+    for _ in range(500):
+        if all(degree[k] == 6 for k in degree):
+            return schedule
+        e_candidates = [k for k in east if degree[k] < 6]
+        if not e_candidates:
+            return None
+        e = sorted(e_candidates, key=lambda k: (degree[k], k))[0]
+        w_candidates = [k for k in west if degree[k] < 6 and tuple(sorted((e, k))) not in used]
+        if not w_candidates:
+            # Relax only when provider cache contains an unusual repeat; keep six cross matches/team.
+            w_candidates = [k for k in west if degree[k] < 6]
+            if not w_candidates:
+                return None
+        w = sorted(w_candidates, key=lambda k: (degree[k], k))[0]
+        home, away = ctx["choose_home"](e, w, ordered_counts, home_games)
+        schedule.append((home, away))
+        used.add(tuple(sorted((e, w))))
+        degree[e] += 1
+        degree[w] += 1
+        ordered_counts[(home, away)] = ordered_counts.get((home, away), 0) + 1
+        home_games[home] = home_games.get(home, 0) + 1
+    return None
+
+
+def _usa(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int, elo_scope: Any, ctx: dict[str, Any]):
+    table = ctx["build_table"](fixtures)
+    if len(table) != 30:
+        return None
+    keys = sorted(table)
+    if any(k not in elo_scope.teams for k in keys):
+        return None
+    names = {k: table[k].name for k in keys}
+    east = _resolve_group(ctx, MLS_EAST, keys, names)
+    west = _resolve_group(ctx, MLS_WEST, keys, names)
+    if east is None or west is None or set(east) | set(west) != set(keys):
+        return None
+    east_done = [f for f in fixtures if _norm(ctx, f.get("home_team")) in east and _norm(ctx, f.get("away_team")) in east]
+    west_done = [f for f in fixtures if _norm(ctx, f.get("home_team")) in west and _norm(ctx, f.get("away_team")) in west]
+    intra = [
+        *ctx["remaining_stage_schedule"](east, ctx["ORDERED"], 1, east_done),
+        *ctx["remaining_stage_schedule"](west, ctx["ORDERED"], 1, west_done),
+    ]
+    cross = _cross_schedule_mls(ctx, fixtures, east, west)
+    if cross is None:
+        return None
+    schedule = [*intra, *cross]
+    history = ctx["LeagueHistory"](fixtures)
+    model = ctx["MatchModel"](history, elo_scope, "USA", "2026")
+    packed = _prepare_schedule(ctx, schedule, model, runs, "USA|2026|regular")
+    if packed is None:
+        return None
+    prepared, weights, mature = packed
+    base_p, base_gf, base_ga = _state_from_table(table, keys)
+    position_counts, point_totals = _init_counts(keys)
+    rng = random.Random(2026100505)
+
+    def conference_winner(ranking: list[str]) -> tuple[str, list[str], list[str]]:
+        wild = _single_winner(ranking[7], ranking[8], model, elo_scope, rng, False)
+        round1_pairs = [(ranking[0], wild), (ranking[1], ranking[6]), (ranking[2], ranking[5]), (ranking[3], ranking[4])]
+        r1_winners, r1_losers = [], []
+        for high, low in round1_pairs:
+            winner = _best_of_three(high, low, model, elo_scope, rng)
+            r1_winners.append(winner)
+            r1_losers.append(low if winner == high else high)
+        # Fixed bracket: 1/8-9 vs 4/5; 2/7 vs 3/6.
+        semi_pairs = [(r1_winners[0], r1_winners[3]), (r1_winners[1], r1_winners[2])]
+        semi_winners, semi_losers = [], []
+        for a, b in semi_pairs:
+            high, low = (a, b) if ranking.index(a) < ranking.index(b) else (b, a)
+            winner = _single_winner(high, low, model, elo_scope, rng, False)
+            semi_winners.append(winner)
+            semi_losers.append(low if winner == high else high)
+        a, b = semi_winners
+        high, low = (a, b) if ranking.index(a) < ranking.index(b) else (b, a)
+        winner = _single_winner(high, low, model, elo_scope, rng, False)
+        conf_loser = low if winner == high else high
+        return winner, [conf_loser, *semi_losers], r1_losers
+
+    for run_idx in range(runs):
+        points, gf, ga = dict(base_p), dict(base_gf), dict(base_ga)
+        _apply_prepared(ctx, prepared, run_idx, points, gf, ga)
+        east_rank = _rank(ctx, east, points, gf, ga, names)
+        west_rank = _rank(ctx, west, points, gf, ga, names)
+        east_winner, east_late_losers, east_r1_losers = conference_winner(east_rank)
+        west_winner, west_late_losers, west_r1_losers = conference_winner(west_rank)
+        champion = _single_winner(east_winner, west_winner, model, elo_scope, rng, neutral=True)
+        runner = west_winner if champion == east_winner else east_winner
+        regular_combined = _rank(ctx, keys, points, gf, ga, names)
+        order = _unique_order(
+            [champion, runner, east_late_losers[0], west_late_losers[0], *east_late_losers[1:], *west_late_losers[1:], *east_r1_losers, *west_r1_losers],
+            regular_combined,
+        )
+        _record_run(order, keys, points, position_counts, point_totals)
+
+    return _rows_and_meta(
+        ctx, entry, fixtures, runs, elo_scope, table, keys, names,
+        position_counts, point_totals, weights, mature,
+        "34-match East/West regular season + 18-team MLS Cup Playoffs",
+        510, len(schedule) + 33,
+    )
+
+
+def _uruguay(entry: dict[str, Any], fixtures: list[dict[str, Any]], runs: int, elo_scope: Any, ctx: dict[str, Any]):
+    apertura_fx = [f for f in fixtures if _date(ctx, f) < "2026-05-12"]
+    clausura_fx = [f for f in fixtures if _date(ctx, f) >= URU_CLAUSURA_START]
+    intermedio_group_fx = [f for f in fixtures if "2026-05-12" <= _date(ctx, f) < URU_INTERMEDIO_FINAL]
+    # The Aug-5 Intermedio final does not count toward the Tabla Anual.
+    annual_fx = [f for f in fixtures if _date(ctx, f) != URU_INTERMEDIO_FINAL]
+    apertura_table = ctx["build_table"](apertura_fx)
+    clausura_table = ctx["build_table"](clausura_fx)
+    annual_table = ctx["build_table"](annual_fx)
+    if len(apertura_table) != 16 or len(clausura_table) != 16 or len(annual_table) != 16:
+        return None
+    keys = sorted(annual_table)
+    if any(k not in elo_scope.teams for k in keys):
+        return None
+    names = {k: annual_table[k].name for k in keys}
+    apertura_rank = ctx["current_ranking"](apertura_table)
+    apertura_champ = apertura_rank[0]
+    # Clausura is reverse home/away of Apertura: across both stages every ordered pair occurs once.
+    league_only = [*apertura_fx, *clausura_fx]
+    schedule = ctx["remaining_stage_schedule"](keys, ctx["ORDERED"], 1, league_only)
+    history = ctx["LeagueHistory"](fixtures)
+    model = ctx["MatchModel"](history, elo_scope, "URU", "2026")
+    packed = _prepare_schedule(ctx, schedule, model, runs, "URU|2026|clausura")
+    if packed is None:
+        return None
+    prepared, weights, mature = packed
+    annual_p, annual_gf, annual_ga = _state_from_table(annual_table, keys)
+    cl_p, cl_gf, cl_ga = _state_from_table(clausura_table, keys)
+    position_counts, point_totals = _init_counts(keys)
+    rng = random.Random(2026100506)
+
+    for run_idx in range(runs):
+        points, gf, ga = dict(annual_p), dict(annual_gf), dict(annual_ga)
+        cp, cgf, cga = dict(cl_p), dict(cl_gf), dict(cl_ga)
+        for home, away, home_draws, away_draws in prepared:
+            hg, ag = home_draws[run_idx], away_draws[run_idx]
+            ctx["apply_score"](home, away, hg, ag, points, gf, ga)
+            ctx["apply_score"](home, away, hg, ag, cp, cgf, cga)
+        annual = _rank(ctx, keys, points, gf, ga, names)
+        clausura_rank = _rank(ctx, keys, cp, cgf, cga, names)
+        clausura_champ = clausura_rank[0]
+        annual_leader = annual[0]
+
+        if apertura_champ == clausura_champ:
+            if annual_leader == apertura_champ:
+                champion = apertura_champ
+                runner = annual[1]
+            else:
+                champion = _single_winner(apertura_champ, annual_leader, model, elo_scope, rng, neutral=True)
+                runner = annual_leader if champion == apertura_champ else apertura_champ
+        else:
+            semi = _single_winner(apertura_champ, clausura_champ, model, elo_scope, rng, neutral=True)
+            if semi == annual_leader:
+                champion = semi
+                runner = clausura_champ if semi == apertura_champ else apertura_champ
+            else:
+                champion = _single_winner(semi, annual_leader, model, elo_scope, rng, neutral=True)
+                runner = annual_leader if champion == semi else semi
+        order = _unique_order([champion, runner], annual)
+        _record_run(order, keys, points, position_counts, point_totals)
+
+    return _rows_and_meta(
+        ctx, entry, fixtures, runs, elo_scope, annual_table, keys, names,
+        position_counts, point_totals, weights, mature,
+        "Apertura + Intermedio + Clausura + Tabla Anual championship definition",
+        296, len(schedule) + 2,
+    )
+
+
+def simulate_special_league(
+    entry: dict[str, Any],
+    fixtures: list[dict[str, Any]],
+    runs: int,
+    elo_scope: Any,
+    ctx: dict[str, Any],
+):
+    code = str(entry.get("league_code") or "")
+    if code == "ARG":
+        return _argentina(entry, fixtures, runs, elo_scope, ctx)
+    if code == "COL":
+        return _colombia(entry, fixtures, runs, elo_scope, ctx)
+    if code == "MEX":
+        return _mexico(entry, fixtures, runs, elo_scope, ctx)
+    if code == "PER":
+        return _peru(entry, fixtures, runs, elo_scope, ctx)
+    if code == "USA":
+        return _usa(entry, fixtures, runs, elo_scope, ctx)
+    if code == "URU":
+        return _uruguay(entry, fixtures, runs, elo_scope, ctx)
+    return None
