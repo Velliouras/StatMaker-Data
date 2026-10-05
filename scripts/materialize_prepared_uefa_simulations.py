@@ -60,7 +60,9 @@ def find_league_id(api_key: str, competition: dict[str, Any], season: int) -> in
     wanted = str(competition["name"])
     candidates: list[tuple[float, int, str, str]] = []
     for term in competition.get("apiSearchTerms") or [wanted]:
-        payload = api_get(api_key, "leagues", {"search": term, "season": season})
+        # API-Football does not allow search+season in the same leagues request.
+        # Resolve the stable v3 league id by name, then use season on the fixtures call.
+        payload = api_get(api_key, "leagues", {"search": term})
         for row in response_items(payload):
             league = row.get("league") if isinstance(row.get("league"), dict) else {}
             country = row.get("country") if isinstance(row.get("country"), dict) else {}
