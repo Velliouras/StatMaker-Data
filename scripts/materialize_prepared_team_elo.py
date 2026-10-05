@@ -86,7 +86,6 @@ def is_simulation_current_entry(row: dict[str, Any]) -> bool:
             )
         )
     )
-}
 
 
 @dataclass
