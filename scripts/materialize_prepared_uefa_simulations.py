@@ -308,6 +308,16 @@ class ScoreModel:
         exponent = (self.ratings[team_b] - self.ratings[team_a]) / RATING_SCALE
         return 1.0 / (1.0 + 10.0 ** exponent)
 
+    def draw_neutral(self, team_a: str, team_b: str, rng: random.Random) -> tuple[int, int]:
+        # Final venue is neutral: use the mean scoring environment and no home advantage.
+        base = max(0.15, (self.base_home + self.base_away) / 2.0)
+        diff = (self.ratings[team_a] - self.ratings[team_b]) / RATING_SCALE
+        diff = max(-1.5, min(1.5, diff))
+        shift = max(-0.85, min(0.85, GOAL_LOG_COEFF * diff))
+        a_cdf = poisson_cdf(max(0.15, min(4.50, base * math.exp(shift))))
+        b_cdf = poisson_cdf(max(0.15, min(4.50, base * math.exp(-shift))))
+        return draw_from_cdf(rng, a_cdf), draw_from_cdf(rng, b_cdf)
+
 
 def two_leg_winner(team_a: str, team_b: str, model: ScoreModel, rng: random.Random) -> str:
     # One home leg each; away goals do not apply.
@@ -323,17 +333,13 @@ def two_leg_winner(team_a: str, team_b: str, model: ScoreModel, rng: random.Rand
 
 
 def final_winner(team_a: str, team_b: str, model: ScoreModel, rng: random.Random) -> str:
-    # Neutral final: remove home advantage by selecting winner from neutral Elo after a score tie.
-    p = model.neutral_win_probability(team_a, team_b)
-    # Blend neutral Elo with one simulated neutral-style score using the regular scoring model in both orientations.
-    first = model.draw(team_a, team_b, rng)
-    second = model.draw(team_b, team_a, rng)
-    a = first[0] + second[1]
-    b = first[1] + second[0]
+    # UEFA final is one match at a neutral venue.
+    a, b = model.draw_neutral(team_a, team_b, rng)
     if a > b:
         return team_a
     if b > a:
         return team_b
+    p = model.neutral_win_probability(team_a, team_b)
     return team_a if rng.random() < p else team_b
 
 
