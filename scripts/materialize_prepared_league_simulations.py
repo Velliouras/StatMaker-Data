@@ -190,6 +190,21 @@ RULES: dict[str, LeagueRule] = {
         (StageSpec(6, UNORDERED, 1), StageSpec(6, UNORDERED, 1)),
         "33 rounds + championship/relegation groups",
     ),
+
+    # Final cache-backed expansion. Complex competitions are routed through
+    # simulate_special_league; ECU/MAR use the native stage engine.
+    "ECU": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, ORDERED, 1), StageSpec(6, ORDERED, 1), StageSpec(4, ORDERED, 1)),
+        "30 rounds + 6/6/4 final phase",
+    ),
+    "MAR": LeagueRule(ORDERED, 1, format_label="30-round double round-robin"),
+    "ARG": LeagueRule(UNORDERED, 1, format_label="Apertura/Clausura zones + annual champion"),
+    "COL": LeagueRule(UNORDERED, 1, format_label="Clausura + quadrangulares + final"),
+    "MEX": LeagueRule(UNORDERED, 1, format_label="Apertura + top-8 Liguilla"),
+    "PER": LeagueRule(UNORDERED, 1, format_label="Apertura/Clausura + national playoffs"),
+    "USA": LeagueRule(UNORDERED, 1, format_label="MLS conferences + Audi MLS Cup Playoffs"),
+    "URU": LeagueRule(UNORDERED, 1, format_label="Apertura/Intermedio/Clausura + championship playoff"),
 }
 
 SIMULATION_CACHE_CURRENT_CODES = {
@@ -197,6 +212,7 @@ SIMULATION_CACHE_CURRENT_CODES = {
     "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
     "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
     "KOR", "SWZ",
+    "ARG", "COL", "ECU", "MEX", "MAR", "PER", "USA", "URU",
 }
 
 
@@ -238,6 +254,7 @@ SPLIT_GROUP_KEYS: dict[str, tuple[str, ...]] = {
     "SVK": ("svk_championship_top6", "svk_relegation_bottom6"),
     "KOR": ("kor_final_a", "kor_final_b"),
     "SWZ": ("swz_championship_top6", "swz_relegation_bottom6"),
+    "ECU": ("ecu_title_top6", "ecu_sudamericana_7_12", "ecu_relegation_13_16"),
 }
 
 # Competition-specific point carry rules for the second phase.
@@ -722,6 +739,882 @@ def apply_points_only(home: str, away: str, hg: int, ag: int, points: dict[str, 
         points[away] += 1
 
 
+
+SPECIAL_SIMULATION_CODES = {"ARG", "COL", "MEX", "PER", "USA", "URU"}
+
+ARG_ZONE_A_LABELS = (
+    "Platense", "Defensa Y Justicia", "Central Cordoba de Santiago", "Lanus",
+    "Deportivo Riestra", "Talleres Cordoba", "Boca Juniors", "Estudiantes L.P.",
+    "Instituto Cordoba", "Gimnasia M.", "San Lorenzo", "Independiente",
+    "Newells Old Boys", "Union Santa Fe", "Velez Sarsfield",
+)
+ARG_ZONE_B_LABELS = (
+    "Argentinos JRS", "Aldosivi", "Atletico Tucuman", "Banfield",
+    "Barracas Central", "Belgrano Cordoba", "River Plate", "Gimnasia L.P.",
+    "Estudiantes de Rio Cuarto", "Independ. Rivadavia", "Huracan",
+    "Racing Club", "Rosario Central", "Sarmiento Junin", "Tigre",
+)
+
+MLS_EAST_LABELS = (
+    "Atlanta United FC", "Charlotte", "Chicago Fire", "FC Cincinnati",
+    "Columbus Crew", "DC United", "Inter Miami", "Montreal Impact",
+    "Nashville SC", "New England Revolution", "New York City FC",
+    "Orlando City SC", "Philadelphia Union", "New York Red Bulls", "Toronto FC",
+)
+MLS_WEST_LABELS = (
+    "Austin", "Colorado Rapids", "FC Dallas", "Houston Dynamo", "Los Angeles FC",
+    "Los Angeles Galaxy", "Minnesota United FC", "Portland Timbers",
+    "Real Salt Lake", "St. Louis City", "San Diego", "San Jose Earthquakes",
+    "Seattle Sounders", "Sporting Kansas City", "Vancouver Whitecaps",
+)
+
+EXTRA_CURRENT_TEAMS: dict[str, tuple[str, ...]] = {
+    "MAR": ("FAR Rabat",),
+}
+
+
+def resolve_team_label(team_keys: list[str], label: str) -> str | None:
+    target = norm(label)
+    if target in team_keys:
+        return target
+    candidates = [
+        key for key in team_keys
+        if target in key or key in target
+    ]
+    if len(candidates) == 1:
+        return candidates[0]
+    return None
+
+
+def resolve_group(team_keys: list[str], labels: tuple[str, ...], group_name: str) -> list[str]:
+    resolved: list[str] = []
+    for label in labels:
+        key = resolve_team_label(team_keys, label)
+        if key is None:
+            raise RuntimeError(f"{group_name}: cannot resolve team label {label!r}")
+        if key in resolved:
+            raise RuntimeError(f"{group_name}: duplicate resolved team {key}")
+        resolved.append(key)
+    if len(resolved) != len(labels):
+        raise RuntimeError(f"{group_name}: incomplete group resolution")
+    return resolved
+
+
+def add_extra_current_teams(
+    table: dict[str, TeamStanding],
+    league_code: str,
+    elo_scope: EloScope,
+) -> None:
+    for name in EXTRA_CURRENT_TEAMS.get(league_code, ()):
+        key = norm(name)
+        if key and key in elo_scope.teams and key not in table:
+            table[key] = TeamStanding(key=key, name=name)
+
+
+def combine_tables(*tables: dict[str, TeamStanding]) -> dict[str, TeamStanding]:
+    out: dict[str, TeamStanding] = {}
+    for table in tables:
+        for key, team in table.items():
+            row = out.setdefault(
+                key,
+                TeamStanding(
+                    key=key,
+                    name=team.name,
+                    logo=team.logo,
+                ),
+            )
+            if not row.logo and team.logo:
+                row.logo = team.logo
+            row.played += team.played
+            row.points += team.points
+            row.goals_for += team.goals_for
+            row.goals_against += team.goals_against
+    return out
+
+
+def seed_rank_map(order: list[str]) -> dict[str, int]:
+    return {key: idx + 1 for idx, key in enumerate(order)}
+
+
+def resolve_decisive_draw(
+    first: str,
+    second: str,
+    elo_scope: EloScope,
+    rng: random.Random,
+    home_advantage: bool = False,
+) -> str:
+    first_elo = elo_scope.teams[first].rating + (elo_scope.home_advantage if home_advantage else 0.0)
+    second_elo = elo_scope.teams[second].rating
+    exponent = (second_elo - first_elo) / max(1.0, elo_scope.rating_scale)
+    probability_first = 1.0 / (1.0 + 10.0 ** exponent)
+    return first if rng.random() < probability_first else second
+
+
+def single_match_winner(
+    home: str,
+    away: str,
+    match_model: MatchModel,
+    elo_scope: EloScope,
+    rng: random.Random,
+) -> str:
+    score = match_model.draw(home, away, rng)
+    if score is None:
+        raise RuntimeError(f"Cannot model knockout match {home} v {away}")
+    hg, ag = score
+    if hg > ag:
+        return home
+    if ag > hg:
+        return away
+    return resolve_decisive_draw(home, away, elo_scope, rng, home_advantage=True)
+
+
+def neutral_match_winner(
+    first: str,
+    second: str,
+    match_model: MatchModel,
+    elo_scope: EloScope,
+    rng: random.Random,
+) -> str:
+    first_score = match_model.draw(first, second, rng)
+    second_score = match_model.draw(second, first, rng)
+    if first_score is None or second_score is None:
+        raise RuntimeError(f"Cannot model neutral match {first} v {second}")
+    first_goals = first_score[0] + second_score[1]
+    second_goals = first_score[1] + second_score[0]
+    if first_goals > second_goals:
+        return first
+    if second_goals > first_goals:
+        return second
+    return resolve_decisive_draw(first, second, elo_scope, rng, home_advantage=False)
+
+
+def two_leg_winner(
+    first: str,
+    second: str,
+    match_model: MatchModel,
+    elo_scope: EloScope,
+    rng: random.Random,
+    higher_seed: str | None = None,
+) -> str:
+    leg1 = match_model.draw(first, second, rng)
+    leg2 = match_model.draw(second, first, rng)
+    if leg1 is None or leg2 is None:
+        raise RuntimeError(f"Cannot model two-leg tie {first} v {second}")
+    first_goals = leg1[0] + leg2[1]
+    second_goals = leg1[1] + leg2[0]
+    if first_goals > second_goals:
+        return first
+    if second_goals > first_goals:
+        return second
+    if higher_seed in (first, second):
+        return higher_seed
+    return resolve_decisive_draw(first, second, elo_scope, rng, home_advantage=False)
+
+
+def best_of_three_winner(
+    higher: str,
+    lower: str,
+    match_model: MatchModel,
+    elo_scope: EloScope,
+    rng: random.Random,
+) -> str:
+    wins = {higher: 0, lower: 0}
+    for home, away in ((higher, lower), (lower, higher), (higher, lower)):
+        winner = single_match_winner(home, away, match_model, elo_scope, rng)
+        wins[winner] += 1
+        if wins[winner] >= 2:
+            return winner
+    return higher if wins[higher] > wins[lower] else lower
+
+
+def synthetic_cross_group_schedule(
+    group_a: list[str],
+    group_b: list[str],
+    completed: list[dict[str, Any]],
+    target_cross_games_per_team: int,
+) -> list[tuple[str, str]]:
+    ordered_counts, _, home_games = count_pairs(completed)
+    completed_pairs: set[tuple[str, str]] = set()
+    cross_counts = {key: 0 for key in [*group_a, *group_b]}
+    set_a = set(group_a)
+    set_b = set(group_b)
+    for fixture in completed:
+        home = norm(fixture.get("home_team"))
+        away = norm(fixture.get("away_team"))
+        if not home or not away:
+            continue
+        if (home in set_a and away in set_b) or (home in set_b and away in set_a):
+            pair = tuple(sorted((home, away)))
+            completed_pairs.add(pair)
+            cross_counts[home] = cross_counts.get(home, 0) + 1
+            cross_counts[away] = cross_counts.get(away, 0) + 1
+
+    deficits = {
+        key: max(0, target_cross_games_per_team - cross_counts.get(key, 0))
+        for key in [*group_a, *group_b]
+    }
+    planned_pairs = set(completed_pairs)
+    schedule: list[tuple[str, str]] = []
+
+    while sum(deficits[key] for key in group_a) > 0:
+        a_candidates = [key for key in group_a if deficits[key] > 0]
+        b_candidates = [key for key in group_b if deficits[key] > 0]
+        if not a_candidates or not b_candidates:
+            break
+        a = sorted(a_candidates, key=lambda key: (-deficits[key], key))[0]
+        options = [
+            b for b in b_candidates
+            if tuple(sorted((a, b))) not in planned_pairs
+        ]
+        if not options:
+            options = b_candidates
+        b = sorted(options, key=lambda key: (-deficits[key], key))[0]
+        home, away = choose_home(a, b, ordered_counts, home_games)
+        schedule.append((home, away))
+        pair = tuple(sorted((a, b)))
+        planned_pairs.add(pair)
+        ordered_counts[(home, away)] = ordered_counts.get((home, away), 0) + 1
+        home_games[home] = home_games.get(home, 0) + 1
+        deficits[a] -= 1
+        deficits[b] -= 1
+
+    if any(value != 0 for value in deficits.values()):
+        raise RuntimeError(
+            "Cannot synthesize cross-group schedule "
+            f"target={target_cross_games_per_team} deficits={deficits}"
+        )
+    return schedule
+
+
+def apply_simulated_schedule(
+    schedule: list[tuple[str, str]],
+    match_model: MatchModel,
+    rng: random.Random,
+    points: dict[str, int],
+    goals_for: dict[str, int],
+    goals_against: dict[str, int],
+) -> None:
+    for home, away in schedule:
+        score = match_model.draw(home, away, rng)
+        if score is None:
+            raise RuntimeError(f"Cannot model scheduled match {home} v {away}")
+        apply_score(
+            home, away, score[0], score[1],
+            points, goals_for, goals_against,
+        )
+
+
+def special_meta_and_rows(
+    entry: dict[str, Any],
+    elo_scope: EloScope,
+    current_table: dict[str, TeamStanding],
+    position_counts: dict[str, list[int]],
+    point_totals: dict[str, int],
+    title_counts: dict[str, int],
+    split_group_keys: tuple[str, ...],
+    split_group_counts: dict[str, list[int]],
+    runs: int,
+    format_label: str,
+    regular_stage_target_matches: int,
+    remaining_matches: int,
+    average_elo_weight: float,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    team_keys = sorted(current_table)
+    current_order = current_ranking(current_table)
+    current_positions = {key: idx + 1 for idx, key in enumerate(current_order)}
+    team_rows: list[dict[str, Any]] = []
+    for key in team_keys:
+        counts = position_counts[key]
+        team = current_table[key]
+        team_rows.append(
+            {
+                "team_key": key,
+                "team_name": team.name,
+                "team_logo": team.logo,
+                "elo_rating": elo_scope.teams[key].rating,
+                "current_position": current_positions[key],
+                "current_played": team.played,
+                "current_points": team.points,
+                "current_goal_difference": team.goal_difference,
+                "current_goals_for": team.goals_for,
+                "expected_position": sum(
+                    (idx + 1) * count for idx, count in enumerate(counts)
+                ) / runs,
+                "expected_points": point_totals[key] / runs,
+                "title_probability": title_counts[key] / runs,
+                "top2_probability": sum(counts[: min(2, len(counts))]) / runs,
+                "top4_probability": sum(counts[: min(4, len(counts))]) / runs,
+                "position_probabilities_json": json.dumps(
+                    [count / runs for count in counts],
+                    separators=(",", ":"),
+                ),
+                "split_group_probabilities_json": json.dumps(
+                    [count / runs for count in split_group_counts[key]],
+                    separators=(",", ":"),
+                ),
+            }
+        )
+
+    league_code = str(entry.get("league_code") or "")
+    season = str(entry.get("app_season") or entry.get("target_app_season") or "")
+    meta = {
+        "league_code": league_code,
+        "country": str(entry.get("country") or ""),
+        "league_name": str(entry.get("league") or ""),
+        "season": season,
+        "team_count": len(team_keys),
+        "current_completed_matches": sum(team.played for team in current_table.values()) // 2,
+        "remaining_matches": remaining_matches,
+        "simulation_runs": runs,
+        "model_version": MODEL_VERSION,
+        "elo_model_version": elo_scope.model_version,
+        "average_elo_weight": average_elo_weight,
+        "tie_break_model": TIE_BREAK_MODEL,
+        "mature_fixture_count": 0,
+        "total_simulated_fixtures": remaining_matches,
+        "format_label": format_label,
+        "regular_stage_target_matches": regular_stage_target_matches,
+        "split_group_count": len(split_group_keys),
+        "split_group_keys_json": json.dumps(split_group_keys, separators=(",", ":")),
+    }
+    return meta, team_rows
+
+
+def schedule_average_elo_weight(
+    schedule: list[tuple[str, str]],
+    elo_scope: EloScope,
+) -> float:
+    weights = [
+        elo_weight(
+            elo_scope.teams[home].current_matches,
+            elo_scope.teams[away].current_matches,
+        )
+        for home, away in schedule
+        if home in elo_scope.teams and away in elo_scope.teams
+    ]
+    return sum(weights) / max(1, len(weights)) if weights else ELO_WEIGHT_FLOOR
+
+
+def simulate_special_league(
+    entry: dict[str, Any],
+    fixtures: list[dict[str, Any]],
+    runs: int,
+    elo_scope: EloScope,
+) -> tuple[dict[str, Any], list[dict[str, Any]]] | None:
+    league_code = str(entry.get("league_code") or "")
+    season = str(entry.get("app_season") or entry.get("target_app_season") or "")
+    history = LeagueHistory(fixtures)
+    match_model = MatchModel(history, elo_scope, league_code, season)
+    rng = random.Random(
+        int(hashlib.sha256(
+            f"{league_code}|{season}|special|{runs}|{MODEL_VERSION}".encode("utf-8")
+        ).hexdigest()[:16], 16)
+    )
+
+    if league_code == "ARG":
+        if len(fixtures) < 255:
+            return None
+        apertura_regular = fixtures[:240]
+        clausura_finished = fixtures[255:]
+        apertura_table = build_table(apertura_regular)
+        clausura_table = build_table(clausura_finished)
+        team_keys = sorted(set(apertura_table) | set(clausura_table))
+        if len(team_keys) != 30 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        zone_a = resolve_group(team_keys, ARG_ZONE_A_LABELS, "ARG Zone A")
+        zone_b = resolve_group(team_keys, ARG_ZONE_B_LABELS, "ARG Zone B")
+        if set(zone_a) | set(zone_b) != set(team_keys):
+            raise RuntimeError("ARG zones do not cover all 30 teams")
+
+        zone_a_set = set(zone_a)
+        zone_b_set = set(zone_b)
+        zone_a_finished = [
+            row for row in clausura_finished
+            if norm(row.get("home_team")) in zone_a_set
+            and norm(row.get("away_team")) in zone_a_set
+        ]
+        zone_b_finished = [
+            row for row in clausura_finished
+            if norm(row.get("home_team")) in zone_b_set
+            and norm(row.get("away_team")) in zone_b_set
+        ]
+        remaining = [
+            *remaining_stage_schedule(zone_a, UNORDERED, 1, zone_a_finished),
+            *remaining_stage_schedule(zone_b, UNORDERED, 1, zone_b_finished),
+            *synthetic_cross_group_schedule(zone_a, zone_b, clausura_finished, 2),
+        ]
+        current_table = combine_tables(apertura_table, clausura_table)
+        base_points = {key: current_table[key].points for key in team_keys}
+        base_gf = {key: current_table[key].goals_for for key in team_keys}
+        base_ga = {key: current_table[key].goals_against for key in team_keys}
+        names = {key: current_table[key].name for key in team_keys}
+
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("arg_clausura_zone_a", "arg_clausura_zone_b")
+        split_counts = {key: [0, 0] for key in team_keys}
+        for key in zone_a:
+            split_counts[key][0] = runs
+        for key in zone_b:
+            split_counts[key][1] = runs
+
+        for _ in range(runs):
+            points = dict(base_points)
+            gf = dict(base_gf)
+            ga = dict(base_ga)
+            apply_simulated_schedule(remaining, match_model, rng, points, gf, ga)
+            order = ranking_for_values(team_keys, points, gf, ga, names)
+            title_counts[order[0]] += 1
+            for pos, key in enumerate(order):
+                position_counts[key][pos] += 1
+                point_totals[key] += points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "Apertura/Clausura zones + Campeón de Liga annual table",
+            480, len(remaining), schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    if league_code == "COL":
+        if len(fixtures) <= 204:
+            return None
+        current_phase = fixtures[204:]
+        current_table = build_table(current_phase)
+        team_keys = sorted(current_table)
+        if len(team_keys) != 20 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        remaining = remaining_stage_schedule(team_keys, UNORDERED, 1, current_phase)
+        names = {key: current_table[key].name for key in team_keys}
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("col_quadrangular_a", "col_quadrangular_b")
+        split_counts = {key: [0, 0] for key in team_keys}
+
+        for _ in range(runs):
+            points = {key: current_table[key].points for key in team_keys}
+            gf = {key: current_table[key].goals_for for key in team_keys}
+            ga = {key: current_table[key].goals_against for key in team_keys}
+            apply_simulated_schedule(remaining, match_model, rng, points, gf, ga)
+            regular_order = ranking_for_values(team_keys, points, gf, ga, names)
+            top8 = regular_order[:8]
+            pool = list(top8[2:])
+            rng.shuffle(pool)
+            group_a = [top8[0], *pool[:3]]
+            group_b = [top8[1], *pool[3:]]
+            for key in group_a:
+                split_counts[key][0] += 1
+            for key in group_b:
+                split_counts[key][1] += 1
+
+            winners: list[str] = []
+            for group in (group_a, group_b):
+                gp = {key: 0 for key in group}
+                ggf = {key: 0 for key in group}
+                gga = {key: 0 for key in group}
+                schedule = full_hypothetical_stage_schedule(
+                    group, StageSpec(4, ORDERED, 1), rng
+                )
+                apply_simulated_schedule(schedule, match_model, rng, gp, ggf, gga)
+                winners.append(
+                    ranking_for_values(group, gp, ggf, gga, names)[0]
+                )
+            finalist_a, finalist_b = winners
+            champion = two_leg_winner(
+                finalist_a, finalist_b, match_model, elo_scope, rng
+            )
+            title_counts[champion] += 1
+            for pos, key in enumerate(regular_order):
+                position_counts[key][pos] += 1
+                point_totals[key] += points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "19-match Clausura + two semifinal quadrangulares + two-leg final",
+            190, len(remaining) + 26,
+            schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    if league_code == "MEX":
+        current_table = build_table(fixtures)
+        team_keys = sorted(current_table)
+        if len(team_keys) != 18 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        remaining = remaining_stage_schedule(team_keys, UNORDERED, 1, fixtures)
+        names = {key: current_table[key].name for key in team_keys}
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("mex_liguilla_top8",)
+        split_counts = {key: [0] for key in team_keys}
+
+        for _ in range(runs):
+            points = {key: current_table[key].points for key in team_keys}
+            gf = {key: current_table[key].goals_for for key in team_keys}
+            ga = {key: current_table[key].goals_against for key in team_keys}
+            apply_simulated_schedule(remaining, match_model, rng, points, gf, ga)
+            regular_order = ranking_for_values(team_keys, points, gf, ga, names)
+            seeds = seed_rank_map(regular_order)
+            top8 = regular_order[:8]
+            for key in top8:
+                split_counts[key][0] += 1
+
+            quarter_pairs = [
+                (top8[0], top8[7]),
+                (top8[1], top8[6]),
+                (top8[2], top8[5]),
+                (top8[3], top8[4]),
+            ]
+            semifinalists = []
+            for higher, lower in quarter_pairs:
+                semifinalists.append(
+                    two_leg_winner(
+                        lower, higher, match_model, elo_scope, rng,
+                        higher_seed=higher,
+                    )
+                )
+            semifinalists.sort(key=lambda key: seeds[key])
+            semifinal_pairs = [
+                (semifinalists[0], semifinalists[-1]),
+                (semifinalists[1], semifinalists[-2]),
+            ]
+            finalists = []
+            for higher, lower in semifinal_pairs:
+                finalists.append(
+                    two_leg_winner(
+                        lower, higher, match_model, elo_scope, rng,
+                        higher_seed=higher,
+                    )
+                )
+            finalists.sort(key=lambda key: seeds[key])
+            champion = two_leg_winner(
+                finalists[1], finalists[0], match_model, elo_scope, rng
+            )
+            title_counts[champion] += 1
+            for pos, key in enumerate(regular_order):
+                position_counts[key][pos] += 1
+                point_totals[key] += points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "17-match Apertura + top-8 two-leg Liguilla",
+            153, len(remaining) + 14,
+            schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    if league_code == "PER":
+        if len(fixtures) <= 153:
+            return None
+        apertura = fixtures[:153]
+        clausura_finished = fixtures[153:]
+        apertura_table = build_table(apertura)
+        clausura_table = build_table(clausura_finished)
+        team_keys = sorted(set(apertura_table) | set(clausura_table))
+        if len(team_keys) != 18 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        remaining = remaining_stage_schedule(team_keys, UNORDERED, 1, clausura_finished)
+        current_table = combine_tables(apertura_table, clausura_table)
+        names = {key: current_table[key].name for key in team_keys}
+        apertura_order = current_ranking(apertura_table)
+        apertura_winner = apertura_order[0]
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("per_national_playoffs",)
+        split_counts = {key: [0] for key in team_keys}
+
+        for _ in range(runs):
+            clausura_points = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).points
+                for key in team_keys
+            }
+            clausura_gf = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).goals_for
+                for key in team_keys
+            }
+            clausura_ga = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).goals_against
+                for key in team_keys
+            }
+            apply_simulated_schedule(
+                remaining, match_model, rng,
+                clausura_points, clausura_gf, clausura_ga,
+            )
+            clausura_order = ranking_for_values(
+                team_keys, clausura_points, clausura_gf, clausura_ga, names
+            )
+            clausura_winner = clausura_order[0]
+
+            annual_points = {
+                key: apertura_table[key].points + clausura_points[key]
+                for key in team_keys
+            }
+            annual_gf = {
+                key: apertura_table[key].goals_for + clausura_gf[key]
+                for key in team_keys
+            }
+            annual_ga = {
+                key: apertura_table[key].goals_against + clausura_ga[key]
+                for key in team_keys
+            }
+            annual_order = ranking_for_values(
+                team_keys, annual_points, annual_gf, annual_ga, names
+            )
+            annual_rank = seed_rank_map(annual_order)
+
+            if apertura_winner == clausura_winner:
+                champion = apertura_winner
+                qualifiers = {annual_order[1], annual_order[2], annual_order[3]}
+            else:
+                qualifiers = {annual_order[0], annual_order[1]}
+                if annual_rank[apertura_winner] <= 8:
+                    qualifiers.add(apertura_winner)
+                if annual_rank[clausura_winner] <= 8:
+                    qualifiers.add(clausura_winner)
+                q = sorted(qualifiers, key=lambda key: annual_rank[key])
+                if len(q) >= 4:
+                    sf1 = two_leg_winner(
+                        q[-1], q[0], match_model, elo_scope, rng
+                    )
+                    sf2 = two_leg_winner(
+                        q[-2], q[1], match_model, elo_scope, rng
+                    )
+                    finalists = sorted((sf1, sf2), key=lambda key: annual_rank[key])
+                    champion = two_leg_winner(
+                        finalists[1], finalists[0], match_model, elo_scope, rng
+                    )
+                elif len(q) == 3:
+                    direct = q[0]
+                    semi = two_leg_winner(
+                        q[2], q[1], match_model, elo_scope, rng
+                    )
+                    finalists = sorted((direct, semi), key=lambda key: annual_rank[key])
+                    champion = two_leg_winner(
+                        finalists[1], finalists[0], match_model, elo_scope, rng
+                    )
+                elif len(q) == 2:
+                    champion = two_leg_winner(
+                        q[1], q[0], match_model, elo_scope, rng
+                    )
+                else:
+                    champion = q[0]
+
+            for key in qualifiers:
+                split_counts[key][0] += 1
+            title_counts[champion] += 1
+            for pos, key in enumerate(annual_order):
+                position_counts[key][pos] += 1
+                point_totals[key] += annual_points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "Apertura + Clausura + national two-leg Play-Offs",
+            306, len(remaining) + 6,
+            schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    if league_code == "URU":
+        if len(fixtures) <= 177:
+            return None
+        apertura = fixtures[:120]
+        intermedio_group = fixtures[120:176]
+        clausura_finished = fixtures[177:]
+        apertura_table = build_table(apertura)
+        annual_base = build_table([*apertura, *intermedio_group])
+        clausura_table = build_table(clausura_finished)
+        team_keys = sorted(set(annual_base) | set(clausura_table))
+        if len(team_keys) != 16 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        remaining = remaining_stage_schedule(team_keys, UNORDERED, 1, clausura_finished)
+        current_table = combine_tables(annual_base, clausura_table)
+        names = {key: current_table[key].name for key in team_keys}
+        apertura_winner = current_ranking(apertura_table)[0]
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("uru_championship_playoff",)
+        split_counts = {key: [0] for key in team_keys}
+
+        for _ in range(runs):
+            clausura_points = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).points
+                for key in team_keys
+            }
+            clausura_gf = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).goals_for
+                for key in team_keys
+            }
+            clausura_ga = {
+                key: clausura_table.get(key, TeamStanding(key, names[key])).goals_against
+                for key in team_keys
+            }
+            apply_simulated_schedule(
+                remaining, match_model, rng,
+                clausura_points, clausura_gf, clausura_ga,
+            )
+            clausura_order = ranking_for_values(
+                team_keys, clausura_points, clausura_gf, clausura_ga, names
+            )
+            clausura_winner = clausura_order[0]
+            annual_points = {
+                key: annual_base[key].points + clausura_points[key]
+                for key in team_keys
+            }
+            annual_gf = {
+                key: annual_base[key].goals_for + clausura_gf[key]
+                for key in team_keys
+            }
+            annual_ga = {
+                key: annual_base[key].goals_against + clausura_ga[key]
+                for key in team_keys
+            }
+            annual_order = ranking_for_values(
+                team_keys, annual_points, annual_gf, annual_ga, names
+            )
+            annual_leader = annual_order[0]
+
+            if apertura_winner == clausura_winner:
+                semifinal_winner = apertura_winner
+            else:
+                semifinal_winner = neutral_match_winner(
+                    apertura_winner, clausura_winner,
+                    match_model, elo_scope, rng,
+                )
+            if semifinal_winner == annual_leader:
+                champion = semifinal_winner
+            else:
+                champion = two_leg_winner(
+                    semifinal_winner, annual_leader,
+                    match_model, elo_scope, rng,
+                )
+            for key in {apertura_winner, clausura_winner, annual_leader}:
+                split_counts[key][0] += 1
+            title_counts[champion] += 1
+            for pos, key in enumerate(annual_order):
+                position_counts[key][pos] += 1
+                point_totals[key] += annual_points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "Apertura + Intermedio + Clausura + championship playoff",
+            296, len(remaining) + 3,
+            schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    if league_code == "USA":
+        current_table = build_table(fixtures)
+        team_keys = sorted(current_table)
+        if len(team_keys) != 30 or any(key not in elo_scope.teams for key in team_keys):
+            return None
+        east = resolve_group(team_keys, MLS_EAST_LABELS, "MLS East")
+        west = resolve_group(team_keys, MLS_WEST_LABELS, "MLS West")
+        set_east = set(east)
+        set_west = set(west)
+        east_completed = [
+            row for row in fixtures
+            if norm(row.get("home_team")) in set_east
+            and norm(row.get("away_team")) in set_east
+        ]
+        west_completed = [
+            row for row in fixtures
+            if norm(row.get("home_team")) in set_west
+            and norm(row.get("away_team")) in set_west
+        ]
+        remaining = [
+            *remaining_stage_schedule(east, ORDERED, 1, east_completed),
+            *remaining_stage_schedule(west, ORDERED, 1, west_completed),
+            *synthetic_cross_group_schedule(east, west, fixtures, 6),
+        ]
+        names = {key: current_table[key].name for key in team_keys}
+        position_counts = {key: [0] * len(team_keys) for key in team_keys}
+        point_totals = {key: 0 for key in team_keys}
+        title_counts = {key: 0 for key in team_keys}
+        split_keys = ("usa_eastern_conference", "usa_western_conference")
+        split_counts = {key: [0, 0] for key in team_keys}
+        for key in east:
+            split_counts[key][0] = runs
+        for key in west:
+            split_counts[key][1] = runs
+
+        for _ in range(runs):
+            points = {key: current_table[key].points for key in team_keys}
+            gf = {key: current_table[key].goals_for for key in team_keys}
+            ga = {key: current_table[key].goals_against for key in team_keys}
+            apply_simulated_schedule(remaining, match_model, rng, points, gf, ga)
+            east_order = ranking_for_values(east, points, gf, ga, names)
+            west_order = ranking_for_values(west, points, gf, ga, names)
+            east_seed = seed_rank_map(east_order)
+            west_seed = seed_rank_map(west_order)
+
+            def conference_champion(
+                order: list[str],
+                seed_map: dict[str, int],
+            ) -> str:
+                wildcard = single_match_winner(
+                    order[7], order[8], match_model, elo_scope, rng
+                )
+                round_one_pairs = [
+                    (order[0], wildcard),
+                    (order[1], order[6]),
+                    (order[2], order[5]),
+                    (order[3], order[4]),
+                ]
+                r1 = [
+                    best_of_three_winner(higher, lower, match_model, elo_scope, rng)
+                    for higher, lower in round_one_pairs
+                ]
+                semi1_home = min((r1[0], r1[3]), key=lambda key: seed_map[key])
+                semi1_away = max((r1[0], r1[3]), key=lambda key: seed_map[key])
+                semi2_home = min((r1[1], r1[2]), key=lambda key: seed_map[key])
+                semi2_away = max((r1[1], r1[2]), key=lambda key: seed_map[key])
+                semi1 = single_match_winner(
+                    semi1_home, semi1_away, match_model, elo_scope, rng
+                )
+                semi2 = single_match_winner(
+                    semi2_home, semi2_away, match_model, elo_scope, rng
+                )
+                higher = min((semi1, semi2), key=lambda key: seed_map[key])
+                lower = max((semi1, semi2), key=lambda key: seed_map[key])
+                return single_match_winner(
+                    higher, lower, match_model, elo_scope, rng
+                )
+
+            east_champion = conference_champion(east_order, east_seed)
+            west_champion = conference_champion(west_order, west_seed)
+            if points[east_champion] > points[west_champion]:
+                home, away = east_champion, west_champion
+            elif points[west_champion] > points[east_champion]:
+                home, away = west_champion, east_champion
+            else:
+                home, away = sorted((east_champion, west_champion))
+            champion = single_match_winner(
+                home, away, match_model, elo_scope, rng
+            )
+            title_counts[champion] += 1
+            global_order = ranking_for_values(
+                team_keys, points, gf, ga, names
+            )
+            for pos, key in enumerate(global_order):
+                position_counts[key][pos] += 1
+                point_totals[key] += points[key]
+
+        return special_meta_and_rows(
+            entry, elo_scope, current_table, position_counts, point_totals,
+            title_counts, split_keys, split_counts, runs,
+            "34-match conference season + 18-team Audi MLS Cup Playoffs",
+            510, len(remaining) + 33,
+            schedule_average_elo_weight(remaining, elo_scope),
+        )
+
+    return None
+
+
 def simulate_league(
     entry: dict[str, Any],
     fixtures: list[dict[str, Any]],
@@ -732,7 +1625,11 @@ def simulate_league(
     season = str(entry.get("app_season") or entry.get("target_app_season") or "")
     rule = RULES[league_code]
 
+    if league_code in SPECIAL_SIMULATION_CODES:
+        return simulate_special_league(entry, fixtures, runs, elo_scope)
+
     current_table = build_table(fixtures)
+    add_extra_current_teams(current_table, league_code, elo_scope)
     if len(current_table) < 8 or len(fixtures) < 10:
         return None
     team_keys = sorted(current_table)
@@ -743,6 +1640,7 @@ def simulate_league(
     regular_finished = fixtures[: min(len(fixtures), regular_target)]
     post_regular_finished = fixtures[regular_target:] if len(fixtures) > regular_target else []
     regular_table = build_table(regular_finished)
+    add_extra_current_teams(regular_table, league_code, elo_scope)
     if set(regular_table) != set(team_keys):
         return None
 
