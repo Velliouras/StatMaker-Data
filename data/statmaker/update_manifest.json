@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "eacfa65b92e9aa51b59b812654dcfe437241c546a7decfcb8ac08f20ea9c29c1",
-  "generatedAt": "2026-10-04T23:59:11Z",
+  "contentVersion": "2c4564ba7ddc6fd6d5fe33cec16e676b3fa4e8e2d1297bf5d78a3cf90eb33051",
+  "generatedAt": "2026-10-05T02:10:33.227862Z",
   "artifactCount": 8,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "a5831828c910a289b6e8d0bfe3664b1972d930c442ac6f4374be674b587a3be5",
+      "sha256": "e34edd99520b651a4d486806063093cb18776ab66c04cc39bdb9c3662baef2a7",
       "bytes": 106557,
-      "generatedAt": "2026-10-04T23:20:38Z"
+      "generatedAt": "2026-10-05T02:10:27Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "baaf246a03295cf08544d2ab1fa03f8016afea9c9cf0eba6b8282edcfc5987a5",
-      "bytes": 23311065,
+      "sha256": "7b40300a665cf44ec7d712c5b760465c42d3f22fd6c972e2947f544e5b001402",
+      "bytes": 23312334,
       "generatedAt": ""
     },
     {
@@ -57,9 +57,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "6f056829d99806d3b4e89d30a7753104bf0d17ab58be9d282958f7af8c027011",
-      "bytes": 8464893,
-      "generatedAt": "2026-10-04T23:20:41.327550Z"
+      "sha256": "c6f0dee6b5fd650a9aa8427f2f3da261ead1f18d4d5bd3a98fb6d10bf4110429",
+      "bytes": 8464936,
+      "generatedAt": "2026-10-05T02:10:33.227862Z"
     },
     {
       "id": "uefa_team_logos",
@@ -83,7 +83,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "baaf246a03295cf08544d2ab1fa03f8016afea9c9cf0eba6b8282edcfc5987a5",
+    "targetSha256": "7b40300a665cf44ec7d712c5b760465c42d3f22fd6c972e2947f544e5b001402",
     "transitions": [
       {
         "fromSha256": "1d73dcb0695524b7b9213a0e29d570a4a1328090c800807b911013fbf9aa9ebf",
@@ -563,6 +563,65 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 9,
               "AFreeKicks": 13
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "baaf246a03295cf08544d2ab1fa03f8016afea9c9cf0eba6b8282edcfc5987a5",
+        "toSha256": "7b40300a665cf44ec7d712c5b760465c42d3f22fd6c972e2947f544e5b001402",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1493152,
+            "league_id": 128,
+            "league_code": "ARG",
+            "country": "Argentina",
+            "league": "Liga Profesional Argentina",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-10-04",
+            "home_team": "Argentinos JRS",
+            "away_team": "Tigre",
+            "stats": {
+              "HS": 13,
+              "AS": 13,
+              "HST": 5,
+              "AST": 4,
+              "HC": 4,
+              "AC": 3,
+              "HF": 14,
+              "AF": 11,
+              "HY": 2,
+              "AY": 2,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 45,
+              "APossession": 55,
+              "HSaves": 3,
+              "ASaves": 3,
+              "HPasses": 362,
+              "APasses": 444,
+              "HPassesAccurate": 280,
+              "APassesAccurate": 351,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 4,
+              "AShotsOffGoal": 6,
+              "HBlockedShots": 4,
+              "ABlockedShots": 3,
+              "HShotsInsideBox": 6,
+              "AShotsInsideBox": 8,
+              "HShotsOutsideBox": 7,
+              "AShotsOutsideBox": 5,
+              "HOffsides": 3,
+              "AOffsides": 1,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 9,
+              "AFreeKicks": 14
             }
           }
         ]

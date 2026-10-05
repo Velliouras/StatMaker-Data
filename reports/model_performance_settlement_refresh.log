@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-04T23:20:33Z",
+  "generatedAt": "2026-10-05T02:10:19Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,12 +15,12 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 68,
-  "registryLeagueCount": 3,
-  "polledLeagueCount": 3,
-  "incompleteBefore": 2,
+  "requestsUsed": 7,
+  "registryLeagueCount": 2,
+  "polledLeagueCount": 2,
+  "incompleteBefore": 1,
   "completeAfter": 1,
-  "incompleteAfter": 2,
+  "incompleteAfter": 1,
   "allocations": [
     {
       "phase": "tier2_core27",
@@ -30,20 +30,8 @@
       "league": "Liga Profesional Argentina",
       "lifecycle": "active",
       "allocatedRequests": 120,
-      "usedRequests": 7,
+      "usedRequests": 6,
       "before": {
-        "leagueCode": "ARG",
-        "priorityTier": "tier2_core27",
-        "completed": 411,
-        "withStats": 407,
-        "withScores": 411,
-        "missingStats": 4,
-        "missingScores": 0,
-        "coverage": 0.990268,
-        "scoreCoverage": 1.0,
-        "complete": false
-      },
-      "after": {
         "leagueCode": "ARG",
         "priorityTier": "tier2_core27",
         "completed": 413,
@@ -54,38 +42,16 @@
         "coverage": 0.990315,
         "scoreCoverage": 1.0,
         "complete": false
-      }
-    },
-    {
-      "phase": "tier3_restored26",
-      "priorityTier": "tier3_restored26",
-      "leagueCode": "NOR2",
-      "country": "Norway",
-      "league": "OBOS-ligaen",
-      "lifecycle": "active",
-      "allocatedRequests": 56,
-      "usedRequests": 56,
-      "before": {
-        "leagueCode": "NOR2",
-        "priorityTier": "tier3_restored26",
-        "completed": 190,
-        "withStats": 0,
-        "withScores": 190,
-        "missingStats": 190,
-        "missingScores": 0,
-        "coverage": 0.0,
-        "scoreCoverage": 1.0,
-        "complete": false
       },
       "after": {
-        "leagueCode": "NOR2",
-        "priorityTier": "tier3_restored26",
-        "completed": 190,
-        "withStats": 0,
-        "withScores": 190,
-        "missingStats": 190,
+        "leagueCode": "ARG",
+        "priorityTier": "tier2_core27",
+        "completed": 414,
+        "withStats": 410,
+        "withScores": 414,
+        "missingStats": 4,
         "missingScores": 0,
-        "coverage": 0.0,
+        "coverage": 0.990338,
         "scoreCoverage": 1.0,
         "complete": false
       }
@@ -97,14 +63,14 @@
       "country": "Spain",
       "league": "Segunda División",
       "lifecycle": "active",
-      "allocatedRequests": 57,
-      "usedRequests": 5,
+      "allocatedRequests": 114,
+      "usedRequests": 1,
       "before": {
         "leagueCode": "SP2",
         "priorityTier": "tier3_restored26",
-        "completed": 83,
-        "withStats": 83,
-        "withScores": 83,
+        "completed": 87,
+        "withStats": 87,
+        "withScores": 87,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -129,24 +95,12 @@
     {
       "leagueCode": "ARG",
       "priorityTier": "tier2_core27",
-      "completed": 413,
-      "withStats": 409,
-      "withScores": 413,
+      "completed": 414,
+      "withStats": 410,
+      "withScores": 414,
       "missingStats": 4,
       "missingScores": 0,
-      "coverage": 0.990315,
-      "scoreCoverage": 1.0,
-      "complete": false
-    },
-    {
-      "leagueCode": "NOR2",
-      "priorityTier": "tier3_restored26",
-      "completed": 190,
-      "withStats": 0,
-      "withScores": 190,
-      "missingStats": 190,
-      "missingScores": 0,
-      "coverage": 0.0,
+      "coverage": 0.990338,
       "scoreCoverage": 1.0,
       "complete": false
     },
@@ -166,7 +120,6 @@
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
     "ARG",
-    "NOR2",
     "SP2"
   ],
   "targetedMode": true,
@@ -184,7 +137,7 @@
   "historicalClosureComplete": true,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 5213,
+    "dailyRemaining": 7440,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
