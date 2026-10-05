@@ -33,6 +33,7 @@ concurrency:
   # Settlement writes canonical main artifacts, so it must share the same writer lock as
   # every other canonical producer. This prevents rebase conflicts on the ledger/cache/feed.
   group: statmaker-canonical-main-writer
+  queue: max
   cancel-in-progress: false
 
 jobs:
