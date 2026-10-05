@@ -51,6 +51,7 @@ class LeagueRule:
     regular_meetings: int
     split_groups: tuple[StageSpec, ...] = ()
     format_label: str = "Regular league"
+    reset_split_goals: bool = False
 
 
 # Every current_target domestic league in the repository has an explicit competition rule.
@@ -134,11 +135,68 @@ RULES: dict[str, LeagueRule] = {
     "SWE2": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
     "SVN": LeagueRule(ORDERED, 2, format_label="Four-round league"),
     "UAE": LeagueRule(ORDERED, 1, format_label="Double round-robin"),
+
+    # Second cache-backed expansion. All of these use already-published current-season
+    # fixture caches and require zero additional API-Football requests.
+    "BGR": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(4, ORDERED, 1), StageSpec(4, ORDERED, 1), StageSpec(6, UNORDERED, 1)),
+        "26 rounds + 4/4/6 split",
+    ),
+    "CZE": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, UNORDERED, 1), StageSpec(4, UNORDERED, 0), StageSpec(6, UNORDERED, 1)),
+        "30 rounds + 6/4/6 final phase",
+    ),
+    "DNK": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, ORDERED, 1), StageSpec(6, ORDERED, 1)),
+        "22 rounds + 6/6 split",
+    ),
+    "FIN": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, ORDERED, 1), StageSpec(6, UNORDERED, 1)),
+        "22 rounds + championship/relegation series",
+    ),
+    "FIN2": LeagueRule(UNORDERED, 3, format_label="27-round triple round-robin"),
+    "ISL": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, UNORDERED, 1), StageSpec(6, UNORDERED, 1)),
+        "22 rounds + top/bottom six split",
+    ),
+    "ROM": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, ORDERED, 1), StageSpec(10, UNORDERED, 1)),
+        "30 rounds + 6/10 split with halved points",
+        reset_split_goals=True,
+    ),
+    "SRB": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, UNORDERED, 1), StageSpec(8, UNORDERED, 1)),
+        "26 rounds + 6/8 split",
+    ),
+    "SVK": LeagueRule(
+        ORDERED, 1,
+        (StageSpec(6, ORDERED, 1), StageSpec(6, ORDERED, 1)),
+        "22 rounds + 6/6 split",
+    ),
+    "KOR": LeagueRule(
+        UNORDERED, 3,
+        (StageSpec(6, UNORDERED, 1), StageSpec(6, UNORDERED, 1)),
+        "33 rounds + Final A/Final B",
+    ),
+    "SWZ": LeagueRule(
+        UNORDERED, 3,
+        (StageSpec(6, UNORDERED, 1), StageSpec(6, UNORDERED, 1)),
+        "33 rounds + championship/relegation groups",
+    ),
 }
 
 SIMULATION_CACHE_CURRENT_CODES = {
     "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
     "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
+    "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
+    "KOR", "SWZ",
 }
 
 
@@ -170,12 +228,23 @@ SPLIT_GROUP_KEYS: dict[str, tuple[str, ...]] = {
     "G1": ("g1_playoffs_1_4", "g1_playoffs_5_8", "g1_playouts_9_14"),
     "ISR": ("isr_championship_top6", "isr_lower_bottom8"),
     "SC0": ("sc0_top6", "sc0_bottom6"),
+    "BGR": ("bgr_title_top4", "bgr_europe_5_8", "bgr_relegation_9_14"),
+    "CZE": ("cze_title_top6", "cze_placement_7_10", "cze_relegation_11_16"),
+    "DNK": ("dnk_championship_top6", "dnk_relegation_bottom6"),
+    "FIN": ("fin_championship_top6", "fin_relegation_bottom6"),
+    "ISL": ("isl_championship_top6", "isl_relegation_bottom6"),
+    "ROM": ("rom_playoff_top6", "rom_playout_bottom10"),
+    "SRB": ("srb_playoff_top6", "srb_playout_bottom8"),
+    "SVK": ("svk_championship_top6", "svk_relegation_bottom6"),
+    "KOR": ("kor_final_a", "kor_final_b"),
+    "SWZ": ("swz_championship_top6", "swz_relegation_bottom6"),
 }
 
 # Competition-specific point carry rules for the second phase.
 # Greece 5-8 starts with half the regular-season points, rounded up.
 SPLIT_POINT_RULES: dict[str, tuple[tuple[int, bool], ...]] = {
     "G1": ((1, False), (2, True), (1, False)),
+    "ROM": ((2, True), (2, True)),
 }
 
 
@@ -835,6 +904,10 @@ def simulate_league(
                             group_index,
                             points[key],
                         )
+                if rule.reset_split_goals:
+                    for key in team_keys:
+                        goals_for[key] = 0
+                        goals_against[key] = 0
                 schedules = [
                     full_hypothetical_stage_schedule(group, spec, split_rng)
                     for group, spec in zip(groups, specs)
