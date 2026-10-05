@@ -21,6 +21,8 @@ jobs:
           fetch-depth: 1
 
       - name: Hot-patch current App-Ready betting bundle
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python scripts/hotpatch_app_ready_simulation.py
 
       - name: Verify hot-patched bundle
@@ -44,6 +46,11 @@ jobs:
           assert int(metadata.get('preparedLeagueSimulationCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationTeamCount') or 0) > 0
           assert int(metadata.get('preparedLeagueSimulationRuns') or 0) >= 10000
+          assert metadata.get('preparedUefaSimulationContract') == 'uefa-club-monte-carlo-v1'
+          assert metadata.get('preparedUefaSimulationStrengthModel') == 'uefa-seeding-elo-v1'
+          assert int(metadata.get('preparedUefaSimulationCount') or 0) == 3
+          assert int(metadata.get('preparedUefaSimulationTeamCount') or 0) == 108
+          assert int(metadata.get('preparedUefaSimulationRuns') or 0) >= 10000
           artifact=next(x for x in manifest['artifacts'] if x['id']=='app_ready_betting_bundle')
           bundle=root/artifact['path']
           with tempfile.TemporaryDirectory() as td:
@@ -60,6 +67,8 @@ jobs:
                       'prepared_team_elo_meta',
                       'prepared_league_simulation_meta',
                       'prepared_league_team_simulations',
+                      'prepared_uefa_simulation_meta',
+                      'prepared_uefa_team_simulations',
                   }
                   tables={r[0] for r in con.execute(
                       "SELECT name FROM sqlite_master WHERE type='table'"
@@ -73,15 +82,21 @@ jobs:
                   league_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_simulation_meta').fetchone()[0])
                   league_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_team_simulations').fetchone()[0])
                   league_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta').fetchone()[0])
+                  uefa_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_simulation_meta').fetchone()[0])
+                  uefa_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_team_simulations').fetchone()[0])
+                  uefa_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta').fetchone()[0])
                   assert rows>0 and match_rows>0 and runs>=10000
                   assert elo_rows>0 and elo_meta_rows>0
                   assert league_rows>0 and league_team_rows>0 and league_runs>=10000
+                  assert uefa_rows==3 and uefa_team_rows==108 and uefa_runs>=10000
                   print(
                       'HOT_PUBLISH_VERIFY_OK',
                       f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}',
                       f'elo_rows={elo_rows}', f'elo_meta_rows={elo_meta_rows}',
                       f'league_rows={league_rows}', f'league_team_rows={league_team_rows}',
-                      f'league_runs={league_runs}'
+                      f'league_runs={league_runs}',
+                      f'uefa_rows={uefa_rows}', f'uefa_team_rows={uefa_team_rows}',
+                      f'uefa_runs={uefa_runs}'
                   )
               finally:
                   con.close()
