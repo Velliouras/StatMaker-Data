@@ -6,7 +6,7 @@ on:
       cycle_size:
         description: "Number of Domestic leagues to refresh in this cycle"
         required: true
-        default: "16"
+        default: "24"
         type: string
   push:
     branches:
@@ -96,7 +96,7 @@ jobs:
           ODDS_API_IO_RATE_LIMIT_WAIT_BUFFER_SECONDS: "2"
           STATMAKER_DOMESTIC_SCHEDULE_HORIZON_DAYS: "7"
           STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS: "7"
-          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '16' }}
+          INPUT_CYCLE_SIZE: ${{ github.event_name == 'workflow_dispatch' && inputs.cycle_size || '24' }}
         run: |
           if [ "${GITHUB_EVENT_NAME}" = "push" ]; then
             target_codes="$(head -n 1 .github/domestic-odds-refresh-request | tr -d '[:space:]')"
@@ -108,7 +108,7 @@ jobs:
             IFS=',' read -r -a target_array <<< "$target_codes"
             cycle_size="${#target_array[@]}"
           else
-            cycle_size="${INPUT_CYCLE_SIZE:-16}"
+            cycle_size="${INPUT_CYCLE_SIZE:-24}"
           fi
           python scripts/refresh_domestic_odds_schedule_priority.py --cycle-size "$cycle_size"
 
