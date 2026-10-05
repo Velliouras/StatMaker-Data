@@ -19,6 +19,7 @@ concurrency:
   # Serialize every workflow that writes canonical StatMaker main data.
   # One running writer at a time prevents manifest/data rebase collisions.
   group: statmaker-canonical-main-writer
+  queue: max
   cancel-in-progress: false
 
 jobs:
