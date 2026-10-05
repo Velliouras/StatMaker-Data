@@ -49,6 +49,43 @@ LEAGUE_BASELINES = {
     "NOR": 1500.0, "NOR2": 1400.0,
     "BRA": 1500.0, "BRA2": 1400.0,
     "CHN": 1500.0,
+    "CHL": 1500.0,
+    "EST": 1500.0,
+    "HUN": 1500.0,
+    "IRL": 1500.0,
+    "LVA": 1500.0,
+    "LTU": 1500.0,
+    "SVN": 1500.0,
+    "UAE": 1500.0,
+}
+
+# Active same-season scopes that are already fully cached in StatMaker-Data but are
+# tagged historical_support because betting readiness/odds coverage is a separate concern.
+# League Simulation is score/Elo driven and may safely use these caches without any API call.
+SIMULATION_CACHE_CURRENT_CODES = {
+    "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
+    "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
+}
+
+
+def is_simulation_current_entry(row: dict[str, Any]) -> bool:
+    code = str(row.get("league_code") or "")
+    role = str(row.get("stats_role") or "")
+    lifecycle = str(row.get("lifecycle") or "")
+    app_season = str(row.get("app_season") or "")
+    target_app_season = str(row.get("target_app_season") or "")
+    return (
+        lifecycle == "active"
+        and (
+            role == "current_target"
+            or (
+                code in SIMULATION_CACHE_CURRENT_CODES
+                and role == "historical_support"
+                and app_season
+                and app_season == target_app_season
+            )
+        )
+    )
 }
 
 
@@ -214,6 +251,7 @@ def historical_entries(index: dict[str, Any]) -> list[dict[str, Any]]:
         if str(row.get("league_code") or "") in LEAGUE_BASELINES
         and str(row.get("stats_role") or "") == "historical_support"
         and str(row.get("lifecycle") or "") == "active"
+        and not is_simulation_current_entry(row)
         and (ROOT / str(row.get("cache_path") or "")).is_file()
         and int(row.get("completed_fixtures") or 0) >= 20
     ]
@@ -228,8 +266,7 @@ def current_entries(index: dict[str, Any]) -> list[dict[str, Any]]:
     rows = [
         row for row in (index.get("leagues") or [])
         if str(row.get("league_code") or "") in LEAGUE_BASELINES
-        and str(row.get("stats_role") or "") == "current_target"
-        and str(row.get("lifecycle") or "") == "active"
+        and is_simulation_current_entry(row)
         and (ROOT / str(row.get("cache_path") or "")).is_file()
         and int(row.get("completed_fixtures") or 0) >= 10
     ]
