@@ -131,6 +131,13 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
 
+      - name: Materialize fixture index for verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/materialize_prepared_fixture_index.py \
+            app-ready-checkpoint/databases/statmaker_prepared_betting.db
+
       - name: Verify China prepared coverage
         shell: bash
         run: |
