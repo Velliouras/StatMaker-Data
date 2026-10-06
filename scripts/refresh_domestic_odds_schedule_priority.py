@@ -242,13 +242,18 @@ def _install_priority_rotation(priority_codes: Sequence[str]) -> None:
 def _install_near_term_event_horizon(
     days: int,
     global_events: Sequence[Dict[str, Any]],
+    slug_to_code: Dict[str, str],
 ) -> None:
     original = target.odds_fetch.fetch_events_for_league
-    by_slug: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    by_code: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    source_slugs_by_code: Dict[str, set[str]] = defaultdict(set)
     for event in global_events:
-        slug = _league_slug(event)
-        if slug:
-            by_slug[slug].append(event)
+        event_slug = _league_slug(event)
+        code = slug_to_code.get(event_slug)
+        if code:
+            by_code[code].append(event)
+            if event_slug:
+                source_slugs_by_code[code].add(event_slug)
 
     def near_term(api_key: str, slug: str, horizon_days: int, debug: Dict[str, Any]) -> List[Dict[str, Any]]:
         effective_days = min(max(1, int(horizon_days)), days)
@@ -257,15 +262,19 @@ def _install_near_term_event_horizon(
             return rows
 
         # Odds-API.io occasionally returns an empty league-scoped /events result even
-        # though the same verified events are present in the global /events response.
-        # Reuse only those provider event IDs for the exact same league slug; exact odds
-        # are still fetched from /odds/multi and are never synthesized.
-        fallback = list(by_slug.get(slug, []))
+        # though the same verified fixtures exist in the global /events response under
+        # a renamed/provider-variant slug. Resolve both slugs to the same canonical
+        # league code, then reuse only those provider event IDs. Exact odds still come
+        # from /odds/multi and are never synthesized.
+        code = slug_to_code.get(slug)
+        fallback = list(by_code.get(code, [])) if code else []
         if fallback:
             debug.setdefault("globalEventFallbacks", []).append({
-                "providerLeagueSlug": slug,
+                "leagueCode": code,
+                "requestedProviderLeagueSlug": slug,
+                "sourceProviderLeagueSlugs": sorted(source_slugs_by_code.get(code, set())),
                 "eventCount": len(fallback),
-                "policy": "verified-global-events-only",
+                "policy": "verified-global-events-same-league-code",
             })
             return fallback
         return rows
@@ -545,7 +554,7 @@ def main() -> int:
     )
 
     _install_priority_rotation(priority_codes)
-    _install_near_term_event_horizon(odds_days, events)
+    _install_near_term_event_horizon(odds_days, events, slug_to_code)
 
     # Install the shared Domestic expansion before the schedule wrapper replaces
     # canonical_team_info. guarded.main() installs the same expansion later, but
