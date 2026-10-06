@@ -470,6 +470,13 @@ app_cpu_ticks() {
   stat="$(adb shell run-as "$APP_ID" cat "/proc/$pid/stat" 2>/dev/null | tr -d '\r')" || return 1
   awk '{print $14 + $15}' <<<"$stat"
 }
+
+dump_producer_crash_diagnostics() {
+  echo "APP_READY_PRODUCER_PROCESS_DIAGNOSTICS_BEGIN" >&2
+  adb logcat -d -v time AndroidRuntime:E ActivityManager:I ActivityTaskManager:I libc:F DEBUG:F "*:S" >&2 || true
+  adb shell dumpsys meminfo "$APP_ID" >&2 || true
+  echo "APP_READY_PRODUCER_PROCESS_DIAGNOSTICS_END" >&2
+}
 monitor_phase() {
   local phase="$1"
   local require_prepared="$2"
@@ -526,15 +533,18 @@ monitor_phase() {
 
     now_epoch="$(date +%s)"
     cpu_ticks="$(app_cpu_ticks || true)"
-    if [[ "$cpu_ticks" =~ ^[0-9]+$ ]]; then
-      if [[ -n "$last_cpu_ticks" && "$cpu_ticks" != "$last_cpu_ticks" ]]; then
-        last_progress_epoch="$now_epoch"
-      fi
-      last_cpu_ticks="$cpu_ticks"
-      if (( now_epoch - last_heartbeat_epoch >= 60 )); then
-        echo "APP_READY_PHASE_HEARTBEAT phase=$phase cpuTicks=$cpu_ticks idleSeconds=$((now_epoch - last_progress_epoch)) lastStage=${last_stage:-none}"
-        last_heartbeat_epoch="$now_epoch"
-      fi
+    if [[ ! "$cpu_ticks" =~ ^[0-9]+$ ]]; then
+      echo "App-ready producer process disappeared during phase=$phase; last stage: ${last_stage:-none}" >&2
+      dump_producer_crash_diagnostics
+      return 1
+    fi
+    if [[ -n "$last_cpu_ticks" && "$cpu_ticks" != "$last_cpu_ticks" ]]; then
+      last_progress_epoch="$now_epoch"
+    fi
+    last_cpu_ticks="$cpu_ticks"
+    if (( now_epoch - last_heartbeat_epoch >= 60 )); then
+      echo "APP_READY_PHASE_HEARTBEAT phase=$phase cpuTicks=$cpu_ticks idleSeconds=$((now_epoch - last_progress_epoch)) lastStage=${last_stage:-none}"
+      last_heartbeat_epoch="$now_epoch"
     fi
     if (( now_epoch - last_progress_epoch >= max_idle_seconds )); then
       echo "App-ready phase=$phase made no stage progress for ${max_idle_seconds}s; last stage: ${last_stage:-none}" >&2
