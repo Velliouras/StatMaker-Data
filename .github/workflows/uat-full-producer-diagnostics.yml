@@ -1,0 +1,205 @@
+name: StatMaker UAT Full Producer Diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      statmaker_ref:
+        description: "StatMaker UAT ref"
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/uat-full-producer-diagnostics-request"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-uat-full-producer-diagnostics
+  cancel-in-progress: true
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      APP_READY_UAT_SOURCE: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve requested StatMaker ref
+        id: source
+        shell: bash
+        env:
+          DISPATCH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || '' }}
+        run: |
+          set -euo pipefail
+          ref="${DISPATCH_REF}"
+          if [[ -z "$ref" ]]; then
+            ref="$(sed -n '1p' .github/uat-full-producer-diagnostics-request | tr -d '\r\n')"
+          fi
+          [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid StatMaker ref: $ref" >&2; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch immutable UEFA source branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+
+      - name: Validate canonical Domestic provider identity
+        run: python scripts/validate_domestic_cache_provider_identity.py
+
+      - name: Require private read token
+        env:
+          TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: test -n "$TOKEN" || (echo "Missing STATMAKER_PRIVATE_READ_TOKEN" >&2; exit 1)
+
+      - name: Checkout StatMaker UAT source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ${{ steps.source.outputs.ref }}
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-private
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Stage UAT App-Ready producer
+        shell: bash
+        run: bash "$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh" "$GITHUB_WORKSPACE/statmaker-private"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Verify preinstalled Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}" || { echo "ANDROID_HOME is not set" >&2; exit 1; }
+          test -d "$ANDROID_HOME"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -path '*/bin/sdkmanager' -perm -u+x 2>/dev/null | sort -V | tail -n 1)"
+          if [[ -z "$SDKMANAGER" && -x "$ANDROID_HOME/tools/bin/sdkmanager" ]]; then
+            SDKMANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+          fi
+          test -n "$SDKMANAGER"
+          echo "$(dirname "$SDKMANAGER")" >> "$GITHUB_PATH"
+          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> "$GITHUB_ENV"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Assemble UAT producer
+        working-directory: statmaker-private
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Enable KVM acceleration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -e /dev/kvm || { echo "/dev/kvm unavailable" >&2; exit 1; }
+          sudo chown "$USER" /dev/kvm
+          sudo chmod 600 /dev/kvm
+          test -r /dev/kvm -a -w /dev/kvm
+
+      - name: Produce fresh UAT prepared source from PROD data
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          APP_ID: com.statmaker.app.uat.local
+          APP_READY_SOURCE_ONLY: "true"
+          APP_READY_DISABLE_SEED: "true"
+          APP_READY_PREPARED_MAX_SECONDS: "5400"
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 4
+          ram-size: 5120M
+          heap-size: 1536M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
+
+      - name: Verify China prepared coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3
+          from pathlib import Path
+
+          db=Path("app-ready-checkpoint/databases/statmaker_prepared_betting.db")
+          if not db.is_file():
+              raise SystemExit("Fresh UAT prepared DB missing")
+          con=sqlite3.connect(db)
+          con.row_factory=sqlite3.Row
+
+          fixtures=con.execute("""
+            select match_key, local_date, home_team, away_team, team_mapping_status, usable_for_stats
+            from prepared_fixture_matches
+            where league_code='CHN' and local_date between '2026-10-06' and '2026-10-13'
+            order by local_date, home_team
+          """).fetchall()
+          print("UAT_CHN_FIXTURE_INDEX", len(fixtures))
+
+          prepared=con.execute("""
+            select match_key, local_date, payload
+            from prepared_matches
+            where competition_id='domestic'
+          """).fetchall()
+
+          def match_names(payload):
+              try:
+                  p=json.loads(payload)
+              except Exception:
+                  return ("","")
+              return (str(p.get("homeTeam") or ""), str(p.get("awayTeam") or ""))
+
+          prepared_by_names={}
+          for r in prepared:
+              home,away=match_names(r["payload"])
+              if home or away:
+                  prepared_by_names[(home,away)]=r["match_key"]
+
+          failures=[]
+          for f in fixtures:
+              pair=(f["home_team"],f["away_team"])
+              pmk=prepared_by_names.get(pair)
+              selections=0
+              if pmk:
+                  selections=con.execute(
+                      "select count(*) from prepared_selections where competition_id='domestic' and match_key=?",
+                      (pmk,)
+                  ).fetchone()[0]
+              row={
+                  "date":f["local_date"],
+                  "home":f["home_team"],
+                  "away":f["away_team"],
+                  "fixture_key":f["match_key"],
+                  "prepared_match_key":pmk,
+                  "prepared_selections":selections,
+                  "mapping":f["team_mapping_status"],
+                  "usable":f["usable_for_stats"],
+              }
+              print("UAT_CHN_PREPARED", json.dumps(row,ensure_ascii=False,sort_keys=True))
+              if not pmk or selections <= 0:
+                  failures.append(pair)
+
+          if len(fixtures) != 8:
+              raise SystemExit(f"Expected 8 CHN fixture-index matches, got {len(fixtures)}")
+          if failures:
+              raise SystemExit("CHN prepared coverage incomplete: "+repr(failures))
+          print("UAT_CHN_PREPARED_8_OF_8_OK")
+          con.close()
+          PY
