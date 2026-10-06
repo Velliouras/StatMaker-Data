@@ -45,6 +45,21 @@ VERIFIED_ALIAS_PRIORITY = 200
 # by spelling between Odds-API.io and API-Football. Keep this list small, explicit and
 # league-scoped. These claims have the same priority as the verified ingestion aliases.
 VERIFIED_CROSS_PROVIDER_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    "CHN": {
+        "Chengdu Rongcheng": ("Chengdu Better City",),
+        "Shenzhen Peng City": ("Sichuan Jiuniu",),
+        "Shandong Taishan": ("Shandong Luneng",),
+        "Tianjin Jinmen Tiger": ("Tianjin Teda",),
+        "Chongqing Tonglianglong FC": ("Chongqing Tongliang Long",),
+        "Dalian Yingbo FC": ("Dalian Zhixing",),
+        "Zhejiang Prof.": ("Hangzhou Greentown",),
+        "Shanghai Port": ("SHANGHAI SIPG",),
+        "Henan": ("Henan Jianye",),
+        "Qingdao Hainiu": ("Qingdao Jonoon",),
+        "Qingdao West Coast FC": ("Qingdao Youth Island",),
+        "Liaoning Tieren": ("Shenyang Urban",),
+        "Wuhan Three Towns FC": ("Wuhan Three Towns",),
+    },
     "EGY": {
         "Ghazl El Mehalla": ("Ghazl El Mahallah",),
     },
