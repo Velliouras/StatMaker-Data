@@ -17,6 +17,36 @@ class DomesticProviderLeagueGuardTest(unittest.TestCase):
             'searchTerms': ['turkey super lig', 'turkish super lig', 'süper lig', 'super lig'],
         }
 
+    def test_turkiye_country_guard_accepts_provider_spelling(self):
+        configured = dict(self.t1)
+        provider = {
+            'name': 'Türkiye - Süper Lig',
+            'slug': 'turkiye-super-lig',
+            'eventsCount': 9,
+        }
+        self.assertTrue(odds.provider_country_matches(configured, provider))
+        matched = odds.match_provider_league(configured, [provider])
+        self.assertIsNotNone(matched)
+        self.assertEqual('turkiye-super-lig', matched['slug'])
+
+    def test_czechia_country_guard_accepts_provider_spelling(self):
+        configured = {
+            'leagueCode': 'CZE',
+            'country': 'Czech Republic',
+            'competition': 'Czech Liga',
+            'providerLeagueSlug': 'czechia-1-liga',
+            'searchTerms': ['czech republic czech liga', 'czech liga', 'chance liga', 'czechia first league'],
+        }
+        provider = {
+            'name': 'Czechia - 1. Liga',
+            'slug': 'czechia-1-liga',
+            'eventsCount': 8,
+        }
+        self.assertTrue(odds.provider_country_matches(configured, provider))
+        matched = odds.match_provider_league(configured, [provider])
+        self.assertIsNotNone(matched)
+        self.assertEqual('czechia-1-liga', matched['slug'])
+
     def test_rejects_simulated_turkey_super_lig(self):
         providers = [{
             'name': 'Simulated Reality League - Turkey Super Lig SRL',
