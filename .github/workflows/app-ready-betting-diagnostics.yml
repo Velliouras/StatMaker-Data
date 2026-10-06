@@ -1,0 +1,123 @@
+name: App-Ready Betting Diagnostics
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/app-ready-diagnostics-request"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Inspect current App-Ready betting DB
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, sqlite3, zipfile
+          from pathlib import Path
+          from datetime import date, timedelta
+
+          manifest = json.loads(Path("data/statmaker/app_ready/update_manifest.json").read_text())
+          betting = next(a for a in manifest["artifacts"] if a["id"] == "app_ready_betting_bundle")
+          bundle = Path(betting["path"])
+          print("DIAG_MANIFEST", manifest.get("generatedAt"), manifest.get("contentVersion"))
+          print("DIAG_BUNDLE", bundle, bundle.stat().st_size)
+
+          out = Path("/tmp/statmaker-app-ready-diag")
+          out.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(bundle) as zf:
+              names = zf.namelist()
+              db_name = next(n for n in names if n.endswith("statmaker_prepared_betting.db"))
+              zf.extract(db_name, out)
+          db_path = out / db_name
+          con = sqlite3.connect(db_path)
+          con.row_factory = sqlite3.Row
+
+          tables = [r[0] for r in con.execute("select name from sqlite_master where type='table' order by name")]
+          print("DIAG_TABLES", ",".join(tables))
+
+          for table in tables:
+              cols = [r[1] for r in con.execute(f"pragma table_info({table})")]
+              if any(c in cols for c in ("league_code","selection_key","match_key","model_probability","simulation_probability")):
+                  print("DIAG_SCHEMA", table, ",".join(cols))
+
+          start = date(2026,10,6)
+          end = start + timedelta(days=7)
+          if "prepared_pattern_candidates" in tables:
+              cols = [r[1] for r in con.execute("pragma table_info(prepared_pattern_candidates)")]
+              q = """
+                select
+                  count(*) rows,
+                  count(distinct match_key) matches,
+                  sum(case when recommendation_eligible=1 then 1 else 0 end) eligible_rows,
+                  count(distinct case when recommendation_eligible=1 then match_key end) eligible_matches,
+                  sum(case when policy_premium_eligible=1 then 1 else 0 end) premium_rows,
+                  count(distinct case when policy_premium_eligible=1 then match_key end) premium_matches
+                from prepared_pattern_candidates
+                where league_code='CHN' and local_date>=? and local_date<?
+              """
+              print("DIAG_CHN_CANDIDATES", dict(con.execute(q,(start.isoformat(),end.isoformat())).fetchone()))
+
+              tiers = con.execute("""
+                select coalesce(value_tier,'NULL') tier,
+                       count(*) rows,
+                       count(distinct match_key) matches,
+                       sum(case when recommendation_eligible=1 then 1 else 0 end) eligible_rows
+                from prepared_pattern_candidates
+                where league_code='CHN' and local_date>=? and local_date<?
+                group by coalesce(value_tier,'NULL')
+                order by rows desc
+              """,(start.isoformat(),end.isoformat())).fetchall()
+              for r in tiers:
+                  print("DIAG_CHN_TIER", dict(r))
+
+              samples = con.execute("""
+                select local_date, match_key, market_family, selection_odd,
+                       strict_hit_rate, strict_sample, value_tier,
+                       recommendation_eligible, policy_premium_eligible,
+                       policy_rejection_reason, selection_score, evidence_score,
+                       exact_recommendation_key, selection_key
+                from prepared_pattern_candidates
+                where league_code='CHN' and local_date>=? and local_date<?
+                order by local_date, match_key, evidence_score desc, selection_score desc
+                limit 60
+              """,(start.isoformat(),end.isoformat())).fetchall()
+              for r in samples:
+                  print("DIAG_CHN_SAMPLE", json.dumps(dict(r), ensure_ascii=False, sort_keys=True))
+
+              all7 = con.execute("""
+                select count(*) rows, count(distinct match_key) matches,
+                       count(distinct case when recommendation_eligible=1 then match_key end) eligible_matches,
+                       count(distinct case when policy_premium_eligible=1 then match_key end) premium_matches
+                from prepared_pattern_candidates
+                where local_date>=? and local_date<?
+              """,(start.isoformat(),end.isoformat())).fetchone()
+              print("DIAG_7D_CANDIDATES", dict(all7))
+
+          # Find every table carrying CHN or the Chinese match keys through useful identity columns.
+          for table in tables:
+              cols = [r[1] for r in con.execute(f"pragma table_info({table})")]
+              conds=[]; params=[]
+              if "league_code" in cols:
+                  conds.append("league_code='CHN'")
+              if "country" in cols:
+                  conds.append("lower(country) like '%china%'")
+              if not conds:
+                  continue
+              try:
+                  n=con.execute(f"select count(*) from {table} where " + " or ".join(conds)).fetchone()[0]
+                  if n:
+                      print("DIAG_CHN_TABLE", table, n)
+              except Exception as e:
+                  print("DIAG_TABLE_ERR", table, repr(e))
+
+          con.close()
+          PY
