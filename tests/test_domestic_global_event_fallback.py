@@ -17,7 +17,7 @@ class DomesticGlobalEventFallbackTest(unittest.TestCase):
     def tearDown(self):
         schedule_priority.target.odds_fetch.fetch_events_for_league = self.original
 
-    def test_empty_league_response_uses_same_slug_global_events(self):
+    def test_empty_league_response_uses_same_league_code_global_events(self):
         schedule_priority.target.odds_fetch.fetch_events_for_league = (
             lambda api_key, slug, horizon_days, debug: []
         )
@@ -25,7 +25,7 @@ class DomesticGlobalEventFallbackTest(unittest.TestCase):
             {
                 "id": 101,
                 "date": "2026-10-09T17:30:00Z",
-                "league": {"slug": "argentina-liga-profesional"},
+                "league": {"slug": "argentina-liga-profesional-variant"},
             },
             {
                 "id": 202,
@@ -33,7 +33,12 @@ class DomesticGlobalEventFallbackTest(unittest.TestCase):
                 "league": {"slug": "denmark-superliga"},
             },
         ]
-        schedule_priority._install_near_term_event_horizon(7, global_events)
+        slug_to_code = {
+            "argentina-liga-profesional": "ARG",
+            "argentina-liga-profesional-variant": "ARG",
+            "denmark-superliga": "DNK",
+        }
+        schedule_priority._install_near_term_event_horizon(7, global_events, slug_to_code)
 
         debug = {}
         rows = schedule_priority.target.odds_fetch.fetch_events_for_league(
@@ -42,7 +47,7 @@ class DomesticGlobalEventFallbackTest(unittest.TestCase):
 
         self.assertEqual([101], [row["id"] for row in rows])
         self.assertEqual(
-            "verified-global-events-only",
+            "verified-global-events-same-league-code",
             debug["globalEventFallbacks"][0]["policy"],
         )
 
@@ -62,7 +67,8 @@ class DomesticGlobalEventFallbackTest(unittest.TestCase):
                 "league": {"slug": "denmark-superliga"},
             }
         ]
-        schedule_priority._install_near_term_event_horizon(7, global_events)
+        slug_to_code = {"denmark-superliga": "DNK"}
+        schedule_priority._install_near_term_event_horizon(7, global_events, slug_to_code)
 
         debug = {}
         rows = schedule_priority.target.odds_fetch.fetch_events_for_league(
