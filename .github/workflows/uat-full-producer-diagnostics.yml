@@ -152,59 +152,50 @@ jobs:
           con=sqlite3.connect(db)
           con.row_factory=sqlite3.Row
 
-          fixtures=con.execute("""
-            select match_key, local_date, home_team, away_team, team_mapping_status, usable_for_stats
-            from prepared_fixture_matches
-            where league_code='CHN' and local_date between '2026-10-06' and '2026-10-13'
-            order by local_date, home_team
-          """).fetchall()
-          print("UAT_CHN_FIXTURE_INDEX", len(fixtures))
+          tables={r[0] for r in con.execute("select name from sqlite_master where type='table'")}
+          required={"prepared_matches","prepared_selections"}
+          missing=required-tables
+          if missing:
+              raise SystemExit(f"Fresh UAT DB missing required tables: {sorted(missing)}")
 
-          prepared=con.execute("""
-            select match_key, local_date, payload
+          matches=[]
+          for r in con.execute("""
+            select competition_id,snapshot_version,match_key,payload
             from prepared_matches
             where competition_id='domestic'
-          """).fetchall()
-
-          def match_names(payload):
+          """):
               try:
-                  p=json.loads(payload)
+                  p=json.loads(r["payload"])
               except Exception:
-                  return ("","")
-              return (str(p.get("homeTeam") or ""), str(p.get("awayTeam") or ""))
+                  continue
+              league=str(p.get("leagueCode") or "").strip().upper()
+              date=str(p.get("date") or "")[:10]
+              if league=="CHN" and "2026-10-06" <= date <= "2026-10-13":
+                  matches.append((r,p))
 
-          prepared_by_names={}
-          for r in prepared:
-              home,away=match_names(r["payload"])
-              if home or away:
-                  prepared_by_names[(home,away)]=r["match_key"]
-
+          print("UAT_CHN_PREPARED_MATCHES", len(matches))
           failures=[]
-          for f in fixtures:
-              pair=(f["home_team"],f["away_team"])
-              pmk=prepared_by_names.get(pair)
-              selections=0
-              if pmk:
-                  selections=con.execute(
-                      "select count(*) from prepared_selections where competition_id='domestic' and match_key=?",
-                      (pmk,)
-                  ).fetchone()[0]
+          for r,p in sorted(matches,key=lambda item:(str(item[1].get("date") or ""),str(item[1].get("homeTeam") or ""))):
+              selections=con.execute(
+                  """
+                  select count(*) from prepared_selections
+                  where competition_id=? and snapshot_version=? and match_key=?
+                  """,
+                  (r["competition_id"],r["snapshot_version"],r["match_key"])
+              ).fetchone()[0]
               row={
-                  "date":f["local_date"],
-                  "home":f["home_team"],
-                  "away":f["away_team"],
-                  "fixture_key":f["match_key"],
-                  "prepared_match_key":pmk,
+                  "date":str(p.get("date") or "")[:10],
+                  "home":str(p.get("homeTeam") or ""),
+                  "away":str(p.get("awayTeam") or ""),
+                  "match_key":r["match_key"],
                   "prepared_selections":selections,
-                  "mapping":f["team_mapping_status"],
-                  "usable":f["usable_for_stats"],
               }
-              print("UAT_CHN_PREPARED", json.dumps(row,ensure_ascii=False,sort_keys=True))
-              if not pmk or selections <= 0:
-                  failures.append(pair)
+              print("UAT_CHN_PREPARED",json.dumps(row,ensure_ascii=False,sort_keys=True))
+              if selections <= 0:
+                  failures.append((row["home"],row["away"]))
 
-          if len(fixtures) != 8:
-              raise SystemExit(f"Expected 8 CHN fixture-index matches, got {len(fixtures)}")
+          if len(matches) != 8:
+              raise SystemExit(f"Expected 8 CHN prepared matches, got {len(matches)}")
           if failures:
               raise SystemExit("CHN prepared coverage incomplete: "+repr(failures))
           print("UAT_CHN_PREPARED_8_OF_8_OK")
