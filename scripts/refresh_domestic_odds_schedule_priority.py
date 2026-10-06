@@ -239,11 +239,36 @@ def _install_priority_rotation(priority_codes: Sequence[str]) -> None:
     target.pipeline.rotated = prioritized
 
 
-def _install_near_term_event_horizon(days: int) -> None:
+def _install_near_term_event_horizon(
+    days: int,
+    global_events: Sequence[Dict[str, Any]],
+) -> None:
     original = target.odds_fetch.fetch_events_for_league
+    by_slug: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    for event in global_events:
+        slug = _league_slug(event)
+        if slug:
+            by_slug[slug].append(event)
 
     def near_term(api_key: str, slug: str, horizon_days: int, debug: Dict[str, Any]) -> List[Dict[str, Any]]:
-        return original(api_key, slug, min(max(1, int(horizon_days)), days), debug)
+        effective_days = min(max(1, int(horizon_days)), days)
+        rows = original(api_key, slug, effective_days, debug)
+        if rows:
+            return rows
+
+        # Odds-API.io occasionally returns an empty league-scoped /events result even
+        # though the same verified events are present in the global /events response.
+        # Reuse only those provider event IDs for the exact same league slug; exact odds
+        # are still fetched from /odds/multi and are never synthesized.
+        fallback = list(by_slug.get(slug, []))
+        if fallback:
+            debug.setdefault("globalEventFallbacks", []).append({
+                "providerLeagueSlug": slug,
+                "eventCount": len(fallback),
+                "policy": "verified-global-events-only",
+            })
+            return fallback
+        return rows
 
     target.odds_fetch.fetch_events_for_league = near_term
 
@@ -520,7 +545,7 @@ def main() -> int:
     )
 
     _install_priority_rotation(priority_codes)
-    _install_near_term_event_horizon(odds_days)
+    _install_near_term_event_horizon(odds_days, events)
 
     # Install the shared Domestic expansion before the schedule wrapper replaces
     # canonical_team_info. guarded.main() installs the same expansion later, but
