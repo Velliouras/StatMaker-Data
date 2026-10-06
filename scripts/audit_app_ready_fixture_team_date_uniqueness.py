@@ -118,16 +118,20 @@ def _inspect_bundle(path: Path) -> Tuple[int, List[Dict[str, Any]]]:
             "apiFixtureId": _fixture_id(match),
         }
 
-    by_team_day: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
+    # Team-date uniqueness is league-scoped. Different competitions can legitimately
+    # contain different clubs whose normalized names collapse to the same token, e.g.
+    # Vitória SC (Portugal/P1) and Vitoria (Brazil/BRA) on the same date.
+    by_team_day: Dict[Tuple[str, str, str], List[Dict[str, Any]]] = defaultdict(list)
     for fixture in fixtures.values():
         date = fixture["localDate"]
+        league_code = str(fixture.get("leagueCode") or "").strip()
         for team in (fixture["homeTeam"], fixture["awayTeam"]):
             key = _norm_team(team)
             if key:
-                by_team_day[(date, key)].append(fixture)
+                by_team_day[(league_code, date, key)].append(fixture)
 
     conflicts: List[Dict[str, Any]] = []
-    for (date, normalized_team), candidate_fixtures in sorted(by_team_day.items()):
+    for (league_code, date, normalized_team), candidate_fixtures in sorted(by_team_day.items()):
         unique_signatures: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
         for fixture in candidate_fixtures:
             opponent = fixture["awayTeam"] if _norm_team(fixture["homeTeam"]) == normalized_team else fixture["homeTeam"]
@@ -136,6 +140,7 @@ def _inspect_bundle(path: Path) -> Tuple[int, List[Dict[str, Any]]]:
         if len(unique_signatures) <= 1:
             continue
         conflicts.append({
+            "leagueCode": league_code,
             "localDate": date,
             "normalizedTeam": normalized_team,
             "fixtures": list(unique_signatures.values()),
