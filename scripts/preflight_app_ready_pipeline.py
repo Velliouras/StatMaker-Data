@@ -103,9 +103,10 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         (
             "bash \"$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh\"",
             'APP_READY_UAT_SOURCE: "true"',
-            "APP_READY_PREPARED_SCHEMA_VERSION: \"12\"",
-            f'APP_READY_PATTERN_RULES_FINGERPRINT: "{EXPECTED_RULES}"',
-            f'APP_READY_STATMAKER_COMMIT: "{EXPECTED_STATMAKER_COMMIT}"',
+            "expected_rules='pattern-policy-v2-final-read-model-v6-probability-first-prod'",
+            "expected_schema=12",
+            "expected_statmaker_commit=str(json.load(response).get('sha') or '').strip()",
+            'f.write(f"statmaker_commit={expected_statmaker_commit}\\n")',
         ),
         "publisher workflow",
         report,
