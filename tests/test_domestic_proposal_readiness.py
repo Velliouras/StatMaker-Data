@@ -68,6 +68,31 @@ class DomesticProposalReadinessTest(unittest.TestCase):
         asian = {"market": "ASIAN_GOALS", "bookmaker": "Bet365", "exactBookmakerOdds": True}
         self.assertTrue(readiness.valid_exact_market({**asian, "odds": 1.91}))
 
+
+    def test_china_verified_identity_bridge_preserves_historical_samples(self):
+        matches = [
+            {
+                "home_team": "Chengdu Better City",
+                "away_team": "Sichuan Jiuniu",
+                "home_goals": 2,
+                "away_goals": 1,
+                "hthg": 1,
+                "htag": 0,
+                "normalized_stats": {"HC": 6, "AC": 3},
+            }
+        ]
+        support = readiness.historical_support(matches, "CHN")
+        row = readiness.market_support(
+            support,
+            "Chengdu Rongcheng",
+            "Shenzhen Peng City",
+            "1X2",
+            "CHN",
+        )
+        self.assertTrue(row["hardHistoryValid"])
+        self.assertEqual(1, row["homeSample"])
+        self.assertEqual(1, row["awaySample"])
+
     def test_restored_non_core_league_can_be_proposal_ready(self):
         # CZE is intentionally outside the temporary core-27 odds polling scope,
         # but remains inside the 53-league Stats universe and may use preserved exact odds.
