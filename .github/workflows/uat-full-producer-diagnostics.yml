@@ -93,6 +93,33 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Restrict diagnostic odds to China
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path=Path("odds/odds_api_io/domestic_odds.json")
+          payload=json.loads(path.read_text(encoding="utf-8"))
+          leagues=[
+              row for row in (payload.get("leagues") or [])
+              if str(row.get("leagueCode") or "").strip().upper()=="CHN"
+          ]
+          matches=[
+              row for row in (payload.get("matches") or [])
+              if str(row.get("leagueCode") or "").strip().upper()=="CHN"
+          ]
+          if not leagues and not matches:
+              raise SystemExit("China diagnostic scope is empty")
+          payload["leagues"]=leagues
+          payload["matches"]=matches
+          path.write_text(json.dumps(payload,ensure_ascii=False,separators=(",",":")),encoding="utf-8")
+          total=sum(len(row.get("matches") or []) for row in leagues)
+          print(f"UAT_CHN_SCOPE_OK leagues={len(leagues)} top_matches={len(matches)} league_matches={total}")
+          PY
+
       - name: Assemble UAT producer
         working-directory: statmaker-private
         shell: bash
