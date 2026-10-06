@@ -1,0 +1,103 @@
+name: Domestic Proposal Readiness Rebuild
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/domestic-readiness-rebuild-request'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate readiness code
+        run: |
+          python -m py_compile \
+            scripts/canonical_team_identity.py \
+            scripts/build_domestic_proposal_readiness.py \
+            scripts/build_statmaker_update_manifest.py
+          python -m unittest tests/test_domestic_proposal_readiness.py
+
+      - name: Capture China readiness before rebuild
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('data/statmaker/domestic_proposal_readiness.json')
+          payload=json.loads(path.read_text(encoding='utf-8'))
+          row=next((x for x in payload.get('leagues',[]) if x.get('leagueCode')=='CHN'),{})
+          value=int(row.get('proposalReadyFixtureCount') or 0)
+          Path('/tmp/chn_before.txt').write_text(str(value),encoding='utf-8')
+          print(f'CHN_READINESS_BEFORE={value}/{int(row.get("oddsFixtureCount") or 0)}')
+          PY
+
+      - name: Rebuild proposal readiness from current main
+        run: python scripts/build_domestic_proposal_readiness.py
+
+      - name: Verify and report China readiness
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before=int(Path('/tmp/chn_before.txt').read_text())
+          payload=json.loads(Path('data/statmaker/domestic_proposal_readiness.json').read_text(encoding='utf-8'))
+          row=next((x for x in payload.get('leagues',[]) if x.get('leagueCode')=='CHN'),{})
+          after=int(row.get('proposalReadyFixtureCount') or 0)
+          total=int(row.get('oddsFixtureCount') or 0)
+          print(f'CHN_READINESS_AFTER={after}/{total}')
+          if after < before:
+              raise SystemExit(f'China readiness regressed: {before} -> {after}')
+          with open(Path('/tmp/chn_result.txt'),'w',encoding='utf-8') as f:
+              f.write(f'{before}->{after}/{total}\n')
+          PY
+
+      - name: Build current main update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Commit regenerated readiness and manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/statmaker/domestic_proposal_readiness.json \
+            reports/domestic_proposal_readiness.json \
+            data/statmaker/update_manifest.json
+          if git diff --cached --quiet; then
+            echo "No readiness/manifest changes."
+          else
+            git commit -m "Rebuild Domestic proposal readiness from current main"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f /tmp/chn_result.txt ]; then
+            echo "China readiness: $(cat /tmp/chn_result.txt)" >> "$GITHUB_STEP_SUMMARY"
+          fi
