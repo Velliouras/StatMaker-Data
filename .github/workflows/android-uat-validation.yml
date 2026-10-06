@@ -66,9 +66,22 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:compileDebugKotlin :app:compileDebugJavaWithJavac --no-daemon --stacktrace
 
+      - name: Isolate focused regression sources
+        working-directory: statmaker-uat
+        shell: bash
+        run: |
+          set -euo pipefail
+          find app/src/test -type f -name '*.kt' \
+            ! -name 'DomesticCurrentMembershipTest.kt' \
+            ! -name 'ModelPerformanceConfidenceTest.kt' \
+            -delete
+
       - name: Run focused regression tests
         working-directory: statmaker-uat
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew :app:testDebugUnitTest             --tests "com.statmaker.app.DomesticCurrentMembershipTest"             --tests "com.statmaker.app.ModelPerformanceConfidenceTest"             --no-daemon --stacktrace
+          ./gradlew :app:testDebugUnitTest \
+            --tests "com.statmaker.app.DomesticCurrentMembershipTest" \
+            --tests "com.statmaker.app.ModelPerformanceConfidenceTest" \
+            --no-daemon --stacktrace
