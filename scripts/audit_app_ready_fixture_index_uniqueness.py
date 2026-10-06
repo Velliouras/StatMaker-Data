@@ -23,9 +23,8 @@ def _norm(value: Any) -> str:
 
 
 def _identity_key(canonical: str, app_name: str) -> str:
-    # Cross-league uniqueness must be based on the canonical/app identity only. Provider aliases
-    # such as "SK Rapid" are intentionally NOT used globally because they can collapse unrelated
-    # clubs (e.g. Rapid Vienna vs Rapid Bucuresti) after decoration removal.
+    # League-scoped uniqueness uses canonical/app identity only. Provider aliases are not used
+    # because decoration removal can collapse distinct clubs even within noisy provider feeds.
     return _norm(canonical or app_name)
 
 
@@ -101,9 +100,10 @@ def _inspect(bundle: Path) -> Tuple[int, List[Dict[str, Any]]]:
             "providerAwayTeam": str(provider_away or "").strip(),
         })
 
-    by_team_day: Dict[Tuple[str, str], Dict[Tuple[str, str, str], Dict[str, Any]]] = defaultdict(dict)
+    by_team_day: Dict[Tuple[str, str, str], Dict[Tuple[str, str, str], Dict[str, Any]]] = defaultdict(dict)
     for fixture in fixtures:
         date = fixture["localDate"]
+        league_code = str(fixture.get("leagueCode") or "").strip()
         sides = (
             (
                 fixture["canonicalHomeTeam"], fixture["homeTeam"],
@@ -124,11 +124,11 @@ def _inspect(bundle: Path) -> Tuple[int, List[Dict[str, Any]]]:
                 fixture["matchKey"],
                 opponent_key,
             )
-            by_team_day[(date, team_key)][signature] = fixture
+            by_team_day[(league_code, date, team_key)][signature] = fixture
 
     conflicts: List[Dict[str, Any]] = []
     seen_conflicts = set()
-    for (date, team_key), distinct_fixtures in sorted(by_team_day.items()):
+    for (league_code, date, team_key), distinct_fixtures in sorted(by_team_day.items()):
         if len(distinct_fixtures) <= 1:
             continue
         conflict_signature = tuple(sorted(
@@ -139,6 +139,7 @@ def _inspect(bundle: Path) -> Tuple[int, List[Dict[str, Any]]]:
             continue
         seen_conflicts.add(conflict_signature)
         conflicts.append({
+            "leagueCode": league_code,
             "localDate": date,
             "teamIdentity": team_key,
             "fixtures": list(distinct_fixtures.values()),
