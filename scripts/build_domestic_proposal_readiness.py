@@ -12,6 +12,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, Tuple
 
+import canonical_team_identity
 import update_domestic_odds_api_io as odds_util
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,6 +80,21 @@ def normalize_team(value: Any) -> str:
     return odds_util.normalize_text(value, drop_suffixes=True)
 
 
+def readiness_team_key(league_code: Any, value: Any) -> str:
+    """Normalize a team name and bridge only explicit verified cross-provider aliases."""
+    key = normalize_team(value)
+    code = normalize_code(league_code)
+    aliases = canonical_team_identity.VERIFIED_CROSS_PROVIDER_ALIASES.get(code, {})
+    for canonical, variants in aliases.items():
+        canonical_key = normalize_team(canonical)
+        if key == canonical_key:
+            return canonical_key
+        for variant in variants:
+            if key == normalize_team(variant):
+                return canonical_key
+    return key
+
+
 def valid_exact_market(market: Dict[str, Any]) -> bool:
     if market.get("exactBookmakerOdds") is not True:
         return False
@@ -111,15 +127,18 @@ def _increment_pair(
             support[away][requirement]["match"] += 1
 
 
-def historical_support(matches: Iterable[Dict[str, Any]]) -> Dict[str, Dict[str, Dict[str, int]]]:
+def historical_support(
+    matches: Iterable[Dict[str, Any]],
+    league_code: Any = "",
+) -> Dict[str, Dict[str, Dict[str, int]]]:
     support: Dict[str, Dict[str, Dict[str, int]]] = defaultdict(
         lambda: defaultdict(lambda: {"team": 0, "match": 0})
     )
     for match in matches:
         if not isinstance(match, dict):
             continue
-        home = normalize_team(match.get("home_team"))
-        away = normalize_team(match.get("away_team"))
+        home = readiness_team_key(league_code, match.get("home_team"))
+        away = readiness_team_key(league_code, match.get("away_team"))
 
         home_goals = match.get("home_goals")
         away_goals = match.get("away_goals")
@@ -145,10 +164,11 @@ def market_support(
     home_team: str,
     away_team: str,
     market_id: str,
+    league_code: Any = "",
 ) -> Dict[str, Any]:
     requirement, scope = MARKET_REQUIREMENTS[market_id]
-    home = normalize_team(home_team)
-    away = normalize_team(away_team)
+    home = readiness_team_key(league_code, home_team)
+    away = readiness_team_key(league_code, away_team)
     home_sample = int(support.get(home, {}).get(requirement, {}).get(scope, 0))
     away_sample = int(support.get(away, {}).get(requirement, {}).get(scope, 0))
     best_sample = max(home_sample, away_sample)
@@ -193,7 +213,7 @@ def build_payload(
             output_path = ROOT / str(index_row.get("output_path") or "")
             stats_artifact = read_json(output_path, {})
         history_matches = stats_artifact.get("matches", []) if isinstance(stats_artifact, dict) else []
-        support = historical_support(history_matches or [])
+        support = historical_support(history_matches or [], code)
 
         fixture_rows = []
         league_ready_markets = set()
@@ -211,7 +231,7 @@ def build_payload(
             readiness = {}
             ready_markets = []
             for market_id in sorted(exact_by_market):
-                support_row = market_support(support, home, away, market_id)
+                support_row = market_support(support, home, away, market_id, code)
                 data_ready = support_row["hardHistoryValid"]
                 readiness[market_id] = {
                     **support_row,
