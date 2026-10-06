@@ -10,7 +10,7 @@ permissions:
 
 concurrency:
   group: statmaker-app-ready-simulation-hot-publish
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -112,11 +112,46 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/statmaker/app_ready/update_manifest.json
-          git add data/statmaker/app_ready/app_ready_betting_bundle-*.zip
-          if git diff --cached --quiet; then
-            echo "No App-Ready simulation changes to publish."
-            exit 0
-          fi
-          git commit -m "Publish match and league simulation App-Ready hotfix"
-          git push origin HEAD:main
+
+          publish_dir="$(mktemp -d)"
+          cp data/statmaker/app_ready/update_manifest.json "$publish_dir/update_manifest.json"
+          bundle_name="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          betting=next(x for x in manifest['artifacts'] if x['id']=='app_ready_betting_bundle')
+          print(Path(betting['path']).name)
+          PY
+          )"
+          cp "data/statmaker/app_ready/$bundle_name" "$publish_dir/$bundle_name"
+
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+
+            cp "$publish_dir/update_manifest.json" data/statmaker/app_ready/update_manifest.json
+            cp "$publish_dir/$bundle_name" "data/statmaker/app_ready/$bundle_name"
+            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$bundle_name"
+
+            if git diff --cached --quiet; then
+              echo "APP_READY_SIMULATION_HOT_PUBLISH_ALREADY_PRESENT"
+              published=true
+              break
+            fi
+
+            git commit -m "Publish match and league simulation App-Ready hotfix"
+            if git push origin HEAD:main; then
+              echo "APP_READY_SIMULATION_HOT_PUBLISH_PUSH_OK attempt=$attempt"
+              published=true
+              break
+            fi
+
+            echo "APP_READY_SIMULATION_HOT_PUBLISH_RETRY attempt=$attempt"
+            sleep $((attempt * 2))
+          done
+
+          [[ "$published" == "true" ]] || {
+            echo "Could not publish App-Ready simulation hotfix after 5 retries" >&2
+            exit 1
+          }
