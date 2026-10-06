@@ -64,7 +64,11 @@ jobs:
         run: |
           set -euo pipefail
           chmod +x gradlew
-          ./gradlew :app:compileDebugKotlin :app:compileDebugJavaWithJavac --no-daemon --stacktrace
+          ./gradlew :app:compileDebugKotlin :app:compileDebugJavaWithJavac \
+            --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
+            -Dorg.gradle.workers.max=2 \
+            -Pkotlin.compiler.execution.strategy=in-process
 
       - name: Isolate focused regression sources
         working-directory: statmaker-uat
@@ -84,4 +88,7 @@ jobs:
           ./gradlew :app:testDebugUnitTest \
             --tests "com.statmaker.app.DomesticCurrentMembershipTest" \
             --tests "com.statmaker.app.ModelPerformanceConfidenceTest" \
-            --no-daemon --stacktrace
+            --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
+            -Dorg.gradle.workers.max=2 \
+            -Pkotlin.compiler.execution.strategy=in-process
