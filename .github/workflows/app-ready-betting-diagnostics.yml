@@ -106,5 +106,29 @@ jobs:
           for mk in sorted(fixture_keys-candidate_keys):
               print("DIAG_CHN_MISSING_CANDIDATE", mk)
 
+          print("DIAG_PATTERN_SCHEMA", [
+              dict(r) for r in con.execute("pragma table_info(prepared_pattern_candidates)")
+          ])
+          print("DIAG_SELECTION_SCHEMA", [
+              dict(r) for r in con.execute("pragma table_info(prepared_selections)")
+          ])
+
+          ledger_path = Path("data/statmaker/canonical_recommendation_ledger.json")
+          if ledger_path.is_file():
+              ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+              print("DIAG_LEDGER_TYPE", type(ledger).__name__)
+              if isinstance(ledger, dict):
+                  print("DIAG_LEDGER_KEYS", sorted(ledger.keys()))
+                  for key, value in ledger.items():
+                      if isinstance(value, list):
+                          print("DIAG_LEDGER_LIST", key, len(value))
+                          if value:
+                              sample=value[0]
+                              print("DIAG_LEDGER_SAMPLE", key, json.dumps(sample, ensure_ascii=False, sort_keys=True)[:6000])
+                      elif isinstance(value, dict):
+                          print("DIAG_LEDGER_DICT", key, sorted(value.keys())[:50])
+                      else:
+                          print("DIAG_LEDGER_SCALAR", key, value)
+
           con.close()
           PY
