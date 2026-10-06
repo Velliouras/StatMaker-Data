@@ -213,6 +213,7 @@ def output_debug(generated_at: str, debug: Dict[str, Any]) -> Dict[str, Any]:
         "leaguesMatched": debug.get("leaguesMatched", []),
         "leaguesMissing": debug.get("leaguesMissing", []),
         "leagueReports": debug.get("leagueReports", []),
+        "globalEventFallbacks": debug.get("globalEventFallbacks", []),
         "unmatchedTeams": unique_unmatched_teams(debug.get("unmatchedTeams", [])),
         "rawMarketCounts": debug.get("rawMarketCounts", {}),
         "classifiedMarketCounts": debug.get("classifiedMarketCounts", {}),
