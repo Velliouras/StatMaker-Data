@@ -51,9 +51,9 @@ concurrency:
   # Failed/cancelled upstream workflow_run events are no-op runs. Give those runs a
   # unique key so they cannot cancel a valid publisher already building a generation.
   group: statmaker-app-ready-${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && github.run_id || 'active' }}
-  # A deliberate publisher-code push supersedes older in-flight publisher attempts.
-  # Normal schedule/workflow_run triggers never cancel a valid expensive generation.
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  # Never cancel a valid in-flight generation. A completed generation is publishable even if
+  # newer canonical inputs arrive while it is building; the next queued run will catch up.
+  cancel-in-progress: false
 
 jobs:
   publish:
@@ -373,6 +373,9 @@ jobs:
           python scripts/materialize_prepared_league_simulations.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db \
             --runs 10000
+          python scripts/materialize_prepared_uefa_simulations.py \
+            app-ready-export/raw/databases/statmaker_prepared_betting.db \
+            --runs 10000
 
       - name: Stage canonical repository inputs
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
@@ -499,21 +502,21 @@ jobs:
           actual_main=str(current_main.get('contentVersion') or '')
           actual_uefa=str(current_uefa.get('contentVersion') or '')
           recovery=os.environ.get('HOST_RECOVERY','false').lower() == 'true'
-          current=recovery or (expected_main == actual_main and expected_uefa == actual_uefa)
+          source_matches=(expected_main == actual_main and expected_uefa == actual_uefa)
           if recovery:
               print(
                   'APP_READY_RECOVERY_SOURCE_ACCEPTED',
                   f'main={expected_main[:12]} current={actual_main[:12]}',
                   f'uefa={expected_uefa[:12]} current={actual_uefa[:12]}',
               )
-          elif not current:
+          elif not source_matches:
               print(
-                  'APP_READY_STALE_SOURCE_SKIP',
+                  'APP_READY_SOURCE_ADVANCED_PUBLISHING_COMPLETED_GENERATION',
                   f'main={expected_main[:12]}->{actual_main[:12]}',
                   f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}',
               )
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:
-              f.write(f"current={'true' if current else 'false'}\n")
+              f.write("current=true\n")
           PY
 
       - name: Report stale generation skip
@@ -632,9 +635,8 @@ jobs:
               git fetch --no-tags origin +main:refs/remotes/origin/main
               git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
 
-              # Keep the strict source contract on every retry. A live-settlement-only commit
-              # leaves these content versions unchanged and is safe to publish over; a canonical
-              # source change aborts rather than publishing a stale generation.
+              # Publish the fully validated generation even if canonical inputs advanced while it
+              # was building. A later queued publisher will catch up to the newer source version.
               python - <<'PY'
           import json, subprocess
           from pathlib import Path
@@ -653,10 +655,10 @@ jobs:
           actual_main=str(current_main.get('contentVersion') or '')
           actual_uefa=str(current_uefa.get('contentVersion') or '')
           if expected_main != actual_main or expected_uefa != actual_uefa:
-              raise SystemExit(
-                  'Refusing stale app-ready publish after concurrent canonical update: '
-                  f'main={expected_main[:12]}->{actual_main[:12]} '
-                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}'
+              print(
+                  'APP_READY_CONCURRENT_SOURCE_ADVANCE_ALLOWED',
+                  f'main={expected_main[:12]}->{actual_main[:12]}',
+                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}',
               )
           PY
 
