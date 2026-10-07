@@ -73,6 +73,11 @@ jobs:
           for row in index.get('leagues', []):
               if row.get('lifecycle') != 'active':
                   continue
+              # Only validate the actual current-season row. Historical-support rows
+              # can intentionally remain active for model evidence while pointing at
+              # the next target season window.
+              if str(row.get('app_season') or '').strip() != str(row.get('target_app_season') or '').strip():
+                  continue
               start = str(row.get('target_season_start') or '').strip()
               path = str(row.get('output_path') or '').strip()
               if not start or not path:
