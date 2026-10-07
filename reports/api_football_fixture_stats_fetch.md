@@ -1,7 +1,7 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-10-06T10:27:27Z`
-Requests used: `1127` / `2400`
+Generated at: `2026-10-07T10:28:56Z`
+Requests used: `1130` / `2400`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
@@ -35,7 +35,7 @@ API-Football is the active domestic historical/stat source. Football-Data CSV is
 | England | League One | 2026 | 41 | 90 | 90 | 0 | 90 | 0 | 0 | 1 | league+season:2026 | 552 | data/api_football/fixture_stats/england/league-one/2026/fixture_stats.json | league+season:2026 returned=552 completed=90 |
 | England | League Two | 2026 | 42 | 102 | 102 | 0 | 102 | 0 | 0 | 1 | league+season:2026 | 552 | data/api_football/fixture_stats/england/league-two/2026/fixture_stats.json | league+season:2026 returned=552 completed=102 |
 | Australia | A-League | 2026 | 188 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | league+season:2026 | 156 | data/api_football/fixture_stats/australia/a-league/2026/fixture_stats.json | league+season:2026 returned=156 completed=0; fixtures returned=156 but no completed fixtures with status FT/AET/PEN; statuses=NS |
-| Uruguay | Primera División | 2026 | 268 | 249 | 0 | 54 | 249 | 0 | 54 | 55 | league+season:2026 | 257 | data/api_football/fixture_stats/uruguay/primera-division/2026/fixture_stats.json | league+season:2026 returned=257 completed=249; request cap reached before all fixture statistics were fetched |
+| Uruguay | Primera División | 2026 | 268 | 249 | 0 | 54 | 249 | 0 | 54 | 55 | league+season:2026 | 265 | data/api_football/fixture_stats/uruguay/primera-division/2026/fixture_stats.json | league+season:2026 returned=265 completed=249; request cap reached before all fixture statistics were fetched |
 | Lithuania | A Lyga | 2026 | 362 | 143 | 0 | 54 | 143 | 0 | 54 | 55 | league+season:2026 | 180 | data/api_football/fixture_stats/lithuania/a-lyga/2026/fixture_stats.json | league+season:2026 returned=180 completed=143; request cap reached before all fixture statistics were fetched |
 | Estonia | Meistriliiga | 2026 | 329 | 145 | 0 | 54 | 145 | 0 | 54 | 55 | league+season:2026 | 180 | data/api_football/fixture_stats/estonia/meistriliiga/2026/fixture_stats.json | league+season:2026 returned=180 completed=145; request cap reached before all fixture statistics were fetched |
 | Latvia | Virsliga | 2026 | 365 | 154 | 0 | 54 | 154 | 0 | 54 | 55 | league+season:2026 | 180 | data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json | league+season:2026 returned=180 completed=154; request cap reached before all fixture statistics were fetched |
@@ -63,10 +63,10 @@ API-Football is the active domestic historical/stat source. Football-Data CSV is
 | Ecuador | Liga Pro | 2026 | 242 | 247 | 242 | 5 | 247 | 0 | 5 | 6 | league+season:2026 | 312 | data/api_football/fixture_stats/ecuador/liga-pro/2026/fixture_stats.json | league+season:2026 returned=312 completed=247 |
 | Saudi Arabia | Pro League | 2026 | 307 | 63 | 62 | 1 | 63 | 0 | 1 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/saudi-arabia/pro-league/2026/fixture_stats.json | league+season:2026 returned=306 completed=63 |
 | Chile | Primera División | 2026 | 265 | 184 | 182 | 2 | 184 | 0 | 2 | 3 | league+season:2026 | 240 | data/api_football/fixture_stats/chile/primera-division/2026/fixture_stats.json | league+season:2026 returned=240 completed=184 |
-| USA | Major League Soccer | 2026 | 253 | 404 | 402 | 2 | 404 | 0 | 2 | 3 | league+season:2026 | 510 | data/api_football/fixture_stats/usa/major-league-soccer/2026/fixture_stats.json | league+season:2026 returned=510 completed=404 |
+| USA | Major League Soccer | 2026 | 253 | 405 | 402 | 3 | 405 | 0 | 2 | 4 | league+season:2026 | 510 | data/api_football/fixture_stats/usa/major-league-soccer/2026/fixture_stats.json | league+season:2026 returned=510 completed=405 |
 | Peru | Primera División | 2026 | 281 | 243 | 242 | 1 | 243 | 0 | 1 | 2 | league+season:2026 | 306 | data/api_football/fixture_stats/peru/primera-division/2026/fixture_stats.json | league+season:2026 returned=306 completed=243 |
-| Colombia | Primera A | 2026 | 239 | 321 | 319 | 2 | 321 | 0 | 1 | 3 | league+season:2026 | 394 | data/api_football/fixture_stats/colombia/primera-a/2026/fixture_stats.json | league+season:2026 returned=394 completed=321 |
-| Brazil | Serie B | 2026 | 72 | 310 | 310 | 0 | 310 | 0 | 0 | 1 | league+season:2026 | 380 | data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json | league+season:2026 returned=380 completed=310 |
+| Colombia | Primera A | 2026 | 239 | 321 | 320 | 1 | 321 | 0 | 1 | 2 | league+season:2026 | 394 | data/api_football/fixture_stats/colombia/primera-a/2026/fixture_stats.json | league+season:2026 returned=394 completed=321 |
+| Brazil | Serie B | 2026 | 72 | 313 | 310 | 3 | 313 | 0 | 0 | 4 | league+season:2026 | 380 | data/api_football/fixture_stats/brazil/serie-b/2026/fixture_stats.json | league+season:2026 returned=380 completed=313 |
 | Bulgaria | First League | 2026 | 172 | 69 | 69 | 0 | 69 | 0 | 0 | 1 | league+season:2026 | 182 | data/api_football/fixture_stats/bulgaria/first-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=69 |
 | Serbia | Super Liga | 2026 | 286 | 68 | 68 | 0 | 68 | 0 | 0 | 1 | league+season:2026 | 182 | data/api_football/fixture_stats/serbia/super-liga/2026/fixture_stats.json | league+season:2026 returned=182 completed=68 |
 | Czech Republic | Czech Liga | 2026 | 345 | 71 | 71 | 0 | 71 | 0 | 0 | 1 | league+season:2026 | 240 | data/api_football/fixture_stats/czech-republic/czech-liga/2026/fixture_stats.json | league+season:2026 returned=240 completed=71 |

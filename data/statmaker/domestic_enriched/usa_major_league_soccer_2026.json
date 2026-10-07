@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-06T10:27:35Z",
+  "generated_at": "2026-10-07T10:29:04Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,8 +13,13 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/usa/major-league-soccer/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-06T10:27:13Z",
+    "cache_generated_at": "2026-10-07T10:28:41Z",
     "api_football_season": "2026",
+    "season_window": [
+      "2026-01-01",
+      "2026-12-31"
+    ],
+    "season_filtered_out": 0,
     "csv_import": "inactive_archive_only"
   },
   "competition": {
@@ -40,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 404,
-    "fixtures_with_any_stats": 402,
-    "fixtures_with_bb_core_stats": 395,
-    "any_stats_coverage": 0.995,
-    "bb_core_coverage": 0.9777,
+    "completed_fixtures": 405,
+    "fixtures_with_any_stats": 403,
+    "fixtures_with_bb_core_stats": 396,
+    "any_stats_coverage": 0.9951,
+    "bb_core_coverage": 0.9778,
     "group_counts": {
-      "shots_total": 402,
-      "shots_on_target": 402,
-      "corners": 402,
-      "fouls": 402,
-      "yellow_cards": 395,
-      "red_cards": 116,
-      "possession": 402,
-      "passes": 402,
+      "shots_total": 403,
+      "shots_on_target": 403,
+      "corners": 403,
+      "fouls": 403,
+      "yellow_cards": 396,
+      "red_cards": 117,
+      "possession": 403,
+      "passes": 403,
       "xg": 342
     },
     "group_coverage": {
-      "shots_total": 0.995,
-      "shots_on_target": 0.995,
-      "corners": 0.995,
-      "fouls": 0.995,
-      "yellow_cards": 0.9777,
-      "red_cards": 0.2871,
-      "possession": 0.995,
-      "passes": 0.995,
-      "xg": 0.8465
+      "shots_total": 0.9951,
+      "shots_on_target": 0.9951,
+      "corners": 0.9951,
+      "fouls": 0.9951,
+      "yellow_cards": 0.9778,
+      "red_cards": 0.2889,
+      "possession": 0.9951,
+      "passes": 0.9951,
+      "xg": 0.8444
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -33997,6 +34002,90 @@
         },
         "fulltime": {
           "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1490326,
+      "date_utc": "2026-10-07T00:30:00+00:00",
+      "country": "USA",
+      "league": "Major League Soccer",
+      "league_code": "USA",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 253,
+      "round": "Regular Season - 16",
+      "home_team": "Chicago Fire",
+      "away_team": "Vancouver Whitecaps",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 22,
+        "AS": 15,
+        "HST": 7,
+        "AST": 2,
+        "HC": 2,
+        "AC": 8,
+        "HF": 8,
+        "AF": 11,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 48,
+        "APossession": 52,
+        "HSaves": 1,
+        "ASaves": 3,
+        "HPasses": 446,
+        "APasses": 470,
+        "HPassesAccurate": 357,
+        "APassesAccurate": 370,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 1,
+      "home_score": 3,
+      "away_score": 1,
+      "fthg": 3,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
           "away": 1
         },
         "extratime": {
