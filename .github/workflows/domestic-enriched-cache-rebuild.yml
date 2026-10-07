@@ -64,8 +64,9 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          from datetime import date, datetime
+          from datetime import date, datetime, timezone
           from pathlib import Path
+          from zoneinfo import ZoneInfo
 
           root = Path('.')
           index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
@@ -86,9 +87,22 @@ jobs:
               matches = payload.get('matches') or []
               if not matches:
                   continue
-              first = min(str(item.get('date_utc') or '')[:10] for item in matches if item.get('date_utc'))
+              local_dates = []
+              athens = ZoneInfo('Europe/Athens')
+              for item in matches:
+                  raw = str(item.get('date_utc') or '').strip()
+                  if not raw:
+                      continue
+                  try:
+                      value = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+                      if value.tzinfo is None:
+                          value = value.replace(tzinfo=timezone.utc)
+                      local_dates.append(value.astimezone(athens).date().isoformat())
+                  except ValueError:
+                      local_dates.append(raw[:10])
+              first = min(local_dates) if local_dates else ''
               if first and first < start:
-                  failures.append(f"{row.get('league_code')}: first={first} target_start={start}")
+                  failures.append(f"{row.get('league_code')}: first_local={first} target_start={start}")
           if failures:
               raise SystemExit('Current-season contamination remains: ' + '; '.join(failures))
           print('Current-season boundary validation passed')
