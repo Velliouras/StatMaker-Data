@@ -1,0 +1,109 @@
+name: Domestic Enriched Cache Rebuild
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/domestic-enriched-cache-rebuild'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate season guard code
+        run: |
+          python -m py_compile \
+            scripts/api_football_fetch_fixture_stats.py \
+            scripts/build_statmaker_domestic_enriched.py \
+            scripts/domestic_live_july_pipeline.py
+
+      - name: Rebuild app statistics from existing caches only
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic Stats registry is empty')
+
+          rows = pipeline.build_app_statistics(registry)
+          print(f'rebuilt domestic enriched rows={len(rows)}')
+          PY
+
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
+          python scripts/build_statmaker_update_manifest.py \
+            --profile main \
+            --branch main \
+            --output data/statmaker/update_manifest.json
+
+      - name: Validate current season boundaries
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import date, datetime
+          from pathlib import Path
+
+          root = Path('.')
+          index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          failures = []
+          for row in index.get('leagues', []):
+              if row.get('lifecycle') != 'active':
+                  continue
+              start = str(row.get('target_season_start') or '').strip()
+              path = str(row.get('output_path') or '').strip()
+              if not start or not path:
+                  continue
+              payload = json.loads((root / path).read_text(encoding='utf-8'))
+              matches = payload.get('matches') or []
+              if not matches:
+                  continue
+              first = min(str(item.get('date_utc') or '')[:10] for item in matches if item.get('date_utc'))
+              if first and first < start:
+                  failures.append(f"{row.get('league_code')}: first={first} target_start={start}")
+          if failures:
+              raise SystemExit('Current-season contamination remains: ' + '; '.join(failures))
+          print('Current-season boundary validation passed')
+          PY
+
+      - name: Commit rebuilt domestic artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/statmaker/domestic_enriched \
+            data/api_football/domestic_normalized_fixture_stats.json \
+            data/statmaker/uefa_support_history.json \
+            data/statmaker/uefa_team_support_history.json \
+            data/statmaker/update_manifest.json \
+            reports
+          if git diff --cached --quiet; then
+            echo "No rebuilt artifact changes."
+          else
+            git commit -m "Rebuild domestic artifacts with season guard"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
