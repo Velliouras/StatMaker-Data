@@ -59,6 +59,18 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
+        # Refresh the fixture index first so schedule-only upcoming domestic fixtures
+        # become eligible for Match Simulation even when bookmaker selections are absent.
+        subprocess.run(
+            [
+                "python",
+                str(ROOT / "scripts/materialize_prepared_fixture_index.py"),
+                str(db_path),
+            ],
+            cwd=ROOT,
+            check=True,
+        )
+
         # Canonical Elo must be refreshed first. Match Simulation and League Simulation
         # both consume the same prepared_team_elo contract from this exact DB snapshot.
         subprocess.run(
