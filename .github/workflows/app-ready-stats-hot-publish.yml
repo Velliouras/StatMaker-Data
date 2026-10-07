@@ -1,0 +1,129 @@
+name: App-Ready Stats Hot Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/stats-hotpatch-trigger'
+  workflow_run:
+    workflows:
+      - "Domestic Enriched Cache Rebuild"
+      - "Build StatMaker Domestic Enriched"
+      - "Domestic Targeted Stats Backfill"
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-stats-hot-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Validate stats hot-publish code
+        run: python -m py_compile scripts/hotpatch_app_ready_stats.py
+
+      - name: Publish current stats bundle without prepared betting rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+
+            python scripts/hotpatch_app_ready_stats.py
+
+            bundle_name="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          stats=next(x for x in manifest['artifacts'] if x['id']=='app_ready_stats_bundle')
+          print(Path(stats['path']).name)
+          PY
+          )"
+
+            python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+
+          root=Path('.')
+          manifest=json.loads((root/'data/statmaker/app_ready/update_manifest.json').read_text())
+          metadata=manifest.get('metadata',{})
+          assert metadata.get('statsHotPublish') is True
+          artifact=next(x for x in manifest['artifacts'] if x['id']=='app_ready_stats_bundle')
+          bundle=root/artifact['path']
+          assert bundle.is_file() and bundle.stat().st_size > 0
+
+          index=json.loads((root/'data/statmaker/domestic_enriched/index.json').read_text())
+          expected={
+              (
+                  {'2025-2026':'2526','2024-2025':'2425','2023-2024':'2324'}.get(str(row.get('app_season') or ''), str(row.get('app_season') or '2526')),
+                  str(row.get('league_code') or ''),
+              ): int(row.get('completed_fixtures') or 0)
+              for row in index.get('leagues',[])
+              if int(row.get('completed_fixtures') or 0) > 0
+          }
+
+          with tempfile.TemporaryDirectory() as td:
+              out=Path(td)
+              with zipfile.ZipFile(bundle) as zf:
+                  zf.extractall(out)
+              db=out/'databases/statmaker.db'
+              normalized=out/'files/domestic_normalized_stats_v2.bin'
+              assert db.is_file() and normalized.is_file() and normalized.stat().st_size > 12
+              con=sqlite3.connect(db)
+              try:
+                  quick=con.execute('PRAGMA quick_check').fetchone()
+                  assert quick and quick[0]=='ok'
+                  actual={
+                      (str(season),str(division)):int(count)
+                      for season,division,count in con.execute(
+                          'SELECT season,division,COUNT(*) FROM matches GROUP BY season,division'
+                      )
+                  }
+                  assert actual==expected, (len(actual),len(expected))
+              finally:
+                  con.close()
+          print(
+              'APP_READY_STATS_HOT_VERIFY_OK',
+              'matches='+str(metadata.get('statsHotPublishMatchCount')),
+              'scopes='+str(metadata.get('statsHotPublishScopeCount')),
+          )
+          PY
+
+            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$bundle_name"
+            if git diff --cached --quiet; then
+              echo "APP_READY_STATS_HOT_PUBLISH_ALREADY_PRESENT"
+              published=true
+              break
+            fi
+
+            git commit -m "Publish App-Ready stats hotfix"
+            if git push origin HEAD:main; then
+              echo "APP_READY_STATS_HOT_PUBLISH_PUSH_OK attempt=$attempt"
+              published=true
+              break
+            fi
+
+            echo "APP_READY_STATS_HOT_PUBLISH_RETRY attempt=$attempt"
+            sleep $((attempt * 2))
+          done
+
+          [[ "$published" == "true" ]] || {
+            echo "Could not publish App-Ready stats hotfix after 5 retries" >&2
+            exit 1
+          }
