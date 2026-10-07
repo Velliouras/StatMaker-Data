@@ -1,0 +1,67 @@
+name: API-Football Standings Fetch
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Safe API request cap for this run"
+        required: true
+        default: "60"
+        type: string
+      force:
+        description: "Refetch leagues already cached for the same season"
+        required: true
+        default: false
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/triggers/api-football-standings-refresh'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  standings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch official standings descriptions
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '60' }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(--max-requests "$MAX_REQUESTS")
+          if [[ "$FORCE" == "true" ]]; then
+            args+=(--force)
+          fi
+          python scripts/api_football_fetch_standings.py "${args[@]}"
+
+      - name: Commit standings cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/api_football/standings/current_standings.json reports/api_football_standings_fetch.json
+          if git diff --cached --quiet; then
+            echo "No standings cache changes to commit."
+            exit 0
+          fi
+          git commit -m "Update API-Football standings cache"
+          git push
