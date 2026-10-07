@@ -509,9 +509,28 @@ def final_candidates_hybrid(db,gid,target=None):
         if old is None or r['_hybrid_rank']>old['_hybrid_rank']:
             exact[k]=r
 
+    return _best_per_match_market_family(exact.values())
+
+
+def _best_per_match_market_family(candidates):
+    """
+    Canonical Performance/Daily contract matches Android Singles:
+    every independently qualifying Strong market family stays visible, while multiple
+    lines/sides inside the same family for the same match collapse to the strongest row.
+    """
     best={}
-    for r in exact.values():
-        k=(str(r.get('competition_id') or ''),str(r.get('match_key') or ''))
+    for r in candidates:
+        family=str(
+            r.get('market_family')
+            or r.get('identity_family')
+            or r.get('identity_sub_market_key')
+            or ''
+        ).strip()
+        k=(
+            str(r.get('competition_id') or ''),
+            str(r.get('match_key') or ''),
+            family,
+        )
         old=best.get(k)
         if old is None or r['_hybrid_rank']>old['_hybrid_rank']:
             best[k]=r
