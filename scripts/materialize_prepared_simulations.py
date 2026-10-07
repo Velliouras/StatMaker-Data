@@ -606,6 +606,48 @@ def main() -> int:
                 continue
             matches[(row["competition_id"], row["snapshot_version"], row["match_key"])] = payload
 
+        # Match Simulation must not depend on bookmaker coverage. The fixture index now
+        # contains schedule-only upcoming domestic fixtures sourced from the existing
+        # API-Football season request. Supplement prepared_matches with those rows so
+        # they receive an Elo-backed match summary even when prepared_selections is empty.
+        fixture_tables = {
+            str(row[0])
+            for row in con.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        }
+        if "prepared_fixture_matches" in fixture_tables:
+            for row in con.execute(
+                """
+                SELECT competition_id,snapshot_version,match_key,
+                       id,date,kickoff,league_code,country,competition,season,
+                       home_team,away_team,home_team_logo,away_team_logo
+                FROM prepared_fixture_matches
+                WHERE usable_for_stats=1
+                """
+            ):
+                key = (
+                    row["competition_id"],
+                    row["snapshot_version"],
+                    row["match_key"],
+                )
+                matches.setdefault(
+                    key,
+                    {
+                        "id": row["id"],
+                        "date": row["date"],
+                        "kickoff": row["kickoff"],
+                        "leagueCode": row["league_code"],
+                        "country": row["country"],
+                        "competition": row["competition"],
+                        "season": row["season"],
+                        "homeTeam": row["home_team"],
+                        "awayTeam": row["away_team"],
+                        "homeTeamLogo": row["home_team_logo"],
+                        "awayTeamLogo": row["away_team_logo"],
+                    },
+                )
+
         selection_rows = list(
             con.execute(
                 """
@@ -633,10 +675,8 @@ def main() -> int:
         simulated_matches = 0
         unsupported = 0
 
-        for match_key, rows in by_match.items():
-            match = matches.get(match_key)
-            if not match:
-                continue
+        for match_key, match in matches.items():
+            rows = by_match.get(match_key, [])
             league_code = str(match.get("leagueCode") or "")
             season = str(match.get("season") or "")
             entry = choose_index_entry(index, league_code, season)
