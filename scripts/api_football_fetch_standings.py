@@ -54,8 +54,6 @@ def current_entries() -> list[dict[str, Any]]:
         code = str(row.get("league_code") or "").strip().upper()
         if not code:
             continue
-        if str(row.get("stats_role") or "") != "current_target":
-            continue
         if str(row.get("lifecycle") or "") != "active":
             continue
         if int(row.get("completed_fixtures") or 0) <= 0:
@@ -64,7 +62,27 @@ def current_entries() -> list[dict[str, Any]]:
         api_season = str(row.get("api_football_season") or row.get("target_api_football_season") or "").strip()
         if league_id <= 0 or not api_season:
             continue
-        rows[code] = row
+
+        current = rows.get(code)
+        if current is None:
+            rows[code] = row
+            continue
+
+        current_season = str(
+            current.get("api_football_season")
+            or current.get("target_api_football_season")
+            or ""
+        ).strip()
+        current_target = str(current.get("stats_role") or "") == "current_target"
+        candidate_target = str(row.get("stats_role") or "") == "current_target"
+
+        if api_season > current_season or (
+            api_season == current_season
+            and candidate_target
+            and not current_target
+        ):
+            rows[code] = row
+
     return sorted(rows.values(), key=lambda row: (str(row.get("country") or ""), str(row.get("league_code") or "")))
 
 
