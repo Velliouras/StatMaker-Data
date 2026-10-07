@@ -693,6 +693,23 @@ def fetch_league(
             if discovered_roster:
                 roster = discovered_roster
 
+            # Exact-season responses are authoritative for cache membership.
+            # Older fallback-season fixture ids must not survive indefinitely when the
+            # provider later starts returning the requested season. Keeping them here
+            # caused cross-season contamination (e.g. 2025/26 + 2026/27 in one cache).
+            authoritative_ids = {
+                fixture_id
+                for fixture_id in (fixture_identity(item) for item in all_fixtures)
+                if fixture_id is not None
+            }
+            stale_ids = set(existing_by_id) - authoritative_ids
+            if stale_ids:
+                for fixture_id in stale_ids:
+                    existing_by_id.pop(fixture_id, None)
+                notes.append(
+                    f"pruned stale cached fixtures outside exact season: {len(stale_ids)}"
+                )
+
         if not all_fixtures:
             notes.append("no fixtures returned after fallback queries")
         elif not fixtures:
