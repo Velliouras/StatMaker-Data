@@ -13,8 +13,6 @@ from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from materialize_prepared_league_simulations import SPLIT_GROUP_KEYS
-
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_PATH = ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
 CACHE_PATH = ROOT / "data" / "api_football" / "standings" / "current_standings.json"
@@ -47,14 +45,14 @@ def api_get(api_key: str, league_id: int, season: str) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def current_regular_entries() -> list[dict[str, Any]]:
+def current_entries() -> list[dict[str, Any]]:
     index = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
     rows: dict[str, dict[str, Any]] = {}
     for row in index.get("leagues") or []:
         if not isinstance(row, dict):
             continue
         code = str(row.get("league_code") or "").strip().upper()
-        if not code or code in SPLIT_GROUP_KEYS:
+        if not code:
             continue
         if str(row.get("stats_role") or "") != "current_target":
             continue
@@ -151,7 +149,7 @@ def main() -> int:
     skipped = 0
     failures: list[dict[str, str]] = []
 
-    for entry in current_regular_entries():
+    for entry in current_entries():
         if fetched >= args.max_requests:
             break
         code = str(entry.get("league_code") or "").strip().upper()
