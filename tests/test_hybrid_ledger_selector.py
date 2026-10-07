@@ -127,6 +127,39 @@ class HybridCanonicalLedgerSelectorTest(unittest.TestCase):
         )
         self.assertIsNone(ranked)
 
+    def test_canonical_keeps_one_strong_per_market_family_per_match(self):
+        candidates = [
+            {
+                "competition_id": "domestic",
+                "match_key": "m1",
+                "market_family": "Corners",
+                "_hybrid_rank": (0.70,),
+                "id": "corners-12.5",
+            },
+            {
+                "competition_id": "domestic",
+                "match_key": "m1",
+                "market_family": "Corners",
+                "_hybrid_rank": (0.82,),
+                "id": "corners-13.5",
+            },
+            {
+                "competition_id": "domestic",
+                "match_key": "m1",
+                "market_family": "Shots on Target",
+                "_hybrid_rank": (0.76,),
+                "id": "sot-2.5",
+            },
+        ]
+
+        selected = target._best_per_match_market_family(candidates)
+
+        self.assertEqual(2, len(selected))
+        self.assertEqual(
+            {"corners-13.5", "sot-2.5"},
+            {item["id"] for item in selected},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
