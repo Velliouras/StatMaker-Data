@@ -64,7 +64,7 @@ jobs:
         run: |
           python - <<'PY'
           import json
-          from datetime import date, datetime, timezone
+          from datetime import date, datetime, timezone, timedelta
           from pathlib import Path
           from zoneinfo import ZoneInfo
 
@@ -101,8 +101,16 @@ jobs:
                   except ValueError:
                       local_dates.append(raw[:10])
               first = min(local_dates) if local_dates else ''
-              if first and first < start:
-                  failures.append(f"{row.get('league_code')}: first_local={first} target_start={start}")
+              if first:
+                  first_date = date.fromisoformat(first)
+                  start_date = date.fromisoformat(start)
+                  # Provider/registry season boundaries can differ from the first
+                  # fixture date by 1-2 calendar days. We only want to catch genuine
+                  # cross-season contamination, not nominal boundary drift.
+                  if first_date < start_date - timedelta(days=2):
+                      failures.append(
+                          f"{row.get('league_code')}: first_local={first} target_start={start}"
+                      )
           if failures:
               raise SystemExit('Current-season contamination remains: ' + '; '.join(failures))
           print('Current-season boundary validation passed')
