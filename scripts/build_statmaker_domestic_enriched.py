@@ -221,6 +221,63 @@ def build_readiness(matches: List[Dict[str, Any]], min_fixtures: int, min_covera
     }
 
 
+def parse_fixture_date(value: Any) -> Optional[dt.date]:
+    text = str(value or "").strip()
+    if not text:
+        return None
+    try:
+        return dt.datetime.fromisoformat(text.replace("Z", "+00:00")).date()
+    except ValueError:
+        try:
+            return dt.date.fromisoformat(text[:10])
+        except ValueError:
+            return None
+
+
+def app_season_date_window(league: Dict[str, Any]) -> Optional[Tuple[dt.date, dt.date]]:
+    explicit_start = str(
+        league.get("target_season_start")
+        or league.get("season_start")
+        or ""
+    ).strip()
+    explicit_end = str(
+        league.get("target_season_end")
+        or league.get("season_end")
+        or ""
+    ).strip()
+    if explicit_start and explicit_end:
+        try:
+            return dt.date.fromisoformat(explicit_start[:10]), dt.date.fromisoformat(explicit_end[:10])
+        except ValueError:
+            pass
+
+    season = app_season(league).strip()
+    split = re.fullmatch(r"(20\d{2})-(20\d{2})", season)
+    if split:
+        start_year = int(split.group(1))
+        end_year = int(split.group(2))
+        # Broad domestic-season guard. July..June covers the supported European /
+        # cross-year leagues without relying on league-specific kickoff dates.
+        return dt.date(start_year, 7, 1), dt.date(end_year, 6, 30)
+
+    calendar = re.fullmatch(r"20\d{2}", season)
+    if calendar:
+        year = int(season)
+        return dt.date(year, 1, 1), dt.date(year, 12, 31)
+
+    return None
+
+
+def fixture_belongs_to_app_season(cache_item: Dict[str, Any], league: Dict[str, Any]) -> bool:
+    window = app_season_date_window(league)
+    if window is None:
+        return True
+    fixture_date = parse_fixture_date(cache_item.get("date"))
+    if fixture_date is None:
+        return False
+    return window[0] <= fixture_date <= window[1]
+
+
 def build_match(cache_item: Dict[str, Any], league: Dict[str, Any]) -> Dict[str, Any]:
     stats = normalize_stats(cache_item.get("normalized_stats") or {})
     source_league = cache_item.get("source_league") or {}
@@ -255,6 +312,12 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
         )
     cache_fixtures = cache.get("fixtures") if isinstance(cache, dict) else []
     cache_fixtures = cache_fixtures if isinstance(cache_fixtures, list) else []
+    source_fixture_count = len(cache_fixtures)
+    cache_fixtures = [
+        item for item in cache_fixtures
+        if isinstance(item, dict) and fixture_belongs_to_app_season(item, league)
+    ]
+    season_filtered_out = source_fixture_count - len(cache_fixtures)
 
     matches = [build_match(item, league) for item in cache_fixtures]
     matches = sorted(matches, key=lambda item: (str(item.get("date_utc") or ""), int(item.get("fixture_id") or 0)))
@@ -276,6 +339,12 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
             "cache_path": str(cache_path.relative_to(ROOT)).replace("\\", "/"),
             "cache_generated_at": cache.get("generated_at") if isinstance(cache, dict) else None,
             "api_football_season": api_season(league),
+            "season_window": (
+                [value.isoformat() for value in app_season_date_window(league)]
+                if app_season_date_window(league) is not None
+                else None
+            ),
+            "season_filtered_out": season_filtered_out,
             "csv_import": "inactive_archive_only",
         },
         "competition": {
@@ -310,7 +379,14 @@ def build_league_artifact(league: Dict[str, Any], min_fixtures: int, min_coverag
         "any_stats_coverage": readiness["any_stats_coverage"],
         "bb_core_coverage": readiness["bb_core_coverage"],
         "bb_ready_candidate": readiness["bb_ready_candidate"],
-        "notes": "; ".join(readiness["notes"]),
+        "notes": "; ".join(
+            readiness["notes"]
+            + (
+                [f"season guard filtered stale fixtures: {season_filtered_out}"]
+                if season_filtered_out
+                else []
+            )
+        ),
     }
 
     return artifact, report_row
