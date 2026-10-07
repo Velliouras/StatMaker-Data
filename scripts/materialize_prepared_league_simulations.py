@@ -28,6 +28,7 @@ DEFAULT_RUNS = 10_000
 MODEL_VERSION = "league-season-monte-carlo-v3-all-domestic-elo"
 ELO_MODEL_VERSION = "team-elo-v1"
 TIE_BREAK_MODEL = "POINTS_GD_GF"
+OFFICIAL_STANDINGS_CACHE = ROOT / "data" / "api_football" / "standings" / "current_standings.json"
 
 ELO_GOAL_LOG_COEFF = 0.55
 ELO_WEIGHT_EARLY = 0.65
@@ -321,6 +322,15 @@ def team_logo_from_fixture(fixture: dict[str, Any], team_key: str) -> str | None
         if logo:
             return logo
     return None
+
+
+def load_official_standings_cache() -> dict[str, dict[str, Any]]:
+    try:
+        payload = json.loads(OFFICIAL_STANDINGS_CACHE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    leagues = payload.get("leagues") if isinstance(payload, dict) else {}
+    return leagues if isinstance(leagues, dict) else {}
 
 
 def current_entries(index: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1080,11 +1090,13 @@ def main() -> int:
     generated_at_ms = int(time.time() * 1000)
     expected_entries = current_entries(index)
     expected_codes = {str(entry.get("league_code") or "") for entry in expected_entries}
+    official_standings = load_official_standings_cache()
 
     con = sqlite3.connect(args.db)
     try:
         con.executescript(
             """
+            DROP TABLE IF EXISTS prepared_league_standing_zones;
             DROP TABLE IF EXISTS prepared_league_team_simulations;
             DROP TABLE IF EXISTS prepared_league_simulation_meta;
 
@@ -1135,11 +1147,25 @@ def main() -> int:
             );
             CREATE INDEX idx_prepared_league_team_title
               ON prepared_league_team_simulations(league_code, season, title_probability DESC);
+
+            CREATE TABLE prepared_league_standing_zones (
+                league_code TEXT NOT NULL,
+                season TEXT NOT NULL,
+                rank INTEGER NOT NULL,
+                description TEXT NOT NULL,
+                group_name TEXT NOT NULL,
+                source TEXT NOT NULL,
+                generated_at_ms INTEGER NOT NULL,
+                PRIMARY KEY (league_code, season, rank, group_name)
+            );
+            CREATE INDEX idx_prepared_league_standing_zones
+              ON prepared_league_standing_zones(league_code, season, rank);
             """
         )
 
         materialized_codes: set[str] = set()
         team_count = 0
+        official_zone_count = 0
         e0_rows: list[dict[str, Any]] = []
 
         for entry in expected_entries:
@@ -1202,6 +1228,40 @@ def main() -> int:
                     for row in rows
                 ],
             )
+            official = official_standings.get(league_code) or {}
+            cache_api_season = str(official.get("apiFootballSeason") or "")
+            entry_api_season = str(
+                entry.get("api_football_season")
+                or entry.get("target_api_football_season")
+                or ""
+            )
+            if cache_api_season and cache_api_season == entry_api_season:
+                zone_rows = [
+                    row for row in (official.get("rows") or [])
+                    if isinstance(row, dict)
+                    and int(row.get("rank") or 0) > 0
+                    and str(row.get("description") or "").strip()
+                ]
+                con.executemany(
+                    """
+                    INSERT OR REPLACE INTO prepared_league_standing_zones(
+                        league_code,season,rank,description,group_name,source,generated_at_ms
+                    ) VALUES(?,?,?,?,?,?,?)
+                    """,
+                    [
+                        (
+                            league_code,
+                            meta["season"],
+                            int(row["rank"]),
+                            str(row.get("description") or "").strip(),
+                            str(row.get("group") or "").strip(),
+                            "api-football-standings",
+                            generated_at_ms,
+                        )
+                        for row in zone_rows
+                    ],
+                )
+                official_zone_count += len(zone_rows)
             materialized_codes.add(league_code)
             team_count += len(rows)
             if league_code == "E0":
@@ -1226,6 +1286,7 @@ def main() -> int:
             f"runs={runs}",
             f"leagues={len(materialized_codes)}",
             f"teams={team_count}",
+            f"official_zones={official_zone_count}",
             "codes=" + ",".join(sorted(materialized_codes)),
         )
         if e0_rows:
