@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -27,6 +27,11 @@ COMPETITIONS = (
 ATHENS = ZoneInfo("Europe/Athens")
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_VALIDITY_PATH = REPO_ROOT / "data" / "statmaker" / "fixture_validity.json"
+DOMESTIC_INDEX_PATH = REPO_ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
+SCHEDULE_SIMULATION_HORIZON_DAYS = 14
+SCHEDULE_EXCLUDED_STATUSES = {
+    "FT", "AET", "PEN", "CANC", "PST", "ABD", "AWD", "WO",
+}
 VOID_DISPOSITIONS = {"POSTPONED", "CANCELLED", "RESCHEDULED", "ABANDONED", "AWARDED", "WALKOVER"}
 
 
@@ -58,6 +63,90 @@ def match_key(match: dict) -> str:
             str(match.get("awayTeam") or ""),
         )
     )
+
+
+def schedule_current_entry(row: dict) -> bool:
+    lifecycle = str(row.get("lifecycle") or "")
+    app_season = str(row.get("app_season") or "")
+    target_season = str(row.get("target_app_season") or "")
+    cache_path = REPO_ROOT / str(row.get("cache_path") or "")
+    return (
+        lifecycle == "active"
+        and app_season
+        and app_season == target_season
+        and cache_path.is_file()
+        and int(row.get("completed_fixtures") or 0) >= 10
+    )
+
+
+def schedule_local_date(raw_date: str) -> str:
+    return betting_local_date({"kickoff": raw_date, "date": raw_date[:10]})
+
+
+def supplemental_domestic_schedule_rows(snapshot_version: str) -> list[tuple]:
+    if not DOMESTIC_INDEX_PATH.is_file():
+        return []
+    payload = json.loads(DOMESTIC_INDEX_PATH.read_text(encoding="utf-8"))
+    today = datetime.now(ATHENS).date()
+    last_day = today + timedelta(days=SCHEDULE_SIMULATION_HORIZON_DAYS)
+    rows: list[tuple] = []
+
+    for entry in payload.get("leagues") or []:
+        if not isinstance(entry, dict) or not schedule_current_entry(entry):
+            continue
+        cache_path = REPO_ROOT / str(entry.get("cache_path") or "")
+        try:
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+
+        for fixture in cache.get("schedule_fixtures") or []:
+            if not isinstance(fixture, dict):
+                continue
+            fixture_id = str(fixture.get("fixture_id") or "").strip()
+            raw_date = str(fixture.get("date") or "").strip()
+            home = str(fixture.get("home_team") or "").strip()
+            away = str(fixture.get("away_team") or "").strip()
+            status = str(fixture.get("status") or "").strip().upper()
+            if not fixture_id or not raw_date or not home or not away:
+                continue
+            if status in SCHEDULE_EXCLUDED_STATUSES:
+                continue
+            local_date = schedule_local_date(raw_date)
+            try:
+                local_day = datetime.fromisoformat(local_date).date()
+            except ValueError:
+                continue
+            if local_day < today or local_day > last_day:
+                continue
+
+            rows.append(
+                (
+                    "domestic",
+                    snapshot_version,
+                    fixture_id,
+                    local_date,
+                    fixture_id,
+                    raw_date,
+                    raw_date,
+                    str(entry.get("league_code") or ""),
+                    str(entry.get("country") or ""),
+                    str(entry.get("league") or ""),
+                    str(entry.get("app_season") or ""),
+                    home,
+                    away,
+                    home,
+                    away,
+                    home,
+                    away,
+                    nullable_text(fixture.get("home_team_logo")),
+                    nullable_text(fixture.get("away_team_logo")),
+                    "schedule_only",
+                    1,
+                    nullable_text(fixture.get("venue")),
+                )
+            )
+    return rows
 
 
 def nullable_text(value):
@@ -327,6 +416,30 @@ def materialize(prepared_db: Path) -> dict[str, int]:
                 raise SystemExit(
                     f"Fixture index count mismatch {competition_id}: expected={expected} actual={actual}"
                 )
+
+        domestic_snapshot = by_competition["domestic"][0]
+        supplemental_rows = supplemental_domestic_schedule_rows(domestic_snapshot)
+        if supplemental_rows:
+            before = connection.total_changes
+            connection.executemany(
+                """
+                INSERT OR IGNORE INTO prepared_fixture_matches(
+                    competition_id, snapshot_version, match_key, local_date,
+                    id, date, kickoff, league_code, country, competition, season,
+                    provider_home_team, provider_away_team, home_team, away_team,
+                    canonical_home_team, canonical_away_team, home_team_logo, away_team_logo,
+                    team_mapping_status, usable_for_stats, venue
+                ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """,
+                supplemental_rows,
+            )
+            inserted = connection.total_changes - before
+            print(
+                "APP_READY_SCHEDULE_FIXTURES_OK",
+                f"candidate_rows={len(supplemental_rows)}",
+                f"inserted={inserted}",
+                f"horizon_days={SCHEDULE_SIMULATION_HORIZON_DAYS}",
+            )
 
         apply_fixture_validity_gate(connection)
         connection.commit()
