@@ -329,6 +329,7 @@ def fixture_summary(fixture: Dict[str, Any]) -> Dict[str, Any]:
     away = teams.get("away") or {}
     status = fixture_info.get("status") or {}
 
+    venue = fixture_info.get("venue") or {}
     summary = {
         "fixture_id": fixture_info.get("id"),
         "date": fixture_info.get("date"),
@@ -336,6 +337,9 @@ def fixture_summary(fixture: Dict[str, Any]) -> Dict[str, Any]:
         "away_team": away.get("name"),
         "home_team_id": home.get("id"),
         "away_team_id": away.get("id"),
+        "home_team_logo": home.get("logo"),
+        "away_team_logo": away.get("logo"),
+        "venue": venue.get("name") if isinstance(venue, dict) else None,
         "status": status.get("short") or status.get("long"),
     }
     summary.update(fixture_score_summary(fixture))
@@ -491,8 +495,13 @@ def cache_payload(
     league: Dict[str, Any],
     fixtures: Iterable[Dict[str, Any]],
     roster: Optional[Iterable[str]] = None,
+    schedule_fixtures: Optional[Iterable[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     ordered = sorted(fixtures, key=lambda item: (str(item.get("date") or ""), int(item.get("fixture_id") or 0)))
+    ordered_schedule = sorted(
+        (schedule_fixtures or []),
+        key=lambda item: (str(item.get("date") or ""), int(item.get("fixture_id") or 0)),
+    )
     return {
         "provider": "api-football",
         "purpose": "api_only_domestic_history_and_fixture_statistics",
@@ -506,7 +515,20 @@ def cache_payload(
             key=str.casefold,
         ),
         "fixtures": ordered,
+        # Lightweight full-season fixture index. Future fixtures are persisted here
+        # without fixture/statistics calls so Match Simulation can exist without odds.
+        "schedule_fixtures": ordered_schedule,
     }
+
+
+def schedule_fixture_summary(
+    fixture: Dict[str, Any],
+    fixture_query_used: str,
+) -> Dict[str, Any]:
+    summary = fixture_summary(fixture)
+    summary["fixture_query_used"] = fixture_query_used
+    summary["source_league"] = fixture_source_league(fixture)
+    return summary
 
 
 def league_filter(
@@ -658,6 +680,16 @@ def fetch_league(
         # fixtures from the previous competition into the corrected provider scope.
         existing_cache = {}
     existing_by_id = cached_fixture_map(existing_cache)
+    existing_schedule = [
+        item
+        for item in (
+            existing_cache.get("schedule_fixtures", [])
+            if isinstance(existing_cache, dict)
+            else []
+        )
+        if isinstance(item, dict)
+    ]
+    schedule_fixtures = existing_schedule
     existing_roster = [
         str(name).strip()
         for name in (existing_cache.get("roster", []) if isinstance(existing_cache, dict) else [])
@@ -685,6 +717,12 @@ def fetch_league(
         fixtures_returned = len(all_fixtures)
         completed_count = len(fixtures)
         notes.extend(query_notes)
+        if all_fixtures:
+            schedule_fixtures = [
+                schedule_fixture_summary(item, fixture_query_used)
+                for item in all_fixtures
+                if fixture_identity(item) is not None
+            ]
 
         requested_season = parse_season(league.get("season"))
         exact_query = f"league+season:{requested_season}" if requested_season is not None else ""
@@ -720,7 +758,15 @@ def fetch_league(
             )
     except RequestLimitReached:
         notes.append("request cap reached before fixtures request")
-        write_json(cache_path, cache_payload(league, existing_by_id.values(), roster))
+        write_json(
+            cache_path,
+            cache_payload(
+                league,
+                existing_by_id.values(),
+                roster,
+                schedule_fixtures=schedule_fixtures,
+            ),
+        )
         return report_row(
             league, cache_path, completed_count, already_cached, newly_fetched,
             missing_stats, metadata_refreshed, missing_scores, requests_before,
@@ -770,7 +816,15 @@ def fetch_league(
         existing_by_id[fixture_id] = merged
         newly_fetched += 1
 
-    write_json(cache_path, cache_payload(league, existing_by_id.values(), roster))
+    write_json(
+        cache_path,
+        cache_payload(
+            league,
+            existing_by_id.values(),
+            roster,
+            schedule_fixtures=schedule_fixtures,
+        ),
+    )
 
     if not notes:
         notes.append("ok")
