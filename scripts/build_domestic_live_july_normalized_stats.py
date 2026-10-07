@@ -57,6 +57,42 @@ def normalize_code(value: Any) -> str:
     return "ROU" if code == "ROM" else code
 
 
+def app_season_window(league: Dict[str, Any]):
+    season = str(league.get("app_season") or "").strip()
+    if not season:
+        return None
+    if "-" in season:
+        parts = season.split("-", 1)
+        try:
+            start_year = int(parts[0])
+            end_year = int(parts[1])
+        except ValueError:
+            return None
+        return (
+            dt.date(start_year, 7, 1),
+            dt.date(end_year, 6, 30),
+        )
+    try:
+        year = int(season)
+    except ValueError:
+        return None
+    return (dt.date(year, 1, 1), dt.date(year, 12, 31))
+
+
+def fixture_in_app_season(league: Dict[str, Any], item: Dict[str, Any]) -> bool:
+    window = app_season_window(league)
+    if window is None:
+        return True
+    raw = str(item.get("date") or "").strip()
+    if not raw:
+        return False
+    try:
+        fixture_date = dt.date.fromisoformat(raw[:10])
+    except ValueError:
+        return False
+    return window[0] <= fixture_date <= window[1]
+
+
 def export_fixture(league: Dict[str, Any], item: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "fixture_id": item.get("fixture_id"),
@@ -137,7 +173,11 @@ def main() -> int:
         for league in pipeline.stats_artifact_variants(base_league):
             cache_path = stats_fetch.cache_path_for(league)
             cache = load_json(cache_path, {})
-            rows = [item for item in cache.get("fixtures", []) or [] if isinstance(item, dict)]
+            rows = [
+                item
+                for item in cache.get("fixtures", []) or []
+                if isinstance(item, dict) and fixture_in_app_season(league, item)
+            ]
             exported = [export_fixture(league, item) for item in rows]
             fixtures.extend(exported)
             league_reports.append({
