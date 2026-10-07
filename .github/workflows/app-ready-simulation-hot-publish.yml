@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - '.github/simulation-hotpatch-trigger'
+  workflow_run:
+    workflows:
+      - "API-Football Standings Fetch"
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
@@ -14,6 +19,7 @@ concurrency:
 
 jobs:
   publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,6 +73,7 @@ jobs:
                       'prepared_team_elo_meta',
                       'prepared_league_simulation_meta',
                       'prepared_league_team_simulations',
+                      'prepared_league_standing_zones',
                       'prepared_uefa_simulation_meta',
                       'prepared_uefa_team_simulations',
                   }
@@ -81,6 +88,7 @@ jobs:
                   elo_meta_rows=int(con.execute('SELECT COUNT(*) FROM prepared_team_elo_meta').fetchone()[0])
                   league_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_simulation_meta').fetchone()[0])
                   league_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_team_simulations').fetchone()[0])
+                  league_zone_rows=int(con.execute('SELECT COUNT(*) FROM prepared_league_standing_zones').fetchone()[0])
                   league_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_league_simulation_meta').fetchone()[0])
                   league_meta_cols={row[1] for row in con.execute('PRAGMA table_info(prepared_league_simulation_meta)')}
                   league_team_cols={row[1] for row in con.execute('PRAGMA table_info(prepared_league_team_simulations)')}
@@ -89,7 +97,7 @@ jobs:
                   uefa_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta').fetchone()[0])
                   assert rows>0 and match_rows>0 and runs>=10000
                   assert elo_rows>0 and elo_meta_rows>0
-                  assert league_rows>0 and league_team_rows>0 and league_runs>=10000
+                  assert league_rows>0 and league_team_rows>0 and league_zone_rows>0 and league_runs>=10000
                   assert 'split_group_keys_json' in league_meta_cols
                   assert 'split_group_probabilities_json' in league_team_cols
                   assert uefa_rows==3 and uefa_team_rows==108 and uefa_runs>=10000
