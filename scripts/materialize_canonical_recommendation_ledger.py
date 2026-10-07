@@ -871,6 +871,7 @@ def extract(bundle,target=None):
                   'competition':str(m.get('competition') or ''),'season':str(m.get('season') or ''),'homeTeam':str(m.get('homeTeam') or ''),'awayTeam':str(m.get('awayTeam') or ''),
                   'apiFixtureId':live._fixture_id_from_match_payload(m),'kickoffEpochMillis':ko,'homeNames':hp,'awayNames':ap,
                   'market':str(s.get('selection_market') or ''),'selection':str(s.get('selection_name') or ''),'team':s.get('selection_team'),'line':nullable(s.get('selection_line')),'odd':nullable(s.get('selection_odd')),
+                  'marketFamily':str(c.get('market_family') or ''),
                   'broadGroup':s.get('identity_broad_group'),'family':s.get('identity_family'),'subMarketKey':sub,'teamSide':s.get('identity_team_side'),'selectionSide':s.get('identity_selection_side'),'selectionToken':s.get('identity_selection_token'),
                   'marketProbability':nullable(s.get('bm_market_probability')),
                   'modelProbability':nullable(c.get('_hybrid_probability')) if MODE_LABEL in ('uat-hybrid','prod-hybrid') else (mp if mp is not None else post),
