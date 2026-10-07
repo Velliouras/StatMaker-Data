@@ -1,0 +1,84 @@
+name: API-Football Targeted Fixture Schedule Refresh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/api-football-targeted-fixture-schedule-refresh'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Read targeted refresh request
+        id: request
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          payload=json.loads(Path('.github/triggers/api-football-targeted-fixture-schedule-refresh').read_text(encoding='utf-8'))
+          league_id=int(payload['league_id'])
+          max_requests=max(1,min(10,int(payload.get('max_requests',5))))
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f"league_id={league_id}\n")
+              out.write(f"max_requests={max_requests}\n")
+          print(f"TARGETED_FIXTURE_SCHEDULE_REQUEST league_id={league_id} max_requests={max_requests}")
+          PY
+
+      - name: Fetch fixture schedule and cached statistics metadata
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          python scripts/api_football_fetch_fixture_stats.py \
+            --league-id "${{ steps.request.outputs.league_id }}" \
+            --max-requests "${{ steps.request.outputs.max_requests }}"
+
+      - name: Validate schedule fixture index
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('reports/api_football_fixture_stats_fetch.json').read_text(encoding='utf-8'))
+          rows=report.get('reports') or []
+          if len(rows) != 1:
+              raise SystemExit(f'Expected one targeted league, got {len(rows)}')
+          cache=Path(rows[0]['cache_path'])
+          payload=json.loads(cache.read_text(encoding='utf-8'))
+          schedule=payload.get('schedule_fixtures') or []
+          if not schedule:
+              raise SystemExit(f'No schedule_fixtures persisted in {cache}')
+          print(f"TARGETED_FIXTURE_SCHEDULE_OK cache={cache} schedule_rows={len(schedule)}")
+          PY
+
+      - name: Commit targeted fixture schedule cache
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            data/api_football/fixture_stats \
+            reports/api_football_fixture_stats_fetch.json \
+            reports/api_football_fixture_stats_fetch.csv \
+            reports/api_football_fixture_stats_fetch.md
+          if git diff --cached --quiet; then
+            echo "No targeted fixture schedule changes."
+          else
+            git commit -m "Refresh targeted API-Football fixture schedule"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
