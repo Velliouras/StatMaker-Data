@@ -906,6 +906,8 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Optional provider season override for a single --league-id target",
     )
+    parser.add_argument("--target-country", default=None, help="Canonical country override for a targeted league")
+    parser.add_argument("--target-league-name", default=None, help="Canonical league/display name override for a targeted league")
     return parser.parse_args()
 
 
@@ -928,14 +930,32 @@ def main() -> int:
         if args.league_id is None:
             print("ERROR: --season-override requires --league-id.", file=sys.stderr)
             return 2
-        if len(leagues) != 1:
+        target_country = str(args.target_country or "").strip()
+        target_league_name = str(args.target_league_name or "").strip()
+        if len(leagues) == 1:
+            league = dict(leagues[0])
+        elif len(leagues) == 0 and target_country and target_league_name:
+            # Canonical current-season repair targets come from domestic_enriched/index.json.
+            # They must not depend on the static enrichment config being current or complete.
+            league = {
+                "enabled": True,
+                "api_football_league_id": args.league_id,
+                "country": target_country,
+                "display_name": target_league_name,
+                "competition": target_league_name,
+            }
+        else:
             print(
-                f"ERROR: --season-override expected exactly one configured league, got {len(leagues)}.",
+                f"ERROR: --season-override expected one configured league or canonical target metadata, got {len(leagues)} configured matches.",
                 file=sys.stderr,
             )
             return 2
-        league = dict(leagues[0])
         league["season"] = str(args.season_override)
+        if target_country:
+            league["country"] = target_country
+        if target_league_name:
+            league["display_name"] = target_league_name
+            league["competition"] = target_league_name
         leagues = [league]
 
     request_state = {"count": 0}
