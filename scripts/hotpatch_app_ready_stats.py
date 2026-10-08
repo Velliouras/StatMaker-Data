@@ -20,6 +20,7 @@ APP_READY_MANIFEST = APP_READY / "update_manifest.json"
 MAIN_MANIFEST = ROOT / "data/statmaker/update_manifest.json"
 DOMESTIC_INDEX = ROOT / "data/statmaker/domestic_enriched/index.json"
 NORMALIZED_STATS = ROOT / "data/api_football/domestic_normalized_fixture_stats.json"
+UEFA_CURRENT_STATS = ROOT / "data/statmaker/uefa_current_stats.json"
 
 TEAM_MATCHING_ALIASES = {
     "aek": "AEK Athens FC",
@@ -458,6 +459,11 @@ def main() -> int:
 
         match_count, scopes = create_stats_db(db_path)
         normalized_keys = create_normalized_snapshot(normalized_path)
+        if not UEFA_CURRENT_STATS.is_file():
+            raise SystemExit("Missing current UEFA stats artifact")
+        uefa_current_target = extracted / "files/uefa_current_stats.json"
+        uefa_current_target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(UEFA_CURRENT_STATS, uefa_current_target)
         rebuild_bundle_manifest(extracted)
 
         provisional = temp / "stats.zip"
@@ -483,6 +489,7 @@ def main() -> int:
     metadata["statsHotPublishMatchCount"] = match_count
     metadata["statsHotPublishScopeCount"] = len(scopes)
     metadata["statsHotPublishNormalizedKeyCount"] = normalized_keys
+    metadata["uefaCurrentStatsSha256"] = sha256(UEFA_CURRENT_STATS)
 
     seed = "\n".join(
         sorted(

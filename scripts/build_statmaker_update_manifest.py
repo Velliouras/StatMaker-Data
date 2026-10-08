@@ -45,6 +45,7 @@ MAIN_ARTIFACT_SPECS: tuple[ArtifactSpec, ...] = (
     ArtifactSpec("uefa_support_history", "data/statmaker/uefa_support_history.json", "support"),
     ArtifactSpec("uefa_team_support_history", "data/statmaker/uefa_team_support_history.json", "support"),
     ArtifactSpec("uefa_team_logos", "data/statmaker/uefa_team_logos.json", "visual"),
+    ArtifactSpec("uefa_current_stats", "data/statmaker/uefa_current_stats.json", "history"),
     ArtifactSpec("domestic_team_aliases", "mappings/domestic_team_aliases.json", "identity"),
 )
 

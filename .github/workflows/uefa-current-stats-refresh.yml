@@ -1,0 +1,95 @@
+name: UEFA Current Stats Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_requests:
+        description: "Maximum API-Football requests for current UEFA stats"
+        required: true
+        default: "180"
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - '.github/uefa-current-stats-refresh-request'
+  schedule:
+    # Daily after the European match window; incremental fixture-ID reuse keeps requests bounded.
+    - cron: "25 5 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate producer
+        run: |
+          python -m py_compile             scripts/refresh_uefa_current_stats.py             scripts/api_football_fetch_fixture_stats.py             scripts/canonical_team_identity.py             scripts/build_statmaker_update_manifest.py
+
+      - name: Refresh current UEFA stats
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '180' }}
+        run: |
+          python scripts/refresh_uefa_current_stats.py             --max-requests "${INPUT_MAX_REQUESTS:-180}"
+
+      - name: Validate current UEFA artifact
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          payload=json.loads(Path('data/statmaker/uefa_current_stats.json').read_text(encoding='utf-8'))
+          assert payload.get('schemaVersion') == 1
+          comps=payload.get('competitions') or []
+          assert {c.get('competitionId') for c in comps} == {
+              'champions_league','europa_league','conference_league'
+          }
+          for comp in comps:
+              start=str(comp.get('phaseStart') or '')
+              league_id=int(comp.get('apiFootballLeagueId') or 0)
+              assert league_id > 0
+              for row in comp.get('fixtures') or []:
+                  assert str(row.get('date') or '') >= start
+                  assert row.get('status') in {'FT','AET','PEN'}
+                  assert int((row.get('sourceLeague') or {}).get('id') or 0) == league_id
+          print('UEFA_CURRENT_STATS_VERIFY_OK', [(c['competitionId'], c['fixtureCount']) for c in comps])
+          PY
+
+      - name: Rebuild main update manifest
+        run: |
+          python scripts/build_statmaker_update_manifest.py             --profile main             --branch main             --output data/statmaker/update_manifest.json
+
+      - name: Commit canonical UEFA current stats
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add             data/statmaker/uefa_current_stats.json             data/statmaker/update_manifest.json             reports/uefa_current_stats_refresh.json
+          if git diff --cached --quiet; then
+            echo "No UEFA current-stats changes."
+          else
+            git commit -m "Refresh current UEFA statistics"
+            git pull --rebase --autostash origin main
+            python scripts/build_statmaker_update_manifest.py               --profile main               --branch main               --output data/statmaker/update_manifest.json
+            git add data/statmaker/update_manifest.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Rebuild main manifest after UEFA stats refresh"
+            fi
+            git push origin HEAD:main
+          fi
