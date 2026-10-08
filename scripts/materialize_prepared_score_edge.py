@@ -115,6 +115,9 @@ def materialize(db_path: Path) -> tuple[int, int]:
 
         total_rows = 0
         covered_matches = 0
+        seen_simulations = 0
+        matched_odds_count = 0
+        examples = []
         generated = int(time.time() * 1000)
         for row in con.execute("""
             SELECT s.competition_id, s.snapshot_version, s.match_key,
@@ -128,6 +131,7 @@ def materialize(db_path: Path) -> tuple[int, int]:
             WHERE m.state='ready' AND s.simulation_runs >= 10000
         """):
             key = (row["competition_id"], row["snapshot_version"], row["match_key"])
+            seen_simulations += 1
             header = match_headers.get(key) or {}
             fixture_id = str(header.get("id") or "").strip()
             fixture_date = str(header.get("date") or "")[:10]
@@ -139,7 +143,10 @@ def materialize(db_path: Path) -> tuple[int, int]:
                 or odds_by_id.get((row["competition_id"], row["match_key"]))
             )
             if not bookmaker_quotes:
+                if len(examples) < 5:
+                    examples.append((key, fixture_id, fixture_date, home, away))
                 continue
+            matched_odds_count += 1
             try:
                 scores = json.loads(row["score_distribution_json"] or "[]")
             except (ValueError, TypeError):
@@ -184,6 +191,16 @@ def materialize(db_path: Path) -> tuple[int, int]:
             total_rows += len(batch)
             covered_matches += 1
         if covered_matches == 0:
+            print(
+                "SCORE_EDGE_DIAGNOSTIC",
+                "simulations=", seen_simulations,
+                "matched_odds=", matched_odds_count,
+                "headers=", len(match_headers),
+                "odds_ids=", len(odds_by_id),
+                "odds_teams=", len(odds_by_team),
+                "examples=", examples,
+                flush=True,
+            )
             raise RuntimeError(
                 "No exact-score markets overlap with 10k prepared simulations: "
                 "do not publish an empty Score Edge contract."
