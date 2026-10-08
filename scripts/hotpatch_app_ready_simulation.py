@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import shutil
@@ -35,6 +36,12 @@ def deterministic_zip(source: Path, target: Path) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--score-edge-only", action="store_true",
+        help="Re-materialize Score Edge from the existing 10k simulation rows only",
+    )
+    args = parser.parse_args()
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
     betting = next((x for x in artifacts if x.get("id") == "app_ready_betting_bundle"), None)
@@ -59,58 +66,71 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
-        # Refresh the fixture index first so schedule-only upcoming domestic fixtures
-        # become eligible for Match Simulation even when bookmaker selections are absent.
-        subprocess.run(
-            [
-                "python",
-                str(ROOT / "scripts/materialize_prepared_fixture_index.py"),
-                str(db_path),
-            ],
-            cwd=ROOT,
-            check=True,
-        )
+        if not args.score_edge_only:
+            # Refresh the fixture index first so schedule-only upcoming domestic fixtures
+            # become eligible for Match Simulation even when bookmaker selections are absent.
+            subprocess.run(
+                [
+                    "python",
+                    str(ROOT / "scripts/materialize_prepared_fixture_index.py"),
+                    str(db_path),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
 
-        # Canonical Elo must be refreshed first. Match Simulation and League Simulation
-        # both consume the same prepared_team_elo contract from this exact DB snapshot.
+            # Canonical Elo must be refreshed first. Match Simulation and League Simulation
+            # both consume the same prepared_team_elo contract from this exact DB snapshot.
+            subprocess.run(
+                [
+                    "python",
+                    str(ROOT / "scripts/materialize_prepared_team_elo.py"),
+                    str(db_path),
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "python",
+                    str(ROOT / "scripts/materialize_prepared_simulations.py"),
+                    str(db_path),
+                    "--runs",
+                    "10000",
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "python",
+                    str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
+                    str(db_path),
+                    "--runs",
+                    "10000",
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+            subprocess.run(
+                [
+                    "python",
+                    str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
+                    str(db_path),
+                    "--runs",
+                    "10000",
+                ],
+                cwd=ROOT,
+                check=True,
+            )
+
+
+        # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
         subprocess.run(
             [
                 "python",
-                str(ROOT / "scripts/materialize_prepared_team_elo.py"),
+                str(ROOT / "scripts/materialize_prepared_score_edge.py"),
                 str(db_path),
-            ],
-            cwd=ROOT,
-            check=True,
-        )
-        subprocess.run(
-            [
-                "python",
-                str(ROOT / "scripts/materialize_prepared_simulations.py"),
-                str(db_path),
-                "--runs",
-                "10000",
-            ],
-            cwd=ROOT,
-            check=True,
-        )
-        subprocess.run(
-            [
-                "python",
-                str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
-                str(db_path),
-                "--runs",
-                "10000",
-            ],
-            cwd=ROOT,
-            check=True,
-        )
-        subprocess.run(
-            [
-                "python",
-                str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
-                str(db_path),
-                "--runs",
-                "10000",
             ],
             cwd=ROOT,
             check=True,
@@ -142,6 +162,13 @@ def main() -> int:
             uefa_rows = int(con.execute("SELECT COUNT(*) FROM prepared_uefa_simulation_meta").fetchone()[0])
             uefa_team_rows = int(con.execute("SELECT COUNT(*) FROM prepared_uefa_team_simulations").fetchone()[0])
             uefa_runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta").fetchone()[0])
+            score_edge_rows = int(con.execute(
+                "SELECT COUNT(*) FROM prepared_score_edge_values"
+            ).fetchone()[0])
+            score_edge_matches = int(con.execute(
+                "SELECT COUNT(DISTINCT competition_id || '|' || snapshot_version || '|' || match_key) "
+                "FROM prepared_score_edge_values"
+            ).fetchone()[0])
             quick = con.execute("PRAGMA quick_check").fetchone()
             if not quick or quick[0] != "ok":
                 raise SystemExit(f"Hot-patched DB quick_check failed: {quick}")
@@ -177,6 +204,9 @@ def main() -> int:
                 "Invalid UEFA simulation "
                 f"competitions={uefa_rows} teams={uefa_team_rows} runs={uefa_runs}"
             )
+
+        if score_edge_rows <= 0 or score_edge_matches <= 0:
+            raise SystemExit("Refusing to publish empty precomputed Score Edge rows")
 
         bundle_manifest = json.loads(bundle_manifest_path.read_text(encoding="utf-8"))
         found_db = False
@@ -228,6 +258,9 @@ def main() -> int:
     metadata["preparedUefaSimulationCount"] = uefa_rows
     metadata["preparedUefaSimulationTeamCount"] = uefa_team_rows
     metadata["preparedUefaSimulationRuns"] = uefa_runs
+    metadata["preparedScoreEdgeContract"] = "exact-score-monte-carlo-10k-value-v1"
+    metadata["preparedScoreEdgeRowCount"] = score_edge_rows
+    metadata["preparedScoreEdgeMatchCount"] = score_edge_matches
     metadata["simulationHotPublish"] = True
 
     payload["generatedAt"] = now
@@ -238,7 +271,8 @@ def main() -> int:
             str(match_score_distribution_rows), str(runs),
             str(elo_rows), str(elo_meta_rows),
             str(league_rows), str(league_team_rows), str(league_runs),
-            str(uefa_rows), str(uefa_team_rows), str(uefa_runs), now
+            str(uefa_rows), str(uefa_team_rows), str(uefa_runs),
+            str(score_edge_rows), str(score_edge_matches), now
         ]
     )
     payload["contentVersion"] = hashlib.sha256(seed.encode("utf-8")).hexdigest()
@@ -260,6 +294,8 @@ def main() -> int:
         f"uefa_rows={uefa_rows}",
         f"uefa_team_rows={uefa_team_rows}",
         f"uefa_runs={uefa_runs}",
+        f"score_edge_rows={score_edge_rows}",
+        f"score_edge_matches={score_edge_matches}",
         f"bundle={new_name}",
         f"sha256={new_sha}",
     )
