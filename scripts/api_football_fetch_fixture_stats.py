@@ -900,6 +900,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-requests", type=int, default=DEFAULT_MAX_REQUESTS, help="Safe request cap for this run")
     parser.add_argument("--priority-group", default=None, help="Optional priority_group filter from config")
     parser.add_argument("--league-id", type=int, default=None, help="Optional API-Football league id filter")
+    parser.add_argument(
+        "--season-override",
+        type=int,
+        default=None,
+        help="Optional provider season override for a single --league-id target",
+    )
     return parser.parse_args()
 
 
@@ -917,6 +923,20 @@ def main() -> int:
 
     config = load_config()
     leagues = league_filter(config.get("leagues", []), args.priority_group, args.league_id)
+
+    if args.season_override is not None:
+        if args.league_id is None:
+            print("ERROR: --season-override requires --league-id.", file=sys.stderr)
+            return 2
+        if len(leagues) != 1:
+            print(
+                f"ERROR: --season-override expected exactly one configured league, got {len(leagues)}.",
+                file=sys.stderr,
+            )
+            return 2
+        league = dict(leagues[0])
+        league["season"] = str(args.season_override)
+        leagues = [league]
 
     request_state = {"count": 0}
     rows: List[Dict[str, Any]] = []
