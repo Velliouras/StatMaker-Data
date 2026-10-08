@@ -561,6 +561,7 @@ def main() -> int:
                 away_win_probability REAL NOT NULL,
                 expected_home_goals REAL NOT NULL,
                 expected_away_goals REAL NOT NULL,
+                score_distribution_json TEXT NOT NULL DEFAULT '[]',
                 history_home_sample INTEGER NOT NULL DEFAULT 0,
                 history_away_sample INTEGER NOT NULL DEFAULT 0,
                 history_league_sample INTEGER NOT NULL DEFAULT 0,
@@ -787,6 +788,20 @@ def main() -> int:
                         1 for h, a in zip(elo_home_draws, elo_away_draws) if h == a
                     )
                     away_wins = runs - home_wins - draws
+                    score_counts: dict[tuple[int, int], int] = defaultdict(int)
+                    for home_goals, away_goals in zip(elo_home_draws, elo_away_draws):
+                        score_counts[(home_goals, away_goals)] += 1
+                    score_distribution_json = json.dumps(
+                        [
+                            {
+                                "homeGoals": home_goals,
+                                "awayGoals": away_goals,
+                                "probability": count / runs,
+                            }
+                            for (home_goals, away_goals), count in sorted(score_counts.items())
+                        ],
+                        separators=(",", ":"),
+                    )
                     con.execute(
                         """
                         INSERT OR REPLACE INTO prepared_match_simulations(
@@ -794,17 +809,17 @@ def main() -> int:
                             simulation_runs,simulation_model,
                             elo_model_version,home_elo_rating,away_elo_rating,elo_weight,
                             home_win_probability,draw_probability,away_win_probability,
-                            expected_home_goals,expected_away_goals,
+                            expected_home_goals,expected_away_goals,score_distribution_json,
                             history_home_sample,history_away_sample,history_league_sample,
                             generated_at_ms
-                        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
                         """,
                         (
                             match_key[0], match_key[1], match_key[2],
                             runs, MATCH_MODEL_VERSION,
                             ELO_MODEL_VERSION, home_elo, away_elo, elo_weight,
                             home_wins / runs, draws / runs, away_wins / runs,
-                            home_mean, away_mean,
+                            home_mean, away_mean, score_distribution_json,
                             home_sample, away_sample, league_sample,
                             generated_at_ms,
                         ),

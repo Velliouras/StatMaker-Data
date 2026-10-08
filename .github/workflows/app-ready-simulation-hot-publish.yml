@@ -45,6 +45,8 @@ jobs:
           assert metadata.get('preparedSimulationContract') == 'monte-carlo-v1-prod-data-uat-engine'
           assert int(metadata.get('preparedSimulationRuns') or 0) >= 10000
           assert int(metadata.get('preparedMatchSimulationCount') or 0) > 0
+          assert metadata.get('preparedMatchScoreDistributionContract') == 'same-run-monte-carlo-exact-score-v1'
+          assert int(metadata.get('preparedMatchScoreDistributionCount') or 0) == int(metadata.get('preparedMatchSimulationCount') or 0)
           assert metadata.get('preparedTeamEloContract') == 'team-elo-v1'
           assert int(metadata.get('preparedTeamEloCount') or 0) > 0
           assert int(metadata.get('preparedTeamEloLeagueCount') or 0) > 0
@@ -83,6 +85,13 @@ jobs:
                   assert tables == expected_tables
                   rows=int(con.execute('SELECT COUNT(*) FROM prepared_simulations').fetchone()[0])
                   match_rows=int(con.execute('SELECT COUNT(*) FROM prepared_match_simulations').fetchone()[0])
+                  match_cols={row[1] for row in con.execute('PRAGMA table_info(prepared_match_simulations)')}
+                  assert 'score_distribution_json' in match_cols
+                  score_rows=int(con.execute(
+                      "SELECT COUNT(*) FROM prepared_match_simulations "
+                      "WHERE score_distribution_json IS NOT NULL "
+                      "AND LENGTH(TRIM(score_distribution_json)) > 2"
+                  ).fetchone()[0])
                   runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations').fetchone()[0])
                   elo_rows=int(con.execute('SELECT COUNT(*) FROM prepared_team_elo').fetchone()[0])
                   elo_meta_rows=int(con.execute('SELECT COUNT(*) FROM prepared_team_elo_meta').fetchone()[0])
@@ -95,7 +104,7 @@ jobs:
                   uefa_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_simulation_meta').fetchone()[0])
                   uefa_team_rows=int(con.execute('SELECT COUNT(*) FROM prepared_uefa_team_simulations').fetchone()[0])
                   uefa_runs=int(con.execute('SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_uefa_simulation_meta').fetchone()[0])
-                  assert rows>0 and match_rows>0 and runs>=10000
+                  assert rows>0 and match_rows>0 and score_rows==match_rows and runs>=10000
                   assert elo_rows>0 and elo_meta_rows>0
                   assert league_rows>0 and league_team_rows>0 and league_zone_rows>0 and league_runs>=10000
                   assert 'split_group_keys_json' in league_meta_cols
@@ -103,7 +112,8 @@ jobs:
                   assert uefa_rows==3 and uefa_team_rows==108 and uefa_runs>=10000
                   print(
                       'HOT_PUBLISH_VERIFY_OK',
-                      f'rows={rows}', f'match_rows={match_rows}', f'runs={runs}',
+                      f'rows={rows}', f'match_rows={match_rows}',
+                      f'score_rows={score_rows}', f'runs={runs}',
                       f'elo_rows={elo_rows}', f'elo_meta_rows={elo_meta_rows}',
                       f'league_rows={league_rows}', f'league_team_rows={league_team_rows}',
                       f'league_runs={league_runs}',

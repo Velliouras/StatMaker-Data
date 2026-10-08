@@ -128,6 +128,11 @@ def main() -> int:
             match_explorer_rows = int(con.execute(
                 "SELECT COUNT(*) FROM prepared_match_explorer_simulations"
             ).fetchone()[0])
+            match_score_distribution_rows = int(con.execute(
+                "SELECT COUNT(*) FROM prepared_match_simulations "
+                "WHERE score_distribution_json IS NOT NULL "
+                "AND LENGTH(TRIM(score_distribution_json)) > 2"
+            ).fetchone()[0])
             runs = int(con.execute("SELECT COALESCE(MAX(simulation_runs),0) FROM prepared_simulations").fetchone()[0])
             elo_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo").fetchone()[0])
             elo_meta_rows = int(con.execute("SELECT COUNT(*) FROM prepared_team_elo_meta").fetchone()[0])
@@ -147,11 +152,16 @@ def main() -> int:
             raise SystemExit(
                 f"Invalid hot-patched simulation rows={rows} match_rows={match_rows} runs={runs}"
             )
-        if match_elo_rows != match_rows or match_explorer_rows <= 0:
+        if (
+            match_elo_rows != match_rows
+            or match_explorer_rows <= 0
+            or match_score_distribution_rows != match_rows
+        ):
             raise SystemExit(
                 "Invalid Elo-backed Match Simulation "
                 f"match_rows={match_rows} elo_match_rows={match_elo_rows} "
-                f"explorer_rows={match_explorer_rows}"
+                f"explorer_rows={match_explorer_rows} "
+                f"score_distribution_rows={match_score_distribution_rows}"
             )
         if elo_rows <= 0 or elo_meta_rows <= 0:
             raise SystemExit(
@@ -203,6 +213,8 @@ def main() -> int:
     metadata["preparedMatchSimulationCount"] = match_rows
     metadata["preparedMatchSimulationContract"] = "match-monte-carlo-v2-elo"
     metadata["preparedMatchSimulationExplorerRowCount"] = match_explorer_rows
+    metadata["preparedMatchScoreDistributionCount"] = match_score_distribution_rows
+    metadata["preparedMatchScoreDistributionContract"] = "same-run-monte-carlo-exact-score-v1"
     metadata["preparedMatchSimulationUsesPreparedElo"] = True
     metadata["preparedTeamEloContract"] = "team-elo-v1"
     metadata["preparedTeamEloCount"] = elo_rows
@@ -222,7 +234,8 @@ def main() -> int:
     seed = "|".join(
         [
             str(payload.get("contentVersion") or ""), new_sha,
-            str(rows), str(match_rows), str(match_explorer_rows), str(runs),
+            str(rows), str(match_rows), str(match_explorer_rows),
+            str(match_score_distribution_rows), str(runs),
             str(elo_rows), str(elo_meta_rows),
             str(league_rows), str(league_team_rows), str(league_runs),
             str(uefa_rows), str(uefa_team_rows), str(uefa_runs), now
@@ -237,6 +250,7 @@ def main() -> int:
         f"match_rows={match_rows}",
         f"match_elo_rows={match_elo_rows}",
         f"match_explorer_rows={match_explorer_rows}",
+        f"match_score_distribution_rows={match_score_distribution_rows}",
         f"runs={runs}",
         f"elo_rows={elo_rows}",
         f"elo_meta_rows={elo_meta_rows}",
