@@ -16,7 +16,7 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-SCORE = re.compile(r"^\\s*(\\d+)\\s*[-:]\\s*(\\d+)\\s*$")
+SCORE = re.compile(r"^\s*(\d+)\s*[-:]\s*(\d+)\s*$")
 MIN_PROBABILITY = 0.05
 
 
@@ -112,6 +112,23 @@ def materialize(db_path: Path) -> tuple[int, int]:
                 )] = header
             except (ValueError, TypeError):
                 continue
+
+        # Most current Simulation fixtures originate from the bookmaker-
+        # independent fixture index, not from prepared_matches betting rows.
+        # Join by scheduled teams/date when Odds-API.io IDs differ from
+        # API-Football fixture IDs.
+        for row in con.execute("""
+            SELECT competition_id,snapshot_version,match_key,
+                   id,local_date,home_team,away_team
+            FROM prepared_fixture_matches
+        """):
+            key = (row["competition_id"], row["snapshot_version"], row["match_key"])
+            match_headers.setdefault(key, {
+                "id": row["id"],
+                "date": row["local_date"],
+                "homeTeam": row["home_team"],
+                "awayTeam": row["away_team"],
+            })
 
         total_rows = 0
         covered_matches = 0
