@@ -1,0 +1,91 @@
+name: App-Ready Score Edge Hot Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/score-edge-hot-publish'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-score-edge-hot-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Reuse canonical 10k simulations and materialize Score Edge only
+        run: python scripts/hotpatch_app_ready_simulation.py --score-edge-only
+      - name: Verify prepared Score Edge source and SQLite integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, sqlite3, tempfile, zipfile
+          from pathlib import Path
+          root=Path('.')
+          manifest=json.loads((root/'data/statmaker/app_ready/update_manifest.json').read_text())
+          assert manifest['metadata']['preparedScoreEdgeContract']=='exact-score-monte-carlo-10k-value-v1'
+          target=next(x for x in manifest['artifacts'] if x['id']=='app_ready_betting_bundle')
+          with tempfile.TemporaryDirectory() as tmp:
+              with zipfile.ZipFile(root/target['path']) as arc:
+                  arc.extract('databases/statmaker_prepared_betting.db', tmp)
+              db=sqlite3.connect(Path(tmp)/'databases/statmaker_prepared_betting.db')
+              assert db.execute('PRAGMA quick_check').fetchone()[0]=='ok'
+              cnt=db.execute('SELECT COUNT(*) FROM prepared_score_edge_values').fetchone()[0]
+              matches=db.execute("""
+                  SELECT COUNT(*) FROM (
+                  SELECT competition_id,snapshot_version,match_key
+                  FROM prepared_score_edge_values
+                  GROUP BY competition_id,snapshot_version,match_key)
+              """).fetchone()[0]
+              assert cnt>0 and matches>0
+              assert cnt==manifest['metadata']['preparedScoreEdgeRowCount']
+              assert matches==manifest['metadata']['preparedScoreEdgeMatchCount']
+              assert db.execute('SELECT MIN(simulation_runs) FROM prepared_score_edge_values').fetchone()[0]>=10000
+              print('APP_READY_SCORE_EDGE_VERIFY_OK', 'rows=',cnt,'matches=',matches)
+              db.close()
+          PY
+      - name: Publish targeted betting App-Ready bundle to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          publish_dir="$(mktemp -d)"
+          cp data/statmaker/app_ready/update_manifest.json "$publish_dir/update_manifest.json"
+          bundle_name="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          m=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          print(Path(next(x for x in m['artifacts'] if x['id']=='app_ready_betting_bundle')['path']).name)
+          PY
+          )"
+          cp "data/statmaker/app_ready/$bundle_name" "$publish_dir/$bundle_name"
+          published=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp "$publish_dir/update_manifest.json" data/statmaker/app_ready/update_manifest.json
+            cp "$publish_dir/$bundle_name" "data/statmaker/app_ready/$bundle_name"
+            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$bundle_name"
+            if git diff --cached --quiet; then
+              echo "APP_READY_SCORE_EDGE_ALREADY_PRESENT"
+              published=true
+              break
+            fi
+            git commit -m "Publish precomputed Score Edge App-Ready hotfix"
+            if git push origin HEAD:main; then
+              echo "APP_READY_SCORE_EDGE_PUBLISH_OK attempt=$attempt"
+              published=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$published" == "true" ]]
