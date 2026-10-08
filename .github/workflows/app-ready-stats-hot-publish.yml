@@ -85,14 +85,8 @@ jobs:
                   zf.extractall(out)
               db=out/'databases/statmaker.db'
               normalized=out/'files/domestic_normalized_stats_v2.bin'
-              uefa_current=out/'files/uefa_current_stats.json'
               assert db.is_file() and normalized.is_file() and normalized.stat().st_size > 12
-              assert uefa_current.is_file() and uefa_current.stat().st_size > 0
-              current=json.loads(uefa_current.read_text(encoding='utf-8'))
-              assert current.get('schemaVersion') == 1
-              assert {c.get('competitionId') for c in current.get('competitions', [])} == {
-                  'champions_league','europa_league','conference_league'
-              }
+              assert not (out/'files/uefa_current_stats.json').exists()
               con=sqlite3.connect(db)
               try:
                   quick=con.execute('PRAGMA quick_check').fetchone()

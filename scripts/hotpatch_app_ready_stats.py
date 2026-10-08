@@ -459,11 +459,9 @@ def main() -> int:
 
         match_count, scopes = create_stats_db(db_path)
         normalized_keys = create_normalized_snapshot(normalized_path)
-        if not UEFA_CURRENT_STATS.is_file():
-            raise SystemExit("Missing current UEFA stats artifact")
-        uefa_current_target = extracted / "files/uefa_current_stats.json"
-        uefa_current_target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(UEFA_CURRENT_STATS, uefa_current_target)
+        # Keep the App-Ready bundle backward-compatible with existing Android builds.
+        # Current UEFA stats are consumed by new clients from the canonical main artifact.
+        (extracted / "files/uefa_current_stats.json").unlink(missing_ok=True)
         rebuild_bundle_manifest(extracted)
 
         provisional = temp / "stats.zip"
