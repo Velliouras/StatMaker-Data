@@ -52,23 +52,66 @@ def materialize(db_path: Path) -> tuple[int, int]:
                     competition_id, snapshot_version, match_key
                 );
         """)
-        quotes: dict[tuple[str, str, str], dict[tuple[int, int], float]] = defaultdict(dict)
-        for row in con.execute("""
-            SELECT competition_id, snapshot_version, match_key,
-                   selection_name, selection_odd
-            FROM prepared_selections
-            WHERE identity_sub_market_key='RESULT_CORRECT_SCORE'
-              AND selection_odd > 1.0
-        """):
-            odds = float(row["selection_odd"])
-            if not math.isfinite(odds) or odds <= 1.0:
+        # Exact score is deliberately excluded from the legacy prepared betting
+        # selection table. The raw, already-published repository odds feed is
+        # the canonical market source for Score Edge. Do not treat absent
+        # prepared_selections as an absence of exact bookmaker odds.
+        root = Path(__file__).resolve().parents[1]
+        feeds = (
+            ("domestic", root / "odds/odds_api_io/domestic_odds.json"),
+            ("champions_league", root / "odds/odds_api_io/champions_league_odds.json"),
+            ("europa_league", root / "odds/odds_api_io/europa_league_odds.json"),
+        )
+        odds_by_id: dict[tuple[str, str], dict[tuple[int, int], float]] = defaultdict(dict)
+        odds_by_team: dict[tuple[str, str, str, str], dict[tuple[int, int], float]] = defaultdict(dict)
+        for competition, path in feeds:
+            if not path.is_file():
                 continue
-            found = SCORE.fullmatch(str(row["selection_name"] or ""))
-            if not found:
+            feed = json.loads(path.read_text(encoding="utf-8"))
+            all_matches = list(feed.get("matches") or [])
+            for league in feed.get("leagues") or []:
+                all_matches.extend(league.get("matches") or [])
+            for fixture in all_matches:
+                if not isinstance(fixture, dict):
+                    continue
+                fixture_id = str(fixture.get("id") or "").strip()
+                fixture_date = str(fixture.get("date") or "")[:10]
+                home = str(fixture.get("homeTeam") or "").strip().casefold()
+                away = str(fixture.get("awayTeam") or "").strip().casefold()
+                for market in fixture.get("markets") or []:
+                    if str(market.get("market") or "").upper() != "CORRECT_SCORE":
+                        continue
+                    if market.get("exactBookmakerOdds") is False:
+                        continue
+                    found = SCORE.fullmatch(str(market.get("selection") or ""))
+                    if not found:
+                        continue
+                    try:
+                        odd = float(market.get("odds") or 0.0)
+                    except (ValueError, TypeError):
+                        continue
+                    if not math.isfinite(odd) or odd <= 1.0:
+                        continue
+                    score = (int(found.group(1)), int(found.group(2)))
+                    if fixture_id:
+                        quotes = odds_by_id[(competition, fixture_id)]
+                        quotes[score] = max(odd, quotes.get(score, 0.0))
+                    if fixture_date and home and away:
+                        quotes = odds_by_team[(competition, fixture_date, home, away)]
+                        quotes[score] = max(odd, quotes.get(score, 0.0))
+
+        match_headers = {}
+        for row in con.execute(
+            "SELECT competition_id,snapshot_version,match_key,payload "
+            "FROM prepared_matches"
+        ):
+            try:
+                header = json.loads(row["payload"])
+                match_headers[(
+                    row["competition_id"], row["snapshot_version"], row["match_key"]
+                )] = header
+            except (ValueError, TypeError):
                 continue
-            score = (int(found.group(1)), int(found.group(2)))
-            key = (row["competition_id"], row["snapshot_version"], row["match_key"])
-            quotes[key][score] = max(odds, quotes[key].get(score, 0.0))
 
         total_rows = 0
         covered_matches = 0
@@ -85,7 +128,16 @@ def materialize(db_path: Path) -> tuple[int, int]:
             WHERE m.state='ready' AND s.simulation_runs >= 10000
         """):
             key = (row["competition_id"], row["snapshot_version"], row["match_key"])
-            bookmaker_quotes = quotes.get(key)
+            header = match_headers.get(key) or {}
+            fixture_id = str(header.get("id") or "").strip()
+            fixture_date = str(header.get("date") or "")[:10]
+            home = str(header.get("homeTeam") or "").strip().casefold()
+            away = str(header.get("awayTeam") or "").strip().casefold()
+            bookmaker_quotes = (
+                odds_by_id.get((row["competition_id"], fixture_id))
+                or odds_by_team.get((row["competition_id"], fixture_date, home, away))
+                or odds_by_id.get((row["competition_id"], row["match_key"]))
+            )
             if not bookmaker_quotes:
                 continue
             try:
