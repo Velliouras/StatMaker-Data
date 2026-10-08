@@ -1,0 +1,208 @@
+name: API-Football Missing Current Schedules Repair
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/api-football-missing-current-schedules-repair'
+  schedule:
+    - cron: "35 4 * * 1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-api-football-missing-current-schedules-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/*
+            /config/api_football_enrichment_leagues.json
+            /data/statmaker/domestic_enriched/index.json
+            /data/api_football/fixture_stats/*
+            /reports/*
+            /.github/triggers/api-football-missing-current-schedules-repair
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Detect missing current schedules
+        id: detect
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import date
+          from pathlib import Path
+
+          root=Path('.')
+          index=json.loads((root/'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+          today=date.today().isoformat()
+          candidates=[]
+
+          for row in index.get('leagues') or []:
+              if not isinstance(row, dict):
+                  continue
+              if str(row.get('lifecycle') or '') != 'active':
+                  continue
+              app=str(row.get('app_season') or '')
+              target=str(row.get('target_app_season') or '')
+              if not app or app != target:
+                  continue
+              if int(row.get('completed_fixtures') or 0) < 10:
+                  continue
+              season_end=str(row.get('target_season_end') or '')
+              if season_end and season_end < today:
+                  continue
+              cache_path=Path(str(row.get('cache_path') or ''))
+              if not cache_path.is_file():
+                  continue
+              try:
+                  payload=json.loads(cache_path.read_text(encoding='utf-8'))
+              except Exception:
+                  continue
+              schedule=payload.get('schedule_fixtures') or []
+              latest=max((str(x.get('date') or '')[:10] for x in schedule if isinstance(x,dict)), default='')
+              needs=(not schedule) or (latest and latest < today)
+              if not needs:
+                  continue
+              league_id=int(row.get('api_football_league_id') or 0)
+              if league_id <= 0:
+                  continue
+              candidates.append({
+                  'league_id': league_id,
+                  'league_code': str(row.get('league_code') or ''),
+                  'country': str(row.get('country') or ''),
+                  'league': str(row.get('league') or ''),
+                  'cache_path': str(cache_path),
+                  'before_schedule_rows': len(schedule),
+                  'before_latest_date': latest,
+              })
+
+          # de-duplicate provider league ids
+          dedup=[]
+          seen=set()
+          for row in candidates:
+              if row['league_id'] in seen:
+                  continue
+              seen.add(row['league_id'])
+              dedup.append(row)
+
+          if len(dedup) > 80:
+              raise SystemExit(f'Refusing unexpected repair fanout: {len(dedup)} leagues')
+
+          Path('reports').mkdir(parents=True, exist_ok=True)
+          Path('reports/api_football_missing_current_schedules_candidates.json').write_text(
+              json.dumps({'generated_on':today,'candidates':dedup},ensure_ascii=False,indent=2)+'\n',
+              encoding='utf-8'
+          )
+          ids=' '.join(str(x['league_id']) for x in dedup)
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
+              out.write(f"ids={ids}\n")
+              out.write(f"count={len(dedup)}\n")
+          print('MISSING_CURRENT_SCHEDULES', len(dedup))
+          for row in dedup:
+              print(row['league_id'], row['country'], row['league'], row['before_schedule_rows'], row['before_latest_date'])
+          PY
+
+      - name: Refresh missing schedules
+        if: steps.detect.outputs.count != '0'
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          set -euo pipefail
+          for league_id in ${{ steps.detect.outputs.ids }}; do
+            echo "Refreshing provider league $league_id with one fixture-list request"
+            python scripts/api_football_fetch_fixture_stats.py               --league-id "$league_id"               --max-requests 1
+          done
+
+      - name: Verify repaired schedules
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import date
+          from pathlib import Path
+
+          candidates_path=Path('reports/api_football_missing_current_schedules_candidates.json')
+          candidates=json.loads(candidates_path.read_text(encoding='utf-8')).get('candidates') or []
+          today=date.today().isoformat()
+          repaired=[]
+          unresolved=[]
+
+          for row in candidates:
+              cache_path=Path(row['cache_path'])
+              payload=json.loads(cache_path.read_text(encoding='utf-8'))
+              schedule=payload.get('schedule_fixtures') or []
+              future=[
+                  x for x in schedule
+                  if isinstance(x,dict) and str(x.get('date') or '')[:10] >= today
+              ]
+              result={
+                  **row,
+                  'after_schedule_rows': len(schedule),
+                  'future_rows': len(future),
+                  'after_latest_date': max(
+                      (str(x.get('date') or '')[:10] for x in schedule if isinstance(x,dict)),
+                      default=''
+                  ),
+              }
+              if schedule:
+                  repaired.append(result)
+              else:
+                  unresolved.append(result)
+
+          report={
+              'generated_on':today,
+              'candidate_count':len(candidates),
+              'repaired_count':len(repaired),
+              'unresolved_count':len(unresolved),
+              'repaired':repaired,
+              'unresolved':unresolved,
+          }
+          Path('reports/api_football_missing_current_schedules_repair.json').write_text(
+              json.dumps(report,ensure_ascii=False,indent=2)+'\n',
+              encoding='utf-8'
+          )
+          print('CURRENT_SCHEDULE_REPAIR_VERIFY',
+                f"candidates={len(candidates)}",
+                f"repaired={len(repaired)}",
+                f"unresolved={len(unresolved)}")
+          for row in unresolved:
+              print('UNRESOLVED', row['league_id'], row['country'], row['league'])
+          PY
+
+      - name: Commit repaired current schedules
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add             data/api_football/fixture_stats             reports/api_football_missing_current_schedules_candidates.json             reports/api_football_missing_current_schedules_repair.json
+          if git diff --cached --quiet; then
+            echo "No current schedule changes."
+            exit 0
+          fi
+          git commit -m "Repair missing current fixture schedules"
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "CURRENT_SCHEDULE_REPAIR_PUSH_OK attempt=$attempt"
+              exit 0
+            fi
+            git fetch --depth=2 origin main
+            git rebase origin/main
+            sleep $((attempt * 2))
+          done
+          echo "Could not publish repaired schedules after 5 retries" >&2
+          exit 1
