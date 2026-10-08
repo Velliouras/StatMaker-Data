@@ -20,7 +20,7 @@ SCORE = re.compile(r"^\s*(\d+)\s*[-:]\s*(\d+)\s*$")
 MIN_PROBABILITY = 0.05
 
 
-def materialize(db_path: Path) -> tuple[int, int]:
+def materialize(db_path: Path, source_dir: Path | None = None) -> tuple[int, int]:
     con = sqlite3.connect(db_path)
     con.row_factory = sqlite3.Row
     try:
@@ -57,11 +57,19 @@ def materialize(db_path: Path) -> tuple[int, int]:
         # the canonical market source for Score Edge. Do not treat absent
         # prepared_selections as an absence of exact bookmaker odds.
         root = Path(__file__).resolve().parents[1]
-        feeds = (
-            ("domestic", root / "odds/odds_api_io/domestic_odds.json"),
-            ("champions_league", root / "odds/odds_api_io/champions_league_odds.json"),
-            ("europa_league", root / "odds/odds_api_io/europa_league_odds.json"),
-        )
+        if source_dir is not None:
+            feeds = (
+                ("domestic", source_dir / "domestic.json"),
+                ("champions_league", source_dir / "champions_league.json"),
+                ("europa_league", source_dir / "europa_league.json"),
+                ("conference_league", source_dir / "conference_league.json"),
+            )
+        else:
+            feeds = (
+                ("domestic", root / "odds/odds_api_io/domestic_odds.json"),
+                ("champions_league", root / "odds/odds_api_io/champions_league_odds.json"),
+                ("europa_league", root / "odds/odds_api_io/europa_league_odds.json"),
+            )
         odds_by_id: dict[tuple[str, str], dict[tuple[int, int], float]] = defaultdict(dict)
         odds_by_team: dict[tuple[str, str, str, str], dict[tuple[int, int], float]] = defaultdict(dict)
         for competition, path in feeds:
@@ -238,5 +246,6 @@ def materialize(db_path: Path) -> tuple[int, int]:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
+    parser.add_argument("--source-dir", type=Path)
     args = parser.parse_args()
-    materialize(args.db)
+    materialize(args.db, args.source_dir)
