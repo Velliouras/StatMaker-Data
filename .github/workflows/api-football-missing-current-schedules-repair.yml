@@ -126,16 +126,35 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
-          set -euo pipefail
-          for target in ${{ steps.detect.outputs.targets }}; do
-            league_id="${target%%:*}"
-            season="${target#*:}"
-            echo "Refreshing provider league $league_id season $season with one fixture-list request"
-            python scripts/api_football_fetch_fixture_stats.py \
-              --league-id "$league_id" \
-              --season-override "$season" \
-              --max-requests 1
-          done
+          python - <<'PY'
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          candidates=json.loads(
+              Path('reports/api_football_missing_current_schedules_candidates.json').read_text(encoding='utf-8')
+          ).get('candidates') or []
+
+          for row in candidates:
+              league_id=str(row['league_id'])
+              season=str(row['api_football_season'])
+              country=str(row['country'])
+              league=str(row['league'])
+              print(f"Refreshing provider league {league_id} season {season} {country} / {league}")
+              subprocess.run(
+                  [
+                      sys.executable,
+                      'scripts/api_football_fetch_fixture_stats.py',
+                      '--league-id', league_id,
+                      '--season-override', season,
+                      '--target-country', country,
+                      '--target-league-name', league,
+                      '--max-requests', '1',
+                  ],
+                  check=True,
+              )
+          PY
 
       - name: Verify repaired schedules
         run: |
