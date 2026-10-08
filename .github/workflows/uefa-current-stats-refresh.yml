@@ -32,7 +32,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/*
+            /config/uefa_simulation_2026_27.json
+            /data/statmaker/uefa_current_stats.json
+            /reports/*
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -72,24 +79,26 @@ jobs:
           print('UEFA_CURRENT_STATS_VERIFY_OK', [(c['competitionId'], c['fixtureCount']) for c in comps])
           PY
 
-      - name: Rebuild main update manifest
-        run: |
-          python scripts/build_statmaker_update_manifest.py             --profile main             --branch main             --output data/statmaker/update_manifest.json
-
       - name: Commit canonical UEFA current stats
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add             data/statmaker/uefa_current_stats.json             data/statmaker/update_manifest.json             reports/uefa_current_stats_refresh.json
+          git add data/statmaker/uefa_current_stats.json reports/uefa_current_stats_refresh.json
           if git diff --cached --quiet; then
             echo "No UEFA current-stats changes."
-          else
-            git commit -m "Refresh current UEFA statistics"
-            git pull --rebase --autostash origin main
-            python scripts/build_statmaker_update_manifest.py               --profile main               --branch main               --output data/statmaker/update_manifest.json
-            git add data/statmaker/update_manifest.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Rebuild main manifest after UEFA stats refresh"
-            fi
-            git push origin HEAD:main
+            exit 0
           fi
+
+          git commit -m "Refresh current UEFA statistics"
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              echo "UEFA_CURRENT_STATS_PUSH_OK attempt=$attempt"
+              exit 0
+            fi
+            git fetch --depth=2 origin main
+            git rebase origin/main
+            sleep $((attempt * 2))
+          done
+          echo "Could not publish UEFA current stats after 5 retries" >&2
+          exit 1
