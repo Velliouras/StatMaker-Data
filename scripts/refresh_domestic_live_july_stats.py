@@ -84,6 +84,12 @@ def fetch_league_preserving_fixture_metadata(
         # identity here as well. Never merge rows from a previous competition.
         existing_cache = {}
     existing_by_id = stats_fetch.cached_fixture_map(existing_cache)
+    existing_schedule = [
+        item
+        for item in (existing_cache.get("schedule_fixtures") or [])
+        if isinstance(item, dict)
+    ]
+    schedule_fixtures = existing_schedule
 
     requests_before = request_state["count"]
     completed_count = 0
@@ -105,6 +111,12 @@ def fetch_league_preserving_fixture_metadata(
         fixtures_returned = len(all_fixtures)
         completed_count = len(fixtures)
         notes.extend(query_notes)
+        if all_fixtures:
+            schedule_fixtures = [
+                stats_fetch.schedule_fixture_summary(item, fixture_query_used)
+                for item in all_fixtures
+                if stats_fetch.fixture_identity(item) is not None
+            ]
 
         source_name_error = stats_fetch.provider_league_name_mismatch_reason(
             league,
@@ -141,7 +153,14 @@ def fetch_league_preserving_fixture_metadata(
             )
     except stats_fetch.RequestLimitReached:
         notes.append("request cap reached before fixtures request")
-        stats_fetch.write_json(cache_path, stats_fetch.cache_payload(league, existing_by_id.values()))
+        stats_fetch.write_json(
+            cache_path,
+            stats_fetch.cache_payload(
+                league,
+                existing_by_id.values(),
+                schedule_fixtures=schedule_fixtures,
+            ),
+        )
         return stats_fetch.report_row(
             league, cache_path, completed_count, already_cached, newly_fetched,
             missing_stats, metadata_refreshed, missing_scores, requests_before,
@@ -201,7 +220,14 @@ def fetch_league_preserving_fixture_metadata(
         existing_by_id[fixture_id] = merged
         newly_fetched += 1
 
-    stats_fetch.write_json(cache_path, stats_fetch.cache_payload(league, existing_by_id.values()))
+    stats_fetch.write_json(
+        cache_path,
+        stats_fetch.cache_payload(
+            league,
+            existing_by_id.values(),
+            schedule_fixtures=schedule_fixtures,
+        ),
+    )
 
     if not notes:
         notes.append("ok")
