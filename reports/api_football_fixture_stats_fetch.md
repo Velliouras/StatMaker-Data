@@ -1,6 +1,6 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-10-08T15:52:48Z`
+Generated at: `2026-10-08T15:53:17Z`
 Requests used: `1` / `5`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
