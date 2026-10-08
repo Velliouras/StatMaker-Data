@@ -80,10 +80,12 @@ jobs:
               if not needs:
                   continue
               league_id=int(row.get('api_football_league_id') or 0)
-              if league_id <= 0:
+              api_season=str(row.get('api_football_season') or '').strip()
+              if league_id <= 0 or not api_season:
                   continue
               candidates.append({
                   'league_id': league_id,
+                  'api_football_season': api_season,
                   'league_code': str(row.get('league_code') or ''),
                   'country': str(row.get('country') or ''),
                   'league': str(row.get('league') or ''),
@@ -92,13 +94,14 @@ jobs:
                   'before_latest_date': latest,
               })
 
-          # de-duplicate provider league ids
+          # de-duplicate provider league + canonical current season targets
           dedup=[]
           seen=set()
           for row in candidates:
-              if row['league_id'] in seen:
+              key=(row['league_id'], row['api_football_season'])
+              if key in seen:
                   continue
-              seen.add(row['league_id'])
+              seen.add(key)
               dedup.append(row)
 
           if len(dedup) > 80:
@@ -109,13 +112,13 @@ jobs:
               json.dumps({'generated_on':today,'candidates':dedup},ensure_ascii=False,indent=2)+'\n',
               encoding='utf-8'
           )
-          ids=' '.join(str(x['league_id']) for x in dedup)
+          targets=' '.join(f"{x['league_id']}:{x['api_football_season']}" for x in dedup)
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as out:
-              out.write(f"ids={ids}\n")
+              out.write(f"targets={targets}\n")
               out.write(f"count={len(dedup)}\n")
           print('MISSING_CURRENT_SCHEDULES', len(dedup))
           for row in dedup:
-              print(row['league_id'], row['country'], row['league'], row['before_schedule_rows'], row['before_latest_date'])
+              print(row['league_id'], row['api_football_season'], row['country'], row['league'], row['before_schedule_rows'], row['before_latest_date'])
           PY
 
       - name: Refresh missing schedules
@@ -124,9 +127,14 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           set -euo pipefail
-          for league_id in ${{ steps.detect.outputs.ids }}; do
-            echo "Refreshing provider league $league_id with one fixture-list request"
-            python scripts/api_football_fetch_fixture_stats.py               --league-id "$league_id"               --max-requests 1
+          for target in ${{ steps.detect.outputs.targets }}; do
+            league_id="${target%%:*}"
+            season="${target#*:}"
+            echo "Refreshing provider league $league_id season $season with one fixture-list request"
+            python scripts/api_football_fetch_fixture_stats.py \
+              --league-id "$league_id" \
+              --season-override "$season" \
+              --max-requests 1
           done
 
       - name: Verify repaired schedules
