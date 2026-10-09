@@ -1,6 +1,10 @@
 name: StatMaker App-Ready Artifact Publisher
 
-# Current-season Domestic read-model regeneration trigger.
+# This is an EXPLICIT migration/full-rebuild lane, not a routine data refresh.
+# Ordinary stats/simulation/Score Edge data are handled by targeted hot publishers.
+# The old schedule + workflow_run + manifest/odds push triggers created repeated
+# 90-minute emulator jobs for each small producer change and stacked failures.
+# Never restore automatic heavyweight triggers without a bounded host-side builder.
 on:
   workflow_dispatch:
     inputs:
@@ -10,63 +14,31 @@ on:
         default: "main"
         type: string
       force:
-        description: "Force generation"
+        description: "Force an approved full rebuild"
         required: true
         default: false
         type: boolean
-  workflow_run:
-    # GitHub suppresses ordinary push-triggered workflow recursion for commits made
-    # with GITHUB_TOKEN. Chain the heavyweight publisher only from canonical producers
-    # whose changes must reach the immutable phone read-model promptly.
-    workflows:
-      - "Domestic Statistics Universe"
-      - "Domestic Targeted Stats Backfill"
-      - "Odds Integrity Production Refresh"
-      - "Domestic Proposal Readiness Rebuild"
-      - "Build StatMaker Domestic Enriched"
-      - "Greece Super League 2 Sync"
-      - "Turkey Super Lig Schedule Sync"
-      - "Domestic Archive Betting Rehydrate"
-      - "Domestic Enriched Cache Rebuild"
-      - "API-Football Targeted Fixture Schedule Refresh"
-    types: [completed]
-    branches: [main]
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
-      - 'data/statmaker/update_manifest.json'
-      - 'odds/odds_api_io/domestic_odds.json'
-      - 'data/statmaker/uefa_support_history.json'
-      - 'data/statmaker/uefa_team_support_history.json'
-      - 'data/statmaker/domestic_proposal_readiness.json'
-      - 'mappings/domestic_team_aliases.json'
-      - 'data/statmaker/domestic_enriched/**'
-      - 'data/api_football/domestic_normalized_fixture_stats.json'
       - '.github/app-ready-rebuild-trigger'
-  schedule:
-    - cron: "20 2,6,10,14,18,22 * * *"
 
 permissions:
   contents: write
   actions: read
 concurrency:
-  # Failed/cancelled upstream workflow_run events are no-op runs. Give those runs a
-  # unique key so they cannot cancel a valid publisher already building a generation.
-  group: statmaker-app-ready-v2-${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' && github.run_id || 'active' }}
-  # Never cancel a valid in-flight generation. A completed generation is publishable even if
-  # newer canonical inputs arrive while it is building; the next queued run will catch up.
+  # One intentional full rebuild at a time; never cancel a validated generation.
+  group: statmaker-app-ready-full-rebuild
   cancel-in-progress: false
 
 jobs:
   publish:
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
       APP_READY_UAT_SOURCE: "true"
-    # The prepared source phase has its own explicit 90-minute ceiling and failure checkpoint.
-    # Keep the job ceiling above that so GitHub never killss the runner before the checkpoint trap.
-    timeout-minutes: 110
+    # Full rebuilds are explicitly requested and may take longer than the former
+    # 90-minute cap; a failed attempt still exports its resumable checkpoint.
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 1}
@@ -332,7 +304,7 @@ jobs:
           APP_READY_RECOMMENDATION_ONLY: ${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149') && 'true' || 'false' }}
           APP_READY_SOURCE_ONLY: "true"
           # Explicit elapsed-time ceiling. The shell monitor has no hidden iteration timeout.
-          APP_READY_PREPARED_MAX_SECONDS: "5400"
+          APP_READY_PREPARED_MAX_SECONDS: "7200"
         with:
           api-level: 35
           target: google_apis
