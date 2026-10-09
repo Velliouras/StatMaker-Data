@@ -321,6 +321,77 @@ def _hybrid_rank(row, market_preferred, three_way_result):
     )
 
 
+
+def _value_first_uat_rank(r,market_preferred,three_way_result,favorite_team=None):
+    """Exact persisted-scalar UAT Value-First ranking; PROD Hybrid stays untouched."""
+    odd=num(r.get('selection_odd'))
+    market=num(r.get('bm_market_probability'))
+    prob=num(r.get('bm_posterior_probability'))
+    reliability=_clamp01(num(r.get('bm_sample_reliability'),0))
+    if str(r.get('value_tier') or '')!='STRONG_VALUE':
+        return None
+    if not (odd>1.01 and _valid_probability(market) and _valid_probability(prob)):
+        return None
+    edge=prob-market
+    ev=prob*odd-1.0
+    tier_rel=_clamp01(reliability*0.55+0.21)
+    vscore=_clamp01(_clamp01((ev-0.05)/0.25)*0.42+
+                    _clamp01((edge-0.04)/0.12)*0.30+tier_rel*0.28)
+    support=_clamp01(num(r.get('selection_score'),0))
+    hit=_clamp01(num(r.get('strict_hit_rate') or r.get('bm_hit_rate'),0))
+    model=num(r.get('opponent_model_probability'))
+    model_backed=_valid_probability(model)
+    sim=nullable(r.get('simulation_probability'))
+    if sim is not None and not _valid_probability(sim):sim=None
+    floor=(0.32 if odd>3.50 else 0.34 if odd>3.0 else
+           0.36 if odd>2.50 else 0.38)
+    if not (odd<=4.50 and prob>=floor and edge>=0.04 and ev>=0.05
+            and reliability>=0.60 and support>=0.60 and hit>=0.60
+            and vscore>=0.66
+            and not (three_way_result and not market_preferred and odd>2.75
+                     and (not model_backed or prob<0.38))
+            and not (odd>3.50 and reliability<0.62)
+            and not (odd>4.00 and reliability<0.70)):
+        return None
+    penalty=(0.13 if odd>4.0 else 0.07 if odd>3.5
+             else 0.04 if odd>3.0 else 0.0)
+    side=str(r.get('identity_team_side') or '').upper()
+    favorite_bonus=(0.035 if favorite_team and side==favorite_team else
+                    -0.015 if favorite_team and side in ('HOME','AWAY') else 0.0)
+    sim_adjust=(max(-1.0,min(1.0,(sim-prob)/0.20))*0.025
+                if sim is not None else 0.0)
+    rank=_clamp01(vscore*0.64+support*0.12+reliability*0.10+
+                  hit*0.06+prob*0.08+favorite_bonus+sim_adjust-
+                  penalty-(0.025 if three_way_result and not market_preferred else 0.0))
+    return (rank,prob,support,reliability,-odd,
+            model if model_backed else prob,
+            sim,(sim-market) if sim is not None else None,
+            (1.0-_clamp01(abs(sim-prob)/0.20)) if sim is not None else None)
+
+
+def _value_first_fixture_favorite(db,row,cache):
+    """Only factual home/away 1X2 odds establish football strength for team markets."""
+    k=(str(row.get('competition_id') or ''),str(row.get('snapshot_version') or ''),
+       str(row.get('prepared_match_key') or ''))
+    if k not in cache:
+        prs=rows(db,"""
+            SELECT identity_selection_side,selection_odd
+            FROM prepared_selections
+            WHERE competition_id=? AND snapshot_version=? AND match_key=?
+              AND identity_sub_market_key='RESULT_1X2'
+              AND identity_selection_side IN ('HOME','AWAY')
+              AND selection_odd>1.01
+        """,k)
+        prices={str(x.get('identity_selection_side') or ''):num(x.get('selection_odd'))
+                for x in prs}
+        h=prices.get('HOME');a=prices.get('AWAY')
+        cache[k]=(
+            'HOME' if h is not None and a is not None and h+0.01<a else
+            'AWAY' if h is not None and a is not None and a+0.01<h else None
+        )
+    return cache[k]
+
+
 def final_candidates_hybrid(db,gid,target=None):
     date_clause=" AND c.local_date=?" if target else ""
     args=(gid,target) if target else (gid,)
@@ -467,6 +538,7 @@ def final_candidates_hybrid(db,gid,target=None):
                 min(market_rows,key=lambda x:num(x.get('selection_odd'))).get('identity_selection_side') or ''
             )
 
+    favorite_cache={}
     eligible=[]
     for r in src:
         sub=str(r.get('identity_sub_market_key') or '')
@@ -485,7 +557,12 @@ def final_candidates_hybrid(db,gid,target=None):
             market_preferred=(favorite_side.get(key)==side)
         else:
             market_preferred=(market_probability>=0.50)
-        rank=_hybrid_rank(r,market_preferred,three_way_result)
+        if MODE_LABEL=='uat-hybrid':
+            rank=_value_first_uat_rank(
+                r,market_preferred,three_way_result,
+                _value_first_fixture_favorite(db,r,favorite_cache))
+        else:
+            rank=_hybrid_rank(r,market_preferred,three_way_result)
         if rank is None:
             continue
         rr=dict(r)
@@ -884,7 +961,8 @@ def extract(bundle,target=None):
                   'opponentAdjustedRequired':bool(intval(s.get('opponent_adjusted_required'))),'baseModelProbability':nullable(s.get('opponent_base_model_probability')),
                   'withoutFavoriteProbability':nullable(s.get('opponent_without_favorite_probability')),'withoutXgProbability':nullable(s.get('opponent_without_xg_probability')),'withoutFatigueProbability':nullable(s.get('opponent_without_fatigue_probability')),
                   'withoutInjuriesProbability':nullable(s.get('opponent_without_injuries_probability')),'withoutLineupProbability':nullable(s.get('opponent_without_lineup_probability')),'withoutFormationProbability':nullable(s.get('opponent_without_formation_probability')),'withoutSquadTurnoverProbability':nullable(s.get('opponent_without_squad_turnover_probability')),
-                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':'OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR','requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
+                  'modifierProfile':s.get('opponent_modifier_profile'),'predictionSource':('BOOKMAKER_POSTERIOR_VALUE_FIRST' if MODE_LABEL=='uat-hybrid'
+                  else ('OPPONENT_ADJUSTED' if mp is not None else 'BOOKMAKER_POSTERIOR')),'requiredKind':live.SUBMARKET_REQUIREMENT.get(sub,'unsupported')})
             if rejected_identity:
                 print(f"CANONICAL_LEDGER_IDENTITY_REJECTED bundle={bundle.name} rows={rejected_identity}")
             print(
@@ -983,9 +1061,9 @@ def main():
         APP=APP_PROD
         LEDGER=LEDGER_UAT_HYBRID
         MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
-        LEDGER_SOURCE='canonical-uat-hybrid-strong-singles-ledger-v13-simulation-v1'
+        LEDGER_SOURCE='canonical-uat-value-first-strong-singles-ledger-v15'
         MODE_LABEL='uat-hybrid'
-        SCHEMA_VERSION=13
+        SCHEMA_VERSION=15
     elif a.uat:
         APP=APP_UAT
         LEDGER=LEDGER_UAT
