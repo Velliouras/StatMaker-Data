@@ -1,0 +1,56 @@
+name: App-Ready F1 Checkpoint Smoke
+
+# One-shot proof against the failing publisher's exact checkpoint. No emulator,
+# no canonical writes and no artifact publication; this is a read-only test of a
+# temporary download and a locally patched copy of statmaker.db.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/app-ready-f1-checkpoint-smoke.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 37899147032
+          name: statmaker-app-ready-prepared-checkpoint
+          path: checkpoint
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check and reconcile historical scope in local checkpoint copy
+        run: |
+          set -euo pipefail
+          db=checkpoint/databases/statmaker.db
+          test -s "$db"
+          python - <<'PY'
+          import sqlite3
+          db='checkpoint/databases/statmaker.db'
+          with sqlite3.connect(db) as con:
+              n=con.execute(
+                  "SELECT COUNT(*) FROM matches WHERE season='2526' AND division='F1'"
+              ).fetchone()[0]
+              print('CHECKPOINT_F1_BEFORE', n)
+              assert n==309, f'Checkpoint unexpectedly has {n} rows instead of 309'
+          PY
+          python scripts/reconcile_app_ready_stats_scope.py \
+            "$db" data/statmaker/domestic_enriched/index.json --repo-root .
+          python - <<'PY'
+          import sqlite3
+          db='checkpoint/databases/statmaker.db'
+          with sqlite3.connect(db) as con:
+              rows=con.execute(
+                  "SELECT COUNT(*) FROM matches WHERE season='2526' AND division='F1'"
+              ).fetchone()[0]
+              integrity=con.execute("PRAGMA quick_check").fetchone()[0]
+              print('CHECKPOINT_F1_AFTER',rows,'integrity',integrity)
+              assert rows==307 and integrity=='ok'
+          PY
+          echo "CHECKPOINT_F1_REAL_RECONCILIATION_OK"
