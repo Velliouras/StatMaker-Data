@@ -30,13 +30,15 @@ def block(source: str, heading: str, end: str) -> str:
 
 
 class AppReadyRoutingContractTest(unittest.TestCase):
-    def test_heavy_publisher_only_explicit(self) -> None:
+    def test_heavy_publisher_only_nightly_or_explicit(self) -> None:
         source = workflow(HEAVY)
         on = block(source, "on", "permissions")
         self.assertIn("workflow_dispatch:", on)
         self.assertIn("'.github/app-ready-rebuild-trigger'", on)
         self.assertNotIn("workflow_run:", on)
-        self.assertNotRegex(on, r"(?m)^  schedule:")
+        self.assertIn('cron: "20 0 * * *"', on)
+        self.assertEqual(on.count("cron:"), 1)
+        self.assertNotIn("workflow_run:", on)
         self.assertNotIn("data/statmaker/update_manifest.json", on)
         self.assertNotIn("odds/odds_api_io/domestic_odds.json", on)
         self.assertIn("APP_READY_PREPARED_MAX_SECONDS: \"7200\"", source)
