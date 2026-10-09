@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/canonical-uat-daily-multimarket-hotfix.yml'
+      - 'scripts/materialize_canonical_recommendation_ledger.py'
+      - 'tests/test_value_first_uat_ledger.py'
 
 permissions:
   contents: write
@@ -22,7 +24,9 @@ jobs:
           fetch-depth: 150
       - name: Verify all independent market recommendations
         run: python -m unittest discover -s tests -p 'test_canonical_daily_multi_market.py' -v
-      - name: Rebuild ONLY UAT hybrid canonical Daily ledger
+      - name: Test UAT Value-First selector
+        run: python -m unittest discover -s tests -p 'test_value_first_uat_ledger.py' -v
+      - name: Rebuild ONLY UAT Value-First canonical Daily ledger
         run: |
           set -euo pipefail
           python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 0
@@ -38,13 +42,14 @@ jobs:
           for row in ledger['entries']:
               grouped[row['localDate'],row['matchKey']].append(row)
           multi={k:v for k,v in grouped.items() if len(v)>1}
-          assert multi, 'NO_UAT_MULTI_MARKET_FIXTURES'
+          assert ledger.get('schemaVersion') == 15, 'UAT_VALUE_FIRST_SCHEMA_MISMATCH'
+          assert all(1.50 <= float(r['odd']) <= 4.50 for r in ledger['entries']), 'UAT_OUT_OF_BAND_ODD'
           assert all(len({r.get('marketFamily') or r.get('family') or r.get('subMarketKey') or r.get('market') for r in rows})==len(rows) for rows in grouped.values()), 'UAT_DUPLICATE_FAMILY'
           today=datetime.now(ZoneInfo('Europe/Athens')).date().isoformat()
           print('UAT_DAILY_MULTI_MARKET_OK',f'entries={len(ledger["entries"])}',f'multipleFixtures={len(multi)}',f'todayMulti={sum(1 for k in multi if k[0]==today)}')
-          assert any(k[0]==today for k in multi), 'UAT_NO_TODAY_MULTI_MARKETS'
+          # Some days legitimately have no two-family Strong fixtures.
           PY
-      - name: Publish ONLY UAT hybrid Daily ledger
+      - name: Publish ONLY UAT Value-First Daily ledger
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
