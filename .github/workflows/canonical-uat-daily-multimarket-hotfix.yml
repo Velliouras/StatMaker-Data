@@ -43,6 +43,7 @@ jobs:
               grouped[row['localDate'],row['matchKey']].append(row)
           multi={k:v for k,v in grouped.items() if len(v)>1}
           assert ledger.get('schemaVersion') == 15, 'UAT_VALUE_FIRST_SCHEMA_MISMATCH'
+          assert ledger.get('entries'), 'UAT_VALUE_FIRST_LEDGER_EMPTY_REFUSING_PUBLISH'
           assert all(1.50 <= float(r['odd']) <= 4.50 for r in ledger['entries']), 'UAT_OUT_OF_BAND_ODD'
           assert all(len({r.get('marketFamily') or r.get('family') or r.get('subMarketKey') or r.get('market') for r in rows})==len(rows) for rows in grouped.values()), 'UAT_DUPLICATE_FAMILY'
           today=datetime.now(ZoneInfo('Europe/Athens')).date().isoformat()
