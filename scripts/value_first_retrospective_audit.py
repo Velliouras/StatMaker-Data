@@ -146,6 +146,22 @@ def audit(days,snapshot_hour,end_date,output):
                     and p['favorite1X2Odd']<=1.50
                    else 'OTHER_TEAM_OR_MISSING_ODDS')+'_'+
                     (p.get('selectionSide') or 'UNKNOWN').upper()),
+      'valueFirstExtremeFavoriteTeamUnderByGoalLine':by_group(
+          [p for p in value if p.get('subMarketKey') in ('HOME_TEAM_TOTAL','AWAY_TEAM_TOTAL')
+              and (p.get('selectionSide') or '').upper()=='UNDER'
+              and p.get('isFavoriteTeamMarket') is True
+              and p.get('favorite1X2Odd') is not None
+              and p['favorite1X2Odd']<=1.20],
+          lambda p:'Under '+str(p.get('line') if p.get('line') is not None else 'UNKNOWN')),
+      'valueFirstExtremeFavoriteTeamUnderDetails':[
+          {'date':p['date'],'match':p.get('matchKey'),'selection':p.get('selectionName'),
+           'line':p.get('line'),'odd':p.get('odd'),'outcome':p.get('outcome'),
+           'favorite1X2Odd':p.get('favorite1X2Odd')}
+          for p in value if p.get('subMarketKey') in ('HOME_TEAM_TOTAL','AWAY_TEAM_TOTAL')
+              and (p.get('selectionSide') or '').upper()=='UNDER'
+              and p.get('isFavoriteTeamMarket') is True
+              and p.get('favorite1X2Odd') is not None
+              and p['favorite1X2Odd']<=1.20],
       'valueFirstByDate':by_group(value,lambda p:p['date']),
       'assumptions':[
         '1 unit stake per recommendation including independent market families on the same match',
