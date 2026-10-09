@@ -1,0 +1,32 @@
+name: Betting Settlement Fast Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/backtest_elo_betting_ab.py'
+      - 'tests/test_backtest_market_grade.py'
+      - '.github/workflows/betting-settlement-fast-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-betting-settlement-fast-tests
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate graded and ungraded markets
+        run: |
+          python -m unittest discover -s tests -p 'test_backtest_market_grade.py' -v
