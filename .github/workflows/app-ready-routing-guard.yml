@@ -1,0 +1,29 @@
+name: App-Ready Publisher Routing Guard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/app-ready-artifact-publisher.yml'
+      - '.github/workflows/app-ready-stats-hot-publish.yml'
+      - '.github/workflows/app-ready-simulation-hot-publish.yml'
+      - '.github/workflows/app-ready-score-edge-hot-publish.yml'
+      - '.github/workflows/app-ready-routing-guard.yml'
+      - 'tests/test_app_ready_workflow_routing.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-app-ready-routing-tests
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prevent monolithic-trigger and hot-publish race regressions
+        run: python -m unittest discover -s tests -p 'test_app_ready_workflow_routing.py' -v
