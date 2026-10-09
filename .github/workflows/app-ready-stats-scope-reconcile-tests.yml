@@ -1,0 +1,38 @@
+name: App-Ready Stats Scope Reconciliation Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/reconcile_app_ready_stats_scope.py'
+      - 'tests/test_reconcile_app_ready_stats_scope.py'
+      - '.github/workflows/app-ready-stats-scope-reconcile-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate reconciliation and rollback
+        run: python -m unittest discover -s tests -p 'test_reconcile_app_ready_stats_scope.py' -v
+      - name: Validate real Ligue 1 canonical fixture identities
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.reconcile_app_ready_stats_scope import canonical_key
+          index=json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text())
+          rows=[x for x in index['leagues'] if x.get('league_code')=='F1' and x.get('app_season')=='2025-2026']
+          assert len(rows)==1
+          row=rows[0]
+          matches=json.loads(Path(row['output_path']).read_text())['matches']
+          keys={canonical_key('2526','F1',x) for x in matches}
+          expected=int(row['completed_fixtures'])
+          assert expected==len(matches)==len(keys), (expected,len(matches),len(keys))
+          print(f'CANONICAL_F1_SCOPE_OK count={expected} unique_keys={len(keys)}')
+          PY
