@@ -29,6 +29,29 @@ ATHENS = ZoneInfo("Europe/Athens")
 COMPLETED = {"FT", "AET", "PEN"}
 
 
+def deduplicate_market_families(rows: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Keep independent market recommendations; newest generation wins within a family."""
+    dedup: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
+    for row in rows:
+        key = (
+            str(row.get("competitionId") or ""),
+            str(row.get("localDate") or "")[:10],
+            str(row.get("matchKey") or ""),
+            str(
+                row.get("marketFamily")
+                or row.get("family")
+                or row.get("subMarketKey")
+                or row.get("market")
+                or ""
+            ).strip(),
+        )
+        if not all(key):
+            raise ValueError(f"Incomplete canonical recommendation identity: {key}")
+        previous = dedup.get(key)
+        if previous is None or int(row.get("generationBuiltAtMs") or 0) >= int(previous.get("generationBuiltAtMs") or 0):
+            dedup[key] = row
+    return list(dedup.values())
+
 def load(path: Path, default: Any) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8-sig"))
@@ -206,27 +229,8 @@ def main() -> int:
                 )
             output.append(row)
 
-    # Identity repair must not discard a second valid market on the same
-    # fixture. Deduplicate only superseded rows inside the SAME market family.
-    dedup: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
-    for row in output:
-        key = (
-            str(row.get("competitionId") or ""),
-            str(row.get("localDate") or "")[:10],
-            str(row.get("matchKey") or ""),
-            str(
-                row.get("marketFamily")
-                or row.get("family")
-                or row.get("subMarketKey")
-                or row.get("market")
-                or ""
-            ).strip(),
-        )
-        if not all(key):
-            raise ValueError(f"Incomplete canonical recommendation identity: {key}")
-        previous = dedup.get(key)
-        if previous is None or int(row.get("generationBuiltAtMs") or 0) >= int(previous.get("generationBuiltAtMs") or 0):
-            dedup[key] = row
+    # Identity repair is not allowed to collapse independently selected markets.
+    deduped = deduplicate_market_families(output)
 
     backfilled = {
         str(value)[:10]
@@ -238,7 +242,7 @@ def main() -> int:
     semantic.pop("generatedAt", None)
     semantic["backfilledDates"] = sorted(backfilled)
     semantic["entries"] = sorted(
-        dedup.values(),
+        deduped,
         key=lambda row: (str(row.get("localDate") or ""), str(row.get("matchKey") or "")),
     )
 
