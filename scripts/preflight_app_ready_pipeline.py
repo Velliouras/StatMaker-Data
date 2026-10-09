@@ -163,18 +163,28 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
     if engine_patch_call not in stage:
         report.error("producer stage does not invoke the pinned pre-v6 patch")
 
-    trigger_section = ""
-    try:
-        trigger_section = workflow.split("  push:", 1)[1].split("  schedule:", 1)[0]
-    except IndexError:
-        report.error("could not isolate heavy publisher push trigger")
+    # The explicit migration-only publisher has no schedule: section anymore.
+    # Extract ONLY the on: trigger section; never scan steps, comments or jobs
+    # for path fragments, because those mention producer scripts by design.
+    triggers = workflow.partition("\\non:\\n")[2].partition("\\npermissions:")[0]
+    if not triggers:
+        report.error("could not isolate heavy publisher on: trigger")
+    elif (
+        "workflow_dispatch:" not in triggers
+        or "'.github/app-ready-rebuild-trigger'" not in triggers
+        or "workflow_run:" in triggers
+        or "\\n  schedule:" in triggers
+    ):
+        report.error("heavy publisher must be explicitly triggered, not automatic")
     forbidden_trigger_paths = (
         "scripts/stage_app_ready_producer.sh",
         "scripts/run_app_ready_emulator.sh",
         "scripts/validate_app_ready_prepared_contract.py",
         "scripts/materialize_app_ready_pattern_candidates.py",
+        "data/statmaker/update_manifest.json",
+        "odds/odds_api_io/domestic_odds.json",
     )
-    leaked_triggers = [path for path in forbidden_trigger_paths if path in trigger_section]
+    leaked_triggers = [path for path in forbidden_trigger_paths if path in triggers]
     if leaked_triggers:
         report.error(f"pipeline code still self-triggers heavy publisher: {leaked_triggers}")
 
