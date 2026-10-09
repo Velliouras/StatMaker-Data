@@ -44,6 +44,20 @@ if historical.count(old_schema) != 1:
     raise SystemExit("Historical builder schema anchor changed")
 historical = historical.replace(old_schema, new_schema, 1)
 
+# Historic source validates the active index strictly; for a retired 70-day
+# rollover scope require independent exact-key proof against its repo archive.
+# No stats DB row is deleted and no unverified scope is accepted.
+archived_anchor = '    unexpected = sorted(key for key in actual if key not in expected)'
+archived_patch = """    sys.path.insert(0, str(Path.cwd()))
+    from scripts.validate_app_ready_archived_stats import validated_archived_scope_counts
+    expected.update(validated_archived_scope_counts(
+        db_path, domestic_index, Path.cwd(), actual, expected
+    ))
+""" + archived_anchor
+if historical.count(archived_anchor) != 1:
+    raise SystemExit("Historical stats validation anchor changed")
+historical = historical.replace(archived_anchor, archived_patch, 1)
+
 with tempfile.NamedTemporaryFile(
     prefix="statmaker-current-builder-",
     suffix=".py",

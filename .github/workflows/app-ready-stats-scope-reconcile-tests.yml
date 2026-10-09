@@ -6,11 +6,15 @@ on:
     branches: [main]
     paths:
       - 'scripts/reconcile_app_ready_stats_scope.py'
+      - 'scripts/validate_app_ready_archived_stats.py'
+      - 'scripts/build_app_ready_from_device.py'
+      - 'tests/test_validate_app_ready_archived_stats.py'
       - 'tests/test_reconcile_app_ready_stats_scope.py'
       - '.github/workflows/app-ready-stats-scope-reconcile-tests.yml'
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   verify:
@@ -35,4 +39,46 @@ jobs:
           expected=int(row['completed_fixtures'])
           assert expected==len(matches)==len(keys), (expected,len(matches),len(keys))
           print(f'CANONICAL_F1_SCOPE_OK count={expected} unique_keys={len(keys)}')
+          PY
+
+      - name: Validate retired history against exact canonical fixture keys
+        run: python -m unittest discover -s tests -p 'test_validate_app_ready_archived_stats.py' -v
+
+      - name: Restore failed-publisher checkpoint for read-only scope audit
+        uses: actions/download-artifact@v4
+        with:
+          name: statmaker-app-ready-prepared-checkpoint
+          path: app-ready-checkpoint-audit
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 37928937260
+
+      - name: Audit real archived scope keys without rebuilding
+        run: |
+          python - <<'PY'
+          import json, sqlite3
+          from pathlib import Path
+          from scripts.validate_app_ready_archived_stats import validated_archived_scope_counts
+
+          db=Path('app-ready-checkpoint-audit/databases/statmaker.db')
+          idx=json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text())
+          def season(value):
+              return {'2025-2026':'2526','2024-2025':'2425'}.get(value,value)
+          def code(value):
+              return 'ROU' if value=='ROM' else value
+          expected={(season(r['app_season']),code(r['league_code'])):int(r['completed_fixtures'])
+                    for r in idx['leagues'] if int(r.get('completed_fixtures') or 0)>0}
+          with sqlite3.connect(db) as conn:
+              actual={(str(s),code(c)):int(n) for s,c,n in conn.execute(
+                  'SELECT season,division,COUNT(*) FROM matches GROUP BY season,division')}
+          accepted=validated_archived_scope_counts(db,idx,Path('.'),actual,expected)
+          want={('2526',c) for c in ('AUT','AUT2','SC0','UKR')}
+          assert set(accepted)==want,(accepted,want)
+          expected.update(accepted)
+          # The historical builder's original count and scope contract remains intact.
+          assert expected==actual, (
+              sorted(set(expected)-set(actual)), sorted(set(actual)-set(expected)),
+              [(k,v,actual.get(k)) for k,v in expected.items() if actual.get(k)!=v][:12]
+          )
+          print('APP_READY_ARCHIVED_STATS_REAL_CHECKPOINT_OK',accepted)
           PY
