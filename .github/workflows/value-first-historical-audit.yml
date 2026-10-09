@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'scripts/value_first_retrospective_audit.py'
+      - 'scripts/backtest_elo_betting_ab.py'
+      - 'tests/test_backtest_market_grade.py'
       - 'tests/test_value_first_retrospective_audit.py'
       - '.github/workflows/value-first-historical-audit.yml'
 
@@ -32,6 +34,7 @@ jobs:
         run: |
           python -m py_compile scripts/value_first_retrospective_audit.py
           python -m unittest discover -s tests -p 'test_value_first_retrospective_audit.py' -v
+          python -m unittest discover -s tests -p 'test_backtest_market_grade.py' -v
       - name: Retrospective A/B replay on historical pre-match snapshots
         run: |
           python scripts/value_first_retrospective_audit.py --days 30 --snapshot-local-hour 11
