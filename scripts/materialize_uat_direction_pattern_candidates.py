@@ -587,6 +587,40 @@ def policy_decision(match, posterior, maturity, eligible):
     return True, None
 
 
+
+
+def uat_result_premium_eligibility(
+    sub_market_key, odd, bookmaker_market, model_probability,
+    modifier_profile, model_history_sample, bookmaker_history_sample,
+    bookmaker_score, market_source, market_overround,
+):
+    """Conservative UAT-only result-market gate for host-built broad candidates.
+
+    The source DB does not persist model convergence or full payout distribution.
+    This is PRELIMINARY host eligibility, *not* a replacement for the Android
+    Strong and model integrity gates. Never admit an overlapping 1X/X2/12 pool.
+    """
+    if sub_market_key not in {"RESULT_1X2", "RESULT_DOUBLE_CHANCE"}:
+        return False
+    if sub_market_key == "RESULT_DOUBLE_CHANCE" and (
+        market_source == "no-vig" and market_overround is not None
+        and market_overround > 1.40
+    ):
+        return False
+    if model_probability is None or bookmaker_market is None:
+        return False
+    if not modifier_profile or model_history_sample < 7 or bookmaker_history_sample < 7:
+        return False
+    if not (1.50 <= odd <= 4.50 and bookmaker_score >= 0.54):
+        return False
+    model=float(model_probability)
+    market=float(bookmaker_market)
+    if not (0.01 < model < .99 and 0.01 < market < .99):
+        return False
+    conservative=market+(model-market)*.65 if model>market else model
+    return (model-market >= .04 and model*odd-1.0 >= .05
+            and conservative>market and conservative*odd>1.0)
+
 def extract_manifest_prefs(checkpoint_root, source_root):
     path = Path(checkpoint_root) / "shared_prefs" / "statmaker_data_manifests.xml"
     tree = ET.parse(path)
@@ -691,6 +725,10 @@ def materialize(checkpoint_root, raw_root):
     candidates = []
     source_order = 0
     rejection_counts = Counter()
+    # Result-market approval requires actual current-season comparable history,
+    # not an old all-season pattern hit rate. Build this only once per bundle.
+    maturity_index = MaturityIndex(history_db, snapshot_dir)
+    maturity_by_match = {}
 
     query = """
         SELECT rowid, selection_key, match_key, local_date,
@@ -706,7 +744,8 @@ def materialize(checkpoint_root, raw_root):
                identity_source_market, identity_team, identity_selection_token,
                score_value, score_tier, score_bookmaker_base,
                score_model_adjustment, score_trend_adjustment,
-               qualifies_pattern, qualifies_builder
+               qualifies_pattern, qualifies_builder,
+               opponent_model_probability, opponent_modifier_profile
         FROM prepared_selections
         WHERE competition_id=? AND snapshot_version=?
         ORDER BY rowid
@@ -741,6 +780,7 @@ def materialize(checkpoint_root, raw_root):
                 evidence_score, _score_tier, _score_bookmaker_base,
                 _score_model_adjustment, _score_trend_adjustment,
                 qualifies_pattern, _qualifies_builder,
+                opponent_model_probability, opponent_modifier_profile,
             ) = row
             order = source_order
             source_order += 1
@@ -794,6 +834,31 @@ def materialize(checkpoint_root, raw_root):
             runtime_match_key = f"{match.get('date', '')}|{match.get('homeTeam', '')}|{match.get('awayTeam', '')}"
             premium = False
             rejection_reason = None
+            if sub_market_key in {"RESULT_DOUBLE_CHANCE", "HT_RESULT_DOUBLE_CHANCE"} and (
+                _market_probability_source == "no-vig"
+                and _market_overround is not None and float(_market_overround) > 1.40
+            ):
+                rejection_counts["STALE_DOUBLE_CHANCE_200_PERCENT_POOL"] += 1
+                continue
+            if sub_market_key in {"RESULT_1X2", "RESULT_DOUBLE_CHANCE"}:
+                match_sample = maturity_by_match.get(runtime_match_key)
+                if match_sample is None and runtime_match_key not in maturity_by_match:
+                    maturity_by_match[runtime_match_key] = maturity_index.resolve(match)
+                    match_sample = maturity_by_match[runtime_match_key]
+                min_matches = (
+                    min(sum(match_sample[0]), sum(match_sample[1]))
+                    if match_sample is not None else 0
+                )
+                premium = uat_result_premium_eligibility(
+                    str(sub_market_key), odd, float(market_probability),
+                    opponent_model_probability, opponent_modifier_profile,
+                    min_matches, sample, evidence_score,
+                    _market_probability_source,
+                    None if _market_overround is None else float(_market_overround),
+                )
+                rejection_reason = None if premium else "UAT_RESULT_MODEL_VALUE_OR_MATURITY_REQUIRED"
+                rejection_counts["RESULT_MODEL_PREMIUM"] += int(premium)
+                rejection_counts["RESULT_POLICY_DENIED"] += int(not premium)
             rejection_counts["ELIGIBLE"] += 1
 
             line_text = "" if identity_line is None else str(float(identity_line))
@@ -823,7 +888,7 @@ def materialize(checkpoint_root, raw_root):
                     sample,
                     None,
                     1,
-                    0,
+                    int(premium),
                     rejection_reason,
                 )
             )
