@@ -899,11 +899,29 @@ def extract(bundle,target=None):
         except sqlite3.Error:return []
         finally:db.close()
 
+def ledger_market_family(row):
+    # A match may carry several independent Strong recommendations. Preserve
+    # each market family, but collapse superseded odds/lines within the SAME
+    # family (the identical policy applied by final_candidates_hybrid).
+    return str(
+        row.get('marketFamily')
+        or row.get('family')
+        or row.get('subMarketKey')
+        or row.get('market')
+        or ''
+    ).strip()
+
+
 def merge(seq):
     d={}
     for r in seq:
         if not valid_fixture_identity(r):continue
-        k=(str(r.get('competitionId') or ''),str(r.get('localDate') or '')[:10],str(r.get('matchKey') or ''))
+        k=(
+            str(r.get('competitionId') or ''),
+            str(r.get('localDate') or '')[:10],
+            str(r.get('matchKey') or ''),
+            ledger_market_family(r),
+        )
         if not all(k):continue
         if k not in d or intval(r.get('generationBuiltAtMs'))>=intval(d[k].get('generationBuiltAtMs')):d[k]=r
     return list(d.values())
