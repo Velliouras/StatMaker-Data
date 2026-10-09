@@ -32,8 +32,8 @@ class ValueFirstLedgerUatTest(unittest.TestCase):
                                     bm_market_probability=0.625,
                                     bm_posterior_probability=0.64))
 
-    def test_solid_does_not_become_strong(self):
-        self.assertIsNone(self.rank(value_tier='VALUE'))
+    def test_old_tier_does_not_shadow_actual_positive_value(self):
+        self.assertIsNotNone(self.rank(value_tier='VALUE'))
 
     def test_favorite_is_a_bounded_tie_breaker(self):
         h=m._value_first_uat_rank(sample(identity_team_side='HOME'),False,False,'HOME')
