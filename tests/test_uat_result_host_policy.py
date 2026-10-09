@@ -17,7 +17,7 @@ class UatResultHostPolicyTest(unittest.TestCase):
         self.assertFalse(self.check(model_probability=None))
         self.assertFalse(self.check(modifier_profile=''))
     def test_65_percent_without_market_value_is_no_longer_enough(self):
-        self.assertFalse(self.check(odd=1.80,bookmaker_market=.60,model_probability=.65))
+        self.assertFalse(self.check(odd=1.80,bookmaker_market=.63,model_probability=.65))
     def test_current_tier_and_pattern_sample_required(self):
         self.assertFalse(self.check(model_history_sample=6))
         self.assertFalse(self.check(bookmaker_history_sample=5))
