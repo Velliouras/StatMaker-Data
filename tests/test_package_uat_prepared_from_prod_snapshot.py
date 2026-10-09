@@ -64,7 +64,7 @@ class IsolatedRepackageTests(unittest.TestCase):
             pack(self.root,self.manifest,self.prepared,self.root/'out','data/statmaker/app_ready_uat/test','sha',self.RULES)
 
     def test_wrong_rules_refused(self):
-        with self.assertRaisesRegex(ValueError,'rules'):
+        with self.assertRaisesRegex(ValueError,'contract'):
             pack(self.root,self.manifest,self.prepared,self.root/'out','data/statmaker/app_ready_uat/test','sha','wrong')
 
     def test_old_overlapping_double_chance_candidate_refused(self):
