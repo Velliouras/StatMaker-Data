@@ -1,0 +1,55 @@
+name: UAT Betting Compile and Regression Tests
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/uat-betting-compile-validation.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-uat-betting-compile
+  cancel-in-progress: true
+
+jobs:
+  kotlin-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - name: Checkout exact Android UAT source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: uat-schedule-standings-sim-performance-20261007
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-uat
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compile Android UAT and run market regressions
+        working-directory: statmaker-uat
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}" || { echo "Missing Android SDK"; exit 1; }
+          chmod +x gradlew
+          ./gradlew :app:compileDebugKotlin :app:testDebugUnitTest --no-daemon \
+            -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            --tests com.statmaker.app.DoubleChanceBookmakerProbabilityTest \
+            --tests com.statmaker.app.ResultMarketValueGateTest \
+            --tests com.statmaker.app.HybridUatRankingTest \
+            --tests com.statmaker.app.ResultMarketShadowAuditTest
+      - name: Upload JUnit findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: statmaker-uat-betting-regressions
+          path: statmaker-uat/app/build/test-results/testDebugUnitTest
+          if-no-files-found: ignore
