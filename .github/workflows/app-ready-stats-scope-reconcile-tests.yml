@@ -55,6 +55,11 @@ jobs:
 
       - name: Audit real archived scope keys without rebuilding
         run: |
+          # The checkpoint was captured before the already-tested F1 correction.
+          python scripts/reconcile_app_ready_stats_scope.py \
+            app-ready-checkpoint-audit/databases/statmaker.db \
+            data/statmaker/domestic_enriched/index.json \
+            --repo-root . --league-code F1 --app-season 2025-2026
           python - <<'PY'
           import json, sqlite3
           from pathlib import Path
