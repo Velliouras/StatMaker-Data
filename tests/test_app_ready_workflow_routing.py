@@ -50,7 +50,16 @@ class AppReadyRoutingContractTest(unittest.TestCase):
                 self.assertIn("group: statmaker-app-ready-targeted-writers", concurrency)
                 self.assertIn("queue: max", concurrency)
                 self.assertIn("cancel-in-progress: false", concurrency)
-                self.assertIn("if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}", source)
+                if file != "app-ready-score-edge-hot-publish.yml":
+                    self.assertIn(
+                        "if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}",
+                        source,
+                    )
+                else:
+                    # Score Edge has only an explicit push trigger; there is no
+                    # workflow_run conclusion to gate.
+                    on = block(source, "on", "permissions")
+                    self.assertNotIn("workflow_run:", on)
 
     def test_hot_publisher_uses_latest_generation_when_dequeued(self) -> None:
         for file in TARGETED[1:]:
