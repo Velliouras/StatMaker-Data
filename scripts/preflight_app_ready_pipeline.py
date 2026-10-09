@@ -163,9 +163,9 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
     if engine_patch_call not in stage:
         report.error("producer stage does not invoke the pinned pre-v6 patch")
 
-    # The explicit migration-only publisher has no schedule: section anymore.
-    # Extract ONLY the on: trigger section; never scan steps, comments or jobs
-    # for path fragments, because those mention producer scripts by design.
+    # The full betting publisher has ONE overnight schedule and an explicit
+    # migration trigger, not a workflow_run fanout or manifest/odds push trigger.
+    # Restrict validation to on:, as steps mention producer scripts by design.
     triggers = workflow.partition("\non:\n")[2].partition("\npermissions:")[0]
     if not triggers:
         report.error("could not isolate heavy publisher on: trigger")
@@ -173,9 +173,10 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         "workflow_dispatch:" not in triggers
         or "'.github/app-ready-rebuild-trigger'" not in triggers
         or "workflow_run:" in triggers
-        or "\n  schedule:" in triggers
+        or 'cron: "20 0 * * *"' not in triggers
+        or triggers.count("cron:") != 1
     ):
-        report.error("heavy publisher must be explicitly triggered, not automatic")
+        report.error("heavy publisher must run nightly once or by explicit request")
     forbidden_trigger_paths = (
         "scripts/stage_app_ready_producer.sh",
         "scripts/run_app_ready_emulator.sh",
