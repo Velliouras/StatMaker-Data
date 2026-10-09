@@ -159,8 +159,11 @@ def merge_schedule(
         }
         leagues.append(league)
 
-    if str(league.get("providerLeagueSlug") or "").strip():
-        raise RuntimeError("Refusing to overwrite a verified T1 provider slug")
+    # Registry coverage is deliberately schedule-only, but an independent
+    # verified bookmaker feed may later attach an exact-odds provider slug.
+    # Never erase that identity or replace its priced markets with schedule rows.
+    original_provider_slug = league.get("providerLeagueSlug")
+    verified_provider_slug = str(original_provider_slug or "").strip()
 
     kept = [
         dict(match) for match in league.get("matches", []) or []
@@ -181,6 +184,13 @@ def merge_schedule(
         if current is None:
             by_key[key] = fresh
             added += 1
+            continue
+        if current.get("markets") and verified_provider_slug:
+            # Preserve a bookmaker-priced record byte-for-byte when official
+            # schedules are supplemental to an already verified odds provider.
+            by_key[key] = current
+            updated += 1
+            preserved_bettable += 1
             continue
         merged = {**fresh, **current}
         merged["date"] = fresh["date"]
@@ -212,7 +222,10 @@ def merge_schedule(
             key=lambda row: (str(row.get("kickoff") or row.get("date") or ""), str(row.get("homeTeam") or "")),
         ),
     })
-    league["providerLeagueSlug"] = None
+    # Do not modify providerLeagueSlug: it may hold an actual verified
+    # bookmaker identity. The schedule-only path never creates one.
+    if league.get("providerLeagueSlug") != original_provider_slug:
+        raise RuntimeError("T1 verified provider slug unexpectedly changed")
     result["leagues"] = leagues
     result["generatedAt"] = generated_at
     result.setdefault("debug", {})["turkeySuperLigSchedule"] = {
@@ -221,6 +234,7 @@ def merge_schedule(
         "season": SEASON,
         "scheduleOnly": True,
         "syntheticOdds": False,
+        "providerLeagueSlugPreserved": bool(verified_provider_slug),
         "officialFixtures": len(official_fixtures),
         "added": added,
         "updated": updated,
@@ -231,6 +245,7 @@ def merge_schedule(
         "added": added,
         "updated": updated,
         "preservedBettable": preserved_bettable,
+        "providerLeagueSlugPreserved": bool(verified_provider_slug),
         "publishedMatches": len(league.get("matches", [])),
     }
 
@@ -277,7 +292,10 @@ def main() -> int:
         "from": today.isoformat(),
         "to": end.isoformat(),
         "requestsUsed": client.requests_used,
-        "providerLeagueSlug": registry_row.get("providerLeagueSlug"),
+        "providerLeagueSlug": next(
+            (row.get("providerLeagueSlug") for row in merged.get("leagues", [])
+             if str(row.get("leagueCode") or "") == CODE), None
+        ),
         "scheduleSource": "api-football",
         "scheduleVerified": True,
         "syntheticOdds": False,
