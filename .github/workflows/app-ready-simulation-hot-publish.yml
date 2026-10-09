@@ -16,8 +16,11 @@ permissions:
   contents: write
 
 concurrency:
-  group: statmaker-app-ready-simulation-hot-publish
-  cancel-in-progress: true
+  # One coherent App-Ready manifest/bundle writer at a time. Queue all
+  # targeted updates rather than cancelling a valid publish mid-commit.
+  group: statmaker-app-ready-targeted-writers
+  queue: max
+  cancel-in-progress: false
 
 jobs:
   publish:
