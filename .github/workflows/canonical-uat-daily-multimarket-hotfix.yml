@@ -1,0 +1,72 @@
+name: Canonical UAT Daily Multi-Market Hotfix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/canonical-uat-daily-multimarket-hotfix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-uat-daily-multimarket-hotfix
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 150
+      - name: Verify all independent market recommendations
+        run: python -m unittest discover -s tests -p 'test_canonical_daily_multi_market.py' -v
+      - name: Rebuild ONLY UAT hybrid canonical Daily ledger
+        run: |
+          set -euo pipefail
+          python scripts/materialize_canonical_recommendation_ledger.py --uat-hybrid --backfill-dates 0
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+          path=Path('data/statmaker/canonical_recommendation_ledger_uat_hybrid.json')
+          ledger=json.loads(path.read_text())
+          grouped=defaultdict(list)
+          for row in ledger['entries']:
+              grouped[row['localDate'],row['matchKey']].append(row)
+          multi={k:v for k,v in grouped.items() if len(v)>1}
+          assert multi, 'NO_UAT_MULTI_MARKET_FIXTURES'
+          assert all(len({r.get('marketFamily') or r.get('family') or r.get('subMarketKey') or r.get('market') for r in rows})==len(rows) for rows in grouped.values()), 'UAT_DUPLICATE_FAMILY'
+          today=datetime.now(ZoneInfo('Europe/Athens')).date().isoformat()
+          print('UAT_DAILY_MULTI_MARKET_OK',f'entries={len(ledger["entries"])}',f'multipleFixtures={len(multi)}',f'todayMulti={sum(1 for k in multi if k[0]==today)}')
+          assert any(k[0]==today for k in multi), 'UAT_NO_TODAY_MULTI_MARKETS'
+          PY
+      - name: Publish ONLY UAT hybrid Daily ledger
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp data/statmaker/canonical_recommendation_ledger_uat_hybrid.json /tmp/statmaker-uat-ledger.json
+          success=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp /tmp/statmaker-uat-ledger.json data/statmaker/canonical_recommendation_ledger_uat_hybrid.json
+            git add data/statmaker/canonical_recommendation_ledger_uat_hybrid.json
+            if git diff --cached --quiet; then
+              echo "UAT_DAILY_MULTI_MARKET_ALREADY_CURRENT"
+              success=true
+              break
+            fi
+            git commit -m "Data: publish UAT hybrid canonical Daily multi-market recommendations"
+            if git push origin HEAD:main; then
+              echo "UAT_DAILY_MULTI_MARKET_PUBLISHED"
+              success=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$success" == "true" ]]
