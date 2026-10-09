@@ -1,0 +1,43 @@
+name: Value-First Read-Only Historical Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/value_first_retrospective_audit.py'
+      - 'tests/test_value_first_retrospective_audit.py'
+      - '.github/workflows/value-first-historical-audit.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-value-first-readonly-audit
+  cancel-in-progress: false
+
+jobs:
+  retrospective-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout immutable archive history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate audit and settlement math
+        run: |
+          python -m py_compile scripts/value_first_retrospective_audit.py
+          python -m unittest discover -s tests -p 'test_value_first_retrospective_audit.py' -v
+      - name: Retrospective A/B replay on historical pre-match snapshots
+        run: |
+          python scripts/value_first_retrospective_audit.py --days 14 --snapshot-local-hour 11
+      - name: Archive report without publishing to Data or Android
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: value-first-readonly-audit
+          path: reports/value_first_retrospective_audit.json
+          if-no-files-found: warn
