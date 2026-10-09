@@ -206,13 +206,24 @@ def main() -> int:
                 )
             output.append(row)
 
-    dedup: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+    # Identity repair must not discard a second valid market on the same
+    # fixture. Deduplicate only superseded rows inside the SAME market family.
+    dedup: Dict[Tuple[str, str, str, str], Dict[str, Any]] = {}
     for row in output:
         key = (
             str(row.get("competitionId") or ""),
             str(row.get("localDate") or "")[:10],
             str(row.get("matchKey") or ""),
+            str(
+                row.get("marketFamily")
+                or row.get("family")
+                or row.get("subMarketKey")
+                or row.get("market")
+                or ""
+            ).strip(),
         )
+        if not all(key):
+            raise ValueError(f"Incomplete canonical recommendation identity: {key}")
         previous = dedup.get(key)
         if previous is None or int(row.get("generationBuiltAtMs") or 0) >= int(previous.get("generationBuiltAtMs") or 0):
             dedup[key] = row
