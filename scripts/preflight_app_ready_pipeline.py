@@ -166,14 +166,14 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
     # The explicit migration-only publisher has no schedule: section anymore.
     # Extract ONLY the on: trigger section; never scan steps, comments or jobs
     # for path fragments, because those mention producer scripts by design.
-    triggers = workflow.partition("\\non:\\n")[2].partition("\\npermissions:")[0]
+    triggers = workflow.partition("\non:\n")[2].partition("\npermissions:")[0]
     if not triggers:
         report.error("could not isolate heavy publisher on: trigger")
     elif (
         "workflow_dispatch:" not in triggers
         or "'.github/app-ready-rebuild-trigger'" not in triggers
         or "workflow_run:" in triggers
-        or "\\n  schedule:" in triggers
+        or "\n  schedule:" in triggers
     ):
         report.error("heavy publisher must be explicitly triggered, not automatic")
     forbidden_trigger_paths = (
