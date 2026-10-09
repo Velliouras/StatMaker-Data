@@ -1,0 +1,46 @@
+name: StatMaker PROD Unit Baseline Comparison
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/prod-baseline-unit-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - name: Checkout PROD source READ ONLY
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ff250fef1efcc210b14091e94dd90c4ce53cec96
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-prod
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Audit full PROD JVM test baseline without changing code
+        working-directory: statmaker-prod
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew :app:testDebugUnitTest --no-daemon \
+            -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
+            -Pkotlin.compiler.execution.strategy=in-process
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: statmaker-prod-unit-baseline
+          path: statmaker-prod/app/build/test-results/testDebugUnitTest
+          if-no-files-found: ignore
