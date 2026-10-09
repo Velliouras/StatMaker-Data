@@ -1,0 +1,38 @@
+name: UAT Value-First Market Funnel Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/uat-value-first-market-funnel.yml'
+      - 'scripts/audit_value_first_market_gates.py'
+      - 'tests/test_audit_value_first_market_gates.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statmaker-uat-market-funnel-audit
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run market integrity tests
+        run: python -m unittest discover -s tests -p 'test_audit_value_first_market_gates.py' -v
+      - name: Audit actual prepared betting bundle, read-only
+        run: python scripts/audit_value_first_market_gates.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: statmaker-uat-market-funnel
+          path: reports/uat_value_first_market_funnel.json
+          if-no-files-found: warn
