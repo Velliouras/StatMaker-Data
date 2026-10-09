@@ -21,6 +21,8 @@ ATHENS=ZoneInfo('Europe/Athens'); RETENTION=30; SAFETY_MS=60000; SCHEMA_VERSION=
 # Clean audit epoch for the active Monte Carlo Hybrid contract.
 # 2026-10-04 07:45:00Z (10:45 Greece).
 UAT_HYBRID_SIMULATION_V1_EPOCH_MS=1791099900000
+# All recommendations before the explicit PROD promotion retain their original cohort.
+PROD_VALUE_FIRST_START='2026-10-09'
 
 # Permanent product retirement. Legacy parsers may still recognize these identities for old
 # persisted rows, but they must never re-enter the canonical recommendation/performance ledger.
@@ -1054,10 +1056,18 @@ def main():
     ap.add_argument('--backfill-dates',type=int,default=30)
     ap.add_argument('--uat',action='store_true')
     ap.add_argument('--uat-hybrid',action='store_true')
+    ap.add_argument('--prod-value-first',action='store_true')
     a=ap.parse_args()
-    if a.uat and a.uat_hybrid:
-        raise SystemExit('Choose only one of --uat or --uat-hybrid')
-    if a.uat_hybrid:
+    if sum((a.uat,a.uat_hybrid,a.prod_value_first))>1:
+        raise SystemExit('Choose one of --uat, --uat-hybrid, --prod-value-first')
+    if a.prod_value_first:
+        APP=APP_PROD
+        LEDGER=LEDGER_PROD
+        MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
+        LEDGER_SOURCE='canonical-prod-value-first-strong-singles-ledger-v15'
+        MODE_LABEL='uat-hybrid'  # identical validated selector to installed UAT
+        SCHEMA_VERSION=15
+    elif a.uat_hybrid:
         APP=APP_PROD
         LEDGER=LEDGER_UAT_HYBRID
         MANIFEST_REL='data/statmaker/app_ready/update_manifest.json'
@@ -1079,7 +1089,7 @@ def main():
     # Strong Singles contract, including the reliable posterior fallback. Never carry forward
     # v7 identities because the recommendation universe can change under the new contract.
     existing=[]
-    if isinstance(old,dict) and intval(old.get('schemaVersion'))>=SCHEMA_VERSION:
+    if isinstance(old,dict) and (intval(old.get('schemaVersion'))>=SCHEMA_VERSION or a.prod_value_first):
         for r in old.get('entries',[]):
             if (
                 isinstance(r,dict)
@@ -1090,12 +1100,18 @@ def main():
                 and not retired_market(r.get('market'), r.get('subMarketKey'))
                 and (
                     MODE_LABEL!='uat-hybrid'
-                    or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_SIMULATION_V1_EPOCH_MS
+                    or (a.prod_value_first and str(r.get('localDate') or '')[:10]<PROD_VALUE_FIRST_START)
+                    or (intval(old.get('schemaVersion'))>=SCHEMA_VERSION and
+                        intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_SIMULATION_V1_EPOCH_MS)
                 )
             ):
-                existing.append(dict(r))
+                original=dict(r)
+                if a.prod_value_first:
+                    original['policyCohort']=('legacy-pre-2026-10-09' if
+                        str(r.get('localDate') or '')[:10]<PROD_VALUE_FIRST_START else 'value-first-v15')
+                existing.append(original)
     old_schema=intval(old.get('schemaVersion')) if isinstance(old,dict) else 0
-    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if old_schema>=SCHEMA_VERSION else set()
+    done={str(x)[:10] for x in old.get('backfilledDates',[]) if isinstance(old,dict)} if (old_schema>=SCHEMA_VERSION or a.prod_value_first) else set()
     cb=current_bundles(); current=[]
     for b in cb:current.extend(extract(b))
 
@@ -1107,6 +1123,9 @@ def main():
     same_day_rows=[]; same_day_bundles=0
     same_day_rows,same_day_bundles=history_from_manifest(today,MANIFEST_REL)
     current.extend(same_day_rows)
+    if a.prod_value_first:
+        current=[dict(r,policyCohort='value-first-v15') for r in current
+                 if str(r.get('localDate') or '')[:10]>=PROD_VALUE_FIRST_START]
 
     # Model Performance is an audit ledger: a recommendation that was genuinely published
     # pre-kickoff must remain present even if the fixture is later postponed/cancelled/rescheduled.
@@ -1127,10 +1146,14 @@ def main():
         and not retired_market(r.get('market'), r.get('subMarketKey'))
         and (
             MODE_LABEL!='uat-hybrid'
+            or (a.prod_value_first and str(r.get('localDate') or '')[:10]<PROD_VALUE_FIRST_START)
             or intval(r.get('generationBuiltAtMs'))>=UAT_HYBRID_SIMULATION_V1_EPOCH_MS
         )
     ]
     sem={'schemaVersion':SCHEMA_VERSION,'retentionDays':RETENTION,'source':LEDGER_SOURCE,'backfilledDates':sorted(x for x in done if low.isoformat()<=x<=today.isoformat()),'invalidatedMatchKeys':[],'entries':sorted(entries,key=lambda r:(str(r.get('localDate') or ''),str(r.get('matchKey') or '')))}
+    if a.prod_value_first:
+        sem['legacyHistoryThrough']='2026-10-08'
+        sem['newModelFrom']=PROD_VALUE_FIRST_START
     prior=dict(old) if isinstance(old,dict) else {}; prior.pop('generatedAt',None); changed=prior!=sem
     if changed:
         tmp=LEDGER.with_suffix('.json.tmp'); tmp.write_text(json.dumps({'generatedAt':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z'),**sem},ensure_ascii=False,indent=2)+'\n',encoding='utf-8'); tmp.replace(LEDGER)
