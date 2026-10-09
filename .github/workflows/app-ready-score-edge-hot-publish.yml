@@ -23,8 +23,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Reuse canonical 10k simulations and materialize Score Edge only
-        run: python scripts/hotpatch_app_ready_simulation.py --score-edge-only
+      - name: Reuse latest 10k simulations and materialize Score Edge only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git reset --hard refs/remotes/origin/main
+          python scripts/hotpatch_app_ready_simulation.py --score-edge-only
       - name: Verify prepared Score Edge source and SQLite integrity
         shell: bash
         run: |
