@@ -251,6 +251,53 @@ jobs:
                   'commit='+matched_commit[:12],flush=True)
           PY
 
+      - name: Validate fresh UAT market candidates before packaging
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sqlite3
+          db='app-ready-export/raw/databases/statmaker_prepared_betting.db'
+          con=sqlite3.connect(db)
+          try:
+              stale=con.execute("""
+                  SELECT COUNT(*) FROM prepared_pattern_candidates c
+                  JOIN prepared_selections s ON c.competition_id=s.competition_id
+                   AND c.snapshot_version=s.snapshot_version
+                   AND c.selection_key=s.selection_key
+                  WHERE s.identity_sub_market_key IN ('RESULT_DOUBLE_CHANCE','HT_RESULT_DOUBLE_CHANCE')
+                   AND s.bm_market_probability_source='no-vig'
+                   AND s.bm_market_overround>1.40
+              """).fetchone()[0]
+              assert stale==0, 'UAT_STALE_DOUBLE_CHANCE_CANDIDATE_NOT_REMOVED'
+              rows=con.execute("""
+                  SELECT s.identity_sub_market_key, COUNT(*),
+                    SUM(CASE WHEN c.policy_premium_eligible=1 THEN 1 ELSE 0 END)
+                  FROM prepared_pattern_candidates c
+                  JOIN prepared_selections s ON c.competition_id=s.competition_id
+                   AND c.snapshot_version=s.snapshot_version
+                   AND c.selection_key=s.selection_key
+                  WHERE s.identity_sub_market_key IN ('RESULT_1X2','RESULT_DOUBLE_CHANCE')
+                  GROUP BY s.identity_sub_market_key
+              """).fetchall()
+              for market,count,premium in rows:
+                  print('UAT_RESULT_PREMIUM_FUNNEL',market,
+                      'candidates='+str(count),'approved='+str(premium or 0))
+              bad=con.execute("""
+                  SELECT COUNT(*) FROM prepared_pattern_candidates c
+                  JOIN prepared_selections s ON c.competition_id=s.competition_id
+                   AND c.snapshot_version=s.snapshot_version
+                   AND c.selection_key=s.selection_key
+                  WHERE c.policy_premium_eligible=1
+                   AND (s.opponent_model_probability IS NULL
+                     OR s.opponent_modifier_profile IS NULL)
+              """).fetchone()[0]
+              assert bad==0, 'UAT_MODEL_PREMIUM_WITHOUT_MODEL'
+              print('UAT_RESULT_CANDIDATE_INTEGRITY_OK',flush=True)
+          finally:
+              con.close()
+          PY
+
       - name: Build isolated UAT bundles
         env:
           APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/probability-first-v1
