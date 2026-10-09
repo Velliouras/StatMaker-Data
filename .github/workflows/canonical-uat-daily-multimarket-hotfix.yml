@@ -1,11 +1,14 @@
 name: Canonical UAT Daily Multi-Market Hotfix
 on:
+  schedule:
+    - cron: '11,41 * * * *'
   push:
     branches: [main]
     paths:
       - '.github/workflows/canonical-uat-daily-multimarket-hotfix.yml'
       - 'scripts/materialize_canonical_recommendation_ledger.py'
       - 'tests/test_value_first_uat_ledger.py'
+      - 'tests/test_uat_ledger_writer_ownership.py'
 
 permissions:
   contents: write
@@ -24,8 +27,10 @@ jobs:
           fetch-depth: 150
       - name: Verify all independent market recommendations
         run: python -m unittest discover -s tests -p 'test_canonical_daily_multi_market.py' -v
-      - name: Test UAT Value-First selector
-        run: python -m unittest discover -s tests -p 'test_value_first_uat_ledger.py' -v
+      - name: Test UAT Value-First selector and publisher ownership
+        run: |
+          python -m unittest discover -s tests -p 'test_value_first_uat_ledger.py' -v
+          python -m unittest discover -s tests -p 'test_uat_ledger_writer_ownership.py' -v
       - name: Rebuild ONLY UAT Value-First canonical Daily ledger
         run: |
           set -euo pipefail
