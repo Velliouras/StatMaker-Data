@@ -56,6 +56,28 @@ def picks_from_historical_db(db_path,day):
                     WHERE competition_id=? AND snapshot_version=? AND selection_key=? LIMIT 1''',
                     (pick['competitionId'],pick['snapshotVersion'],pick['selectionKey'])).fetchone()
                 pick['marketFamily']=str(row[0]) if row and row[0] else pick['subMarketKey']
+                # Pre-match 1X2 pricing for directional scoring market analysis.
+                # Reading the same historical fixture snapshot never uses future data.
+                match=con.execute('''SELECT payload FROM prepared_matches
+                    WHERE competition_id=? AND snapshot_version=? AND match_key=? LIMIT 1''',
+                    (pick['competitionId'],pick['snapshotVersion'],pick['matchKey'])).fetchone()
+                prices={}
+                if match:
+                    try:
+                        payload=json.loads(match[0])
+                        for odds in payload.get('markets',[]):
+                            if odds.get('market')!='1X2': continue
+                            side=str(odds.get('selection') or '').strip().upper()
+                            if side not in ('HOME','AWAY'): continue
+                            raw=odds.get('odd',odds.get('odds'))
+                            if raw is not None and float(raw)>1.01: prices[side]=float(raw)
+                    except (TypeError,ValueError,KeyError,json.JSONDecodeError):
+                        pass
+                favourite=min(prices,key=prices.get) if len(prices)==2 else None
+                pick['favorite1X2Odd']=prices.get(favourite) if favourite else None
+                pick['isFavoriteTeamMarket']=(
+                    str(pick.get('teamSide') or '').upper()==favourite
+                ) if favourite else None
             result[mode]=picks
         return result,None
     finally:con.close()
@@ -105,6 +127,22 @@ def audit(days,snapshot_hour,end_date,output):
       'previousHybrid':a,'valueFirst':b,
       'valueFirstByMarketFamily':by_group(value,lambda p:p.get('marketFamily') or 'UNKNOWN'),
       'valueFirstByOddsBand':by_group(value,lambda p:odds_band(float(p['odd']))),
+      'valueFirstByDirection':by_group(
+          value,lambda p:(p.get('selectionSide') or 'OTHER').upper()
+          if (p.get('selectionSide') or '').upper() in ('OVER','UNDER') else 'OTHER'),
+      'valueFirstTeamGoalsByDirection':by_group(
+          [p for p in value if p.get('subMarketKey') in ('HOME_TEAM_TOTAL','AWAY_TEAM_TOTAL')],
+          lambda p:(p.get('selectionSide') or 'UNKNOWN').upper()),
+      'valueFirstTeamGoalsByFavoriteStrengthAndDirection':by_group(
+          [p for p in value if p.get('subMarketKey') in ('HOME_TEAM_TOTAL','AWAY_TEAM_TOTAL')],
+          lambda p:('FAV_1X2_<=1.20' if p.get('isFavoriteTeamMarket') is True
+                    and p.get('favorite1X2Odd') is not None
+                    and p['favorite1X2Odd']<=1.20
+                   else 'FAV_1X2_<=1.50' if p.get('isFavoriteTeamMarket') is True
+                    and p.get('favorite1X2Odd') is not None
+                    and p['favorite1X2Odd']<=1.50
+                   else 'OTHER_TEAM_OR_MISSING_ODDS')+'_'+
+                    (p.get('selectionSide') or 'UNKNOWN').upper()),
       'valueFirstByDate':by_group(value,lambda p:p['date']),
       'assumptions':[
         '1 unit stake per recommendation including independent market families on the same match',
