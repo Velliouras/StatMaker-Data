@@ -6,6 +6,8 @@ on:
       - '.github/workflows/uat-value-first-market-funnel.yml'
       - 'scripts/audit_value_first_market_gates.py'
       - 'tests/test_audit_value_first_market_gates.py'
+      - 'scripts/materialize_uat_direction_pattern_candidates.py'
+      - 'tests/test_uat_result_host_policy.py'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +29,10 @@ jobs:
         with:
           python-version: '3.11'
       - name: Run market integrity tests
-        run: python -m unittest discover -s tests -p 'test_audit_value_first_market_gates.py' -v
+        run: |
+          python -m py_compile scripts/materialize_uat_direction_pattern_candidates.py
+          python -m unittest discover -s tests -p 'test_audit_value_first_market_gates.py' -v
+          python -m unittest discover -s tests -p 'test_uat_result_host_policy.py' -v
       - name: Audit actual prepared betting bundle, read-only
         run: python scripts/audit_value_first_market_gates.py
       - uses: actions/upload-artifact@v4
