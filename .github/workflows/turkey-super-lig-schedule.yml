@@ -67,8 +67,20 @@ jobs:
           league = next((x for x in feed.get('leagues', []) if x.get('leagueCode') == 'T1'), None)
           if league is None:
               raise SystemExit('T1 missing from canonical Domestic feed')
-          if str(league.get('providerLeagueSlug') or '').strip():
-              raise SystemExit('Unexpected T1 provider slug')
+          # A real exact-odds provider may attach a verified slug after the
+          # original schedule-only T1 integration. Verify it is unchanged,
+          # rather than rejecting its existence or blanking it.
+          import subprocess
+          previous = json.loads(subprocess.check_output([
+              'git', 'show', 'HEAD:odds/odds_api_io/domestic_odds.json'
+          ]).decode('utf-8-sig'))
+          old_league = next(
+              (x for x in previous.get('leagues', []) if x.get('leagueCode') == 'T1'),
+              None
+          )
+          prior_slug = (old_league or {}).get('providerLeagueSlug')
+          if league.get('providerLeagueSlug') != prior_slug:
+              raise SystemExit('T1 verified provider slug was modified')
           schedule = [
               m for m in league.get('matches', [])
               if m.get('scheduleOnly') is True
@@ -77,9 +89,25 @@ jobs:
               and not (m.get('markets') or [])
           ]
           report = json.loads(Path('reports/turkey_super_lig_schedule_sync.json').read_text(encoding='utf-8-sig'))
-          if report.get('officialFixtures', 0) > 0 and not schedule:
+          if report.get('officialFixtures', 0) > 0 and not schedule and not report.get('preservedBettable', 0):
               raise SystemExit('Official T1 fixtures were fetched but not preserved in canonical feed')
-          print(f"T1_SCHEDULE_OK official={report.get('officialFixtures', 0)} published_schedule_only={len(schedule)}")
+          if report.get('providerLeagueSlug') != prior_slug:
+              raise SystemExit('T1 report lost provider slug')
+          if bool(report.get('providerLeagueSlugPreserved')) != bool(str(prior_slug or '').strip()):
+              raise SystemExit('T1 verified provider slug audit flag mismatch')
+          # Existing priced bookmaker fixtures are not allowed to disappear.
+          if old_league is not None:
+              prior_priced = {
+                  str(m.get('id') or m.get('matchId') or ''): m
+                  for m in old_league.get('matches', []) if m.get('markets')
+              }
+              present_priced = {
+                  str(m.get('id') or m.get('matchId') or ''): m
+                  for m in league.get('matches', []) if m.get('markets')
+              }
+              if not all(key in present_priced for key in prior_priced):
+                  raise SystemExit('T1 existing bookmaker-priced match missing')
+          print(f"T1_SCHEDULE_OK official={report.get('officialFixtures', 0)} published_schedule_only={len(schedule)} verified_provider_slug_preserved={bool(prior_slug)}")
           PY
 
       - name: Build Domestic update manifest
