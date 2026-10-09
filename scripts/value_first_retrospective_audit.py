@@ -58,9 +58,12 @@ def picks_from_historical_db(db_path,day):
                 pick['marketFamily']=str(row[0]) if row and row[0] else pick['subMarketKey']
                 # Pre-match 1X2 pricing for directional scoring market analysis.
                 # Reading the same historical fixture snapshot never uses future data.
-                match=con.execute('''SELECT payload FROM prepared_matches
-                    WHERE competition_id=? AND snapshot_version=? AND match_key=? LIMIT 1''',
-                    (pick['competitionId'],pick['snapshotVersion'],pick['matchKey'])).fetchone()
+                match=con.execute('''SELECT m.payload FROM prepared_selections s
+                    JOIN prepared_matches m ON m.competition_id=s.competition_id
+                     AND m.snapshot_version=s.snapshot_version AND m.match_key=s.match_key
+                    WHERE s.competition_id=? AND s.snapshot_version=? AND s.selection_key=?
+                    LIMIT 1''',
+                    (pick['competitionId'],pick['snapshotVersion'],pick['selectionKey'])).fetchone()
                 prices={}
                 if match:
                     try:
@@ -69,7 +72,7 @@ def picks_from_historical_db(db_path,day):
                             if odds.get('market')!='1X2': continue
                             side=str(odds.get('selection') or '').strip().upper()
                             if side not in ('HOME','AWAY'): continue
-                            raw=odds.get('odd',odds.get('odds'))
+                            raw=odds.get('odd') if odds.get('odd') is not None else odds.get('odds')
                             if raw is not None and float(raw)>1.01: prices[side]=float(raw)
                     except (TypeError,ValueError,KeyError,json.JSONDecodeError):
                         pass
