@@ -197,46 +197,58 @@ jobs:
           python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Fetch exact Domestic enriched index from cloned PROD manifest
+      - name: Restore all exact immutable canonical odds and index artifacts
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import hashlib, json, urllib.request
+          import hashlib, json, subprocess
           from pathlib import Path
           source=Path('app-ready-export/source')
           main=json.loads((source/'main_manifest.json').read_text(encoding='utf-8'))
-          item=next((x for x in main.get('artifacts',[]) if x.get('id')=='domestic_enriched_index'),None)
-          if not item:
-              raise SystemExit('Cloned PROD manifest missing domestic_enriched_index')
-          path=str(item.get('path') or '')
-          expected=str(item.get('sha256') or '')
-          if not path or not expected:
-              raise SystemExit('Cloned PROD domestic_enriched_index contract incomplete')
-
-          # The manifest URL points at mutable main. Resolve the immutable repository commit
-          # whose file matches the exact SHA recorded by the cloned PROD manifest instead.
-          import subprocess
-          commits=subprocess.check_output(
-              ['git','log','--format=%H','--',path],
-              text=True,
-          ).splitlines()
-          data=None
-          resolved_commit=None
-          for commit in commits:
-              try:
-                  candidate=subprocess.check_output(['git','show',f'{commit}:{path}'])
-              except subprocess.CalledProcessError:
-                  continue
-              if hashlib.sha256(candidate).hexdigest() == expected:
-                  data=candidate
-                  resolved_commit=commit
-                  break
-          if data is None:
-              raise SystemExit('Exact PROD domestic_enriched_index revision not found in repository history')
-          actual=hashlib.sha256(data).hexdigest()
-          (source/'domestic_enriched_index.json').write_bytes(data)
-          print('UAT_EXACT_PROD_DOMESTIC_INDEX_OK', actual[:12], resolved_commit[:12])
+          uefa=json.loads((source/'uefa_manifest.json').read_text(encoding='utf-8'))
+          required=[
+              (main,'domestic_enriched_index','domestic_enriched_index.json'),
+              (main,'domestic_odds','domestic.json'),
+              (uefa,'champions_league_odds','champions_league.json'),
+              (uefa,'europa_league_odds','europa_league.json'),
+              (uefa,'conference_league_odds','conference_league.json'),
+          ]
+          for manifest,artifact_id,target_name in required:
+              item=next((a for a in manifest.get('artifacts',[])
+                  if a.get('id')==artifact_id),None)
+              if not item:
+                  raise SystemExit('Cloned manifest is missing '+artifact_id)
+              path=str(item.get('path') or '').strip()
+              expected=str(item.get('sha256') or '').strip()
+              size=int(item.get('bytes') or 0)
+              if not path or len(expected)!=64 or size<=0:
+                  raise SystemExit('Immutable contract incomplete: '+artifact_id)
+              commits=subprocess.check_output([
+                  'git','log','--format=%H','--',path
+              ],text=True).splitlines()
+              data=None;matched_commit=None
+              for commit in commits:
+                  # Check object size before downloading and hashing large odds
+                  # revisions. Never fetch mutable raw.githubusercontent.com/main.
+                  object_id=subprocess.run(['git','rev-parse',f'{commit}:{path}'],
+                      text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+                  if object_id.returncode!=0:continue
+                  blob_size=subprocess.run(['git','cat-file','-s',object_id.stdout.strip()],
+                      text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+                  if blob_size.returncode!=0 or int(blob_size.stdout)!=size:continue
+                  candidate=subprocess.run(['git','show',f'{commit}:{path}'],
+                      stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+                  if candidate.returncode!=0:continue
+                  if len(candidate.stdout)==size and hashlib.sha256(candidate.stdout).hexdigest()==expected:
+                      data=candidate.stdout;matched_commit=commit;break
+              if data is None:
+                  raise SystemExit('IMMUTABLE_SOURCE_REVISION_NOT_FOUND '+artifact_id+
+                      ' expected_sha='+expected[:12]+' bytes='+str(size))
+              (source/target_name).write_bytes(data)
+              print('UAT_CANONICAL_SOURCE_OK',artifact_id,
+                  'bytes='+str(size),'sha='+expected[:12],
+                  'commit='+matched_commit[:12],flush=True)
           PY
 
       - name: Build isolated UAT bundles
