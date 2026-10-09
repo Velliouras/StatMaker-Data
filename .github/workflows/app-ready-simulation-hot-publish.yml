@@ -31,10 +31,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Hot-patch current App-Ready betting bundle
+      - name: Hot-patch latest App-Ready betting bundle
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python scripts/hotpatch_app_ready_simulation.py
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A queued hot publisher must start from the latest immutable bundle,
+          # not from its original workflow_run source commit.
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git reset --hard refs/remotes/origin/main
+          python scripts/hotpatch_app_ready_simulation.py
 
       - name: Verify hot-patched bundle
         shell: bash
