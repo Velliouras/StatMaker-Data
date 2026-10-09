@@ -20,10 +20,10 @@ def workflow(name: str) -> str:
 
 
 def block(source: str, heading: str, end: str) -> str:
-    match = re.search(r"(?m)^" + re.escape(heading) + r":\\s*$", source)
+    match = re.search(r"(?m)^" + re.escape(heading) + r":\s*$", source)
     if not match:
         raise AssertionError(f"Missing {heading!r}")
-    finish = re.search(r"(?m)^" + re.escape(end) + r":\\s*$", source[match.end():])
+    finish = re.search(r"(?m)^" + re.escape(end) + r":\s*$", source[match.end():])
     if not finish:
         raise AssertionError(f"Missing {end!r} after {heading!r}")
     return source[match.end():match.end() + finish.start()]
