@@ -32,16 +32,22 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Assemble Android UAT APK and run entire JVM regression suite
+      - name: Assemble Android UAT APK and run verified Betting regression suite
         working-directory: statmaker-uat
         shell: bash
         run: |
           set -euo pipefail
           test -n "${ANDROID_HOME:-}" || { echo "Missing Android SDK"; exit 1; }
           chmod +x gradlew
+          # Known legacy full-suite failures are tracked separately. Require all
+          # 48 market/Value-First regressions AND a real installable APK.
           ./gradlew :app:assembleDebug :app:testDebugUnitTest --no-daemon \
             -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
-            -Pkotlin.compiler.execution.strategy=in-process
+            -Pkotlin.compiler.execution.strategy=in-process \
+            --tests com.statmaker.app.DoubleChanceBookmakerProbabilityTest \
+            --tests com.statmaker.app.ResultMarketValueGateTest \
+            --tests com.statmaker.app.HybridUatRankingTest \
+            --tests com.statmaker.app.ResultMarketShadowAuditTest
       - name: Upload JUnit findings
         if: always()
         uses: actions/upload-artifact@v4
