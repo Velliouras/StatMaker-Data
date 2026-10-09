@@ -1,0 +1,73 @@
+name: Canonical Daily Multi-Market Hotfix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/canonical-daily-multimarket-hotfix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-daily-multimarket-hotfix
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify independent market families and stable identities
+        run: python -m unittest discover -s tests -p 'test_canonical_daily_multi_market.py' -v
+      - name: Rebuild ONLY canonical Daily recommendation ledger
+        run: |
+          set -euo pipefail
+          python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 0
+          python - <<'PY'
+          import json
+          from collections import defaultdict
+          from pathlib import Path
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          ledger=json.loads(Path('data/statmaker/canonical_recommendation_ledger.json').read_text())
+          by_fixture=defaultdict(list)
+          for row in ledger['entries']:
+              key=(row.get('competitionId'),row.get('localDate'),row.get('matchKey'))
+              by_fixture[key].append(row)
+          multi={k:v for k,v in by_fixture.items() if len(v)>1}
+          assert multi, 'NO_MULTI_MARKET_FIXTURE_RESTORED'
+          assert all(len({(r.get('marketFamily') or r.get('family') or r.get('subMarketKey') or r.get('market')) for r in v})==len(v) for v in by_fixture.values()), 'DUPLICATE_FAMILY'
+          today=datetime.now(ZoneInfo('Europe/Athens')).date().isoformat()
+          today_multi={k:v for k,v in multi.items() if k[1]==today}
+          print('CANONICAL_DAILY_MULTI_MARKET_OK',f'entries={len(ledger["entries"])}',f'multiFixtures={len(multi)}',f'todayMultiFixtures={len(today_multi)}')
+          assert today_multi, 'NO_TODAY_MULTI_MARKET_FIXTURE'
+          PY
+      - name: Commit ONLY rebuilt canonical ledger
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp data/statmaker/canonical_recommendation_ledger.json /tmp/statmaker-multimarket-ledger.json
+          success=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp /tmp/statmaker-multimarket-ledger.json data/statmaker/canonical_recommendation_ledger.json
+            git add data/statmaker/canonical_recommendation_ledger.json
+            if git diff --cached --quiet; then
+              echo "CANONICAL_DAILY_LEDGER_ALREADY_CURRENT"
+              success=true
+              break
+            fi
+            git commit -m "Data: publish complete per-market-family canonical Daily recommendations"
+            if git push origin HEAD:main; then
+              echo "CANONICAL_DAILY_LEDGER_PUBLISHED"
+              success=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$success" == "true" ]]
