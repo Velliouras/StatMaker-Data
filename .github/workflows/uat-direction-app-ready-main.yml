@@ -197,60 +197,6 @@ jobs:
           python scripts/validate_app_ready_retirement_contract.py \
             app-ready-export/raw/databases/statmaker_prepared_betting.db
 
-      - name: Restore all exact immutable canonical odds and index artifacts
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import hashlib, json, subprocess
-          from pathlib import Path
-          source=Path('app-ready-export/source')
-          main=json.loads((source/'main_manifest.json').read_text(encoding='utf-8'))
-          uefa=json.loads((source/'uefa_manifest.json').read_text(encoding='utf-8'))
-          required=[
-              (main,'domestic_enriched_index','domestic_enriched_index.json'),
-              (main,'domestic_odds','domestic.json'),
-              (uefa,'champions_league_odds','champions_league.json'),
-              (uefa,'europa_league_odds','europa_league.json'),
-              (uefa,'conference_league_odds','conference_league.json'),
-          ]
-          for manifest,artifact_id,target_name in required:
-              item=next((a for a in manifest.get('artifacts',[])
-                  if a.get('id')==artifact_id),None)
-              if not item:
-                  raise SystemExit('Cloned manifest is missing '+artifact_id)
-              path=str(item.get('path') or '').strip()
-              expected=str(item.get('sha256') or '').strip()
-              size=int(item.get('bytes') or 0)
-              if not path or len(expected)!=64 or size<=0:
-                  raise SystemExit('Immutable contract incomplete: '+artifact_id)
-              commits=subprocess.check_output([
-                  'git','log','--format=%H','--',path
-              ],text=True).splitlines()
-              data=None;matched_commit=None
-              for commit in commits:
-                  # Check object size before downloading and hashing large odds
-                  # revisions. Never fetch mutable raw.githubusercontent.com/main.
-                  object_id=subprocess.run(['git','rev-parse',f'{commit}:{path}'],
-                      text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
-                  if object_id.returncode!=0:continue
-                  blob_size=subprocess.run(['git','cat-file','-s',object_id.stdout.strip()],
-                      text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
-                  if blob_size.returncode!=0 or int(blob_size.stdout)!=size:continue
-                  candidate=subprocess.run(['git','show',f'{commit}:{path}'],
-                      stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
-                  if candidate.returncode!=0:continue
-                  if len(candidate.stdout)==size and hashlib.sha256(candidate.stdout).hexdigest()==expected:
-                      data=candidate.stdout;matched_commit=commit;break
-              if data is None:
-                  raise SystemExit('IMMUTABLE_SOURCE_REVISION_NOT_FOUND '+artifact_id+
-                      ' expected_sha='+expected[:12]+' bytes='+str(size))
-              (source/target_name).write_bytes(data)
-              print('UAT_CANONICAL_SOURCE_OK',artifact_id,
-                  'bytes='+str(size),'sha='+expected[:12],
-                  'commit='+matched_commit[:12],flush=True)
-          PY
-
       - name: Validate fresh UAT market candidates before packaging
         shell: bash
         run: |
@@ -298,10 +244,16 @@ jobs:
               con.close()
           PY
 
-      - name: Build isolated UAT bundles
-        env:
-          APP_READY_PUBLISH_SUBDIR: data/statmaker/app_ready_uat/probability-first-v1
-        run: python scripts/build_uat_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source
+      - name: Repackage immutable production betting odds with UAT-only prepared database
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/package_uat_prepared_from_prod_snapshot.py
+          python scripts/package_uat_prepared_from_prod_snapshot.py \
+            --manifest data/statmaker/app_ready/update_manifest.json \
+            --prepared app-ready-export/raw/databases/statmaker_prepared_betting.db \
+            --out app-ready-export/out \
+            --destination data/statmaker/app_ready_uat/probability-first-v1
 
       - name: Publish isolated UAT artifacts to Data main
         shell: bash
