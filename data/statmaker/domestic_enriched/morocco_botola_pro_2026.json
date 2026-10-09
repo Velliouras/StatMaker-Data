@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-08T20:02:16Z",
+  "generated_at": "2026-10-09T00:36:16Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/morocco/botola-pro/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-08T20:02:11Z",
+    "cache_generated_at": "2026-10-09T00:35:56Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 17,
-    "fixtures_with_any_stats": 3,
-    "fixtures_with_bb_core_stats": 0,
-    "any_stats_coverage": 0.1765,
-    "bb_core_coverage": 0.0,
+    "completed_fixtures": 18,
+    "fixtures_with_any_stats": 4,
+    "fixtures_with_bb_core_stats": 1,
+    "any_stats_coverage": 0.2222,
+    "bb_core_coverage": 0.0556,
     "group_counts": {
-      "shots_total": 0,
-      "shots_on_target": 0,
-      "corners": 0,
+      "shots_total": 1,
+      "shots_on_target": 1,
+      "corners": 1,
       "fouls": 0,
-      "yellow_cards": 3,
-      "red_cards": 3,
-      "possession": 0,
+      "yellow_cards": 4,
+      "red_cards": 4,
+      "possession": 1,
       "passes": 0,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.0,
-      "shots_on_target": 0.0,
-      "corners": 0.0,
+      "shots_total": 0.0556,
+      "shots_on_target": 0.0556,
+      "corners": 0.0556,
       "fouls": 0.0,
-      "yellow_cards": 0.1765,
-      "red_cards": 0.1765,
-      "possession": 0.0,
+      "yellow_cards": 0.2222,
+      "red_cards": 0.2222,
+      "possession": 0.0556,
       "passes": 0.0,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.1765 < 0.65",
-      "low BB-core coverage: 0.0 < 0.65",
+      "low any-stats coverage: 0.2222 < 0.65",
+      "low BB-core coverage: 0.0556 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -1498,6 +1498,90 @@
         "fulltime": {
           "home": 2,
           "away": 5
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1644205,
+      "date_utc": "2026-10-08T20:00:00+00:00",
+      "country": "Morocco",
+      "league": "Botola Pro",
+      "league_code": "MAR",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 200,
+      "round": "Regular Season - 3",
+      "home_team": "Maghreb Fès",
+      "away_team": "Raja Casablanca",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 2,
+        "HST": 6,
+        "AST": 2,
+        "HC": 4,
+        "AC": 1,
+        "HF": null,
+        "AF": null,
+        "HY": 3,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 61,
+        "APossession": 39,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,

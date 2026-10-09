@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T20:02:11Z",
+  "generatedAt": "2026-10-09T00:36:06Z",
   "completenessContract": "all completed fixture scores are cached at discovery time; advanced statistics are incrementally backfilled",
   "incrementalContract": "poll every active Stats league for new completed fixtures; persist all score metadata immediately; fetch advanced statistics only when real cached stats are missing",
   "scopeContract": "53 configured Domestic leagues eligible for Stats; core odds scope remains separately protected",
@@ -15,12 +15,12 @@
   "statsUniverseLeagueCount": 69,
   "coreOddsLeagueCount": 27,
   "maxRequests": 120,
-  "requestsUsed": 17,
-  "registryLeagueCount": 2,
-  "polledLeagueCount": 2,
-  "incompleteBefore": 1,
+  "requestsUsed": 28,
+  "registryLeagueCount": 4,
+  "polledLeagueCount": 4,
+  "incompleteBefore": 3,
   "completeAfter": 1,
-  "incompleteAfter": 1,
+  "incompleteAfter": 3,
   "allocations": [
     {
       "phase": "tier2_core27",
@@ -30,13 +30,13 @@
       "league": "Liga I",
       "lifecycle": "active",
       "allocatedRequests": 120,
-      "usedRequests": 2,
+      "usedRequests": 1,
       "before": {
         "leagueCode": "ROM",
         "priorityTier": "tier2_core27",
-        "completed": 79,
-        "withStats": 79,
-        "withScores": 79,
+        "completed": 80,
+        "withStats": 80,
+        "withScores": 80,
         "missingStats": 0,
         "missingScores": 0,
         "coverage": 1.0,
@@ -63,21 +63,9 @@
       "country": "Morocco",
       "league": "Botola Pro",
       "lifecycle": "active",
-      "allocatedRequests": 118,
-      "usedRequests": 15,
+      "allocatedRequests": 39,
+      "usedRequests": 16,
       "before": {
-        "leagueCode": "MAR",
-        "priorityTier": "tier3_restored26",
-        "completed": 14,
-        "withStats": 3,
-        "withScores": 14,
-        "missingStats": 11,
-        "missingScores": 0,
-        "coverage": 0.214286,
-        "scoreCoverage": 1.0,
-        "complete": false
-      },
-      "after": {
         "leagueCode": "MAR",
         "priorityTier": "tier3_restored26",
         "completed": 17,
@@ -88,10 +76,114 @@
         "coverage": 0.176471,
         "scoreCoverage": 1.0,
         "complete": false
+      },
+      "after": {
+        "leagueCode": "MAR",
+        "priorityTier": "tier3_restored26",
+        "completed": 18,
+        "withStats": 4,
+        "withScores": 18,
+        "missingStats": 14,
+        "missingScores": 0,
+        "coverage": 0.222222,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "IRL",
+      "country": "Ireland",
+      "league": "Premier Division",
+      "lifecycle": "active",
+      "allocatedRequests": 51,
+      "usedRequests": 7,
+      "before": {
+        "leagueCode": "IRL",
+        "priorityTier": "tier3_restored26",
+        "completed": 160,
+        "withStats": 155,
+        "withScores": 160,
+        "missingStats": 5,
+        "missingScores": 0,
+        "coverage": 0.96875,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "IRL",
+        "priorityTier": "tier3_restored26",
+        "completed": 161,
+        "withStats": 157,
+        "withScores": 161,
+        "missingStats": 4,
+        "missingScores": 0,
+        "coverage": 0.975155,
+        "scoreCoverage": 1.0,
+        "complete": false
+      }
+    },
+    {
+      "phase": "tier3_restored26",
+      "priorityTier": "tier3_restored26",
+      "leagueCode": "PER",
+      "country": "Peru",
+      "league": "Primera División",
+      "lifecycle": "active",
+      "allocatedRequests": 96,
+      "usedRequests": 4,
+      "before": {
+        "leagueCode": "PER",
+        "priorityTier": "tier3_restored26",
+        "completed": 243,
+        "withStats": 242,
+        "withScores": 243,
+        "missingStats": 1,
+        "missingScores": 0,
+        "coverage": 0.995885,
+        "scoreCoverage": 1.0,
+        "complete": false
+      },
+      "after": {
+        "leagueCode": "PER",
+        "priorityTier": "tier3_restored26",
+        "completed": 245,
+        "withStats": 244,
+        "withScores": 245,
+        "missingStats": 1,
+        "missingScores": 0,
+        "coverage": 0.995918,
+        "scoreCoverage": 1.0,
+        "complete": false
       }
     }
   ],
   "progress": [
+    {
+      "leagueCode": "PER",
+      "priorityTier": "tier3_restored26",
+      "completed": 245,
+      "withStats": 244,
+      "withScores": 245,
+      "missingStats": 1,
+      "missingScores": 0,
+      "coverage": 0.995918,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
+    {
+      "leagueCode": "IRL",
+      "priorityTier": "tier3_restored26",
+      "completed": 161,
+      "withStats": 157,
+      "withScores": 161,
+      "missingStats": 4,
+      "missingScores": 0,
+      "coverage": 0.975155,
+      "scoreCoverage": 1.0,
+      "complete": false
+    },
     {
       "leagueCode": "ROM",
       "priorityTier": "tier2_core27",
@@ -107,18 +199,20 @@
     {
       "leagueCode": "MAR",
       "priorityTier": "tier3_restored26",
-      "completed": 17,
-      "withStats": 3,
-      "withScores": 17,
+      "completed": 18,
+      "withStats": 4,
+      "withScores": 18,
       "missingStats": 14,
       "missingScores": 0,
-      "coverage": 0.176471,
+      "coverage": 0.222222,
       "scoreCoverage": 1.0,
       "complete": false
     }
   ],
   "rosterDiscoveryRequests": 0,
   "selectedLeagueCodes": [
+    "PER",
+    "IRL",
     "ROU",
     "MAR"
   ],
@@ -141,7 +235,7 @@
   "historicalClosureComplete": false,
   "apiFootballQuotaGuard": {
     "dailyLimit": 7500,
-    "dailyRemaining": 5727,
+    "dailyRemaining": 7435,
     "reserve": 1500,
     "stoppedAtReserve": false
   }
