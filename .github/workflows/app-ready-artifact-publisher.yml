@@ -1,10 +1,11 @@
 name: StatMaker App-Ready Artifact Publisher
 
-# This is an EXPLICIT migration/full-rebuild lane, not a routine data refresh.
-# Ordinary stats/simulation/Score Edge data are handled by targeted hot publishers.
-# The old schedule + workflow_run + manifest/odds push triggers created repeated
-# 90-minute emulator jobs for each small producer change and stacked failures.
-# Never restore automatic heavyweight triggers without a bounded host-side builder.
+# One nightly complete betting build plus explicit on-demand migrations.
+# Ordinary stats/simulation/Score Edge updates use targeted host-only hot publishers.
+# Do not restore the former 6x/day cron, upstream workflow_run fanout or
+# broad manifest/odds pushes: those flooded a 90-minute emulator queue.
+# A full daily rebuild preserves automatic betting freshness until the remaining
+# off-device Android source phase has been migrated fully to host-side code.
 on:
   workflow_dispatch:
     inputs:
@@ -22,6 +23,9 @@ on:
     branches: [main]
     paths:
       - '.github/app-ready-rebuild-trigger'
+  schedule:
+    # One consolidated overnight update, not six competing daily builds.
+    - cron: "20 0 * * *"
 
 permissions:
   contents: write
