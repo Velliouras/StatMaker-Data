@@ -627,6 +627,13 @@ def grade_pick(pick: dict[str, Any], stats: dict[str, Any] | None) -> tuple[str 
             or (side == "HOME_OR_AWAY" and half != "DRAW")
         )
         outcome = "WON" if hit else "LOST"
+    elif sub == "GOALS_ODD_EVEN":
+        # The prepared contract uses selectionSide=UNKNOWN for Odd/Even.
+        # The exact persisted selectionName carries the only valid direction.
+        direction = str(pick.get("selectionName") or "").strip().upper()
+        if direction in {"ODD", "EVEN"}:
+            is_even = total % 2 == 0
+            outcome = "WON" if (direction == "EVEN") == is_even else "LOST"
     elif sub == "BTTS":
         actual = hg > 0 and ag > 0
         if side == "YES":
