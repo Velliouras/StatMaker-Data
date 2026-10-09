@@ -34,7 +34,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_value_first_retrospective_audit.py' -v
       - name: Retrospective A/B replay on historical pre-match snapshots
         run: |
-          python scripts/value_first_retrospective_audit.py --days 14 --snapshot-local-hour 11
+          python scripts/value_first_retrospective_audit.py --days 30 --snapshot-local-hour 11
       - name: Archive report without publishing to Data or Android
         if: always()
         uses: actions/upload-artifact@v4
