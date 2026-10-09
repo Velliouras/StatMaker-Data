@@ -1,0 +1,79 @@
+name: Canonical PROD Value-First Publisher
+
+on:
+  schedule:
+    - cron: '12,42 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/canonical-prod-value-first-publisher.yml'
+      - 'scripts/materialize_canonical_recommendation_ledger.py'
+      - 'tests/test_value_first_prod_promotion.py'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-prod-value-first-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 150
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate promotion contract
+        run: |
+          python -m unittest discover -s tests -p 'test_value_first_uat_ledger.py' -v
+          python -m unittest discover -s tests -p 'test_value_first_prod_promotion.py' -v
+      - name: Materialize independent PROD Value-First ledger
+        run: |
+          set -euo pipefail
+          python scripts/materialize_canonical_recommendation_ledger.py --prod-value-first --backfill-dates 0
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('data/statmaker/canonical_recommendation_ledger.json')
+          root=json.loads(p.read_text())
+          assert root['schemaVersion']==15, 'PROD_SCHEMA_NOT_V15'
+          assert root.get('newModelFrom')=='2026-10-09', 'PROD_COHORT_CUTOFF_MISMATCH'
+          picks=[r for r in root['entries'] if r.get('localDate','')>='2026-10-09']
+          assert picks, 'PROD_VALUE_FIRST_LEDGER_EMPTY'
+          assert all(r.get('policyCohort')=='value-first-v15' for r in picks)
+          assert all(1.50<=float(r['odd'])<=4.50 for r in picks)
+          older=[r for r in root['entries'] if r.get('localDate','')<'2026-10-09']
+          assert all(r.get('policyCohort')=='legacy-pre-2026-10-09' for r in older)
+          print('PROD_VALUE_FIRST_LEDGER_VALID',len(picks),'legacy',len(older))
+          PY
+      - name: Publish production canonical ledger only
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp data/statmaker/canonical_recommendation_ledger.json /tmp/statmaker-prod-value-first-ledger.json
+          success=false
+          for attempt in 1 2 3 4; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp /tmp/statmaker-prod-value-first-ledger.json data/statmaker/canonical_recommendation_ledger.json
+            git add data/statmaker/canonical_recommendation_ledger.json
+            if git diff --cached --quiet; then
+              echo "PROD_VALUE_FIRST_ALREADY_CURRENT"
+              success=true
+              break
+            fi
+            git commit -m "Data: publish PROD Value-First canonical recommendation ledger"
+            if git push origin HEAD:main; then
+              echo "PROD_VALUE_FIRST_PUBLISHED"
+              success=true
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          [[ "$success" == "true" ]]
