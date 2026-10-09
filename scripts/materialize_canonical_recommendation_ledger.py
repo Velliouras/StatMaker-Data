@@ -328,8 +328,8 @@ def _value_first_uat_rank(r,market_preferred,three_way_result,favorite_team=None
     market=num(r.get('bm_market_probability'))
     prob=num(r.get('bm_posterior_probability'))
     reliability=_clamp01(num(r.get('bm_sample_reliability'),0))
-    if str(r.get('value_tier') or '')!='STRONG_VALUE':
-        return None
+    # Persisted old value_tier is metadata, not another eligibility gate.
+    # The UAT and Android selectors recompute the same legacy value score.
     if not (odd>1.01 and _valid_probability(market) and _valid_probability(prob)):
         return None
     edge=prob-market
