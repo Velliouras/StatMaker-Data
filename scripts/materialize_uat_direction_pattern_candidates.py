@@ -711,13 +711,16 @@ def materialize(checkpoint_root, raw_root):
         (generation_id, RULES_FINGERPRINT),
     ).fetchone()
     if existing and int(existing[0]) > 0:
+        # Existing candidate rows were built with a previous policy that set
+        # policy_premium_eligible=0 for *every* 1X2/DC row. Source and schema
+        # fingerprints did not change, so reusing them is unsafe. Always
+        # reconstruct only this indexed candidate table; no history import,
+        # odds fetch, simulation rerun, or Android emulator is needed.
         print(
-            "APP_READY_HOST_PATTERN_REUSED",
+            "APP_READY_HOST_PATTERN_POLICY_REBUILD",
             f"generation={generation_id}",
-            f"candidates={int(existing[0])}",
+            f"previous_candidates={int(existing[0])}",
         )
-        connection.close()
-        return generation_id, int(existing[0])
 
     started = time.monotonic()
     # Final Probability-First structural/value checks run in the UAT app.
