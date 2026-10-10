@@ -87,6 +87,43 @@ Before any *future* provider expansion, confirm real account remaining quota
 from provider response headers, keep the existing reserve, and require an
 explicit user-approved capped request plan. **This rollout doesn't need one.**
 
+## Verified bookmaker-quote firewall
+
+A Git App-Ready generation cutoff is **not** the observation timestamp of
+any individual bookmaker quote. The existing archived
+`prepared_selections` are a legacy filtered subset, **not** independently
+verified unfiltered bookmaker offers. They cannot certify positive EV or ROI.
+
+The independent `calibration_gate.py` now requires, for each exact quote:
+
+- `priceObservationTimestampVerified: true`;
+- `independentUnfilteredBookmakerUniverseVerified: true` with
+  `priceUniverse: "INDEPENDENT_VERIFIED_BOOKMAKER_OFFERS"`;
+- immutable nonblank `bookmaker`, `bookmakerMarketSelectionId`, and
+  `sourceGenerationId`;
+- explicit timezone-aware `quoteObservedAt`, before archive cutoff
+  and kickoff, within 24 hours of kickoff;
+- decimal price strictly `1.80 < odd < 3.00` and exact fixture match.
+
+If any evidence is absent, the quote is **rejected before calibration**.
+The archived quotes have `priceObservationTimestampVerified: false`,
+so an archive-only pilot is expected to show zero *price-certified*
+STRONG candidates. This does not erase raw historical selections or the
+separate descriptive backtest; it prevents mistaking that old subset
+for a certified bookmaker price history.
+
+`walk_forward_elo.py` also records retrospective ELO-only holdout 1X2
+accuracy, per-league counts and 95% Wilson lower bounds. These are
+diagnostics, never automatic STRONG labels; no published model certificate
+exists. The observed research sample of 20/26 has a Wilson lower bound
+of approximately 57.95%, below the required conservative 60% threshold.
+
+Local synthetic regression suite for `quote_provenance.py` and
+`elo_holdout_diagnostics.py`: **11/11 PASS**, and source
+Git blob hashes match the exact executed local files. An additional
+8/8 xG source-integrity tests passed. The entire repository Python
+suite and full model pilot have not been executed.
+
 ## Fastest local pilot
 
 From the \`StatMaker-Data\` repository root with Python 3.11+:
