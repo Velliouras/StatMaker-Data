@@ -16,6 +16,7 @@ import json
 from pathlib import Path
 
 from walk_forward_goals import walk_forward
+from walk_forward_elo import walk_forward_elo
 from export_historical_prices import export_date
 from fixture_lookup import CachedFixtureLookup
 from calibration_gate import evaluate as evaluate_calibrated
@@ -49,6 +50,10 @@ def main() -> None:
     directory = (root / args.output_root).resolve()
     paths = {k: directory / v for k, v in {
         "model": "pilot_model.json",
+        "elo_model": "pilot_elo_fallback_model.json",
+        "elo_calibration": "pilot_elo_fallback_calibration.jsonl",
+        "elo_holdout": "pilot_elo_fallback_holdout.jsonl",
+        "elo_priced": "pilot_elo_fallback_priced.json",
         "calibration": "pilot_calibration.jsonl",
         "holdout": "pilot_holdout.jsonl",
         "prices": "pilot_historical_prices.jsonl",
@@ -70,6 +75,12 @@ def main() -> None:
     _atomic_write(paths["model"], report)
     _write_jsonl(paths["calibration"], calibration)
     _write_jsonl(paths["holdout"], holdout)
+    # Independently tuned, disjoint Elo-only fallback: never borrow the xG
+    # calibration bin or claim certification from another data regime.
+    elo_report, elo_calibration, elo_holdout = walk_forward_elo(root)
+    _atomic_write(paths["elo_model"], elo_report)
+    _write_jsonl(paths["elo_calibration"], elo_calibration)
+    _write_jsonl(paths["elo_holdout"], elo_holdout)
     priced_report = None
 
     if args.with_prices:
@@ -98,6 +109,19 @@ def main() -> None:
                 "holdout": {"exactQuotes": len(quotes)},
             }
         _atomic_write(paths["priced"], priced_report)
+        if elo_calibration and elo_holdout:
+            if max(x["date"] for x in elo_calibration) >= min(x["date"] for x in elo_holdout):
+                raise ValueError("Elo holdout overlaps Elo calibration")
+            elo_priced_report = evaluate_calibrated(elo_calibration, elo_holdout, quotes)
+        else:
+            elo_priced_report = {
+                "contract": "betting-v2-elo-fallback-pricing-v1",
+                "certified": False, "noPriceEvidence": True,
+                "reason": "Missing independently disjoint Elo calibration and holdout",
+            }
+        elo_priced_report["strategy"] = "ELO_GOALS_FALLBACK_NO_XG"
+        elo_priced_report["certified"] = False
+        _atomic_write(paths["elo_priced"], elo_priced_report)
 
     shadow = publish(
         root, paths["shadow"],
@@ -109,6 +133,9 @@ def main() -> None:
         "forecastedHistoricFixtures": report.get("eligiblePrematchRows", 0),
         "calibrationFixtures": len(calibration),
         "holdoutFixtures": len(holdout),
+        "eloFallbackHistoricRows": elo_report.get("eloFallbackEligible", 0),
+        "eloFallbackCalibrationFixtures": len(elo_calibration),
+        "eloFallbackHoldoutFixtures": len(elo_holdout),
         "apiCalls": 0,
         "realStrongSelections": 0,
         "report": str(paths["shadow"].relative_to(root)),
