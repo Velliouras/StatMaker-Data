@@ -61,11 +61,11 @@ jobs:
           python scripts/betting_v2/freeze_prematch_shadow.py \
             --repository-root . --horizon-days 2 --archive
 
-      - name: Publish bounded research-only V2 Android UAT forecast preview
-        run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
-
       - name: Audit existing immutable forecasts against API-Football fixtures
         run: python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
+
+      - name: Publish bounded research-only V2 Android UAT forecast preview
+        run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
 
       - name: Commit ONLY Betting V2 shadow research artifacts
         run: |
