@@ -17,7 +17,7 @@ from math import exp, log
 from pathlib import Path
 
 from audit_data import read_fixtures, number
-from walk_forward_goals import event_probs
+from walk_forward_goals import event_probs, outcomes
 from elo_holdout_diagnostics import summarize_elo_holdout
 
 
@@ -189,14 +189,7 @@ def forecasts(rows: list[EloRow], params: EloParams) -> list[dict]:
             "homeGoals": r.hgoals, "awayGoals": r.agoals,
             "probabilities": p,
             "expectedHomeGoals": h, "expectedAwayGoals": a,
-            "observed": {
-                "1X2_HOME": int(r.hgoals > r.agoals),
-                "1X2_DRAW": int(r.hgoals == r.agoals),
-                "1X2_AWAY": int(r.hgoals < r.agoals),
-                "HOME_OVER_1_5": int(r.hgoals >= 2),
-                "AWAY_OVER_1_5": int(r.agoals >= 2),
-                "MATCH_OVER_2_5": int(r.hgoals + r.agoals >= 3),
-            },
+            "observed": outcomes(r),
             "strategy": "ELO_GOALS_FALLBACK_NO_XG",
             "historicalXgSufficient": not r.missing_prior_xg,
             "notCertified": True,
