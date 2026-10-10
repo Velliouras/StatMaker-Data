@@ -219,7 +219,7 @@ def evaluate(calibration: list[dict], holdout: list[dict],
         "allRawQualifiedOffers": metrics(qualifying),
         "oneGoalsScenarioPerFixture": metrics(noncorrelated),
         "blockingGaps": [
-            "Archived prepared_selections are a legacy filtered selection universe, not independently verified unfiltered bookmaker offers",
+            "Archived prepared_selections are a legacy-prepared selection universe; complete, unfiltered bookmaker coverage has not been independently verified",
             "No reliable adverse injury/lineup scenario calculation",
             "Small sample and multiple-comparison risk needs evaluation",
             "No proof historical feature extraction matched original as-of releases",
