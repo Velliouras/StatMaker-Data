@@ -91,16 +91,19 @@ def make_rows(matches: list[dict]) -> tuple[list[PrematchRow], dict]:
         last = team[-20:]
         recent = last[-5:]
         at_venue = [x for x in last if x["venue"] == venue][-8:]
-        fallback = 1.4
-        def vals(source: list[dict], key: str) -> list[float]:
-            return [float(x[key]) for x in source if x[key] is not None]
+        def verified_mean(source: list[dict], key: str) -> float:
+            values = [float(x[key]) for x in source if x.get(key) is not None]
+            if not values:
+                raise ValueError("Missing required pre-match feature: " + key)
+            return sum(values) / len(values)
+
         return (
-            mean(vals(recent, which + "xg"), fallback),
-            mean(vals(last, which + "xg"), fallback),
-            mean(vals(at_venue, which + "xg"), fallback),
-            mean(vals(recent, which + "goals"), fallback),
-            mean(vals(last, which + "goals"), fallback),
-            mean(vals(at_venue, which + "goals"), fallback),
+            verified_mean(recent, which + "xg"),
+            verified_mean(last, which + "xg"),
+            verified_mean(at_venue, which + "xg"),
+            verified_mean(recent, which + "goals"),
+            verified_mean(last, which + "goals"),
+            verified_mean(at_venue, which + "goals"),
         )
 
     for group, today in sorted(dated):
@@ -120,13 +123,30 @@ def make_rows(matches: list[dict]) -> tuple[list[PrematchRow], dict]:
             if min(len(home_venue), len(away_venue)) < MIN_VENUE:
                 counts["short_venue_history"] += 1
                 continue
-            if min(sum(x["forxg"] is not None for x in home),
-                   sum(x["forxg"] is not None for x in away)) < MIN_XG:
-                counts["short_xg_history"] += 1
+            # Required team attack *and* opposition defense xG/xGA must be
+            # genuine observations within the precise model feature windows.
+            # Never replace missing xG with a league average or an invented 1.4.
+            last_home, last_away = home[-20:], away[-20:]
+            if not all(
+                sum(x.get(k) is not None for x in window) >= MIN_XG
+                for window in (last_home, last_away)
+                for k in ("forxg", "againstxg")
+            ):
+                counts["insufficient_last20_xg_xga"] += 1
                 continue
-            if not all(sum(x["forxg"] is not None for x in side) >= MIN_VENUE
-                       for side in (home_venue, away_venue)):
-                counts["short_venue_xg"] += 1
+            if not all(
+                all(x.get(k) is not None for x in window[-5:])
+                for window in (last_home, last_away)
+                for k in ("forxg", "againstxg")
+            ):
+                counts["missing_recent5_xg_xga"] += 1
+                continue
+            if not all(
+                sum(x.get(k) is not None for x in window[-8:]) >= MIN_VENUE
+                for window in (home_venue, away_venue)
+                for k in ("forxg", "againstxg")
+            ):
+                counts["insufficient_venue_xg_xga"] += 1
                 continue
             ha = feature(home, "for", "home", "attack")
             ad = feature(away, "against", "away", "defense")
