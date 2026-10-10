@@ -126,6 +126,10 @@ def make_elo_rows(matches: list[dict]) -> tuple[list[EloRow], dict]:
 
         # No results from the current UTC date are visible above.
         for m in batch:
+            # A prospective target is feature-only; never inject invented FT
+            # results/xG into the historical rating or form state.
+            if m.get("prematch_target"):
+                continue
             hkey, akey = (group, m["home"]), (group, m["away"])
             hxg, axg = number(m["stats"].get("HxG")), number(m["stats"].get("AxG"))
             history[hkey].append({
