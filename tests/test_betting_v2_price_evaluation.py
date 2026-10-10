@@ -69,6 +69,42 @@ class BettingV2HistoricalSettlementTests(unittest.TestCase):
         self.assertEqual(r["rawProbabilityAndValueCandidates"]["n"], 1)
         self.assertEqual(r["oneCorrelatedScenarioPerMatch"]["won"], 1)
 
+    def test_conflicting_team_side_never_settles_wrong_team(self):
+        quote = {**self.base, "selectionKey": "away-goals-bad-side",
+                 "market": "AWAY_TEAM_TOTAL", "direction": "OVER",
+                 "teamSide": "HOME", "line": 1.5, "odd": 2.0}
+        report = evaluate([self.forecast], [quote])
+        self.assertEqual(report["availableExactJoinedQuotes"], 0)
+        self.assertEqual(report["rejected"]["unsupported_market_in_research_baseline"], 1)
+
+    def test_non_numeric_goal_line_is_excluded_not_crash(self):
+        quote = {**self.base, "selectionKey": "invalid-line",
+                 "market": "FULL_TIME_MATCH_TOTAL", "direction": "OVER",
+                 "line": "invalid", "odd": 2.0}
+        report = evaluate([self.forecast], [quote])
+        self.assertEqual(report["availableExactJoinedQuotes"], 0)
+        self.assertEqual(report["rejected"]["unsupported_market_in_research_baseline"], 1)
+
+    def test_early_invalid_quote_does_not_hide_valid_identical_selection(self):
+        first = {**self.base, "odd": 1.8}
+        later = {**self.base, "odd": 2.10}
+        report = evaluate([self.forecast], [first, later])
+        self.assertEqual(report["availableExactJoinedQuotes"], 1)
+        self.assertEqual(report["rejected"]["outside_odds_contract"], 1)
+
+    def test_no_selection_id_cannot_be_counted(self):
+        report = evaluate([self.forecast], [{**self.base, "selectionKey": None}])
+        self.assertEqual(report["availableExactJoinedQuotes"], 0)
+        self.assertEqual(report["rejected"]["missing_exact_selection_key"], 1)
+
+    def test_odds_endpoints_both_excluded(self):
+        report = evaluate([self.forecast], [
+            {**self.base, "selectionKey": "lower", "odd": 1.80},
+            {**self.base, "selectionKey": "upper", "odd": 3.00}
+        ])
+        self.assertEqual(report["availableExactJoinedQuotes"], 0)
+        self.assertEqual(report["rejected"]["outside_odds_contract"], 2)
+
     def test_changed_kickoff_never_falsely_joins(self):
         quote = {**self.base, "kickoffUTC": "2026-10-10T18:30:00+00:00"}
         r = evaluate([self.forecast], [quote])
