@@ -135,6 +135,7 @@ def evidence(forecast: dict, match: dict) -> list[dict]:
             "market": str(item.get("market")),
             "selection": str(item.get("selection")),
             "line": item.get("line"),
+            "team": str(item.get("team") or ""),
             "bookmaker": bookmaker,
             "odds": round(odd, 3),
             "modelProbability": round(p, 6),
