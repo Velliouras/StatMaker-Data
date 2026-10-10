@@ -47,6 +47,27 @@ class BettingV2PrematchDataTests(unittest.TestCase):
         self.assertNotIn("1022", {r.fixture for r in rows})
         self.assertGreaterEqual(counts.get("missing_recent5_xg_xga", 0), 1)
 
+    def test_stale_lifetime_venue_history_cannot_pass_last20_window(self):
+        first = datetime(2026, 1, 1, 12, tzinfo=timezone.utc)
+        data = []
+        for index in range(43):
+            # A has eight+ historic HOME fixtures, B eight+ AWAY fixtures,
+            # but their latest twenty matches have the opposite venues only.
+            a_home = index < 15 or index == 42
+            data.append({
+                "group": "E0|Synthetic", "fixture_id": str(2000 + index),
+                "date": first + timedelta(days=index),
+                "home": "A" if a_home else "B",
+                "away": "B" if a_home else "A",
+                "hg": 2, "ag": 1,
+                "stats": {"HxG": 1.8, "AxG": 1.2},
+            })
+        rows, reasons = make_rows(data)
+        # Previously this would raise ValueError from the empty venue window
+        # despite the lifetime venue readiness gate having passed.
+        self.assertNotIn("2042", {row.fixture for row in rows})
+        self.assertGreater(reasons.get("insufficient_venue_xg_xga", 0), 0)
+
     def test_model_does_not_substitute_default_xg(self):
         from inspect import getsource
         source = getsource(__import__("walk_forward_goals").make_rows)
