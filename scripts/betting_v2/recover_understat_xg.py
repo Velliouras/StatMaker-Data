@@ -28,6 +28,10 @@ LEAGUES = {
     "I1": "Serie_A", "F1": "Ligue_1"
 }
 ALLOWED_SEASONS = range(2024, 2028)
+# Explicitly verified from the EPL 2026 mirror; never perform fuzzy joins.
+DEFAULT_ALIASES = {
+    "E0": {"Hull City": "Hull", "Newcastle": "Newcastle United"},
+}
 
 
 def name_key(value: object) -> str:
@@ -223,7 +227,9 @@ def main() -> None:
         data = fetch_understat(args.league, args.season)
     else:
         data = json.loads(args.input.read_text())
-    aliases = json.loads(args.aliases.read_text()) if args.aliases else None
+    aliases = dict(DEFAULT_ALIASES.get(args.league, {}))
+    if args.aliases:
+        aliases.update(json.loads(args.aliases.read_text()))
     observed = datetime.now(timezone.utc).isoformat()
     overlay = recovery_rows(enriched, data, args.league, observed, aliases)
     overlay["understatSeason"] = args.season
