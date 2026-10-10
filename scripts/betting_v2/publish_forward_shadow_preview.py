@@ -82,6 +82,8 @@ def build(root: Path) -> dict:
             continue
         if row.get("noObservedTargetScoreUsed") is not True:
             continue
+        if any(key in row for key in ("homeGoals", "awayGoals", "observed")):
+            continue
         probs = row.get("probabilities")
         if not isinstance(probs, dict):
             continue
