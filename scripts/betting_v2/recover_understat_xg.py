@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Bounded Understat xG recovery into a RESEARCH ONLY overlay, not App-Ready.
+"""Research-only xG recovery from a locally saved Understat league JSON.
 
-The only optional HTTP path fetches one explicitly requested Understat
-league-season using public league data. It NEVER calls API-Football, Odds-API,
-Android or Actions. If fetching isn't available, import a saved JSON export.
-No modification of existing source statistics or betting predictions.
-
-No historical use before the import's observedAtUTC unless source-point-in-time
-availability is proven independently.
+STRICTLY OFFLINE: no HTTP clients, API-Football calls, bookmaker requests,
+Android writes or GitHub Actions. Never changes canonical statistics.
+Data is imported only from an explicitly provided existing local JSON file.
+The overlay is NOT a historically timestamped prediction source.
 """
 from __future__ import annotations
 
@@ -18,7 +15,6 @@ import json
 from math import isfinite
 from pathlib import Path
 import re
-from urllib.request import Request, urlopen
 import unicodedata
 
 from publish_shadow import _safe_output, _atomic_write
@@ -74,28 +70,6 @@ def _number_of_goals(value: object) -> int | None:
         return i if i >= 0 and str(value) == str(i) else None
     except (ValueError, TypeError):
         return None
-
-
-def fetch_understat(league_code: str, season: int) -> dict:
-    """ONE capped HTTPS GET for an explicitly chosen supported league/season."""
-    if league_code not in LEAGUES or season not in ALLOWED_SEASONS:
-        raise ValueError("Unsupported Understat league/season")
-    url = f"https://understat.com/getLeagueData/{LEAGUES[league_code]}/{season}"
-    request = Request(url, headers={
-        "User-Agent": "Mozilla/5.0",
-        "X-Requested-With": "XMLHttpRequest",
-        "Referer": "https://understat.com/",
-        "Accept": "application/json",
-    })
-    with urlopen(request, timeout=12) as response:
-        if response.status != 200:
-            raise ValueError(f"Understat response status {response.status}")
-        payload = response.read(3_000_001)
-        if len(payload) > 3_000_000:
-            raise ValueError("Oversized Understat response")
-    parsed = json.loads(payload)
-    provider_fixture_rows(parsed)
-    return parsed
 
 
 def recovery_rows(enriched: dict, provider: dict, league_code: str,
@@ -206,9 +180,8 @@ def main() -> None:
     ap.add_argument("--repository-root", type=Path, default=Path("."))
     ap.add_argument("--league", choices=sorted(LEAGUES), required=True)
     ap.add_argument("--season", type=int, choices=ALLOWED_SEASONS, required=True)
-    source = ap.add_mutually_exclusive_group(required=True)
-    source.add_argument("--input", type=Path, help="Previously downloaded Understat league JSON")
-    source.add_argument("--fetch-understat", action="store_true", help="Explicitly perform 1 non-API-Football GET")
+    ap.add_argument("--input", type=Path, required=True,
+                    help="Already saved Understat league JSON; no network access")
     ap.add_argument("--aliases", type=Path, help="Optional explicit canonical-name -> Understat-name JSON")
     ap.add_argument("--output", type=Path, default=None)
     args = ap.parse_args()
@@ -223,17 +196,14 @@ def main() -> None:
     if not canonical_path.is_relative_to(root / "data/statmaker/domestic_enriched"):
         raise ValueError("Unsafe canonical cache path")
     enriched = json.loads(canonical_path.read_text())
-    if args.fetch_understat:
-        data = fetch_understat(args.league, args.season)
-    else:
-        data = json.loads(args.input.read_text())
+    data = json.loads(args.input.read_text(encoding="utf-8"))
     aliases = dict(DEFAULT_ALIASES.get(args.league, {}))
     if args.aliases:
         aliases.update(json.loads(args.aliases.read_text()))
     observed = datetime.now(timezone.utc).isoformat()
     overlay = recovery_rows(enriched, data, args.league, observed, aliases)
     overlay["understatSeason"] = args.season
-    overlay["retrievalMode"] = "ONE_DIRECT_UNDERSTAT_GET" if args.fetch_understat else "LOCAL_UNDERSTAT_JSON"
+    overlay["retrievalMode"] = "LOCAL_UNDERSTAT_JSON_NO_NETWORK"
     # Per-league/season default prevents one recovery pass from overwriting
     # a previously recovered competition.
     output = args.output or Path(
