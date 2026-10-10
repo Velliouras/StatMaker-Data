@@ -68,19 +68,27 @@ def event(quote: dict, forecast: dict) -> tuple[str, float, float, float] | None
             win = h != a
         label = "DOUBLE_CHANCE_" + direction
     elif market in {"FULL_TIME_MATCH_TOTAL", "HOME_TEAM_TOTAL", "AWAY_TEAM_TOTAL"} and (
-        line is not None and float(line) in (1.5, 2.5)
-    ) and direction in {"OVER", "UNDER"}:
-        numeric_line = float(line)
+        direction in {"OVER", "UNDER"}
+    ):
+        try:
+            numeric_line = float(line)
+        except (ValueError, TypeError):
+            return None
         if market == "FULL_TIME_MATCH_TOTAL" and numeric_line == 2.5:
+            if team not in {"", "MATCH", "NONE", "BOTH"}:
+                return None
             label = "MATCH_OVER_2_5"
             over = h + a >= 3
-        elif market in {"HOME_TEAM_TOTAL", "AWAY_TEAM_TOTAL"} and numeric_line == 1.5:
-            if market == "HOME_TEAM_TOTAL" or team == "HOME":
-                label = "HOME_OVER_1_5"
-                over = h >= 2
-            else:
-                label = "AWAY_OVER_1_5"
-                over = a >= 2
+        elif market == "HOME_TEAM_TOTAL" and numeric_line == 1.5:
+            if team not in {"", "HOME"}:
+                return None  # Conflicting team identity: never silently switch
+            label = "HOME_OVER_1_5"
+            over = h >= 2
+        elif market == "AWAY_TEAM_TOTAL" and numeric_line == 1.5:
+            if team not in {"", "AWAY"}:
+                return None
+            label = "AWAY_OVER_1_5"
+            over = a >= 2
         else:
             return None
         p_over = float(probabilities[label])
@@ -105,11 +113,14 @@ def evaluate(forecasts: list[dict], quotes: list[dict]) -> dict:
             rejected[join_status] += 1
             continue
         ident = (str(q["leagueCode"]), str(q["fixtureId"]))
-        unique = (ident, q.get("selectionKey"))
+        selection_key = str(q.get("selectionKey") or "").strip()
+        if not selection_key:
+            rejected["missing_exact_selection_key"] += 1
+            continue
+        unique = (ident, selection_key)
         if unique in seen:
             rejected["duplicate_exact_price"] += 1
             continue
-        seen.add(unique)
         try:
             odd = float(q.get("odd"))
         except (ValueError, TypeError):
@@ -126,8 +137,9 @@ def evaluate(forecasts: list[dict], quotes: list[dict]) -> dict:
         if not 0 <= p <= 1 or not 0 <= push <= 1 or p + push > 1.0 + 1e-9:
             rejected["invalid_probability"] += 1
             continue
+        seen.add(unique)
         rows.append({
-            "fixture": ident, "selectionKey": q.get("selectionKey"),
+            "fixture": ident, "selectionKey": selection_key,
             "market": market, "odd": odd, "p": p, "push": push,
             "expectedReturn": p * odd + push,
             "grossReturn": gross
