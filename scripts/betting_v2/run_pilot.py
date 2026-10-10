@@ -20,6 +20,7 @@ from walk_forward_elo import walk_forward_elo
 from export_historical_prices import export_date
 from fixture_lookup import CachedFixtureLookup
 from calibration_gate import evaluate as evaluate_calibrated
+from raw_market_holdout import summarize as summarize_raw_market_holdout
 from publish_shadow import publish, _safe_output, _atomic_write
 
 
@@ -54,6 +55,8 @@ def main() -> None:
         "elo_calibration": "pilot_elo_fallback_calibration.jsonl",
         "elo_holdout": "pilot_elo_fallback_holdout.jsonl",
         "elo_priced": "pilot_elo_fallback_priced.json",
+        "market_holdout": "pilot_market_holdout.json",
+        "elo_market_holdout": "pilot_elo_market_holdout.json",
         "calibration": "pilot_calibration.jsonl",
         "holdout": "pilot_holdout.jsonl",
         "prices": "pilot_historical_prices.jsonl",
@@ -81,6 +84,27 @@ def main() -> None:
     _atomic_write(paths["elo_model"], elo_report)
     _write_jsonl(paths["elo_calibration"], elo_calibration)
     _write_jsonl(paths["elo_holdout"], elo_holdout)
+    # Distinct, strict temporal holdout diagnostics for every supported market.
+    # These are outcome-only research diagnostics; prices, lineup adversity and
+    # certified STRONG decisions remain out of scope.
+    for path_key, mode, cal_rows, held_rows in (
+        ("market_holdout", "XG_PRIMARY", calibration, holdout),
+        ("elo_market_holdout", "ELO_GOALS_FALLBACK_NO_XG",
+         elo_calibration, elo_holdout),
+    ):
+        if cal_rows and held_rows:
+            diagnostics = summarize_raw_market_holdout(cal_rows, held_rows, mode)
+        else:
+            diagnostics = {
+                "contract": "betting-v2-unpriced-market-holdout-v1",
+                "modelPopulation": mode,
+                "researchOnly": True,
+                "certified": False,
+                "strongRecommendations": 0,
+                "error": "No disjoint calibration and holdout available",
+            }
+        _atomic_write(paths[path_key], diagnostics)
+
     priced_report = None
 
     if args.with_prices:
