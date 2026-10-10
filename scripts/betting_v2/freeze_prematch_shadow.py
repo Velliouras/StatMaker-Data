@@ -24,6 +24,7 @@ import json
 from pathlib import Path
 
 from audit_data import read_fixtures
+from future_fixture_crosswalk import CachedUpcomingFixtureIndex
 from fixture_lookup import canonical_name, as_utc
 from walk_forward_goals import (
     Parameters, make_rows, model_lambdas, event_probs,
@@ -158,6 +159,19 @@ def freeze(root: Path, now: datetime, *, horizon_days: int = MAX_DAYS,
     )
     targets, rejected = verified_targets(payload, history, now,
                                          horizon_days=horizon_days)
+    future_index = CachedUpcomingFixtureIndex(root) if (
+        root / "data/statmaker/domestic_enriched/index.json"
+    ).is_file() else None
+    verified_crosswalks = {}
+    for target in targets:
+        if future_index is None:
+            rejected["NO_API_FOOTBALL_FUTURE_CACHE_INDEX"] += 1
+            continue
+        resolved, reason = future_index.resolve(target)
+        if resolved is None:
+            rejected[reason] += 1
+            continue
+        verified_crosswalks[target["providerEventId"]] = resolved
     # For the historical stream, disallow anything occurring on the UTC as-of
     # date or later, even if that match may have already finished today.
     # This exactly mirrors the prior-UTC-calendar-date research feature gate.
