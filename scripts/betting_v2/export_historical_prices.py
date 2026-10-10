@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Export historical *unfiltered* exact bookmaker prices from archived App-Ready DBs.
+"""Export historical LEGACY-PREPARED selections from archived App-Ready DBs.
+
+IMPORTANT: These rows are NOT an independently verified unfiltered bookmaker
+price universe and their snapshot cutoff is NOT the time each bookmaker
+quote was actually observed. They cannot certify ROI/EV/STRONG.
 
 This research tool is read-only. It requires a full local StatMaker-Data git
 history and a working git executable. It does not run any GitHub Actions.
