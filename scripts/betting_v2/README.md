@@ -25,6 +25,34 @@ The offline pilot is evidence-gathering only. Its Poisson models, Elo weights,
 Wilson bounds and reports are **research**, not certified model parameters.
 They do not produce a live recommendation.
 
+## Two-regime feature policy (2026-10-10)
+
+1. **XG_PRIMARY**: use the original strict xG/xGA/ELO/venue model when enough real pre-kickoff xG history exists.
+2. **ELO_GOALS_FALLBACK_NO_XG**: otherwise, if enough observed scored/conceded goals, prior ELO and home/away samples exist, use a separately tuned/calibrated ELO + observed-goals research model. Do not synthesize xG.
+3. Neither model is allowed to produce STRONG without its own frozen chronological calibration, verified conservative win probability >=60% even under adverse lineup scenarios, independent price coverage and strict 1.80 < odd < 3.00 with positive conservative EV.
+
+The Python offline pilot now writes separate Elo artifacts: pilot_elo_fallback_model.json, pilot_elo_fallback_calibration.jsonl and pilot_elo_fallback_holdout.jsonl. Under explicit --with-prices it also writes pilot_elo_fallback_priced.json. These are research-only; they do not promote Android PROD or modify App-Ready.
+
+## Independent xG recovery (optional, not automatic)
+
+Understat covers E0, D1, SP1, I1 and F1. The recovery script performs strict source-score/team/date reconciliation; for all other leagues, use the ELO fallback when approved. Recovered xG must never be treated as historically available before its source observation timestamp.
+
+One explicitly requested Understat fetch (NOT an API-Football call), only in a local environment where network access and provider terms permit:
+
+```bash
+python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --fetch-understat
+```
+
+Or from a previously downloaded Understat league-season JSON, without network:
+
+```bash
+python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --input ./understat_epl_2026.json
+```
+
+Both modes write a separate offline report at reports/betting_v2/understat_xg_E0_2026.json, NOT canonical stats or App-Ready. Other league/seasons use distinct files. The saved overlay needs point-in-time ingestion verification and model backtesting before it can affect STRONG decisions. This session's environment could not access Understat, so **no live missing xG values were retrieved** here.
+
+Independent six-league real-cache readiness check: 317 completed fixtures of 2026-27, 105 primary xG-ready, 122 additional ELO-ready and 90 without adequate prematch sample. See reports/betting_v2/DUAL_MODE_COVERAGE_AND_RECOVERY_2026-10-10.md. The full committed Python tests and pilot remain unexecuted in the available environment.
+
 ## Provider quota protection
 
 **V2-specific quota budget: 0 requests.**
