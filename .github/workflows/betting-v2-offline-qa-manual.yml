@@ -64,6 +64,14 @@ jobs:
         id: cached_odds
         if: ${{ always() && steps.offline.outcome == 'success' }}
         run: python scripts/betting_v2/audit_cached_odds_provenance.py --repository-root .
+      - name: Exact receipt-to-xG/ELO holdout crosswalk OFFLINE
+        id: bridge
+        if: ${{ always() && steps.offline.outcome == 'success' }}
+        run: |
+          python scripts/betting_v2/receipt_forecast_bridge.py \
+            --repository-root . \
+            --primary-forecast reports/betting_v2/pilot_holdout.jsonl \
+            --elo-forecast reports/betting_v2/pilot_elo_fallback_holdout.jsonl
       - name: Diagnose existing archived receipt rejections OFFLINE
         if: ${{ always() }}
         run: python scripts/betting_v2/diagnose_quote_receipts.py
@@ -99,8 +107,9 @@ jobs:
           PILOT_OUTCOME: ${{ steps.offline.outcome }}
           GATE_OUTCOME: ${{ steps.shadow_gate.outcome }}
           ODDS_AUDIT_OUTCOME: ${{ steps.cached_odds.outcome }}
+          BRIDGE_OUTCOME: ${{ steps.bridge.outcome }}
         run: |
-          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" && "$ODDS_AUDIT_OUTCOME" == "success" ]]; then
+          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" && "$ODDS_AUDIT_OUTCOME" == "success" && "$BRIDGE_OUTCOME" == "success" ]]; then
             outcome=success
             description="Full offline V2 tests and dual-model research pilot passed; no STRONG certification"
           else
@@ -124,6 +133,7 @@ jobs:
             reports/betting_v2/pilot_elo_market_holdout.json
             reports/betting_v2/pilot_cached_odds_provenance.json
             reports/betting_v2/pilot_receipt_diagnostics.json
+            reports/betting_v2/pilot_receipt_forecast_bridge.json
             reports/betting_v2/quote_receipt_index.json
             reports/betting_v2/shadow_manifest.json
           if-no-files-found: warn
