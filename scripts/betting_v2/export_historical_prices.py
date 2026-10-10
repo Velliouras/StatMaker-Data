@@ -25,6 +25,8 @@ import tempfile
 from zoneinfo import ZoneInfo
 import zipfile
 
+from fixture_lookup import CachedFixtureLookup
+
 ATHENS = ZoneInfo("Europe/Athens")
 MANIFEST = "data/statmaker/app_ready/update_manifest.json"
 
@@ -83,7 +85,10 @@ def source_fixture_id(payload: dict) -> str | None:
     return None
 
 
-def export_date(root: Path, target: date, out, seen: set[str]) -> dict:
+def export_date(
+    root: Path, target: date, out, seen: set[str],
+    resolver: CachedFixtureLookup | None = None,
+) -> dict:
     selected = snapshot_for(root, target)
     if selected is None:
         return {"date": target.isoformat(), "status": "NO_PRE_CUTOFF_MANIFEST"}
@@ -103,8 +108,10 @@ def export_date(root: Path, target: date, out, seen: set[str]) -> dict:
         raise ValueError("Archived App-Ready ZIP checksum mismatch")
     with zipfile.ZipFile(BytesIO(content)) as zipped:
         db_bytes = zipped.read("databases/statmaker_prepared_betting.db")
+    resolver = resolver or CachedFixtureLookup(root)
     output_count = 0
     ignored = 0
+    identity_rejections: dict[str, int] = {}
     with tempfile.TemporaryDirectory(prefix="sm-v2-archive-") as td:
         db = Path(td) / "snapshot.db"
         db.write_bytes(db_bytes)
@@ -152,11 +159,16 @@ def export_date(root: Path, target: date, out, seen: set[str]) -> dict:
                                 selection["selection_key"]])
                 if key in seen:
                     continue
-                seen.add(key)
-                fixture_id = source_fixture_id(m)
+                fixture_id, match_status = resolver.resolve(
+                    m, kickoff, source_fixture_id(m)
+                )
                 if fixture_id is None:
                     ignored += 1
+                    identity_rejections[match_status] = (
+                        identity_rejections.get(match_status, 0) + 1
+                    )
                     continue
+                seen.add(key)
                 record = {
                     "date": target.isoformat(), "sourceCommit": commit,
                     "generationContentVersion": manifest.get("contentVersion"),
@@ -167,6 +179,7 @@ def export_date(root: Path, target: date, out, seen: set[str]) -> dict:
                     "selectionKey": selection["selection_key"],
                     "matchKey": selection["match_key"],
                     "fixtureId": fixture_id,
+                    "identityResolution": match_status,
                     "homeTeam": m.get("homeTeam"), "awayTeam": m.get("awayTeam"),
                     "leagueCode": m.get("leagueCode"),
                     "market": selection["identity_sub_market_key"],
@@ -182,7 +195,8 @@ def export_date(root: Path, target: date, out, seen: set[str]) -> dict:
             con.close()
     return {
         "date": target.isoformat(), "status": "OK", "commit": commit,
-        "exportedQuotes": output_count, "skippedUnsafeOrUnmatched": ignored
+        "exportedQuotes": output_count, "skippedUnsafeOrUnmatched": ignored,
+        "identityRejections": identity_rejections
     }
 
 
@@ -198,10 +212,11 @@ def main() -> None:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     seen: set[str] = set()
     statuses = []
+    resolver = CachedFixtureLookup(args.data_root)
     with args.output.open("w", encoding="utf-8") as out:
         day = args.from_date
         while day <= args.to_date:
-            status = export_date(args.data_root, day, out, seen)
+            status = export_date(args.data_root, day, out, seen, resolver)
             print(status, flush=True)
             statuses.append(status)
             day += timedelta(days=1)
