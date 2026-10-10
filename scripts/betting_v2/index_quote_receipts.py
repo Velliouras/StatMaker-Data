@@ -108,8 +108,10 @@ def inspect(root: Path, *, max_files: int = MAX_RECEIPT_FILES) -> dict:
         raise ValueError("max_files must be positive")
     directory = root.resolve() / STATUS_PATH
     files = sorted(directory.glob("*.json.gz")) if directory.exists() else []
-    if len(files) > max_files:
-        raise ValueError("Receipt archive is larger than bounded audit limit")
+    truncated = len(files) > max_files
+    if truncated:
+        # This is a recent-receipts diagnostic, not a full archive claim.
+        files = files[-max_files:]
     counters: Counter = Counter()
     by_market = Counter()
     by_bookmaker = Counter()
@@ -144,6 +146,8 @@ def inspect(root: Path, *, max_files: int = MAX_RECEIPT_FILES) -> dict:
         "hasPricedProfitCertificate": False,
         "providerCalls": 0,
         "recordsScanned": len(files),
+        "olderReceiptFilesOmittedByLimit": truncated,
+        "maxFilesScanned": max_files,
         "verifiedSnapshotReceipts": counters["verifiedSnapshotReceipts"],
         "preKickoffPriceRows": counters["preKickoffPriceRows"],
         "uniqueProviderEvents": len(fixture_ids),
