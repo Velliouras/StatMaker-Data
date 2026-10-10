@@ -79,7 +79,7 @@ by optimizing wins/ROI after looking at the holdout.
 The individual scripts also remain available:
 - \`audit_data.py\`: previously known evidence and xG coverage.
 - \`walk_forward_goals.py\`: initial joint 1X2/goals feature model.
-- \`export_historical_prices.py\`: pre-kickoff original bookmaker quotes.
+- \`export_historical_prices.py\`: legacy-prepared selection prices (NOT proven independently unfiltered bookmaker data).
 - \`evaluate_holdout_prices.py\`: price-aligned raw-value evaluation.
 - \`calibration_gate.py\`: bin/league Wilson-bound exploratory holdout.
 
@@ -97,6 +97,19 @@ are **UTC**. The research join uses verified fixture ID + league + kickoff
 instead of comparing those potentially different dates. The quote-cutoff
 timestamp must be strictly before kickoff. This fixes the midnight-rollover
 case without accepting incorrectly priced or mismatched fixtures.
+
+**Research limitation:** the historical exporter uses legacy
+\`prepared_selections\` from archived App-Ready bundles, not an independently
+verified complete bookmaker market. Upstream selection/coverage bias is
+unresolved. Replay rows carry \`priceUniverse=LEGACY_PREPARED_SELECTIONS\`, and the
+calibration report sets \`independentUnfilteredBookmakerUniverseVerified=false\`.
+ROI from these records is diagnostic only and cannot certify V2.
+
+Replay rejects unverifiable, future-dated or >24-hour-old bundle generation
+timestamps. ZIP generation time does not prove individual bookmaker quote
+observation time; \`quoteCutoff\` is the as-of upper bound, NOT an independently
+observed price timestamp. Complete, independently captured quotes remain
+a certification prerequisite.
 
 ## Prematch feature completeness
 
@@ -118,9 +131,11 @@ python -m unittest discover -s tests -p 'test_betting_v2_*.py' -v
 ```
 
 Synthetic tests cover missing xG/xGA, ambiguous fixture IDs, UTC/Athens
-midnight crossover, quote timing, 1X2, DNB PUSH, goals totals and the
-strict 1.80–3.00 price interval. These tests were committed but their
-execution has **not** yet been verified in this conversation.
+midnight rollover, quote timing, 1X2, DNB PUSH, strict team-goals identity,
+malformed goal lines, quote duplication, archival bundle age, and the
+strict 1.80–3.00 price interval. No full Python test-suite pass has yet
+been verified in this conversation. Connected GitHub sources alone are
+not an executable full local checkout.
 
 ## Integration conditions (NOT satisfied yet)
 
