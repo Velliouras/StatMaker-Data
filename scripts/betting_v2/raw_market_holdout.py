@@ -10,7 +10,9 @@ from collections import defaultdict
 from datetime import date
 from math import isfinite
 
-from calibration_gate import model_events
+from calibration_gate import (
+    model_events, build_calibration, prob_bin, MIN_MARKET_BIN, MIN_LOCAL_BIN
+)
 from elo_holdout_diagnostics import wilson_lower
 
 MODES = frozenset({"XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG"})
@@ -60,6 +62,13 @@ def summarize(calibration: list[dict], holdout: list[dict], mode: str) -> dict:
         elif strategy not in (None, "XG_PRIMARY"):
             raise ValueError("Fallback/unknown strategy cannot calibrate xG model")
 
+    # Freeze calibration BEFORE evaluating the later holdout. Readiness here
+    # means statistical pre-price evidence only, NEVER STRONG certification.
+    bins = build_calibration(calibration)
+    passed_by_market: dict[str, int] = defaultdict(int)
+    blocked: dict[str, int] = defaultdict(int)
+    candidate_fixtures: set[tuple[str, str]] = set()
+
     global_markets: dict[str, list[tuple[float, int]]] = defaultdict(list)
     league_markets: dict[tuple[str, str], list[tuple[float, int]]] = defaultdict(list)
     seen: set[tuple[str, str]] = set()
@@ -89,6 +98,23 @@ def summarize(calibration: list[dict], holdout: list[dict], mode: str) -> dict:
                 continue
             global_markets[market].append((probability, hit))
             league_markets[(league, market)].append((probability, hit))
+            # Not a bet: no bookmaker offer, quote timestamp or lineup bound.
+            # This is a frozen-calibration market/league eligibility counter.
+            bucket = prob_bin(probability)
+            g_wins, g_n = bins["global"].get((market, bucket), (0, 0))
+            l_wins, l_n = bins["local"].get((league, market, bucket), (0, 0))
+            if probability < 0.60:
+                blocked["raw_probability_below_60pct"] += 1
+            elif g_n < MIN_MARKET_BIN:
+                blocked["insufficient_global_market_bin"] += 1
+            elif l_n < MIN_LOCAL_BIN:
+                blocked["insufficient_league_market_bin"] += 1
+            elif min(wilson_lower(g_wins, g_n),
+                     wilson_lower(l_wins, l_n)) < 0.60:
+                blocked["conservative_wilson_lower_below_60pct"] += 1
+            else:
+                passed_by_market[market] += 1
+                candidate_fixtures.add(identity)
     return {
         "contract": "betting-v2-unpriced-market-holdout-v1",
         "modelPopulation": mode,
@@ -100,6 +126,19 @@ def summarize(calibration: list[dict], holdout: list[dict], mode: str) -> dict:
         "hasROIProof": False,
         "outcomesUsedOnlyForRetrospectiveEvaluation": True,
         "marketCorrelationsMayInvalidateNaivePooledSignificance": True,
+        "frozenCalibrationReadiness": {
+            "method": "prior-date only global market/bin >=70; same-league market/bin >=25; min 95pct Wilson >=0.60",
+            "prePriceOnly": True,
+            "hasBookmakerQuoteOrExpectedValueEvidence": False,
+            "hasAdverseLineupBounds": False,
+            "certifiedStrong": 0,
+            "minGlobalBin": MIN_MARKET_BIN,
+            "minLeagueBin": MIN_LOCAL_BIN,
+            "passedMarketEvaluations": sum(passed_by_market.values()),
+            "fixturesWithAtLeastOnePassingMarket": len(candidate_fixtures),
+            "passedByMarket": dict(sorted(passed_by_market.items())),
+            "blockedCounts": dict(sorted(blocked.items())),
+        },
         "rejected": dict(sorted(rejected.items())),
         "byMarket": {
             key: _summary(items) for key, items in sorted(global_markets.items())
