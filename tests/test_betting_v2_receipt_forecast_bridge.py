@@ -12,7 +12,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts/betting_v2"))
 from quote_receipt_capture import write_receipt
-from receipt_forecast_bridge import normalized_market, fixture_resolution, study
+from receipt_forecast_bridge import normalized_market, fixture_resolution, provider_schedule_resolution, study
 from walk_forward_goals import event_probs
 
 OBSERVED = datetime(2026, 10, 10, 14, 30, tzinfo=timezone.utc)
@@ -96,6 +96,54 @@ class ReceiptForecastBridgeTests(unittest.TestCase):
                 )
                 self.assertEqual(why, reason)
                 self.assertEqual(result is not None, reason.startswith("EXACT"))
+
+    def test_exact_odds_provider_schedule_is_not_api_football_identity(self):
+        event = PAYLOAD[0]
+        cached = {
+            "123": [{
+                "providerEventId": "123",
+                "leagueCode": "BRA",
+                "providerHomeTeam": "Home FC",
+                "providerAwayTeam": "Away FC",
+                "kickoffUTC": KICKOFF,
+            }]
+        }
+        result, status = provider_schedule_resolution(event, cached)
+        self.assertEqual(status, "EXACT_PROVIDER_SCHEDULE_ONLY_NOT_API_FIXTURE")
+        self.assertEqual(result["leagueCode"], "BRA")
+        duplicate = {**cached["123"][0], "leagueCode": "CUP"}
+        _, status = provider_schedule_resolution(
+            event, {"123": [cached["123"][0], duplicate]}
+        )
+        self.assertEqual(status, "AMBIGUOUS_PROVIDER_SCHEDULE_FIXTURE")
+        mismatch = {**cached["123"][0], "providerAwayTeam": "Other FC"}
+        _, status = provider_schedule_resolution(event, {"123": [mismatch]})
+        self.assertEqual(status, "NO_EXACT_PROVIDER_SCHEDULE_FIXTURE")
+
+    def test_provider_schedule_match_does_not_invent_model_predictions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            dest = root / "odds/odds_api_io/domestic_odds.json"
+            dest.parent.mkdir(parents=True)
+            dest.write_text(json.dumps({
+                "leagues": [{
+                    "leagueCode": "BRA",
+                    "matches": [{
+                        "id": "123", "kickoff": KICKOFF,
+                        "providerHomeTeam": "Home FC",
+                        "providerAwayTeam": "Away FC",
+                    }],
+                }],
+            }), encoding="utf-8")
+            write_receipt(root, PAYLOAD, "/odds", PARAMS, OBSERVED)
+            result = study(root, lookup=lookup_fixture(valid=False))
+            self.assertEqual(result["distinctSameProviderScheduledFixtures"], 1)
+            self.assertGreater(
+                result["counts"]["verifiedSameProviderSchedulePriceObservations"], 0
+            )
+            self.assertFalse(result["sameProviderScheduleIsApiFootballIdentity"])
+            self.assertEqual(result["distinctExactCachedFixtures"], 0)
+            self.assertIsNone(result["certifiedEV"])
 
     def test_real_receipt_no_timestamps_invented_for_roi(self):
         with tempfile.TemporaryDirectory() as tmp:
