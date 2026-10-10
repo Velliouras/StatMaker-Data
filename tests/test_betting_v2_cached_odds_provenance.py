@@ -66,6 +66,18 @@ class CachedOddsProvenanceAuditTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 audit_file(Path(tmp))
 
+    def test_scan_ignores_scalar_nodes_and_covers_every_offer(self):
+        payload = {"offers": [
+            {"bookmaker": "B", "selection": f"s{i}", "odd": 2.0,
+             "unimportant": "foo"}
+            for i in range(20)
+        ]}
+        # root dict + offers list + 20 offer dictionaries = 22 nodes.
+        result = audit_structure(payload, max_nodes=22)
+        self.assertEqual(result["visitedNodes"], 22)
+        self.assertFalse(result["scanTruncated"])
+        self.assertEqual(result["counts"]["priceLikeObjects"], 20)
+
     def test_explicit_scan_limit_is_visible(self):
         result = audit_structure([{"odd": 2.05}, {"odd": 1.95}], max_nodes=1)
         self.assertTrue(result["scanTruncated"])
