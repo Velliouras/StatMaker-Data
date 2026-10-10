@@ -24,6 +24,16 @@ class BettingV2EloFallbackTests(unittest.TestCase):
             "stats": {"HxG": xg, "AxG": xg},
         } for i in range(n)]
 
+    def test_first_seen_matches_remain_in_scored_history(self):
+        # Two teams alternate venues, so after 20 complete earlier
+        # league fixtures both have sufficient scored/venue history.
+        # A discarded first-game record would silently undercount readiness.
+        rows, reasons = make_elo_rows(self.fixtures(n=34))
+        self.assertEqual(len(rows), 14)
+        self.assertEqual(rows[0].fixture, "1020")
+        self.assertEqual(rows[-1].fixture, "1033")
+        self.assertEqual(reasons["elo_fallback_due_to_insufficient_xg"], 14)
+
     def test_without_xg_has_elo_forecasts_not_fake_xg(self):
         rows, counts = make_elo_rows(self.fixtures())
         self.assertTrue(rows)
