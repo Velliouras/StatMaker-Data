@@ -87,6 +87,14 @@ class BettingV2CalibrationIntegrityTests(unittest.TestCase):
             "QUOTE_OBSERVED_AFTER_CUTOFF_OR_KICKOFF"], 1)
         self.assertEqual(report["marketCounts"], {})
 
+    def test_infinite_probability_keeps_nonfinite_rejection_reason(self):
+        invalid = {**self.forecast, "probabilities": {
+            **self.forecast["probabilities"], "1X2_HOME": float("inf")
+        }}
+        result = evaluate_calibration([self.calib], [invalid], [self.quote])
+        self.assertEqual(result["rejected"][
+            "nonfinite_market_probability_or_settlement"], 1)
+
     def test_nonfinite_probability_rejected(self):
         invalid = {**self.forecast, "probabilities": {
             **self.forecast["probabilities"], "1X2_HOME": float("nan")
