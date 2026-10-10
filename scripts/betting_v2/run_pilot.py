@@ -17,6 +17,7 @@ from pathlib import Path
 
 from walk_forward_goals import walk_forward
 from export_historical_prices import export_date
+from fixture_lookup import CachedFixtureLookup
 from calibration_gate import evaluate as evaluate_calibrated
 from publish_shadow import publish, _safe_output, _atomic_write
 
@@ -74,10 +75,11 @@ def main() -> None:
     if args.with_prices:
         statuses: list[dict] = []
         seen: set[str] = set()
+        resolver = CachedFixtureLookup(root)
         with paths["prices"].open("w", encoding="utf-8") as out:
             day = args.from_date
             while day <= args.to_date:
-                status = export_date(root, day, out, seen)
+                status = export_date(root, day, out, seen, resolver)
                 statuses.append(status)
                 print("V2_PRICE_REPLAY", status, flush=True)
                 day += timedelta(days=1)
