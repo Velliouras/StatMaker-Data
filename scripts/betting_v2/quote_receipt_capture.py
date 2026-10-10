@@ -341,19 +341,26 @@ def install(
                 "receipt_count_cap_reached"
             )
             return result
-        count[0] += 1
-        try:
-            dest = write_receipt(
-                root, result, path, params, now(), event_context=events_seen
-            )
-            debug.setdefault("bettingV2ReceiptPaths", []).append(
-                dest.relative_to(root.resolve()).as_posix()
-            )
-        except (OSError, ValueError, TypeError, OverflowError) as error:
-            # Research receipts must NEVER break core live odds publication.
-            debug.setdefault("bettingV2ReceiptWarnings", []).append(
-                type(error).__name__
-            )
+        candidates = result if path == "/odds/multi" and isinstance(result, list) else [result]
+        ids = set(str(params.get("eventIds") or "").split(","))
+        for item in candidates:
+            if not isinstance(item, dict):
+                continue
+            eid = str(item.get("id") or item.get("eventId") or "")
+            if path == "/odds/multi" and eid not in ids:
+                debug.setdefault("bettingV2ReceiptWarnings", []).append("unrequested_event_id")
+                continue
+            try:
+                dest = write_receipt(
+                    root, item, path, params, now(), event_context=events_seen
+                )
+                debug.setdefault("bettingV2ReceiptPaths", []).append(
+                    dest.relative_to(root.resolve()).as_posix()
+                )
+            except (OSError, ValueError, TypeError, OverflowError) as error:
+                debug.setdefault("bettingV2ReceiptWarnings", []).append(
+                    type(error).__name__
+                )
         return result
 
     odds_module.api_get = captured
