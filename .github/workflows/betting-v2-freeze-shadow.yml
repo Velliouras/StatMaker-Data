@@ -67,6 +67,9 @@ jobs:
       - name: Publish bounded research-only V2 Android UAT forecast preview
         run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
 
+      - name: Attach already cached bookmaker prices to UAT shadow preview
+        run: python scripts/betting_v2/attach_shadow_market_evidence.py --repository-root .
+
       - name: Commit ONLY Betting V2 shadow research artifacts
         run: |
           git config user.name "github-actions[bot]"
