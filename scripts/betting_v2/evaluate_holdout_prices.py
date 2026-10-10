@@ -19,7 +19,7 @@ import json
 from pathlib import Path
 
 from quote_join import exact_join, forecast_index
-from walk_forward_goals import GOAL_LINES
+from forecast_market import market_probability
 
 
 def load_lines(file: Path):
@@ -30,83 +30,40 @@ def load_lines(file: Path):
 
 
 def event(quote: dict, forecast: dict) -> tuple[str, float, float, float] | None:
-    """Return exact market, WIN, PUSH and realized unit gross return."""
-    probabilities = forecast["probabilities"]
+    """RESEARCH-ONLY: settle a PREMATCH probability against a finished score.
+
+    Market selection and probabilities are delegated to forecast_market.py
+    (which never reads outcomes), preventing live/research market drift.
+    """
+    mapped = market_probability(quote, forecast)
+    if mapped is None:
+        return None
+    label, p, push = mapped
     h, a = int(forecast["homeGoals"]), int(forecast["awayGoals"])
+    odd = float(quote["odd"])
     market = str(quote.get("market") or "")
     direction = str(quote.get("direction") or "").upper()
-    team = str(quote.get("teamSide") or "").upper()
-    line = quote.get("line")
-    odd = float(quote["odd"])
-    p: float
-    win: bool
-    push = 0.0
     actual_push = False
 
-    if market == "RESULT_1X2" and direction in {"HOME", "DRAW", "AWAY"}:
-        label = f"1X2_{direction}"
-        p = float(probabilities[label])
-        win = ((h > a and direction == "HOME") or
-               (h == a and direction == "DRAW") or
-               (h < a and direction == "AWAY"))
-    elif market == "RESULT_DNB" and direction in {"HOME", "AWAY"}:
-        label = f"1X2_{direction}"
-        p = float(probabilities[label])
-        push = float(probabilities["1X2_DRAW"])
-        win = (h > a and direction == "HOME") or (h < a and direction == "AWAY")
-        actual_push = (h == a)
-    elif market == "RESULT_DOUBLE_CHANCE" and direction in {
-        "HOME_OR_DRAW", "AWAY_OR_DRAW", "HOME_OR_AWAY"
-    }:
-        if direction == "HOME_OR_DRAW":
-            p = float(probabilities["1X2_HOME"]) + float(probabilities["1X2_DRAW"])
-            win = h >= a
-        elif direction == "AWAY_OR_DRAW":
-            p = float(probabilities["1X2_AWAY"]) + float(probabilities["1X2_DRAW"])
-            win = a >= h
-        else:
-            p = 1.0 - float(probabilities["1X2_DRAW"])
-            win = h != a
-        label = "DOUBLE_CHANCE_" + direction
-    elif market in {"FULL_TIME_MATCH_TOTAL", "HOME_TEAM_TOTAL", "AWAY_TEAM_TOTAL"} and (
-        direction in {"OVER", "UNDER"}
-    ):
-        if isinstance(line, bool):
-            return None
-        try:
-            numeric_line = float(line)
-        except (ValueError, TypeError):
-            return None
-        # Only strictly binary half-goal lines; no handicap or Asian push.
-        if numeric_line not in GOAL_LINES:
-            return None
-        suffix = f"{int(numeric_line)}_5"
-        if market == "FULL_TIME_MATCH_TOTAL":
-            if team not in {"", "MATCH", "NONE", "BOTH"}:
-                return None
-            label = f"MATCH_OVER_{suffix}"
-            over = h + a > numeric_line
-        elif market == "HOME_TEAM_TOTAL":
-            if team not in {"", "HOME"}:
-                return None
-            label = f"HOME_OVER_{suffix}"
-            over = h > numeric_line
-        else:
-            if team not in {"", "AWAY"}:
-                return None
-            label = f"AWAY_OVER_{suffix}"
-            over = a > numeric_line
-        if label not in probabilities:
-            return None
-        p_over = float(probabilities[label])
-        p = p_over if direction == "OVER" else (1.0 - p_over)
-        win = over if direction == "OVER" else not over
-        label = label + "_" + direction
+    if market == "RESULT_1X2":
+        won = ((direction == "HOME" and h > a) or
+               (direction == "DRAW" and h == a) or
+               (direction == "AWAY" and h < a))
+    elif market == "RESULT_DNB":
+        actual_push = h == a
+        won = ((direction == "HOME" and h > a) or
+               (direction == "AWAY" and h < a))
+    elif market == "RESULT_DOUBLE_CHANCE":
+        won = ((direction == "HOME_OR_DRAW" and h >= a) or
+               (direction == "AWAY_OR_DRAW" and a >= h) or
+               (direction == "HOME_OR_AWAY" and h != a))
     else:
-        return None
-
-    # Exact decimal odds settlement with explicit DNB push.
-    return label, p, push, odd if win else (1.0 if actual_push else 0.0)
+        line = float(quote["line"])
+        score = (h + a if market == "FULL_TIME_MATCH_TOTAL" else
+                 h if market == "HOME_TEAM_TOTAL" else a)
+        over = score > line
+        won = over if direction == "OVER" else not over
+    return label, p, push, odd if won else (1.0 if actual_push else 0.0)
 
 
 def evaluate(forecasts: list[dict], quotes: list[dict]) -> dict:
