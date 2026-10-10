@@ -35,7 +35,7 @@ def _price(v: Any) -> float | None:
 
 def extracted_offers(receipt: dict) -> tuple[list[dict], Counter]:
     """Flatten without guessing bookmaker event-to-API-Football crosswalks."""
-    status = verify_receipt(receipt)
+    status = verify_receipt(receipt, allow_partial=True)
     observed = datetime.fromisoformat(
         status["clientReceivedAtUTC"].replace("Z", "+00:00")
     )
@@ -133,6 +133,10 @@ def inspect(root: Path, *, max_files: int = MAX_RECEIPT_FILES) -> dict:
             errors["invalid_receipt"] += 1
             continue
         counters["verifiedSnapshotReceipts"] += 1
+        if doc.get("marketSnapshotComplete") is True:
+            counters["completeSnapshotReceipts"] += 1
+        else:
+            counters["integrityVerifiedPartialSnapshotReceipts"] += 1
         counters["preKickoffPriceRows"] += len(offers)
         errors.update(issues)
         for offer in offers:
@@ -149,6 +153,8 @@ def inspect(root: Path, *, max_files: int = MAX_RECEIPT_FILES) -> dict:
         "olderReceiptFilesOmittedByLimit": truncated,
         "maxFilesScanned": max_files,
         "verifiedSnapshotReceipts": counters["verifiedSnapshotReceipts"],
+        "completeSnapshotReceipts": counters["completeSnapshotReceipts"],
+        "integrityVerifiedPartialSnapshotReceipts": counters["integrityVerifiedPartialSnapshotReceipts"],
         "preKickoffPriceRows": counters["preKickoffPriceRows"],
         "uniqueProviderEvents": len(fixture_ids),
         "byMarket": dict(sorted(by_market.items())),
