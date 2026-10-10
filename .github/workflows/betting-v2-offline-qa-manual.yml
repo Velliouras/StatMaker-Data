@@ -1,8 +1,14 @@
-name: "Betting V2 - manual offline QA (zero provider quota)"
+name: "Betting V2 - offline QA (zero provider quota)"
 
-# Explicitly manual-only: no push, pull_request or schedule triggers.
+# Manual dispatch or one single, dedicated push-marker. No recurring schedule.
 on:
   workflow_dispatch:
+  # One-shot push trigger, limited to a dedicated request marker on Data/main.
+  # Ordinary code/data changes and Android commits do NOT trigger QA.
+  push:
+    branches: [main]
+    paths:
+      - 'reports/betting_v2/run_offline_qa_2026-10-10.txt'
 
 permissions:
   contents: read
