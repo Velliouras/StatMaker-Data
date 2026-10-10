@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Append-only, zero-extra-request receipts from existing Odds-API.io /odds calls.
 
-Captures the parsed provider RESPONSE exactly as delivered to the existing
-refresh normalizer, before merge/rotation. The receipt UTC time is when the
+Observes the parsed provider response and stores only bounded, whitelisted
+event/bookmaker/market/outcome evidence, before merge/rotation. The receipt UTC time is when the
 CLIENT received a response; it is NOT a provider price-update timestamp.
-Full decoded payload is retained for later exact offer/fixture/market audits.
+Raw full provider responses are NOT published in the public Data repository.
+A source SHA-256 allows later comparison against the original provider response
+if legally and securely retained elsewhere; it does not prove quote freshness.
 
 No extra HTTP calls, no changes to provider responses or API quota. Receipts
 are research evidence, not independent quote certificates or STRONG decisions.
