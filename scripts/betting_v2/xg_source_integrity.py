@@ -116,8 +116,14 @@ def audit_pair(enriched: dict, raw: dict) -> dict:
         if source_match is None:
             counts["missingRawFixture"] += 1
             continue
-        if str(source_match.get("date") or "")[:10] != dt[:10]:
-            counts["rawKickoffDateMismatch"] += 1
+        try:
+            raw_dt = datetime.fromisoformat(
+                str(source_match.get("date") or "").replace("Z", "+00:00")
+            )
+            if raw_dt.tzinfo is None or abs((raw_dt - parsed).total_seconds()) > 900:
+                raise ValueError("raw kickoff differs from canonical fixture")
+        except ValueError:
+            counts["rawKickoffMismatch"] += 1
             continue
         if (canonical_team(source_match.get("home_team")) != canonical_team(m.get("home_team")) or
                 canonical_team(source_match.get("away_team")) != canonical_team(m.get("away_team"))):
@@ -144,7 +150,7 @@ def audit_pair(enriched: dict, raw: dict) -> dict:
         else:
             counts["rawXgNotIndependentlyVerified"] += 1
     measures = ("completed", "invalidOrDuplicateFixtureIdentity", "missingRawFixture",
-                "rawKickoffDateMismatch", "rawTeamsMismatch", "publishedBothXg",
+                "rawKickoffMismatch", "rawTeamsMismatch", "publishedBothXg",
                 "sourceNormalizedBothXg", "sourceVsPublishedXgMismatch",
                 "providerObservedBothXg", "rawVsSourceNormalizedXgMismatch",
                 "rawXgNotIndependentlyVerified")
