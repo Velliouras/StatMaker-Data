@@ -25,6 +25,7 @@ from typing import Any, Dict, Iterable, List, Sequence
 import domestic_live_july_pipeline as pipeline
 import refresh_domestic_live_july_odds as target
 import refresh_domestic_odds_integrity as guarded
+from betting_v2.quote_receipt_capture import install as install_v2_receipt_capture
 
 
 DEFAULT_SCHEDULE_HORIZON_DAYS = 3
@@ -539,6 +540,15 @@ def main() -> int:
 
     schedule_days = _positive_int("STATMAKER_DOMESTIC_SCHEDULE_HORIZON_DAYS", DEFAULT_SCHEDULE_HORIZON_DAYS)
     odds_days = _positive_int("STATMAKER_DOMESTIC_EXACT_ODDS_HORIZON_DAYS", DEFAULT_EXACT_ODDS_HORIZON_DAYS)
+    # Observe existing Odds-API.io /odds responses without fetching again.
+    # Deliberately research-only: a client response time is not a provider
+    # bookmaker quote-update timestamp. Off unless explicitly enabled by the
+    # controlled Data/main odds-refresh workflow.
+    install_v2_receipt_capture(
+        target.odds_fetch,
+        pipeline.ROOT,
+        enabled=os.getenv("STATMAKER_V2_CAPTURE_ODDS_RECEIPTS", "0") == "1",
+    )
     global_debug: Dict[str, Any] = {"warnings": [], "apiCalls": []}
     events = _global_imminent_events(api_key, schedule_days, global_debug)
     slug_to_code = _resolved_slug_map(events, registry)
