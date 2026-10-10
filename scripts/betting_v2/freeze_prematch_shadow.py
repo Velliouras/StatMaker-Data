@@ -19,6 +19,7 @@ from collections import Counter, defaultdict
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
+import gzip
 import json
 from pathlib import Path
 
@@ -164,6 +165,20 @@ def freeze(root: Path, now: datetime, *, horizon_days: int = MAX_DAYS,
         m for m in history
         if m["date"].astimezone(timezone.utc).date() < now.date()
     ]
+    # SHA-256 of the actual feature-bearing history and source fixture schedule:
+    # a later regenerated archive may not be substituted for the real as-of
+    # input without a detectable content-hash change.
+    history_hash = sha256(_json_bytes([
+        {
+            "group": m["group"], "id": m["fixture_id"],
+            "date": m["date"].isoformat(), "home": m["home"], "away": m["away"],
+            "homeGoals": m["hg"], "awayGoals": m["ag"],
+            "HxG": m["stats"].get("HxG"), "AxG": m["stats"].get("AxG"),
+        } for m in sorted(
+            safe_history, key=lambda x: (x["group"], x["date"], x["fixture_id"])
+        )
+    ])).hexdigest()
+    schedule_hash = sha256(_json_bytes(payload)).hexdigest()
     records: list[dict] = []
     by_day: dict[str, list[dict]] = defaultdict(list)
     for t in targets:
@@ -212,6 +227,8 @@ def freeze(root: Path, now: datetime, *, horizon_days: int = MAX_DAYS,
                 "forecastComputedAtUTC": now.isoformat(),
                 "strategy": selected_model,
                 "modelVersion": PARAMS_VERSION,
+                "historicalFeatureArchiveSha256": history_hash,
+                "providerScheduleSnapshotSha256": schedule_hash,
                 "parameters": asdict(XG_PARAMS if row is not None else ELO_PARAMS),
                 "expectedHomeGoals": round(home_lambda, 6),
                 "expectedAwayGoals": round(away_lambda, 6),
@@ -235,6 +252,8 @@ def freeze(root: Path, now: datetime, *, horizon_days: int = MAX_DAYS,
         "forecastComputedAtUTC": now.isoformat(),
         "modelVersion": PARAMS_VERSION,
         "modelParametersFrozen": True,
+        "historicalFeatureArchiveSha256": history_hash,
+        "providerScheduleSnapshotSha256": schedule_hash,
         "apiCalls": 0,
         "outputDestination": "SHADOW_RESEARCH_ONLY",
         "certificationStatus": "BLOCKED",
@@ -258,10 +277,13 @@ def write_snapshot(root: Path, result: dict, *, now: datetime) -> Path:
     payload = _json_bytes(result)
     key = sha256(payload).hexdigest()[:16]
     when = now.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    path = target_dir / f"{when}_{key}.json"
+    path = target_dir / f"{when}_{key}.json.gz"
     # Never overwrite a previous recorded point-in-time forecast.
+    # Deterministic gzip: no embedded original filename or varying mtime.
     with path.open("xb") as stream:
-        stream.write(payload + b"\n")
+        with gzip.GzipFile(filename="", mode="wb", fileobj=stream,
+                           compresslevel=7, mtime=0) as zipped:
+            zipped.write(payload + b"\n")
     return path
 
 
