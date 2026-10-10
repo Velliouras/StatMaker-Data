@@ -21,6 +21,7 @@ from math import sqrt
 from pathlib import Path
 
 from evaluate_holdout_prices import event, load_lines
+from quote_join import exact_join, forecast_index
 
 MIN_MARKET_BIN = 70
 MIN_LOCAL_BIN = 25
@@ -102,17 +103,14 @@ def match_quoted_event(quote: dict, forecast: dict):
 def evaluate(calibration: list[dict], holdout: list[dict],
              quotes: list[dict]) -> dict:
     params = build_calibration(calibration)
-    by_id = {(str(f["date"]), str(f["fixtureId"])): f for f in holdout}
+    by_id = forecast_index(holdout)
     rejected = defaultdict(int)
     qualifying = []
     per_market = defaultdict(lambda: [0, 0])
     for quote in quotes:
-        if quote.get("fixtureId") is None:
-            rejected["missing_fixture_id"] += 1
-            continue
-        match = by_id.get((str(quote.get("date")), str(quote["fixtureId"])))
+        match, join_status = exact_join(quote, by_id)
         if match is None:
-            rejected["not_in_untouched_holdout"] += 1
+            rejected[join_status] += 1
             continue
         try:
             odd = float(quote["odd"])
