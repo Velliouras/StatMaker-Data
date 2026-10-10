@@ -102,8 +102,11 @@ def projected_market_snapshot(payload: Any, event_context: dict[str, dict] | Non
                     context[field] = from_events[field]
         raw = event.get("bookmakers") or event.get("odds")
         if isinstance(raw, dict):
-            books = [{"name": key, "markets": value.get("markets") if isinstance(value, dict) else value}
-                     for key, value in raw.items()]
+            books = [{
+                "name": key,
+                "markets": (value.get("markets") or value.get("odds"))
+                if isinstance(value, dict) else value,
+            } for key, value in raw.items()]
         elif isinstance(raw, list):
             books = raw
         else:
@@ -117,7 +120,8 @@ def projected_market_snapshot(payload: Any, event_context: dict[str, dict] | Non
             if not isinstance(book, dict):
                 complete = False
                 continue
-            name = str(book.get("name") or book.get("bookmaker") or book.get("key") or "")
+            name = str(book.get("name") or book.get("bookmaker") or
+                       book.get("key") or book.get("title") or "")
             markets = book.get("markets") or book.get("odds")
             if isinstance(markets, dict):
                 markets = [{"name": key, "odds": value} for key, value in markets.items()]
