@@ -55,6 +55,23 @@ def build(root: Path) -> dict:
     at = as_utc(data.get("forecastComputedAtUTC"))
     if at is None:
         raise ValueError("Missing verified forecast snapshot UTC time")
+    verified = {}
+    identity_report = root / "reports/betting_v2/pilot_forward_identity_crosswalk.json"
+    if identity_report.is_file():
+        checked = json.loads(identity_report.read_text(encoding="utf-8"))
+        if checked.get("contract") == "betting-v2-future-api-football-crosswalk-audit-v1":
+            for item in checked.get("verifiedFixtureLinks") or []:
+                if item.get("forecastArchive") != file.name:
+                    continue
+                if not item.get("apiFootballFixtureId"):
+                    continue
+                key = (str(item.get("leagueCode") or ""),
+                       str(item.get("bookmakerProviderEventId") or ""),
+                       str(item.get("kickoffUTC") or ""))
+                if key in verified:
+                    verified[key] = None  # conflicting proof must fail closed
+                else:
+                    verified[key] = str(item["apiFootballFixtureId"])
     records = []
     for row in data["forecastData"]:
         if not isinstance(row, dict) or row.get("certifiedStrong") is not False:
@@ -79,7 +96,15 @@ def build(root: Path) -> dict:
             continue
         if abs(sum(selected[k] for k in ("1X2_HOME","1X2_DRAW","1X2_AWAY"))-1)>0.002:
             continue
+        crosswalk_key = (
+            str(row.get("leagueCode") or ""),
+            str(row.get("providerEventId") or ""),
+            str(row.get("kickoffUTC") or ""),
+        )
+        fixture_id = verified.get(crosswalk_key)
         records.append({
+            "independentApiFootballFixtureVerified": bool(fixture_id),
+            "independentApiFootballFixtureId": fixture_id,
             "providerEventId": str(row.get("providerEventId") or ""),
             "leagueCode": str(row.get("leagueCode") or ""),
             "homeTeam": str(row.get("providerHomeTeam") or ""),
@@ -110,6 +135,10 @@ def build(root: Path) -> dict:
         "apiCalls": 0,
         "truncated": len(records) > MAX_ROWS,
         "totalFrozenForecastRows": len(records),
+        "independentlyVerifiedFixtureCount": sum(
+            bool(r["independentApiFootballFixtureVerified"])
+            for r in records[:MAX_ROWS]
+        ),
         "matches": records[:MAX_ROWS],
     }
 
