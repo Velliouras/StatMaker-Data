@@ -11,6 +11,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts" / "betting_v2"
 sys.path.insert(0, str(SCRIPT_DIR))
@@ -55,6 +56,43 @@ class BettingV2ZeroQuotaShadowTests(unittest.TestCase):
                 with self.subTest(destination=destination):
                     with self.assertRaises(ValueError):
                         _safe_output(root, Path(destination))
+
+    def test_elo_isolated_research_is_reported_but_never_certified(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            index = root / "data/statmaker/domestic_enriched/index.json"
+            index.parent.mkdir(parents=True)
+            index.write_text(json.dumps({"schema_version": 3, "leagues": []}))
+            research_dir = root / "reports/betting_v2"
+            research_dir.mkdir(parents=True)
+            elo_path = research_dir / "elo_model.json"
+            elo_price_path = research_dir / "elo_priced.json"
+            elo_path.write_text(json.dumps({
+                "contract": "betting-v2-elo-fallback-research-v1",
+                "notCertified": True, "eloEligible": 122,
+                "eloFallbackEligible": 100,
+                "splits": {"fallbackCalibrationN": 20, "fallbackHoldoutN": 15}
+            }))
+            elo_price_path.write_text(json.dumps({
+                "certified": False, "strategy": "ELO_GOALS_FALLBACK_NO_XG",
+                "holdout": {"exactQuotes": 3}
+            }))
+            with patch("publish_shadow.audit", return_value={
+                "totals": {"completed": 140}, "coverage": {},
+                "sourceErrors": {}, "leagues": []
+            }):
+                result = publish(
+                    root, research_dir / "shadow_manifest.json",
+                    elo_model_report=elo_path, elo_priced_report=elo_price_path)
+            self.assertEqual(result["certifiedForecasts"], [])
+            self.assertEqual(result["liveRecommendationsPublished"], 0)
+            self.assertEqual(result["certificationStatus"], "BLOCKED")
+            self.assertEqual(
+                result["researchSnapshotMetrics"]["eloFallback"]["fallbackEligible"], 100)
+            self.assertEqual(
+                result["researchSnapshotMetrics"]["eloFallback"]["pricedHoldoutQuotes"], 3)
+            self.assertTrue(result["researchReports"]["eloFallbackModel"]["provided"])
+            self.assertEqual(result["api"]["callsMadeByThisPublisher"], 0)
 
     def test_shadow_cannot_issue_certified_forecasts(self):
         with tempfile.TemporaryDirectory() as td:
