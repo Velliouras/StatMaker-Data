@@ -53,15 +53,20 @@ class CaptureReceiptTests(unittest.TestCase):
             self.assertNotEqual(one, two)
             with gzip.open(one, "rt", encoding="utf-8") as f:
                 receipt = json.load(f)
-            self.assertEqual(receipt["decodedResponse"], SOURCE)
-            self.assertTrue(receipt["fullDecodedResponseStored"])
+            self.assertNotIn("decodedResponse", receipt)
+            self.assertFalse(receipt["fullDecodedResponseStored"])
+            self.assertFalse(receipt["rawProviderBodyPublished"])
+            self.assertTrue(receipt["marketSnapshotComplete"])
             self.assertEqual(receipt["decodedResponseBytes"], len(canonical(SOURCE)))
+            self.assertEqual(receipt["boundedMarketSnapshot"][0]["event"]["id"], 123)
+            self.assertEqual(receipt["boundedMarketSnapshot"][0]["bookmakers"][0]["markets"][0]["outcomes"][0]["odds"], 2.15)
             self.assertEqual(len(list((root / "reports/betting_v2/quote_receipts").glob("*.gz"))), 2)
 
     def test_oversized_response_is_metadata_only_not_falsely_complete(self):
         receipt = receipt_document(SOURCE, "/odds/multi", PARAMS, NOW, max_decoded_bytes=1)
         self.assertFalse(receipt["fullDecodedResponseStored"])
-        self.assertIsNone(receipt["decodedResponse"])
+        self.assertFalse(receipt["marketSnapshotComplete"])
+        self.assertEqual(receipt["boundedMarketSnapshot"], [])
         self.assertGreater(receipt["decodedResponseBytes"], 1)
 
     def test_client_time_must_be_timezone_aware(self):
@@ -82,7 +87,7 @@ class CaptureReceiptTests(unittest.TestCase):
     def test_altered_or_missing_response_is_never_verified(self):
         receipt = receipt_document(SOURCE, "/odds/multi", PARAMS, NOW)
         modified = dict(receipt)
-        modified["decodedResponse"] = []
+        modified["boundedMarketSnapshot"] = []
         with self.assertRaises(ValueError):
             verify_receipt(modified)
         modified = dict(receipt)
@@ -98,6 +103,29 @@ class CaptureReceiptTests(unittest.TestCase):
         modified["priceObservationTimestampVerified"] = True
         with self.assertRaises(ValueError):
             verify_receipt(modified)
+
+    def test_sanitized_public_receipt_omits_unrelated_raw_provider_fields(self):
+        payload = [{
+            "id": 11, "randomRawSecret": "DO_NOT_PUBLISH_RAW",
+            "bookmakers": [{"name": "B", "internalProviderSecret": "DO_NOT_PUBLISH_RAW",
+                            "markets": [{"name": "1X2", "adminToken": "DO_NOT_PUBLISH_RAW",
+                                         "odds": [{"name": "Home", "odds": 1.95,
+                                                   "apiKey": "HIDDEN"}]}]}]
+        }]
+        receipt = receipt_document(payload, "/odds", {"eventId": "11"}, NOW)
+        published = json.dumps(receipt)
+        self.assertNotIn("DO_NOT_PUBLISH_RAW", published)
+        self.assertNotIn("HIDDEN", published)
+        self.assertNotIn("adminToken", published)
+        self.assertTrue(receipt["marketSnapshotComplete"])
+        self.assertNotIn("decodedResponse", receipt)
+
+    def test_unsupported_bookmaker_shapes_are_not_certified(self):
+        payload = [{"id": 11, "bookmakers": [{"name": "B", "markets": ["unexpected"]}]}]
+        receipt = receipt_document(payload, "/odds", {"eventId": "11"}, NOW)
+        self.assertFalse(receipt["marketSnapshotComplete"])
+        with self.assertRaises(ValueError):
+            verify_receipt(receipt)
 
     def test_hook_returns_same_provider_response_without_repoll(self):
         calls = []
