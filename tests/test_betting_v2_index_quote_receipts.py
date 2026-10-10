@@ -71,6 +71,20 @@ class QuoteReceiptIndexTests(unittest.TestCase):
             self.assertEqual(report["preKickoffPriceRows"], 0)
             self.assertEqual(report["rejected"]["received_at_or_after_kickoff"], 1)
 
+    def test_provider_dict_bookmaker_odds_shape_is_recognized(self):
+        payload = [{"id": 123, "bookmakers": {"Bet365": {
+            "odds": [{"name": "1X2", "odds": [
+                {"name": "Home", "odds": 2.1}
+            ]}]
+        }}}]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_receipt(root, payload, "/odds", {"eventId": "123"},
+                          NOW, event_context=CONTEXT)
+            report = inspect(root)
+            self.assertEqual(report["preKickoffPriceRows"], 1)
+            self.assertEqual(report["byBookmaker"]["Bet365"], 1)
+
     def test_actual_events_hook_uses_no_additional_provider_requests(self):
         calls = []
         def fetch(path, params, debug, *, allow_error=True):
