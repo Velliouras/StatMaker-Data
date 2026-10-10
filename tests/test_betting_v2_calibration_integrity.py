@@ -46,7 +46,13 @@ class BettingV2CalibrationIntegrityTests(unittest.TestCase):
             "identityResolution": "EXACT_CACHED_FIXTURE",
             "selectionKey": "win-home", "market": "RESULT_1X2",
             "direction": "HOME", "odd": 2.0,
-            "priceUniverse": "LEGACY_PREPARED_SELECTIONS"
+            "priceUniverse": "INDEPENDENT_VERIFIED_BOOKMAKER_OFFERS",
+            "priceObservationTimestampVerified": True,
+            "independentUnfilteredBookmakerUniverseVerified": True,
+            "quoteObservedAt": "2026-10-10T20:00:00Z",
+            "bookmaker": "SyntheticBookmaker",
+            "bookmakerMarketSelectionId": "synthetic-home-9876",
+            "sourceGenerationId": "synthetic-generation-A"
         }
         self.calib = {**self.forecast, "date": "2026-09-01",
                       "fixtureId": "1234", "kickoffUTC": "2026-09-01T18:00:00Z"}
@@ -57,8 +63,29 @@ class BettingV2CalibrationIntegrityTests(unittest.TestCase):
         self.assertEqual(report["marketCounts"]["1X2_HOME"]["evaluated"], 1)
         self.assertEqual(report["rejected"]["duplicate_selection_quote"], 1)
         self.assertFalse(report["independentUnfilteredBookmakerUniverseVerified"])
-        self.assertIn("LEGACY_PREPARED_SELECTIONS",
+        self.assertIn("INDEPENDENT_VERIFIED_BOOKMAKER_OFFERS",
                       report["observedPriceUniverses"])
+
+    def test_legacy_prepared_quote_never_becomes_calibrated_evidence(self):
+        legacy = {
+            **self.quote,
+            "priceUniverse": "LEGACY_PREPARED_SELECTIONS",
+            "priceObservationTimestampVerified": False,
+            "independentUnfilteredBookmakerUniverseVerified": False,
+            "quoteObservedAt": None,
+        }
+        report = evaluate_calibration([self.calib], [self.forecast], [legacy])
+        self.assertEqual(report["rejected"][
+            "UNVERIFIED_INDIVIDUAL_BOOKMAKER_QUOTE_OR_PRICE_UNIVERSE"], 1)
+        self.assertEqual(report["marketCounts"], {})
+        self.assertEqual(report["oneGoalsScenarioPerFixture"]["n"], 0)
+
+    def test_snapshot_cutoff_does_not_replace_quote_observed_at(self):
+        fake = {**self.quote, "quoteObservedAt": self.quote["kickoffUTC"]}
+        report = evaluate_calibration([self.calib], [self.forecast], [fake])
+        self.assertEqual(report["rejected"][
+            "QUOTE_OBSERVED_AFTER_CUTOFF_OR_KICKOFF"], 1)
+        self.assertEqual(report["marketCounts"], {})
 
     def test_nonfinite_probability_rejected(self):
         invalid = {**self.forecast, "probabilities": {
