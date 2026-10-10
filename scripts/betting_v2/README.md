@@ -83,6 +83,31 @@ The individual scripts also remain available:
 - \`evaluate_holdout_prices.py\`: price-aligned raw-value evaluation.
 - \`calibration_gate.py\`: bin/league Wilson-bound exploratory holdout.
 
+## Offline xG source-to-publication integrity (no provider calls)
+
+Run against the locally cached fixture statistics and the canonical
+`domestic_enriched` cache. This does not refetch anything:
+
+```bash
+python scripts/betting_v2/xg_source_integrity.py --repository-root . --league-codes E0 D1 SP1 I1 --output reports/betting_v2/xg_source_integrity.json
+python -m unittest discover -s tests -p 'test_betting_v2_xg_source_integrity.py' -v
+```
+
+For each league/season/month, it compares cached original provider
+`raw_statistics.expected_goals`, source `normalized_stats.HxG/AxG`,
+and the enriched published `HxG/AxG`, using verified fixture ID,
+team names and kickoff within 15 minutes. Missing xG, identity mismatches,
+duplicated IDs and normalization discrepancies are counted separately.
+If raw team identity cannot be independently verified, the raw xG is NOT
+credited as verified. The tool never synthesizes xG or certifies picks.
+
+Locally executed synthetic regression tests: **8 passed (2026-10-10)**.
+An additional read-only four-league GitHub-cache check of 207 completed
+2026–27 games found **zero raw-to-published xG mismatches**, but substantial
+missing September xG at the raw source. A full 94-entry local run and
+the official Python model pilot are **still unverified**.
+See `reports/betting_v2/REAL_CACHED_SOURCE_DIAGNOSTIC_2026-10-10.md`.
+
 ## Archived-price feasibility preflight (before expensive replay)
 
 To audit 1–14 explicitly selected dates **offline** without training a model,
