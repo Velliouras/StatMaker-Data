@@ -68,6 +68,15 @@ class CacheXgTests(unittest.TestCase):
         self.assertEqual(result["invalidOrDuplicateFixtureIdentity"], 1)
         self.assertEqual(result["providerObservedBothXg"], 0)
 
+    def test_wrong_kickoff_same_day_is_rejected(self):
+        src = fixture(1, "2026-09-05T18:00:00Z", 2.1, 0.8)
+        published = {"matches": [{"fixture_id": 1, "date_utc": "2026-09-05T20:00:00Z",
+                                  "status": "FT", "home_team": "Home FC", "away_team": "Away FC",
+                                  "normalized_stats": src["normalized_stats"]}]}
+        result = audit_pair(published, {"fixtures": [src]})["2026-09"]
+        self.assertEqual(result["rawKickoffMismatch"], 1)
+        self.assertEqual(result["providerObservedBothXg"], 0)
+
     def test_team_order_not_guessed(self):
         src = fixture(1, "2026-09-05T18:00:00Z", 2.1, 0.8)
         src["raw_statistics"][0]["team"]["name"] = "Unknown Club"
