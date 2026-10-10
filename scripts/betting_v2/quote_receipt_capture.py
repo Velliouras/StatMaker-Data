@@ -97,9 +97,16 @@ def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
         not req.get("eventId") and not req.get("eventIds")
     ) or "apiKey" in req:
         raise ValueError("Missing event identity or secret in request")
-    from quote_provenance import parse_utc
-    observed = parse_utc(doc.get("clientReceivedAtUTC"))
-    if observed is None:
+    raw_observed = doc.get("clientReceivedAtUTC")
+    if not isinstance(raw_observed, str):
+        raise ValueError("Client receipt timestamp missing")
+    try:
+        observed = dt.datetime.fromisoformat(
+            raw_observed.replace("Z", "+00:00")
+        )
+    except ValueError as exc:
+        raise ValueError("Malformed client receipt timestamp") from exc
+    if observed.tzinfo is None or observed.utcoffset() is None:
         raise ValueError("Client receipt must be timezone aware")
     if doc.get("fullDecodedResponseStored") is not True:
         raise ValueError("Incomplete received payload cannot prove offer identity")
