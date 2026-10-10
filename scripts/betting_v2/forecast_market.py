@@ -34,6 +34,13 @@ def market_probability(quote: dict, forecast: dict) -> tuple[str, float, float] 
     label = ""
     p = push = 0.0
 
+    # 1X2 derivatives require a complete, coherent outcome distribution.
+    # A partially corrupted forecast must not look like a high-value bet.
+    if market in ("RESULT_1X2", "RESULT_DNB", "RESULT_DOUBLE_CHANCE"):
+        distribution = [_prob(probs, f"1X2_{key}") for key in ("HOME", "DRAW", "AWAY")]
+        if abs(sum(distribution) - 1.0) > 1e-6:
+            raise ValueError("1X2 distribution is not normalized")
+
     if market == "RESULT_1X2" and direction in ("HOME", "DRAW", "AWAY"):
         label = f"1X2_{direction}"
         p = _prob(probs, label)
