@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-10T00:10:23Z",
+  "generated_at": "2026-10-10T10:07:39Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/finland/veikkausliiga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-09T10:28:56Z",
+    "cache_generated_at": "2026-10-10T09:49:13Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 153,
-    "fixtures_with_any_stats": 90,
-    "fixtures_with_bb_core_stats": 89,
-    "any_stats_coverage": 0.5882,
-    "bb_core_coverage": 0.5817,
+    "completed_fixtures": 154,
+    "fixtures_with_any_stats": 91,
+    "fixtures_with_bb_core_stats": 90,
+    "any_stats_coverage": 0.5909,
+    "bb_core_coverage": 0.5844,
     "group_counts": {
-      "shots_total": 90,
-      "shots_on_target": 90,
-      "corners": 89,
-      "fouls": 90,
-      "yellow_cards": 90,
-      "red_cards": 90,
-      "possession": 90,
-      "passes": 82,
-      "xg": 33
+      "shots_total": 91,
+      "shots_on_target": 91,
+      "corners": 90,
+      "fouls": 91,
+      "yellow_cards": 91,
+      "red_cards": 91,
+      "possession": 91,
+      "passes": 83,
+      "xg": 34
     },
     "group_coverage": {
-      "shots_total": 0.5882,
-      "shots_on_target": 0.5882,
-      "corners": 0.5817,
-      "fouls": 0.5882,
-      "yellow_cards": 0.5882,
-      "red_cards": 0.5882,
-      "possession": 0.5882,
-      "passes": 0.5359,
-      "xg": 0.2157
+      "shots_total": 0.5909,
+      "shots_on_target": 0.5909,
+      "corners": 0.5844,
+      "fouls": 0.5909,
+      "yellow_cards": 0.5909,
+      "red_cards": 0.5909,
+      "possession": 0.5909,
+      "passes": 0.539,
+      "xg": 0.2208
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5882 < 0.65",
-      "low BB-core coverage: 0.5817 < 0.65",
+      "low any-stats coverage: 0.5909 < 0.65",
+      "low BB-core coverage: 0.5844 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -12922,6 +12922,90 @@
         "fulltime": {
           "home": 0,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1638086,
+      "date_utc": "2026-10-09T15:00:00+00:00",
+      "country": "Finland",
+      "league": "Veikkausliiga",
+      "league_code": "FIN",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 244,
+      "round": "Relegation Group - 26",
+      "home_team": "SJK",
+      "away_team": "Lahti",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 14,
+        "HST": 6,
+        "AST": 3,
+        "HC": 3,
+        "AC": 9,
+        "HF": 15,
+        "AF": 13,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": 3,
+        "ASaves": 5,
+        "HPasses": 344,
+        "APasses": 563,
+        "HPassesAccurate": 286,
+        "APassesAccurate": 485,
+        "HxG": 1.86,
+        "AxG": 0.74
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 0,
+      "home_score": 1,
+      "away_score": 0,
+      "fthg": 1,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 0
         },
         "extratime": {
           "home": null,
