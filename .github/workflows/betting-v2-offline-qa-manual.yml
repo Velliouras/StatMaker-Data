@@ -40,6 +40,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Publish pending offline QA status
+        if: ${{ always() && !cancelled() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state=pending \
+            -f context="betting-v2/offline-qa" \
+            -f description="Offline V2 tests and dual-model pilot running; no live picks" \
+            -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
       - name: Betting V2 standard-library regression tests
         id: tests
         run: python -m unittest discover -s tests -p 'test_betting_v2*.py' -v
