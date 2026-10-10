@@ -183,6 +183,14 @@ def main() -> None:
     ap.add_argument("--input", type=Path, required=True,
                     help="Already saved Understat league JSON; no network access")
     ap.add_argument("--aliases", type=Path, help="Optional explicit canonical-name -> Understat-name JSON")
+    ap.add_argument("--source-commit", type=str, default=None,
+                    help="Immutable original Git commit SHA (40 lowercase hex)")
+    ap.add_argument("--source-blob-sha", type=str, default=None,
+                    help="Original Git blob SHA of this provider source (40 lowercase hex)")
+    ap.add_argument("--source-commit-at", type=str, default=None,
+                    help="Original source commit timestamp with explicit timezone")
+    ap.add_argument("--source-repository", type=str, default=None,
+                    help="Original repository URL for audit provenance")
     ap.add_argument("--output", type=Path, default=None)
     args = ap.parse_args()
     root = args.repository_root.resolve()
@@ -204,6 +212,34 @@ def main() -> None:
     overlay = recovery_rows(enriched, data, args.league, observed, aliases)
     overlay["understatSeason"] = args.season
     overlay["retrievalMode"] = "LOCAL_UNDERSTAT_JSON_NO_NETWORK"
+    overlay["sourceModelsMayDiffer"] = True
+    overlay["canonicalDataModified"] = False
+    overlay["mayBackfillTrainingHistory"] = False
+    overlay["mayCertifyPicks"] = False
+    overlay["directUnderstatVerified"] = False
+    overlay["sourceRepository"] = args.source_repository
+    # A local export without a dated immutable source snapshot remains
+    # diagnostically useful but CANNOT pass validate_xg_overlay.py.
+    if any(x is not None for x in (
+        args.source_commit, args.source_blob_sha, args.source_commit_at
+    )):
+        if not all(x is not None for x in (
+            args.source_commit, args.source_blob_sha, args.source_commit_at
+        )):
+            raise ValueError("Source provenance requires commit, blob SHA and dated commit")
+        for identity in (args.source_commit, args.source_blob_sha):
+            if not re.fullmatch(r"[a-f0-9]{40}", identity):
+                raise ValueError("Expected a 40-character lowercase hexadecimal Git SHA")
+        commit_date = valid_utc(args.source_commit_at)
+        if commit_date > valid_utc(observed):
+            raise ValueError("Source Git commit may not postdate its import observation")
+        overlay["sourceCommit"] = args.source_commit
+        overlay["sourceBlobSha"] = args.source_blob_sha
+        overlay["sourceCommitTimestampUTC"] = commit_date.isoformat()
+    else:
+        overlay["sourceCommit"] = None
+        overlay["sourceBlobSha"] = None
+        overlay["sourceCommitTimestampUTC"] = None
     # Per-league/season default prevents one recovery pass from overwriting
     # a previously recovered competition.
     output = args.output or Path(
