@@ -78,6 +78,53 @@ def receipt_document(
     }
 
 
+
+def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
+    """Fail-closed authenticity/integrity check for a captured decoded reply.
+
+    Hash + client time establish local receipt integrity only. The verifier
+    cannot establish provider quote-update time, independent market coverage,
+    bookmaker selection identity or profitable expected value.
+    """
+    if doc.get("contract") != "betting-v2-client-odds-http-receipt-v1":
+        raise ValueError("Unknown quote receipt contract")
+    if doc.get("researchOnly") is not True or doc.get("certifiedStrong") is not False:
+        raise ValueError("A quote receipt must not claim betting certification")
+    if doc.get("endpoint") not in ("/odds", "/odds/multi"):
+        raise ValueError("Unexpected endpoint")
+    req = doc.get("request")
+    if not isinstance(req, dict) or (
+        not req.get("eventId") and not req.get("eventIds")
+    ) or "apiKey" in req:
+        raise ValueError("Missing event identity or secret in request")
+    from quote_provenance import parse_utc
+    observed = parse_utc(doc.get("clientReceivedAtUTC"))
+    if observed is None:
+        raise ValueError("Client receipt must be timezone aware")
+    if doc.get("fullDecodedResponseStored") is not True:
+        raise ValueError("Incomplete received payload cannot prove offer identity")
+    payload = doc.get("decodedResponse")
+    if not isinstance(payload, (dict, list)):
+        raise ValueError("Provider response not a structured JSON value")
+    wire = canonical(payload)
+    if len(wire) != doc.get("decodedResponseBytes"):
+        raise ValueError("Received payload byte length differs")
+    if sha256(wire).hexdigest() != doc.get("decodedResponseSha256"):
+        raise ValueError("Received payload SHA-256 differs")
+    if (doc.get("priceObservationTimestampVerified") is not False or
+            doc.get("independentUnfilteredBookmakerUniverseVerified") is not False or
+            doc.get("bookmakerMarketSelectionIdVerified") is not False):
+        raise ValueError("Unverified individual quote cannot claim provenance")
+    return {
+        "verifiedLocalReceiptIntegrity": True,
+        "clientReceivedAtUTC": doc["clientReceivedAtUTC"],
+        "sourceGenerationId": doc["decodedResponseSha256"],
+        "providerOfferTimestampIndependentlyVerified": False,
+        "independentBookmakerUniverseVerified": False,
+        "readyForCertifyingStrong": False,
+    }
+
+
 def write_receipt(
     root: Path, payload: Any, path: str, params: dict[str, Any],
     received_at: dt.datetime, *,
