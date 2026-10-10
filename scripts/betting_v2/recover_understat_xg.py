@@ -206,7 +206,7 @@ def main() -> None:
     source.add_argument("--input", type=Path, help="Previously downloaded Understat league JSON")
     source.add_argument("--fetch-understat", action="store_true", help="Explicitly perform 1 non-API-Football GET")
     ap.add_argument("--aliases", type=Path, help="Optional explicit canonical-name -> Understat-name JSON")
-    ap.add_argument("--output", type=Path, default=Path("reports/betting_v2/understat_xg_overlay.json"))
+    ap.add_argument("--output", type=Path, default=None)
     args = ap.parse_args()
     root = args.repository_root.resolve()
     index = json.loads((root / "data/statmaker/domestic_enriched/index.json").read_text())
@@ -228,9 +228,14 @@ def main() -> None:
     overlay = recovery_rows(enriched, data, args.league, observed, aliases)
     overlay["understatSeason"] = args.season
     overlay["retrievalMode"] = "ONE_DIRECT_UNDERSTAT_GET" if args.fetch_understat else "LOCAL_UNDERSTAT_JSON"
-    _atomic_write(_safe_output(root, args.output), overlay)
+    # Per-league/season default prevents one recovery pass from overwriting
+    # a previously recovered competition.
+    output = args.output or Path(
+        f"reports/betting_v2/understat_xg_{args.league}_{args.season}.json"
+    )
+    _atomic_write(_safe_output(root, output), overlay)
     print(json.dumps({"recovered": len(overlay["recovered"]),
-                      "output": str(args.output),
+                      "output": str(output),
                       "apiFootballCalls": 0, "certified": False}))
 
 
