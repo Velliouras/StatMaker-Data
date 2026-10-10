@@ -51,6 +51,9 @@ def audit_structure(data: object, *, max_nodes: int = NODES_MAX) -> dict:
     counts: Counter = Counter()
     keys: Counter = Counter()
     offer_shape_keys: Counter = Counter()
+    # Metadata exists on dictionaries. Scalar values cannot contain quote
+    # timestamps or bookmaker identities; skipping scalar traversal permits
+    # a complete bounded scan of large cached snapshots.
     nodes = 0
     while to_visit and nodes < max_nodes:
         value = to_visit.pop()
@@ -81,12 +84,11 @@ def audit_structure(data: object, *, max_nodes: int = NODES_MAX) -> dict:
                 counts["objectsWithTimestampCandidateField"] += 1
                 if absolute:
                     counts["objectsWithAbsoluteTimestampCandidate"] += 1
-            to_visit.extend(normalized.values())
+            to_visit.extend(v for v in normalized.values()
+                            if isinstance(v, (dict, list)))
         elif isinstance(value, list):
             counts["listNodes"] += 1
-            to_visit.extend(value)
-        else:
-            counts["scalarNodes"] += 1
+            to_visit.extend(v for v in value if isinstance(v, (dict, list)))
     return {
         "visitedNodes": nodes,
         "scanTruncated": bool(to_visit),
