@@ -17,7 +17,7 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 import json
-from math import sqrt
+from math import isfinite, sqrt
 from pathlib import Path
 
 from evaluate_holdout_prices import event, load_lines
@@ -107,6 +107,7 @@ def evaluate(calibration: list[dict], holdout: list[dict],
     rejected = defaultdict(int)
     qualifying = []
     per_market = defaultdict(lambda: [0, 0])
+    seen_selection_quotes = set()
     for quote in quotes:
         match, join_status = exact_join(quote, by_id)
         if match is None:
@@ -120,14 +121,35 @@ def evaluate(calibration: list[dict], holdout: list[dict],
         if not 1.8 < odd < 3.0:
             rejected["outside_price_contract"] += 1
             continue
-        value = match_quoted_event(quote, match)
+        selection_key = str(quote.get("selectionKey") or "").strip()
+        if not selection_key:
+            rejected["missing_exact_selection_key"] += 1
+            continue
+        try:
+            value = match_quoted_event(quote, match)
+        except (KeyError, TypeError, ValueError, OverflowError):
+            rejected["malformed_market_probability"] += 1
+            continue
         if value is None:
             rejected["not_supported_binary_research_market"] += 1
             continue
         market, raw_p, push, gross = value
+        if not all(isfinite(x) for x in (raw_p, push, gross)):
+            rejected["nonfinite_market_probability_or_settlement"] += 1
+            continue
+        if not (0.0 <= raw_p <= 1.0 and 0.0 <= push <= 1.0 and
+                raw_p + push <= 1.0 + 1e-9):
+            rejected["invalid_market_probability"] += 1
+            continue
         if push != 0:
             rejected["unvalidated_push_calibration"] += 1
             continue
+        identity = (str(quote["leagueCode"]), str(quote["fixtureId"]),
+                    selection_key)
+        if identity in seen_selection_quotes:
+            rejected["duplicate_selection_quote"] += 1
+            continue
+        seen_selection_quotes.add(identity)
         prob_bucket = prob_bin(raw_p)
         success, size = params["global"].get((market, prob_bucket), (0, 0))
         league = str(match.get("league") or "")
@@ -149,8 +171,9 @@ def evaluate(calibration: list[dict], holdout: list[dict],
             continue
         per_market[market][1] += 1
         qualifying.append({
-            "date": match["date"], "fixtureId": str(match["fixtureId"]),
-            "market": market, "selectionKey": str(quote.get("selectionKey")),
+            "date": match["date"], "leagueCode": str(match["leagueCode"]),
+            "fixtureId": str(match["fixtureId"]),
+            "market": market, "selectionKey": selection_key,
             "odd": odd, "gross": gross, "rawP": raw_p,
             "conservativeCalibratedP": conservative
         })
@@ -158,7 +181,7 @@ def evaluate(calibration: list[dict], holdout: list[dict],
     # goals scenario. Research reports both all and one-per-fixture.
     by_fixture = defaultdict(list)
     for candidate in qualifying:
-        by_fixture[(candidate["date"], candidate["fixtureId"])].append(candidate)
+        by_fixture[(candidate["leagueCode"], candidate["fixtureId"])].append(candidate)
     noncorrelated = [sorted(xs, key=lambda x: (
         -x["conservativeCalibratedP"], -x["rawP"], x["selectionKey"]
     ))[0] for xs in by_fixture.values()]
@@ -179,6 +202,11 @@ def evaluate(calibration: list[dict], holdout: list[dict],
     return {
         "contract": "statmaker-v2-research-calibration-replay-v1",
         "certified": False,
+        "independentUnfilteredBookmakerUniverseVerified": False,
+        "observedPriceUniverses": sorted({
+            str(quote.get("priceUniverse") or "UNVERIFIED_SOURCE")
+            for quote in quotes
+        }),
         "calibration": {"fixtures": len(calibration),
                         "minGlobalSamples": MIN_MARKET_BIN,
                         "minLeagueSamples": MIN_LOCAL_BIN,
@@ -191,6 +219,7 @@ def evaluate(calibration: list[dict], holdout: list[dict],
         "allRawQualifiedOffers": metrics(qualifying),
         "oneGoalsScenarioPerFixture": metrics(noncorrelated),
         "blockingGaps": [
+            "Archived prepared_selections are a legacy filtered selection universe, not independently verified unfiltered bookmaker offers",
             "No reliable adverse injury/lineup scenario calculation",
             "Small sample and multiple-comparison risk needs evaluation",
             "No proof historical feature extraction matched original as-of releases",
