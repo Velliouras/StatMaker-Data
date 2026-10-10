@@ -105,6 +105,21 @@ class BettingV2HistoricalSettlementTests(unittest.TestCase):
         self.assertEqual(report["availableExactJoinedQuotes"], 0)
         self.assertEqual(report["rejected"]["outside_odds_contract"], 2)
 
+    def test_away_goals_rejects_explicit_home_team_identity(self):
+        quote = {**self.base, "selectionKey": "wrongside",
+                 "market": "AWAY_TEAM_TOTAL", "direction": "OVER",
+                 "line": 1.5, "teamSide": "HOME", "odd": 2.0}
+        r = evaluate([self.forecast], [quote])
+        self.assertEqual(r["availableExactJoinedQuotes"], 0)
+
+    def test_valid_away_team_goal_market_uses_away_goals(self):
+        quote = {**self.base, "selectionKey": "away-goals",
+                 "market": "AWAY_TEAM_TOTAL", "direction": "UNDER",
+                 "line": 1.5, "teamSide": "AWAY", "odd": 2.0}
+        r = evaluate([self.forecast], [quote])
+        self.assertEqual(r["availableExactJoinedQuotes"], 1)
+        self.assertEqual(r["allResearchQuotes"]["won"], 1)
+
     def test_changed_kickoff_never_falsely_joins(self):
         quote = {**self.base, "kickoffUTC": "2026-10-10T18:30:00+00:00"}
         r = evaluate([self.forecast], [quote])
