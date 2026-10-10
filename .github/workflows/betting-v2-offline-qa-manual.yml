@@ -60,6 +60,10 @@ jobs:
         # Keep the overall workflow FAILED when any step fails.
         if: ${{ always() && !cancelled() }}
         run: python scripts/betting_v2/run_pilot.py --repository-root .
+      - name: Inspect cached bookmaker odds provenance OFFLINE
+        id: cached_odds
+        if: ${{ always() && steps.offline.outcome == 'success' }}
+        run: python scripts/betting_v2/audit_cached_odds_provenance.py --repository-root .
       - name: Show fail-closed certification summary
         id: shadow_gate
         if: ${{ always() && steps.offline.outcome == 'success' }}
@@ -88,8 +92,9 @@ jobs:
           UNIT_OUTCOME: ${{ steps.tests.outcome }}
           PILOT_OUTCOME: ${{ steps.offline.outcome }}
           GATE_OUTCOME: ${{ steps.shadow_gate.outcome }}
+          ODDS_AUDIT_OUTCOME: ${{ steps.cached_odds.outcome }}
         run: |
-          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" ]]; then
+          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" && "$ODDS_AUDIT_OUTCOME" == "success" ]]; then
             outcome=success
             description="Full offline V2 tests and dual-model research pilot passed; no STRONG certification"
           else
@@ -111,6 +116,7 @@ jobs:
             reports/betting_v2/pilot_elo_fallback_model.json
             reports/betting_v2/pilot_market_holdout.json
             reports/betting_v2/pilot_elo_market_holdout.json
+            reports/betting_v2/pilot_cached_odds_provenance.json
             reports/betting_v2/shadow_manifest.json
           if-no-files-found: warn
           retention-days: 7
