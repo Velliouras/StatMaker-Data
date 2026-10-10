@@ -191,7 +191,9 @@ def build(root: Path, events_dir: Path | None = None,
             errors["no_valid_leaderboard_players"] += 1
             continue
         seen_leagues.add(code)
-        players = sorted(players, key=lambda p: (-p["goals"], p["player"]))
+        # Python sort is stable: retain provider tie-break ranking rather than
+        # alphabetically rearranging players with the same goal count.
+        players = sorted(players, key=lambda p: -p["goals"])
         top_data.append({"leagueCode": code, "season": season, "verified": True,
                          "retrievedAtUTC": raw["retrievedAtUTC"],
                          "players": players})
