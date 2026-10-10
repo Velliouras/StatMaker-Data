@@ -29,6 +29,22 @@ from fixture_lookup import CachedFixtureLookup
 
 ATHENS = ZoneInfo("Europe/Athens")
 MANIFEST = "data/statmaker/app_ready/update_manifest.json"
+MAX_BUNDLE_AGE = timedelta(hours=24)
+
+
+def verified_archive_timestamp(artifact: dict, cutoff: datetime) -> datetime | None:
+    """Reject unknown, future-dated or stale ZIP generations. Not a quote timestamp."""
+    raw = artifact.get("generatedAt")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    try:
+        generated = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if generated.tzinfo is None:
+        return None
+    age = cutoff.astimezone(timezone.utc) - generated.astimezone(timezone.utc)
+    return generated if timedelta(0) <= age <= MAX_BUNDLE_AGE else None
 
 
 def git(root: Path, *args: str) -> bytes:
@@ -97,6 +113,12 @@ def export_date(
                      if x.get("id") == "app_ready_betting_bundle"), None)
     if artifact is None:
         return {"date": target.isoformat(), "status": "NO_BETTING_BUNDLE"}
+    cutoff = datetime.combine(target, time(11, 0), ATHENS)
+    archive_generated_at = verified_archive_timestamp(artifact, cutoff)
+    if archive_generated_at is None:
+        return {"date": target.isoformat(),
+                "status": "MISSING_FUTURE_OR_STALE_ARCHIVED_BUNDLE_TIMESTAMP",
+                "commit": commit}
     try:
         content = git(root, "show", f"{commit}:{artifact['path']}")
     except subprocess.CalledProcessError:
@@ -141,7 +163,6 @@ def export_date(
                     ignored += 1
                     continue
                 kickoff = datetime_kickoff(m)
-                cutoff = datetime.combine(target, time(11, 0), ATHENS)
                 if kickoff is None or kickoff <= cutoff.astimezone(timezone.utc):
                     ignored += 1
                     continue
@@ -172,7 +193,11 @@ def export_date(
                 record = {
                     "date": target.isoformat(), "sourceCommit": commit,
                     "generationContentVersion": manifest.get("contentVersion"),
+                    "archiveBundleGeneratedAt": archive_generated_at.isoformat(),
                     "quoteCutoff": cutoff.isoformat(),
+                    "quoteCutoffIsObservationTimestamp": False,
+                    "priceObservationTimestampVerified": False,
+                    "priceUniverse": "LEGACY_PREPARED_SELECTIONS",
                     "kickoffUTC": kickoff.isoformat(),
                     "competitionId": selection["competition_id"],
                     "snapshotVersion": selection["snapshot_version"],
@@ -196,6 +221,9 @@ def export_date(
     return {
         "date": target.isoformat(), "status": "OK", "commit": commit,
         "exportedQuotes": output_count, "skippedUnsafeOrUnmatched": ignored,
+        "priceUniverse": "LEGACY_PREPARED_SELECTIONS",
+        "independentlyVerifiedUnfilteredOffers": False,
+        "archiveBundleGeneratedAt": archive_generated_at.isoformat(),
         "identityRejections": identity_rejections
     }
 
