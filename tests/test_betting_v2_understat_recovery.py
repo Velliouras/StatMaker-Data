@@ -60,6 +60,14 @@ class RecoveryTests(unittest.TestCase):
         bad = season(timestamp="2026-09-07 18:00:00")
         self.assertFalse(recovery_rows(canonical(), bad, "E0", OBSERVED)["recovered"])
 
+    def test_naive_source_time_cannot_be_fuzzily_shifted_hours(self):
+        # Same date, teams, and final score is NOT enough to establish
+        # that the raw xG belongs to the same canonical kickoff.
+        bad = season(timestamp="2026-09-05 19:00:00")
+        report = recovery_rows(canonical(), bad, "E0", OBSERVED)
+        self.assertEqual(len(report["recovered"]), 0)
+        self.assertEqual(report["counts"]["unmatched_or_ambiguous"], 1)
+
     def test_missing_xg_never_imputed(self):
         src = season(hxg=None)
         self.assertFalse(recovery_rows(canonical(), src, "E0", OBSERVED)["recovered"])
