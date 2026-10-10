@@ -212,7 +212,7 @@ def receipt_document(
     }
 
 
-def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
+def verify_receipt(doc: dict[str, Any], *, allow_partial: bool = False) -> dict[str, Any]:
     """Fail-closed authenticity/integrity check for a captured decoded reply.
 
     Hash + client time establish local receipt integrity only. The verifier
@@ -246,7 +246,10 @@ def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
     ):
         raise ValueError("Raw provider response must not be published in public Git")
     snapshot = doc.get("boundedMarketSnapshot")
-    if not isinstance(snapshot, list) or not doc.get("marketSnapshotComplete"):
+    if not isinstance(snapshot, list) or not snapshot:
+        raise ValueError("Incomplete offer snapshot cannot prove price evidence")
+    complete = doc.get("marketSnapshotComplete") is True
+    if not complete and not allow_partial:
         raise ValueError("Incomplete offer snapshot cannot prove price evidence")
     wire = canonical(snapshot)
     if len(wire) != doc.get("marketSnapshotBytes"):
@@ -259,7 +262,7 @@ def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Unverified individual quote cannot claim provenance")
     return {
         "verifiedLocalReceiptIntegrity": True,
-        "marketSnapshotComplete": True,
+        "marketSnapshotComplete": complete,
         "clientReceivedAtUTC": doc["clientReceivedAtUTC"],
         "sourceGenerationId": doc["decodedResponseSha256"],
         "providerOfferTimestampIndependentlyVerified": False,
