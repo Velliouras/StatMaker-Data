@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""Bounded Understat xG recovery into a RESEARCH ONLY overlay, not App-Ready.
+
+The only optional HTTP path fetches one explicitly requested Understat
+league-season using public league data. It NEVER calls API-Football, Odds-API,
+Android or Actions. If fetching isn't available, import a saved JSON export.
+No modification of existing source statistics or betting predictions.
+
+No historical use before the import's observedAtUTC unless source-point-in-time
+availability is proven independently.
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
+import json
+from math import isfinite
+from pathlib import Path
+import re
+from urllib.request import Request, urlopen
+import unicodedata
+
+from publish_shadow import _safe_output, _atomic_write
+
+LEAGUES = {
+    "E0": "EPL", "D1": "Bundesliga", "SP1": "La_Liga",
+    "I1": "Serie_A", "F1": "Ligue_1"
+}
+ALLOWED_SEASONS = range(2024, 2028)
+
+
+def name_key(value: object) -> str:
+    s = unicodedata.normalize("NFKD", str(value or "")).casefold()
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return " ".join(re.findall(r"[a-z0-9]+", s))
+
+
+def required_xg(value: object) -> float | None:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (ValueError, TypeError):
+        return None
+    return number if isfinite(number) and 0 <= number <= 20 else None
+
+
+def valid_utc(value: str) -> datetime:
+    timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if timestamp.tzinfo is None:
+        raise ValueError("Explicit timezone required for observedAtUTC")
+    return timestamp.astimezone(timezone.utc)
+
+
+def provider_fixture_rows(payload: dict) -> list[dict]:
+    if isinstance(payload, list):
+        return payload
+    if not isinstance(payload, dict):
+        raise ValueError("Understat export must contain JSON object/list")
+    rows = payload.get("datesData", payload.get("dates"))
+    if not isinstance(rows, list):
+        raise ValueError("Understat season JSON has no datesData/dates fixture list")
+    return rows
+
+
+def _number_of_goals(value: object) -> int | None:
+    try:
+        i = int(str(value))
+        return i if i >= 0 and str(value) == str(i) else None
+    except (ValueError, TypeError):
+        return None
+
+
+def fetch_understat(league_code: str, season: int) -> dict:
+    """ONE capped HTTPS GET for an explicitly chosen supported league/season."""
+    if league_code not in LEAGUES or season not in ALLOWED_SEASONS:
+        raise ValueError("Unsupported Understat league/season")
+    url = f"https://understat.com/getLeagueData/{LEAGUES[league_code]}/{season}"
+    request = Request(url, headers={
+        "User-Agent": "Mozilla/5.0",
+        "X-Requested-With": "XMLHttpRequest",
+        "Referer": "https://understat.com/",
+        "Accept": "application/json",
+    })
+    with urlopen(request, timeout=12) as response:
+        if response.status != 200:
+            raise ValueError(f"Understat response status {response.status}")
+        payload = response.read(3_000_001)
+        if len(payload) > 3_000_000:
+            raise ValueError("Oversized Understat response")
+    parsed = json.loads(payload)
+    provider_fixture_rows(parsed)
+    return parsed
+
+
+def recovery_rows(enriched: dict, provider: dict, league_code: str,
+                  observed_at: str, aliases: dict[str, str] | None = None) -> dict:
+    """Only supplement source-missing xG for exact scored/dated team fixtures."""
+    observed_time = valid_utc(observed_at)
+    aliases = aliases or {}
+    if any(name_key(k) == "" or name_key(v) == "" for k, v in aliases.items()):
+        raise ValueError("Invalid aliases")
+    norm_aliases = {name_key(k): name_key(v) for k, v in aliases.items()}
+    if str((enriched.get("competition") or {}).get("league_code") or "") != league_code:
+        raise ValueError("League code does not match canonical cache")
+    index = defaultdict(list)
+    counters = Counter()
+    for p in provider_fixture_rows(provider):
+        if not isinstance(p, dict) or p.get("isResult") is not True:
+            continue
+        score = p.get("goals") or {}
+        goals = (_number_of_goals(score.get("h")), _number_of_goals(score.get("a")))
+        xg_data = p.get("xG") or {}
+        xg = (required_xg(xg_data.get("h")), required_xg(xg_data.get("a")))
+        if None in goals or None in xg:
+            counters["understat_missing_score_or_xg"] += 1
+            continue
+        h, a = name_key((p.get("h") or {}).get("title")), name_key((p.get("a") or {}).get("title"))
+        if not h or not a or h == a:
+            counters["understat_invalid_teams"] += 1
+            continue
+        try:
+            # Understat season 'datetime' is timezone-naive. Never falsely
+            # attribute it to UTC; 12h is only a matching tolerance, and
+            # the canonical UTC date must be within one day of the date label.
+            local_naive = datetime.fromisoformat(str(p.get("datetime")))
+            if local_naive.tzinfo is not None:
+                local_naive = local_naive.astimezone(timezone.utc).replace(tzinfo=None)
+        except ValueError:
+            counters["understat_invalid_date"] += 1
+            continue
+        key = (h, a, *goals)
+        index[key].append((local_naive, p.get("id"), xg))
+    recovered = []
+    seen_source_ids = set()
+    for m in enriched.get("matches") or []:
+        if not isinstance(m, dict) or m.get("status") not in {"FT", "AET", "PEN"}:
+            continue
+        stats = m.get("normalized_stats") or {}
+        if required_xg(stats.get("HxG")) is not None and required_xg(stats.get("AxG")) is not None:
+            counters["already_has_both_canonical_xg"] += 1
+            continue
+        try:
+            canonical_time = valid_utc(str(m["date_utc"]))
+            hg, ag = int(m["home_goals"]), int(m["away_goals"])
+        except (KeyError, ValueError, TypeError):
+            counters["invalid_canonical_identity"] += 1
+            continue
+        if hg < 0 or ag < 0 or not m.get("fixture_id"):
+            counters["invalid_canonical_identity"] += 1
+            continue
+        home = norm_aliases.get(name_key(m.get("home_team")), name_key(m.get("home_team")))
+        away = norm_aliases.get(name_key(m.get("away_team")), name_key(m.get("away_team")))
+        candidates = [
+            record for record in index.get((home, away, hg, ag), [])
+            if abs((record[0] - canonical_time.replace(tzinfo=None)).total_seconds()) <= 12 * 3600
+        ]
+        if len(candidates) != 1:
+            counters["unmatched_or_ambiguous"] += 1
+            continue
+        naive, uid, (hxg, axg) = candidates[0]
+        if not uid or uid in seen_source_ids:
+            counters["duplicate_understat_id"] += 1
+            continue
+        # Do not overwrite an already observed canonical value with
+        # a different provider scale, including partial source xG.
+        existing_h, existing_a = required_xg(stats.get("HxG")), required_xg(stats.get("AxG"))
+        if ((existing_h is not None and abs(hxg - existing_h) > 0.01) or
+                (existing_a is not None and abs(axg - existing_a) > 0.01)):
+            counters["provider_xg_conflict"] += 1
+            continue
+        seen_source_ids.add(uid)
+        recovered.append({
+            "leagueCode": league_code,
+            "fixtureId": str(m["fixture_id"]),
+            "kickoffUTC": canonical_time.isoformat(),
+            "homeTeam": str(m["home_team"]),
+            "awayTeam": str(m["away_team"]),
+            "homeGoals": hg, "awayGoals": ag,
+            "homeXg": existing_h if existing_h is not None else hxg,
+            "awayXg": existing_a if existing_a is not None else axg,
+            "understatMatchId": str(uid),
+            "source": "UNDERSTAT_INDEPENDENT_XG",
+            "sourceObservedAtUTC": observed_time.isoformat(),
+            "historicalAsOfVerified": False,
+        })
+    return {
+        "contract": "betting-v2-understat-xg-research-overlay-v1",
+        "leagueCode": league_code, "source": "UNDERSTAT",
+        "sourceObservedAtUTC": observed_time.isoformat(),
+        "historicalAsOfVerified": False,
+        "certified": False,
+        "apiFootballCalls": 0,
+        "recovered": recovered,
+        "counts": dict(sorted(counters.items())),
+    }
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--repository-root", type=Path, default=Path("."))
+    ap.add_argument("--league", choices=sorted(LEAGUES), required=True)
+    ap.add_argument("--season", type=int, choices=ALLOWED_SEASONS, required=True)
+    source = ap.add_mutually_exclusive_group(required=True)
+    source.add_argument("--input", type=Path, help="Previously downloaded Understat league JSON")
+    source.add_argument("--fetch-understat", action="store_true", help="Explicitly perform 1 non-API-Football GET")
+    ap.add_argument("--aliases", type=Path, help="Optional explicit canonical-name -> Understat-name JSON")
+    ap.add_argument("--output", type=Path, default=Path("reports/betting_v2/understat_xg_overlay.json"))
+    args = ap.parse_args()
+    root = args.repository_root.resolve()
+    index = json.loads((root / "data/statmaker/domestic_enriched/index.json").read_text())
+    matches = [item for item in index["leagues"]
+               if item.get("league_code") == args.league and
+               str(item.get("api_football_season")) == str(args.season)]
+    if len(matches) != 1:
+        raise ValueError("Expected a unique canonical league/season from index")
+    canonical_path = (root / str(matches[0]["output_path"])).resolve()
+    if not canonical_path.is_relative_to(root / "data/statmaker/domestic_enriched"):
+        raise ValueError("Unsafe canonical cache path")
+    enriched = json.loads(canonical_path.read_text())
+    if args.fetch_understat:
+        data = fetch_understat(args.league, args.season)
+    else:
+        data = json.loads(args.input.read_text())
+    aliases = json.loads(args.aliases.read_text()) if args.aliases else None
+    observed = datetime.now(timezone.utc).isoformat()
+    overlay = recovery_rows(enriched, data, args.league, observed, aliases)
+    overlay["understatSeason"] = args.season
+    overlay["retrievalMode"] = "ONE_DIRECT_UNDERSTAT_GET" if args.fetch_understat else "LOCAL_UNDERSTAT_JSON"
+    _atomic_write(_safe_output(root, args.output), overlay)
+    print(json.dumps({"recovered": len(overlay["recovered"]),
+                      "output": str(args.output),
+                      "apiFootballCalls": 0, "certified": False}))
+
+
+if __name__ == "__main__":
+    main()
