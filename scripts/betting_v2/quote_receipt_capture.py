@@ -73,7 +73,7 @@ def _projection_row(row: Any, fields: frozenset[str]) -> dict:
     return out
 
 
-def projected_market_snapshot(payload: Any) -> tuple[list[dict], bool]:
+def projected_market_snapshot(payload: Any, event_context: dict[str, dict] | None = None) -> tuple[list[dict], bool]:
     """Capture supported field shapes from every returned bookmaker market.
 
     Incomplete or unusual provider shapes are flagged, never silently
@@ -92,6 +92,14 @@ def projected_market_snapshot(payload: Any) -> tuple[list[dict], bool]:
         eid = context.get("id") or context.get("eventId")
         if eid is None:
             complete = False
+        else:
+            # The existing /events request precedes /odds in the same cycle.
+            # Only attach that provider event's *own* exact event ID metadata.
+            from_events = (event_context or {}).get(str(eid), {})
+            for field in ("date", "kickoff", "startTime", "home", "away",
+                          "homeTeam", "awayTeam"):
+                if not context.get(field) and from_events.get(field):
+                    context[field] = from_events[field]
         raw = event.get("bookmakers") or event.get("odds")
         if isinstance(raw, dict):
             books = [{"name": key, "markets": value.get("markets") if isinstance(value, dict) else value}
@@ -149,6 +157,7 @@ def projected_market_snapshot(payload: Any) -> tuple[list[dict], bool]:
 def receipt_document(
     payload: Any, path: str, params: dict[str, Any],
     received_at: dt.datetime, *, max_decoded_bytes: int = MAX_DECODED_BYTES,
+    event_context: dict[str, dict] | None = None,
 ) -> dict[str, Any]:
     """Hash the actual decoded provider response and keep safe request context.
 
@@ -169,7 +178,7 @@ def receipt_document(
     safe_request = {k: v for k, v in safe_request.items() if v}
     if not safe_request.get("eventId") and not safe_request.get("eventIds"):
         raise ValueError("Missing provider event identity in odds request")
-    projected, complete = projected_market_snapshot(payload)
+    projected, complete = projected_market_snapshot(payload, event_context)
     snapshot_wire = canonical(projected)
     stored = (len(wire) <= max_decoded_bytes and
               len(snapshot_wire) <= MAX_PUBLIC_SNAPSHOT_BYTES)
@@ -259,10 +268,12 @@ def write_receipt(
     root: Path, payload: Any, path: str, params: dict[str, Any],
     received_at: dt.datetime, *,
     max_decoded_bytes: int = MAX_DECODED_BYTES,
+    event_context: dict[str, dict] | None = None,
 ) -> Path:
     receipt = receipt_document(
         payload, path, params, received_at,
         max_decoded_bytes=max_decoded_bytes,
+        event_context=event_context,
     )
     root = root.resolve()
     directory = (root / STATUS_PATH).resolve()
@@ -299,10 +310,24 @@ def install(
     now = now_fn or (lambda: dt.datetime.now(dt.timezone.utc))
     original = odds_module.api_get
     count = [0]
+    events_seen: dict[str, dict] = {}
 
     def captured(path: str, params: dict[str, Any], debug: dict,
                  *, allow_error: bool = True) -> Any:
         result = original(path, params, debug, allow_error=allow_error)
+        if path == "/events":
+            rows = result if isinstance(result, list) else [result]
+            for event in rows:
+                if isinstance(event, dict):
+                    identity = event.get("id") or event.get("eventId")
+                    if identity is not None:
+                        events_seen[str(identity)] = _projection_row(
+                            event, _EVENT_FIELDS
+                        )
+            # Bound in-memory context even for unusually large global /events.
+            if len(events_seen) > 12_000:
+                events_seen.clear()
+            return result
         if path not in ("/odds", "/odds/multi") or result is None:
             return result
         if not isinstance(result, (dict, list)):
@@ -314,7 +339,9 @@ def install(
             return result
         count[0] += 1
         try:
-            dest = write_receipt(root, result, path, params, now())
+            dest = write_receipt(
+                root, result, path, params, now(), event_context=events_seen
+            )
             debug.setdefault("bettingV2ReceiptPaths", []).append(
                 dest.relative_to(root.resolve()).as_posix()
             )
