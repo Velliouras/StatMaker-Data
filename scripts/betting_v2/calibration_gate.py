@@ -23,6 +23,7 @@ from pathlib import Path
 from evaluate_holdout_prices import event, load_lines
 from quote_join import exact_join, forecast_index
 from quote_provenance import verified_offer_reason
+from walk_forward_goals import GOAL_LINES
 
 MIN_MARKET_BIN = 70
 MIN_LOCAL_BIN = 25
@@ -47,16 +48,19 @@ def model_events(match: dict) -> list[tuple[str, float, int]]:
     probabilities = match["probabilities"]
     actual = match["observed"]
     results = ("1X2_HOME", "1X2_DRAW", "1X2_AWAY")
-    totals = ("HOME_OVER_1_5", "AWAY_OVER_1_5", "MATCH_OVER_2_5")
     events = [
         (key, float(probabilities[key]), int(actual[key]))
         for key in results if key in probabilities and key in actual
     ]
-    for key in totals:
-        if key in probabilities and key in actual:
-            p, y = float(probabilities[key]), int(actual[key])
-            events.append((key + "_OVER", p, y))
-            events.append((key + "_UNDER", 1.0 - p, 1 - y))
+    # Evaluate EVERY supported half-goal line, not just legacy 1.5/2.5.
+    # OVER and UNDER always share one probability and complementary outcome.
+    for side in ("HOME", "AWAY", "MATCH"):
+        for line in GOAL_LINES:
+            key = f"{side}_OVER_{int(line)}_5"
+            if key in probabilities and key in actual:
+                p, y = float(probabilities[key]), int(actual[key])
+                events.append((key + "_OVER", p, y))
+                events.append((key + "_UNDER", 1.0 - p, 1 - y))
     for key, components, predicate in (
         ("DOUBLE_CHANCE_HOME_OR_DRAW", ("1X2_HOME", "1X2_DRAW"),
          lambda h, a: h >= a),
