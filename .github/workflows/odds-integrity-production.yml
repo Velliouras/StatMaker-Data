@@ -247,6 +247,10 @@ jobs:
         continue-on-error: true
         run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
 
+      - name: Attach cached bookmaker market evidence to V2 research preview
+        continue-on-error: true
+        run: python scripts/betting_v2/attach_shadow_market_evidence.py --repository-root .
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
