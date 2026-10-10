@@ -77,6 +77,11 @@ jobs:
         if: ${{ always() && steps.offline.outcome == 'success' }}
         run: python scripts/betting_v2/freeze_prematch_shadow.py --repository-root .
 
+      - name: Verify frozen forecast against independent API-Football fixture IDs OFFLINE
+        id: future_fixture_ids
+        if: ${{ always() && steps.offline.outcome == 'success' }}
+        run: python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
+
       - name: Diagnose existing archived receipt rejections OFFLINE
         if: ${{ always() }}
         run: python scripts/betting_v2/diagnose_quote_receipts.py
@@ -114,8 +119,9 @@ jobs:
           ODDS_AUDIT_OUTCOME: ${{ steps.cached_odds.outcome }}
           BRIDGE_OUTCOME: ${{ steps.bridge.outcome }}
           FORWARD_OUTCOME: ${{ steps.future_shadow.outcome }}
+          FUTURE_IDS_OUTCOME: ${{ steps.future_fixture_ids.outcome }}
         run: |
-          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" && "$ODDS_AUDIT_OUTCOME" == "success" && "$BRIDGE_OUTCOME" == "success" && "$FORWARD_OUTCOME" == "success" ]]; then
+          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" && "$ODDS_AUDIT_OUTCOME" == "success" && "$BRIDGE_OUTCOME" == "success" && "$FORWARD_OUTCOME" == "success" && "$FUTURE_IDS_OUTCOME" == "success" ]]; then
             outcome=success
             description="Full offline V2 tests and dual-model research pilot passed; no STRONG certification"
           else
@@ -141,6 +147,7 @@ jobs:
             reports/betting_v2/pilot_receipt_diagnostics.json
             reports/betting_v2/pilot_receipt_forecast_bridge.json
             reports/betting_v2/pilot_forward_shadow_diagnostics.json
+            reports/betting_v2/pilot_forward_identity_crosswalk.json
             reports/betting_v2/quote_receipt_index.json
             reports/betting_v2/shadow_manifest.json
           if-no-files-found: warn
