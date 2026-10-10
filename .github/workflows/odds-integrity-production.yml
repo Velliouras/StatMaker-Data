@@ -56,6 +56,7 @@ jobs:
             scripts/odds_market_integrity.py \
             scripts/refresh_domestic_odds_integrity.py \
             scripts/refresh_domestic_odds_schedule_priority.py \
+            scripts/betting_v2/quote_receipt_capture.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/domestic_odds_expansion.py \
             scripts/update_domestic_odds_api_io_push_aware.py \
@@ -74,6 +75,7 @@ jobs:
             tests/test_statmaker_domestic_scope.py \
             tests/test_odds_market_integrity.py \
             tests/test_refresh_domestic_odds_integrity.py \
+            tests/test_betting_v2_quote_receipt_capture.py \
             tests/test_domestic_schedule_only_validation.py \
             tests/test_domestic_provider_league_guard.py \
             tests/test_domestic_global_event_fallback.py \
@@ -93,6 +95,8 @@ jobs:
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          # Client-side raw response receipts are research evidence, never live STRONG.
+          STATMAKER_V2_CAPTURE_ODDS_RECEIPTS: "1"
           ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
           ODDS_API_IO_RATE_LIMIT_WAIT_MAX_SECONDS: "420"
           ODDS_API_IO_RATE_LIMIT_WAIT_BUFFER_SECONDS: "2"
@@ -235,6 +239,11 @@ jobs:
             reports/domestic_proposal_readiness.json \
             reports/domestic_lineup_watch.json \
             reports/domestic_squad_context.json
+          # Record only raw responses actually observed in this same provider cycle.
+          # No subsequent API call and no app-facing odds schema mutation.
+          if [ -d reports/betting_v2/quote_receipts ]; then
+            git add -A reports/betting_v2/quote_receipts
+          fi
           if git diff --cached --quiet; then
             echo "No Domestic odds/readiness changes."
           else
