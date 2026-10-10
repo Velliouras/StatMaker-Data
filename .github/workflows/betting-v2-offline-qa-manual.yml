@@ -67,6 +67,9 @@ jobs:
       - name: Diagnose existing archived receipt rejections OFFLINE
         if: ${{ always() }}
         run: python scripts/betting_v2/diagnose_quote_receipts.py
+      - name: Reindex existing archived receipts OFFLINE
+        if: ${{ always() }}
+        run: python scripts/betting_v2/index_quote_receipts.py --repository-root .
       - name: Show fail-closed certification summary
         id: shadow_gate
         if: ${{ always() && steps.offline.outcome == 'success' }}
@@ -121,6 +124,7 @@ jobs:
             reports/betting_v2/pilot_elo_market_holdout.json
             reports/betting_v2/pilot_cached_odds_provenance.json
             reports/betting_v2/pilot_receipt_diagnostics.json
+            reports/betting_v2/quote_receipt_index.json
             reports/betting_v2/shadow_manifest.json
           if-no-files-found: warn
           retention-days: 7
