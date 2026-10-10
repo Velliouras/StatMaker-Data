@@ -32,6 +32,8 @@ python scripts/fetch_schedule_scorers_capped.py --execute --phase events --max-r
 python scripts/fetch_schedule_scorers_capped.py --phase build
 ```
 
+A **manual-only** GitHub Actions workflow is available in `/.github/workflows/schedule-scorers-manual.yml` on the Data repository. It has only `workflow_dispatch` (no schedule/push trigger) and has **not been executed**. It uses the existing `API_FOOTBALL_KEY` secret only after a user starts it and stays capped at 6, 12 or 20 requests by dispatch choice. This workflow does not run on Android builds.
+
 The script caps each explicitly executed run at at most 40 calls and refuses a reserve below 1,500. It stops if the provider does not return a usable quota remainder or falls below reserve. One initial request might be necessary to discover the provider's actual remaining quota. Always confirm a real account balance before any --execute. It is NOT connected to GitHub Actions and does not run when Android opens Schedule or when Update All runs.
 
 ## Verification and release
