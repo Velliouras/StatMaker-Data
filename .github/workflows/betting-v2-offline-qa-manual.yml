@@ -85,10 +85,10 @@ jobs:
             outcome=failure
             description="Offline V2 QA failed; inspect unit tests, model pilot or fail-closed manifest"
           fi
-          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \\
-            -f state="$outcome" \\
-            -f context="betting-v2/offline-qa" \\
-            -f description="$description" \\
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state="$outcome" \
+            -f context="betting-v2/offline-qa" \
+            -f description="$description" \
             -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
       - name: Attach bounded offline pilot diagnostics
         if: always()
