@@ -83,6 +83,30 @@ The individual scripts also remain available:
 - \`evaluate_holdout_prices.py\`: price-aligned raw-value evaluation.
 - \`calibration_gate.py\`: bin/league Wilson-bound exploratory holdout.
 
+## Archived-price feasibility preflight (before expensive replay)
+
+To audit 1–14 explicitly selected dates **offline** without training a model,
+from a **full local Git checkout** of StatMaker-Data:
+
+```bash
+python scripts/betting_v2/archive_preflight.py --repository-root . --from-date YYYY-MM-DD --to-date YYYY-MM-DD
+```
+
+Output (local, not automatically committed):
+`reports/betting_v2/archive_preflight.json`
+
+For each day, it validates the pre-11:00 Athens Git manifest, bundle age,
+SHA-256, ZIP entry, prepared SQLite schema, timezone-aware kickoff, odds
+inside the strict 1.80–3.00 window, selection identities and presence
+of explicit cached fixture IDs. It counts rejection reasons per archive
+without calling any provider, running Actions, or touching App-Ready data.
+
+The counts are **before exact fixture joining** and do not claim verified
+historical bookmaker observation timestamps or independent/unfiltered odds.
+Only run price replay on dates with usable archive coverage, chosen within
+the pre-frozen chronological holdout. The preflight does not certify ROI or
+generate betting picks.
+
 ## Exact pregame source reconciliation
 
 The historical odds exporter resolves the bookmaker match to the **cached,
