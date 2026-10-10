@@ -239,6 +239,10 @@ jobs:
         continue-on-error: true
         run: python scripts/betting_v2/freeze_prematch_shadow.py --repository-root . --horizon-days 2 --archive
 
+      - name: Publish read-only Betting V2 Android UAT preview
+        continue-on-error: true
+        run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
+
       - name: Verify independent fixture IDs for frozen V2 research snapshots
         continue-on-error: true
         run: python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
@@ -274,6 +278,9 @@ jobs:
           fi
           if [ -f reports/betting_v2/pilot_forward_shadow_diagnostics.json ]; then
             git add reports/betting_v2/pilot_forward_shadow_diagnostics.json
+          fi
+          if [ -f reports/betting_v2/pilot_forward_shadow_preview.json ]; then
+            git add reports/betting_v2/pilot_forward_shadow_preview.json
           fi
           if [ -f reports/betting_v2/pilot_forward_identity_crosswalk.json ]; then
             git add reports/betting_v2/pilot_forward_identity_crosswalk.json
