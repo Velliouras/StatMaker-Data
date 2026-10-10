@@ -19,6 +19,7 @@ import json
 from pathlib import Path
 
 from quote_join import exact_join, forecast_index
+from walk_forward_goals import GOAL_LINES
 
 
 def load_lines(file: Path):
@@ -70,26 +71,32 @@ def event(quote: dict, forecast: dict) -> tuple[str, float, float, float] | None
     elif market in {"FULL_TIME_MATCH_TOTAL", "HOME_TEAM_TOTAL", "AWAY_TEAM_TOTAL"} and (
         direction in {"OVER", "UNDER"}
     ):
+        if isinstance(line, bool):
+            return None
         try:
             numeric_line = float(line)
         except (ValueError, TypeError):
             return None
-        if market == "FULL_TIME_MATCH_TOTAL" and numeric_line == 2.5:
+        # Only strictly binary half-goal lines; no handicap or Asian push.
+        if numeric_line not in GOAL_LINES:
+            return None
+        suffix = f"{int(numeric_line)}_5"
+        if market == "FULL_TIME_MATCH_TOTAL":
             if team not in {"", "MATCH", "NONE", "BOTH"}:
                 return None
-            label = "MATCH_OVER_2_5"
-            over = h + a >= 3
-        elif market == "HOME_TEAM_TOTAL" and numeric_line == 1.5:
+            label = f"MATCH_OVER_{suffix}"
+            over = h + a > numeric_line
+        elif market == "HOME_TEAM_TOTAL":
             if team not in {"", "HOME"}:
-                return None  # Conflicting team identity: never silently switch
-            label = "HOME_OVER_1_5"
-            over = h >= 2
-        elif market == "AWAY_TEAM_TOTAL" and numeric_line == 1.5:
+                return None
+            label = f"HOME_OVER_{suffix}"
+            over = h > numeric_line
+        else:
             if team not in {"", "AWAY"}:
                 return None
-            label = "AWAY_OVER_1_5"
-            over = a >= 2
-        else:
+            label = f"AWAY_OVER_{suffix}"
+            over = a > numeric_line
+        if label not in probabilities:
             return None
         p_over = float(probabilities[label])
         p = p_over if direction == "OVER" else (1.0 - p_over)
