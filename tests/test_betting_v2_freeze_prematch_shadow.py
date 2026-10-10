@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+import gzip
 import json
 from pathlib import Path
 import sys
@@ -74,6 +75,8 @@ class FreezeShadowTests(unittest.TestCase):
         self.assertNotIn("observed", row)
         self.assertEqual(result["certificationStatus"], "BLOCKED")
         self.assertFalse(row["certifiedStrong"])
+        self.assertEqual(len(row["historicalFeatureArchiveSha256"]), 64)
+        self.assertEqual(len(row["providerScheduleSnapshotSha256"]), 64)
         self.assertAlmostEqual(sum(row["probabilities"][k]
             for k in ("1X2_HOME","1X2_DRAW","1X2_AWAY")), 1, places=5)
 
@@ -91,6 +94,8 @@ class FreezeShadowTests(unittest.TestCase):
         leaked = freeze(Path("."), ASOF, previous_matches=historical(xg=True, extra_future=True),
                         schedule=schedule())
         self.assertEqual(baseline["forecastData"], leaked["forecastData"])
+        self.assertEqual(baseline["historicalFeatureArchiveSha256"],
+                         leaked["historicalFeatureArchiveSha256"])
 
     def test_unverified_team_mapping_blocked_not_guessed(self):
         data = schedule()
@@ -121,7 +126,8 @@ class FreezeShadowTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             path = write_snapshot(root, result, now=ASOF)
-            data = json.loads(path.read_text(encoding="utf-8"))
+            with gzip.open(path, "rt", encoding="utf-8") as stream:
+                data = json.load(stream)
             self.assertEqual(data["forecastCount"], 1)
             self.assertEqual(data["realStrongSelections"], 0)
             with self.assertRaises(FileExistsError):
