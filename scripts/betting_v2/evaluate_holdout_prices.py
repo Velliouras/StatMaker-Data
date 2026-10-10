@@ -129,7 +129,11 @@ def evaluate(forecasts: list[dict], quotes: list[dict]) -> dict:
         if not 1.8 < odd < 3.0:
             rejected["outside_odds_contract"] += 1
             continue
-        forecasted = event(q, predicted)
+        try:
+            forecasted = event(q, predicted)
+        except (KeyError, ValueError, TypeError, OverflowError):
+            rejected["malformed_market_probability_or_score"] += 1
+            continue
         if forecasted is None:
             rejected["unsupported_market_in_research_baseline"] += 1
             continue
