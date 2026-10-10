@@ -52,6 +52,58 @@ class QuoteReceiptIndexTests(unittest.TestCase):
             self.assertEqual(result["byMarket"]["1X2"], 3)
             self.assertEqual(result["byMarket"]["Match Goals"], 2)
 
+    def test_partial_snapshot_is_hash_verified_but_not_complete_or_certified(self):
+        payload = [{
+            "id": 123, "date": "2026-10-10T19:15:00Z",
+            "bookmakers": [{
+                "name": "Bet365",
+                "markets": [
+                    {"name": "1X2", "odds": [{"name": "Home", "odds": 2.1}]},
+                    {"name": "Unsupported Empty Market"},
+                ],
+            }],
+        }]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            saved = write_receipt(
+                root, payload, "/odds", {"eventId": "123"}, NOW
+            )
+            with gzip.open(saved, "rt", encoding="utf-8") as stream:
+                doc = json.load(stream)
+            self.assertFalse(doc["marketSnapshotComplete"])
+            with self.assertRaises(ValueError):
+                verify_receipt(doc)
+            result = verify_receipt(doc, allow_partial=True)
+            self.assertFalse(result["marketSnapshotComplete"])
+            self.assertFalse(result["readyForCertifyingStrong"])
+            stats = inspect(root)
+            self.assertEqual(stats["verifiedSnapshotReceipts"], 1)
+            self.assertEqual(stats["completeSnapshotReceipts"], 0)
+            self.assertEqual(stats["integrityVerifiedPartialSnapshotReceipts"], 1)
+            self.assertEqual(stats["preKickoffPriceRows"], 1)
+            self.assertEqual(stats["certifiedStrong"], 0)
+
+    def test_partial_snapshot_corruption_is_still_rejected(self):
+        payload = [{
+            "id": 123, "date": "2026-10-10T19:15:00Z",
+            "bookmakers": [{"name": "Bet365", "markets": [
+                {"name": "1X2", "odds": [{"name": "Home", "odds": 2.1}]},
+                {"name": "Missing Odds"},
+            ]}],
+        }]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            saved = write_receipt(root, payload, "/odds", {"eventId": "123"}, NOW)
+            with gzip.open(saved, "rt", encoding="utf-8") as stream:
+                doc = json.load(stream)
+            doc["boundedMarketSnapshot"][0]["bookmakers"][0]["markets"][0]["outcomes"][0]["odds"] = 1.5
+            with gzip.open(saved, "wt", encoding="utf-8") as stream:
+                json.dump(doc, stream)
+            stats = inspect(root)
+            self.assertEqual(stats["verifiedSnapshotReceipts"], 0)
+            self.assertEqual(stats["preKickoffPriceRows"], 0)
+            self.assertEqual(stats["rejected"]["invalid_receipt"], 1)
+
     def test_odds_without_matching_event_context_fail_closed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
