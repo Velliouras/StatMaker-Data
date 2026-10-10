@@ -94,6 +94,16 @@ class RecoveredXgOverlayTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             inspect_overlay(overlay, original)
 
+    def test_malformed_git_sha_is_rejected(self):
+        overlay, original = sample()
+        overlay["sourceCommit"] = "z" * 40
+        with self.assertRaises(ValueError):
+            inspect_overlay(overlay, original)
+        overlay["sourceCommit"] = SHA
+        overlay["sourceBlobSha"] = "!" * 40
+        with self.assertRaises(ValueError):
+            inspect_overlay(overlay, original)
+
     def test_timezone_required_and_observed_after_commit(self):
         overlay, original = sample()
         overlay["sourceCommitTimestampUTC"] = "2026-10-06T20:59:42"
