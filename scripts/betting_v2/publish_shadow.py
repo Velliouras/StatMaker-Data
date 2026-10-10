@@ -40,7 +40,7 @@ PROVIDER_REQUEST_BUDGET = 0
 CERTIFIED_FORECASTS = 0
 
 
-def _safe_output(root: Path, output: Path) -> Path:
+def _safe_output(root: Path, output: Path, *, allowed_suffixes: tuple[str, ...] = (".json",)) -> Path:
     resolved_root = root.resolve()
     resolved = (resolved_root / output).resolve() if not output.is_absolute() else output.resolve()
     try:
@@ -52,8 +52,8 @@ def _safe_output(root: Path, output: Path) -> Path:
         raise ValueError("Refusing to write into PRODUCTION data, odds or workflows")
     if not rel.startswith("reports/betting_v2/"):
         raise ValueError("Shadow output must remain inside reports/betting_v2/")
-    if resolved.suffix != ".json":
-        raise ValueError("Shadow output must be a JSON file")
+    if resolved.suffix not in allowed_suffixes:
+        raise ValueError("Shadow output has an unapproved extension")
     return resolved
 
 
