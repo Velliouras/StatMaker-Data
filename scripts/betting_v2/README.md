@@ -45,6 +45,21 @@ verified. Then import the existing file locally:
 python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --input ./understat_epl_2026.json
 ```
 
+If the JSON came from an immutable repository commit, supply its original
+Git commit, content blob and commit timestamp to support strict source
+validation (these are provenance declarations, **not** direct Understat
+attestation or verified data licensing):
+
+```bash
+python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --input ./understat_epl_2026.json --source-commit 18d9131000f56b48347702a51724e940ec731a72 --source-blob-sha db6431fa83ae7672187189f61acb94361f91aec8 --source-commit-at 2026-10-06T20:59:42Z --source-repository https://github.com/shanbhag003/pl-supercomputer
+python scripts/betting_v2/validate_xg_overlay.py --repository-root . --input reports/betting_v2/understat_xg_E0_2026.json --output reports/betting_v2/recovered_xg_integrity.json
+```
+
+A local JSON without immutable provenance may be imported into isolated
+research output, but deliberately fails the strict provenance validator.
+Do not use any overlay for forecasts predating its verified source
+availability, or mix independent xG models without new calibration.
+
 Only local JSON imports are accepted; there is intentionally **no**
 `--fetch-understat` option. The output stays in a separate offline
 league-season report (`reports/betting_v2/understat_xg_E0_2026.json`),
