@@ -37,19 +37,18 @@ The Python offline pilot now writes separate Elo artifacts: pilot_elo_fallback_m
 
 Understat covers E0, D1, SP1, I1 and F1. The recovery script performs strict source-score/team/date reconciliation; for all other leagues, use the ELO fallback when approved. Recovered xG must never be treated as historically available before its source observation timestamp.
 
-One explicitly requested Understat fetch (NOT an API-Football call), only in a local environment where network access and provider terms permit:
-
-```bash
-python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --fetch-understat
-```
-
-Or from a previously downloaded Understat league-season JSON, without network:
+Betting V2 has **no HTTP client**. First obtain a league-season JSON
+through a separately approved source workflow, with license and provenance
+verified. Then import the existing file locally:
 
 ```bash
 python scripts/betting_v2/recover_understat_xg.py --repository-root . --league E0 --season 2026 --input ./understat_epl_2026.json
 ```
 
-Both modes write a separate offline report at reports/betting_v2/understat_xg_E0_2026.json, NOT canonical stats or App-Ready. Other league/seasons use distinct files. The saved overlay needs point-in-time ingestion verification and model backtesting before it can affect STRONG decisions. This session's environment could not access Understat, so **no live missing xG values were retrieved** here.
+Only local JSON imports are accepted; there is intentionally **no**
+`--fetch-understat` option. The output stays in a separate offline
+league-season report (`reports/betting_v2/understat_xg_E0_2026.json`),
+never in canonical statistics or App-Ready. The saved overlay needs point-in-time ingestion verification and model backtesting before it can affect STRONG decisions. This session's environment could not access Understat, so **no live missing xG values were retrieved** here.
 
 Independent six-league real-cache readiness check: 317 completed fixtures of 2026-27, 105 primary xG-ready, 122 additional ELO-ready and 90 without adequate prematch sample. See reports/betting_v2/DUAL_MODE_COVERAGE_AND_RECOVERY_2026-10-10.md. The full committed Python tests and pilot remain unexecuted in the available environment.
 
