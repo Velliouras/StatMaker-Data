@@ -11,13 +11,19 @@ from math import isfinite
 from walk_forward_goals import GOAL_LINES
 
 
+class NonfiniteMarketProbability(ValueError):
+    """Forecast contains NaN or infinity; always fail closed in priced evaluation."""
+
+
 def _prob(probs: dict, key: str) -> float:
     value = probs[key]
     if isinstance(value, bool):
         raise ValueError("Boolean market probability")
     parsed = float(value)
-    if not isfinite(parsed) or not 0.0 <= parsed <= 1.0:
-        raise ValueError("Nonfinite or invalid market probability")
+    if not isfinite(parsed):
+        raise NonfiniteMarketProbability("Nonfinite market probability")
+    if not 0.0 <= parsed <= 1.0:
+        raise ValueError("Out-of-range market probability")
     return parsed
 
 
