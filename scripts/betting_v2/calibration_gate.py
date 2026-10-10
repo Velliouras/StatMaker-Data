@@ -24,6 +24,7 @@ from evaluate_holdout_prices import event, load_lines
 from quote_join import exact_join, forecast_index
 from quote_provenance import verified_offer_reason
 from walk_forward_goals import GOAL_LINES
+from forecast_market import NonfiniteMarketProbability
 
 MIN_MARKET_BIN = 70
 MIN_LOCAL_BIN = 25
@@ -140,6 +141,11 @@ def evaluate(calibration: list[dict], holdout: list[dict],
             continue
         try:
             value = match_quoted_event(quote, match)
+        except NonfiniteMarketProbability:
+            # Prematch inference correctly rejects NaN/Inf before settlement.
+            # Preserve the separate nonfinite category for calibration audits.
+            rejected["nonfinite_market_probability_or_settlement"] += 1
+            continue
         except (KeyError, TypeError, ValueError, OverflowError):
             rejected["malformed_market_probability"] += 1
             continue
