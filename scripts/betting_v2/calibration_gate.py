@@ -22,6 +22,7 @@ from pathlib import Path
 
 from evaluate_holdout_prices import event, load_lines
 from quote_join import exact_join, forecast_index
+from quote_provenance import verified_offer_reason
 
 MIN_MARKET_BIN = 70
 MIN_LOCAL_BIN = 25
@@ -112,6 +113,14 @@ def evaluate(calibration: list[dict], holdout: list[dict],
         match, join_status = exact_join(quote, by_id)
         if match is None:
             rejected[join_status] += 1
+            continue
+        # The historical App-Ready bundle only proves a Git snapshot cutoff.
+        # It does NOT prove the bookmaker's individual quote observation time.
+        # Never infer that legacy prepared selections are independently
+        # priced or include an unbiased universe of bookmaker offers.
+        provenance_issue = verified_offer_reason(quote)
+        if provenance_issue is not None:
+            rejected[provenance_issue] += 1
             continue
         try:
             odd = float(quote["odd"])
