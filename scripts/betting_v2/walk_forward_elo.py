@@ -18,6 +18,7 @@ from pathlib import Path
 
 from audit_data import read_fixtures, number
 from walk_forward_goals import event_probs
+from elo_holdout_diagnostics import summarize_elo_holdout
 
 
 @dataclass(frozen=True)
@@ -237,6 +238,9 @@ def walk_forward_elo(root: Path) -> tuple[dict, list[dict], list[dict]]:
         }, [], [])
     params = [EloParams(*x) for x in product((.25, .5), (.35, .65), (.0, .25, .5))]
     best = min(params, key=lambda p: logloss(tuning, p))
+    calibration_forecasts = forecasts(calibration, best)
+    holdout_forecasts = forecasts(untouched, best)
+    holdout_diagnostics = summarize_elo_holdout(holdout_forecasts)
     return ({
         "contract": "betting-v2-elo-fallback-research-v1",
         "notCertified": True, "strategy": "ELO_GOALS_FALLBACK_NO_XG",
@@ -256,7 +260,9 @@ def walk_forward_elo(root: Path) -> tuple[dict, list[dict], list[dict]]:
         "tunedParams": {"recent": best.recent, "venue": best.venue, "elo": best.elo},
         "tune1X2LogLoss": logloss(tuning, best),
         "holdoutFallback1X2LogLoss": logloss(untouched, best) if untouched else None,
-    }, forecasts(calibration, best), forecasts(untouched, best))
+        "retrospectiveFallbackHoldout": holdout_diagnostics,
+        "holdoutCanCertifyStrong": False,
+    }, calibration_forecasts, holdout_forecasts)
 
 
 def main() -> None:
