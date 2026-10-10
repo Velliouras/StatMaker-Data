@@ -47,7 +47,8 @@ jobs:
             --tests com.statmaker.app.DoubleChanceBookmakerProbabilityTest \
             --tests com.statmaker.app.ResultMarketValueGateTest \
             --tests com.statmaker.app.HybridUatRankingTest \
-            --tests com.statmaker.app.ResultMarketShadowAuditTest
+            --tests com.statmaker.app.ResultMarketShadowAuditTest \
+            --tests com.statmaker.app.AppReadyChannelRoutingTest
       - name: Upload JUnit findings
         if: always()
         uses: actions/upload-artifact@v4
