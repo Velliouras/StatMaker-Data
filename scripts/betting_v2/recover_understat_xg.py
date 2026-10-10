@@ -99,9 +99,11 @@ def recovery_rows(enriched: dict, provider: dict, league_code: str,
             counters["understat_invalid_teams"] += 1
             continue
         try:
-            # Understat season 'datetime' is timezone-naive. Never falsely
-            # attribute it to UTC; 12h is only a matching tolerance, and
-            # the canonical UTC date must be within one day of the date label.
+            # Understat season 'datetime' is often timezone-naive.
+            # Fail closed unless its wall-clock instant matches the canonical
+            # UTC kickoff within 15 minutes; NEVER use a 12-hour tolerance
+            # to guess a source timezone. Sources in local time require a
+            # separately verified timezone conversion before import.
             local_naive = datetime.fromisoformat(str(p.get("datetime")))
             if local_naive.tzinfo is not None:
                 local_naive = local_naive.astimezone(timezone.utc).replace(tzinfo=None)
@@ -132,7 +134,7 @@ def recovery_rows(enriched: dict, provider: dict, league_code: str,
         away = norm_aliases.get(name_key(m.get("away_team")), name_key(m.get("away_team")))
         candidates = [
             record for record in index.get((home, away, hg, ag), [])
-            if abs((record[0] - canonical_time.replace(tzinfo=None)).total_seconds()) <= 12 * 3600
+            if abs((record[0] - canonical_time.replace(tzinfo=None)).total_seconds()) <= 15 * 60
         ]
         if len(candidates) != 1:
             counters["unmatched_or_ambiguous"] += 1
