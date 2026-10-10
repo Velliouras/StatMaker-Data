@@ -83,6 +83,45 @@ The individual scripts also remain available:
 - \`evaluate_holdout_prices.py\`: price-aligned raw-value evaluation.
 - \`calibration_gate.py\`: bin/league Wilson-bound exploratory holdout.
 
+## Exact pregame source reconciliation
+
+The historical odds exporter resolves the bookmaker match to the **cached,
+finished API-Football fixture** only when the league code, normalized home
+and away team names and kickoff (within 15 minutes) resolve to exactly one
+fixture. An explicit source API fixture ID must agree with this evidence.
+Ambiguous, missing or late fixture identities are dropped with rejection
+counts. No fuzzy team aliases or guessed fixture IDs are permitted.
+
+Odds dates are grouped by **Athens local day**, while stored training dates
+are **UTC**. The research join uses verified fixture ID + league + kickoff
+instead of comparing those potentially different dates. The quote-cutoff
+timestamp must be strictly before kickoff. This fixes the midnight-rollover
+case without accepting incorrectly priced or mismatched fixtures.
+
+## Prematch feature completeness
+
+The model requires observed attacking AND defensive xG/xGA in its actual
+feature windows: 8 in the last 20, all 5 most recent fixtures, and at least
+3 venue-specific observations in the latest 8 relevant venue appearances.
+Missing xG **never receives a synthetic average of 1.4**. Such fixtures are
+rejected before probabilities are generated.
+
+This is intentionally stricter than the earlier *diagnostic* report based on
+3,164 qualifying historical rows. The published 10/18 outcome at raw p>=60%
+belongs to the **older exploratory model**, not the revised full-data
+contract. A fresh holdout on genuinely unseen results is mandatory.
+
+## Explicit local tests (no GitHub Actions)
+
+```bash
+python -m unittest discover -s tests -p 'test_betting_v2_*.py' -v
+```
+
+Synthetic tests cover missing xG/xGA, ambiguous fixture IDs, UTC/Athens
+midnight crossover, quote timing, 1X2, DNB PUSH, goals totals and the
+strict 1.80–3.00 price interval. These tests were committed but their
+execution has **not** yet been verified in this conversation.
+
 ## Integration conditions (NOT satisfied yet)
 
 1. The pilot must run successfully and all audit issues resolved.
