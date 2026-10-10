@@ -1,0 +1,68 @@
+name: "Betting V2 - manual offline QA (zero provider quota)"
+
+# Explicitly manual-only: no push, pull_request or schedule triggers.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betting-v2-offline-qa-manual
+  cancel-in-progress: false
+
+jobs:
+  pilot:
+    name: "Unit tests and independent xG/ELO holdouts"
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+      # No API credentials are passed to the offline scripts.
+      # No betting publisher, API-Football / odds fetcher or Android build.
+    steps:
+      - name: Checkout Data/main (read-only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Betting V2 standard-library regression tests
+        run: python -m unittest discover -s tests -p 'test_betting_v2*.py' -v
+      - name: Execute full OFFLINE Betting V2 Python pilot
+        run: python scripts/betting_v2/run_pilot.py --repository-root .
+      - name: Show fail-closed certification summary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          f = Path('reports/betting_v2/shadow_manifest.json')
+          data = json.loads(f.read_text(encoding='utf-8'))
+          assert data['certificationStatus'] == 'BLOCKED'
+          assert data['liveRecommendationsPublished'] == 0
+          assert data['api']['callsMadeByThisPublisher'] == 0
+          print(json.dumps({
+              'status': data['certificationStatus'],
+              'liveRecommendationsPublished': data['liveRecommendationsPublished'],
+              'providerCalls': data['api']['callsMadeByThisPublisher'],
+              'blockingReasons': data.get('blockingReasons', []),
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Attach bounded offline pilot diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: betting-v2-offline-qa
+          path: |
+            reports/betting_v2/pilot_model.json
+            reports/betting_v2/pilot_elo_fallback_model.json
+            reports/betting_v2/pilot_market_holdout.json
+            reports/betting_v2/pilot_elo_market_holdout.json
+            reports/betting_v2/shadow_manifest.json
+          if-no-files-found: warn
+          retention-days: 7
