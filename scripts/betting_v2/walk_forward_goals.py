@@ -141,9 +141,18 @@ def make_rows(matches: list[dict]) -> tuple[list[PrematchRow], dict]:
             ):
                 counts["missing_recent5_xg_xga"] += 1
                 continue
+            # Features below use venue matches WITHIN the last 20 team games.
+            # Checking the team's lifetime venue history instead can admit
+            # zero usable venue samples and crash verified_mean().
+            model_home_venue = [
+                x for x in last_home if x["venue"] == "home"
+            ][-8:]
+            model_away_venue = [
+                x for x in last_away if x["venue"] == "away"
+            ][-8:]
             if not all(
-                sum(x.get(k) is not None for x in window[-8:]) >= MIN_VENUE
-                for window in (home_venue, away_venue)
+                sum(x.get(k) is not None for x in window) >= MIN_VENUE
+                for window in (model_home_venue, model_away_venue)
                 for k in ("forxg", "againstxg")
             ):
                 counts["insufficient_venue_xg_xga"] += 1
