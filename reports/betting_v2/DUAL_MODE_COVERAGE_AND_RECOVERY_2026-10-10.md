@@ -20,7 +20,7 @@ Feature eligibility rises from 105 to 227. Actual p>=60% calibration, uncertaint
 
 Research-only ingestion from Understat is implemented for E0, D1, SP1, I1 and F1. Import requires matching league, final score, canonical home/away names, close fixture date and a unique Understat match. Existing conflicting canonical xG are never overwritten. The result is a separate research overlay tagged with sourceObservedAtUTC and historicalAsOfVerified=false, so it cannot be silently used as historical information before observed source availability.
 
-**No live Understat xG were actually recovered here**: direct access failed in both the browser and container because of network restrictions. API-Football requests: zero. The script offers one explicit Understat fetch per league-season or imports an already-downloaded Understat JSON. Availability and permissible third-party data use must be verified before executing the fetch locally.
+**No live Understat xG were actually recovered here**: direct access failed in both the browser and container because of network restrictions. API-Football requests: zero. The script now accepts only an already-downloaded, separately sourced Understat JSON; the old optional HTTP fetch was removed to preserve the V2 zero-network policy. Availability and permissible third-party data use must be verified before executing the fetch locally.
 
 ## Offline pipeline
 
