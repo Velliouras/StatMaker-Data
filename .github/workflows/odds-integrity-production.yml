@@ -57,6 +57,7 @@ jobs:
             scripts/refresh_domestic_odds_integrity.py \
             scripts/refresh_domestic_odds_schedule_priority.py \
             scripts/betting_v2/quote_receipt_capture.py \
+            scripts/betting_v2/index_quote_receipts.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/domestic_odds_expansion.py \
             scripts/update_domestic_odds_api_io_push_aware.py \
@@ -76,6 +77,7 @@ jobs:
             tests/test_odds_market_integrity.py \
             tests/test_refresh_domestic_odds_integrity.py \
             tests/test_betting_v2_quote_receipt_capture.py \
+            tests/test_betting_v2_index_quote_receipts.py \
             tests/test_domestic_schedule_only_validation.py \
             tests/test_domestic_provider_league_guard.py \
             tests/test_domestic_global_event_fallback.py \
@@ -218,6 +220,12 @@ jobs:
             --branch main \
             --output data/statmaker/update_manifest.json
 
+      - name: Summarize observed V2 quote evidence (offline, shadow-only)
+        # Does not call Odds-API.io, nor read any API key.
+        # A research-report failure must not block the canonical feed.
+        continue-on-error: true
+        run: python scripts/betting_v2/index_quote_receipts.py --repository-root .
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
@@ -243,6 +251,9 @@ jobs:
           # No subsequent API call and no app-facing odds schema mutation.
           if [ -d reports/betting_v2/quote_receipts ]; then
             git add -A reports/betting_v2/quote_receipts
+          fi
+          if [ -f reports/betting_v2/quote_receipt_index.json ]; then
+            git add reports/betting_v2/quote_receipt_index.json
           fi
           if git diff --cached --quiet; then
             echo "No Domestic odds/readiness changes."
