@@ -126,7 +126,9 @@ def main() -> None:
     shadow = publish(
         root, paths["shadow"],
         model_report=paths["model"],
-        priced_report=paths["priced"] if priced_report is not None else None
+        priced_report=paths["priced"] if priced_report is not None else None,
+        elo_model_report=paths["elo_model"],
+        elo_priced_report=paths["elo_priced"] if priced_report is not None else None
     )
     print(json.dumps({
         "status": shadow["certificationStatus"],
