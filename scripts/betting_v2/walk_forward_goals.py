@@ -239,6 +239,10 @@ def measures(rows: list[PrematchRow], p: Parameters) -> dict:
         return {"n": 0, "score": None}
     nll = 0.0
     brier = defaultdict(float)
+    raw_top_60_count = 0
+    raw_top_60_wins = 0
+    raw_top_60_predicted_sum = 0.0
+    all_top_1x2_hits = 0
     buckets: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
     for row in rows:
         home, away = model_lambdas(row, p)
@@ -247,12 +251,34 @@ def measures(rows: list[PrematchRow], p: Parameters) -> dict:
         observed_label = "1X2_HOME" if row.hgoals > row.agoals else (
             "1X2_DRAW" if row.hgoals == row.agoals else "1X2_AWAY")
         nll -= log(max(1e-12, forecasts[observed_label]))
+        top_key = max(("1X2_HOME", "1X2_DRAW", "1X2_AWAY"),
+                      key=lambda key: forecasts[key])
+        top_p = forecasts[top_key]
+        if top_key == observed_label:
+            all_top_1x2_hits += 1
+        if top_p >= 0.60:
+            raw_top_60_count += 1
+            raw_top_60_predicted_sum += top_p
+            raw_top_60_wins += int(top_key == observed_label)
         for key, predicted in forecasts.items():
             brier[key] += (predicted - actual[key]) ** 2
             bin_key = f"{min(9, int(predicted * 10)) / 10:.1f}"
             buckets[key][bin_key].append((predicted, actual[key]))
     return {
         "n": len(rows), "score": nll / len(rows),
+        "argmax1X2Accuracy": all_top_1x2_hits / len(rows),
+        "rawHighest1X2AtLeast60pct": {
+            "count": raw_top_60_count,
+            "wins": raw_top_60_wins,
+            "observedHitRate": (
+                raw_top_60_wins / raw_top_60_count if raw_top_60_count else None
+            ),
+            "meanRawPredictedProbability": (
+                raw_top_60_predicted_sum / raw_top_60_count
+                if raw_top_60_count else None
+            ),
+            "certifiedConservative60pct": False
+        },
         "brier": {k: round(v / len(rows), 5) for k, v in brier.items()},
         "buckets": {k: {b: {
             "n": len(v), "forecastMean": round(mean([e[0] for e in v], 0), 4),
