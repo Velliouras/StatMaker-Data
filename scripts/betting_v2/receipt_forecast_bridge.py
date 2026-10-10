@@ -116,6 +116,62 @@ def fixture_resolution(
     return item, "EXACT_CACHED_API_FIXTURE"
 
 
+def provider_schedule_index(root: Path) -> dict[str, list[dict]]:
+    """Read actual canonical Odds-API.io fixture schedule, not model results."""
+    source = root / "odds/odds_api_io/domestic_odds.json"
+    if not source.is_file():
+        return {}
+    feed = json.loads(source.read_text(encoding="utf-8"))
+    if not isinstance(feed, dict):
+        raise ValueError("Provider schedule not an object")
+    by_id: dict[str, list[dict]] = defaultdict(list)
+    for league in feed.get("leagues") or []:
+        if not isinstance(league, dict):
+            continue
+        league_code = str(league.get("leagueCode") or "").strip()
+        if not league_code:
+            continue
+        for match in league.get("matches") or []:
+            if not isinstance(match, dict):
+                continue
+            identity = str(match.get("id") or "").strip()
+            if identity:
+                by_id[identity].append({
+                    "leagueCode": league_code,
+                    "kickoffUTC": match.get("kickoff"),
+                    "providerHomeTeam": match.get("providerHomeTeam"),
+                    "providerAwayTeam": match.get("providerAwayTeam"),
+                    "providerEventId": identity,
+                    "source": "odds-api-io-domestic-schedule",
+                })
+    return dict(by_id)
+
+
+def provider_schedule_resolution(event: dict, by_id: dict) -> tuple[dict | None, str]:
+    """Exact event ID, both unaltered teams and kickoff, one unique league."""
+    eid = str(event.get("id") or event.get("eventId") or "").strip()
+    h = canonical_name(event.get("home") or event.get("homeTeam"))
+    a = canonical_name(event.get("away") or event.get("awayTeam"))
+    kickoff = aware_utc(event.get("date") or event.get("kickoff") or event.get("startTime"))
+    if not eid or not h or not a or kickoff is None:
+        return None, "MISSING_PROVIDER_EVENT_TIME_OR_TEAMS"
+    valid = {}
+    for item in by_id.get(eid, []):
+        ikick = aware_utc(item.get("kickoffUTC"))
+        if (ikick is None or
+                abs((ikick - kickoff).total_seconds()) > 900 or
+                canonical_name(item.get("providerHomeTeam")) != h or
+                canonical_name(item.get("providerAwayTeam")) != a):
+            continue
+        identity = (item["leagueCode"], eid)
+        valid[identity] = item
+    if not valid:
+        return None, "NO_EXACT_PROVIDER_SCHEDULE_FIXTURE"
+    if len(valid) > 1:
+        return None, "AMBIGUOUS_PROVIDER_SCHEDULE_FIXTURE"
+    return next(iter(valid.values())), "EXACT_PROVIDER_SCHEDULE_ONLY_NOT_API_FIXTURE"
+
+
 def _load_forecasts(path: Path | None) -> dict:
     if path is None or not path.is_file():
         return {}
@@ -134,12 +190,14 @@ def study(root: Path, primary: Path | None = None,
     limited = len(paths) > max_files
     paths = paths[-max_files:]
     fixture_cache = lookup if lookup is not None else CachedFixtureLookup(root)
+    provider_schedule = provider_schedule_index(root)
     models = {"XG_PRIMARY": _load_forecasts(primary),
               "ELO_GOALS_FALLBACK_NO_XG": _load_forecasts(fallback)}
     counts = Counter()
     reject = Counter()
     market_count = Counter()
     linked_ids: set[tuple[str, str]] = set()
+    scheduled_ids: set[tuple[str, str]] = set()
     price_identities: set[tuple] = set()
     for path in paths:
         if path.is_symlink() or not path.is_file() or path.stat().st_size > MAX_GZIP_FILE_BYTES:
@@ -159,6 +217,7 @@ def study(root: Path, primary: Path | None = None,
         events = {str(row["event"].get("id") or row["event"].get("eventId")):
                   row["event"] for row in document["boundedMarketSnapshot"]}
         resolved: dict[str, tuple[dict | None, str]] = {}
+        schedule_resolved: dict[str, tuple[dict | None, str]] = {}
         for offer in offers:
             counts["rawPriceObservations"] += 1
             market, reason = normalized_market(offer)
@@ -168,6 +227,16 @@ def study(root: Path, primary: Path | None = None,
             counts["mappedPriceObservations"] += 1
             market_count[market["market"]] += 1
             eid = offer["providerEventId"]
+            if eid not in schedule_resolved:
+                schedule_resolved[eid] = provider_schedule_resolution(
+                    events.get(eid, {}), provider_schedule
+                )
+            scheduled, schedule_status = schedule_resolved[eid]
+            if scheduled is None:
+                reject[schedule_status] += 1
+            else:
+                scheduled_ids.add((scheduled["leagueCode"], eid))
+                counts["verifiedSameProviderSchedulePriceObservations"] += 1
             if eid not in resolved:
                 resolved[eid] = fixture_resolution(events.get(eid, {}), fixture_cache)
             item, status = resolved[eid]
@@ -222,6 +291,8 @@ def study(root: Path, primary: Path | None = None,
         "receiptArchiveTruncated": limited,
         "receiptFilesScanned": len(paths),
         "distinctExactCachedFixtures": len(linked_ids),
+        "distinctSameProviderScheduledFixtures": len(scheduled_ids),
+        "sameProviderScheduleIsApiFootballIdentity": False,
         "counts": dict(sorted(counts.items())),
         "mappedByMarket": dict(sorted(market_count.items())),
         "rejected": dict(sorted(reject.items())),
@@ -252,6 +323,7 @@ def main() -> None:
     print(json.dumps({"contract": output["contract"],
                       "counts": output["counts"],
                       "distinctExactCachedFixtures": output["distinctExactCachedFixtures"],
+                      "distinctSameProviderScheduledFixtures": output["distinctSameProviderScheduledFixtures"],
                       "certifiedEV": None, "certifiedROI": None, "providerCalls": 0}))
 
 
