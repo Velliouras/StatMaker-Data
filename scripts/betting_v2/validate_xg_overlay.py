@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import json
 from math import isfinite
 from pathlib import Path
+import re
 
 from publish_shadow import _safe_output, _atomic_write
 
@@ -47,10 +48,10 @@ def inspect_overlay(overlay: dict, enriched: dict) -> dict:
     if overlay.get("sourceModelsMayDiffer") is not True:
         raise ValueError("Mixing different provider xG models is forbidden")
     if (not isinstance(overlay.get("sourceCommit"), str) or
-            len(overlay["sourceCommit"]) != 40 or
+            re.fullmatch(r"[a-f0-9]{40}", overlay["sourceCommit"]) is None or
             not isinstance(overlay.get("sourceBlobSha"), str) or
-            len(overlay["sourceBlobSha"]) != 40):
-        raise ValueError("Missing immutable mirror Git identifiers")
+            re.fullmatch(r"[a-f0-9]{40}", overlay["sourceBlobSha"]) is None):
+        raise ValueError("Missing or invalid immutable mirror Git identifiers")
     published = as_utc(overlay.get("sourceCommitTimestampUTC"))
     observed = as_utc(overlay.get("sourceObservedAtUTC"))
     if observed < published:
