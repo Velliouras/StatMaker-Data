@@ -1,0 +1,65 @@
+name: Schedule Scorers Bounded Manual Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'Only leaderboard, fixture events, or both'
+        required: true
+        type: choice
+        options: [leaders, events, both]
+        default: leaders
+      max_requests:
+        description: 'Strict provider call budget'
+        required: true
+        type: choice
+        options: ['6', '12', '20']
+        default: '6'
+      lookback:
+        description: 'Days of completed fixtures (events only)'
+        required: true
+        type: choice
+        options: ['7', '14', '30']
+        default: '14'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-schedule-scorers-bounded-manual
+  cancel-in-progress: false
+
+jobs:
+  scorer-refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Import only bounded verified scorer data
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          REQUEST_PHASE: ${{ inputs.phase }}
+          MAX_REQUESTS: ${{ inputs.max_requests }}
+          LOOKBACK: ${{ inputs.lookback }}
+        run: |
+          test -n "$API_FOOTBALL_KEY" || { echo 'Missing API_FOOTBALL_KEY'; exit 1; }
+          python scripts/fetch_schedule_scorers_capped.py --execute \
+            --phase "$REQUEST_PHASE" \
+            --max-requests "$MAX_REQUESTS" \
+            --lookback "$LOOKBACK" \
+            --quota-reserve 1500
+      - name: Publish only scorer cache and read model
+        run: |
+          git config user.name 'statmaker-data-bot'
+          git config user.email 'statmaker-data-bot@users.noreply.github.com'
+          git add data/api_football/schedule_scorers/ data/statmaker/schedule_scorers/season_snapshot.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data: refresh bounded verified Schedule scorers'
+            git push origin HEAD:main
+          fi
