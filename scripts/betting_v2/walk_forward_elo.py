@@ -207,18 +207,34 @@ def walk_forward_elo(root: Path) -> tuple[dict, list[dict], list[dict]]:
     matches, problems, leagues = read_fixtures(root)
     rows, readiness = make_elo_rows(matches)
     rows.sort(key=lambda r: (r.date, r.league, r.fixture))
-    days = sorted({r.date for r in rows})
+    # A model calibrated for the no-xG population must be trained on the
+    # SAME no-xG population. Using the xG-rich population for ELO tuning
+    # would silently reintroduce regime selection bias.
+    fallback = [r for r in rows if r.missing_prior_xg]
+    days = sorted({r.date for r in fallback})
     if len(days) < 50:
         return ({
             "contract": "betting-v2-elo-fallback-research-v1",
-            "notCertified": True, "error": "Less than 50 dates with Elo-ready matches",
-            "eloEligible": len(rows),
+            "notCertified": True, "strategy": "ELO_GOALS_FALLBACK_NO_XG",
+            "error": "Fewer than 50 distinct fallback-only pregame dates",
+            "eloEligible": len(rows), "eloFallbackEligible": len(fallback),
+            "providerCalls": 0, "liveStrongPicks": 0,
+            "requiresSeparateCalibration": True,
         }, [], [])
     boundary = lambda frac: days[min(len(days) - 1, int(len(days) * frac))]
     fit, tune_end, cal_end = boundary(.55), boundary(.75), boundary(.90)
-    tuning = [r for r in rows if fit < r.date <= tune_end]
-    calibration = [r for r in rows if tune_end < r.date <= cal_end and r.missing_prior_xg]
-    untouched = [r for r in rows if r.date > cal_end and r.missing_prior_xg]
+    tuning = [r for r in fallback if fit < r.date <= tune_end]
+    calibration = [r for r in fallback if tune_end < r.date <= cal_end]
+    untouched = [r for r in fallback if r.date > cal_end]
+    if not tuning or not calibration or not untouched:
+        return ({
+            "contract": "betting-v2-elo-fallback-research-v1",
+            "notCertified": True, "strategy": "ELO_GOALS_FALLBACK_NO_XG",
+            "error": "Disjoint fallback-only tuning/calibration/holdout unavailable",
+            "eloEligible": len(rows), "eloFallbackEligible": len(fallback),
+            "providerCalls": 0, "liveStrongPicks": 0,
+            "requiresSeparateCalibration": True,
+        }, [], [])
     params = [EloParams(*x) for x in product((.25, .5), (.35, .65), (.0, .25, .5))]
     best = min(params, key=lambda p: logloss(tuning, p))
     return ({
@@ -230,10 +246,12 @@ def walk_forward_elo(root: Path) -> tuple[dict, list[dict], list[dict]]:
         "providerCalls": 0, "neverImputesXg": True,
         "leagues": len(leagues), "sourceErrors": dict(problems),
         "eloEligible": len(rows),
-        "eloFallbackEligible": sum(r.missing_prior_xg for r in rows),
+        "eloFallbackEligible": len(fallback),
+        "tuningPopulation": "ELO_FALLBACK_ONLY_NO_XG",
         "readiness": readiness,
         "splits": {"fitEnd": fit, "tuneEnd": tune_end, "calibrationEnd": cal_end,
-                   "tuneN": len(tuning), "fallbackCalibrationN": len(calibration),
+                   "tuneN": len(tuning), "fallbackTuneN": len(tuning),
+                   "fallbackCalibrationN": len(calibration),
                    "fallbackHoldoutN": len(untouched)},
         "tunedParams": {"recent": best.recent, "venue": best.venue, "elo": best.elo},
         "tune1X2LogLoss": logloss(tuning, best),
