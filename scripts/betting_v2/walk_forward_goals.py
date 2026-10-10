@@ -175,6 +175,10 @@ def make_rows(matches: list[dict]) -> tuple[list[PrematchRow], dict]:
 
         # IMPORTANT: update only after forecasting ALL same-date fixtures.
         for m in batch:
+            # A prospective target is feature-only; never inject invented FT
+            # results/xG into the historical rating or form state.
+            if m.get("prematch_target"):
+                continue
             hkey = (group, m["home"])
             akey = (group, m["away"])
             hxg = number(m["stats"].get("HxG"))
