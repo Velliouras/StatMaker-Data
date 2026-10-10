@@ -32,6 +32,118 @@ def canonical(payload: Any) -> bytes:
     ).encode("utf-8")
 
 
+
+# Public Data/main must not become an indefinite mirror of raw provider payloads.
+# Retain bounded market/outcome evidence only, not unrelated response metadata.
+MAX_PUBLIC_SNAPSHOT_BYTES = 256_000
+_MARKET_FIELDS = frozenset((
+    "id", "key", "name", "market", "type", "line", "hdp", "updatedAt",
+    "updated_at", "lastUpdatedAt", "lastUpdate", "odds", "outcomes", "prices",
+))
+_OUTCOME_FIELDS = frozenset((
+    "id", "key", "name", "label", "selection", "team", "side", "line", "hdp",
+    "odds", "price", "decimal", "decimalOdds", "value", "over", "under",
+    "home", "away", "draw", "yes", "no", "1X", "X2", "12",
+))
+_EVENT_FIELDS = frozenset((
+    "id", "eventId", "date", "kickoff", "startTime", "home", "away",
+    "homeTeam", "awayTeam", "league",
+))
+
+
+def _safe_scalar(v: Any) -> str | float | int | bool | None:
+    if v is None or isinstance(v, (int, float, bool)):
+        return v
+    if isinstance(v, str):
+        return v[:160]
+    return None
+
+
+def _projection_row(row: Any, fields: frozenset[str]) -> dict:
+    if not isinstance(row, dict):
+        return {}
+    out = {}
+    for key, value in row.items():
+        if key not in fields:
+            continue
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            out[key] = _safe_scalar(value)
+    return out
+
+
+def projected_market_snapshot(payload: Any) -> tuple[list[dict], bool]:
+    """Capture supported field shapes from every returned bookmaker market.
+
+    Incomplete or unusual provider shapes are flagged, never silently
+    represented as a verified full offer universe.
+    """
+    events = payload if isinstance(payload, list) else [payload]
+    if not isinstance(events, list) or len(events) > 300:
+        return [], False
+    snapshots = []
+    complete = True
+    for event in events:
+        if not isinstance(event, dict):
+            complete = False
+            continue
+        context = _projection_row(event, _EVENT_FIELDS)
+        eid = context.get("id") or context.get("eventId")
+        if eid is None:
+            complete = False
+        raw = event.get("bookmakers") or event.get("odds")
+        if isinstance(raw, dict):
+            books = [{"name": key, "markets": value.get("markets") if isinstance(value, dict) else value}
+                     for key, value in raw.items()]
+        elif isinstance(raw, list):
+            books = raw
+        else:
+            books = []
+            complete = False
+        if len(books) > 80:
+            complete = False
+            books = books[:80]
+        saved_books = []
+        for book in books:
+            if not isinstance(book, dict):
+                complete = False
+                continue
+            name = str(book.get("name") or book.get("bookmaker") or book.get("key") or "")
+            markets = book.get("markets") or book.get("odds")
+            if isinstance(markets, dict):
+                markets = [{"name": key, "odds": value} for key, value in markets.items()]
+            if not name or not isinstance(markets, list):
+                complete = False
+                continue
+            if len(markets) > 300:
+                complete = False
+            saved_markets = []
+            for market in markets[:300]:
+                if not isinstance(market, dict):
+                    complete = False
+                    continue
+                item = _projection_row(market, _MARKET_FIELDS)
+                values = market.get("outcomes") or market.get("odds") or market.get("prices")
+                if isinstance(values, dict):
+                    values = [{"name": k, **v} if isinstance(v, dict)
+                              else {"name": k, "odds": v}
+                              for k, v in values.items()]
+                if not isinstance(values, list):
+                    complete = False
+                    continue
+                if len(values) > 150:
+                    complete = False
+                item["outcomes"] = [
+                    _projection_row(row, _OUTCOME_FIELDS)
+                    for row in values[:150] if isinstance(row, dict)
+                ]
+                if len(item["outcomes"]) != min(len(values), 150):
+                    complete = False
+                saved_markets.append(item)
+            saved_books.append({"bookmaker": name[:120], "markets": saved_markets})
+        snapshots.append({"event": context, "bookmakers": saved_books})
+    return snapshots, complete
+
+
 def receipt_document(
     payload: Any, path: str, params: dict[str, Any],
     received_at: dt.datetime, *, max_decoded_bytes: int = MAX_DECODED_BYTES,
@@ -55,9 +167,12 @@ def receipt_document(
     safe_request = {k: v for k, v in safe_request.items() if v}
     if not safe_request.get("eventId") and not safe_request.get("eventIds"):
         raise ValueError("Missing provider event identity in odds request")
-    stored = len(wire) <= max_decoded_bytes
+    projected, complete = projected_market_snapshot(payload)
+    snapshot_wire = canonical(projected)
+    stored = (len(wire) <= max_decoded_bytes and
+              len(snapshot_wire) <= MAX_PUBLIC_SNAPSHOT_BYTES)
     return {
-        "contract": "betting-v2-client-odds-http-receipt-v1",
+        "contract": "betting-v2-client-odds-http-receipt-v2",
         "provider": "Odds-API.io",
         "endpoint": path,
         "request": safe_request,
@@ -66,8 +181,12 @@ def receipt_document(
         ).isoformat().replace("+00:00", "Z"),
         "decodedResponseSha256": digest,
         "decodedResponseBytes": len(wire),
-        "fullDecodedResponseStored": stored,
-        "decodedResponse": payload if stored else None,
+        "fullDecodedResponseStored": False,
+        "rawProviderBodyPublished": False,
+        "boundedMarketSnapshot": projected if stored else [],
+        "marketSnapshotSha256": sha256(snapshot_wire).hexdigest() if stored else None,
+        "marketSnapshotComplete": bool(stored and complete),
+        "marketSnapshotBytes": len(snapshot_wire) if stored else 0,
         "timestampSemantics": "CLIENT_RESPONSE_RECEIVED_AT_NOT_PROVIDER_LAST_PRICE_UPDATE",
         "priceObservationTimestampVerified": False,
         "bookmakerMarketSelectionIdVerified": False,
@@ -78,7 +197,6 @@ def receipt_document(
     }
 
 
-
 def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
     """Fail-closed authenticity/integrity check for a captured decoded reply.
 
@@ -86,7 +204,7 @@ def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
     cannot establish provider quote-update time, independent market coverage,
     bookmaker selection identity or profitable expected value.
     """
-    if doc.get("contract") != "betting-v2-client-odds-http-receipt-v1":
+    if doc.get("contract") != "betting-v2-client-odds-http-receipt-v2":
         raise ValueError("Unknown quote receipt contract")
     if doc.get("researchOnly") is not True or doc.get("certifiedStrong") is not False:
         raise ValueError("A quote receipt must not claim betting certification")
@@ -108,22 +226,25 @@ def verify_receipt(doc: dict[str, Any]) -> dict[str, Any]:
         raise ValueError("Malformed client receipt timestamp") from exc
     if observed.tzinfo is None or observed.utcoffset() is None:
         raise ValueError("Client receipt must be timezone aware")
-    if doc.get("fullDecodedResponseStored") is not True:
-        raise ValueError("Incomplete received payload cannot prove offer identity")
-    payload = doc.get("decodedResponse")
-    if not isinstance(payload, (dict, list)):
-        raise ValueError("Provider response not a structured JSON value")
-    wire = canonical(payload)
-    if len(wire) != doc.get("decodedResponseBytes"):
-        raise ValueError("Received payload byte length differs")
-    if sha256(wire).hexdigest() != doc.get("decodedResponseSha256"):
-        raise ValueError("Received payload SHA-256 differs")
+    if doc.get("fullDecodedResponseStored") is not False or (
+        doc.get("rawProviderBodyPublished") is not False
+    ):
+        raise ValueError("Raw provider response must not be published in public Git")
+    snapshot = doc.get("boundedMarketSnapshot")
+    if not isinstance(snapshot, list) or not doc.get("marketSnapshotComplete"):
+        raise ValueError("Incomplete offer snapshot cannot prove price evidence")
+    wire = canonical(snapshot)
+    if len(wire) != doc.get("marketSnapshotBytes"):
+        raise ValueError("Stored offer snapshot byte count mismatch")
+    if sha256(wire).hexdigest() != doc.get("marketSnapshotSha256"):
+        raise ValueError("Stored offer snapshot integrity mismatch")
     if (doc.get("priceObservationTimestampVerified") is not False or
             doc.get("independentUnfilteredBookmakerUniverseVerified") is not False or
             doc.get("bookmakerMarketSelectionIdVerified") is not False):
         raise ValueError("Unverified individual quote cannot claim provenance")
     return {
         "verifiedLocalReceiptIntegrity": True,
+        "marketSnapshotComplete": True,
         "clientReceivedAtUTC": doc["clientReceivedAtUTC"],
         "sourceGenerationId": doc["decodedResponseSha256"],
         "providerOfferTimestampIndependentlyVerified": False,
