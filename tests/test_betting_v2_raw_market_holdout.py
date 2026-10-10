@@ -47,6 +47,34 @@ class UnpricedHoldoutTests(unittest.TestCase):
         self.assertIn("DOUBLE_CHANCE_HOME_OR_DRAW", report["byMarket"])
         self.assertEqual(report["byMarket"]["MATCH_OVER_3_5_OVER"]["n"], 1)
 
+    def test_one_calibration_fixture_cannot_certify_any_market(self):
+        report = summarize(
+            [forecast("2026-09-01", "cal")],
+            [forecast("2026-09-05", "held")], "XG_PRIMARY"
+        )
+        gate = report["frozenCalibrationReadiness"]
+        self.assertEqual(gate["passedMarketEvaluations"], 0)
+        self.assertEqual(gate["fixturesWithAtLeastOnePassingMarket"], 0)
+        self.assertGreater(gate["blockedCounts"]["insufficient_global_market_bin"], 0)
+        self.assertEqual(gate["certifiedStrong"], 0)
+
+    def test_90_earlier_observations_can_pass_unpriced_gate_not_strong(self):
+        calibration = [
+            forecast("2026-09-01", f"historical-{i}")
+            for i in range(90)
+        ]
+        report = summarize(calibration,
+                           [forecast("2026-09-05", "held")],
+                           "XG_PRIMARY")
+        gate = report["frozenCalibrationReadiness"]
+        self.assertGreater(gate["passedMarketEvaluations"], 0)
+        self.assertEqual(gate["fixturesWithAtLeastOnePassingMarket"], 1)
+        self.assertGreater(gate["passedByMarket"]["1X2_HOME"], 0)
+        self.assertFalse(gate["hasBookmakerQuoteOrExpectedValueEvidence"])
+        self.assertFalse(gate["hasAdverseLineupBounds"])
+        self.assertEqual(gate["certifiedStrong"], 0)
+        self.assertFalse(report["certified"])
+
     def test_elo_population_is_independent(self):
         mode = "ELO_GOALS_FALLBACK_NO_XG"
         report = summarize(
