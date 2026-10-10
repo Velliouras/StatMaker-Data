@@ -41,8 +41,13 @@ jobs:
       - name: Betting V2 standard-library regression tests
         run: python -m unittest discover -s tests -p 'test_betting_v2*.py' -v
       - name: Execute full OFFLINE Betting V2 Python pilot
+        id: offline
+        # Diagnostic phase is independent: a failing unit test cannot hide pilot errors.
+        # Keep the overall workflow FAILED when any step fails.
+        if: ${{ always() && !cancelled() }}
         run: python scripts/betting_v2/run_pilot.py --repository-root .
       - name: Show fail-closed certification summary
+        if: ${{ always() && steps.offline.outcome == 'success' }}
         run: |
           python - <<'PY'
           import json
