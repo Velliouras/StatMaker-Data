@@ -67,6 +67,31 @@ never in canonical statistics or App-Ready. The saved overlay needs point-in-tim
 
 Independent six-league real-cache readiness check: 317 completed fixtures of 2026-27, 105 primary xG-ready, 122 additional ELO-ready and 90 without adequate prematch sample. See reports/betting_v2/DUAL_MODE_COVERAGE_AND_RECOVERY_2026-10-10.md. The full committed Python tests and pilot remain unexecuted in the available environment.
 
+## Emerging-league ELO evidence (calendar-year caches; 2026-10-10)
+
+The strict prior-date goal/ELO readiness analysis has now been expanded to
+Argentina, Brazil, China, Japan, Norway and Sweden. Read-only cached data
+yielded **1,554 completed games: 279 xG-primary-ready, 796 additional
+ELO-fallback-ready, and 479 insufficient for either mode**. The earlier
+exploratory 249/762 count was superseded by a correction to the separate
+JavaScript research replay's first-match history retention; the Python
+history builder uses persistent dictionaries and was not shown to share it.
+
+At fixed, pre-existing exploratory ELO parameters, the fallback-only
+subset gave raw 1X2 argmax **365/796**, and raw p>=0.60 subgroup
+**59/91**. Its 95% Wilson lower bound is **54.61%**, NOT the
+required conservative 60%. No odds, exact market profitability,
+lineup adverse case, Python/full-suite parity or production certification
+has been established. See
+`reports/betting_v2/ELO_FALLBACK_EMERGING_MARKETS_2026-10-10.md`.
+
+The separate Understat JSON importer now **rejects kickoff differences
+exceeding 15 minutes** instead of guessing a 12-hour timezone difference.
+The 33/33 EPL 2026 recovered fixtures were checked against the immutable
+source mirror and all matched kickoff time *exactly* (0-second maximum
+discrepancy). Non-UTC naive source clocks must first be independently
+converted to UTC, never guessed. No App-Ready or original xG was changed.
+
 ## Provider quota protection
 
 **V2-specific quota budget: 0 requests.**
