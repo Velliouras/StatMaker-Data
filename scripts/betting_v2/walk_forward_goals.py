@@ -44,6 +44,7 @@ class PrematchRow:
     date: str
     league: str
     fixture: str
+    kickoff_utc: str
     hgoals: int
     agoals: int
     home_att_recent_xg: float
@@ -135,7 +136,8 @@ def make_rows(matches: list[dict]) -> tuple[list[PrematchRow], dict]:
                 counts["short_league_history"] += 1
                 continue
             rows.append(PrematchRow(
-                today, group, m["fixture_id"], m["hg"], m["ag"],
+                today, group, m["fixture_id"], m["date"].isoformat(),
+                m["hg"], m["ag"],
                 *ha, *ad, *aa, *hd,
                 elo[(group, m["home"])] - elo[(group, m["away"])],
                 league_h, league_a
@@ -316,7 +318,10 @@ def walk_forward(data_root: Path) -> tuple[dict, list[dict], list[dict]]:
             expected_home, expected_away = model_lambdas(row, best)
             predicted.append({
                 "date": row.date, "league": row.league,
-                "fixtureId": row.fixture, "homeGoals": row.hgoals,
+                "fixtureId": row.fixture,
+                "leagueCode": row.league.split("|", 1)[0],
+                "kickoffUTC": row.kickoff_utc,
+                "homeGoals": row.hgoals,
                 "awayGoals": row.agoals,
                 "expectedHomeGoals": expected_home, "expectedAwayGoals": expected_away,
                 "probabilities": event_probs(expected_home, expected_away),
