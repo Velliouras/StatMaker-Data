@@ -100,7 +100,9 @@ def _atomic_write(path: Path, data: dict[str, Any]) -> None:
 
 def publish(root: Path, output: Path,
             model_report: Path | None = None,
-            priced_report: Path | None = None) -> dict[str, Any]:
+            priced_report: Path | None = None,
+            elo_model_report: Path | None = None,
+            elo_priced_report: Path | None = None) -> dict[str, Any]:
     root = root.resolve()
     dest = _safe_output(root, output)
     data_index = root / "data/statmaker/domestic_enriched/index.json"
@@ -109,6 +111,20 @@ def publish(root: Path, output: Path,
     data_index_hash = hashlib.sha256(data_index.read_bytes()).hexdigest()
     model, model_provenance = _checked_input(root, model_report)
     priced, priced_provenance = _checked_input(root, priced_report)
+    elo_model, elo_model_provenance = _checked_input(root, elo_model_report)
+    elo_priced, elo_priced_provenance = _checked_input(root, elo_priced_report)
+    # Elo fallback is a separate evidence/calibration population. A primary
+    # model report MUST NOT silently masquerade as fallback evidence.
+    if elo_model is not None and (
+        elo_model.get("contract") != "betting-v2-elo-fallback-research-v1" or
+        elo_model.get("notCertified") is not True
+    ):
+        raise ValueError("Unrecognized or wrongly certified ELO research report")
+    if elo_priced is not None and (
+        elo_priced.get("certified") is not False or
+        elo_priced.get("strategy") != "ELO_GOALS_FALLBACK_NO_XG"
+    ):
+        raise ValueError("ELO price report must be separate and uncertified")
 
     # Historical coverage only, read-only. No fixture/network fetches.
     coverage = audit(root)
@@ -166,11 +182,21 @@ def publish(root: Path, output: Path,
         "researchReports": {
             "model": model_provenance,
             "pricedHoldout": priced_provenance,
+            "eloFallbackModel": elo_model_provenance,
+            "eloFallbackPricedHoldout": elo_priced_provenance,
         },
         "researchSnapshotMetrics": {
             "model": {
                 "eligiblePrematchRows": (model or {}).get("eligiblePrematchRows"),
                 "holdoutFixtures": ((model or {}).get("untouchedHoldout") or {}).get("n"),
+            },
+            "eloFallback": {
+                "eligiblePrematchRows": (elo_model or {}).get("eloEligible"),
+                "fallbackEligible": (elo_model or {}).get("eloFallbackEligible"),
+                "calibrationFixtures": ((elo_model or {}).get("splits") or {}).get("fallbackCalibrationN"),
+                "holdoutFixtures": ((elo_model or {}).get("splits") or {}).get("fallbackHoldoutN"),
+                "hasUntestedResearchErrors": bool((elo_model or {}).get("error")),
+                "pricedHoldoutQuotes": ((elo_priced or {}).get("holdout") or {}).get("exactQuotes"),
             },
             "priced": {
                 "quotes": ((priced or {}).get("holdout") or {}).get("exactQuotes"),
