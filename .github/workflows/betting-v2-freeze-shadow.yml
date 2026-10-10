@@ -53,17 +53,23 @@ jobs:
             scripts/betting_v2/walk_forward_goals.py \
             scripts/betting_v2/walk_forward_elo.py
           python -m unittest discover -s tests -p 'test_betting_v2_freeze_prematch_shadow.py' -v
+          python -m unittest discover -s tests -p 'test_betting_v2_verify_forward_fixture_ids.py' -v
+          python -m unittest discover -s tests -p 'test_betting_v2_future_fixture_crosswalk.py' -v
 
       - name: Freeze imminent pre-kickoff shadow forecasts
         run: |
           python scripts/betting_v2/freeze_prematch_shadow.py \
             --repository-root . --horizon-days 2 --archive
 
+      - name: Audit existing immutable forecasts against API-Football fixtures
+        run: python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
+
       - name: Commit ONLY Betting V2 shadow research artifacts
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add reports/betting_v2/pilot_forward_shadow_diagnostics.json
+          git add reports/betting_v2/pilot_forward_identity_crosswalk.json
           if [ -d reports/betting_v2/forward_snapshots ]; then
             git add -A reports/betting_v2/forward_snapshots
           fi
