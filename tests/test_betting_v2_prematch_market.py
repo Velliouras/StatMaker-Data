@@ -96,6 +96,20 @@ class PrematchMarketTests(unittest.TestCase):
             "teamSide": "AWAY", "line": 1.5,
         }, self.future))
 
+    def test_inconsistent_1x2_distribution_is_rejected(self):
+        corrupted = {"probabilities": dict(self.future["probabilities"])}
+        corrupted["probabilities"]["1X2_HOME"] = 0.95
+        for market, direction in (
+            ("RESULT_1X2", "HOME"),
+            ("RESULT_DOUBLE_CHANCE", "HOME_OR_DRAW"),
+            ("RESULT_DNB", "HOME"),
+        ):
+            with self.subTest(market=market):
+                with self.assertRaises(ValueError):
+                    market_probability({
+                        "market": market, "direction": direction,
+                    }, corrupted)
+
     def test_nonfinite_forecast_probability_is_rejected(self):
         corrupted = {"probabilities": dict(self.future["probabilities"])}
         corrupted["probabilities"]["HOME_OVER_1_5"] = float("nan")
