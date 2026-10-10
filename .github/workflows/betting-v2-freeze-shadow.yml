@@ -1,0 +1,100 @@
+name: "Betting V2 - freeze forward shadow (no provider calls)"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "reports/betting_v2/run_forward_snapshot_now.txt"
+
+permissions:
+  contents: write
+  statuses: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout latest Data/main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Publish running status
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state=pending \
+            -f context="betting-v2/forward-freeze" \
+            -f description="Read-only source replay, pre-kickoff shadow snapshot" \
+            -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Test forward xG and Elo models OFFLINE
+        run: |
+          python -m py_compile \
+            scripts/betting_v2/freeze_prematch_shadow.py \
+            scripts/betting_v2/walk_forward_goals.py \
+            scripts/betting_v2/walk_forward_elo.py
+          python -m unittest discover -s tests -p 'test_betting_v2_freeze_prematch_shadow.py' -v
+
+      - name: Freeze imminent pre-kickoff shadow forecasts
+        run: |
+          python scripts/betting_v2/freeze_prematch_shadow.py \
+            --repository-root . --horizon-days 2 --archive
+
+      - name: Commit ONLY Betting V2 shadow research artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/betting_v2/pilot_forward_shadow_diagnostics.json
+          if [ -d reports/betting_v2/forward_snapshots ]; then
+            git add -A reports/betting_v2/forward_snapshots
+          fi
+          if git diff --cached --quiet; then
+            echo "No new shadow forecast artifacts to publish."
+          else
+            git commit -m "Freeze Betting V2 as-of xG/ELO shadow forecasts (no provider calls)"
+            git pull --rebase --autostash origin main
+            git push origin HEAD:main
+          fi
+
+      - name: Publish verifiable success status
+        if: ${{ success() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state=success \
+            -f context="betting-v2/forward-freeze" \
+            -f description="Forward xG/Elo shadow freeze passed; NO STRONG or app PROD" \
+            -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+      - name: Publish failure status
+        if: ${{ failure() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \
+            -f state=failure \
+            -f context="betting-v2/forward-freeze" \
+            -f description="Forward xG/Elo shadow freeze failed; inspect logs" \
+            -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
