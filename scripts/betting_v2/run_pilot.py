@@ -56,7 +56,7 @@ def main() -> None:
         "shadow": "shadow_manifest.json",
     }.items()}
     for p in paths.values():
-        _safe_output(root, p)
+        _safe_output(root, p, allowed_suffixes=(".json", ".jsonl"))
     if args.with_prices:
         if args.from_date is None or args.to_date is None:
             ap.error("--with-prices requires --from-date and --to-date")
