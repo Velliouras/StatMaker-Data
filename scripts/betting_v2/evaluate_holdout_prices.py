@@ -18,6 +18,8 @@ from collections import defaultdict
 import json
 from pathlib import Path
 
+from quote_join import exact_join, forecast_index
+
 
 def load_lines(file: Path):
     with file.open(encoding="utf-8") as stream:
@@ -93,23 +95,16 @@ def event(quote: dict, forecast: dict) -> tuple[str, float, float, float] | None
 
 
 def evaluate(forecasts: list[dict], quotes: list[dict]) -> dict:
-    by_fixture = {}
-    for f in forecasts:
-        if f.get("fixtureId") is not None:
-            key = str(f["fixtureId"])
-            by_fixture[(f["date"], key)] = f
+    by_fixture = forecast_index(forecasts)
     rows = []
     rejected = defaultdict(int)
     seen = set()
     for q in quotes:
-        if q.get("fixtureId") is None:
-            rejected["quote_missing_fixture_id"] += 1
-            continue
-        ident = (q["date"], str(q["fixtureId"]))
-        predicted = by_fixture.get(ident)
+        predicted, join_status = exact_join(q, by_fixture)
         if predicted is None:
-            rejected["no_untouched_holdout_prediction"] += 1
+            rejected[join_status] += 1
             continue
+        ident = (str(q["leagueCode"]), str(q["fixtureId"]))
         unique = (ident, q.get("selectionKey"))
         if unique in seen:
             rejected["duplicate_exact_price"] += 1
