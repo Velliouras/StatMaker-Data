@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: read
+  # Write only commit CI status, never push files or release artifacts.
+  statuses: write
 
 concurrency:
   group: betting-v2-offline-qa-manual
@@ -39,6 +41,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Betting V2 standard-library regression tests
+        id: tests
         run: python -m unittest discover -s tests -p 'test_betting_v2*.py' -v
       - name: Execute full OFFLINE Betting V2 Python pilot
         id: offline
@@ -47,6 +50,7 @@ jobs:
         if: ${{ always() && !cancelled() }}
         run: python scripts/betting_v2/run_pilot.py --repository-root .
       - name: Show fail-closed certification summary
+        id: shadow_gate
         if: ${{ always() && steps.offline.outcome == 'success' }}
         run: |
           python - <<'PY'
@@ -64,6 +68,28 @@ jobs:
               'blockingReasons': data.get('blockingReasons', []),
           }, ensure_ascii=False, indent=2))
           PY
+      - name: Publish verifiable GitHub commit QA status
+        # Existing connector can read this status without looking up a run ID.
+        if: ${{ always() && !cancelled() }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UNIT_OUTCOME: ${{ steps.tests.outcome }}
+          PILOT_OUTCOME: ${{ steps.offline.outcome }}
+          GATE_OUTCOME: ${{ steps.shadow_gate.outcome }}
+        run: |
+          if [[ "$UNIT_OUTCOME" == "success" && "$PILOT_OUTCOME" == "success" && "$GATE_OUTCOME" == "success" ]]; then
+            outcome=success
+            description="Full offline V2 tests and dual-model research pilot passed; no STRONG certification"
+          else
+            outcome=failure
+            description="Offline V2 QA failed; inspect unit tests, model pilot or fail-closed manifest"
+          fi
+          gh api -X POST "repos/${GITHUB_REPOSITORY}/statuses/${GITHUB_SHA}" \\
+            -f state="$outcome" \\
+            -f context="betting-v2/offline-qa" \\
+            -f description="$description" \\
+            -f target_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
       - name: Attach bounded offline pilot diagnostics
         if: always()
         uses: actions/upload-artifact@v4
