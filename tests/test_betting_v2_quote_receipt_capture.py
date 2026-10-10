@@ -14,7 +14,7 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from betting_v2.quote_receipt_capture import (
-    canonical, install, receipt_document, write_receipt,
+    canonical, install, receipt_document, verify_receipt, write_receipt,
 )
 
 NOW = dt.datetime(2026, 10, 10, 14, 32, 4, tzinfo=dt.timezone.utc)
@@ -69,6 +69,35 @@ class CaptureReceiptTests(unittest.TestCase):
             receipt_document(SOURCE, "/odds", PARAMS, dt.datetime(2026, 10, 10))
         with self.assertRaises(ValueError):
             receipt_document(SOURCE, "/events", PARAMS, NOW)
+
+    def test_verified_local_hash_does_not_imply_certified_odds(self):
+        receipt = receipt_document(SOURCE, "/odds/multi", PARAMS, NOW)
+        verified = verify_receipt(receipt)
+        self.assertTrue(verified["verifiedLocalReceiptIntegrity"])
+        self.assertEqual(verified["sourceGenerationId"],
+                         receipt["decodedResponseSha256"])
+        self.assertFalse(verified["providerOfferTimestampIndependentlyVerified"])
+        self.assertFalse(verified["readyForCertifyingStrong"])
+
+    def test_altered_or_missing_response_is_never_verified(self):
+        receipt = receipt_document(SOURCE, "/odds/multi", PARAMS, NOW)
+        modified = dict(receipt)
+        modified["decodedResponse"] = []
+        with self.assertRaises(ValueError):
+            verify_receipt(modified)
+        modified = dict(receipt)
+        modified["clientReceivedAtUTC"] = "2026-10-10T14:32:04"
+        with self.assertRaises(ValueError):
+            verify_receipt(modified)
+        modified = receipt_document(
+            SOURCE, "/odds/multi", PARAMS, NOW, max_decoded_bytes=1
+        )
+        with self.assertRaises(ValueError):
+            verify_receipt(modified)
+        modified = dict(receipt)
+        modified["priceObservationTimestampVerified"] = True
+        with self.assertRaises(ValueError):
+            verify_receipt(modified)
 
     def test_hook_returns_same_provider_response_without_repoll(self):
         calls = []
