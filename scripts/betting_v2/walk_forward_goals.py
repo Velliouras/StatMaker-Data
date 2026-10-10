@@ -237,6 +237,12 @@ def poisson_probs(rate: float, max_goals: int = 15) -> list[float]:
     return values
 
 
+# Research coverage, not permission to promote any market to STRONG.
+# Every binary half-goal line is evaluated in both directions by the same
+# calibrated event contract. No invented xG or assumptions about bookmaker odds.
+GOAL_LINES = (0.5, 1.5, 2.5, 3.5, 4.5, 5.5)
+
+
 def event_probs(h: float, a: float) -> dict[str, float]:
     ph = poisson_probs(h)
     pa = poisson_probs(a)
@@ -247,23 +253,33 @@ def event_probs(h: float, a: float) -> dict[str, float]:
                           for j, y in enumerate(pa) if i == j),
         "1X2_AWAY": sum(x * y for i, x in enumerate(ph)
                           for j, y in enumerate(pa) if i < j),
-        "HOME_OVER_1_5": sum(ph[2:]),
-        "AWAY_OVER_1_5": sum(pa[2:]),
-        "MATCH_OVER_2_5": 1.0 - sum(ph[i] * pa[j] for i in range(3)
-                                  for j in range(3 - i))
     }
+    for line in GOAL_LINES:
+        threshold = int(line) + 1
+        suffix = f"{int(line)}_5"
+        result[f"HOME_OVER_{suffix}"] = sum(ph[threshold:])
+        result[f"AWAY_OVER_{suffix}"] = sum(pa[threshold:])
+        # P(total >= threshold), computed from the same joint score distribution.
+        result[f"MATCH_OVER_{suffix}"] = 1.0 - sum(
+            ph[i] * pa[j] for i in range(threshold)
+            for j in range(threshold - i)
+        )
     return result
 
 
 def outcomes(row: PrematchRow) -> dict[str, int]:
     h, a = row.hgoals, row.agoals
-    return {
+    result = {
         "1X2_HOME": int(h > a), "1X2_DRAW": int(h == a),
-        "1X2_AWAY": int(h < a), "HOME_OVER_1_5": int(h >= 2),
-        "AWAY_OVER_1_5": int(a >= 2),
-        "MATCH_OVER_2_5": int(h + a >= 3)
+        "1X2_AWAY": int(h < a),
     }
-
+    for line in GOAL_LINES:
+        threshold = int(line) + 1
+        suffix = f"{int(line)}_5"
+        result[f"HOME_OVER_{suffix}"] = int(h >= threshold)
+        result[f"AWAY_OVER_{suffix}"] = int(a >= threshold)
+        result[f"MATCH_OVER_{suffix}"] = int(h + a >= threshold)
+    return result
 
 def measures(rows: list[PrematchRow], p: Parameters) -> dict:
     if not rows:
