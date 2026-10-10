@@ -58,6 +58,7 @@ jobs:
             scripts/refresh_domestic_odds_schedule_priority.py \
             scripts/betting_v2/quote_receipt_capture.py \
             scripts/betting_v2/index_quote_receipts.py \
+            scripts/betting_v2/freeze_prematch_shadow.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
             scripts/domestic_odds_expansion.py \
             scripts/update_domestic_odds_api_io_push_aware.py \
@@ -78,6 +79,7 @@ jobs:
             tests/test_refresh_domestic_odds_integrity.py \
             tests/test_betting_v2_quote_receipt_capture.py \
             tests/test_betting_v2_index_quote_receipts.py \
+            tests/test_betting_v2_freeze_prematch_shadow.py \
             tests/test_domestic_schedule_only_validation.py \
             tests/test_domestic_provider_league_guard.py \
             tests/test_domestic_global_event_fallback.py \
@@ -226,6 +228,13 @@ jobs:
         continue-on-error: true
         run: python scripts/betting_v2/index_quote_receipts.py --repository-root .
 
+      - name: Freeze current pre-match V2 research forecasts
+        # Strictly from existing completed xG/Elo stats and provider schedule.
+        # No provider calls, no App-Ready writes and no betting certification.
+        # Persist a compressed immutable as-of snapshot only if eligible games exist.
+        continue-on-error: true
+        run: python scripts/betting_v2/freeze_prematch_shadow.py --repository-root . --horizon-days 2 --archive
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
@@ -254,6 +263,12 @@ jobs:
           fi
           if [ -f reports/betting_v2/quote_receipt_index.json ]; then
             git add reports/betting_v2/quote_receipt_index.json
+          fi
+          if [ -f reports/betting_v2/pilot_forward_shadow_diagnostics.json ]; then
+            git add reports/betting_v2/pilot_forward_shadow_diagnostics.json
+          fi
+          if [ -d reports/betting_v2/forward_snapshots ]; then
+            git add -A reports/betting_v2/forward_snapshots
           fi
           if git diff --cached --quiet; then
             echo "No Domestic odds/readiness changes."
