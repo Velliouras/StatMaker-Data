@@ -85,6 +85,47 @@ class QuoteReceiptIndexTests(unittest.TestCase):
             self.assertEqual(report["preKickoffPriceRows"], 1)
             self.assertEqual(report["byBookmaker"]["Bet365"], 1)
 
+    def test_multi_response_split_into_individually_verifiable_event_receipts(self):
+        second = {**ODDS[0], "id": 456}
+        many = [ODDS[0], second]
+        events = EVENTS + [{"id": 456, "date": "2026-10-10T20:15:00Z",
+                             "home": "Other", "away": "Rival"}]
+        calls = []
+        def fetch(path, params, debug, *, allow_error=True):
+            calls.append(path)
+            return events if path == "/events" else many
+        module = SimpleNamespace(api_get=fetch)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install(module, root, now_fn=lambda: NOW)
+            module.api_get("/events", {"apiKey": "SECRET"}, {})
+            debug = {}
+            returned = module.api_get("/odds/multi", {
+                "eventIds": "123,456", "bookmakers": "Bet365",
+            }, debug)
+            self.assertIs(returned, many)
+            self.assertEqual(calls, ["/events", "/odds/multi"])
+            self.assertEqual(len(debug.get("bettingV2ReceiptPaths", [])), 2)
+            self.assertEqual(inspect(root)["verifiedSnapshotReceipts"], 2)
+            self.assertEqual(inspect(root)["uniqueProviderEvents"], 2)
+            self.assertEqual(inspect(root)["preKickoffPriceRows"], 10)
+
+    def test_multi_response_does_not_capture_unrequested_provider_ids(self):
+        unexpected = {**ODDS[0], "id": 999}
+        def fetch(path, params, debug, *, allow_error=True):
+            return EVENTS if path == "/events" else [ODDS[0], unexpected]
+        module = SimpleNamespace(api_get=fetch)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            install(module, root, now_fn=lambda: NOW)
+            module.api_get("/events", {}, {})
+            debug = {}
+            module.api_get("/odds/multi", {"eventIds": "123"}, debug)
+            self.assertEqual(len(debug.get("bettingV2ReceiptPaths", [])), 1)
+            self.assertIn("unrequested_event_id",
+                          debug.get("bettingV2ReceiptWarnings", []))
+            self.assertEqual(inspect(root)["uniqueProviderEvents"], 1)
+
     def test_actual_events_hook_uses_no_additional_provider_requests(self):
         calls = []
         def fetch(path, params, debug, *, allow_error=True):
