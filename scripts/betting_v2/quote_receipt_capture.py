@@ -347,9 +347,21 @@ def install(
             if not isinstance(item, dict):
                 continue
             eid = str(item.get("id") or item.get("eventId") or "")
-            if path == "/odds/multi" and eid not in ids:
-                debug.setdefault("bettingV2ReceiptWarnings", []).append("unrequested_event_id")
+            if not eid or (
+                path == "/odds/multi" and eid not in ids
+            ) or (
+                path == "/odds" and eid != str(params.get("eventId") or "")
+            ):
+                debug.setdefault("bettingV2ReceiptWarnings", []).append(
+                    "unrequested_event_id"
+                )
                 continue
+            if count[0] >= MAX_RECEIPTS_PER_PROCESS:
+                debug.setdefault("bettingV2ReceiptWarnings", []).append(
+                    "receipt_count_cap_reached"
+                )
+                break
+            count[0] += 1
             try:
                 dest = write_receipt(
                     root, item, path, params, now(), event_context=events_seen
