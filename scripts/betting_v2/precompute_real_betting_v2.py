@@ -14,6 +14,7 @@ import argparse
 from collections import Counter
 from datetime import datetime, timezone
 from math import isfinite
+from hashlib import sha256
 from pathlib import Path
 import json
 
@@ -21,6 +22,7 @@ from fixture_lookup import as_utc
 
 SOURCE = Path("reports/betting_v2/pilot_forward_shadow_preview.json")
 DESTINATION = Path("reports/betting_v2/betting_v2_precompute.json")
+HISTORY = Path("reports/betting_v2/precompute_history")
 CONTRACT = "statmaker-v2-uat-real-precompute-v1"
 MARKETS = frozenset({"1X2", "DOUBLE_CHANCE", "MATCH_GOALS", "TEAM_TOTAL_GOALS"})
 MIN_ODD = 1.50
@@ -199,6 +201,38 @@ def compute(document: dict, *, now: datetime) -> dict:
     }
 
 
+def write_output(root: Path, result: dict) -> tuple[Path, Path | None]:
+    """Publish current real picks and append-only picks-only as-of ledger."""
+    destination = root / DESTINATION
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(result, ensure_ascii=False, indent=2,
+                                      allow_nan=False) + "\n", encoding="utf-8")
+    history_file = None
+    if result["suggestionCount"]:
+        evidence = {
+            "contract": "statmaker-v2-uat-picks-ledger-v1",
+            "observedAtUTC": result["generatedAtUTC"],
+            "sourceArchive": result["sourceArchive"],
+            "researchOnly": True,
+            "certifiedStrong": 0,
+            "bookmakerPriceUpdatedAtVerified": False,
+            "selectionCount": result["suggestionCount"],
+            "suggestions": result["suggestions"],
+        }
+        content = json.dumps(evidence, ensure_ascii=False, sort_keys=True,
+                             separators=(",", ":"), allow_nan=False) + "\n"
+        digest = sha256(content.encode("utf-8")).hexdigest()[:12]
+        stamp = datetime.fromisoformat(
+            result["generatedAtUTC"].replace("Z", "+00:00")
+        ).strftime("%Y%m%dT%H%M%S%fZ")
+        folder = root / HISTORY
+        folder.mkdir(parents=True, exist_ok=True)
+        history_file = folder / f"{stamp}_{digest}.json"
+        with history_file.open("x", encoding="utf-8") as out:
+            out.write(content)
+    return destination, history_file
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repository-root", type=Path, default=Path("."))
@@ -209,10 +243,7 @@ def main() -> None:
         raise ValueError("Real-data source preview is missing or oversized")
     document = json.loads(path.read_text(encoding="utf-8"))
     output = compute(document, now=datetime.now(timezone.utc))
-    destination = root / DESTINATION
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(output, ensure_ascii=False, indent=2,
-                                      allow_nan=False) + "\n", encoding="utf-8")
+    _, immutable_history = write_output(root, output)
     print(json.dumps({
         "contract": CONTRACT,
         "realPrematchUatSuggestions": output["suggestionCount"],
@@ -220,6 +251,8 @@ def main() -> None:
         "independentlyVerifiedFixtures": output["independentlyVerifiedFixtureCount"],
         "rejected": output["rejected"],
         "apiCalls": 0, "certifiedStrong": 0,
+        "immutableHistory": (immutable_history.relative_to(root).as_posix()
+                             if immutable_history else None),
     }))
 
 
