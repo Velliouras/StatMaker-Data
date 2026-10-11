@@ -17,7 +17,7 @@ def fixture(*, odd=2.20, prob=0.65, independently_verified=True,
     value = prob * odd - 1.0
     result = {
         "leagueCode": "BRA", "providerEventId": event,
-        "apiFootballFixtureId": "api-123" if independently_verified else None,
+        "independentApiFootballFixtureId": "api-123" if independently_verified else None,
         "independentApiFootballFixtureVerified": independently_verified,
         "homeTeam": "Team A", "awayTeam": "Team B",
         "model": "ELO_GOALS_FALLBACK_NO_XG",
