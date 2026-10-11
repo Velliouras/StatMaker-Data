@@ -15,7 +15,6 @@ stub_names={
     'freeze_prematch_shadow':{'XG_PARAMS':object(),'ELO_PARAMS':object(),'PARAMS_VERSION':'test'},
     'walk_forward_goals':{'make_rows':lambda x:([],[]),'model_lambdas':lambda *x:(1.5,1.2)},
     'walk_forward_elo':{'make_elo_rows':lambda x:([],[]),'lambda_rates':lambda *x:(1.5,1.2)},
-    'scripts':{},'scripts.betting_v2':{},
     'scripts.betting_v2.production_sources':{'full_inventory':lambda *x:([],{}),'market_identity':lambda x:x},
     'scripts.betting_v2.production_contract':{'Blocked':ValueError},
 }
