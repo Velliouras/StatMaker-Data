@@ -5,8 +5,8 @@ Input is the published, actual-data shadow preview produced from archived
 pre-kickoff xG/ELO model forecasts and the canonical Odds-API.io bookmaker feed.
 No mock events, provider calls, invented odds, retroactive results, or Android
 production writes. Only independently matched API-Football IDs participate.
-The research-only grade is SOLID / provisional, NOT certified STRONG, until
-model calibration, price freshness and independently audited EV are proven.
+This producer publishes ONLY independently certified STRONG HIGH / CONFIRMED /
+DEVELOPING. Uncertified raw model odds stay diagnostics, never recommendations.
 """
 from __future__ import annotations
 
@@ -25,10 +25,10 @@ DESTINATION = Path("reports/betting_v2/betting_v2_precompute.json")
 HISTORY = Path("reports/betting_v2/precompute_history")
 CONTRACT = "statmaker-v2-uat-real-precompute-v1"
 MARKETS = frozenset({"1X2", "DOUBLE_CHANCE", "MATCH_GOALS", "TEAM_TOTAL_GOALS"})
-MIN_ODD = 1.50
+MIN_ODD = 1.80
 MAX_ODD = 3.00
-MIN_PROBABILITY = 0.45
-MIN_INDICATIVE_EV = 0.05
+MIN_PROBABILITY = 0.60
+MIN_INDICATIVE_EV = 0.0
 MAX_BYTES = 3_000_000
 
 
@@ -51,74 +51,41 @@ def candidate(match: dict, *, now: datetime, rejects: Counter) -> dict | None:
         rejects["UNKNOWN_MODEL"] += 1
         return None
 
-    best: dict | None = None
-    quality = -1.0
+    # Diagnostics from actual prices are allowed, but are NEVER a certified
+    # Strong recommendation. Raw model p is not a conservative calibrated p.
+    admissible = []
     for offer in match.get("marketEvidence") or []:
-        if not isinstance(offer, dict):
-            continue
-        market = str(offer.get("market") or "")
-        if market not in MARKETS or (
-            offer.get("certifiedStrong") is not False or
-            offer.get("EV_Certified") is not False or
-            offer.get("bookmakerPriceUpdatedAtVerified") is not False
-        ):
-            continue
-        if not str(offer.get("bookmaker") or "").strip():
+        if not isinstance(offer, dict) or offer.get("market") not in MARKETS:
             continue
         try:
-            p = float(offer["modelProbability"])
             odd = float(offer["odds"])
-            indicative_ev = float(offer["indicativeEVNotCertified"])
-        except (KeyError, TypeError, ValueError, OverflowError):
+            raw_probability = float(offer["modelProbability"])
+        except (KeyError, ValueError, TypeError, OverflowError):
             continue
-        if not all(map(isfinite, (p, odd, indicative_ev))):
+        if not (isfinite(odd) and isfinite(raw_probability) and
+                MIN_ODD < odd < MAX_ODD and raw_probability >= MIN_PROBABILITY):
             continue
-        if not (MIN_ODD <= odd <= MAX_ODD and MIN_PROBABILITY <= p <= 1.0 and
-                indicative_ev >= MIN_INDICATIVE_EV):
-            continue
-        if abs(p * odd - 1.0 - indicative_ev) > 0.005:
-            rejects["PRICE_PROBABILITY_EV_INCONSISTENT"] += 1
-            continue
-        if market == "MATCH_GOALS" or market == "TEAM_TOTAL_GOALS":
-            try:
-                line = float(offer.get("line"))
-            except (ValueError, TypeError, OverflowError):
-                continue
-            if line not in (0.5, 1.5, 2.5, 3.5, 4.5, 5.5):
-                continue
-        score = p * 0.70 + min(indicative_ev, 0.20) * 0.30
-        if score > quality:
-            best, quality = offer, score
-
-    if best is None:
-        rejects["NO_ELIGIBLE_REAL_MARKET"] += 1
+        admissible.append(offer)
+    if not admissible:
+        rejects["NO_STRICT_ODDS_RAW_PROBABILITY_SCREEN"] += 1
         return None
 
-    return {
-        "leagueCode": match["leagueCode"],
-        "providerEventId": str(match["providerEventId"]),
-        "apiFootballFixtureId": str(match["independentApiFootballFixtureId"]),
-        "homeTeam": str(match["homeTeam"]),
-        "awayTeam": str(match["awayTeam"]),
-        "kickoffUTC": kickoff.isoformat(),
-        "forecastComputedAtUTC": forecast_at.isoformat(),
-        "model": match["model"],
-        "grade": "SOLID",
-        "gradeStatus": "UAT_PROVISIONAL_NO_STRONG_CERTIFICATION",
-        "market": best["market"],
-        "selection": str(best["selection"]),
-        "line": best.get("line"),
-        "team": str(best.get("team") or ""),
-        "bookmaker": str(best["bookmaker"]),
-        "odds": float(best["odds"]),
-        "probability": float(best["modelProbability"]),
-        "indicativeEV": float(best["indicativeEVNotCertified"]),
-        "qualityScore": round(quality, 6),
-        "certifiedStrong": False,
-        "EV_Certified": False,
-        "bookmakerPriceUpdatedAtVerified": False,
-    }
+    # This snapshot deliberately has no independently signed/versioned
+    # calibration + adverse-case evidence; no blanket SOLID workaround.
+    # A future certificate producer must prove these fields from an immutable
+    # independent holdout and original bookmaker timestamps before this
+    # producer may issue any Strong grades.
+    certified = match.get("independentConservativeForecastCertificate")
+    if not isinstance(certified, dict):
+        rejects["MISSING_INDEPENDENT_CONSERVATIVE_CALIBRATION"] += 1
+        return None
 
+    # Mere claims or booleans in an untrusted preview are not proof. Until an
+    # independent audit importer verifies source hashes, holdout, scenario,
+    # selected quote and issuer identity, fail closed even if JSON advertises
+    # a superficially complete certificate.
+    rejects["CERTIFICATE_IMPORTER_NOT_YET_VERIFIED"] += 1
+    return None
 
 def compute(document: dict, *, now: datetime) -> dict:
     if now.utcoffset() is None:
@@ -149,22 +116,13 @@ def compute(document: dict, *, now: datetime) -> dict:
         selected = candidate(match, now=now, rejects=rejects)
         match["precomputedSelection"] = None
         if selected:
-            match["precomputedSelection"] = {
-                "market": selected["market"],
-                "selection": selected["selection"],
-                "line": selected["line"],
-                "team": selected["team"],
-                "bookmaker": selected["bookmaker"],
-                "odds": selected["odds"],
-                "modelProbability": selected["probability"],
-                "indicativeEVNotCertified": selected["indicativeEV"],
-                "grade": selected["grade"],
-                "gradeStatus": selected["gradeStatus"],
-                "certifiedStrong": False,
-                "EV_Certified": False,
-                "bookmakerPriceUpdatedAtVerified": False,
-            }
+            # Only an independently verified HIGH/CONFIRMED/DEVELOPING
+            # certificate may eventually be emitted. No SOLID at any layer.
+            require_tier = selected.get("grade")
+            if require_tier not in ("HIGH", "CONFIRMED", "DEVELOPING"):
+                raise ValueError("Non-STRONG tier rejected by V2 producer")
             rows.append(selected)
+            match["precomputedSelection"] = selected
         matches.append(match)
     rows.sort(key=lambda x: (-x["qualityScore"], x["kickoffUTC"],
                              x["leagueCode"], x["providerEventId"]))
@@ -184,9 +142,11 @@ def compute(document: dict, *, now: datetime) -> dict:
         "ROI_Certified": False,
         "apiCalls": 0,
         "thresholds": {
-            "minOdd": MIN_ODD, "maxOdd": MAX_ODD,
-            "minProbability": MIN_PROBABILITY,
-            "minIndicativeEV": MIN_INDICATIVE_EV,
+            "minOddExclusive": MIN_ODD, "maxOddExclusive": MAX_ODD,
+            "minConservativeWinProbability": MIN_PROBABILITY,
+            "minAdverseConservativeWinProbability": MIN_PROBABILITY,
+            "conservativeEVStrictlyPositive": True,
+            "allowedTiers": ["HIGH", "CONFIRMED", "DEVELOPING"],
             "independentFixtureIdRequired": True,
             "oneSelectionPerFixture": True,
         },
