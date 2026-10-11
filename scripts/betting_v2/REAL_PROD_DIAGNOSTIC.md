@@ -21,11 +21,21 @@ Before execution, verify the current canonical `data/statmaker/app_ready/update_
 - Exact raw fixture/selection totals, forecastable fixture count and per-reason rejects.
 - For each qualifying **real** quoted selection: market, fixture, model (xG/ELO), price, modelled win/push probabilities and indicative EV.
 - Price filters: strictly 1.80 < decimal odd < 3.00; raw win probability >= 60% and raw EV > 0. No Asian/handicap markets.
-- Projections use Poisson score/count assumptions and prior-date history. Count markets with insufficient real market history are explicitly rejected. Some labels in raw data or non-domestic competitions may remain unsupported.
+- Projections use Poisson score/count assumptions and prior-date history. Period markets use confirmed historical 1H/2H scores; count markets with insufficient real market history are explicitly rejected. Some labels in raw data or non-domestic competitions may remain unsupported.
 - **No scientific certification implied**: historical quote observation times, independent calibration and real adverse scenarios are not established. Never relabel indicative candidates as certified STRONG or publish automatically.
 
 The tool does not call provider APIs, does not invoke GitHub Actions, does not modify existing App-Ready artifacts, and does not touch the Android PROD application or user DB. Output is created as a new file; an existing output file will cause an error rather than be overwritten.
 
 ## Limitations
 
-This is the initial UAT computation path, not yet an Android Singles integration. The full 1,800-fixture App-Ready ZIP cannot be executed within the chat's local container (the GitHub connector exposes large binary ZIP contents as unavailable), so **no production-input run or production candidate count is claimed here**. Nine local regression tests passed using synthetic unit fixtures only; the full real-data run must be observed before enabling UAT consumer integration.
+This is the initial UAT computation path, not yet an Android Singles integration. The full 1,800-fixture App-Ready ZIP cannot be executed within the chat's local container (the GitHub connector exposes large binary ZIP contents as unavailable), so **no production-input run or production candidate count is claimed here**. Twelve local regression tests passed using synthetic unit fixtures only; the full real-data run must be observed before enabling UAT consumer integration.
+
+
+## Single-command local execution (Codex)
+
+In the dedicated UAT worktree, run `Start-Real-Prod-Diagnostic.ps1 -DataRoot (Get-Location).Path`.
+This verifies the actual App-Ready ZIP SHA-256 against its canonical manifest, runs all
+12 regression tests, performs the full live-input **offline** evaluation and prints
+candidate counts/top selections to the console. It writes only to a new temporary
+output file. Never run on the original Codex Phase 4 checkout containing 16
+uncommitted modifications; create a separate worktree first.
