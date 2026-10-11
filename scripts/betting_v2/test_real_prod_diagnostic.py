@@ -95,7 +95,7 @@ class MarketProbabilities(unittest.TestCase):
         with patch.object(engine,'apply_real_period_labels',return_value=(history,{})), \
              patch.object(engine,'full_inventory',return_value=([source],Counter())), \
              patch.object(engine,'read_fixtures',return_value=(history,Counter(),groups)), \
-             patch.object(engine,'make_rows',return_value=([types.SimpleNamespace(fixture='real-fixture-1')],{})), \
+             patch.object(engine,'make_rows',return_value=([types.SimpleNamespace(fixture='real-fixture-1',league='E0|Premier League')],{})), \
              patch.object(engine,'make_elo_rows',return_value=([],{})), \
              patch.object(engine,'model_lambdas',return_value=(3.1,.45)):
             report=engine.evaluate(Path('.'),Path('fake.db'),'gen-real',now)
