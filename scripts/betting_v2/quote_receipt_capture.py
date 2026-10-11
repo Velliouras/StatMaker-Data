@@ -46,6 +46,8 @@ _OUTCOME_FIELDS = frozenset((
     "id", "key", "name", "label", "selection", "team", "side", "line", "hdp",
     "odds", "price", "decimal", "decimalOdds", "value", "over", "under",
     "home", "away", "draw", "yes", "no", "1X", "X2", "12",
+    # Preserve genuine optional fields only; never synthesize timestamps or expiration.
+    "observedAt", "validUntil",
 ))
 _EVENT_FIELDS = frozenset((
     "id", "eventId", "date", "kickoff", "startTime", "home", "away",

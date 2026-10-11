@@ -813,6 +813,10 @@ def fetch_league(
 
         merged["raw_statistics"] = raw_statistics
         merged["normalized_stats"] = normalize_statistics(raw_statistics, fixture)
+        # Opt-in lineage only for this actual provider response; never backdate old cached rows.
+        if os.environ.get("STATMAKER_BETTING_V2_CAPTURE_LINEAGE") == "1":
+            from betting_v2.production_sources import capture_new_statistics
+            merged["betting_v2_provenance"] = capture_new_statistics(merged, raw_statistics)
         existing_by_id[fixture_id] = merged
         newly_fetched += 1
 

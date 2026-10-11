@@ -135,6 +135,10 @@ class ApiBudget:
                 record["error"] = errors
                 return None
             items = payload.get("response") if isinstance(payload, dict) else None
+            receipt_directory = os.environ.get("STATMAKER_BETTING_V2_CONTEXT_RECEIPTS", "").strip()
+            if receipt_directory and isinstance(items, list) and path in ("/injuries", "/fixtures"):
+                from betting_v2.production_context import capture_context_response
+                capture_context_response(Path(receipt_directory), path, safe_params, items)
             record["results"] = len(items or []) if isinstance(items, list) else 0
             return [item for item in (items or []) if isinstance(item, dict)]
         except Exception as exc:

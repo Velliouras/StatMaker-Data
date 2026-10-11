@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sqlite3
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -457,6 +458,16 @@ def main() -> None:
     parser.add_argument("prepared_db", type=Path)
     args = parser.parse_args()
     counts = materialize(args.prepared_db)
+    # Disabled unless an owner-approved, evaluated release is explicitly supplied.
+    # This runs on the existing disposable export DB, before normal bundle hashes/package.
+    release_path = os.environ.get("STATMAKER_BETTING_V2_RELEASE_PATH")
+    approval_path = os.environ.get("STATMAKER_BETTING_V2_RELEASE_APPROVAL")
+    if release_path or approval_path:
+        if not release_path or not approval_path:
+            raise SystemExit("BLOCKED: incomplete explicit Betting V2 release approval")
+        from betting_v2.production_app_ready import install_release
+        v2 = install_release(args.prepared_db, Path(release_path), Path(approval_path), REPO_ROOT)
+        print("APP_READY_CERTIFIED_BETTING_V2_STAGED", v2)
     print("APP_READY_FIXTURE_INDEX_READY", " ".join(f"{k}={v}" for k, v in counts.items()))
 
 
