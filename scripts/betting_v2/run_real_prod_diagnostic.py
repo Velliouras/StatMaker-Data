@@ -215,6 +215,21 @@ def open_app_ready(path: Path, tmp: Path) -> Path:
     return tmp/'app_ready.db'
 
 
+def strongest_per_market(candidates: list[dict]) -> tuple[list[dict], int]:
+    """At most one selection per fixture + market; keep maximum indicative EV."""
+    ordered = sorted(candidates, key=lambda r: (-r['indicativeEV'],
+                                               -r['winProbability'], r['kickoff']))
+    unique = set()
+    result = []
+    for row in ordered:
+        key = (row['competitionId'], row['fixtureId'], row['market'])
+        if key in unique:
+            continue
+        unique.add(key)
+        result.append(row)
+    return result, len(candidates) - len(result)
+
+
 def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     inventory, raw_blockers = full_inventory(db, generation)
     history, history_errors, groups = read_fixtures(root)
@@ -322,7 +337,8 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'certified':False,'category':'UNVERIFIED_REAL_DATA_DIAGNOSTIC',
             'selectionId':r.get('selectionId'),
         })
-    results.sort(key=lambda r:(-r['indicativeEV'],-r['winProbability'],r['kickoff']))
+    raw_candidates = len(results)
+    results, duplicates_removed = strongest_per_market(results)
     return {'status':'REAL_PROD_INPUT_DIAGNOSTIC','source':'CANONICAL_APP_READY_SQLITE',
             'generatedAt':now.isoformat(),'generationId':generation,
             'modelVersion':PARAMS_VERSION,
@@ -331,6 +347,8 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'rawQuotedRows':sum(bool(r['market']) for r in inventory),
             'historyRows':len(history),'historicalPeriodDiagnostics':period_diagnostics,
             'forecastableFixtures':len(models),
+            'rawCandidateCountBeforeDeduplication':raw_candidates,
+            'suppressedSameMatchSameMarket':duplicates_removed,
             'candidateCount':len(results),'candidates':results,
             'rejections':dict(reject.most_common()),
             'oddsNotIndependentlyTimestampVerified':True,
