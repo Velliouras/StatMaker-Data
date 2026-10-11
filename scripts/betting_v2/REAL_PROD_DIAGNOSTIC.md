@@ -28,14 +28,16 @@ The tool does not call provider APIs, does not invoke GitHub Actions, does not m
 
 ## Limitations
 
-This is the initial UAT computation path, not yet an Android Singles integration. The full 1,800-fixture App-Ready ZIP cannot be executed within the chat's local container (the GitHub connector exposes large binary ZIP contents as unavailable), so **no production-input run or production candidate count is claimed here**. Twelve local regression tests passed using synthetic unit fixtures only; the full real-data run must be observed before enabling UAT consumer integration.
+This is the initial UAT computation path, not yet an Android Singles integration. The full 1,800-fixture App-Ready ZIP cannot be executed within the chat's local container (the GitHub connector exposes large binary ZIP contents as unavailable), so **no production-input run or production candidate count is claimed here**. Thirteen local regression tests passed using synthetic unit fixtures only; the full real-data run must be observed before enabling UAT consumer integration.
 
 
 ## Single-command local execution (Codex)
 
 In the dedicated UAT worktree, run `Start-Real-Prod-Diagnostic.ps1 -DataRoot (Get-Location).Path`.
 This verifies the actual App-Ready ZIP SHA-256 against its canonical manifest, runs all
-12 regression tests, performs the full live-input **offline** evaluation and prints
+13 regression tests, performs the full live-input **offline** evaluation and prints
 candidate counts/top selections to the console. It writes only to a new temporary
 output file. Never run on the original Codex Phase 4 checkout containing 16
 uncommitted modifications; create a separate worktree first.
+
+- Same-fixture same-market duplicates are suppressed, retaining the highest indicative EV.
