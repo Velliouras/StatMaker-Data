@@ -33,7 +33,7 @@ def certify(model: dict, plan: dict, bins: list[dict], adverse_bins: list[dict],
     drift_sha = documents.add(evidence(**common, segments=results["errorBySegment"],
                          driftPValue=results["driftPValue"], revalidationRequired=False))
     profitability_sha = documents.add(evidence(**common, settledCases=results["settledCases"],
-                      issuedStrongCases=results["issuedStrongCases"],
+                      evaluatedStrongCases=results["evaluatedStrongCases"],
                       unitStakeRoiLowerBound=results["unitStakeRoiLowerBound"],
                       unitStakeRoi=results["unitStakeRoi"],
                       expectedUnitStakeRoi=results["expectedUnitStakeRoi"],

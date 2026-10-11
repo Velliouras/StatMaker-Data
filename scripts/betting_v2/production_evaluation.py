@@ -256,7 +256,7 @@ def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict
         equity += c["offer"]["odd"]-1 if c["outcome"] == 1 else 0 if c["outcome"] == 0 else -1
         peak = max(peak, equity)
         drawdown = max(drawdown, peak-equity)
-    return {"settledCases": len(cases), "issuedStrongCases": len(selected), "independentFixtures": len(blocks),
+    return {"settledCases": len(cases), "evaluatedStrongCases": len(selected), "independentFixtures": len(blocks),
             "unitStakeRoi": sum(sum(b) for b in blocks)/sum(len(b) for b in blocks),
             "unitStakeRoiLowerBound": roi_lower, "maximumUnitStakeDrawdown": drawdown,
             "expectedUnitStakeRoi": sum(c["ev"] for c in selected)/len(selected),
