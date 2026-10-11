@@ -35,6 +35,7 @@ COUNT_STATS = {
     'CORNERS': ('HC', 'AC'), 'SHOTS': ('HS', 'AS'),
     'SOT': ('HST', 'AST'), 'YELLOW_CARDS': ('HY', 'AY'),
     'GOALS_1H': ('HTHG', 'HTAG'),
+    'GOALS_2H': ('H2HG', 'H2AG'),
 }
 
 
@@ -45,58 +46,111 @@ def utc(value: str) -> datetime:
     return dt.astimezone(timezone.utc)
 
 
-def poisson(rate: float, max_goals: int = 35) -> list[float]:
-    if not math.isfinite(rate) or rate < 0:
+def poisson(rate: float) -> list[float]:
+    """Complete Poisson probabilities, including high-volume corners/shots markets."""
+    if not math.isfinite(rate) or rate < 0 or rate > 500:
         raise ValueError('Invalid Poisson rate')
+    # Series recurrence is stable for the observed football count ranges.
+    maximum = min(1000, max(35, math.ceil(rate + 14 * math.sqrt(rate + 1))))
+    if rate > 650:
+        raise ValueError('Unsupported extreme rate')
     out = [math.exp(-rate)]
-    for k in range(1, max_goals + 1):
+    for k in range(1, maximum + 1):
         out.append(out[-1] * rate / k)
-    if 1-sum(out) > 1e-8:
+    if 1 - sum(out) > 1e-8:
         raise ValueError('Poisson tail too large')
     return out
 
 
-def probability(model: dict, h: float, a: float) -> tuple[float,float] | None:
+def probability(model: dict, h: float, a: float) -> tuple[float, float] | None:
+    """Model (P[WIN], P[PUSH]) for an actual supported market/selection."""
     key = model['marketModelKey']
     side = model['side']
     line = model.get('line')
-    home, away = poisson(h), poisson(a)
     if key in ('RESULT_1X2', 'HT_RESULT_1X2', 'RESULT_DOUBLE_CHANCE',
                'HT_RESULT_DOUBLE_CHANCE', 'RESULT_DNB', 'BTTS'):
-        ph = sum(x*y for i,x in enumerate(home) for j,y in enumerate(away) if i > j)
-        pd = sum(x*y for i,x in enumerate(home) for j,y in enumerate(away) if i == j)
+        home, away = poisson(h), poisson(a)
+        ph = sum(x * y for i, x in enumerate(home) for j, y in enumerate(away) if i > j)
+        pd = sum(x * y for i, x in enumerate(home) for j, y in enumerate(away) if i == j)
         pa = max(0., 1. - ph - pd)
-        result = {'HOME': ph, 'DRAW': pd, 'AWAY': pa, 'YES': (1-home[0])*(1-away[0]),
-                  'NO': home[0]+away[0]-home[0]*away[0],
-                  'HOME_OR_DRAW': ph+pd, 'AWAY_OR_DRAW': pa+pd,
-                  'HOME_OR_AWAY': ph+pa}
+        result = {'HOME': ph, 'DRAW': pd, 'AWAY': pa,
+                  'YES': (1 - home[0]) * (1 - away[0]),
+                  'NO': home[0] + away[0] - home[0] * away[0],
+                  'HOME_OR_DRAW': ph + pd, 'AWAY_OR_DRAW': pa + pd,
+                  'HOME_OR_AWAY': ph + pa}
         if key == 'RESULT_DNB':
-            return ((ph if side == 'HOME' else pa), pd) if side in ('HOME','AWAY') else None
-        if key in ('RESULT_1X2','HT_RESULT_1X2') and side not in ('HOME','DRAW','AWAY'):
+            return ((ph if side == 'HOME' else pa), pd) if side in ('HOME', 'AWAY') else None
+        if key in ('RESULT_1X2', 'HT_RESULT_1X2') and side not in ('HOME', 'DRAW', 'AWAY'):
             return None
-        if key in ('RESULT_DOUBLE_CHANCE','HT_RESULT_DOUBLE_CHANCE') and side not in ('HOME_OR_DRAW','AWAY_OR_DRAW','HOME_OR_AWAY'):
+        if key in ('RESULT_DOUBLE_CHANCE', 'HT_RESULT_DOUBLE_CHANCE') and side not in (
+                'HOME_OR_DRAW', 'AWAY_OR_DRAW', 'HOME_OR_AWAY'):
             return None
-        if key == 'BTTS' and side not in ('YES','NO'):
+        if key == 'BTTS' and side not in ('YES', 'NO'):
             return None
         return (result[side], 0.) if side in result else None
-    if key.endswith('TOTAL') or key.endswith('_CORNERS') or key.endswith('_SOT') or key.endswith('_SHOTS') or key.endswith('_YELLOW_CARDS'):
+    if key.endswith(('TOTAL', '_CORNERS', '_SOT', '_SHOTS', '_YELLOW_CARDS')):
         if side not in ('OVER', 'UNDER') or line is None:
             return None
-        line = float(line)
-        if line < 0 or (line*2) != int(line*2):
+        try:
+            line = float(line)
+        except (ValueError, TypeError):
             return None
-        if key.startswith('HOME_'):
-            counts = home
-        elif key.startswith('AWAY_'):
-            counts = away
-        else:
-            counts = [sum(home[i]*away[n-i] for i in range(max(0,n-len(away)+1),min(n+1,len(home))))
-                      for n in range(len(home)+len(away)-1)]
-        over = sum(p for count,p in enumerate(counts) if count > line)
-        under = sum(p for count,p in enumerate(counts) if count < line)
+        if line < 0 or line * 2 != int(line * 2):
+            return None
+        # Independent Poisson sum: home+away counts are Poisson(h+a).
+        rate = h if key.startswith('HOME_') else a if key.startswith('AWAY_') else h + a
+        counts = poisson(rate)
+        over = sum(p for count, p in enumerate(counts) if count > line)
+        under = sum(p for count, p in enumerate(counts) if count < line)
         push = max(0., 1. - over - under)
         return (over if side == 'OVER' else under, push)
     return None
+
+
+def apply_real_period_labels(root: Path, history: list[dict]) -> tuple[list[dict], dict]:
+    """Attach halftime/2nd-half labels FROM REAL completed enriched fixture records.
+
+    Never synthesize missing period scores; exclude AET/PEN as not regulation FT.
+    Also copy no postmatch field into prematch predictor for target matches.
+    """
+    index = json.loads((root / 'data/statmaker/domestic_enriched/index.json').read_text(encoding='utf-8'))
+    originals = {}
+    for league in index['leagues']:
+        path = (root / league['output_path']).resolve()
+        if not path.is_relative_to(root.resolve()) or not path.is_file():
+            continue
+        payload = json.loads(path.read_text(encoding='utf-8'))
+        comp = payload.get('competition') or {}
+        group = str(comp.get('league_code') or '') + '|' + str(comp.get('league') or '')
+        for m in payload.get('matches', []):
+            fid = str(m.get('fixture_id') or '')
+            if fid:
+                originals[(group, fid)] = m
+    out = []
+    counters = Counter()
+    for m in history:
+        original = originals.get((m['group'], str(m['fixture_id'])))
+        if original is None:
+            counters['MISSING_ORIGINAL'] += 1
+            continue
+        if original.get('status') != 'FT':
+            counters['NON_REGULATION_MATCH'] += 1
+            continue
+        prepared = dict(m)
+        stats = dict(prepared['stats'])
+        h = number(original.get('hthg'))
+        a = number(original.get('htag'))
+        gh, ga = prepared['hg'], prepared['ag']
+        if (h is not None and a is not None and h.is_integer() and a.is_integer()
+                and 0 <= h <= gh and 0 <= a <= ga):
+            stats.update(HTHG=int(h), HTAG=int(a),
+                         H2HG=int(gh-h), H2AG=int(ga-a))
+            counters['VERIFIED_PERIOD_LABELS'] += 1
+        else:
+            counters['MISSING_OR_INVALID_PERIOD_LABELS'] += 1
+        prepared['stats'] = stats
+        out.append(prepared)
+    return out, dict(counters)
 
 
 def normalize_identity(row: dict) -> dict:
@@ -164,6 +218,7 @@ def open_app_ready(path: Path, tmp: Path) -> Path:
 def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     inventory, raw_blockers = full_inventory(db, generation)
     history, history_errors, groups = read_fixtures(root)
+    history, period_diagnostics = apply_real_period_labels(root, history)
     history = [h for h in history if h['date'].date() < now.date()]
     by_code=defaultdict(set)
     for group in groups: by_code[group.split('|',1)[0]].add(group)
@@ -261,7 +316,8 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'totalFixtureRows':len({(r['competitionId'],r['fixtureId']) for r in inventory}),
             'rawJoinedRows':len(inventory),
             'rawQuotedRows':sum(bool(r['market']) for r in inventory),
-            'historyRows':len(history),'forecastableFixtures':len(models),
+            'historyRows':len(history),'historicalPeriodDiagnostics':period_diagnostics,
+            'forecastableFixtures':len(models),
             'candidateCount':len(results),'candidates':results,
             'rejections':dict(reject.most_common()),
             'oddsNotIndependentlyTimestampVerified':True,
