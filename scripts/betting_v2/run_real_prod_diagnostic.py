@@ -198,7 +198,7 @@ def historical_metric_rates(history: list[dict], targets: list[dict], cutoff: da
             def avg(rows,idx):return sum(r[idx] for r in rows)/len(rows)
             ha = .35*avg(home,1)+.35*avg(hv,1)+.30*avg(av,2)
             aa = .35*avg(away,1)+.35*avg(av,1)+.30*avg(hv,2)
-            rates[t['fixtureId'],family] = (max(.05,ha),max(.05,aa))
+            rates[t['group'], t['fixtureId'], family] = (max(.05,ha),max(.05,aa))
     return rates
 
 
@@ -234,42 +234,55 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
         if r['kickoff'] is None or utc(r['kickoff']) <= now:
             reject['PAST_OR_INVALID_KICKOFF']+=1
             continue
-        code=r['leagueCode']; possible=by_code.get(code,set())
-        if len(possible)!=1:
-            reject['NO_UNIQUE_DOMESTIC_HISTORY_SCOPE']+=1
+        code = r['leagueCode']
+        possible = by_code.get(code, set())
+        if not possible:
+            reject['NO_DOMESTIC_HISTORY_FOR_LEAGUE'] += 1
             continue
-        group=next(iter(possible)); sides=[]
-        for key in ('home','away'):
-            choices=[r.get('canonicalHomeTeam' if key=='home' else 'canonicalAwayTeam'),
-                     r.get('homeTeam' if key=='home' else 'awayTeam'),
-                     r.get('providerHomeTeam' if key=='home' else 'providerAwayTeam')]
-            identified=set()
-            for label in choices:
-                if label: identified |= names.get((group,canonical_name(label)),set())
-            sides.append(identified)
-        if len(sides[0])!=1 or len(sides[1])!=1 or sides[0]==sides[1]:
-            reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY']+=1
+        # League title can change across historical seasons. Resolve by the
+        # actual two independent team names in each scope, never a guessed alias.
+        matched = []
+        for group in sorted(possible):
+            sides = []
+            for key in ('home', 'away'):
+                choices = [r.get('canonicalHomeTeam' if key == 'home' else 'canonicalAwayTeam'),
+                           r.get('homeTeam' if key == 'home' else 'awayTeam'),
+                           r.get('providerHomeTeam' if key == 'home' else 'providerAwayTeam')]
+                identified = set()
+                for label in choices:
+                    if label:
+                        identified |= names.get((group, canonical_name(label)), set())
+                sides.append(identified)
+            if len(sides[0]) == len(sides[1]) == 1 and sides[0] != sides[1]:
+                matched.append((group, next(iter(sides[0])), next(iter(sides[1]))))
+        if not matched:
+            reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY'] += 1
             continue
-        fixtures[fid]={'group':group,'fixtureId':r['fixtureId'],'date':utc(r['kickoff']),
-                       'home':next(iter(sides[0])),'away':next(iter(sides[1])),
-                       'leagueCode':code,'competitionId':r['competitionId'],
-                       'homeTeam':r['homeTeam'],'awayTeam':r['awayTeam']}
+        if len(matched) != 1:
+            reject['AMBIGUOUS_HISTORICAL_LEAGUE_SCOPE'] += 1
+            continue
+        group, home, away = matched[0]
+        fixtures[fid] = {'group': group, 'fixtureId': r['fixtureId'], 'date': utc(r['kickoff']),
+                         'home': home, 'away': away,
+                         'leagueCode': code, 'competitionId': r['competitionId'],
+                         'homeTeam': r['homeTeam'], 'awayTeam': r['awayTeam']}
     targets=list(fixtures.values())
     synthetic=[{'group':x['group'],'fixture_id':x['fixtureId'],'date':x['date'],
                 'home':x['home'],'away':x['away'],'hg':None,'ag':None,'stats':{},
                 'prematch_target':True} for x in targets]
     xg_rows,_=make_rows(history+synthetic)
     elo_rows,_=make_elo_rows(history+synthetic)
-    xg_by_id={r.fixture:r for r in xg_rows if r.fixture in {t['fixtureId'] for t in targets}}
-    elo_by_id={r.fixture:r for r in elo_rows if r.fixture in {t['fixtureId'] for t in targets}}
+    target_ids = {(t['group'], t['fixtureId']) for t in targets}
+    xg_by_id = {(r.league, r.fixture): r for r in xg_rows if (r.league, r.fixture) in target_ids}
+    elo_by_id = {(r.league, r.fixture): r for r in elo_rows if (r.league, r.fixture) in target_ids}
     metric_rates=historical_metric_rates(history,targets,now)
     models={}
     for t in targets:
-        fid=t['fixtureId']; xg=xg_by_id.get(fid)
+        fid=t['fixtureId']; xg=xg_by_id.get((t['group'], fid))
         if xg:
             h,a=model_lambdas(xg,XG_PARAMS); mode='XG_PRIMARY'
         else:
-            erow=elo_by_id.get(fid)
+            erow=elo_by_id.get((t['group'], fid))
             if erow is None:
                 reject['NO_PRIOR_TEAM_FORM_FOR_GOALS_MODEL']+=1;continue
             h,a=lambda_rates(erow,ELO_PARAMS);mode='ELO_GOALS_FALLBACK_NO_XG'
@@ -288,7 +301,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             reject['MISSING_REAL_HISTORY_FORECAST']+=1;continue
         h,a,mode=row_model;family=r['family']
         if family=='GOALS_FT':rates=(h,a)
-        else:rates=metric_rates.get((r['fixtureId'],family))
+        else:rates=metric_rates.get((fixtures[(r['competitionId'], r['fixtureId'])]['group'], r['fixtureId'], family)) if (r['competitionId'], r['fixtureId']) in fixtures else None
         if rates is None:
             reject['MISSING_MARKET_SPECIFIC_HISTORY']+=1;continue
         try:p=probability(r,*rates)
