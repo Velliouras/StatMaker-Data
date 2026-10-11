@@ -95,7 +95,30 @@ jobs:
             echo "No new shadow forecast artifacts to publish."
           else
             git commit -m "Freeze Betting V2 as-of xG/ELO shadow forecasts (no provider calls)"
-            git pull --rebase --autostash origin main
+            if ! git pull --rebase --autostash origin main; then
+              # Never publish conflict markers or force-push. Recover from a
+              # concurrent GitHub contents edit by recomputing offline from
+              # the NEW main, then commit only freshly rebuilt research data.
+              git rebase --abort || true
+              git fetch origin main
+              git reset --hard origin/main
+              python scripts/betting_v2/freeze_prematch_shadow.py --repository-root . --horizon-days 2 --archive
+              python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
+              python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
+              python scripts/betting_v2/attach_shadow_market_evidence.py --repository-root .
+              python scripts/betting_v2/precompute_real_betting_v2.py --repository-root .
+              git add reports/betting_v2/pilot_forward_shadow_diagnostics.json
+              git add reports/betting_v2/pilot_forward_shadow_preview.json
+              git add reports/betting_v2/pilot_forward_identity_crosswalk.json
+              git add reports/betting_v2/betting_v2_precompute.json
+              git add -A reports/betting_v2/forward_snapshots
+              if [ -d reports/betting_v2/precompute_history ]; then
+                git add -A reports/betting_v2/precompute_history
+              fi
+              if ! git diff --cached --quiet; then
+                git commit -m "Rebuild Betting V2 precompute from latest Data/main (offline)"
+              fi
+            fi
             git push origin HEAD:main
           fi
 
