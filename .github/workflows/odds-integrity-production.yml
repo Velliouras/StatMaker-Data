@@ -295,6 +295,9 @@ jobs:
           if [ -f reports/betting_v2/betting_v2_precompute.json ]; then
             git add reports/betting_v2/betting_v2_precompute.json
           fi
+          if [ -d reports/betting_v2/precompute_history ]; then
+            git add -A reports/betting_v2/precompute_history
+          fi
           if [ -f reports/betting_v2/pilot_forward_identity_crosswalk.json ]; then
             git add reports/betting_v2/pilot_forward_identity_crosswalk.json
           fi
