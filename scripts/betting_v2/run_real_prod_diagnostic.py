@@ -104,10 +104,12 @@ def normalize_identity(row: dict) -> dict:
     if row.get('blocker') != 'MISSING_COUNT_LINE_OR_SIDE':
         return row
     label = str(row.get('selection') or '')
-    m = re.fullmatch(r'\s*(Over|Under)\s+(\d+(?:\.\d+)?)\s*', label, re.I)
-    if not m or row.get('line') is None or float(m.group(2)) != float(row['line']):
+    directions = re.findall(r'\b(OVER|UNDER)\b', label, flags=re.I)
+    quoted_lines = re.findall(r'(?<![A-Za-z0-9])(\d+(?:\.\d+)?)(?![A-Za-z0-9])', label)
+    if (len(directions)!=1 or len(quoted_lines)!=1 or row.get('line') is None
+            or float(quoted_lines[0]) != float(row['line'])):
         return row
-    candidate = dict(row, selection=m.group(1).upper())
+    candidate = dict(row, selection=directions[0].upper())
     try:
         updated = market_identity(candidate)
     except (Blocked, ValueError):
