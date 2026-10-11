@@ -522,6 +522,7 @@ def main() -> int:
 
         con.executescript(
             """
+            DROP TABLE IF EXISTS prepared_match_metric_simulations;
             DROP TABLE IF EXISTS prepared_match_explorer_simulations;
             DROP TABLE IF EXISTS prepared_match_simulations;
             DROP TABLE IF EXISTS prepared_simulations;
@@ -571,6 +572,26 @@ def main() -> int:
             CREATE INDEX idx_prepared_match_simulations_scope
               ON prepared_match_simulations(competition_id, snapshot_version, match_key);
 
+            -- Independent per-fixture metric distributions for Match Simulation.
+            -- Never contingent on a bookmaker selection or proposed bet.
+            CREATE TABLE prepared_match_metric_simulations (
+                competition_id TEXT NOT NULL,
+                snapshot_version TEXT NOT NULL,
+                match_key TEXT NOT NULL,
+                metric_key TEXT NOT NULL,
+                simulation_runs INTEGER NOT NULL,
+                simulation_model TEXT NOT NULL,
+                expected_home_count REAL NOT NULL,
+                expected_away_count REAL NOT NULL,
+                history_home_sample INTEGER NOT NULL,
+                history_away_sample INTEGER NOT NULL,
+                history_league_sample INTEGER NOT NULL,
+                home_histogram_json TEXT NOT NULL,
+                away_histogram_json TEXT NOT NULL,
+                total_histogram_json TEXT NOT NULL,
+                generated_at_ms INTEGER NOT NULL,
+                PRIMARY KEY (competition_id, snapshot_version, match_key, metric_key)
+            );
             CREATE TABLE prepared_match_explorer_simulations (
                 competition_id TEXT NOT NULL,
                 snapshot_version TEXT NOT NULL,
@@ -692,14 +713,11 @@ def main() -> int:
             if not home_team or not away_team:
                 continue
 
-            needed_metrics = {
-                metric
-                for row in rows
-                if (metric := metric_for_submarket(str(row["identity_sub_market_key"] or ""))) is not None
-            }
-            # Match-level Simulation Explorer always needs goals so 1/X/2 is available
-            # independently of whether a specific 1X2 betting row exists.
-            needed_metrics.add("goals")
+            # Match Simulation generates the FULL supported metric family from
+            # cached historical stats independently of bookmaker/betting picks.
+            # The older prepared_simulations table remains selection-based for
+            # backward compatibility with the betting evidence pipeline.
+            needed_metrics = set(METRICS)
 
             seed_material = "|".join(match_key) + f"|{runs}|{MODEL_VERSION}"
             simulated: dict[str, tuple[list[int], list[int], tuple[float, float, int, int, int], str]] = {}
@@ -741,6 +759,43 @@ def main() -> int:
             if not simulated:
                 continue
             simulated_matches += 1
+
+            # Publish one independent distribution per fixture/metric, even
+            # when prepared_selections contains no corresponding market.
+            # All probabilities originate in the actual 10,000 simulated draws.
+            for metric, (home_draws, away_draws, expected, model_kind) in simulated.items():
+                if metric == "goals":
+                    continue  # Goals use the existing Elo-backed score distribution.
+                home_mean, away_mean, home_sample, away_sample, league_sample = expected
+                def histogram(values: list[int]) -> str:
+                    counts: dict[int, int] = defaultdict(int)
+                    for value in values:
+                        counts[value] += 1
+                    return json.dumps(
+                        [[value, count / runs] for value, count in sorted(counts.items())],
+                        separators=(",", ":"),
+                    )
+
+                con.execute(
+                    """
+                    INSERT OR REPLACE INTO prepared_match_metric_simulations(
+                        competition_id,snapshot_version,match_key,metric_key,
+                        simulation_runs,simulation_model,
+                        expected_home_count,expected_away_count,
+                        history_home_sample,history_away_sample,history_league_sample,
+                        home_histogram_json,away_histogram_json,total_histogram_json,
+                        generated_at_ms
+                    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """,
+                    (
+                        match_key[0], match_key[1], match_key[2], metric,
+                        runs, f"{MODEL_VERSION}:{model_kind}",
+                        home_mean, away_mean, home_sample, away_sample, league_sample,
+                        histogram(home_draws), histogram(away_draws),
+                        histogram([h + a for h, a in zip(home_draws, away_draws)]),
+                        generated_at_ms,
+                    ),
+                )
 
             if "goals" in simulated:
                 # Match Explorer gets an Elo-backed goal model in its own tables. The legacy
