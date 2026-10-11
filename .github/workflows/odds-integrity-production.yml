@@ -59,6 +59,7 @@ jobs:
             scripts/betting_v2/quote_receipt_capture.py \
             scripts/betting_v2/index_quote_receipts.py \
             scripts/betting_v2/freeze_prematch_shadow.py \
+            scripts/betting_v2/precompute_real_betting_v2.py \
             scripts/betting_v2/verify_forward_fixture_ids.py \
             scripts/betting_v2/future_fixture_crosswalk.py \
             scripts/rehydrate_domestic_betting_from_archive.py \
@@ -82,6 +83,7 @@ jobs:
             tests/test_betting_v2_quote_receipt_capture.py \
             tests/test_betting_v2_index_quote_receipts.py \
             tests/test_betting_v2_freeze_prematch_shadow.py \
+            tests/test_betting_v2_precompute_real.py \
             tests/test_betting_v2_verify_forward_fixture_ids.py \
             tests/test_betting_v2_future_fixture_crosswalk.py \
             tests/test_domestic_schedule_only_validation.py \
@@ -251,6 +253,10 @@ jobs:
         continue-on-error: true
         run: python scripts/betting_v2/attach_shadow_market_evidence.py --repository-root .
 
+      - name: Precompute real Betting V2 UAT proposals from latest odds
+        continue-on-error: true
+        run: python scripts/betting_v2/precompute_real_betting_v2.py --repository-root .
+
       - name: Commit Domestic feed
         run: |
           git config user.name "github-actions[bot]"
@@ -285,6 +291,9 @@ jobs:
           fi
           if [ -f reports/betting_v2/pilot_forward_shadow_preview.json ]; then
             git add reports/betting_v2/pilot_forward_shadow_preview.json
+          fi
+          if [ -f reports/betting_v2/betting_v2_precompute.json ]; then
+            git add reports/betting_v2/betting_v2_precompute.json
           fi
           if [ -f reports/betting_v2/pilot_forward_identity_crosswalk.json ]; then
             git add reports/betting_v2/pilot_forward_identity_crosswalk.json
