@@ -1,0 +1,184 @@
+{
+  "contract": "betting-v2-real-holdout-evidence-audit-v1",
+  "source": {
+    "githubRunId": 38084468346,
+    "artifact": "betting-v2-offline-qa",
+    "artifactSha256": "4c61b3a4bce531b65427f232b80721a6a0e93480a6bed97f03fd8ebc32c03228",
+    "files": [
+      "pilot_market_holdout.json",
+      "pilot_elo_market_holdout.json",
+      "pilot_cached_odds_provenance.json"
+    ]
+  },
+  "researchOnly": true,
+  "providerCalls": 0,
+  "certifiedStrong": 0,
+  "confidenceLevel": 0.95,
+  "description": "Counts from already-settled real out-of-time model holdout diagnostics, NOT a priced bookmaker backtest nor future-win guarantee",
+  "marketPopulation": {
+    "XG_PRIMARY": [
+      {
+        "market": "1X2_HOME",
+        "rawProbabilityAtLeast60N": 25,
+        "wins": 24,
+        "observedHitRate": 0.96,
+        "wilson95Lower": 0.8045552759497747,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "1X2_AWAY",
+        "rawProbabilityAtLeast60N": 7,
+        "wins": 6,
+        "observedHitRate": 0.857143,
+        "wilson95Lower": 0.4868654966809702,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_2_5_OVER",
+        "rawProbabilityAtLeast60N": 71,
+        "wins": 53,
+        "observedHitRate": 0.746479,
+        "wilson95Lower": 0.6344585450983388,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_2_5_UNDER",
+        "rawProbabilityAtLeast60N": 45,
+        "wins": 27,
+        "observedHitRate": 0.6,
+        "wilson95Lower": 0.4545159420914473,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_3_5_OVER",
+        "rawProbabilityAtLeast60N": 1,
+        "wins": 1,
+        "observedHitRate": 1,
+        "wilson95Lower": 0.20654329147389294,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "DOUBLE_CHANCE_HOME_OR_DRAW",
+        "rawProbabilityAtLeast60N": 318,
+        "wins": 229,
+        "observedHitRate": 0.720126,
+        "wilson95Lower": 0.6683800493178027,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "DOUBLE_CHANCE_AWAY_OR_DRAW",
+        "rawProbabilityAtLeast60N": 167,
+        "wins": 121,
+        "observedHitRate": 0.724551,
+        "wilson95Lower": 0.6523208701525998,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      }
+    ],
+    "ELO_GOALS_FALLBACK_NO_XG": [
+      {
+        "market": "1X2_HOME",
+        "rawProbabilityAtLeast60N": 200,
+        "wins": 133,
+        "observedHitRate": 0.665,
+        "wilson95Lower": 0.5970206277343806,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "1X2_AWAY",
+        "rawProbabilityAtLeast60N": 33,
+        "wins": 22,
+        "observedHitRate": 0.666667,
+        "wilson95Lower": 0.49607581799949974,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_2_5_OVER",
+        "rawProbabilityAtLeast60N": 349,
+        "wins": 224,
+        "observedHitRate": 0.641834,
+        "wilson95Lower": 0.5902369898187211,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_2_5_UNDER",
+        "rawProbabilityAtLeast60N": 116,
+        "wins": 54,
+        "observedHitRate": 0.465517,
+        "wilson95Lower": 0.37730845831344373,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "MATCH_OVER_3_5_OVER",
+        "rawProbabilityAtLeast60N": 21,
+        "wins": 13,
+        "observedHitRate": 0.619048,
+        "wilson95Lower": 0.40878295815501514,
+        "retrospectiveWilsonAbove60": false,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "DOUBLE_CHANCE_HOME_OR_DRAW",
+        "rawProbabilityAtLeast60N": 1060,
+        "wins": 789,
+        "observedHitRate": 0.74434,
+        "wilson95Lower": 0.7172283570019027,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      },
+      {
+        "market": "DOUBLE_CHANCE_AWAY_OR_DRAW",
+        "rawProbabilityAtLeast60N": 495,
+        "wins": 349,
+        "observedHitRate": 0.705051,
+        "wilson95Lower": 0.6634219550845338,
+        "retrospectiveWilsonAbove60": true,
+        "hasQuoteLevelOdds": false,
+        "certifiedStrong": false
+      }
+    ]
+  },
+  "bookmakerPriceAudit": {
+    "priceLikeObjects": 126386,
+    "objectsWithSameObjectAbsoluteTimestamp": 25,
+    "individualPriceObservationTimestampVerified": false,
+    "independentlyCompletePriceUniverseVerified": false,
+    "pricedROIProven": false
+  },
+  "blockingReasons": [
+    "MISSING_REAL_QUOTE_LEVEL_OBSERVED_AT_FOR_MATCHED_FIXTURES",
+    "MISSING_INDEPENDENT_UNFILTERED_BOOKMAKER_PRICE_UNIVERSE",
+    "CALIBRATION_MODEL_OUT_OF_TIME_ROI_NOT_PROVEN",
+    "REALISTIC_ADVERSE_LINEUP_SCENARIO_NOT_VERIFIED",
+    "UNPRICED_HIGH_RAW_PROBABILITY_DOES_NOT_CERTIFY_CONSERVATIVE_STRONG"
+  ],
+  "notes": [
+    "The seven market columns overlap on the same fixtures; do not sum them as independent bets",
+    "Raw model p>=0.60 filter is not a per-market conservative probability bound",
+    "xG and ELO populations have different dates/samples and are never pooled or cross-calibrated",
+    "The report records an existing archived evidence run. No new model fit or new unseen holdout was performed"
+  ]
+}
