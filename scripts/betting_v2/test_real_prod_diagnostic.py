@@ -52,6 +52,31 @@ class MarketProbabilities(unittest.TestCase):
         self.assertIsNone(self.t('UNKNOWN','OVER',1.6,1.1,2.5))
     def test_no_quarter_lines(self):
         self.assertIsNone(self.t('FULL_TIME_MATCH_TOTAL','OVER',1.6,1.1,2.25))
+    def test_shots_distribution_not_arbitrarily_capped(self):
+        over,push=self.t('MATCH_SHOTS_TOTAL','OVER',16.2,14.8,24.5)
+        self.assertGreater(over,0.5)
+        self.assertAlmostEqual(push,0)
+    def test_second_half_total_is_supported(self):
+        over,push=self.t('SECOND_HALF_MATCH_TOTAL','OVER',1.1,0.9,1.5)
+        self.assertAlmostEqual(over,1-math.exp(-2)*3)
+        self.assertEqual(push,0)
+    def test_period_mapping_uses_only_real_halftime(self):
+        import tempfile, json
+        with tempfile.TemporaryDirectory() as d:
+            base=Path(d)
+            directory=base/'data/statmaker/domestic_enriched'
+            directory.mkdir(parents=True)
+            (directory/'index.json').write_text(json.dumps({'leagues':[{'output_path':'data/statmaker/domestic_enriched/x.json'}]}))
+            (directory/'x.json').write_text(json.dumps({'competition':{'league_code':'E0','league':'Premier League'},
+                'matches':[{'fixture_id':'real-id','status':'FT','hthg':1,'htag':0},
+                           {'fixture_id':'not-ft','status':'AET','hthg':1,'htag':0}]}))
+            history=[{'group':'E0|Premier League','fixture_id':'real-id','stats':{},'hg':3,'ag':2},
+                     {'group':'E0|Premier League','fixture_id':'not-ft','stats':{},'hg':3,'ag':2}]
+            rows,stats=engine.apply_real_period_labels(base,history)
+            self.assertEqual(len(rows),1)
+            self.assertEqual(rows[0]['stats']['H2HG'],2)
+            self.assertEqual(rows[0]['stats']['H2AG'],2)
+            self.assertEqual(stats['NON_REGULATION_MATCH'],1)
     def test_full_inventory_path_without_certificates(self):
         now=datetime(2026,10,11,14,tzinfo=timezone.utc)
         source={
@@ -68,7 +93,8 @@ class MarketProbabilities(unittest.TestCase):
                   'date':now-timedelta(days=3),'stats':{'HxG':2.0,'AxG':.5},
                   'fixture_id':'prior-1','hg':3,'ag':0}]
         groups={'E0|Premier League':{}}
-        with patch.object(engine,'full_inventory',return_value=([source],Counter())), \
+        with patch.object(engine,'apply_real_period_labels',return_value=(history,{})), \
+             patch.object(engine,'full_inventory',return_value=([source],Counter())), \
              patch.object(engine,'read_fixtures',return_value=(history,Counter(),groups)), \
              patch.object(engine,'make_rows',return_value=([types.SimpleNamespace(fixture='real-fixture-1')],{})), \
              patch.object(engine,'make_elo_rows',return_value=([],{})), \
