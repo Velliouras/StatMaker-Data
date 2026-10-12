@@ -30,6 +30,7 @@ from scripts.betting_v2.production_sources import full_inventory, market_identit
 from scripts.betting_v2.production_contract import Blocked
 from walk_forward_goals import make_rows, model_lambdas
 from walk_forward_elo import make_elo_rows, lambda_rates
+from uefa_verified_history import verified_uefa_history
 
 ODDS_LOW, ODDS_HIGH, P_MIN = 1.80, 3.00, .60
 COUNT_STATS = {
@@ -273,6 +274,12 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     inventory, raw_blockers = full_inventory(db, generation)
     history, history_errors, groups = read_fixtures(root)
     history, period_diagnostics = apply_real_period_labels(root, history)
+    # UEFA data never runs through the domestic period-score join; it uses
+    # verified standalone UEFA source matches and preserves absent statistics.
+    uefa_history, uefa_errors, uefa_groups = verified_uefa_history(root)
+    history.extend(uefa_history)
+    groups.update(uefa_groups)
+    history_errors.update({f"uefa_{k}": v for k, v in uefa_errors.items()})
     history = [h for h in history if h['date'].date() < now.date()]
     by_code=defaultdict(set)
     for group in groups: by_code[group.split('|',1)[0]].add(group)
