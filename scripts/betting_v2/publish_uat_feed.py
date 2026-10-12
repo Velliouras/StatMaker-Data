@@ -13,7 +13,8 @@ import tempfile
 FEED_PATH = Path("data/statmaker/uat/betting_v2")
 
 
-def publish(root: Path, seed: Path | None = None) -> Path:
+def publish(root: Path, seed: Path | None = None,
+            uefa_odds_root: Path | None = None) -> Path:
     if seed is not None:
         payload = seed.read_bytes()
     else:
@@ -23,17 +24,24 @@ def publish(root: Path, seed: Path | None = None) -> Path:
         generation = manifest["metadata"]["preparedPatternGenerationId"]
         with tempfile.TemporaryDirectory(prefix="statmaker-v2-uat-") as temp:
             output = Path(temp) / "candidates.json"
-            subprocess.run([
+            cmd = [
                 sys.executable, "-m", "scripts.betting_v2.run_real_prod_diagnostic",
                 "--repository-root", str(root), "--app-ready", str(bundle),
                 "--generation-id", generation, "--output", str(output)
-            ], cwd=root, check=True)
+            ]
+            if uefa_odds_root is not None:
+                cmd.extend(["--uefa-odds-root", str(uefa_odds_root.resolve())])
+            subprocess.run(cmd, cwd=root, check=True)
             report = json.loads(output.read_bytes())
         # Missing/ambiguous bookmaker binding cannot become a displayed quote.
         report["candidates"] = [
             row for row in report["candidates"]
-            if row.get("bookmakerBinding") == "EXACT_UNIQUE_BUNDLED_QUOTE"
+            if row.get("bookmakerBinding") in {
+                "EXACT_UNIQUE_BUNDLED_QUOTE",
+                "EXACT_UNIQUE_REPOSITORY_UEFA_QUOTE",
+            }
             and row.get("bookmaker")
+            and len(row.get("bundledQuoteSources", [])) == 1
         ]
         report["candidateCount"] = len(report["candidates"])
         payload = json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
@@ -46,8 +54,11 @@ def publish(root: Path, seed: Path | None = None) -> Path:
     if len(report["candidates"]) != report["candidateCount"]:
         raise ValueError("Candidate count mismatch")
     for row in report["candidates"]:
-        if (row["certified"] or row["bookmakerBinding"] != "EXACT_UNIQUE_BUNDLED_QUOTE"
-                or not row["bookmaker"]):
+        if (row["certified"] or row["bookmakerBinding"] not in {
+                "EXACT_UNIQUE_BUNDLED_QUOTE",
+                "EXACT_UNIQUE_REPOSITORY_UEFA_QUOTE",
+            } or not row["bookmaker"]
+                or len(row.get("bundledQuoteSources", [])) != 1):
             raise ValueError("Invalid UAT quote")
 
     sha = hashlib.sha256(payload).hexdigest()
@@ -75,8 +86,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repository-root", type=Path, default=Path(__file__).resolve().parents[2])
     parser.add_argument("--seed", type=Path, help="Publish the supplied existing real snapshot without inference")
+    parser.add_argument("--uefa-odds-root", type=Path,
+                        help="Explicit cached active UEFA odds directory; never uses provider APIs")
     args = parser.parse_args()
-    publish(args.repository_root.resolve(), args.seed)
+    publish(args.repository_root.resolve(), args.seed, args.uefa_odds_root)
 
 
 if __name__ == "__main__":
