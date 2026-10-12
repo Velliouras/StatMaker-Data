@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-11T23:49:54Z",
+  "generated_at": "2026-10-12T10:59:49Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/usa/major-league-soccer/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-11T10:16:42Z",
+    "cache_generated_at": "2026-10-12T10:59:22Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 419,
-    "fixtures_with_any_stats": 417,
-    "fixtures_with_bb_core_stats": 410,
+    "completed_fixtures": 420,
+    "fixtures_with_any_stats": 418,
+    "fixtures_with_bb_core_stats": 411,
     "any_stats_coverage": 0.9952,
-    "bb_core_coverage": 0.9785,
+    "bb_core_coverage": 0.9786,
     "group_counts": {
-      "shots_total": 417,
-      "shots_on_target": 417,
-      "corners": 417,
-      "fouls": 417,
-      "yellow_cards": 410,
-      "red_cards": 131,
-      "possession": 417,
-      "passes": 417,
-      "xg": 356
+      "shots_total": 418,
+      "shots_on_target": 418,
+      "corners": 418,
+      "fouls": 418,
+      "yellow_cards": 411,
+      "red_cards": 132,
+      "possession": 418,
+      "passes": 418,
+      "xg": 357
     },
     "group_coverage": {
       "shots_total": 0.9952,
       "shots_on_target": 0.9952,
       "corners": 0.9952,
       "fouls": 0.9952,
-      "yellow_cards": 0.9785,
-      "red_cards": 0.3126,
+      "yellow_cards": 0.9786,
+      "red_cards": 0.3143,
       "possession": 0.9952,
       "passes": 0.9952,
-      "xg": 0.8496
+      "xg": 0.85
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -35263,6 +35263,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1490525,
+      "date_utc": "2026-10-11T23:00:00+00:00",
+      "country": "USA",
+      "league": "Major League Soccer",
+      "league_code": "USA",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 253,
+      "round": "Regular Season - 28",
+      "home_team": "St. Louis City",
+      "away_team": "Los Angeles Galaxy",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 11,
+        "AS": 18,
+        "HST": 6,
+        "AST": 7,
+        "HC": 2,
+        "AC": 3,
+        "HF": 17,
+        "AF": 10,
+        "HY": 2,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 59,
+        "APossession": 41,
+        "HSaves": 5,
+        "ASaves": 0,
+        "HPasses": 611,
+        "APasses": 413,
+        "HPassesAccurate": 546,
+        "APassesAccurate": 337,
+        "HxG": 2.63,
+        "AxG": 1.99
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 6,
+      "away_goals": 2,
+      "home_score": 6,
+      "away_score": 2,
+      "fthg": 6,
+      "ftag": 2,
+      "hthg": 5,
+      "htag": 1,
+      "goals": {
+        "home": 6,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 5,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 6,
+          "away": 2
         },
         "extratime": {
           "home": null,
