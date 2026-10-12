@@ -1,0 +1,78 @@
+name: Betting V2 UAT Offline Refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    # After canonical odds update windows; quotes are never fetched by this job.
+    - cron: "47 2,6,10,14,18,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-canonical-main-writer
+  cancel-in-progress: false
+
+jobs:
+  publish-uat-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Collect existing UEFA bookmaker files without contacting providers
+        id: uefa
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/uefa-odds"
+          active=0
+          if git fetch --no-tags --depth=1 origin build/uefa-qualifier-feed-20260720; then
+            for league in champions_league europa_league conference_league; do
+              if git cat-file -e "FETCH_HEAD:odds/odds_api_io/${league}_odds.json"; then
+                git show "FETCH_HEAD:odds/odds_api_io/${league}_odds.json" > "$RUNNER_TEMP/uefa-odds/${league}_odds.json"
+                active=$((active + 1))
+              fi
+            done
+          else
+            echo "UEFA_PRICE_BRANCH_NOT_AVAILABLE; use Domestic only" >&2
+          fi
+          echo "number=$active" >> "$GITHUB_OUTPUT"
+          echo "UEFA_SOURCE_ARTIFACTS=$active; provider API calls=0"
+
+      - name: Publish offline UAT-only Betting V2 feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m scripts.betting_v2.publish_uat_feed \
+            --repository-root . --uefa-odds-root "$RUNNER_TEMP/uefa-odds"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          idx=json.loads(Path('data/statmaker/uat/betting_v2/latest.json').read_text())
+          rows=json.loads((Path('data/statmaker/uat/betting_v2')/idx['artifact']).read_text())
+          assert idx['channel'] == 'uat' and idx['apiCalls'] == idx['prodWrites'] == 0
+          assert rows['candidateCount'] == len(rows['candidates'])
+          print('UAT_ONLY_V2_OFFLINE',rows['candidateCount'],'PROD_UNCHANGED')
+          PY
+
+      - name: Commit UAT feed only, never PROD bundles
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/uat/betting_v2/
+          if git diff --cached --quiet; then
+            echo "UAT_V2_FEED_ALREADY_CURRENT"
+            exit 0
+          fi
+          git commit -m "UAT: publish real offline V2 candidate feed from current cached quotes"
+          git push origin HEAD:main
