@@ -32,6 +32,7 @@ from walk_forward_goals import make_rows, model_lambdas
 from walk_forward_elo import make_elo_rows, lambda_rates
 from uefa_verified_history import verified_uefa_history
 from scripts.betting_v2.uefa_quoted_inventory import exact_uefa_quotes
+from scripts.betting_v2.uefa_domestic_elo_bridge import UefaDomesticEloBridge, UEFA_CODES
 
 ODDS_LOW, ODDS_HIGH, P_MIN = 1.80, 3.00, .60
 COUNT_STATS = {
@@ -288,6 +289,9 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime,
         inventory.extend(additional)
     history, history_errors, groups = read_fixtures(root)
     history, period_diagnostics = apply_real_period_labels(root, history)
+    # Match Simulation has already materialized prior-season ELO in this
+    # canonical App-Ready SQLite. Reuse that source for UEFA, not a new rating.
+    elo_bridge = UefaDomesticEloBridge(db, root, history, now)
     # UEFA data never runs through the domestic period-score join; it uses
     # verified standalone UEFA source matches and preserves absent statistics.
     uefa_history, uefa_errors, uefa_groups = verified_uefa_history(root)
@@ -317,6 +321,25 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime,
             continue
         future_fixtures.add(fid)
         code = r['leagueCode']
+        if code in UEFA_CODES:
+            # UEFA clubs retain the prior domestic season's ELO and form.
+            # Their sparse UEFA-only fixture samples must NOT erase that
+            # history. Exact team mapping and form coverage remain strict.
+            bridged = elo_bridge.forecast(r)
+            if bridged is None:
+                reject['UEFA_ELO_OR_DOMESTIC_FORM_UNAVAILABLE'] += 1
+                fixture_reject['UEFA_ELO_OR_DOMESTIC_FORM_UNAVAILABLE'] += 1
+                continue
+            h_rate, a_rate, elo_evidence = bridged
+            fixtures[fid] = {
+                'group': f'UEFA_ELO_CROSS_LEAGUE|{code}',
+                'fixtureId':r['fixtureId'], 'date':utc(r['kickoff']),
+                'home':elo_evidence['homeKey'], 'away':elo_evidence['awayKey'],
+                'leagueCode':code, 'competitionId':r['competitionId'],
+                'homeTeam':r['homeTeam'], 'awayTeam':r['awayTeam'],
+                'eloBridgeRates':(h_rate,a_rate), 'eloBridgeEvidence':elo_evidence,
+            }
+            continue
         possible = by_code.get(code, set())
         if not possible:
             reject['NO_DOMESTIC_HISTORY_FOR_LEAGUE'] += 1
@@ -363,7 +386,18 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime,
     metric_rates=historical_metric_rates(history,targets,now)
     models={}
     for t in targets:
-        fid=t['fixtureId']; xg=xg_by_id.get((t['group'], fid))
+        fid=t['fixtureId']
+        if 'eloBridgeRates' in t:
+            h,a = t['eloBridgeRates']
+            models[t['competitionId'],fid]=(h,a,'UEFA_PREPARED_ELO_DOMESTIC_FORM_UNVERIFIED')
+            for family in COUNT_STATS:
+                rates = elo_bridge.metric_rates(
+                    {'leagueCode': t['leagueCode']}, family,
+                    t['eloBridgeEvidence'], t['date'])
+                if rates is not None:
+                    metric_rates[t['group'],fid,family] = rates
+            continue
+        xg=xg_by_id.get((t['group'], fid))
         if xg:
             h,a=model_lambdas(xg,XG_PARAMS); mode='XG_PRIMARY'
         else:
@@ -421,6 +455,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime,
             'sourceRecordSha256':r.get('sourceRecordSha256'),
             'marketModelKey':r['marketModelKey'], 'family':family,
             'probabilityModel':mode if family == 'GOALS_FT' else 'OBSERVED_MARKET_HISTORY_POISSON',
+            'eloContext':fixtures.get((r['competitionId'], r['fixtureId']), {}).get('eloBridgeEvidence'),
             'marketExpectedHomeCount':round(rates[0],6), 'marketExpectedAwayCount':round(rates[1],6),
         })
     raw_candidates = len(results)
@@ -432,6 +467,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime,
             'rawJoinedRows':len(inventory),
             'rawQuotedRows':sum(bool(r['market']) for r in inventory),
             'historyRows':len(history),'historicalPeriodDiagnostics':period_diagnostics,
+            'uefaExistingPreparedEloBlockers':dict(elo_bridge.blockers),
             'historySourceErrors':dict(history_errors),
             'futureFixtures':len(future_fixtures),
             'forecastableFixtures':len(models),
