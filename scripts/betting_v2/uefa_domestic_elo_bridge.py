@@ -72,7 +72,7 @@ class UefaDomesticEloBridge:
             # match is ever used as domestic-league context.
             if m.get("prematch_target") or m["date"] >= cutoff:
                 continue
-            if not str(m.get("group", "")).split("|")[0] not in UEFA_CODES:
+            if str(m.get("group", "")).split("|")[0] in UEFA_CODES:
                 continue
             for team_field, own, conceded, venue in (
                 ("home", "hg", "ag", "home"), ("away", "ag", "hg", "away")
