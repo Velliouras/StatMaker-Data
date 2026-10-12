@@ -11,7 +11,7 @@ from datetime import datetime, time, timezone
 import json
 from pathlib import Path
 
-from fixture_lookup import canonical_name
+from scripts.betting_v2.fixture_lookup import canonical_name
 
 CODES = {
     "champions_league": ("CL", "UEFA Champions League"),
