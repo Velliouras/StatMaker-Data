@@ -60,9 +60,19 @@ def exact_uefa_quotes(odds_root: Path, generation: str, now: datetime) -> tuple[
                 blocked[f"{league}_INELIGIBLE_FIXTURE"] += 1
                 continue
             offered = list(match.get("markets") or [])
+            # An exact quote may not be claimed unique when the same bookmaker
+            # selection appears more than once in the same source fixture.
+            keys = [(
+                str(q.get("market")), str(q.get("selection")), str(q.get("team")),
+                str(q.get("line")), str(q.get("odds")), str(q.get("bookmaker"))
+            ) for q in offered]
+            occurrences = Counter(keys)
             # Provider match / market identities are immutable source identifiers,
             # not guessed API-Football fixture crosswalks.
             for ordinal, offer in enumerate(offered):
+                if occurrences[keys[ordinal]] != 1:
+                    blocked[f"{league}_DUPLICATE_BOOKMAKER_QUOTE"] += 1
+                    continue
                 bookmaker = str(offer.get("bookmaker") or "").strip()
                 if offer.get("exactBookmakerOdds") is not True or not bookmaker:
                     blocked[f"{league}_NOT_EXACT_BOOKMAKER"] += 1
