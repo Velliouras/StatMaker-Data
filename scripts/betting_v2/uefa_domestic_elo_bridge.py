@@ -40,7 +40,7 @@ class UefaDomesticEloBridge:
         self.ratings: dict[str, list[dict]] = defaultdict(list)
         self.forms: dict[str, list[dict]] = defaultdict(list)
         self.aliases: dict[str, dict[str, str]] = defaultdict(dict)
-        self.rate_keys: set[str] = set()
+        self.domestic_aliases: dict[str, set[tuple[str, str]]] = defaultdict(set)
         self.available = False
 
         with sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True) as db:
@@ -67,6 +67,22 @@ class UefaDomesticEloBridge:
                 "current": int(current or 0),
             })
         self.available = bool(self.ratings)
+        # Reuse the application's explicit, league-scoped verified alias table
+        # for UEFA clubs' Domestic names. Never fuzzy-match or discard ambiguity.
+        aliases_file = root / "mappings/domestic_team_aliases.json"
+        if aliases_file.is_file():
+            aliases_payload = json.loads(aliases_file.read_text(encoding="utf-8"))
+            for league, names in (aliases_payload.get("aliases") or {}).items():
+                if not isinstance(names, dict):
+                    continue
+                for canonical, variants in names.items():
+                    target = canonical_name(canonical)
+                    if not target:
+                        continue
+                    for variant in [canonical, *(variants if isinstance(variants, list) else [])]:
+                        alias = canonical_name(variant)
+                        if alias:
+                            self.domestic_aliases[alias].add((str(league), target))
         for m in domestic_history:
             # Only actual prior, completed FT historical matches. No UEFA support
             # match is ever used as domestic-league context.
@@ -83,6 +99,11 @@ class UefaDomesticEloBridge:
                 key = canonical_name(m.get(team_field))
                 if not key:
                     continue
+                source_league = str(m.get("group", "")).split("|", 1)[0]
+                verified = {target for league, target in self.domestic_aliases.get(key, set())
+                            if league == source_league}
+                if len(verified) == 1:
+                    key = next(iter(verified))
                 self.forms[key].append({
                     "date": m["date"], "venue": venue,
                     "forgoals": own_goals, "againstgoals": against,
@@ -113,6 +134,16 @@ class UefaDomesticEloBridge:
             if not key:
                 continue
             found = self.ratings.get(key) or self.ratings.get(self.aliases[code].get(key, ""))
+            if not found:
+                # Only explicit domestic alias -> canonical identity, with the
+                # exact declared domestic league and a unique current Elo row.
+                candidates = [
+                    rating for league, canonical in self.domestic_aliases.get(key, set())
+                    for rating in self.ratings.get(canonical, [])
+                    if rating["league"] == league
+                ]
+                if candidates:
+                    found = candidates
             if found:
                 current_season = max((r["season"] for r in found))
                 current = [r for r in found if r["season"] == current_season]
