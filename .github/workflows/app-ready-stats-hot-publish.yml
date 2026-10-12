@@ -11,6 +11,13 @@ on:
       - "Build StatMaker Domestic Enriched"
       - "Domestic Targeted Stats Backfill"
       - "UEFA Current Stats Refresh"
+      # The producers below commit completed-match changes to the canonical
+      # domestic_enriched index. GitHub's GITHUB_TOKEN commits do not emit
+      # downstream push events, so subscribe to successful producer runs.
+      - "Model Performance Settlement Refresh"
+      - "Domestic Statistics Universe"
+      - "Greece Super League 2 Sync"
+      - "Domestic Historical Closure"
     types: [completed]
     branches: [main]
 
