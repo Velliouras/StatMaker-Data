@@ -98,6 +98,12 @@ def exact_uefa_quotes(odds_root: Path, generation: str, now: datetime) -> tuple[
                     "sourceRecordSha256": hashlib.sha256(
                         json.dumps(offer, sort_keys=True, ensure_ascii=False).encode("utf-8")
                     ).hexdigest(),
+                    # Stable LOCAL identity for one wager, never a claimed provider
+                    # selection ID. Bookmaker odd must not change first-issued key.
+                    "selectionId": "uefa-local:" + hashlib.sha256(
+                        json.dumps([comp, match_id, market, selection, offer.get("team"),
+                                    offer.get("line")], ensure_ascii=False).encode("utf-8")
+                    ).hexdigest(),
                 }
                 exact_match = {
                     "id": match_id, "date": match.get("date") or kickoff.date().isoformat(),
