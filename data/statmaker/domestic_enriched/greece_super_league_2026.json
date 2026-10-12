@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-12T10:59:50Z",
+  "generated_at": "2026-10-12T22:28:00Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/greece/super-league/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-12T10:42:16Z",
+    "cache_generated_at": "2026-10-12T22:26:36Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-07-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 41,
-    "fixtures_with_any_stats": 41,
-    "fixtures_with_bb_core_stats": 39,
+    "completed_fixtures": 42,
+    "fixtures_with_any_stats": 42,
+    "fixtures_with_bb_core_stats": 40,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9512,
+    "bb_core_coverage": 0.9524,
     "group_counts": {
-      "shots_total": 41,
-      "shots_on_target": 41,
-      "corners": 41,
-      "fouls": 38,
-      "yellow_cards": 39,
-      "red_cards": 33,
-      "possession": 41,
-      "passes": 38,
-      "xg": 18
+      "shots_total": 42,
+      "shots_on_target": 42,
+      "corners": 42,
+      "fouls": 39,
+      "yellow_cards": 40,
+      "red_cards": 34,
+      "possession": 42,
+      "passes": 39,
+      "xg": 19
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
-      "fouls": 0.9268,
-      "yellow_cards": 0.9512,
-      "red_cards": 0.8049,
+      "fouls": 0.9286,
+      "yellow_cards": 0.9524,
+      "red_cards": 0.8095,
       "possession": 1.0,
-      "passes": 0.9268,
-      "xg": 0.439
+      "passes": 0.9286,
+      "xg": 0.4524
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -3511,6 +3511,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1593330,
+      "date_utc": "2026-10-12T15:00:00+00:00",
+      "country": "Greece",
+      "league": "Super League",
+      "league_code": "G1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 197,
+      "round": "Regular Season - 6",
+      "home_team": "PAOK",
+      "away_team": "Kalamata",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 19,
+        "AS": 12,
+        "HST": 5,
+        "AST": 6,
+        "HC": 7,
+        "AC": 2,
+        "HF": 8,
+        "AF": 12,
+        "HY": 1,
+        "AY": 2,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 61,
+        "APossession": 39,
+        "HSaves": 3,
+        "ASaves": 4,
+        "HPasses": 505,
+        "APasses": 324,
+        "HPassesAccurate": 423,
+        "APassesAccurate": 259,
+        "HxG": 1.29,
+        "AxG": 2.37
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 3,
+      "home_score": 1,
+      "away_score": 3,
+      "fthg": 1,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 3
         },
         "extratime": {
           "home": null,
