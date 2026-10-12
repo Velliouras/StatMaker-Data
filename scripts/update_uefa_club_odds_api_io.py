@@ -58,16 +58,20 @@ def competition_provider_match(
 ) -> Optional[Dict[str, Any]]:
     terms = [odds.normalize_text(term) for term in competition.get("searchTerms", []) if str(term).strip()]
     target_code = str(competition.get("leagueCode") or "").upper()
-    blocked = {"women", "womens", "woman", "youth", "u19", "u21", "conference"}
+    blocked = {"women", "womens", "woman", "youth", "u19", "u21"}
     scored: List[Tuple[int, Dict[str, Any]]] = []
     for item in provider_leagues:
         text = provider_text(item)
         words = set(text.split())
         if words & blocked:
             continue
-        if target_code == "CL" and "europa" in words:
+        # Keep each UEFA tournament distinct. Conference League must not be
+        # dropped by the old all-competitions "conference" exclusion.
+        if target_code == "CL" and ("europa" in words or "conference" in words):
             continue
-        if target_code == "EL" and "champions" in words:
+        if target_code == "EL" and ("champions" in words or "conference" in words):
+            continue
+        if target_code == "UECL" and "conference" not in words:
             continue
         best = 0
         for term in terms:
@@ -82,7 +86,15 @@ def competition_provider_match(
             scored.append((best, item))
     if not scored:
         return None
-    scored.sort(key=lambda pair: (pair[0], int(pair[1].get("eventsCount") or 0)), reverse=True)
+    # Prefer the active league-stage provider over expired qualifying-only
+    # providers when both labels match the same tournament.
+    def rank(pair):
+        item = pair[1]
+        label = provider_text(item)
+        is_qualifier = any(k in label for k in ("qualif", "qualification", "qualifying"))
+        return (int(item.get("eventsCount") or 0) > 0,
+                not is_qualifier, pair[0], int(item.get("eventsCount") or 0))
+    scored.sort(key=rank, reverse=True)
     return scored[0][1]
 
 
