@@ -4,16 +4,16 @@
     "Bet365",
     "Unibet"
   ],
-  "matchesChecked": 54,
-  "mixedBookmakerGroupsResolved": 140,
-  "incompleteRowsPruned": 50,
+  "matchesChecked": 64,
+  "mixedBookmakerGroupsResolved": 176,
+  "incompleteRowsPruned": 53,
   "groupsDropped": 18,
   "matches": [
     {
       "matchId": "74173174",
       "fixture": "CS Universitatea Craiova - Getafe CF",
-      "before": 102,
-      "after": 48,
+      "before": 108,
+      "after": 40,
       "groups": [
         {
           "market": "1X2",
@@ -72,7 +72,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 2,
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
@@ -100,9 +100,10 @@
           "market": "TEAM_CORNERS",
           "team": "CS Universitatea Craiova",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -112,9 +113,10 @@
           "market": "TEAM_CORNERS",
           "team": "Getafe CF",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -153,8 +155,8 @@
     {
       "matchId": "74173138",
       "fixture": "FC Lugano - FK Crvena Zvezda Belgrade",
-      "before": 112,
-      "after": 50,
+      "before": 115,
+      "after": 38,
       "groups": [
         {
           "market": "1X2",
@@ -241,9 +243,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Lugano",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -253,9 +256,10 @@
           "market": "TEAM_CORNERS",
           "team": "FK Crvena Zvezda Belgrade",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -281,21 +285,23 @@
           "team": "FK Crvena Zvezda Belgrade",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 10,
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         }
       ]
     },
     {
       "matchId": "74173144",
       "fixture": "HNK Hajduk Split - Ajax Amsterdam",
-      "before": 150,
-      "after": 84,
+      "before": 155,
+      "after": 74,
       "groups": [
         {
           "market": "1X2",
@@ -397,9 +403,10 @@
           "market": "TEAM_CORNERS",
           "team": "Ajax Amsterdam",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -409,9 +416,10 @@
           "market": "TEAM_CORNERS",
           "team": "HNK Hajduk Split",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -461,23 +469,21 @@
           "team": "HNK Hajduk Split",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 6,
+          "rows": 8,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ]
     },
     {
       "matchId": "74173148",
       "fixture": "KAA Gent - AGF Aarhus",
-      "before": 113,
-      "after": 60,
+      "before": 128,
+      "after": 82,
       "groups": [
         {
           "market": "1X2",
@@ -536,7 +542,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 14,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
@@ -559,8 +565,21 @@
             "Unibet": "integrity"
           },
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 1,
+            "Unibet": 1
           }
+        },
+        {
+          "market": "MATCH_SHOTS_ON_TARGET",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Unibet",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_CORNERS",
@@ -587,42 +606,60 @@
           "prunedIncompleteRows": {}
         },
         {
-          "market": "TEAM_TOTAL_GOALS",
+          "market": "TEAM_SHOTS_ON_TARGET",
           "team": "AGF Aarhus",
           "status": "kept",
-          "bookmaker": "Bet365",
-          "rows": 6,
+          "bookmaker": "Unibet",
+          "rows": 4,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS_ON_TARGET",
+          "team": "KAA Gent",
+          "status": "kept",
+          "bookmaker": "Unibet",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_TOTAL_GOALS",
+          "team": "AGF Aarhus",
+          "status": "kept",
+          "bookmaker": "Unibet",
+          "rows": 6,
+          "candidateBookmakers": [
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "KAA Gent",
           "status": "kept",
-          "bookmaker": "Bet365",
+          "bookmaker": "Unibet",
           "rows": 10,
           "candidateBookmakers": [
-            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {
-            "Bet365": 1
-          }
+          "prunedIncompleteRows": {}
         }
       ]
     },
     {
       "matchId": "74173152",
       "fixture": "KF Egnatia Rrogozhine - FC Midtjylland",
-      "before": 107,
-      "after": 60,
+      "before": 115,
+      "after": 40,
       "groups": [
         {
           "market": "1X2",
@@ -680,9 +717,10 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 12,
+          "bookmaker": "Bet365",
+          "rows": 4,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -708,9 +746,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Midtjylland",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -720,9 +759,10 @@
           "market": "TEAM_CORNERS",
           "team": "KF Egnatia Rrogozhine",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -763,8 +803,8 @@
     {
       "matchId": "74173156",
       "fixture": "Kuopion Palloseura - Trabzonspor",
-      "before": 112,
-      "after": 62,
+      "before": 116,
+      "after": 52,
       "groups": [
         {
           "market": "1X2",
@@ -853,9 +893,10 @@
           "market": "TEAM_CORNERS",
           "team": "Kuopion Palloseura",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -865,9 +906,10 @@
           "market": "TEAM_CORNERS",
           "team": "Trabzonspor",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -906,8 +948,8 @@
     {
       "matchId": "74173160",
       "fixture": "Mjallby AIF - Inter Club de Escaldes",
-      "before": 108,
-      "after": 58,
+      "before": 114,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -996,9 +1038,10 @@
           "market": "TEAM_CORNERS",
           "team": "Inter Club de Escaldes",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1008,9 +1051,10 @@
           "market": "TEAM_CORNERS",
           "team": "Mjallby AIF",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1049,8 +1093,8 @@
     {
       "matchId": "74173166",
       "fixture": "PFC CSKA Sofia - AS Monaco",
-      "before": 111,
-      "after": 58,
+      "before": 115,
+      "after": 48,
       "groups": [
         {
           "market": "1X2",
@@ -1139,9 +1183,10 @@
           "market": "TEAM_CORNERS",
           "team": "AS Monaco",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1151,9 +1196,10 @@
           "market": "TEAM_CORNERS",
           "team": "PFC CSKA Sofia",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1194,8 +1240,8 @@
     {
       "matchId": "74173164",
       "fixture": "Panathinaikos Athens - FK Borac Banja Luka",
-      "before": 112,
-      "after": 60,
+      "before": 116,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -1284,9 +1330,10 @@
           "market": "TEAM_CORNERS",
           "team": "FK Borac Banja Luka",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1296,9 +1343,10 @@
           "market": "TEAM_CORNERS",
           "team": "Panathinaikos Athens",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1337,8 +1385,8 @@
     {
       "matchId": "74173170",
       "fixture": "Riga FC - FC Kairat Almaty",
-      "before": 91,
-      "after": 44,
+      "before": 112,
+      "after": 38,
       "groups": [
         {
           "market": "1X2",
@@ -1425,9 +1473,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Kairat Almaty",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1437,9 +1486,10 @@
           "market": "TEAM_CORNERS",
           "team": "Riga FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1449,21 +1499,25 @@
           "market": "TEAM_TOTAL_GOALS",
           "team": "FC Kairat Almaty",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 6,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
-          "prunedIncompleteRows": {}
+          "prunedIncompleteRows": {
+            "Bet365": 1
+          }
         },
         {
           "market": "TEAM_TOTAL_GOALS",
           "team": "Riga FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 10,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1474,8 +1528,8 @@
     {
       "matchId": "74173178",
       "fixture": "Atalanta BC - Pafos FC",
-      "before": 113,
-      "after": 60,
+      "before": 117,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -1564,9 +1618,10 @@
           "market": "TEAM_CORNERS",
           "team": "Atalanta BC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1576,9 +1631,10 @@
           "market": "TEAM_CORNERS",
           "team": "Pafos FC",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1619,8 +1675,8 @@
     {
       "matchId": "74173182",
       "fixture": "Brighton & Hove Albion - FK Kauno Zalgiris",
-      "before": 131,
-      "after": 70,
+      "before": 146,
+      "after": 58,
       "groups": [
         {
           "market": "1X2",
@@ -1682,15 +1738,13 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 14,
+          "bookmaker": "Bet365",
+          "rows": 4,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
-          "rejected": {
-            "Bet365": "integrity"
-          },
+          "rejected": {},
           "prunedIncompleteRows": {}
         },
         {
@@ -1711,12 +1765,37 @@
           }
         },
         {
+          "market": "MATCH_SHOTS",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "MATCH_SHOTS_ON_TARGET",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_CORNERS",
           "team": "Brighton & Hove Albion",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 12,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -1726,10 +1805,59 @@
           "market": "TEAM_CORNERS",
           "team": "FK Kauno Zalgiris",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 4,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "Brighton & Hove Albion",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS",
+          "team": "FK Kauno Zalgiris",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS_ON_TARGET",
+          "team": "Brighton & Hove Albion",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS_ON_TARGET",
+          "team": "FK Kauno Zalgiris",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365"
           ],
           "rejected": {},
           "prunedIncompleteRows": {}
@@ -1739,14 +1867,14 @@
           "team": "Brighton & Hove Albion",
           "status": "kept",
           "bookmaker": "Bet365",
-          "rows": 18,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
           ],
           "rejected": {},
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 2
           }
         },
         {
@@ -1769,8 +1897,8 @@
     {
       "matchId": "74173188",
       "fixture": "FC Copenhagen - SC Braga",
-      "before": 107,
-      "after": 48,
+      "before": 144,
+      "after": 58,
       "groups": [
         {
           "market": "1X2",
@@ -1850,11 +1978,50 @@
             "Unibet": "integrity"
           },
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 1,
+            "Unibet": 1
           }
         },
         {
+          "market": "MATCH_SHOTS_ON_TARGET",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Unibet",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_CORNERS",
+          "team": "FC Copenhagen",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_CORNERS",
+          "team": "SC Braga",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS_ON_TARGET",
           "team": "FC Copenhagen",
           "status": "kept",
           "bookmaker": "Unibet",
@@ -1866,11 +2033,11 @@
           "prunedIncompleteRows": {}
         },
         {
-          "market": "TEAM_CORNERS",
+          "market": "TEAM_SHOTS_ON_TARGET",
           "team": "SC Braga",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 8,
+          "rows": 6,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -1912,8 +2079,8 @@
     {
       "matchId": "74173192",
       "fixture": "FC Twente Enschede - FC Thun",
-      "before": 125,
-      "after": 64,
+      "before": 129,
+      "after": 54,
       "groups": [
         {
           "market": "1X2",
@@ -2002,9 +2169,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Thun",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2014,9 +2182,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Twente Enschede",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2057,8 +2226,8 @@
     {
       "matchId": "74173196",
       "fixture": "Heart of Midlothian FC - FC Nordsjaelland",
-      "before": 115,
-      "after": 60,
+      "before": 150,
+      "after": 72,
       "groups": [
         {
           "market": "1X2",
@@ -2117,7 +2286,7 @@
           "team": null,
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 12,
+          "rows": 16,
           "candidateBookmakers": [
             "Bet365",
             "Unibet"
@@ -2140,11 +2309,50 @@
             "Unibet": "integrity"
           },
           "prunedIncompleteRows": {
-            "Bet365": 1
+            "Bet365": 1,
+            "Unibet": 1
           }
         },
         {
+          "market": "MATCH_SHOTS_ON_TARGET",
+          "team": null,
+          "status": "kept",
+          "bookmaker": "Unibet",
+          "rows": 8,
+          "candidateBookmakers": [
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
           "market": "TEAM_CORNERS",
+          "team": "FC Nordsjaelland",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_CORNERS",
+          "team": "Heart of Midlothian FC",
+          "status": "kept",
+          "bookmaker": "Bet365",
+          "rows": 2,
+          "candidateBookmakers": [
+            "Bet365",
+            "Unibet"
+          ],
+          "rejected": {},
+          "prunedIncompleteRows": {}
+        },
+        {
+          "market": "TEAM_SHOTS_ON_TARGET",
           "team": "FC Nordsjaelland",
           "status": "kept",
           "bookmaker": "Unibet",
@@ -2156,11 +2364,11 @@
           "prunedIncompleteRows": {}
         },
         {
-          "market": "TEAM_CORNERS",
+          "market": "TEAM_SHOTS_ON_TARGET",
           "team": "Heart of Midlothian FC",
           "status": "kept",
           "bookmaker": "Unibet",
-          "rows": 8,
+          "rows": 4,
           "candidateBookmakers": [
             "Unibet"
           ],
@@ -2202,8 +2410,8 @@
     {
       "matchId": "74173204",
       "fixture": "SC Freiburg - FK Jablonec",
-      "before": 113,
-      "after": 52,
+      "before": 117,
+      "after": 42,
       "groups": [
         {
           "market": "1X2",
@@ -2290,9 +2498,10 @@
           "market": "TEAM_CORNERS",
           "team": "FK Jablonec",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2302,9 +2511,10 @@
           "market": "TEAM_CORNERS",
           "team": "SC Freiburg",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2345,8 +2555,8 @@
     {
       "matchId": "74173208",
       "fixture": "SK Brann - Lincoln Red Imps",
-      "before": 122,
-      "after": 66,
+      "before": 126,
+      "after": 44,
       "groups": [
         {
           "market": "1X2",
@@ -2404,9 +2614,10 @@
           "market": "MATCH_CORNERS",
           "team": null,
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 14,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2432,9 +2643,10 @@
           "market": "TEAM_CORNERS",
           "team": "Lincoln Red Imps",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2444,9 +2656,10 @@
           "market": "TEAM_CORNERS",
           "team": "SK Brann",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 8,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2485,8 +2698,8 @@
     {
       "matchId": "74173200",
       "fixture": "St. Truidense VV - FC Iberia 1999",
-      "before": 115,
-      "after": 62,
+      "before": 119,
+      "after": 50,
       "groups": [
         {
           "market": "1X2",
@@ -2575,9 +2788,10 @@
           "market": "TEAM_CORNERS",
           "team": "FC Iberia 1999",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 6,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2587,9 +2801,10 @@
           "market": "TEAM_CORNERS",
           "team": "St. Truidense VV",
           "status": "kept",
-          "bookmaker": "Unibet",
-          "rows": 10,
+          "bookmaker": "Bet365",
+          "rows": 2,
           "candidateBookmakers": [
+            "Bet365",
             "Unibet"
           ],
           "rejected": {},
@@ -2875,6 +3090,76 @@
     {
       "matchId": "74173304",
       "fixture": "St. Truidense VV - SK Brann",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173312",
+      "fixture": "FC Kairat Almaty - Mjallby AIF",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173314",
+      "fixture": "Ajax Amsterdam - FC Thun",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173316",
+      "fixture": "Brighton & Hove Albion - CS Universitatea Craiova",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173318",
+      "fixture": "FC Iberia 1999 - Getafe CF",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173320",
+      "fixture": "FK Jablonec - FC Lugano",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173322",
+      "fixture": "FK Kauno Zalgiris - Riga FC",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173324",
+      "fixture": "Heart of Midlothian FC - AS Monaco",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173326",
+      "fixture": "KF Egnatia Rrogozhine - Lincoln Red Imps",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173328",
+      "fixture": "Pafos FC - FC Midtjylland",
+      "before": 0,
+      "after": 0,
+      "groups": []
+    },
+    {
+      "matchId": "74173330",
+      "fixture": "SK Brann - AGF Aarhus",
       "before": 0,
       "after": 0,
       "groups": []
