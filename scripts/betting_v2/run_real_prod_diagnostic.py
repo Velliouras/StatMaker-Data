@@ -31,6 +31,7 @@ from scripts.betting_v2.production_contract import Blocked
 from walk_forward_goals import make_rows, model_lambdas
 from walk_forward_elo import make_elo_rows, lambda_rates
 from uefa_verified_history import verified_uefa_history
+from scripts.betting_v2.uefa_quoted_inventory import exact_uefa_quotes
 
 ODDS_LOW, ODDS_HIGH, P_MIN = 1.80, 3.00, .60
 COUNT_STATS = {
@@ -263,6 +264,13 @@ def bind_bundled_bookmakers(path: Path, candidates: list[dict]) -> None:
                                                     'teamMappingStatus', 'usableForStats')},
                                             }})
     for row in candidates:
+        source = row.get('externalQuoteSource')
+        if source is not None:
+            # The UEFA repository source is distinct from the Domestic ZIP.
+            row['bookmakerBinding'] = 'EXACT_UNIQUE_REPOSITORY_UEFA_QUOTE'
+            row['bookmaker'] = source['bookmaker']
+            row['bundledQuoteSources'] = [source]
+            continue
         matches = quotes.get((row['competitionId'], row['fixtureId'], row['market'],
                               row['selection'], row['team'], row['line'], row['odd']), [])
         row['bookmakerBinding'] = 'EXACT_UNIQUE_BUNDLED_QUOTE' if len(matches) == 1 else 'MISSING_OR_AMBIGUOUS'
@@ -270,8 +278,14 @@ def bind_bundled_bookmakers(path: Path, candidates: list[dict]) -> None:
         row['bundledQuoteSources'] = matches
 
 
-def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
+def evaluate(root: Path, db: Path, generation: str, now: datetime,
+             uefa_odds_root: Path | None = None) -> dict:
     inventory, raw_blockers = full_inventory(db, generation)
+    external_blockers = Counter()
+    if uefa_odds_root is not None:
+        # Only the explicit current UEFA checkout, never expired main odds.
+        additional, external_blockers = exact_uefa_quotes(uefa_odds_root, generation, now)
+        inventory.extend(additional)
     history, history_errors, groups = read_fixtures(root)
     history, period_diagnostics = apply_real_period_labels(root, history)
     # UEFA data never runs through the domestic period-score join; it uses
@@ -280,6 +294,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     history.extend(uefa_history)
     groups.update(uefa_groups)
     history_errors.update({f"uefa_{k}": v for k, v in uefa_errors.items()})
+    history_errors.update({f"odds_{k}": v for k, v in external_blockers.items()})
     history = [h for h in history if h['date'].date() < now.date()]
     by_code=defaultdict(set)
     for group in groups: by_code[group.split('|',1)[0]].add(group)
@@ -401,7 +416,8 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'modelExpectedHomeGoals':round(h,4),'modelExpectedAwayGoals':round(a,4),
             'certified':False,'category':'UNVERIFIED_REAL_DATA_DIAGNOSTIC',
             'selectionId':r.get('selectionId'),
-            'fixtureKey':r.get('fixtureKey'), 'snapshotVersion':r.get('snapshotVersion'),
+            'fixtureKey':r.get('fixtureKey'),
+            'externalQuoteSource':r.get('externalQuoteSource'), 'snapshotVersion':r.get('snapshotVersion'),
             'sourceRecordSha256':r.get('sourceRecordSha256'),
             'marketModelKey':r['marketModelKey'], 'family':family,
             'probabilityModel':mode if family == 'GOALS_FT' else 'OBSERVED_MARKET_HISTORY_POISSON',
@@ -439,11 +455,14 @@ def main()->None:
     p.add_argument('--repository-root',type=Path,required=True)
     p.add_argument('--app-ready',type=Path,required=True,help='Real App-Ready betting ZIP or SQLite')
     p.add_argument('--generation-id',required=True)
+    p.add_argument('--uefa-odds-root',type=Path,
+                   help='Explicit active UEFA bookmaker feed directory; never fetched via HTTP')
     p.add_argument('--output',type=Path,required=True)
     args=p.parse_args()
     now=datetime.now(timezone.utc)
     with tempfile.TemporaryDirectory(prefix='statmaker-v2-prod-readonly-') as d:
-        report=evaluate(args.repository_root,open_app_ready(args.app_ready,Path(d)),args.generation_id,now)
+        report=evaluate(args.repository_root,open_app_ready(args.app_ready,Path(d)),
+                        args.generation_id,now,args.uefa_odds_root)
     manifest_path=args.repository_root/'data/statmaker/app_ready/update_manifest.json'
     manifest_bytes=manifest_path.read_bytes()
     manifest=json.loads(manifest_bytes)
