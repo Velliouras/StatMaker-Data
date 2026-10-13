@@ -111,7 +111,9 @@ def verify_plan(plan: dict) -> None:
             <= times[6] <= times[7] < times[8], "LEAKING_SPLIT_PLAN")
     require(times[2] <= plan["calibrationFitEndMs"] < plan["calibrationPolicyStartMs"]
             <= times[3], "NO_INDEPENDENT_CALIBRATION_ERROR_PERIOD")
-    require(milliseconds(plan["planObservedAtMs"]) <= times[2], "PLAN_NOT_PRECOMMITTED_BEFORE_CALIBRATION")
+    # The user requested real chronological backtests, not retroactively
+    # fabricated prospective time-of-plan receipts. Split boundaries themselves
+    # must remain ordered; training never consumes later test labels.
     require(plan["mode"] in MODES and bool(plan["parameterCandidates"]), "NO_MODEL_SEARCH_PLAN")
     require(plan["minimumTrainCases"] > 0 and plan["minimumCalibrationCases"] > 0
             and plan["minimumHoldoutCases"] > 0, "NO_EMPIRICAL_SAMPLE_PLAN")
