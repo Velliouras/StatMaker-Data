@@ -18,6 +18,8 @@ STAT_FIELDS = ("HS", "AS", "HST", "AST", "HC", "AC", "HY", "AY", "HxG", "AxG")
 ROOT = Path("data/api_football/fixture_stats")
 FINAL = frozenset({"FT"})
 MAX_CACHE_BYTES = 55_000_000
+# This provider uses ROU; published Romanian domestic scope uses ROM.
+VERIFIED_LEAGUE_CODE_ALIASES = {"ROU": "ROM"}
 
 
 def team_key(league_id: str, team_id: object) -> str:
@@ -71,7 +73,30 @@ class CachedHistoryBridge:
         self.schedule: dict[str, list[dict]] = defaultdict(list)
         self.raw_history: dict[tuple[str, str], dict] = {}
         self.history = list(history)
+        self.aliases: dict[str, dict[str, set[str]]] = defaultdict(lambda: defaultdict(set))
+        self._load_verified_aliases()
         self._build()
+
+    def _load_verified_aliases(self) -> None:
+        """Use existing explicit domestic team aliases, never heuristic fuzziness."""
+        path = self.root / "mappings/domestic_team_aliases.json"
+        if not path.is_file():
+            return
+        data = json.loads(path.read_text(encoding="utf-8"))
+        for code, teams in (data.get("aliases") or {}).items():
+            for canonical, aliases in teams.items():
+                canonical_token = canonical_name(canonical)
+                for name in [canonical] + list(aliases or []):
+                    self.aliases[str(code)][canonical_name(name)].add(canonical_token)
+
+    def normalize_team(self, code: str, value: object) -> str:
+        key = canonical_name(value)
+        owners = self.aliases.get(code, {}).get(key, set())
+        return next(iter(owners)) if len(owners) == 1 else key
+
+    def normalize_league(self, code: object) -> str:
+        raw = str(code or "").strip()
+        return VERIFIED_LEAGUE_CODE_ALIASES.get(raw, raw)
 
     def _build(self) -> None:
         index_file = self.root / "data/statmaker/domestic_enriched/index.json"
@@ -145,8 +170,8 @@ class CachedHistoryBridge:
                 self.schedule[code].append({
                     "group": group, "leagueId": league_id, "season": season,
                     "fixtureId": str(row["fixture_id"]), "kickoff": as_utc(row["date"]),
-                    "home": canonical_name(row.get("home_team")),
-                    "away": canonical_name(row.get("away_team")),
+                    "home": self.normalize_team(code, row.get("home_team")),
+                    "away": self.normalize_team(code, row.get("away_team")),
                     "ids": pair, "cachePath": rel,
                 })
             for row in doc.get("fixtures") or []:
@@ -234,15 +259,15 @@ class CachedHistoryBridge:
 
     def resolve(self, item: dict) -> tuple[tuple[str, str, str] | None, str, dict]:
         """Resolve a bookmaker event to exactly one future API fixture, never fuzzy."""
-        code = str(item.get("leagueCode") or "")
+        code = self.normalize_league(item.get("leagueCode"))
         kickoff = as_utc(item.get("kickoff"))
         details = {"leagueCode": code, "fixtureId": str(item.get("fixtureId") or ""),
                    "home": item.get("homeTeam"), "away": item.get("awayTeam")}
         if not code or kickoff is None:
             return None, "MISSING_LEAGUE_OR_KICKOFF", details
-        homes = {canonical_name(item.get(k)) for k in
+        homes = {self.normalize_team(code, item.get(k)) for k in
                  ("providerHomeTeam", "canonicalHomeTeam", "homeTeam")}
-        aways = {canonical_name(item.get(k)) for k in
+        aways = {self.normalize_team(code, item.get(k)) for k in
                  ("providerAwayTeam", "canonicalAwayTeam", "awayTeam")}
         homes.discard("")
         aways.discard("")
