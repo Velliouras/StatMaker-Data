@@ -786,9 +786,23 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
 
     if family == "1X2":
         for row in rows:
-            home_price = row_side_price(row, "home")
-            draw_price = row_side_price(row, "draw")
-            away_price = row_side_price(row, "away")
+            # Odds-API providers vary between {home,draw,away} and {1,X,2}
+            # objects, and also emit named rows ["1", "X", "2"].
+            # The old parser silently discarded the bare "1" and "2".
+            # Preserve ONLY actual bookmaker quotes. Market integrity still
+            # requires a complete triplet from the same bookmaker.
+            home_price = (
+                row_side_price(row, "home") or row_side_price(row, "Home")
+                or row_side_price(row, "1")
+            )
+            draw_price = (
+                row_side_price(row, "draw") or row_side_price(row, "Draw")
+                or row_side_price(row, "X") or row_side_price(row, "x")
+            )
+            away_price = (
+                row_side_price(row, "away") or row_side_price(row, "Away")
+                or row_side_price(row, "2")
+            )
             if home_price is not None or draw_price is not None or away_price is not None:
                 add_market(out, "1X2", "Home", home_price, bookmaker, team=home)
                 add_market(out, "1X2", "Draw", draw_price, bookmaker)
@@ -799,9 +813,9 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
             price = row_price(row)
             if n in {"draw", "x", "tie"}:
                 add_market(out, "1X2", "Draw", price, bookmaker)
-            elif n == normalize_text(home, drop_suffixes=True) or "home" in n:
+            elif n in {"1", "home", "home win", "home team"} or n == normalize_text(home, drop_suffixes=True):
                 add_market(out, "1X2", "Home", price, bookmaker, team=home)
-            elif n == normalize_text(away, drop_suffixes=True) or "away" in n:
+            elif n in {"2", "away", "away win", "away team"} or n == normalize_text(away, drop_suffixes=True):
                 add_market(out, "1X2", "Away", price, bookmaker, team=away)
         return out
 
