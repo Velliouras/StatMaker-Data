@@ -48,8 +48,7 @@ class V2NoCertificationTests(unittest.TestCase):
             "validation": model, "forecastComputedAtMs": now-1000,
             "kickoffEpochMs": now+3_600_000, "quotedOdd": 2.02,
             "conservativeWinProbability": .65, "conservativePushProbability": 0.0,
-            "adverseScenarioConservativeWinProbability": .61,
-            "adverseScenarioPushProbability": 0.0, "centralWinProbability": .70,
+"centralWinProbability": .70,
             "calibrationReliability": .82, "conservativeIntervalWidth": .10,
             "tier": "DEVELOPING", "primaryXgUnavailableVerified": True,
             "featureEvidence": [{"feature": name, "sourceSha256": "b"*64,
@@ -73,6 +72,10 @@ class V2NoCertificationTests(unittest.TestCase):
         self.assertNotIn("certificates", release)
         self.assertNotIn("certificationId", release["forecasts"][0]["payload"])
         self.assertNotIn("approval", release)
+        self.assertNotIn("adverseScenarioConservativeWinProbability",
+                         release["forecasts"][0]["payload"])
+        self.assertNotIn("adverseScenarioEvidenceSha256",
+                         release["forecasts"][0]["payload"])
         validate_release(release, now)
 
     def test_unvalidated_or_research_probabilities_still_fail(self):
