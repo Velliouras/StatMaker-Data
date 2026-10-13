@@ -301,14 +301,33 @@ def produce(args) -> None:
     documents = Documents()
     certs, forecasts, quote_rows, reasons = {}, [], [], Counter()
     prepared = defaultdict(list)
+    # Index only by the SAME exact fields quote_for already checks. Indexing must
+    # never select the best price or silently resolve ambiguous original quotes.
+    quote_index = defaultdict(list)
+    for quote in quotes:
+        quote_index[(quote.get("selectionId"), quote.get("snapshotVersion"),
+                     quote.get("generationId"))].append(quote)
+    fixture_cache = {}
+    feature_cache = {}
+    card_history_cache = {}
     # Every raw quoted selection is attempted; no model/price shortlist drives discovery.
     for row in source["rawRows"]:
         try:
             require("blocker" not in row, row.get("blocker", "RAW_SOURCE_BLOCKED"))
             require(row["usableForStats"], "UNUSABLE_CANONICAL_FIXTURE")
-            fixture = resolve_fixture(row, source["schedule"])
+            # Resolution and team-history features are matchup-specific, not
+            # bookmaker-selection-specific. Reuse them across all offers of a
+            # fixture while keeping every original offer and quote independent.
+            fixture_key = (row["competitionId"], row["snapshotVersion"], row["fixtureId"],
+                           row["leagueCode"], row["season"], row["kickoffEpochMs"],
+                           row.get("canonicalHomeTeam") or row["homeTeam"],
+                           row.get("canonicalAwayTeam") or row["awayTeam"])
+            if fixture_key not in fixture_cache:
+                fixture_cache[fixture_key] = resolve_fixture(row, source["schedule"])
+            fixture = fixture_cache[fixture_key]
             context = contexts[str(fixture["fixture_id"])]
-            q = quote_for(row, quotes, now)
+            q = quote_for(row, quote_index.get((row["selectionId"], row["snapshotVersion"],
+                                               row["generationId"]), []), now)
             found = []
             for mode in ("XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG"):
                 scope = (row["competitionId"], row["leagueCode"], row["season"], row["marketModelKey"], mode)
@@ -319,11 +338,27 @@ def produce(args) -> None:
                     history = source["history"]
                     if assessed["plan"]["family"] == "CARDS":
                         contract = assessed["plan"]["cardCountContract"]
+                        contract_sha = digest(contract)
                         require(q["bookmaker"] == contract["bookmaker"]
-                                and q["cardCountContractSha256"] == digest(contract), "CARD_SETTLEMENT_MISMATCH")
-                        history = card_history(history, contract)
-                    case = case_for(history, fixture, context, row,
-                                    assessed["model"]["parameters"], assessed["plan"], now)
+                                and q["cardCountContractSha256"] == contract_sha, "CARD_SETTLEMENT_MISMATCH")
+                        if contract_sha not in card_history_cache:
+                            card_history_cache[contract_sha] = card_history(history, contract)
+                        history = card_history_cache[contract_sha]
+                    # A single assessed model has one frozen feature schema/plan.
+                    # Never mix cases from different model certificates or fixtures.
+                    feature_key = (str(fixture["fixture_id"]), id(assessed))
+                    if feature_key not in feature_cache:
+                        try:
+                            feature_cache[feature_key] = (
+                                "ok", case_for(history, fixture, context, {},
+                                               assessed["model"]["parameters"],
+                                               assessed["plan"], now))
+                        except Blocked as error:
+                            feature_cache[feature_key] = ("blocked", str(error))
+                    status, template = feature_cache[feature_key]
+                    if status == "blocked":
+                        raise Blocked(template)
+                    case = dict(template, offer=row)
                     found.append((assessed, case))
                 except Blocked as error:
                     reasons[mode+":"+str(error)] += 1
