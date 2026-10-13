@@ -27,6 +27,7 @@ from audit_data import read_fixtures, number
 from fixture_lookup import canonical_name
 from phase1_cached_history import CachedHistoryBridge, team_key
 from phase1_uefa_domestic_form import evaluate_uefa_form
+from phase1_team_transitions import cross_division_evidence
 from freeze_prematch_shadow import XG_PARAMS, ELO_PARAMS, PARAMS_VERSION
 from scripts.betting_v2.production_sources import full_inventory, market_identity
 from scripts.betting_v2.production_contract import Blocked
@@ -462,6 +463,10 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     raw_candidates = len(results)
     results, duplicates_removed = strongest_per_market(results)
     uefa_form_evidence = evaluate_uefa_form(root, fixture_trace, now.date())
+    lacking_form = {(x['competitionId'],x['fixtureId']) for x in fixture_trace
+                    if x['reason']=='NO_PRIOR_TEAM_FORM_FOR_GOALS_MODEL'}
+    transition_evidence = cross_division_evidence(
+        history, [t for t in targets if (t['competitionId'],t['fixtureId']) in lacking_form], now)
     return {'status':'REAL_PROD_INPUT_DIAGNOSTIC','source':'CANONICAL_APP_READY_SQLITE',
             'generatedAt':now.isoformat(),'generationId':generation,
             'modelVersion':PARAMS_VERSION,
@@ -474,6 +479,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'phase1DataLineage':bridge.coverage(),
             'phase1RejectedFixtures':fixture_trace,
             'phase1UefaDomesticFormSupport':uefa_form_evidence,
+            'phase1VerifiedDivisionTransitionForm':transition_evidence,
             'phase1MarketHistoryFailures':market_history_trace,
             'forecastableFixtures':len(models),
             'rawCandidateCountBeforeDeduplication':raw_candidates,
