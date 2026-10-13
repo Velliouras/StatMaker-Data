@@ -38,13 +38,15 @@ jobs:
             scripts/betting_v2/phase1_cached_history.py \
             scripts/betting_v2/run_real_prod_diagnostic.py \
             scripts/betting_v2/phase1_qa_compare.py \
-            tests/test_betting_v2_phase1_cached_history.py
+            tests/test_betting_v2_phase1_cached_history.py \
+            scripts/betting_v2/phase1_uefa_history.py \
+            tests/test_betting_v2_phase1_uefa_history.py
 
       - name: Phase 1 regression tests only
         run: |
           python3 -m unittest discover \
             -s tests \
-            -p 'test_betting_v2_phase1_cached_history.py' -v
+            -p 'test_betting_v2_phase1_*.py' -v
 
       - name: Compare same PROD ZIP and frozen as-of date OFFLINE
         run: |
