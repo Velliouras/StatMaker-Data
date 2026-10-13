@@ -78,5 +78,77 @@ class BettingV2EloFallbackTests(unittest.TestCase):
             self.assertTrue(.15 <= a <= 4.5)
 
 
+
+class BettingV2ProductionMixedXgTests(unittest.TestCase):
+    """The real fitted-model feature builder cannot require total xG absence."""
+
+    @staticmethod
+    def setup(matches_with_missing_xg: bool):
+        from scripts.betting_v2.production_models import features
+        base = 1730000000000
+        day = 86400000
+        history = []
+        for i in range(34):
+            hg, ag = 2, 1
+            missing = matches_with_missing_xg and i == 31
+            row = {
+                "leagueCode": "E0", "fixture_id": str(i+1000),
+                "home_team_id": 1 if i % 2 == 0 else 2,
+                "away_team_id": 2 if i % 2 == 0 else 1,
+                "kickoffEpochMs": base+i*day,
+                "availableAtMs": base+i*day+3*3600000,
+                "season": "2025", "goals": [hg,ag],
+                "counts": {"GOALS_FT":[hg,ag]},
+                "providerXgUnavailable": missing,
+            }
+            if not missing:
+                row["xg"] = [1.6, 0.9]
+            history.append(row)
+        at = base+35*day
+        target = {"fixture_id":"UPCOMING", "home_team_id":1,
+                  "away_team_id":2,"leagueCode":"E0",
+                  "season":"2025", "kickoffEpochMs":at+3600000}
+        params = {"eloScale":400,"eloK":18,"minimumHistory":3,
+                  "recentWindow":5,"longWindow":10,"venueWindow":6}
+        return features, history, target, at, params
+
+    def test_partial_xg_requires_elo_only_not_fake_xg(self):
+        from scripts.betting_v2.production_contract import Blocked
+        features, history, target, at, params = self.setup(True)
+        vector, used, eligible = features(
+            history,target,at,"GOALS_FT","ELO_GOALS_FALLBACK_NO_XG",
+            params,None,[])
+        self.assertGreater(len(vector),30)
+        self.assertTrue(used and eligible)
+        with self.assertRaises(Blocked):
+            features(history,target,at,"GOALS_FT","XG_PRIMARY",
+                     params,None,[])
+
+    def test_complete_xg_forbids_fallback_and_allows_primary(self):
+        from scripts.betting_v2.production_contract import Blocked
+        features, history, target, at, params = self.setup(False)
+        p, used, _ = features(history,target,at,"GOALS_FT","XG_PRIMARY",
+                              params,None,[])
+        self.assertTrue(p and used)
+        with self.assertRaises(Blocked):
+            features(history,target,at,"GOALS_FT","ELO_GOALS_FALLBACK_NO_XG",
+                     params,None,[])
+
+    def test_unverified_missing_xg_cannot_be_accepted(self):
+        from scripts.betting_v2.production_contract import Blocked
+        features, history, target, at, params = self.setup(True)
+        history[31]["providerXgUnavailable"] = False
+        with self.assertRaises(Blocked):
+            features(history,target,at,"GOALS_FT","ELO_GOALS_FALLBACK_NO_XG",
+                     params,None,[])
+
+    def test_nonempty_injury_context_requires_actual_provider_record(self):
+        from scripts.betting_v2.production_contract import Blocked
+        features, history, target, at, params = self.setup(True)
+        with self.assertRaises(Blocked):
+            features(history,target,at,"GOALS_FT","ELO_GOALS_FALLBACK_NO_XG",
+                     params,None,["verifiedInjuryCount"])
+
+
 if __name__ == "__main__":
     unittest.main()
