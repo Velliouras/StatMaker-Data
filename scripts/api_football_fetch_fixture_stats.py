@@ -851,8 +851,10 @@ def fetch_league(
         merged["statsAttemptedAtUtc"] = now_utc()
         merged["statsAttemptedAtBasis"] = "ACTUAL_PROVIDER_RESPONSE"
         merged["statsProviderResponse"] = "POPULATED" if raw_statistics else "EMPTY"
-        # Opt-in lineage only for this actual provider response; never backdate old cached rows.
-        if os.environ.get("STATMAKER_BETTING_V2_CAPTURE_LINEAGE") == "1":
+        # Capture V2 lineage by default ONLY for a genuinely completed provider
+        # request. Cached historical rows must never receive synthetic receipts.
+        # Operators may disable capture explicitly without changing API quotas.
+        if os.environ.get("STATMAKER_BETTING_V2_CAPTURE_LINEAGE", "1").strip().lower() not in ("0", "false", "no"):
             from betting_v2.production_sources import capture_new_statistics
             merged["betting_v2_provenance"] = capture_new_statistics(merged, raw_statistics)
         existing_by_id[fixture_id] = merged
