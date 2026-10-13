@@ -88,6 +88,14 @@ class CachedHistoryBridge:
                 canonical_token = canonical_name(canonical)
                 for name in [canonical] + list(aliases or []):
                     self.aliases[str(code)][canonical_name(name)].add(canonical_token)
+        # Reuse the existing *verified* cross-provider dictionary, including
+        # older Chinese team names not present in the public alias file.
+        from scripts.canonical_team_identity import VERIFIED_CROSS_PROVIDER_ALIASES
+        for code, teams in VERIFIED_CROSS_PROVIDER_ALIASES.items():
+            for canonical, aliases in teams.items():
+                canonical_token = canonical_name(canonical)
+                for name in [canonical] + list(aliases):
+                    self.aliases[code][canonical_name(name)].add(canonical_token)
 
     def normalize_team(self, code: str, value: object) -> str:
         key = canonical_name(value)
