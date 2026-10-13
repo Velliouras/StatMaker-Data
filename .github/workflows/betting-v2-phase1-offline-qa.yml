@@ -48,6 +48,9 @@ jobs:
             -s tests \
             -p 'test_betting_v2_phase1_*.py' -v
 
+      - name: Inspect existing UEFA support history schema (offline)
+        run: python3 scripts/betting_v2/phase1_probe_uefa_archive.py
+
       - name: Compare same PROD ZIP and frozen as-of date OFFLINE
         run: |
           python3 scripts/betting_v2/phase1_qa_compare.py \
