@@ -219,6 +219,14 @@ class CachedHistoryBridge:
                     continue
                 self.raw_history[key] = historical
         self._overlay_history()
+        from phase1_uefa_history import import_uefa_history
+        self.uefa_history, self.uefa_evidence = import_uefa_history(
+            self.root, self.groups, self.aliases)
+        self.history.extend(self.uefa_history)
+        self.available_teams.update(
+            (m["group"], m["home"]) for m in self.uefa_history)
+        self.available_teams.update(
+            (m["group"], m["away"]) for m in self.uefa_history)
 
     def _overlay_history(self) -> None:
         existing: set[tuple[str, str]] = set()
@@ -305,4 +313,5 @@ class CachedHistoryBridge:
             "cachedScheduledFixtures": sum(map(len, self.schedule.values())),
             "cachedHistoricalFixtures": len(self.raw_history),
             "mergedHistoricalRows": len(self.history),
+            "uefaHistory": self.uefa_evidence,
         }
