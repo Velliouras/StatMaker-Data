@@ -14,7 +14,7 @@ from pathlib import Path
 
 from fixture_lookup import as_utc, canonical_name
 
-STAT_FIELDS = ("HS", "AS", "HST", "AST", "HC", "AC", "HY", "AY", "HxG", "AxG")
+STAT_FIELDS = ("HS", "AS", "HST", "AST", "HC", "AC", "HY", "AY", "HR", "AR", "HxG", "AxG")
 ROOT = Path("data/api_football/fixture_stats")
 FINAL = frozenset({"FT"})
 MAX_CACHE_BYTES = 55_000_000
@@ -265,6 +265,12 @@ class CachedHistoryBridge:
                     continue
                 self.raw_history[key] = historical
         self._overlay_history()
+        from phase1_broad_support import archive_entries
+        self.history, self.broad_support_evidence = archive_entries(
+            self.root, self.groups, self.raw_history, self.history, self.normalize_team)
+        self.available_teams = {
+            (m["group"], team) for m in self.history for team in (m["home"], m["away"])
+        }
         from phase1_uefa_history import import_uefa_history
         self.uefa_history, self.uefa_evidence = import_uefa_history(
             self.root, self.groups, self.aliases)
@@ -405,4 +411,5 @@ class CachedHistoryBridge:
             "cachedHistoricalFixtures": len(self.raw_history),
             "mergedHistoricalRows": len(self.history),
             "uefaHistory": self.uefa_evidence,
+            "verifiedDomesticSupportArchive": self.broad_support_evidence,
         }

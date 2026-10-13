@@ -41,9 +41,12 @@ def prepare_form_index(root: Path, cutoff: date):
                 claimed={canonical_name(x) for x in [participant.get("providerTeam")]+list(participant.get("aliases") or [])}
                 if not (home in claimed or away in claimed):
                     continue
-            matches.append({"date":d,"venue":"HOME" if home==canonical else "AWAY",
-                            "goalsFor":m["homeGoals"] if home==canonical else m["awayGoals"],
-                            "goalsAgainst":m["awayGoals"] if home==canonical else m["homeGoals"],
+            names={canonical,canonical_name(participant.get("providerTeam"))}
+            names.update(canonical_name(x) for x in participant.get("aliases") or [])
+            is_home=home in names
+            matches.append({"date":d,"venue":"HOME" if is_home else "AWAY",
+                            "goalsFor":m["homeGoals"] if is_home else m["awayGoals"],
+                            "goalsAgainst":m["awayGoals"] if is_home else m["homeGoals"],
                             "sourceLeagueCode":participant.get("leagueCode"),
                             "hasCorners":m.get("homeCorners") is not None and m.get("awayCorners") is not None,
                             "hasCards":m.get("homeYellowCards") is not None and m.get("awayYellowCards") is not None})
