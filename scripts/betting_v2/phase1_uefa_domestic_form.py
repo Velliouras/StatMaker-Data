@@ -20,42 +20,65 @@ def prior_date(value):
 
 
 def prepare_form_index(root: Path, cutoff: date):
-    data=json.loads((root/"data/statmaker/uefa_support_history.json").read_text(encoding="utf-8"))
-    if data.get("schemaVersion")!=1:
-        raise ValueError("Expected verified support schemaVersion=1")
+    """Build a UNIQUE alias -> independently verified participant identity index.
+
+    Both existing archives are source-authenticated. UEFA team-specific rows
+    include actual European/cup/domestic results and must be kept in their
+    original competition, never relabeled as European fixtures.
+    """
+    paths=["uefa_support_history.json","uefa_team_support_history.json"]
     names=defaultdict(set)
     profiles={}
-    for idx,participant in enumerate(data.get("participants") or []):
-        matches=[]
-        for m in participant.get("matches") or []:
-            d=prior_date(m.get("date"))
-            if not d or d>=cutoff or not str(m.get("sourceLabel") or "").startswith("StatMaker verified"):
-                continue
-            if not isinstance(m.get("homeGoals"),int) or not isinstance(m.get("awayGoals"),int):
-                continue
+    observed=defaultdict(set)
+    for filename in paths:
+        source=root/"data/statmaker"/filename
+        if not source.is_file():
+            continue
+        data=json.loads(source.read_text(encoding="utf-8"))
+        if data.get("schemaVersion")!=1:
+            raise ValueError("Invalid UEFA form source schema: "+filename)
+        for participant in data.get("participants") or []:
             canonical=canonical_name(participant.get("canonicalTeam"))
-            home=canonical_name(m.get("homeTeam"))
-            away=canonical_name(m.get("awayTeam"))
-            # Strong evidence: the participant must actually be playing.
-            if canonical not in (home,away):
-                claimed={canonical_name(x) for x in [participant.get("providerTeam")]+list(participant.get("aliases") or [])}
-                if not (home in claimed or away in claimed):
-                    continue
+            if not canonical:
+                continue
+            p=profiles.setdefault(canonical,{"team":participant.get("canonicalTeam"),
+                        "leagueCodes":set(),"matches":[],"sources":set()})
+            p["leagueCodes"].add(str(participant.get("leagueCode") or ""))
+            p["sources"].add(filename)
             participant_names={canonical,canonical_name(participant.get("providerTeam"))}
             participant_names.update(canonical_name(a) for a in participant.get("aliases") or [])
-            is_home=home in participant_names
-            matches.append({"date":d,"venue":"HOME" if is_home else "AWAY",
-                            "goalsFor":m["homeGoals"] if is_home else m["awayGoals"],
-                            "goalsAgainst":m["awayGoals"] if is_home else m["homeGoals"],
-                            "sourceLeagueCode":participant.get("leagueCode"),
-                            "hasCorners":m.get("homeCorners") is not None and m.get("awayCorners") is not None,
-                            "hasCards":m.get("homeYellowCards") is not None and m.get("awayYellowCards") is not None})
-        matches.sort(key=lambda x:x["date"])
-        profiles[idx]={"team":participant.get("canonicalTeam"),
-                       "leagueCode":participant.get("leagueCode"),"matches":matches}
-        for name in [participant.get("canonicalTeam"),participant.get("providerTeam")]+list(participant.get("aliases") or []):
-            if name:
-                names[canonical_name(name)].add(idx)
+            for label in participant_names:
+                if label:
+                    names[label].add(canonical)
+            for m in participant.get("matches") or []:
+                d=prior_date(m.get("date"))
+                if not d or d>=cutoff or not str(m.get("sourceLabel") or "").startswith("StatMaker verified"):
+                    continue
+                if "friendl" in canonical_name(m.get("competition")):
+                    continue
+                if not isinstance(m.get("homeGoals"),int) or not isinstance(m.get("awayGoals"),int):
+                    continue
+                home=canonical_name(m.get("homeTeam"))
+                away=canonical_name(m.get("awayTeam"))
+                if home not in participant_names and away not in participant_names:
+                    continue
+                key=(d,home,away,m["homeGoals"],m["awayGoals"])
+                if key in observed[canonical]:
+                    continue
+                observed[canonical].add(key)
+                is_home=home in participant_names
+                p["matches"].append({
+                    "date":d,"venue":"HOME" if is_home else "AWAY",
+                    "goalsFor":m["homeGoals"] if is_home else m["awayGoals"],
+                    "goalsAgainst":m["awayGoals"] if is_home else m["homeGoals"],
+                    "competition":m.get("competition"),
+                    "sourceLeagueCode":participant.get("leagueCode"),
+                    "hasCorners":m.get("homeCorners") is not None and m.get("awayCorners") is not None,
+                    "hasCards":m.get("homeYellowCards") is not None and m.get("awayYellowCards") is not None})
+    for p in profiles.values():
+        p["matches"].sort(key=lambda x:x["date"])
+        p["leagueCodes"]=sorted(p["leagueCodes"])
+        p["sources"]=sorted(p["sources"])
     return names,profiles
 
 
@@ -79,7 +102,7 @@ def evaluate_uefa_form(root:Path, fixture_rows:list[dict], cutoff:date)->dict:
             venue="HOME" if key=="homeTeam" else "AWAY"
             atvenue=[m for m in past if m["venue"]==venue]
             sides[key]={"sourceIdentity":"EXACT_ARCHIVED_PARTICIPANT_ALIAS",
-                        "canonicalTeam":v["team"],"sourceLeagueCode":v["leagueCode"],
+                        "canonicalTeam":v["team"],"sourceLeagueCodes":v["leagueCodes"],"archiveSources":v["sources"],
                         "historicalMatches":len(past),"priorVenueMatches":len(atvenue),
                         "historyFirst":past[0]["date"].isoformat() if past else None,
                         "historyLast":past[-1]["date"].isoformat() if past else None,
