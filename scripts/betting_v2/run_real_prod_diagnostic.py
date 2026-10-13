@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from audit_data import read_fixtures, number
 from fixture_lookup import canonical_name
+from phase1_cached_history import CachedHistoryBridge, team_key
 from freeze_prematch_shadow import XG_PARAMS, ELO_PARAMS, PARAMS_VERSION
 from scripts.betting_v2.production_sources import full_inventory, market_identity
 from scripts.betting_v2.production_contract import Blocked
@@ -273,14 +274,27 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     inventory, raw_blockers = full_inventory(db, generation)
     history, history_errors, groups = read_fixtures(root)
     history, period_diagnostics = apply_real_period_labels(root, history)
-    history = [h for h in history if h['date'].date() < now.date()]
+    bridge = CachedHistoryBridge(root, history, groups)
+    history = [h for h in bridge.history if h['date'].date() < now.date()]
     by_code=defaultdict(set)
     for group in groups: by_code[group.split('|',1)[0]].add(group)
     names=defaultdict(set)
     for h in history:
         names[h['group'],canonical_name(h['home'])].add(h['home'])
         names[h['group'],canonical_name(h['away'])].add(h['away'])
+    # Bind provider names to verified team IDs, never across league scopes.
+    for raw in bridge.raw_history.values():
+        if raw['ids'] and raw['date'].date() < now.date():
+            names[raw['group'],canonical_name(raw['home'])].add(team_key(raw['leagueId'],raw['ids'][0]))
+            names[raw['group'],canonical_name(raw['away'])].add(team_key(raw['leagueId'],raw['ids'][1]))
     fixtures={}
+    fixture_trace=[]
+    market_history_trace=[]
+    def fixture_failure(reason, row, **details):
+        fixture_trace.append(dict(reason=reason,competitionId=row.get('competitionId'),
+            fixtureId=row.get('fixtureId'),leagueCode=row.get('leagueCode'),
+            season=row.get('season'),kickoff=row.get('kickoff') or str(row.get('date') or ''),
+            homeTeam=row.get('homeTeam'),awayTeam=row.get('awayTeam'),**details))
     reject=Counter()
     fixture_reject=Counter()
     seen_fixtures=set()
@@ -299,11 +313,13 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
         if not possible:
             reject['NO_DOMESTIC_HISTORY_FOR_LEAGUE'] += 1
             fixture_reject['NO_DOMESTIC_HISTORY_FOR_LEAGUE'] += 1
+            fixture_failure('NO_DOMESTIC_HISTORY_FOR_LEAGUE',r)
             continue
         # League title can change across historical seasons. Resolve by the
         # actual two independent team names in each scope, never a guessed alias.
-        matched = []
-        for group in sorted(possible):
+        provider_identity,identity_reason,identity_evidence=bridge.resolve(r)
+        matched=[provider_identity] if provider_identity else []
+        for group in ([] if matched else sorted(possible)):
             sides = []
             for key in ('home', 'away'):
                 choices = [r.get('canonicalHomeTeam' if key == 'home' else 'canonicalAwayTeam'),
@@ -319,16 +335,22 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
         if not matched:
             reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY'] += 1
             fixture_reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY'] += 1
+            fixture_failure('UNRESOLVED_HISTORICAL_TEAM_IDENTITY',r,
+                providerResolution=identity_reason,providerEvidence=identity_evidence,
+                historicalScopes=sorted(possible))
             continue
         if len(matched) != 1:
             reject['AMBIGUOUS_HISTORICAL_LEAGUE_SCOPE'] += 1
             fixture_reject['AMBIGUOUS_HISTORICAL_LEAGUE_SCOPE'] += 1
+            fixture_failure('AMBIGUOUS_HISTORICAL_LEAGUE_SCOPE',r,
+                matchingHistoricalScopes=[m[0] for m in matched])
             continue
         group, home, away = matched[0]
         fixtures[fid] = {'group': group, 'fixtureId': r['fixtureId'], 'date': utc(r['kickoff']),
                          'home': home, 'away': away,
                          'leagueCode': code, 'competitionId': r['competitionId'],
-                         'homeTeam': r['homeTeam'], 'awayTeam': r['awayTeam']}
+                         'homeTeam': r['homeTeam'], 'awayTeam': r['awayTeam'],
+                          'identityMethod':'EXACT_API_IDS' if provider_identity else 'UNIQUE_ALIAS_MATCH'}
     targets=list(fixtures.values())
     synthetic=[{'group':x['group'],'fixture_id':x['fixtureId'],'date':x['date'],
                 'home':x['home'],'away':x['away'],'hg':None,'ag':None,'stats':{},
@@ -349,6 +371,13 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             if erow is None:
                 reject['NO_PRIOR_TEAM_FORM_FOR_GOALS_MODEL']+=1
                 fixture_reject['NO_PRIOR_TEAM_FORM_FOR_GOALS_MODEL']+=1
+                home_rows=[m for m in history if m['group']==t['group'] and t['home'] in (m['home'],m['away'])]
+                away_rows=[m for m in history if m['group']==t['group'] and t['away'] in (m['home'],m['away'])]
+                fixture_failure('NO_PRIOR_TEAM_FORM_FOR_GOALS_MODEL',t,
+                    group=t['group'],identityMethod=t['identityMethod'],
+                    priorHomeMatches=len(home_rows),priorAwayMatches=len(away_rows),
+                    priorHomeVenue=sum(m['home']==t['home'] for m in home_rows),
+                    priorAwayVenue=sum(m['away']==t['away'] for m in away_rows))
                 continue
             h,a=lambda_rates(erow,ELO_PARAMS);mode='ELO_GOALS_FALLBACK_NO_XG'
         models[t['competitionId'],fid]=(h,a,mode)
@@ -375,6 +404,16 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
         if family=='GOALS_FT':rates=(h,a)
         else:rates=metric_rates.get((fixtures[(r['competitionId'], r['fixtureId'])]['group'], r['fixtureId'], family)) if (r['competitionId'], r['fixtureId']) in fixtures else None
         if rates is None:
+            match=fixtures.get((r['competitionId'],r['fixtureId']))
+            fields=COUNT_STATS.get(family)
+            valid_rows=[m for m in history if match and fields and m['group']==match['group']
+                and (match['home'] in (m['home'],m['away']) or match['away'] in (m['home'],m['away']))
+                and all(number(m['stats'].get(k)) is not None for k in fields)]
+            market_history_trace.append(dict(competitionId=r['competitionId'],fixtureId=r['fixtureId'],
+                leagueCode=r['leagueCode'],market=r['market'],selection=r['selection'],
+                team=r.get('team'),line=r.get('line'),family=family,
+                group=match['group'] if match else None,observedHistoryRows=len(valid_rows),
+                requiredMetricFields=fields))
             reject_selection(r, 'MISSING_MARKET_SPECIFIC_HISTORY');continue
         try:p=probability(r,*rates)
         except (ValueError,OverflowError):p=None
@@ -411,6 +450,9 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             'historyRows':len(history),'historicalPeriodDiagnostics':period_diagnostics,
             'historySourceErrors':dict(history_errors),
             'futureFixtures':len(future_fixtures),
+            'phase1DataLineage':bridge.coverage(),
+            'phase1RejectedFixtures':fixture_trace,
+            'phase1MarketHistoryFailures':market_history_trace,
             'forecastableFixtures':len(models),
             'rawCandidateCountBeforeDeduplication':raw_candidates,
             'suppressedSameMatchSameMarket':duplicates_removed,
