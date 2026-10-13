@@ -99,6 +99,21 @@ def main() -> None:
         "phase1HistoryCoverage": refreshed["phase1DataLineage"],
         "unresolvedFixtures": refreshed["phase1RejectedFixtures"],
         "marketHistoryFailures": refreshed["phase1MarketHistoryFailures"],
+        "uefaExistingDomesticForm": {
+            "counts": refreshed.get("phase1UefaDomesticFormSupport", {}).get("counts", {}),
+            "fixturesChecked": refreshed.get("phase1UefaDomesticFormSupport", {}).get("fixtureCount", 0),
+            "certifiedUefaModels": 0,
+        },
+        "priorDifferentDivisionHistory": {
+            "counts": refreshed.get("phase1VerifiedDivisionTransitionForm", {}).get("counts", {}),
+            "fixturesChecked": refreshed.get("phase1VerifiedDivisionTransitionForm", {}).get("checkedFixtures", 0),
+            "certifiedCrossDivisionModels": 0,
+        },
+        "unverifiedGenericCardsMarketQuotes": int(refreshed.get("selectionRejections", {}).get(
+            "UNVERIFIED_BOOKMAKER_CARDS_SETTLEMENT_RULE", 0)),
+        "missingActualCornersMarketObservations": sum(
+            1 for row in refreshed.get("phase1MarketHistoryFailures", [])
+            if row.get("family") == "CORNERS"),
         "notCertifiedStrong": True,
         "UatAndroidUnchanged": True,
     }
@@ -115,6 +130,10 @@ def main() -> None:
         "candidateCountDiagnosticOnly": summary["candidateCountDiagnosticOnly"],
         "fixtureRejections": summary["fixtureRejections"],
         "missingMarketSpecificHistory": summary["selectionRejections"].get("MISSING_MARKET_SPECIFIC_HISTORY"),
+        "uefaExistingDomesticForm": summary["uefaExistingDomesticForm"],
+        "priorDifferentDivisionHistory": summary["priorDifferentDivisionHistory"],
+        "unverifiedGenericCardsMarketQuotes": summary["unverifiedGenericCardsMarketQuotes"],
+        "missingActualCornersMarketObservations": summary["missingActualCornersMarketObservations"],
         "unresolvedFixtureDetails": len(summary["unresolvedFixtures"]),
         "unresolvedMarketHistoryDetails": len(summary["marketHistoryFailures"]),
         "providerCalls": 0, "productionWrites": 0,
