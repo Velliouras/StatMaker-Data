@@ -76,32 +76,33 @@ def _observations(rows: list[dict], event: str) -> list[tuple[str, int, float, i
 
 def frozen_market_calibration(cal: list[dict], holdout: list[dict],
                               *, minimum: int = MIN_CALIBRATION_BIN_CASES) -> dict:
-    """Freeze per-market calibration lower bounds BEFORE observing holdout.
+    """Freeze league+market+probability-bin calibration before observing holdout.
 
-    This is diagnostic evidence, not the production calibration plan:
-    context/adverse-scenario uncertainty, exact dated prices, independent ROI
-    and bookmaker-specific settlement are all deliberately unavailable.
+    Research-only and intentionally strict. A league with too few earlier
+    examples NEVER borrows another league's calibration confidence.
+    Provider/market settlement and exact prices remain independent blockers.
     """
     by_market={}
     summary=Counter()
     for event in MARKET_EVENTS:
+        # Keys include the real league; no cross-league pooling whatsoever.
         cal_bins=defaultdict(list)
         for league,b,p,y in _observations(cal,event):
-            cal_bins[b].append((p,y))
+            cal_bins[(league,b)].append((p,y))
         frozen={}
-        for b,observations in cal_bins.items():
+        for (league,b),observations in cal_bins.items():
             n=len(observations)
             wins=sum(y for _,y in observations)
-            frozen[str(b)]={"n":n,"wins":wins,
-                  "meanRawProbability":sum(p for p,_ in observations)/n,
-                  "wilson95Lower":wilson_lower(wins,n),
-                  "sampleSufficient":n>=minimum}
+            frozen.setdefault(league,{})[str(b)]={
+                "n":n,"wins":wins,
+                "meanRawProbability":sum(p for p,_ in observations)/n,
+                "wilson95Lower":wilson_lower(wins,n),
+                "sampleSufficient":n>=minimum}
         hold=_observations(holdout,event)
         scored=[]
         by_league=defaultdict(list)
         for league,b,p,y in hold:
-            entry=frozen.get(str(b))
-            # Do NOT use holdout outcomes to select an acceptance cutoff.
+            entry=frozen.get(league,{}).get(str(b))
             sufficient=bool(entry and entry["sampleSufficient"])
             lower=entry["wilson95Lower"] if sufficient else None
             case={"leagueCode":league,"p":p,"actual":y,
@@ -120,13 +121,21 @@ def frozen_market_calibration(cal: list[dict], holdout: list[dict],
                     "observedWilson95Lower":wilson_lower(sum(x["actual"] for x in items),n) if n else None,
                     "meanRawP":sum(x["p"] for x in items)/n if n else None}
         by_market[event]={
-            "frozenCalibrationBins":frozen,
+            "frozenCalibrationBinsByLeague":frozen,
             "holdout":metrics(scored),
             "calibratedBinHoldout":metrics(valid),
             "frozenConservativePAtLeast60Holdout":metrics(conservative),
-            "byLeague":{k:metrics(v) for k,v in sorted(by_league.items())},
+            "byLeague":{k:{
+                "holdout":metrics(v),
+                "calibrated":metrics([x for x in v if x["hasCalibratedBin"]]),
+                "frozenConservativePAtLeast60Holdout":metrics(
+                    [x for x in v if x["hasCalibratedBin"]
+                     and x["frozenCalibratedLower"]>=.60]),
+            } for k,v in sorted(by_league.items())},
             "canCertifyStrong":False}
     return {"events":by_market,"totals":dict(summary),
+            "sampleUnit":"FIXTURES_PREMATCH_SPLIT_INDEPENDENT_LEAGUE_MARKET_BIN",
+            "minimumCalibrationSamplesPerLeagueMarketBin":minimum,
             "notCertified":True,
             "reason":"UNPRICED_RESEARCH_WITHOUT_ADVERSE_CONTEXT_OR_INDEPENDENT_ROI"}
 
