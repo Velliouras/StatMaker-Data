@@ -40,7 +40,7 @@ def coverage_report(root:Path, key:str, include_prior:bool=False)->dict:
     result=[]
     for row in rows:
         covered,record,reason=probe.read_statistics_coverage(
-            row,None,key,state,len(CODES))
+            row,None,key,state,len(rows))
         result.append({"leagueCode":row["code"],"name":row["league"],"country":row["country"],
                        "apiLeagueId":row["api_football_league_id"],"season":row["season"],
                        "officialFixtureStatsCoverage":covered,"reason":reason,
