@@ -56,6 +56,29 @@ class Phase1HistoricalSupportTests(unittest.TestCase):
     def test_archive_cannot_relabel_domestic_as_uefa(self):
         matches,report=archive_entries(self.root,{"CL|UEFA Champions League":{}},{},[],self.norm)
         self.assertFalse(matches)
+    def test_secondary_team_support_source_resolves_european_opponent(self):
+        self.samples[:] = [{**self.samples[0],"date":f"2025-05-{i:02d}"} for i in range(1,11)]
+        self._save()
+        path=self.root/"data/statmaker/uefa_team_support_history.json"
+        matches=[]
+        for i in range(1,11):
+            home,away=("Opponent", "Team Beta") if i%2 else ("Team Beta","Opponent")
+            matches.append({"competition":"UEFA Europa League","date":f"2025-05-{i:02d}",
+                            "homeTeam":home,"awayTeam":away,"homeGoals":2,
+                            "awayGoals":1,"sourceLabel":"StatMaker verified API-Football team-specific history"})
+        path.write_text(json.dumps({"schemaVersion":1,"participants":[{
+            "canonicalTeam":"Team Beta","providerTeam":"Team Beta",
+            "aliases":["Team Beta"],"leagueCode":"UEFA_TEAM_SUPPORT",
+            "matches":matches}]}),encoding="utf-8")
+        result=evaluate_uefa_form(self.root,[{"reason":"NO_VERIFIED_UEFA_TEAM_HISTORY",
+            "fixtureId":"uefa-z","leagueCode":"EL","homeTeam":"Team Alpha",
+            "awayTeam":"Team Beta"}],date(2025,5,11))
+        self.assertTrue(result["fixtures"][0]["verifiedGoalFormForBoth"])
+        self.assertFalse(result["fixtures"][0]["eligibleForUEFAPrediction"])
+        self.assertEqual(result["fixtures"][0]["sides"]["awayTeam"]["historicalMatches"],10)
+        self.assertIn("uefa_team_support_history.json",
+                      result["fixtures"][0]["sides"]["awayTeam"]["archiveSources"])
+
     def test_uefa_form_uses_only_prior_observed_scores(self):
         self.samples[:]=[
             {**self.samples[0],"date":f"2025-05-{i:02d}"}
