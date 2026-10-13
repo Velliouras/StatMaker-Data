@@ -56,34 +56,32 @@ def input_source(path: Path) -> dict:
     return source
 
 
-def case_for(history: list[dict], target: dict, context: dict, offer: dict,
+def case_for(history: list[dict], target: dict, context: dict | None, offer: dict,
              parameters: dict, plan: dict, at: int) -> dict:
-    base = context["base"]
-    require(base["scenarioKind"] == "BASE" and context["adverse"]["scenarioKind"] == "ADVERSE_DOUBTFUL",
-            "CONTEXT_BASE_ADVERSE_REVERSED")
-    require(context["fixtureId"] == str(target["fixture_id"]), "WRONG_CONTEXT_FIXTURE")
-    x, used, strength_history = features(history, target, at, plan["family"], plan["mode"], parameters,
-                       base, plan["contextColumns"])
-    require(bool(used) and at-max(r["availableAtMs"] for r in used) < parameters["maximumFeatureAgeMs"],
-            "STALE_HISTORICAL_FEATURES")
-    adverse = context["adverse"]
-    require(bool(adverse["realisticAdverseInputs"]) and adverse["scenarioId"], "NO_GROUNDED_ADVERSE_INPUTS")
-    adverse_x = list(x)
-    adverse_x[-len(plan["contextColumns"]):] = context_values(
-        adverse, target, at, plan["contextColumns"])
-    require(adverse_x != x, "ADVERSE_SCENARIO_IS_NOT_A_REALISTIC_CHANGE")
-    require(all(item["scenario"] == "provider-doubtful-player-unavailable"
-                for item in adverse["realisticAdverseInputs"]), "UNGROUNDED_ADVERSE_SCENARIO")
-    doubtful = {str(item["player"]["id"]) for item in adverse["providerRecord"]["receipt"]["response"]
-                if str(item["fixture"]["id"]) == str(target["fixture_id"])
-                and item["player"]["type"] == "Questionable"}
-    require({i["playerId"] for i in adverse["realisticAdverseInputs"]} == doubtful,
-            "ADVERSE_PLAYER_SOURCE_MISMATCH")
-    return {"features": x, "adverseFeatures": adverse_x, "context": base, "adverse": adverse,
-            "history": used, "strengthHistory": strength_history, "apiFixtureId": str(target["fixture_id"]), "atMs": at,
-            "offer": offer, "sourceHashes": sorted({r["sourceSha256"] for r in used+strength_history}
-                         | {base["providerRecordSha256"], adverse["providerRecordSha256"]}),
-            "seasonTransition": any(r["season"] != target["season"] for r in used)}
+    """Prematch matchup model with optional, actually observed player data.
+
+    A missing, stale or never-issued injury report does not disqualify a
+    fixture or imply that all players were available. No adverse receipt,
+    doubtful player or starting-XI proof is necessary.
+    """
+    base = context.get("base") if context is not None else None
+    x, used, strength_history = features(
+        history, target, at, plan["family"], plan["mode"], parameters,
+        base, plan["contextColumns"])
+    require(bool(used) and at-max(r["availableAtMs"] for r in used)
+            < parameters["maximumFeatureAgeMs"], "STALE_HISTORICAL_FEATURES")
+    sources = {r["sourceSha256"] for r in used+strength_history}
+    if base is not None and 0 < base.get("observedAtMs", 0) <= at < base.get("validUntilMs", 0):
+        sources.add(base["providerRecordSha256"])
+    return {
+        "features": x, "history": used, "strengthHistory": strength_history,
+        "apiFixtureId": str(target["fixture_id"]), "atMs": at,
+        "offer": offer, "sourceHashes": sorted(sources),
+        "context": base if base is not None
+                   and 0 < base.get("observedAtMs", 0) <= at < base.get("validUntilMs", 0)
+                   else None,
+        "seasonTransition": any(r["season"] != target["season"] for r in used),
+    }
 
 
 def model_rows(source: dict, contexts: dict, params: dict, plan: dict, through: int) -> tuple[list[dict], Counter]:
@@ -93,8 +91,10 @@ def model_rows(source: dict, contexts: dict, params: dict, plan: dict, through: 
         if target["leagueCode"] != plan["leagueCode"]:
             continue
         try:
-            context = contexts[str(target["fixture_id"])]
-            at = milliseconds(context["base"]["observedAtMs"])
+            context = contexts.get(str(target["fixture_id"]))
+            # Chronological as-of is determined by the real kickoff, never
+            # by the arrival of an optional injury receipt.
+            at = target["kickoffEpochMs"] - 1
             if not plan["trainingStartMs"] <= at <= through or target["availableAtMs"] > through:
                 continue
             require(plan["family"] in target["counts"], "MISSING_OBSERVED_COUNT_LABEL")
@@ -141,14 +141,10 @@ def priced_cases(source: dict, contexts: dict, quotations: list[dict], params: d
                         and q["cardCountContractSha256"] == digest(plan["cardCountContract"]),
                         "CARD_QUOTE_SETTLEMENT_CONTRACT_MISMATCH")
             require(plan["oddsBandFrom"] <= row["odd"] < plan["oddsBandTo"], "OUTSIDE_FROZEN_ODDS_COHORT")
-            context = contexts[str(target["fixture_id"])]
-            realized = context["adverse"].get("historicallyRealized") is True
-            if realized:
-                verify_realization(context["adverse"], target)
+            context = contexts.get(str(target["fixture_id"]))
             case = case_for(history_rows, target, context, row, params, plan, at)
             label = target["counts"][plan["family"]]
             result.append(dict(case, quote=verified_quote, target=label,
-                               historicalAdverseRealized=realized,
                                outcome=event_outcome(row, *label), labelAvailableAtMs=target["availableAtMs"]))
         except (Blocked, KeyError, TypeError) as error:
             reasons[str(error)] += 1
@@ -178,21 +174,6 @@ def quotes(args) -> None:
     save_new(args.output, {"contract": "statmaker-betting-v2-production-quote-input-v1",
                           "quotes": adapted, "rejected": dict(issues)})
 
-
-def verify_realization(adverse: dict, target: dict) -> None:
-    receipt = adverse["realizationReceipt"]
-    verify_receipt(receipt)
-    require(digest(receipt) == adverse["realizationReceiptSha256"]
-            and adverse["observedAtMs"] <= receipt["clientReceivedAtMs"] < target["kickoffEpochMs"],
-            "UNPROVEN_ADVERSE_REALIZATION_TIME")
-    matches = [f for f in receipt["response"] if str(f["fixture"]["id"]) == str(target["fixture_id"])]
-    require(len(matches) == 1, "UNPROVEN_REALIZATION_FIXTURE")
-    lineup = {str(b["team"]["id"]): b.get("startXI", []) for b in matches[0].get("lineups", [])}
-    teams = [str(target[k]) for k in ("home_team_id", "away_team_id")]
-    require(all(t in lineup and len(lineup[t]) == 11 for t in teams), "NO_ACTUAL_CONFIRMED_XI")
-    players = {str(p["player"]["id"]) for t in teams for p in lineup[t]}
-    require(not players.intersection(i["playerId"] for i in adverse["realisticAdverseInputs"]),
-            "ADVERSE_SCENARIO_NOT_HISTORICALLY_REALIZED")
 
 
 def contexts(args) -> None:
@@ -236,12 +217,12 @@ def freeze(args) -> None:
     require(all(c["labelAvailableAtMs"] <= plan["calibrationEndMs"] for c in predictions),
             "CALIBRATION_LABEL_NOT_AVAILABLE_BEFORE_FREEZE_PERIOD")
     bins = uncertainty_bins(predictions, plan)
-    adverse_bins = uncertainty_bins([dict(c, central=c["adverseCentral"], numericalTail=c["adverseNumericalTail"])
-                                    for c in predictions if c["historicalAdverseRealized"]], plan)
-    policy = freeze_tiers(predictions, bins, adverse_bins, plan)
+    # One genuine calibrated distribution is sufficient. Missing injury
+    # receipts and invented adverse-XI confirmations are not a gate.
+    policy = freeze_tiers(predictions, bins, plan)
     save_new(args.output, {"contract": "statmaker-betting-v2-frozen-model-v1",
              "plan": plan, "planSha256": digest(plan), "model": model, "bins": bins, "policy": policy,
-             "adverseBins": adverse_bins, "frozenAtMs": now, "trainingRows": training, "calibration": predictions,
+             "frozenAtMs": now, "trainingRows": training, "calibration": predictions,
              "sourceSha256": file_digest(args.source), "contextSha256": file_digest(args.contexts),
              "rejected": dict(issues+rejected+rejected_quotes)})
 
@@ -266,13 +247,12 @@ def evaluate(args) -> None:
     cases, rejected = priced_cases(source, contexts_index(args.contexts), read_json(args.holdout_quotes)["quotes"],
                                   model["parameters"], plan, plan["holdoutStartMs"], plan["holdoutEndMs"])
     predictions = observed_predictions(model, cases, dict(plan, evaluateAtMs=now))
-    results = evaluate_holdout(predictions, frozen["calibration"], frozen["bins"], frozen["adverseBins"],
+    results = evaluate_holdout(predictions, frozen["calibration"], frozen["bins"],
                                frozen["policy"], model, plan)
-    validation = model_validation(model, plan, frozen["bins"], frozen["adverseBins"],
+    validation = model_validation(model, plan, frozen["bins"],
                                   frozen["policy"], results, now)
     save_new(args.output, {"contract": "statmaker-betting-v2-evaluated-model-v1",
              "validation": validation, "model": model, "plan": plan, "bins": frozen["bins"],
-             "adverseBins": frozen["adverseBins"],
              "frozenArtifactSha256": file_digest(args.frozen),
              "holdoutPriceArtifactSha256": file_digest(args.holdout_quotes),
              "holdoutSourceSha256": file_digest(args.source), "holdoutResults": results,
@@ -333,7 +313,7 @@ def produce(args) -> None:
                          row["marketModelKey"], mode) in models
                         for mode in ("XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG")),
                     "NO_EVALUATED_MODEL_FOR_MARKET_SCOPE")
-            context = contexts[str(fixture["fixture_id"])]
+            context = contexts.get(str(fixture["fixture_id"]))
             found = []
             for mode in ("XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG"):
                 scope = (row["competitionId"], row["leagueCode"], row["season"], row["marketModelKey"], mode)
@@ -389,7 +369,7 @@ def produce(args) -> None:
         for row, q, assessed, case in group:
             try:
                 f = forecast(row, case, q, model, assessed["validation"], assessed["bins"],
-                             assessed["adverseBins"], plan, groups[row["selectionId"]], documents, now)
+                             plan, groups[row["selectionId"]], documents, now)
                 forecasts.append({"competitionId": row["competitionId"], "snapshotVersion": row["snapshotVersion"],
                                   "fixtureId": row["fixtureId"], "selectionId": row["selectionId"], "payload": f})
                 quote_rows.append({k: q[k] for k in ("generationId", "competitionId", "snapshotVersion",
