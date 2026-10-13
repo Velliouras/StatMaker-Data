@@ -21,6 +21,14 @@ MAX_CACHE_BYTES = 55_000_000
 # This provider uses ROU; published Romanian domestic scope uses ROM.
 VERIFIED_LEAGUE_CODE_ALIASES = {"ROU": "ROM"}
 
+# Additional names observed in the exact completed API-Football enriched archives
+# for these same league scopes. These are league-local source bridges, not
+# edit-distance guesses or global team-identity replacements.
+VERIFIED_PHASE1_SOURCE_ALIASES = {
+    "SWE": {"Västerås": ("Vasteras SK FK",), "Hammarby": ("Hammarby FF",)},
+    "JPN": {"Urawa Reds": ("Urawa",)},
+}
+
 
 def team_key(league_id: str, team_id: object) -> str:
     return f"api-team:{league_id}:{team_id}"
@@ -95,6 +103,11 @@ class CachedHistoryBridge:
             for canonical, aliases in teams.items():
                 canonical_token = canonical_name(canonical)
                 for name in [canonical] + list(aliases):
+                    self.aliases[code][canonical_name(name)].add(canonical_token)
+        for code, teams in VERIFIED_PHASE1_SOURCE_ALIASES.items():
+            for canonical, labels in teams.items():
+                canonical_token = canonical_name(canonical)
+                for name in [canonical] + list(labels):
                     self.aliases[code][canonical_name(name)].add(canonical_token)
 
     def normalize_team(self, code: str, value: object) -> str:
