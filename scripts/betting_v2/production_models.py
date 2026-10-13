@@ -9,29 +9,38 @@ from .production_context import bound_value, verify_receipt
 
 
 def context_values(context: dict | None, target: dict, at_ms: int, columns: list[str]) -> list[float]:
-    # Lineup/injury information is OPTIONAL in Master Specification §4.1.
-    # A no-context base model has no player-status features, rather than
-    # treating missing information as a fully available squad.
+    """Optional verified injury features, with explicit missing-observation flags.
+
+    Missing information is NOT assumed to mean a fully available squad.
+    Every fixture uses the same feature schema: count plus observed flag for
+    each requested team, regardless of whether the provider replied.
+    """
     if not columns:
         return []
-    require(context is not None, "MISSING_CONTEXT_FIXTURE")
-    require(context.get("fixtureId") == str(target["fixture_id"]), "MISSING_CONTEXT_FIXTURE")
-    require(0 < context["observedAtMs"] <= at_ms < context["validUntilMs"], "STALE_CONTEXT")
-    require(digest(context["providerRecord"]) == context["providerRecordSha256"], "CONTEXT_HASH_MISMATCH")
+    require(columns == ["homeUnavailablePlayers", "awayUnavailablePlayers"],
+            "UNKNOWN_OPTIONAL_CONTEXT_FEATURE_SCHEMA")
+    missing = [0.0, 0.0, 0.0, 0.0]
+    if context is None or not (0 < context.get("observedAtMs", 0) <= at_ms
+                               < context.get("validUntilMs", 0)):
+        return missing
+    require(context.get("fixtureId") == str(target["fixture_id"]), "CONTEXT_FIXTURE_MISMATCH")
     record = context["providerRecord"]
+    require(digest(record) == context["providerRecordSha256"], "CONTEXT_HASH_MISMATCH")
     require(record["fixtureId"] == str(target["fixture_id"])
             and record["homeTeamId"] == str(target["home_team_id"])
             and record["awayTeamId"] == str(target["away_team_id"]), "CONTEXT_TEAM_BINDING_MISMATCH")
     verify_receipt(record["receipt"])
-    require(context["observedAtMs"] == record["receipt"]["clientReceivedAtMs"], "INVENTED_CONTEXT_TIME")
-    require(bool(columns), "NO_GROUNDED_CONTEXT_FEATURES")
-    require(context["scenarioKind"] in ("BASE", "ADVERSE_DOUBTFUL"), "UNKNOWN_CONTEXT_SCENARIO")
-    expected_types = ["Missing Fixture"] if context["scenarioKind"] == "BASE" else ["Missing Fixture", "Questionable"]
+    require(context["observedAtMs"] == record["receipt"]["clientReceivedAtMs"],
+            "INVENTED_CONTEXT_TIME")
+    require(context["scenarioKind"] == "BASE", "UNKNOWN_CONTEXT_SCENARIO")
+    result = []
     for name in columns:
-        require(context["fieldBindings"][name]["types"] == expected_types, "WRONG_CONTEXT_STATUS_SEMANTICS")
-        require(number(context["values"][name]) == bound_value(record, context["fieldBindings"][name]),
-                "UNBOUND_CONTEXT_VALUE")
-    return [number(context["values"][name]) for name in columns]
+        binding = context["fieldBindings"][name]
+        require(binding["types"] == ["Missing Fixture"], "WRONG_CONTEXT_STATUS_SEMANTICS")
+        count = number(context["values"][name])
+        require(count == bound_value(record, binding), "UNBOUND_CONTEXT_VALUE")
+        result.extend((count, 1.0))  # 1 = verified receipt was available
+    return result
 
 
 def features(history: list[dict], target: dict, at_ms: int, family: str, mode: str,
