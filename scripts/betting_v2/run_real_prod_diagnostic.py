@@ -280,13 +280,15 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
     for group in groups: by_code[group.split('|',1)[0]].add(group)
     names=defaultdict(set)
     for h in history:
-        names[h['group'],canonical_name(h['home'])].add(h['home'])
-        names[h['group'],canonical_name(h['away'])].add(h['away'])
+        league_code=h['group'].split('|',1)[0]
+        names[h['group'],bridge.normalize_team(league_code,h['home'])].add(h['home'])
+        names[h['group'],bridge.normalize_team(league_code,h['away'])].add(h['away'])
     # Bind provider names to verified team IDs, never across league scopes.
     for raw in bridge.raw_history.values():
         if raw['ids'] and raw['date'].date() < now.date():
-            names[raw['group'],canonical_name(raw['home'])].add(team_key(raw['leagueId'],raw['ids'][0]))
-            names[raw['group'],canonical_name(raw['away'])].add(team_key(raw['leagueId'],raw['ids'][1]))
+            alias_code=raw['group'].split('|',1)[0]
+            names[raw['group'],bridge.normalize_team(alias_code,raw['home'])].add(team_key(raw['leagueId'],raw['ids'][0]))
+            names[raw['group'],bridge.normalize_team(alias_code,raw['away'])].add(team_key(raw['leagueId'],raw['ids'][1]))
     fixtures={}
     fixture_trace=[]
     market_history_trace=[]
@@ -308,7 +310,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             fixture_reject['PAST_OR_INVALID_KICKOFF']+=1
             continue
         future_fixtures.add(fid)
-        code = r['leagueCode']
+        code = bridge.normalize_league(r['leagueCode'])
         possible = by_code.get(code, set())
         if not possible:
             reject['NO_DOMESTIC_HISTORY_FOR_LEAGUE'] += 1
@@ -328,7 +330,7 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
                 identified = set()
                 for label in choices:
                     if label:
-                        identified |= names.get((group, canonical_name(label)), set())
+                        identified |= names.get((group, bridge.normalize_team(code,label)), set())
                 sides.append(identified)
             if len(sides[0]) == len(sides[1]) == 1 and sides[0] != sides[1]:
                 matched.append((group, next(iter(sides[0])), next(iter(sides[1]))))
