@@ -1,5 +1,6 @@
 import sys
 import unittest
+import datetime as dt
 from unittest import mock
 from pathlib import Path
 
@@ -14,6 +15,26 @@ import run_domestic_stats_refresh as orchestrator
 
 
 class DomesticStatsCompletenessTest(unittest.TestCase):
+    def test_empty_provider_stats_cooldown_prevents_same_day_requery(self):
+        now = dt.datetime(2026, 10, 13, 12, 0, tzinfo=dt.timezone.utc)
+        cached = {"raw_statistics": [], "normalized_stats": {"HC": None, "HY": None}}
+        self.assertTrue(stats_fetch.provider_empty_cooldown(
+            cached, "2026-10-13T11:00:00Z", now))
+        self.assertFalse(stats_fetch.provider_empty_cooldown(
+            cached, "2026-09-01T11:00:00Z", now))
+        self.assertFalse(stats_fetch.provider_empty_cooldown(
+            {"raw_statistics": [{"team": {"id": 1}}], "normalized_stats": {"HC": 0}},
+            "2026-10-13T11:00:00Z", now))
+        self.assertFalse(stats_fetch.provider_empty_cooldown(
+            {"raw_statistics": [], "normalized_stats": {}}, "", now))
+
+    def test_explicit_attempt_survives_newer_generation_date(self):
+        now = dt.datetime(2026, 10, 13, 12, 0, tzinfo=dt.timezone.utc)
+        old = {"raw_statistics": [], "normalized_stats": {"HC": None},
+               "statsAttemptedAtUtc": "2026-09-01T11:00:00Z"}
+        self.assertFalse(stats_fetch.provider_empty_cooldown(
+            old, "2026-10-13T11:00:00Z", now))
+
     def test_all_null_normalized_dictionary_is_incomplete(self):
         fixture = {
             "raw_statistics": [{"team": {"id": 1}, "statistics": []}],

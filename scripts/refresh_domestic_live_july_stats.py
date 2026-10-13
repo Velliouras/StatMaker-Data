@@ -190,6 +190,14 @@ def fetch_league_preserving_fixture_metadata(
         if stats_fetch.has_cached_stats(merged):
             already_cached += 1
             continue
+        if stats_fetch.provider_empty_cooldown(merged, existing_cache.get("generated_at") or ""):
+            # Persist a first-observed timestamp for legacy caches. No paid call.
+            if not merged.get("statsAttemptedAtUtc"):
+                merged["statsAttemptedAtUtc"] = existing_cache["generated_at"]
+                merged["statsAttemptedAtBasis"] = "LEGACY_CACHE_GENERATION_PROXY"
+            existing_by_id[fixture_id] = merged
+            notes.append(f"cached provider-empty statistics fixture={fixture_id}")
+            continue
 
         if request_state["count"] >= max_requests:
             notes.append("request cap reached before all fixture statistics were fetched")
@@ -211,12 +219,20 @@ def fetch_league_preserving_fixture_metadata(
             notes.append(f"statistics request failed for fixture {fixture_id}: {exc}")
             continue
 
+        provider_error = stats_fetch.api_errors(stats_payload)
+        if provider_error:
+            notes.append(f"fixture={fixture_id} provider error: {provider_error}")
+            missing_stats += 1
+            continue
         raw_statistics = stats_fetch.response_items(stats_payload)
         if not raw_statistics:
             missing_stats += 1
 
         merged["raw_statistics"] = raw_statistics
         merged["normalized_stats"] = stats_fetch.normalize_statistics(raw_statistics, fixture)
+        merged["statsAttemptedAtUtc"] = stats_fetch.now_utc()
+        merged["statsAttemptedAtBasis"] = "ACTUAL_PROVIDER_RESPONSE"
+        merged["statsProviderResponse"] = "POPULATED" if raw_statistics else "EMPTY"
         existing_by_id[fixture_id] = merged
         newly_fetched += 1
 

@@ -604,6 +604,28 @@ def fetch_fixtures_with_fallback(
     return [], [], "none", attempt_notes
 
 
+def provider_empty_cooldown(item: Dict[str, Any], cache_generated_at: str, now: dt.datetime | None = None) -> bool:
+    """Defer repeating an actual empty statistics response for fourteen days.
+
+    An empty provider response is not a zero corner/card observation. Historical
+    caches without an exact attempt timestamp conservatively use the cache's
+    generation time; explicit timestamps survive subsequent cache writes.
+    """
+    if item.get("raw_statistics") != [] or not isinstance(item.get("normalized_stats"), dict):
+        return False
+    stamped = item.get("statsAttemptedAtUtc") or cache_generated_at
+    if not stamped:
+        return False
+    try:
+        when = dt.datetime.fromisoformat(str(stamped).replace("Z", "+00:00"))
+        if when.tzinfo is None:
+            return False
+        current = now or dt.datetime.now(dt.timezone.utc)
+        return current.astimezone(dt.timezone.utc) < when.astimezone(dt.timezone.utc) + dt.timedelta(days=14)
+    except (ValueError, TypeError, OverflowError):
+        return False
+
+
 def has_cached_stats(item: Dict[str, Any]) -> bool:
     return isinstance(item.get("normalized_stats"), dict) and "raw_statistics" in item
 
@@ -789,6 +811,13 @@ def fetch_league(
             already_cached += 1
             existing_by_id[fixture_id] = merged
             continue
+        if provider_empty_cooldown(merged, existing_cache.get("generated_at") or ""):
+            if not merged.get("statsAttemptedAtUtc"):
+                merged["statsAttemptedAtUtc"] = existing_cache["generated_at"]
+                merged["statsAttemptedAtBasis"] = "LEGACY_CACHE_GENERATION_PROXY"
+            existing_by_id[fixture_id] = merged
+            notes.append(f"cached provider-empty statistics fixture={fixture_id}")
+            continue
 
         if request_state["count"] >= max_requests:
             notes.append("request cap reached before all fixture statistics were fetched")
@@ -807,12 +836,21 @@ def fetch_league(
             existing_by_id[fixture_id] = merged
             continue
 
+        provider_error = api_errors(stats_payload)
+        if provider_error:
+            notes.append(f"fixture={fixture_id} provider error: {provider_error}")
+            missing_stats += 1
+            existing_by_id[fixture_id] = merged
+            continue
         raw_statistics = response_items(stats_payload)
         if not raw_statistics:
             missing_stats += 1
 
         merged["raw_statistics"] = raw_statistics
         merged["normalized_stats"] = normalize_statistics(raw_statistics, fixture)
+        merged["statsAttemptedAtUtc"] = now_utc()
+        merged["statsAttemptedAtBasis"] = "ACTUAL_PROVIDER_RESPONSE"
+        merged["statsProviderResponse"] = "POPULATED" if raw_statistics else "EMPTY"
         # Opt-in lineage only for this actual provider response; never backdate old cached rows.
         if os.environ.get("STATMAKER_BETTING_V2_CAPTURE_LINEAGE") == "1":
             from betting_v2.production_sources import capture_new_statistics
