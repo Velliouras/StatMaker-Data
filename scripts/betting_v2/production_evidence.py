@@ -7,7 +7,7 @@ from .production_evaluation import (UNCERTAINTY_METHOD, bin_for, conservative, t
 from .production_models import distribution, probability, unresolved_tail
 
 
-def model_validation(model: dict, plan: dict, bins: list[dict], adverse_bins: list[dict],
+def model_validation(model: dict, plan: dict, bins: list[dict],
                      policy: dict, results: dict, evaluated_at: int) -> dict:
     """Actual chronological backtest findings embedded in the forecast.
 
@@ -19,8 +19,7 @@ def model_validation(model: dict, plan: dict, bins: list[dict], adverse_bins: li
             "MISSING_OR_DRIFTED_MODEL_VALIDATION")
     return {
         "modelVersion": PRODUCER_VERSION + ":" + digest(model),
-        "calibrationVersion": digest({"bins": bins, "adverseBins": adverse_bins,
-                                       "policy": policy, "plan": plan}),
+        "calibrationVersion": digest({"bins": bins, "policy": policy, "plan": plan}),
         "competitionId": plan["competitionId"],
         "leagueCode": plan["leagueCode"],
         "season": plan["season"],
@@ -48,22 +47,16 @@ def model_validation(model: dict, plan: dict, bins: list[dict], adverse_bins: li
 
 
 def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
-             bins: list[dict], adverse_bins: list[dict], plan: dict, group: str, documents: Documents, now: int) -> dict:
+             bins: list[dict], plan: dict, group: str, documents: Documents, now: int) -> dict:
     require(validation["evaluatedAtMs"] <= now < validation["validUntilMs"], "STALE_MODEL_VALIDATION")
-    require(case["adverse"]["validUntilMs"] >= quote["validUntilMs"], "ADVERSE_EXPIRES_BEFORE_QUOTE")
     require(plan["oddsBandFrom"] <= row["odd"] < plan["oddsBandTo"], "UNCALIBRATED_ODDS_COHORT")
     cells = distribution(model, case["features"], plan)
     center = probability(row, cells)
-    adverse_cells = distribution(model, case["adverseFeatures"], plan)
-    adverse_center = probability(row, adverse_cells)
     bin = tail_adjusted_bin(bin_for(center["win"], bins), unresolved_tail(cells))
     p = conservative(center, bin)
-    adverse_bin = tail_adjusted_bin(bin_for(adverse_center["win"], adverse_bins), unresolved_tail(adverse_cells))
-    ap = conservative(adverse_center, adverse_bin)
-    require(1.8 < quote["odd"] < 3 and p["win"] >= .6 and ap["win"] >= .6,
+    require(1.8 < quote["odd"] < 3 and p["win"] >= .6,
             "LOW_CONSERVATIVE_WIN_OR_ODDS_OUT_OF_RANGE")
-    require(p["win"]*quote["odd"]+p["push"] > 1 and ap["win"]*quote["odd"]+ap["push"] > 1,
-            "LOW_CONSERVATIVE_VALUE")
+    require(p["win"]*quote["odd"]+p["push"] > 1, "LOW_CONSERVATIVE_VALUE")
     tier = tier_for(p, bin, validation["tierCriteria"], validation["comparableCases"])
     require(tier is not None, "NO_FROZEN_TIER_QUALIFICATION")
     common = {"fixtureId": row["fixtureId"], "modelVersion": validation["modelVersion"],
@@ -84,14 +77,9 @@ def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
           coherentSettlementDistribution=p, uncertaintyComponents=bin["uncertaintyComponents"],
           numericalTailWinUncertainty=unresolved_tail(cells),
           uncertaintyMethodVersion=UNCERTAINTY_METHOD, distributionSha256=distribution_sha))
-    valid_until = min(quote["validUntilMs"], validation["validUntilMs"],
-                      case["context"]["validUntilMs"], case["adverse"]["validUntilMs"])
-    adverse_sha = documents.add(evidence(**common, scenarioId=case["adverse"]["scenarioId"],
-          conservativeWin=ap["win"], conservativePush=ap["push"], coherentSettlementDistribution=ap,
-          realisticAdverseInputs=case["adverse"]["realisticAdverseInputs"],
-          uncertaintyComponents=adverse_bin["uncertaintyComponents"],
-          observedAtMs=case["adverse"]["observedAtMs"], validUntilMs=case["adverse"]["validUntilMs"],
-          providerRecordSha256=case["adverse"]["providerRecordSha256"]))
+    valid_until = min(quote["validUntilMs"], validation["validUntilMs"])
+    if case["context"] is not None:
+        valid_until = min(valid_until, case["context"]["validUntilMs"])
     correlation_sha = documents.add(evidence(**common, scenarioGroup=group,
           correlationThreshold=plan["correlationThreshold"], evaluationPlanSha256=digest(plan),
           method="event-indicators-under-shared-fitted-distribution"))
@@ -112,7 +100,7 @@ def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
                               "rawStatisticsSha256": r["betting_v2_provenance"]["rawStatisticsSha256"],
                               "availableAtMs": r["availableAtMs"]} for r in feature_rows],
               parametersSha256=digest(model["parameters"]), apiFixtureId=case["apiFixtureId"])
-        if feature == "MARKET_SPECIFIC":
+        if feature == "MARKET_SPECIFIC" and case["context"] is not None:
             doc["contextProviderRecord"] = case["context"]["providerRecord"]
             doc["contextProviderRecordSha256"] = case["context"]["providerRecordSha256"]
             doc["contextFieldBindings"] = case["context"]["fieldBindings"]
@@ -134,11 +122,9 @@ def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
         "quoteObservedAtEpochMs": quote["observedAtMs"], "quoteValidUntilEpochMs": quote["validUntilMs"],
         "forecastComputedAtMs": now, "kickoffEpochMs": row["kickoffEpochMs"],
         "centralWinProbability": center["win"], "conservativeWinProbability": p["win"],
-        "conservativePushProbability": p["push"], "adverseScenarioConservativeWinProbability": ap["win"],
-        "adverseScenarioPushProbability": ap["push"], "calibrationReliability": bin["calibrationReliability"],
+        "conservativePushProbability": p["push"], "calibrationReliability": bin["calibrationReliability"],
         "conservativeIntervalWidth": width, "tier": tier, "sameScenarioGroup": group,
         "probabilityEvidenceSha256": probability_sha, "featureEvidence": feature_evidence,
-        "adverseScenarioEvidenceSha256": adverse_sha, "adverseScenarioId": case["adverse"]["scenarioId"],
         "correlationEvidenceSha256": correlation_sha, "xgUnavailableEvidenceSha256": absence_sha,
         "primaryXgUnavailableVerified": plan["mode"] == "ELO_GOALS_FALLBACK_NO_XG"
               and absence_sha is not None,
