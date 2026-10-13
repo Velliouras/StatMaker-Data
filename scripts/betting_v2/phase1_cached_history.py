@@ -262,6 +262,28 @@ class CachedHistoryBridge:
             (m["group"], m["away"]) for m in self.uefa_history)
 
     def _overlay_history(self) -> None:
+        """Join missing IDs only through a UNIQUE existing API team-ID claim.
+
+        A name that has conflicting provider IDs is never repaired by guessing.
+        Both teams must independently resolve before a historical row is
+        rekeyed. This also avoids treating one real team as two model teams
+        merely because some cached historical fixtures omit API IDs.
+        """
+        owner_claims: dict[tuple[str, str], set[str]] = defaultdict(set)
+        for raw in self.raw_history.values():
+            if not raw["ids"]:
+                continue
+            code = raw["group"].split("|", 1)[0]
+            for side, tid in (("home", raw["ids"][0]), ("away", raw["ids"][1])):
+                label = self.normalize_team(code, raw[side])
+                if label:
+                    owner_claims[raw["group"], label].add(team_key(raw["leagueId"], tid))
+
+        def unique(group: str, label: object) -> str | None:
+            code = group.split("|", 1)[0]
+            owners = owner_claims.get((group, self.normalize_team(code, label)), set())
+            return next(iter(owners)) if len(owners) == 1 else None
+
         existing: set[tuple[str, str]] = set()
         updated = []
         for row in self.history:
@@ -269,31 +291,54 @@ class CachedHistoryBridge:
             existing.add(key)
             raw = self.raw_history.get(key)
             if raw and raw["ids"]:
+                home_key = team_key(raw["leagueId"], raw["ids"][0])
+                away_key = team_key(raw["leagueId"], raw["ids"][1])
+                evidence = "EXACT_CACHED_API_FIXTURE_ID"
+            else:
+                home_key = unique(row["group"], row["home"])
+                away_key = unique(row["group"], row["away"])
+                evidence = "UNIQUE_VERIFIED_LEAGUE_TEAM_ALIAS"
+            if home_key and away_key and home_key != away_key:
                 row = dict(row)
-                row["home"] = team_key(raw["leagueId"], raw["ids"][0])
-                row["away"] = team_key(raw["leagueId"], raw["ids"][1])
-                row["providerHomeId"], row["providerAwayId"] = raw["ids"]
-                self.stats["ENRICHED_ROWS_WITH_VERIFIED_API_IDS"] += 1
+                row["home"], row["away"] = home_key, away_key
+                row["providerHomeId"], row["providerAwayId"] = (
+                    home_key.rsplit(":", 1)[1], away_key.rsplit(":", 1)[1])
+                row["phase1TeamIdentityEvidence"] = evidence
+                self.stats["ENRICHED_ROWS_WITH_VERIFIED_API_IDS" if raw and raw["ids"]
+                           else "ENRICHED_ROWS_REKEYED_BY_UNIQUE_VERIFIED_ALIAS"] += 1
             else:
                 self.stats["ENRICHED_ROWS_WITHOUT_VERIFIED_API_IDS"] += 1
             updated.append(row)
+
         for key, raw in self.raw_history.items():
             if key in existing:
                 continue
             if raw["hg"] is None or raw["ag"] is None:
                 self.stats["OLD_CACHE_MISSING_SCORE"] += 1
                 continue
-            if not raw["ids"] or not raw["home"] or not raw["away"]:
-                self.stats["OLD_CACHE_MISSING_IDENTITY"] += 1
+            if raw["ids"]:
+                home_key, away_key = (
+                    team_key(raw["leagueId"], raw["ids"][0]),
+                    team_key(raw["leagueId"], raw["ids"][1]))
+                evidence = "EXACT_CACHED_API_FIXTURE_ID"
+            else:
+                home_key = unique(raw["group"], raw["home"])
+                away_key = unique(raw["group"], raw["away"])
+                evidence = "UNIQUE_VERIFIED_LEAGUE_TEAM_ALIAS"
+            if not home_key or not away_key or home_key == away_key:
+                self.stats["OLD_CACHE_MISSING_OR_AMBIGUOUS_IDENTITY"] += 1
                 continue
             updated.append({
-                "group": raw["group"], "fixture_id": raw["fixture_id"], "date": raw["date"],
-                "home": team_key(raw["leagueId"], raw["ids"][0]),
-                "away": team_key(raw["leagueId"], raw["ids"][1]),
+                "group": raw["group"], "fixture_id": raw["fixture_id"],
+                "date": raw["date"], "home": home_key, "away": away_key,
                 "hg": raw["hg"], "ag": raw["ag"], "stats": raw["stats"],
-                "providerHomeId": raw["ids"][0], "providerAwayId": raw["ids"][1],
+                "providerHomeId": home_key.rsplit(":", 1)[1],
+                "providerAwayId": away_key.rsplit(":", 1)[1],
+                "phase1TeamIdentityEvidence": evidence,
             })
             self.stats["ADDED_SCORED_OLD_CACHE_ROWS"] += 1
+            if evidence == "UNIQUE_VERIFIED_LEAGUE_TEAM_ALIAS":
+                self.stats["ADDED_OLD_CACHED_ROWS_REPAIRED_BY_ALIAS"] += 1
         self.history = updated
         self.available_teams = {(h["group"], h["home"]) for h in updated} | {
             (h["group"], h["away"]) for h in updated}
