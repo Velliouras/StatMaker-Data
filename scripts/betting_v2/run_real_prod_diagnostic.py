@@ -335,10 +335,27 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
             if len(sides[0]) == len(sides[1]) == 1 and sides[0] != sides[1]:
                 matched.append((group, next(iter(sides[0])), next(iter(sides[1]))))
         if not matched:
-            reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY'] += 1
-            fixture_reject['UNRESOLVED_HISTORICAL_TEAM_IDENTITY'] += 1
-            fixture_failure('UNRESOLVED_HISTORICAL_TEAM_IDENTITY',r,
-                providerResolution=identity_reason,providerEvidence=identity_evidence,
+            # UEFA is a separate source universe, not a domestic-schedule
+            # identity failure. A missing team history must be reported as
+            # missing verified support, without fabricating prior club games.
+            uefa_scope = code in ('CL', 'EL', 'UECL')
+            reason = ('NO_VERIFIED_UEFA_TEAM_HISTORY' if uefa_scope
+                      else 'UNRESOLVED_HISTORICAL_TEAM_IDENTITY')
+            reject[reason] += 1
+            fixture_reject[reason] += 1
+            presence={}
+            if uefa_scope:
+                for side in ('Home','Away'):
+                    raw_names=[r.get('canonical'+side+'Team'), r.get('provider'+side+'Team'),
+                               r.get('homeTeam' if side=='Home' else 'awayTeam')]
+                    claimed={bridge.normalize_team(code,name) for name in raw_names if name}
+                    presence[side.lower()+'HasVerifiedHistory']=any(
+                        any(names.get((group,alias)) for alias in claimed)
+                        for group in possible)
+            fixture_failure(reason,r,
+                providerResolution=('UEFA_SEPARATE_HISTORICAL_SUPPORT' if uefa_scope
+                                    else identity_reason),
+                providerEvidence=identity_evidence if not uefa_scope else presence,
                 historicalScopes=sorted(possible))
             continue
         if len(matched) != 1:
