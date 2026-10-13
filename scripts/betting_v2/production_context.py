@@ -1,8 +1,7 @@
 """Optional, actual pre-match injury receipts for model input features.
 
-Capture is opt-in at an existing successful response, with no new HTTP requests.
-Historical adverse labels require later, actual confirmed starting XIs; the
-realization record never becomes a feature that was known at the earlier as-of.
+Capture uses a genuine received provider response, with no new HTTP requests.
+Missing injury data never imply that every player is fit or block a model.
 """
 from __future__ import annotations
 
