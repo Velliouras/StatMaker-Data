@@ -325,9 +325,14 @@ def produce(args) -> None:
             if fixture_key not in fixture_cache:
                 fixture_cache[fixture_key] = resolve_fixture(row, source["schedule"])
             fixture = fixture_cache[fixture_key]
+            # Model scope and matchup evidence must be assessed BEFORE asking
+            # whether the bookmaker's current price makes the outcome valuable.
+            # This also reports unsupported markets honestly, not as "bad odds".
+            require(any((row["competitionId"], row["leagueCode"], row["season"],
+                         row["marketModelKey"], mode) in models
+                        for mode in ("XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG")),
+                    "NO_EVALUATED_MODEL_FOR_MARKET_SCOPE")
             context = contexts[str(fixture["fixture_id"])]
-            q = quote_for(row, quote_index.get((row["selectionId"], row["snapshotVersion"],
-                                               row["generationId"]), []), now)
             found = []
             for mode in ("XG_PRIMARY", "ELO_GOALS_FALLBACK_NO_XG"):
                 scope = (row["competitionId"], row["leagueCode"], row["season"], row["marketModelKey"], mode)
@@ -339,8 +344,9 @@ def produce(args) -> None:
                     if assessed["plan"]["family"] == "CARDS":
                         contract = assessed["plan"]["cardCountContract"]
                         contract_sha = digest(contract)
-                        require(q["bookmaker"] == contract["bookmaker"]
-                                and q["cardCountContractSha256"] == contract_sha, "CARD_SETTLEMENT_MISMATCH")
+                        # A card model uses the provider's frozen counting
+                        # contract. The bookmaker binding is checked only once
+                        # the independent matchup forecast has been evaluated.
                         if contract_sha not in card_history_cache:
                             card_history_cache[contract_sha] = card_history(history, contract)
                         history = card_history_cache[contract_sha]
@@ -365,6 +371,13 @@ def produce(args) -> None:
                     continue
             require(len(found) == 1, "NO_UNAMBIGUOUS_INDEPENDENTLY_EVALUATED_EVIDENCE_MODE")
             assessed, case = found[0]
+            q = quote_for(row, quote_index.get((row["selectionId"], row["snapshotVersion"],
+                                               row["generationId"]), []), now)
+            if assessed["plan"]["family"] == "CARDS":
+                contract = assessed["plan"]["cardCountContract"]
+                require(q["bookmaker"] == contract["bookmaker"]
+                        and q["cardCountContractSha256"] == digest(contract),
+                        "CARD_SETTLEMENT_MISMATCH")
             prepared[(row["competitionId"], row["fixtureId"], digest(assessed["model"]))].append((row, q, assessed, case))
         except (Blocked, KeyError, TypeError) as error:
             reasons[str(error)] += 1
