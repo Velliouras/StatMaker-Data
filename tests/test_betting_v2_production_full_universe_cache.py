@@ -42,11 +42,11 @@ class BettingV2ProducerFullUniverseCacheTests(TestCase):
         }
         assessed = {
             "contract": "statmaker-betting-v2-evaluated-model-v1",
-            "certificate": {
-                "certificationId": "cert", "competitionId": "domestic",
-                "leagueCode": "E0", "season": "2026",
-                "marketModelKey": "RESULT_1X2",
-                "evidenceMode": "ELO_GOALS_FALLBACK_NO_XG",
+            "validation": {
+                "competitionId": "domestic", "leagueCode": "E0", "season": "2026",
+                "marketModelKey": "RESULT_1X2", "evidenceMode": "ELO_GOALS_FALLBACK_NO_XG",
+                "outOfTimeValidated": True, "comparableMarketCalibrated": True,
+                "independentModelErrorIncluded": True,
             },
             "holdoutResults": {"unitStakeRoiLowerBound": 0.05},
             "plan": {"family": "GOALS_FT", "mode": "ELO_GOALS_FALLBACK_NO_XG",
