@@ -7,20 +7,16 @@ import math
 from .production_contract import TIERS, digest, evidence, number, require
 from .production_models import distribution, probability, unresolved_tail
 
-UNCERTAINTY_METHOD = "chronological-fixture-block-error-adverse-drift-quality-tail-v1"
+UNCERTAINTY_METHOD = "chronological-fixture-block-error-drift-quality-tail-v2"
 
 
 def observed_predictions(model: dict, cases: list[dict], plan: dict) -> list[dict]:
     result = []
     for case in cases:
         cells = distribution(model, case["features"], plan)
-        adverse_cells = distribution(model, case["adverseFeatures"], plan)
         base = probability(case["offer"], cells)
-        adverse = probability(case["offer"], adverse_cells)
         require(case["labelAvailableAtMs"] <= plan["evaluateAtMs"], "UNOBSERVED_HOLDOUT_LABEL")
-        result.append({**case, "central": base, "adverseCentral": adverse,
-                       "numericalTail": unresolved_tail(cells),
-                       "adverseNumericalTail": unresolved_tail(adverse_cells)})
+        result.append({**case, "central": base, "numericalTail": unresolved_tail(cells)})
     return result
 
 
@@ -103,17 +99,14 @@ def bin_for(p: float, bins: list[dict]) -> dict:
     return matches[0]
 
 
-def freeze_tiers(cases: list[dict], bins: list[dict], adverse_bins: list[dict], plan: dict) -> dict:
+def freeze_tiers(cases: list[dict], bins: list[dict], plan: dict) -> dict:
     import numpy as np
     eligible = []
     for case in cases:
         bin = tail_adjusted_bin(bin_for(case["central"]["win"], bins), case["numericalTail"])
         p = conservative(case["central"], bin)
-        adverse = conservative(case["adverseCentral"], tail_adjusted_bin(
-            bin_for(case["adverseCentral"]["win"], adverse_bins), case["adverseNumericalTail"]))
         odd = case["offer"]["odd"]
-        if (1.8 < odd < 3 and p["win"] >= .6 and adverse["win"] >= .6
-                and p["win"]*odd+p["push"] > 1 and adverse["win"]*odd+adverse["push"] > 1):
+        if 1.8 < odd < 3 and p["win"] >= .6 and p["win"]*odd+p["push"] > 1:
             eligible.append((p["win"], bin["calibrationReliability"],
                              min(1.0, 2*sum(bin["uncertaintyComponents"].values())), bin["cases"]))
     require(bool(eligible), "NO_CALIBRATION_SUPPORTED_STRONG_POLICY")
@@ -172,7 +165,7 @@ def scenario_groups(offers: list[dict], cells: list[list[float]], threshold: flo
             for i, offer in enumerate(offers)}
 
 
-def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict], adverse_bins: list[dict],
+def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict],
                      policy: dict, model: dict, plan: dict) -> dict:
     """No tuning/retry against holdout; entire frozen policy fails if a gate fails."""
     import numpy as np
@@ -183,13 +176,11 @@ def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict
     for case in cases:
         b = tail_adjusted_bin(bin_for(case["central"]["win"], bins), case["numericalTail"])
         p = conservative(case["central"], b)
-        ap = conservative(case["adverseCentral"], tail_adjusted_bin(
-            bin_for(case["adverseCentral"]["win"], adverse_bins), case["adverseNumericalTail"]))
         tier = tier_for(p, b, policy, len(cases))
         odd = case["offer"]["odd"]
-        if tier and 1.8 < odd < 3 and p["win"] >= .6 and ap["win"] >= .6:
+        if tier and 1.8 < odd < 3 and p["win"] >= .6:
             ev = p["win"]*odd+p["push"]-1
-            if ev > 0 and ap["win"]*odd+ap["push"]-1 > 0:
+            if ev > 0:
                 candidates.append(dict(case, conservative=p, tier=tier, ev=ev))
     # Exactly the same correlation/selection path is evaluated as will be published.
     fixture_groups = defaultdict(list)
@@ -241,8 +232,6 @@ def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict
                              "observedWinInterval": [lower, upper], "absoluteError": abs(center-rate)})
         return segments
     segments = segments_for(cases, bins, "central", "numericalTail")
-    adverse_segments = segments_for([c for c in cases if c["historicalAdverseRealized"]],
-                                    adverse_bins, "adverseCentral", "adverseNumericalTail")
     brier = sum((c["central"]["win"]-float(c["outcome"] == 1))**2 for c in cases)/len(cases)
     baseline = sum(c["outcome"] == 1 for c in calibration)/len(calibration)
     baseline_brier = sum((baseline-float(c["outcome"] == 1))**2 for c in cases)/len(cases)
@@ -265,5 +254,4 @@ def evaluate_holdout(cases: list[dict], calibration: list[dict], bins: list[dict
             "brier": brier, "baselineBrier": baseline_brier, "noVigBrier": market_brier,
             "modelDecisiveBrier": model_decisive_brier,
             "driftPValue": float(drift.pvalue), "errorBySegment": segments,
-            "adverseErrorBySegment": adverse_segments,
             "priceRecords": [c["quote"] for c in cases], "revalidationRequired": False}
