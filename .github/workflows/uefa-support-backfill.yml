@@ -47,6 +47,7 @@ jobs:
             scripts/build_uefa_support_history.py \
             scripts/backfill_uefa_support_history.py \
             scripts/backfill_uefa_support_history_v2.py \
+            scripts/betting_v2/phase1_uefa_backfill_feed.py \
             scripts/build_statmaker_update_manifest.py
 
       - name: Rebuild zero-call Domestic support history
@@ -65,11 +66,17 @@ jobs:
             cp "$source" "$RUNNER_TEMP/uefa_feeds/$name"
             copied=$((copied + 1))
           done
-          if [ "$copied" -eq 0 ]; then
-            echo "No live UEFA feeds are available; refusing to run participant backfill."
-            exit 1
-          fi
-          echo "Prepared $copied live UEFA feed(s)."
+          echo "Prepared $copied live UEFA feed(s); canonical fixture source will supplement empties."
+
+      - name: Source integrity regressions for canonical UEFA participant feed
+        run: python3 -m unittest discover -s tests -p 'test_betting_v2_phase1_uefa_backfill_feed.py' -v
+
+      - name: Repair participant feed from canonical App-Ready data
+        run: |
+          python3 scripts/betting_v2/phase1_uefa_backfill_feed.py \
+            --root . \
+            --feed-dir "$RUNNER_TEMP/uefa_feeds" \
+            --report "$RUNNER_TEMP/phase1_uefa_feed_source.json"
 
       - name: Backfill only missing UEFA participant history and logos
         env:
@@ -94,7 +101,8 @@ jobs:
           team = json.loads(Path('data/statmaker/uefa_team_support_history.json').read_text(encoding='utf-8'))
           logos = json.loads(Path('data/statmaker/uefa_team_logos.json').read_text(encoding='utf-8'))
           report = json.loads(Path('reports/uefa_support_team_backfill.json').read_text(encoding='utf-8'))
-
+          if int(report.get('fixtureParticipantKeys') or 0) == 0:
+              raise SystemExit('UEFA participant feed is empty: refusal to report a successful no-op')
           for label, payload in [('base', base), ('team', team)]:
               minimum = int(payload.get('minimumMatchesPerParticipant') or 10)
               for participant in payload.get('participants', []) or []:
@@ -114,6 +122,15 @@ jobs:
               f"requests={report.get('apiRequestsUsed')}/{report.get('apiRequestCap')}"
           )
           PY
+
+      - name: Upload UEFA source repair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-uefa-participant-source-evidence
+          path: ${{ runner.temp }}/phase1_uefa_feed_source.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Rebuild main update manifest
         run: |
