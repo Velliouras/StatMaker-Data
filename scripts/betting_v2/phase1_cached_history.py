@@ -219,6 +219,8 @@ class CachedHistoryBridge:
             })
             self.stats["ADDED_SCORED_OLD_CACHE_ROWS"] += 1
         self.history = updated
+        self.available_teams = {(h["group"], h["home"]) for h in updated} | {
+            (h["group"], h["away"]) for h in updated}
 
     def resolve(self, item: dict) -> tuple[tuple[str, str, str] | None, str, dict]:
         """Resolve a bookmaker event to exactly one future API fixture, never fuzzy."""
@@ -257,9 +259,7 @@ class CachedHistoryBridge:
             return None, "SCHEDULE_WITHOUT_TEAM_IDS", details
         home = team_key(match["leagueId"], match["ids"][0])
         away = team_key(match["leagueId"], match["ids"][1])
-        if not any(h["group"] == match["group"] and
-                   (h["home"] in (home, away) or h["away"] in (home, away))
-                   for h in self.history):
+        if not any((match["group"], side) in self.available_teams for side in (home, away)):
             return None, "NO_PRIOR_HISTORY_FOR_PROVIDER_TEAM_IDS", details
         return (match["group"], home, away), "EXACT_API_TEAM_IDS", details
 
