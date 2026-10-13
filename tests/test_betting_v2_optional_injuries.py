@@ -17,7 +17,7 @@ from scripts.betting_v2.produce_certified_app_ready import case_for
 class OptionalInjuryContextTest(unittest.TestCase):
     def target(self):
         return {
-            "fixture_id": "fixture-101", "home_team_id": "home-1",
+            "fixture_id": "101", "home_team_id": "home-1",
             "away_team_id": "away-2", "kickoffEpochMs": 10_000_000,
             "leagueCode": "E0", "season": "2026",
         }
