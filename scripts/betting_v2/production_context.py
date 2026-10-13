@@ -1,4 +1,4 @@
-"""Actual cached context receipts and grounded doubtful-player adverse scenarios.
+"""Optional, actual pre-match injury receipts for model input features.
 
 Capture is opt-in at an existing successful response, with no new HTTP requests.
 Historical adverse labels require later, actual confirmed starting XIs; the
@@ -48,9 +48,15 @@ def bound_value(record: dict, binding: dict) -> float:
 
 
 def adapt_context_receipts(source: dict, receipts: list[dict], maximum_age_ms: int) -> tuple[list[dict], Counter]:
+    """Extract verified, optional player information; never require injury receipts.
+
+    A complete, valid no-injury response may contain an empty list. Missing
+    responses are omitted, not converted into statements of full squad fitness.
+    No doubtful-player scenario or retrospective XI confirmation is required.
+    """
     require(maximum_age_ms > 0, "NO_CONTEXT_FRESHNESS_POLICY")
     targets = {}
-    for item in source["schedule"]+source["history"]:
+    for item in source["schedule"] + source["history"]:
         key = str(item["fixture_id"])
         require(key not in targets or targets[key] == item, "AMBIGUOUS_CONTEXT_FIXTURE_SOURCE")
         targets[key] = item
@@ -59,60 +65,48 @@ def adapt_context_receipts(source: dict, receipts: list[dict], maximum_age_ms: i
         try:
             verify_receipt(receipt)
             valid.append(receipt)
-        except (Blocked, KeyError, TypeError) as error:
+        except (Blocked, KeyError, TypeError, ValueError) as error:
             issues[str(error)] += 1
     result = []
     for key, target in targets.items():
+        # A fixture with no contemporaneous injury receipt remains eligible
+        # for the matchup model's no-injury-input feature regime.
+        matching = [
+            r for r in valid if r["endpoint"] == "/injuries"
+            and key in str(r["parameters"].get("ids", "")).split("-")
+            and r["clientReceivedAtMs"] < target["kickoffEpochMs"]
+        ]
+        if not matching:
+            continue
         try:
-            injury = [r for r in valid if r["endpoint"] == "/injuries"
-                      and key in str(r["parameters"].get("ids", "")).split("-")
-                      and r["clientReceivedAtMs"] < target["kickoffEpochMs"]]
-            require(bool(injury), "NO_PREMATCH_INJURY_RECEIPT")
-            # Predeclared first actual observation; never choose a receipt by outcome.
-            receipt = min(injury, key=lambda r: r["clientReceivedAtMs"])
+            receipt = min(matching, key=lambda r: r["clientReceivedAtMs"])
             home, away = str(target["home_team_id"]), str(target["away_team_id"])
             relevant = [i for i in receipt["response"] if str(i["fixture"]["id"]) == key]
             require(all(str(i["team"]["id"]) in (home, away) for i in relevant), "INJURY_TEAM_MISJOIN")
             require(all(i["player"].get("id") and i["player"].get("type") in
-                        ("Missing Fixture", "Questionable") for i in relevant), "UNKNOWN_INJURY_STATUS")
-            doubtful = {str(i["player"]["id"]) for i in relevant if i["player"]["type"] == "Questionable"}
-            require(bool(doubtful), "NO_OBSERVABLE_ADVERSE_PLAYER_SCENARIO")
-            record = {"fixtureId": key, "homeTeamId": home, "awayTeamId": away, "receipt": receipt}
+                        ("Missing Fixture", "Questionable") for i in relevant),
+                    "UNKNOWN_INJURY_STATUS")
+            record = {"fixtureId": key, "homeTeamId": home, "awayTeamId": away,
+                      "receipt": receipt}
             observed = receipt["clientReceivedAtMs"]
-            expires = min(target["kickoffEpochMs"], observed+maximum_age_ms)
-            def state(statuses, kind):
-                bindings = {name: {"operation": "PROVIDER_PLAYER_COUNT", "teamId": team, "types": statuses}
-                            for name, team in (("homeUnavailablePlayers", home), ("awayUnavailablePlayers", away))}
-                return {"fixtureId": key, "scenarioKind": kind, "observedAtMs": observed, "validUntilMs": expires,
-                        "providerRecord": record, "providerRecordSha256": digest(record),
-                        "fieldBindings": bindings,
-                        "values": {name: bound_value(record, binding) for name, binding in bindings.items()}}
-            base = state(["Missing Fixture"], "BASE")
-            adverse = state(["Missing Fixture", "Questionable"], "ADVERSE_DOUBTFUL")
-            adverse["realisticAdverseInputs"] = [{"playerId": p, "scenario": "provider-doubtful-player-unavailable"}
-                                                 for p in sorted(doubtful)]
-            adverse["scenarioId"] = digest({"fixtureId": key, "doubtfulPlayers": sorted(doubtful),
-                                            "source": digest(receipt)})
-            proof = []
-            for candidate in valid:
-                if candidate["endpoint"] != "/fixtures" or not observed <= candidate["clientReceivedAtMs"] < target["kickoffEpochMs"]:
-                    continue
-                for fixture in candidate["response"]:
-                    if str(fixture["fixture"]["id"]) != key:
-                        continue
-                    lineups = {str(b["team"]["id"]): b.get("startXI", []) for b in fixture.get("lineups", [])}
-                    if home not in lineups or away not in lineups or any(len(lineups[t]) != 11 for t in (home, away)):
-                        continue
-                    starters = {str(p["player"]["id"]) for t in (home, away) for p in lineups[t]}
-                    if not doubtful.intersection(starters):
-                        proof.append(candidate)
-            adverse["historicallyRealized"] = bool(proof)
-            if proof:
-                realization = min(proof, key=lambda r: r["clientReceivedAtMs"])
-                adverse["realizationReceipt"] = realization
-                adverse["realizationReceiptSha256"] = digest(realization)
-            result.append({"fixtureId": key, "providerRecord": record,
-                           "providerRecordSha256": digest(record), "base": base, "adverse": adverse})
-        except (Blocked, KeyError, TypeError) as error:
+            expires = min(target["kickoffEpochMs"], observed + maximum_age_ms)
+            bindings = {
+                name: {"operation": "PROVIDER_PLAYER_COUNT", "teamId": team,
+                       "types": ["Missing Fixture"]}
+                for name, team in (("homeUnavailablePlayers", home),
+                                   ("awayUnavailablePlayers", away))
+            }
+            base = {
+                "fixtureId": key, "scenarioKind": "BASE", "observedAtMs": observed,
+                "validUntilMs": expires, "providerRecord": record,
+                "providerRecordSha256": digest(record), "fieldBindings": bindings,
+                "values": {name: bound_value(record, binding)
+                           for name, binding in bindings.items()},
+            }
+            result.append({
+                "fixtureId": key, "providerRecord": record,
+                "providerRecordSha256": digest(record), "base": base,
+            })
+        except (Blocked, KeyError, TypeError, ValueError) as error:
             issues[str(error)] += 1
     return result, issues
