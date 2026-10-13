@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Sequence
 
 import api_football_fetch_fixture_stats as api
+from uefa_verified_team_ids import load_verified_api_team_index, find_verified_team
 from build_uefa_support_history import normalize_team_key
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -188,6 +189,10 @@ def main() -> int:
         for alias in participant_keys(participant):
             logos.setdefault(alias, logo)
 
+    # Prefer exact source-authenticated team IDs from existing API-Football
+    # league/season fixtures before ambiguous paid /teams?search discovery.
+    verified_team_ids, verified_team_audit = load_verified_api_team_index(ROOT)
+    cached_team_ids_reused = 0
     request_state = {"count": 0}
     added: List[str] = []
     unresolved: List[Dict[str, Any]] = []
@@ -196,18 +201,25 @@ def main() -> int:
         if request_state["count"] >= args.max_requests:
             unresolved.append({"team": feed_name, "reason": "request_cap"})
             continue
-        try:
-            team_payload = api.api_get(api_key, "teams", {"search": feed_name}, request_state, args.max_requests)
-        except api.RequestLimitReached:
-            unresolved.append({"team": feed_name, "reason": "request_cap"})
-            continue
-        except Exception as exc:
-            unresolved.append({"team": feed_name, "reason": f"team_lookup:{type(exc).__name__}"})
-            continue
-        candidate = choose_team_candidate(feed_name, api.response_items(team_payload))
-        if candidate is None:
-            unresolved.append({"team": feed_name, "reason": "ambiguous_or_unresolved_team_identity"})
-            continue
+        cached_identity = find_verified_team(verified_team_ids, feed_name)
+        if cached_identity is not None:
+            candidate = {"team": {"id": cached_identity["id"],
+                                  "name": cached_identity["name"]},
+                         "venue": {}}
+            cached_team_ids_reused += 1
+        else:
+            try:
+                team_payload = api.api_get(api_key, "teams", {"search": feed_name}, request_state, args.max_requests)
+            except api.RequestLimitReached:
+                unresolved.append({"team": feed_name, "reason": "request_cap"})
+                continue
+            except Exception as exc:
+                unresolved.append({"team": feed_name, "reason": f"team_lookup:{type(exc).__name__}"})
+                continue
+            candidate = choose_team_candidate(feed_name, api.response_items(team_payload))
+            if candidate is None:
+                unresolved.append({"team": feed_name, "reason": "ambiguous_or_unresolved_team_identity"})
+                continue
 
         team = candidate.get("team") if isinstance(candidate.get("team"), dict) else {}
         team_id = team.get("id")
@@ -288,6 +300,8 @@ def main() -> int:
         "minimumMatchesPerTeam": max(1, int(args.min_matches)),
         "apiRequestsUsed": request_state["count"],
         "apiRequestCap": int(args.max_requests),
+        "alreadyVerifiedProviderTeamIdsReused": cached_team_ids_reused,
+        "verifiedLocalTeamIdentityCoverage": verified_team_audit,
         "fixtureParticipantKeys": len(requested),
         "coveredBefore": len(requested) - len(missing_names),
         "missingBefore": len(missing_names),
