@@ -76,6 +76,21 @@ class Phase2ChronologicalCalibrationTests(unittest.TestCase):
         self.assertEqual(case["frozenConservativePAtLeast60Holdout"]["n"],0)
         self.assertFalse(case["canCertifyStrong"])
 
+    def test_over_under_use_exact_same_score_distribution(self):
+        cal=[self.sample(date(2025,5,1),str(i),p=.7,win=i<30) for i in range(45)]
+        hold=[self.sample(date(2025,9,1),"under_case",p=.7,win=False)]
+        ev=frozen_market_calibration(cal,hold)
+        over=ev["events"]["MATCH_OVER_2_5"]
+        under=ev["events"]["MATCH_UNDER_2_5"]
+        self.assertEqual(over["holdout"]["n"],1)
+        self.assertEqual(under["holdout"]["n"],1)
+        self.assertAlmostEqual(over["holdout"]["meanRawP"]+
+                               under["holdout"]["meanRawP"],1,places=12)
+        self.assertEqual(over["holdout"]["observedHitRate"]+
+                         under["holdout"]["observedHitRate"],1)
+        self.assertFalse(over["canCertifyStrong"])
+        self.assertFalse(under["canCertifyStrong"])
+
     def test_invalid_distribution_blocks_research(self):
         cal=[self.sample(date(2025,5,1),"1")]
         hold=[self.sample(date(2025,9,1),"2")]
