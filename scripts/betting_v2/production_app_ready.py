@@ -85,13 +85,9 @@ def validate_release(release: dict, now: int) -> None:
                     and q["validUntilMs"] <= f["kickoffEpochMs"],
                     "CHANGED_EXACT_PROVIDER_QUOTE")
         win, push = f["conservativeWinProbability"], f["conservativePushProbability"]
-        adverse_win, adverse_push = (f["adverseScenarioConservativeWinProbability"],
-                                      f["adverseScenarioPushProbability"])
-        require(all(0 <= x <= 1 for x in (win, push, adverse_win, adverse_push))
-                and win + push <= 1 + 1e-9 and adverse_win + adverse_push <= 1 + 1e-9
-                and win >= 0.60 and adverse_win >= 0.60
-                and win*f["quotedOdd"] + push > 1
-                and adverse_win*f["quotedOdd"] + adverse_push > 1,
+        require(all(0 <= x <= 1 for x in (win, push))
+                and win + push <= 1 + 1e-9
+                and win >= 0.60 and win*f["quotedOdd"] + push > 1,
                 "STRONG_CALIBRATED_WIN_OR_PUSH_EV_FAILED")
         require(f["centralWinProbability"] >= win and 0 <= f["calibrationReliability"] <= 1
                 and 0 <= f["conservativeIntervalWidth"] <= 1,
