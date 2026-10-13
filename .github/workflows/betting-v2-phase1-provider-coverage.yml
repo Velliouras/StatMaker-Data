@@ -1,0 +1,47 @@
+name: Betting V2 Phase 1 - API market coverage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/betting-v2-phase1-official-coverage'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betting-v2-phase1-provider-coverage
+  cancel-in-progress: false
+
+jobs:
+  official-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Sparse read-only checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/*
+            /data/statmaker/domestic_enriched/index.json
+      - name: Validate producer source
+        run: |
+          python3 -m py_compile scripts/betting_v2/phase1_provider_market_coverage.py scripts/api_football_stats_coverage_gate.py scripts/api_football_fetch_fixture_stats.py
+      - name: Ask official source for coverage once per league and season
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          python3 scripts/betting_v2/phase1_provider_market_coverage.py --root . --output "${RUNNER_TEMP}/official-market-coverage.json"
+      - name: Publish read-only evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-six-league-provider-coverage
+          path: ${{ runner.temp }}/official-market-coverage.json
+          if-no-files-found: warn
+          retention-days: 14
