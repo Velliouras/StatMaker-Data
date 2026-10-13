@@ -121,9 +121,11 @@ def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
                                  "observedAtMs": observed, "validUntilMs": expires})
     absence_sha = None
     if plan["mode"] == "ELO_GOALS_FALLBACK_NO_XG":
-        require(all(r["providerXgUnavailable"] for r in used), "NO_VERIFIED_NO_XG_MODE")
+        missing = [r for r in used if "xg" not in r]
+        require(bool(missing) and all(r.get("providerXgUnavailable") is True for r in missing),
+                "NO_VERIFIED_NO_XG_MODE")
         absence_sha = documents.add(evidence(fixtureId=row["fixtureId"], providerXgUnavailable=True,
-              sourceReceiptHashes=[r["betting_v2_provenance"]["rawStatisticsSha256"] for r in used]))
+              sourceReceiptHashes=[r["betting_v2_provenance"]["rawStatisticsSha256"] for r in missing]))
     return {
         "contract": FORECAST_CONTRACT, "researchOnly": False, **common,
         "generationId": row["generationId"], "selectionId": row["selectionId"],
@@ -138,4 +140,6 @@ def forecast(row: dict, case: dict, quote: dict, model: dict, validation: dict,
         "probabilityEvidenceSha256": probability_sha, "featureEvidence": feature_evidence,
         "adverseScenarioEvidenceSha256": adverse_sha, "adverseScenarioId": case["adverse"]["scenarioId"],
         "correlationEvidenceSha256": correlation_sha, "xgUnavailableEvidenceSha256": absence_sha,
+        "primaryXgUnavailableVerified": plan["mode"] == "ELO_GOALS_FALLBACK_NO_XG"
+              and absence_sha is not None,
     }
