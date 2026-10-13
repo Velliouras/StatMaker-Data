@@ -127,8 +127,8 @@ def verify_plan(plan: dict) -> None:
     require(0 <= number(plan["maximumHoldoutCalibrationError"]) < 1
             and 1.8 <= number(plan["oddsBandFrom"]) < number(plan["oddsBandTo"]) <= 3,
             "INVALID_COMPARABLE_COHORT_PLAN")
-    require(plan["contextColumns"] == ["homeUnavailablePlayers", "awayUnavailablePlayers"],
-            "UNKNOWN_GROUNDED_CONTEXT_SCHEMA")
+    require(plan["contextColumns"] in ([], ["homeUnavailablePlayers", "awayUnavailablePlayers"]),
+            "UNKNOWN_OPTIONAL_CONTEXT_SCHEMA")
     for candidate in plan["parameterCandidates"]:
         for key in ("recentWindow", "longWindow", "venueWindow", "minimumHistory", "maximumFeatureAgeMs", "maximumFitIterations"):
             require(isinstance(candidate[key], int) and candidate[key] > 0, "INVALID_MODEL_SEARCH_PARAMETER")
