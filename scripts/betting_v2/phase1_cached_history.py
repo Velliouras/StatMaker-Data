@@ -204,13 +204,38 @@ class CachedHistoryBridge:
                 for field in STAT_FIELDS:
                     if normalized.get(field) is not None:
                         source_summary["metricFieldCoverage"][field] += 1
+                # Only a provider-recorded actual half-time score is used.
+                # Do not derive a fictional period breakdown from the FT total.
+                hthg = _score(row.get("hthg"))
+                htag = _score(row.get("htag"))
+                score = row.get("score") or {}
+                halftime = score.get("halftime") or {}
+                if hthg is None:
+                    hthg = _score(halftime.get("home"))
+                if htag is None:
+                    htag = _score(halftime.get("away"))
+                if (hthg is None or htag is None) and scheduled.get(fid):
+                    previous = scheduled[fid]
+                    hthg = _score(previous.get("hthg"))
+                    htag = _score(previous.get("htag"))
+                    if hthg is None or htag is None:
+                        halftime = (previous.get("score") or {}).get("halftime") or {}
+                        hthg = _score(halftime.get("home"))
+                        htag = _score(halftime.get("away"))
+                actual_stats = {k: normalized.get(k) for k in STAT_FIELDS}
+                if (hg is not None and ag is not None and
+                        hthg is not None and htag is not None and
+                        0 <= hthg <= hg and 0 <= htag <= ag):
+                    actual_stats.update(HTHG=hthg, HTAG=htag,
+                                        H2HG=hg-hthg, H2AG=ag-htag)
+                    self.stats["VERIFIED_CACHED_PERIOD_LABELS"] += 1
                 historical = {
                     "group": group, "fixture_id": fid, "date": when,
                     "home": canonical_name(row.get("home_team")),
                     "away": canonical_name(row.get("away_team")),
                     "ids": team_ids, "leagueId": league_id,
                     "hg": hg, "ag": ag,
-                    "stats": {k: normalized.get(k) for k in STAT_FIELDS},
+                    "stats": actual_stats,
                     "cachePath": rel,
                 }
                 old = self.raw_history.get(key)
