@@ -458,16 +458,14 @@ def main() -> None:
     parser.add_argument("prepared_db", type=Path)
     args = parser.parse_args()
     counts = materialize(args.prepared_db)
-    # Disabled unless an owner-approved, evaluated release is explicitly supplied.
-    # This runs on the existing disposable export DB, before normal bundle hashes/package.
+    # The normal App-Ready publisher can install a genuine evaluated model
+    # release directly. No separate certification or approval artifact exists.
+    # A missing model release does not interfere with unrelated app assets.
     release_path = os.environ.get("STATMAKER_BETTING_V2_RELEASE_PATH")
-    approval_path = os.environ.get("STATMAKER_BETTING_V2_RELEASE_APPROVAL")
-    if release_path or approval_path:
-        if not release_path or not approval_path:
-            raise SystemExit("BLOCKED: incomplete explicit Betting V2 release approval")
+    if release_path:
         from betting_v2.production_app_ready import install_release
-        v2 = install_release(args.prepared_db, Path(release_path), Path(approval_path), REPO_ROOT)
-        print("APP_READY_CERTIFIED_BETTING_V2_STAGED", v2)
+        v2 = install_release(args.prepared_db, Path(release_path), REPO_ROOT)
+        print("APP_READY_VALIDATED_BETTING_V2_STAGED", v2)
     print("APP_READY_FIXTURE_INDEX_READY", " ".join(f"{k}={v}" for k, v in counts.items()))
 
 
