@@ -1,0 +1,63 @@
+name: "Betting V2 Phase 1 - targeted offline QA"
+
+# Runs only when explicitly requested, never on unrelated code/Android changes.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/betting-v2-phase1-qa-trigger'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betting-v2-phase1-targeted-offline-qa
+  cancel-in-progress: false
+
+jobs:
+  verify-phase1:
+    name: "Phase 1 tests and exact PROD-data before/after"
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Checkout StatMaker-Data/main (read-only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Verify Python sources compile
+        run: |
+          python3 -m py_compile \
+            scripts/betting_v2/phase1_cached_history.py \
+            scripts/betting_v2/run_real_prod_diagnostic.py \
+            scripts/betting_v2/phase1_qa_compare.py \
+            tests/test_betting_v2_phase1_cached_history.py
+
+      - name: Phase 1 regression tests only
+        run: |
+          python3 -m unittest discover \
+            -s tests \
+            -p 'test_betting_v2_phase1_cached_history.py' -v
+
+      - name: Compare same PROD ZIP and frozen as-of date OFFLINE
+        run: |
+          python3 scripts/betting_v2/phase1_qa_compare.py \
+            --repository-root . \
+            --output-dir "${RUNNER_TEMP}/betting-v2-phase1"
+
+      - name: Upload Phase 1 evidence (not published to app)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: betting-v2-phase1-qa
+          path: |
+            ${{ runner.temp }}/betting-v2-phase1/phase1_summary.json
+            ${{ runner.temp }}/betting-v2-phase1/phase1_diagnostic.json
+          if-no-files-found: warn
+          retention-days: 7
