@@ -123,9 +123,11 @@ class CachedHistoryBridge:
                 group = next(iter(possibilities))
                 self.stats["ADDITIONAL_CACHED_SEASONS"] += 1
             code = group.split("|", 1)[0]
-            self.source_paths.append({"cachePath": rel, "leagueId": league_id,
-                                      "leagueCode": code, "season": season,
-                                      "group": group, "indexed": bool(indexed)})
+            source_summary={"cachePath": rel, "leagueId": league_id,
+                "leagueCode": code, "season": season, "group": group,
+                "indexed": bool(indexed), "completedRows": 0, "scoredRows": 0,
+                "rowsWithTeamIds": 0, "metricFieldCoverage": {k: 0 for k in STAT_FIELDS}}
+            self.source_paths.append(source_summary)
             scheduled = {}
             for row in doc.get("schedule_fixtures") or []:
                 if not isinstance(row, dict) or not _id(row.get("fixture_id")):
@@ -169,6 +171,14 @@ class CachedHistoryBridge:
                 normalized = row.get("normalized_stats") or {}
                 if not isinstance(normalized, dict):
                     normalized = {}
+                source_summary["completedRows"] += 1
+                if hg is not None and ag is not None:
+                    source_summary["scoredRows"] += 1
+                if team_ids:
+                    source_summary["rowsWithTeamIds"] += 1
+                for field in STAT_FIELDS:
+                    if normalized.get(field) is not None:
+                        source_summary["metricFieldCoverage"][field] += 1
                 historical = {
                     "group": group, "fixture_id": fid, "date": when,
                     "home": canonical_name(row.get("home_team")),
