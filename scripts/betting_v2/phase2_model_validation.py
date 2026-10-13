@@ -20,9 +20,13 @@ from walk_forward_goals import walk_forward
 from walk_forward_elo import walk_forward_elo
 
 ONE_X_TWO = ("1X2_HOME", "1X2_DRAW", "1X2_AWAY")
+# Every half-goal Under is the exact complement of its Over event. Both
+# directions share the same observed goals distribution: no Under-only prior.
 MARKET_EVENTS = ONE_X_TWO + tuple(
-    f"{side}_OVER_{line}_5"
-    for side in ("HOME","AWAY","MATCH") for line in (0,1,2,3,4,5)
+    f"{side}_{direction}_{line}_5"
+    for side in ("HOME","AWAY","MATCH")
+    for direction in ("OVER","UNDER")
+    for line in (0,1,2,3,4,5)
 )
 MIN_CALIBRATION_BIN_CASES = 30
 
@@ -61,11 +65,21 @@ def _observations(rows: list[dict], event: str) -> list[tuple[str, int, float, i
     for r in rows:
         prob=r.get("probabilities") or {}
         actual=r.get("observed") or {}
+        inverted = False
+        key = event
         if event not in prob or event not in actual:
-            continue
+            if "_UNDER_" not in event:
+                continue
+            key = event.replace("_UNDER_","_OVER_",1)
+            if key not in prob or key not in actual:
+                continue
+            inverted = True
         try:
-            p=float(prob[event])
-            y=int(actual[event])
+            p=float(prob[key])
+            y=int(actual[key])
+            if inverted:
+                p=1.0-p
+                y=1-y
         except (ValueError,TypeError):
             continue
         if not (isfinite(p) and 0 <= p <= 1 and y in (0,1)):
