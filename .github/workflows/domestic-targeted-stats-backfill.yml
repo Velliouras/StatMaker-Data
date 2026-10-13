@@ -175,14 +175,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Derived UEFA base and update manifest are regenerated AFTER rebasing
+          # onto current main. Never commit stale copies that conflict with another
+          # canonical producer between this workflow's checkout and publication.
+          git restore -- data/statmaker/uefa_support_history.json data/statmaker/update_manifest.json
           git add \
             data/api_football/fixture_stats \
             data/api_football/domestic_normalized_fixture_stats.json \
             data/statmaker/domestic_live_july_registry.json \
             data/statmaker/domestic_rosters.json \
             data/statmaker/domestic_enriched \
-            data/statmaker/update_manifest.json \
-            data/statmaker/uefa_support_history.json \
+
             reports/api_football_fixture_stats_fetch.json \
             reports/api_football_fixture_stats_fetch.csv \
             reports/api_football_fixture_stats_fetch.md \
@@ -200,13 +203,15 @@ jobs:
           else
             git commit -m "Backfill targeted Domestic statistics"
             git pull --rebase --autostash origin main
-            # The producer may have rebased over another canonical writer. Rebuild the
-            # deterministic manifest now so it describes the exact tree being pushed.
+            # Rebuild BOTH volatile derived products against the new main tree.
+            # This preserves concurrently published canonical UEFA participant
+            # support instead of rebasing a stale generated copy over it.
+            python scripts/build_uefa_support_history.py
             python scripts/build_statmaker_update_manifest.py \
               --profile main \
               --branch main \
               --output data/statmaker/update_manifest.json
-            git add data/statmaker/update_manifest.json
+            git add data/statmaker/uefa_support_history.json data/statmaker/update_manifest.json
             if ! git diff --cached --quiet; then
               git commit -m "Rebuild main manifest after producer rebase"
             fi
