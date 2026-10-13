@@ -1,7 +1,8 @@
-"""Opt-in canonical App-Ready population, BEFORE the existing bundle/hash/atomic publisher.
+"""Install direct, evaluated V2 model forecasts into a disposable App-Ready staging DB.
 
-No network, manifest rewrite, fingerprint override, or training inside the publisher.
-Only an explicitly approved immutable release can alter a disposable staging SQLite.
+There are no certificates, model-release approvals, artificial provider receipts or
+new pipeline/workflow requirements. The existing atomic publish and generation
+fingerprint rules remain authoritative. This module does not run on import.
 """
 from __future__ import annotations
 
@@ -10,15 +11,11 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .production_contract import (CERTIFICATE_CONTRACT, EVIDENCE_CONTRACT, FORECAST_CONTRACT,
-                                 TIERS, canonical, digest, file_digest, read_json, require)
+from .production_contract import FORECAST_CONTRACT, TIERS, canonical, digest, read_json, require
 from .production_sources import full_inventory
 
+
 SCHEMA = (
-    """CREATE TABLE IF NOT EXISTS prepared_betting_v2_certificates(
-       certification_id TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL, sha256 TEXT NOT NULL)""",
-    """CREATE TABLE IF NOT EXISTS prepared_betting_v2_evidence(
-       sha256 TEXT PRIMARY KEY NOT NULL, payload TEXT NOT NULL)""",
     """CREATE TABLE IF NOT EXISTS prepared_betting_v2_quotes(
        generation_id TEXT NOT NULL, competition_id TEXT NOT NULL, snapshot_version TEXT NOT NULL,
        fixture_id TEXT NOT NULL, selection_id TEXT NOT NULL, bookmaker TEXT NOT NULL,
@@ -33,138 +30,93 @@ SCHEMA = (
 
 
 def validate_release(release: dict, now: int) -> None:
-    require(release["contract"] == "statmaker-betting-v2-canonical-release-v1"
-            and release["notYetPublished"] is True, "UNKNOWN_CANONICAL_RELEASE")
-    require(0 < release["producedAtMs"] <= now, "INVALID_RELEASE_TIME")
-    require(bool(release["forecasts"]) and bool(release["certificates"]), "NO_GENUINE_CERTIFIED_RELEASE")
-    docs = release["documents"]
-    for sha, doc in docs.items():
-        require(doc["contract"] == EVIDENCE_CONTRACT and doc.get("researchOnly") is False
-                and digest(doc) == sha, "INVALID_RELEASE_EVIDENCE")
-    certs = {}
-    for cert in release["certificates"]:
-        require(cert["contract"] == CERTIFICATE_CONTRACT and cert.get("researchOnly") is False,
-                "INVALID_RELEASE_CERTIFICATE")
-        id = cert["certificationId"]
-        require(id not in certs, "DUPLICATE_CERTIFICATION_ID")
-        require(0 < cert["trainingEndMs"] < cert["calibrationStartMs"] <= cert["calibrationEndMs"]
-                <= cert["frozenPolicyAtMs"] < cert["untouchedHoldoutStartMs"] <= cert["untouchedHoldoutEndMs"]
-                <= cert["evaluatedAtMs"] <= release["producedAtMs"] <= now < cert["validUntilMs"],
-                "LEAKING_OR_STALE_CERTIFICATE")
-        require(cert["comparableCases"] > 0 and set(cert["tierCriteria"]) == set(TIERS), "NO_FROZEN_TIER_POLICY")
-        for field in ("reportSha256", "reliabilityDiagramSha256", "modelErrorAnalysisSha256",
-                      "driftAnalysisSha256", "profitabilityAnalysisSha256"):
-            doc = docs[cert[field]]
-            require(all(doc[k] == cert[k] for k in ("modelVersion", "calibrationVersion",
-                                                   "marketModelKey", "evidenceMode")),
-                    "CROSS_MODEL_EVIDENCE_JOIN")
-        report = docs[cert["reportSha256"]]
-        for key in ("trainingEndMs", "calibrationStartMs", "calibrationEndMs",
-                    "untouchedHoldoutStartMs", "untouchedHoldoutEndMs", "trainingFingerprint"):
-            require(report[key] == cert[key], "REPORT_CERTIFICATE_MISMATCH")
-        require(report["frozenTierCriteria"] == cert["tierCriteria"]
-                and report["settledCases"] == cert["comparableCases"], "UNFROZEN_OR_MISMATCHED_POLICY")
-        profit = docs[cert["profitabilityAnalysisSha256"]]
-        require(profit["unitStakeRoiLowerBound"] > 0 and profit["settledCases"] == cert["comparableCases"]
-                and profit["priceDatasetSha256"] in docs, "NO_INDEPENDENT_PRICED_PROFITABILITY")
-        require(docs[cert["driftAnalysisSha256"]]["revalidationRequired"] is False, "DRIFT_REVALIDATION_REQUIRED")
-        require(bool(docs[cert["reliabilityDiagramSha256"]]["bins"])
-                and bool(docs[cert["reliabilityDiagramSha256"]]["adverseBins"])
-                and docs[cert["modelErrorAnalysisSha256"]]["outOfTimeCases"] == cert["comparableCases"],
-                "NO_INDEPENDENT_ERROR_CALIBRATION")
-        require(bool(docs[cert["modelErrorAnalysisSha256"]]["adverseErrorBySegment"]),
-                "NO_INDEPENDENT_ADVERSE_ERROR_EVIDENCE")
-        certs[id] = cert
+    require(release["contract"] == "statmaker-betting-v2-canonical-release-v2"
+            and release["notYetPublished"] is True, "UNKNOWN_MODEL_FORECAST_RELEASE")
+    require(0 < release["producedAtMs"] <= now and bool(release["forecasts"]),
+            "NO_REAL_MODEL_FORECASTS")
+    documents = release.get("documents", {})
+    for sha, document in documents.items():
+        require(digest(document) == sha and document.get("researchOnly") is False,
+                "INVALID_MODEL_EVIDENCE")
     quotes = {}
-    for q in release["quotes"]:
-        key = tuple(q[k] for k in ("competitionId", "snapshotVersion", "fixtureId", "selectionId"))
-        require(key not in quotes and q["generationId"] == release["generationId"], "AMBIGUOUS_RELEASE_QUOTE")
-        require(q["bookmaker"] and q["providerQuoteId"]
-                and 0 < q["observedAtMs"] <= release["producedAtMs"] <= now < q["validUntilMs"],
-                "STALE_OR_UNATTRIBUTABLE_QUOTE")
-        quotes[key] = q
-    seen = set()
+    for quote in release.get("quotes", []):
+        key = tuple(quote[k] for k in ("competitionId", "snapshotVersion", "fixtureId", "selectionId"))
+        require(key not in quotes and quote["generationId"] == release["generationId"],
+                "AMBIGUOUS_MODEL_QUOTE")
+        require(quote["bookmaker"] and quote["providerQuoteId"]
+                and 0 < quote["observedAtMs"] <= release["producedAtMs"]
+                and now < quote["validUntilMs"], "STALE_OR_UNATTRIBUTABLE_QUOTE")
+        quotes[key] = quote
+
+    observed = set()
     for row in release["forecasts"]:
         key = tuple(row[k] for k in ("competitionId", "snapshotVersion", "fixtureId", "selectionId"))
-        require(key not in seen, "AMBIGUOUS_RELEASE_FORECAST")
-        seen.add(key)
-        f, q = row["payload"], quotes[key]
-        cert = certs[f["certificationId"]]
+        require(key not in observed, "DUPLICATE_MODEL_FORECAST")
+        observed.add(key)
+        f = row["payload"]
+        v = f["validation"]
         require(f["contract"] == FORECAST_CONTRACT and f.get("researchOnly") is False
-                and f["generationId"] == release["generationId"], "WRONG_FORECAST_CONTRACT")
-        require(all(f[k] == cert[k] for k in ("leagueCode", "season", "marketModelKey", "modelVersion", "evidenceMode"))
-                and row["competitionId"] == cert["competitionId"], "CROSS_COHORT_FORECAST")
-        require(f["fixtureId"] == row["fixtureId"] and f["selectionId"] == row["selectionId"],
-                "FORECAST_IDENTITY_MISMATCH")
-        require(f["forecastComputedAtMs"] == release["producedAtMs"]
-                and f["kickoffEpochMs"] > now and q["validUntilMs"] <= f["kickoffEpochMs"]
-                and f["quotedOdd"] == q["odd"] and f["quoteObservedAtEpochMs"] == q["observedAtMs"]
-                and f["quoteValidUntilEpochMs"] == q["validUntilMs"]
-                and cert["oddsBandFrom"] <= q["odd"] < cert["oddsBandTo"] and 1.8 < q["odd"] < 3,
-                "STALE_OR_CHANGED_EXACT_PRICE")
-        require(f["conservativeWinProbability"] >= .6 and f["adverseScenarioConservativeWinProbability"] >= .6
-                and f["conservativeWinProbability"]*q["odd"]+f["conservativePushProbability"] > 1
-                and f["adverseScenarioConservativeWinProbability"]*q["odd"]+f["adverseScenarioPushProbability"] > 1,
-                "STRONG_CONSERVATIVE_GATE_FAILED")
-        probability = docs[f["probabilityEvidenceSha256"]]
-        require(probability["fixtureId"] == row["fixtureId"] and probability["selectionId"] == row["selectionId"]
-                and probability["modelVersion"] == cert["modelVersion"]
-                and probability["calibrationVersion"] == cert["calibrationVersion"], "PROBABILITY_BINDING_MISMATCH")
-        require(probability["centralWin"] == f["centralWinProbability"]
-                and probability["conservativeWin"] == f["conservativeWinProbability"]
-                and probability["conservativePush"] == f["conservativePushProbability"]
-                and probability["calibrationReliability"] == f["calibrationReliability"]
-                and probability["conservativeIntervalWidth"] == f["conservativeIntervalWidth"],
-                "FORECAST_PROBABILITY_MISMATCH")
-        model_errors = docs[cert["modelErrorAnalysisSha256"]]
-        require(model_errors["uncertaintyMethodVersion"] == probability["uncertaintyMethodVersion"]
-                and all(0 <= v for v in probability["uncertaintyComponents"].values()),
-                "MISSING_EMPIRICAL_UNCERTAINTY_BINDING")
-        distribution = docs[probability["distributionSha256"]]
-        require(distribution["fixtureId"] == row["fixtureId"]
-                and distribution["modelVersion"] == cert["modelVersion"]
-                and distribution["marketModelKey"] == cert["marketModelKey"]
-                and distribution["cells"] and distribution["marketConsistencyChecks"],
-                "MISSING_SHARED_DISTRIBUTION_EVIDENCE")
-        dist = probability["coherentSettlementDistribution"]
-        require(abs(sum(dist.values())-1) <= 1e-9 and all(0 <= v <= 1 for v in dist.values()),
-                "INCOHERENT_WIN_PUSH_LOSE")
-        adverse = docs[f["adverseScenarioEvidenceSha256"]]
-        require(adverse["fixtureId"] == row["fixtureId"] and adverse["scenarioId"] == f["adverseScenarioId"]
-                and adverse["calibrationVersion"] == cert["calibrationVersion"]
-                and adverse["realisticAdverseInputs"] and adverse["observedAtMs"] <= f["forecastComputedAtMs"]
-                and adverse["validUntilMs"] >= q["validUntilMs"], "UNPROVEN_ADVERSE_SCENARIO")
-        require(adverse["conservativeWin"] == f["adverseScenarioConservativeWinProbability"]
-                and adverse["conservativePush"] == f["adverseScenarioPushProbability"]
-                and abs(sum(adverse["coherentSettlementDistribution"].values())-1) <= 1e-9,
-                "INCOHERENT_ADVERSE_DISTRIBUTION")
-        correlation = docs[f["correlationEvidenceSha256"]]
-        require(correlation["fixtureId"] == row["fixtureId"]
-                and correlation["modelVersion"] == cert["modelVersion"]
-                and correlation["scenarioGroup"] == f["sameScenarioGroup"], "UNPROVEN_CORRELATION")
+                and f["generationId"] == release["generationId"], "NOT_EVALUATED_MODEL_OUTPUT")
+        require(f["fixtureId"] == row["fixtureId"] and f["selectionId"] == row["selectionId"]
+                and f["sameScenarioGroup"] and f["leagueCode"] == v["leagueCode"]
+                and f["season"] == v["season"] and row["competitionId"] == v["competitionId"],
+                "WRONG_MODEL_OR_FIXTURE_IDENTITY")
+        require(all(f[field] == v[field] for field in ("modelVersion", "calibrationVersion",
+                                                      "marketModelKey", "evidenceMode")),
+                "MODEL_EVALUATION_MISMATCH")
+        require(v["outOfTimeValidated"] is True and v["comparableMarketCalibrated"] is True
+                and v["independentModelErrorIncluded"] is True
+                and v["evidenceModeIndependentlyCalibrated"] is True,
+                "MISSING_REAL_MODEL_BACKTEST")
+        require(0 < v["trainingEndMs"] < v["calibrationStartMs"] <= v["calibrationEndMs"]
+                < v["holdoutStartMs"] <= v["holdoutEndMs"] <= v["evaluatedAtMs"]
+                <= f["forecastComputedAtMs"] <= release["producedAtMs"] <= now < v["validUntilMs"],
+                "LEAKING_OR_STALE_MODEL_EVALUATION")
+        require(v["comparableCases"] > 0 and set(v["tierCriteria"]) == set(TIERS),
+                "INSUFFICIENT_MARKET_CALIBRATION")
+        require(f["kickoffEpochMs"] > now and 1.8 < f["quotedOdd"] < 3.0
+                and v["oddsBandFrom"] <= f["quotedOdd"] < v["oddsBandTo"],
+                "EXPIRED_FIXTURE_OR_OUTSIDE_ODDS_BAND")
+        q = quotes.get(key)
+        if q is not None:
+            require(q["odd"] == f["quotedOdd"]
+                    and q["observedAtMs"] == f["quoteObservedAtEpochMs"]
+                    and q["validUntilMs"] == f["quoteValidUntilEpochMs"]
+                    and q["validUntilMs"] <= f["kickoffEpochMs"],
+                    "CHANGED_EXACT_PROVIDER_QUOTE")
+        win, push = f["conservativeWinProbability"], f["conservativePushProbability"]
+        adverse_win, adverse_push = (f["adverseScenarioConservativeWinProbability"],
+                                      f["adverseScenarioPushProbability"])
+        require(all(0 <= x <= 1 for x in (win, push, adverse_win, adverse_push))
+                and win + push <= 1 + 1e-9 and adverse_win + adverse_push <= 1 + 1e-9
+                and win >= 0.60 and adverse_win >= 0.60
+                and win*f["quotedOdd"] + push > 1
+                and adverse_win*f["quotedOdd"] + adverse_push > 1,
+                "STRONG_CALIBRATED_WIN_OR_PUSH_EV_FAILED")
+        require(f["centralWinProbability"] >= win and 0 <= f["calibrationReliability"] <= 1
+                and 0 <= f["conservativeIntervalWidth"] <= 1,
+                "INVALID_MODEL_UNCERTAINTY")
         types = set()
         for feature in f["featureEvidence"]:
-            require(feature["feature"] not in types, "DUPLICATE_FEATURE")
+            require(feature["feature"] not in types, "DUPLICATE_MODEL_FEATURE")
             types.add(feature["feature"])
-            doc = docs[feature["sourceSha256"]]
-            require(doc["fixtureId"] == row["fixtureId"] and doc["feature"] == feature["feature"]
-                    and doc["sourceObservationCount"] > 0
-                    and 0 < doc["observedAtMs"] == feature["observedAtMs"] <= f["forecastComputedAtMs"]
-                    and doc["validUntilMs"] == feature["validUntilMs"] > now, "STALE_OR_MISSING_FEATURE_LINEAGE")
+            require(len(feature["sourceSha256"]) == 64 and
+                    0 < feature["observedAtMs"] <= f["forecastComputedAtMs"]
+                    < feature["validUntilMs"], "STALE_OR_UNATTRIBUTABLE_MODEL_FEATURE")
         required = {"ELO", "RECENT_FORM", "LONG_TERM_FORM", "HOME_AWAY", "MARKET_SPECIFIC"}
         if f["evidenceMode"] == "XG_PRIMARY":
             required |= {"XG", "XGA"}
         else:
-            absence = docs[f["xgUnavailableEvidenceSha256"]]
-            require(absence["fixtureId"] == row["fixtureId"] and absence["providerXgUnavailable"] is True
-                    and not types.intersection({"XG", "XGA"}), "UNPROVEN_NO_XG_FALLBACK")
-        require(required <= types, "MISSING_REQUIRED_FEATURE")
-        assessed_tier = next((tier for tier in TIERS
-            if f["conservativeWinProbability"] >= cert["tierCriteria"][tier]["minimumWin"]
-            and f["calibrationReliability"] >= cert["tierCriteria"][tier]["minimumReliability"]
-            and f["conservativeIntervalWidth"] <= cert["tierCriteria"][tier]["maximumIntervalWidth"]
-            and cert["comparableCases"] >= cert["tierCriteria"][tier]["minimumComparableCases"]), None)
-        require(assessed_tier == f["tier"], "UNFROZEN_OR_FORGED_TIER")
+            require(f.get("primaryXgUnavailableVerified") is True
+                    and not types.intersection({"XG", "XGA"}),
+                    "INVALID_INDEPENDENT_ELO_FALLBACK")
+        require(required <= types, "INCOMPLETE_MARKET_MODEL_INPUTS")
+        picked_tier = next((tier for tier in TIERS
+                            if win >= v["tierCriteria"][tier]["minimumWin"]
+                            and f["calibrationReliability"] >= v["tierCriteria"][tier]["minimumReliability"]
+                            and f["conservativeIntervalWidth"] <= v["tierCriteria"][tier]["maximumIntervalWidth"]
+                            and v["comparableCases"] >= v["tierCriteria"][tier]["minimumComparableCases"]), None)
+        require(picked_tier == f["tier"], "WRONG_EMPIRICAL_STRONG_TIER")
 
 
 def insert_immutable(db: sqlite3.Connection, table: str, columns: tuple, values: tuple, key_columns: tuple) -> None:
@@ -177,51 +129,51 @@ def insert_immutable(db: sqlite3.Connection, table: str, columns: tuple, values:
     db.execute(f"INSERT INTO {table}({','.join(columns)}) VALUES({','.join('?' for _ in columns)})", values)
 
 
-def install_release(prepared_db: Path, release_path: Path, approval_path: Path, repository: Path) -> dict:
-    approval, release = read_json(approval_path), read_json(release_path)
-    require(approval["contract"] == "statmaker-betting-v2-owner-release-approval-v1"
-            and approval["approvedForCanonicalAppReady"] is True and approval["approvedBy"],
-            "MISSING_EXPLICIT_RELEASE_APPROVAL")
-    require(approval["releaseSha256"] == file_digest(release_path)
-            and approval["generationId"] == release["generationId"], "UNAPPROVED_RELEASE_DIGEST")
-    target, staging = prepared_db.resolve(), Path(approval["stagingRoot"]).resolve()
-    require(target.is_relative_to(staging) and not target.is_relative_to(repository.resolve()/"data")
-            and prepared_db.is_file() and not prepared_db.is_symlink(), "ONLY_DISPOSABLE_STAGING_DB_ALLOWED")
+def install_release(prepared_db: Path, release_path: Path, repository: Path) -> dict:
+    release = read_json(release_path)
+    target, checkout = prepared_db.resolve(), repository.resolve()
+    # Never mutate checked-in canonical data, the Android database, or a
+    # historical issued bet. Only the existing publisher's disposable DB.
+    require(prepared_db.is_file() and not prepared_db.is_symlink()
+            and not target.is_relative_to(checkout / "data"),
+            "ONLY_STAGING_PREPARED_DB_ALLOWED")
     now = int(datetime.now(timezone.utc).timestamp()*1000)
     validate_release(release, now)
     inventory, _ = full_inventory(target, release["generationId"])
     require(digest(inventory) == release["rawInventorySha256"]
             and len(inventory) == release["rawInventoryRowCount"]
             and sum(bool(r["market"]) for r in inventory) == release["rawSelectionCount"],
-            "SOURCE_CHANGED_SINCE_FORECAST")
+            "SOURCE_CHANGED_SINCE_MODEL_FORECAST")
     with sqlite3.connect(target) as db:
-        versions = dict(db.execute("SELECT competition_id,snapshot_version FROM prepared_snapshot_meta WHERE state='ready'"))
-        fingerprint = hashlib.sha256("\n".join(f"{k}|{v}" for k, v in sorted(versions.items())).encode()).hexdigest()
-        generation = db.execute("""SELECT source_fingerprint,rules_fingerprint FROM prepared_pattern_generation
-                                WHERE generation_id=? AND state='ready'""", (release["generationId"],)).fetchall()
+        versions = dict(db.execute(
+            "SELECT competition_id,snapshot_version FROM prepared_snapshot_meta WHERE state='ready'"))
+        fingerprint = hashlib.sha256(
+            "\n".join(f"{k}|{v}" for k, v in sorted(versions.items())).encode()).hexdigest()
+        generation = db.execute(
+            """SELECT source_fingerprint,rules_fingerprint FROM prepared_pattern_generation
+               WHERE generation_id=? AND state='ready'""",
+            (release["generationId"],)).fetchall()
         require(len(generation) == 1 and generation[0][0] == fingerprint
-                and hashlib.sha256((fingerprint+"|"+generation[0][1]).encode()).hexdigest() == release["generationId"],
-                "EXISTING_GENERATION_FINGERPRINT_MISMATCH")
-        schema = db.execute("PRAGMA user_version").fetchone()[0]
+                and hashlib.sha256((fingerprint+"|"+generation[0][1]).encode()).hexdigest()
+                    == release["generationId"],
+                "MODEL_SOURCE_GENERATION_MISMATCH")
+        schema_version = db.execute("PRAGMA user_version").fetchone()[0]
         db.execute("BEGIN IMMEDIATE")
-        for sql in SCHEMA:
-            db.execute(sql)
-        for sha, doc in release["documents"].items():
-            insert_immutable(db, "prepared_betting_v2_evidence", ("sha256", "payload"),
-                             (sha, canonical(doc)), ("sha256",))
-        for cert in release["certificates"]:
-            insert_immutable(db, "prepared_betting_v2_certificates", ("certification_id", "payload", "sha256"),
-                             (cert["certificationId"], canonical(cert), digest(cert)), ("certification_id",))
+        for statement in SCHEMA:
+            db.execute(statement)
         keys = ("generation_id", "competition_id", "snapshot_version", "fixture_id", "selection_id")
-        for q in release["quotes"]:
-            values = tuple(q[k] for k in ("generationId", "competitionId", "snapshotVersion", "fixtureId",
-                     "selectionId", "bookmaker", "providerQuoteId", "observedAtMs", "validUntilMs", "odd"))
-            insert_immutable(db, "prepared_betting_v2_quotes", keys+("bookmaker", "provider_quote_id",
-                             "observed_at_ms", "valid_until_ms", "odd"), values, keys)
+        for q in release.get("quotes", []):
+            values = tuple(q[k] for k in ("generationId", "competitionId", "snapshotVersion",
+                "fixtureId", "selectionId", "bookmaker", "providerQuoteId",
+                "observedAtMs", "validUntilMs", "odd"))
+            insert_immutable(db, "prepared_betting_v2_quotes",
+                keys+("bookmaker", "provider_quote_id", "observed_at_ms", "valid_until_ms", "odd"),
+                values, keys)
         for f in release["forecasts"]:
             values = (release["generationId"], f["competitionId"], f["snapshotVersion"],
                       f["fixtureId"], f["selectionId"], canonical(f["payload"]))
             insert_immutable(db, "prepared_betting_v2_forecasts", keys+("payload",), values, keys)
-        require(db.execute("PRAGMA user_version").fetchone()[0] == schema, "UNAUTHORIZED_SCHEMA_VERSION_CHANGE")
-    return {"certificates": len(release["certificates"]), "forecasts": len(release["forecasts"]),
-            "quotes": len(release["quotes"]), "evidence": len(release["documents"])}
+        require(db.execute("PRAGMA user_version").fetchone()[0] == schema_version,
+                "UNAUTHORIZED_PREPARED_SCHEMA_VERSION_CHANGE")
+    return {"forecasts": len(release["forecasts"]),
+            "quotes": len(release.get("quotes", []))}
