@@ -47,6 +47,7 @@ jobs:
             scripts/build_uefa_support_history.py \
             scripts/backfill_uefa_support_history.py \
             scripts/backfill_uefa_support_history_v2.py \
+            scripts/uefa_verified_team_ids.py \
             scripts/betting_v2/phase1_uefa_backfill_feed.py \
             scripts/build_statmaker_update_manifest.py
 
@@ -71,6 +72,9 @@ jobs:
       - name: Source integrity regressions for canonical UEFA participant feed
         run: python3 -m unittest discover -s tests -p 'test_betting_v2_phase1_uefa_backfill_feed.py' -v
 
+      - name: Verify provider team IDs from immutable cached league/season
+        run: python3 -m unittest discover -s tests -p 'test_uefa_verified_team_ids.py' -v
+
       - name: Repair participant feed from canonical App-Ready data
         run: |
           python3 scripts/betting_v2/phase1_uefa_backfill_feed.py \
@@ -81,7 +85,7 @@ jobs:
       - name: Backfill only missing UEFA participant history and logos
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_MAX_REQUESTS: ${{ github.event_name == 'push' && '120' || (github.event_name == 'workflow_dispatch' && inputs.max_requests || '200') }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'push' && '80' || (github.event_name == 'workflow_dispatch' && inputs.max_requests || '200') }}
         run: |
           max_requests="${INPUT_MAX_REQUESTS:-200}"
           python scripts/backfill_uefa_support_history_v2.py \
