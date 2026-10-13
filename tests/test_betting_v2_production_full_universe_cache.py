@@ -60,6 +60,7 @@ class BettingV2ProducerFullUniverseCacheTests(TestCase):
         }
         calls = Counter()
         quote_lookups = []
+        evaluated_order = []
         published = []
 
         def resolve(row, schedule):
@@ -68,11 +69,13 @@ class BettingV2ProducerFullUniverseCacheTests(TestCase):
 
         def case(history, fixture, context, offer, parameters, plan, at):
             calls["case_for"] += 1
+            evaluated_order.append(("matchup", fixture["fixture_id"]))
             self.assertEqual(offer, {})  # cached template is market-independent
             return {"features": [1.0], "offer": offer}
 
         def exact_quote(row, candidates, at):
             quote_lookups.append((row["selectionId"], len(candidates)))
+            evaluated_order.append(("price", by_fixture[row["fixtureId"]]["fixture_id"]))
             self.assertEqual(len(candidates), 1)
             self.assertEqual(candidates[0]["selectionId"], row["selectionId"])
             return candidates[0]
@@ -117,6 +120,9 @@ class BettingV2ProducerFullUniverseCacheTests(TestCase):
         self.assertEqual(calls["case_for"], 2)
         self.assertEqual(len(quote_lookups), len(rows))
         self.assertTrue(all(count == 1 for _, count in quote_lookups))
+        for fixture in ("api-a", "api-b"):
+            self.assertLess(evaluated_order.index(("matchup", fixture)),
+                            evaluated_order.index(("price", fixture)))
         self.assertEqual(len(published), 1)
         self.assertEqual(published[0]["rawInventoryRowCount"], len(rows))
         self.assertEqual(len(published[0]["forecasts"]), len(rows))
