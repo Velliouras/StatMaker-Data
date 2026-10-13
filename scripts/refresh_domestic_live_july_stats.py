@@ -24,6 +24,7 @@ import sys
 from typing import Any, Dict, List, Sequence, Tuple
 
 import api_football_fetch_fixture_stats as stats_fetch
+from api_football_stats_coverage_gate import read_statistics_coverage
 import domestic_live_july_pipeline as pipeline
 import statmaker_domestic_scope as scope
 
@@ -90,6 +91,14 @@ def fetch_league_preserving_fixture_metadata(
         if isinstance(item, dict)
     ]
     schedule_fixtures = existing_schedule
+    provider_coverage = existing_cache.get("providerStatisticsCoverage")
+    checked_coverage = False
+
+    def cache_with_coverage(*args, **kwargs):
+        payload = stats_fetch.cache_payload(*args, **kwargs)
+        if isinstance(provider_coverage, dict):
+            payload["providerStatisticsCoverage"] = provider_coverage
+        return payload
 
     requests_before = request_state["count"]
     completed_count = 0
@@ -134,7 +143,7 @@ def fetch_league_preserving_fixture_metadata(
             )
             stats_fetch.write_json(
                 cache_path,
-                stats_fetch.cache_payload(league, []),
+                cache_with_coverage(league, []),
             )
             return stats_fetch.report_row(
                 league, cache_path, 0, 0, 0,
@@ -155,7 +164,7 @@ def fetch_league_preserving_fixture_metadata(
         notes.append("request cap reached before fixtures request")
         stats_fetch.write_json(
             cache_path,
-            stats_fetch.cache_payload(
+            cache_with_coverage(
                 league,
                 existing_by_id.values(),
                 schedule_fixtures=schedule_fixtures,
@@ -199,6 +208,14 @@ def fetch_league_preserving_fixture_metadata(
             notes.append(f"cached provider-empty statistics fixture={fixture_id}")
             continue
 
+        if not checked_coverage:
+            covered, provider_coverage, coverage_note = read_statistics_coverage(
+                league, provider_coverage, api_key, request_state, max_requests)
+            checked_coverage = True
+            notes.append("official_stats_preflight=" + coverage_note)
+            if covered is False:
+                notes.append("Provider reports fixture statistics unavailable for this league+season; preserve goals and league")
+                break
         if request_state["count"] >= max_requests:
             notes.append("request cap reached before all fixture statistics were fetched")
             break
@@ -238,7 +255,7 @@ def fetch_league_preserving_fixture_metadata(
 
     stats_fetch.write_json(
         cache_path,
-        stats_fetch.cache_payload(
+        cache_with_coverage(
             league,
             existing_by_id.values(),
             schedule_fixtures=schedule_fixtures,
