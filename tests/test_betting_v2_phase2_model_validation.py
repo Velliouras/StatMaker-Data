@@ -61,8 +61,21 @@ class Phase2ChronologicalCalibrationTests(unittest.TestCase):
         hbad=[self.sample(date(2025,9,1),"b",win=False)]
         good=frozen_market_calibration(cal,hgood)["events"]["1X2_HOME"]
         bad=frozen_market_calibration(cal,hbad)["events"]["1X2_HOME"]
-        self.assertEqual(good["frozenCalibrationBins"],bad["frozenCalibrationBins"])
+        self.assertEqual(good["frozenCalibrationBinsByLeague"],bad["frozenCalibrationBinsByLeague"])
         self.assertNotEqual(good["holdout"]["observedHitRate"],bad["holdout"]["observedHitRate"])
+    def test_league_cannot_borrow_other_leagues_calibration_samples(self):
+        earlier=[self.sample(date(2025,5,1),str(i),win=True) for i in range(50)]
+        # 50 prior examples exist, but none from the fixture's competition.
+        out=self.sample(date(2025,9,1),"away_league")
+        out["leagueCode"]="NOR2"
+        out["league"]="NOR2|OBOS-ligaen"
+        report=frozen_market_calibration(earlier,[out])
+        case=report["events"]["1X2_HOME"]
+        self.assertEqual(case["holdout"]["n"],1)
+        self.assertEqual(case["calibratedBinHoldout"]["n"],0)
+        self.assertEqual(case["frozenConservativePAtLeast60Holdout"]["n"],0)
+        self.assertFalse(case["canCertifyStrong"])
+
     def test_invalid_distribution_blocks_research(self):
         cal=[self.sample(date(2025,5,1),"1")]
         hold=[self.sample(date(2025,9,1),"2")]
