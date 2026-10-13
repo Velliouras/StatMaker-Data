@@ -395,6 +395,117 @@ def choose_index_entry(index: dict[str, Any], league_code: str, season: str) -> 
     return max(fallback, key=lambda x: int(x.get("completed_fixtures") or 0)) if fallback else None
 
 
+UEFA_CURRENT_HISTORY_PATH = ROOT / "data/statmaker/uefa_current_stats.json"
+UEFA_TEAM_HISTORY_PATH = ROOT / "data/statmaker/uefa_team_support_history.json"
+UEFA_COMPETITION_CODES = {
+    "CL": "champions_league",
+    "EL": "europa_league",
+    "CONF": "conference_league",
+    "UECL": "conference_league",
+}
+
+
+def load_uefa_team_history(
+    league_code: str,
+    fixture_date: str,
+    cache: dict[str, LeagueHistory],
+) -> LeagueHistory | None:
+    """Verified UEFA club + participating teams' genuine prior results.
+
+    This is an offline fallback for UEFA, never synthetic completed fixtures
+    or substitute odds. Source matches are strictly older than target date
+    and conflicting source results for an identical fixture are excluded.
+    """
+    competition = UEFA_COMPETITION_CODES.get(league_code)
+    if competition is None:
+        return None
+    target_day = str(fixture_date or "")[:10]
+    if len(target_day) != 10:
+        return None
+    key = "UEFA|" + competition + "|" + target_day
+    if key in cache:
+        return cache[key]
+    if not UEFA_CURRENT_HISTORY_PATH.is_file() or not UEFA_TEAM_HISTORY_PATH.is_file():
+        return None
+    current = json.loads(UEFA_CURRENT_HISTORY_PATH.read_text(encoding="utf-8"))
+    support = json.loads(UEFA_TEAM_HISTORY_PATH.read_text(encoding="utf-8"))
+    # These are the current-season real UEFA participant identities, not
+    # previous-year guessed team lists.
+    current_comp = next((c for c in current.get("competitions", [])
+                         if c.get("competitionId") == competition), None)
+    if current_comp is None:
+        return None
+    participants = {norm(n) for n in current_comp.get("participants", []) if norm(n)}
+    candidates: dict[tuple[str, str, str], dict] = {}
+    conflicts: set[tuple[str, str, str]] = set()
+
+    def add(source: dict, code: str, stats: dict | None = None) -> None:
+        date = str(source.get("date") or "")[:10]
+        home = source.get("homeTeam")
+        away = source.get("awayTeam")
+        hh, aa = norm(home), norm(away)
+        if not date or date >= target_day or not hh or not aa or hh == aa:
+            return
+        if hh not in participants and aa not in participants:
+            return
+        hg, ag = source.get("homeGoals"), source.get("awayGoals")
+        if not isinstance(hg, int) or not isinstance(ag, int) or min(hg, ag) < 0:
+            return
+        ident = (date, hh, aa)
+        if ident in conflicts:
+            return
+        normalized = {
+            "date": date, "status": "FT",
+            "home_team": home, "away_team": away,
+            "home_goals": hg, "away_goals": ag,
+        }
+        if stats:
+            # Normalize only genuinely observed numerical match stats.
+            home_stats = {}
+            away_stats = {}
+            mapping = {
+                "Total Shots": ("HS", "AS"),
+                "Shots on Goal": ("HST", "AST"),
+                "Corner Kicks": ("HC", "AC"),
+                "Yellow Cards": ("HY", "AY"),
+            }
+            for field, (h, a) in mapping.items():
+                if isinstance(stats.get(h), (int, float)):
+                    home_stats[field] = stats[h]
+                if isinstance(stats.get(a), (int, float)):
+                    away_stats[field] = stats[a]
+            if home_stats or away_stats:
+                normalized["raw_statistics"] = [
+                    {"team": {"name": home}, "statistics": [
+                        {"type": t, "value": v} for t, v in home_stats.items()]},
+                    {"team": {"name": away}, "statistics": [
+                        {"type": t, "value": v} for t, v in away_stats.items()]},
+                ]
+        previous = candidates.get(ident)
+        if previous is not None and (
+            previous["home_goals"] != hg or previous["away_goals"] != ag
+        ):
+            candidates.pop(ident, None)
+            conflicts.add(ident)
+            return
+        if previous is None or stats:
+            candidates[ident] = normalized
+
+    for participant in support.get("participants", []):
+        # The source contains actual historic domestic and UEFA scorelines.
+        for match in participant.get("matches", []):
+            add(match, "participant")
+    for match in current_comp.get("fixtures", []):
+        if match.get("status") in FINISHED_STATUSES:
+            add(match, "uefa_current", match.get("normalizedStats"))
+    history = LeagueHistory(list(candidates.values()))
+    # Cannot model this UEFA match when neither team's historical scores exist.
+    if not history.league_home.get("goals"):
+        return None
+    cache[key] = history
+    return history
+
+
 def load_history(entry: dict[str, Any], cache: dict[str, LeagueHistory]) -> LeagueHistory | None:
     path = ROOT / str(entry.get("cache_path") or "")
     key = str(path)
@@ -701,10 +812,14 @@ def main() -> int:
             rows = by_match.get(match_key, [])
             league_code = str(match.get("leagueCode") or "")
             season = str(match.get("season") or "")
-            entry = choose_index_entry(index, league_code, season)
-            if not entry:
-                continue
-            history = load_history(entry, history_cache)
+            if league_code in UEFA_COMPETITION_CODES:
+                history = load_uefa_team_history(
+                    league_code, str(match.get("date") or match.get("kickoff") or ""),
+                    history_cache,
+                )
+            else:
+                entry = choose_index_entry(index, league_code, season)
+                history = load_history(entry, history_cache) if entry else None
             if history is None:
                 continue
 
