@@ -36,7 +36,7 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
-          python3 scripts/betting_v2/phase1_provider_market_coverage.py --root . --output "${RUNNER_TEMP}/official-market-coverage.json"
+          python3 scripts/betting_v2/phase1_provider_market_coverage.py --root . --include-prior-season --output "${RUNNER_TEMP}/official-market-coverage.json"
       - name: Publish read-only evidence artifact
         if: always()
         uses: actions/upload-artifact@v4
