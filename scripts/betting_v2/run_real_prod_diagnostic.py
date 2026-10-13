@@ -422,6 +422,12 @@ def evaluate(root: Path, db: Path, generation: str, now: datetime) -> dict:
         if row_model is None:
             reject_selection(r, 'MISSING_REAL_HISTORY_FORECAST');continue
         h,a,mode=row_model;family=r['family']
+        if family=='CARDS':
+            # A generic bookmaker "cards" market has no proved settlement
+            # normalization: yellow+red vs red=2 vs card points differ.
+            # Never silently present YELLOW_CARDS as the generic card count.
+            reject_selection(r, 'UNVERIFIED_BOOKMAKER_CARDS_SETTLEMENT_RULE')
+            continue
         if family=='GOALS_FT':rates=(h,a)
         else:rates=metric_rates.get((fixtures[(r['competitionId'], r['fixtureId'])]['group'], r['fixtureId'], family)) if (r['competitionId'], r['fixtureId']) in fixtures else None
         if rates is None:
