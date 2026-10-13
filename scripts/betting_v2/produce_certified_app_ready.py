@@ -14,7 +14,7 @@ from .production_models import (calibrate_distribution, event_outcome, features,
                                 select_parameters, context_values, distribution)
 from .production_evaluation import (evaluate_holdout, freeze_tiers, observed_predictions,
                                     scenario_groups, uncertainty_bins)
-from .production_evidence import certify, forecast
+from .production_evidence import model_validation, forecast
 from .production_quote_adapter import adapt_quote_receipts
 from .production_context import adapt_context_receipts, verify_receipt
 
@@ -267,13 +267,12 @@ def evaluate(args) -> None:
     predictions = observed_predictions(model, cases, dict(plan, evaluateAtMs=now))
     results = evaluate_holdout(predictions, frozen["calibration"], frozen["bins"], frozen["adverseBins"],
                                frozen["policy"], model, plan)
-    documents = Documents()
-    certificate = certify(model, plan, frozen["bins"], frozen["adverseBins"], frozen["policy"], results,
-                          frozen["trainingRows"], documents, now, frozen["frozenAtMs"])
+    validation = model_validation(model, plan, frozen["bins"], frozen["adverseBins"],
+                                  frozen["policy"], results, now)
     save_new(args.output, {"contract": "statmaker-betting-v2-evaluated-model-v1",
-             "certificate": certificate, "model": model, "plan": plan, "bins": frozen["bins"],
+             "validation": validation, "model": model, "plan": plan, "bins": frozen["bins"],
              "adverseBins": frozen["adverseBins"],
-             "documents": documents.rows, "frozenArtifactSha256": file_digest(args.frozen),
+             "frozenArtifactSha256": file_digest(args.frozen),
              "holdoutPriceArtifactSha256": file_digest(args.holdout_quotes),
              "holdoutSourceSha256": file_digest(args.source), "holdoutResults": results,
              "rejected": dict(rejected)})
@@ -288,18 +287,19 @@ def produce(args) -> None:
     for path in args.evaluated_models:
         assessed = read_json(path)
         require(assessed["contract"] == "statmaker-betting-v2-evaluated-model-v1", "NOT_EVALUATED_MODEL")
-        certificate = assessed["certificate"]
-        require(assessed["holdoutResults"]["unitStakeRoiLowerBound"] > 0, "NO_REAL_HOLDOUT_PROFITABILITY")
-        scope = tuple(certificate[k] for k in ("competitionId", "leagueCode", "season", "marketModelKey", "evidenceMode"))
+        validation = assessed["validation"]
+        require(validation["outOfTimeValidated"] and validation["comparableMarketCalibrated"]
+                and validation["independentModelErrorIncluded"], "MODEL_BACKTEST_NOT_VALIDATED")
+        scope = tuple(validation[k] for k in ("competitionId", "leagueCode", "season", "marketModelKey", "evidenceMode"))
         require(scope not in models, "AMBIGUOUS_EVALUATED_MODEL")
-        family_key = (certificate["competitionId"], certificate["leagueCode"],
-                      certificate["season"], certificate["evidenceMode"], assessed["plan"]["family"])
+        family_key = (validation["competitionId"], validation["leagueCode"],
+                      validation["season"], validation["evidenceMode"], assessed["plan"]["family"])
         require(family_key not in family_models or family_models[family_key] == digest(assessed["model"]),
                 "INCONSISTENT_RESULT_DC_DNB_COUNT_MODEL")
         family_models[family_key] = digest(assessed["model"])
         models[scope] = assessed
     documents = Documents()
-    certs, forecasts, quote_rows, reasons = {}, [], [], Counter()
+    forecasts, quote_rows, reasons = [], [], Counter()
     prepared = defaultdict(list)
     # Index only by the SAME exact fields quote_for already checks. Indexing must
     # never select the best price or silently resolve ambiguous original quotes.
@@ -387,21 +387,18 @@ def produce(args) -> None:
         groups = scenario_groups([v[0] for v in group], cells, plan["correlationThreshold"])
         for row, q, assessed, case in group:
             try:
-                documents.rows.update(assessed["documents"])
-                f = forecast(row, case, q, model, assessed["certificate"], assessed["bins"],
+                f = forecast(row, case, q, model, assessed["validation"], assessed["bins"],
                              assessed["adverseBins"], plan, groups[row["selectionId"]], documents, now)
-                certs[assessed["certificate"]["certificationId"]] = assessed["certificate"]
                 forecasts.append({"competitionId": row["competitionId"], "snapshotVersion": row["snapshotVersion"],
                                   "fixtureId": row["fixtureId"], "selectionId": row["selectionId"], "payload": f})
                 quote_rows.append({k: q[k] for k in ("generationId", "competitionId", "snapshotVersion",
                       "fixtureId", "selectionId", "bookmaker", "providerQuoteId", "observedAtMs", "validUntilMs", "odd")})
             except (Blocked, KeyError, TypeError) as error:
                 reasons[str(error)] += 1
-    save_new(args.output, {"contract": "statmaker-betting-v2-canonical-release-v1",
+    save_new(args.output, {"contract": "statmaker-betting-v2-canonical-release-v2",
              "generationId": source["generationId"], "producedAtMs": now,
              "rawInventorySha256": source["unfilteredRawInventorySha256"],
              "rawInventoryRowCount": len(source["rawRows"]), "rawSelectionCount": source["rawSelectionCount"],
-             "certificates": list(certs.values()),
              "forecasts": forecasts, "quotes": quote_rows, "documents": documents.rows,
              "rejected": dict(reasons), "notYetPublished": True})
 
