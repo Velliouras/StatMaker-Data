@@ -32,7 +32,10 @@ def safe_workspace(path: Path, repository: Path) -> Path:
     return root
 
 
-def contexts_index(path: Path) -> dict:
+def contexts_index(path: Path | None) -> dict:
+    # Injury feeds are supplemental. Nothing to provide is not a source error.
+    if path is None:
+        return {}
     doc = read_json(path)
     require(doc["contract"] == "statmaker-betting-v2-point-in-time-context-v1"
             and doc.get("researchOnly") is not True, "MISSING_REAL_CONTEXT_SOURCE")
@@ -223,7 +226,8 @@ def freeze(args) -> None:
     save_new(args.output, {"contract": "statmaker-betting-v2-frozen-model-v1",
              "plan": plan, "planSha256": digest(plan), "model": model, "bins": bins, "policy": policy,
              "frozenAtMs": now, "trainingRows": training, "calibration": predictions,
-             "sourceSha256": file_digest(args.source), "contextSha256": file_digest(args.contexts),
+             "sourceSha256": file_digest(args.source),
+             "contextSha256": file_digest(args.contexts) if args.contexts is not None else digest([]),
              "rejected": dict(issues+rejected+rejected_quotes)})
 
 
@@ -396,7 +400,7 @@ def main() -> None:
         p = commands.add_parser(name)
         p.add_argument("--source", type=Path, required=True)
         if name not in ("quotes", "contexts"):
-            p.add_argument("--contexts", type=Path, required=True)
+            p.add_argument("--contexts", type=Path, required=False)
         p.add_argument("--output", type=Path, required=True)
         if name == "quotes":
             p.add_argument("--receipts", type=Path, nargs="+", required=True)
