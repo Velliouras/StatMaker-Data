@@ -8,7 +8,13 @@ from .production_contract import Blocked, digest, number, require
 from .production_context import bound_value, verify_receipt
 
 
-def context_values(context: dict, target: dict, at_ms: int, columns: list[str]) -> list[float]:
+def context_values(context: dict | None, target: dict, at_ms: int, columns: list[str]) -> list[float]:
+    # Lineup/injury information is OPTIONAL in Master Specification §4.1.
+    # A no-context base model has no player-status features, rather than
+    # treating missing information as a fully available squad.
+    if not columns:
+        return []
+    require(context is not None, "MISSING_CONTEXT_FIXTURE")
     require(context.get("fixtureId") == str(target["fixture_id"]), "MISSING_CONTEXT_FIXTURE")
     require(0 < context["observedAtMs"] <= at_ms < context["validUntilMs"], "STALE_CONTEXT")
     require(digest(context["providerRecord"]) == context["providerRecordSha256"], "CONTEXT_HASH_MISMATCH")
@@ -57,6 +63,7 @@ def features(history: list[dict], target: dict, at_ms: int, family: str, mode: s
     require(seen[home] >= parameters["minimumHistory"] and seen[away] >= parameters["minimumHistory"],
             "INSUFFICIENT_REAL_ELO_HISTORY")
     values, used = [ratings[home] / scale, ratings[away] / scale], {}
+    fallback_missing_xg = False
     for team, side in ((home, 0), (away, 1)):
         history_rows = appearances[team]
         for window_name in ("recentWindow", "longWindow", "venueWindow"):
@@ -66,9 +73,17 @@ def features(history: list[dict], target: dict, at_ms: int, family: str, mode: s
             require(all(family in r["counts"] for r, _, _ in pool), "MISSING_MARKET_SPECIFIC_HISTORY")
             if mode == "XG_PRIMARY":
                 require(all("xg" in r for r, _, _ in pool), "MISSING_REAL_XG_XGA")
+            elif mode == "ELO_GOALS_FALLBACK_NO_XG":
+                # The fallback requires INSUFFICIENT historical xG coverage;
+                # it does not require xG to be absent from every prior match.
+                # Existing observed xG values are simply not model features.
+                incomplete = [r for r, _, _ in pool if "xg" not in r]
+                require(all(r.get("providerXgUnavailable") is True for r in incomplete),
+                        "UNVERIFIED_MISSING_PROVIDER_XG")
+                if incomplete:
+                    fallback_missing_xg = True
             else:
-                require(all(r["providerXgUnavailable"] and "xg" not in r for r, _, _ in pool),
-                        "NO_PROVEN_PROVIDER_XG_ABSENCE")
+                require(False, "UNKNOWN_EVIDENCE_MODE")
             scored = [r["counts"][family][s] for r, s, _ in pool]
             conceded = [r["counts"][family][1-s] for r, s, _ in pool]
             goals_for = [r["goals"][s] for r, s, _ in pool]
@@ -82,6 +97,8 @@ def features(history: list[dict], target: dict, at_ms: int, family: str, mode: s
                                mean([r["xg"][1-s] for r, s, _ in pool])))
             for r, _, _ in pool:
                 used[str(r["fixture_id"])] = r
+    if mode == "ELO_GOALS_FALLBACK_NO_XG":
+        require(fallback_missing_xg, "XG_READY_USE_PRIMARY_MODEL")
     values.extend(context_values(context, target, at_ms, context_columns))
     return values, list(used.values()), eligible
 
