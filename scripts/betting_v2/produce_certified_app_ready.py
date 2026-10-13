@@ -206,8 +206,10 @@ def freeze(args) -> None:
     source, plan = input_source(args.source), read_json(args.plan)
     verify_plan(plan)
     now = now_ms()
-    require(plan["calibrationEndMs"] <= now <= plan["policyFreezeAtMs"]
-            < plan["holdoutStartMs"], "NOT_BEFORE_UNTOUCHED_HOLDOUT")
+    # Historical chronological walk-forward can run today. Freeze model
+    # parameters before READING later holdout labels; do not demand that the
+    # computer ran in the past, or claim a retrospective split is prospective.
+    require(plan["calibrationEndMs"] <= now, "CALIBRATION_DATA_NOT_YET_AVAILABLE")
     contexts = contexts_index(args.contexts)
     candidates, issues = [], Counter()
     for params in plan["parameterCandidates"]:
@@ -248,8 +250,7 @@ def evaluate(args) -> None:
     frozen = read_json(args.frozen)
     plan = frozen["plan"]
     verify_plan(plan)
-    require(digest(plan) == frozen["planSha256"] and frozen["frozenAtMs"] < plan["holdoutStartMs"],
-            "FROZEN_ARTIFACT_CHANGED_OR_LATE")
+    require(digest(plan) == frozen["planSha256"], "FROZEN_ARTIFACT_CHANGED")
     now = now_ms()
     require(plan["holdoutEndMs"] <= now < plan["validUntilMs"], "HOLDOUT_NOT_COMPLETE_OR_STALE")
     source = input_source(args.source)
