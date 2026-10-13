@@ -1,0 +1,55 @@
+name: Betting V2 Phase 2 - factual source blocker audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/betting-v2-phase2-source-readiness'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betting-v2-phase2-source-readiness
+  cancel-in-progress: false
+
+jobs:
+  audit-production-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - name: Sparse checkout real cached producer inputs and evidence
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/betting_v2/*
+            /tests/test_betting_v2_phase2_prod_readiness_gate.py
+            /data/statmaker/domestic_enriched/index.json
+            /data/api_football/fixture_stats/*
+            /reports/betting_v2/quote_receipt_index.json
+            /reports/betting_v2/REAL_HOLDOUT_EVIDENCE_AUDIT_2026-10-11.json
+      - name: Verify source gate and pure-regression guards
+        run: |
+          python3 -m py_compile scripts/betting_v2/phase2_prod_readiness_gate.py tests/test_betting_v2_phase2_prod_readiness_gate.py
+          python3 -m unittest discover -s tests -p 'test_betting_v2_phase2_prod_readiness_gate.py' -v
+      - name: Exact source-only production gate audit
+        run: |
+          python3 -m scripts.betting_v2.phase2_prod_readiness_gate \
+            --repository-root . \
+            --output "${RUNNER_TEMP}/phase2-source-readiness.json"
+      - name: Save exact blocking evidence (not App-Ready)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: betting-v2-phase2-production-readiness
+          path: ${{ runner.temp }}/phase2-source-readiness.json
+          if-no-files-found: warn
+          retention-days: 14
