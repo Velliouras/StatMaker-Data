@@ -28,6 +28,7 @@ from betting_v2.production_models import fit_count_model, rates
 METRIC_COLUMNS = {
     "GOALS_FT": ("home_goals", "away_goals"),
     "GOALS_1H": ("hthg", "htag"),
+    "GOALS_2H": ("home_goals", "away_goals"),
     "CORNERS": ("HC", "AC"),
     "SHOTS": ("HS", "AS"),
     "SOT": ("HST", "AST"),
@@ -52,6 +53,12 @@ def kickoff(value):
 def metric_values(row, metric):
     if metric == "GOALS_FT":
         raw = (row.get("home_goals"), row.get("away_goals"))
+    elif metric == "GOALS_2H":
+        try:
+            raw = (int(row["home_goals"]) - int(row["hthg"]),
+                   int(row["away_goals"]) - int(row["htag"]))
+        except (ValueError, TypeError, KeyError):
+            return None
     elif metric == "GOALS_1H":
         raw = (row.get("hthg"), row.get("htag"))
     else:
@@ -190,7 +197,7 @@ class MatchupLeague:
             home_rate, away_rate = rates(model, x)
         except (OverflowError, ValueError, ArithmeticError):
             return None
-        ceiling = {"GOALS_FT": 12, "GOALS_1H": 8, "CORNERS": 32,
+        ceiling = {"GOALS_FT": 12, "GOALS_1H": 8, "GOALS_2H": 8, "CORNERS": 32,
                    "SHOTS": 65, "SOT": 28, "YELLOW_CARDS": 16, "FOULS": 55}[metric]
         if any(not math.isfinite(v) or v <= 0 or v > ceiling for v in (home_rate, away_rate)):
             return None
@@ -222,15 +229,22 @@ def quote_market(row, home, away):
     # Map named bookmaker markets to a SINGLE actual count family.
     targets = {
         "1X2": ("GOALS_FT", "RESULT"),
+        "FULLTIME1X2": ("GOALS_FT", "RESULT"),
         "MATCHRESULT": ("GOALS_FT", "RESULT"),
+        "FULLTIMERESULT3WAY": ("GOALS_FT", "RESULT"),
+        "MATCHRESULT3WAY": ("GOALS_FT", "RESULT"),
         "MATCHWINNER": ("GOALS_FT", "RESULT"),
         "FULLTIMERESULT": ("GOALS_FT", "RESULT"),
         "DOUBLECHANCE": ("GOALS_FT", "DC"),
+        "DC": ("GOALS_FT", "DC"),
         "DRAWNOBET": ("GOALS_FT", "DNB"),
         "BTTS": ("GOALS_FT", "BTTS"),
         "MATCHGOALS": ("GOALS_FT", "TOTAL"),
         "TEAMGOALS": ("GOALS_FT", "TEAM"),
         "FIRSTHALFGOALS": ("GOALS_1H", "TOTAL"),
+        "MATCHFIRSTHALFGOALS": ("GOALS_1H", "TOTAL"),
+        "SECONDHALFGOALS": ("GOALS_2H", "TOTAL"),
+        "MATCHSECONDHALFGOALS": ("GOALS_2H", "TOTAL"),
         "MATCHCORNERS": ("CORNERS", "TOTAL"),
         "TEAMCORNERS": ("CORNERS", "TEAM"),
         "MATCHSHOTS": ("SHOTS", "TOTAL"),
@@ -266,7 +280,9 @@ def quote_market(row, home, away):
         "1": "HOME", "home": "HOME", "x": "DRAW", "draw": "DRAW",
         "2": "AWAY", "away": "AWAY",
         "1x": "HOME_OR_DRAW", "x2": "AWAY_OR_DRAW",
-        "12": "HOME_OR_AWAY", "yes": "YES", "no": "NO"
+        "home or draw": "HOME_OR_DRAW", "draw or away": "AWAY_OR_DRAW",
+        "home or away": "HOME_OR_AWAY", "12": "HOME_OR_AWAY",
+        "yes": "YES", "no": "NO"
     }.get(text, "")
     if not side:
         if name(text) == home:
@@ -351,7 +367,9 @@ def run(db_path):
         pending = []
         for row in matches:
             time = kickoff(row["kickoff"]) or kickoff(row["date"])
-            if time <= now:
+            # Fixture dates can be date-only; Android applies the exact
+            # local kickoff cutoff at query time. Include today's quotes.
+            if time < now - 86400:
                 continue
             league = str(row["league_code"] or "").upper()
             h = name(row["canonical_home_team"] or row["home_team"])
