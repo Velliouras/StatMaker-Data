@@ -376,7 +376,7 @@ def quote_market(row, home, away):
     if scope in ("TOTAL", "TEAM"):
         # Real provider selections are frequently "Corners Over 9.5" or
         # "Shots on Target Under 4.5", not just "Over".
-        tokens = re.findall(r"\\b(over|under)\\b", text, flags=re.IGNORECASE)
+        tokens = re.findall(r"\b(over|under)\b", text, flags=re.IGNORECASE)
         if len(tokens) != 1 or row["line"] is None:
             return None
         side = tokens[0].upper()
