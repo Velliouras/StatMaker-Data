@@ -38,6 +38,8 @@ METRIC_COLUMNS = {
 }
 MODEL = "betting-v2-matchup-poisson-fit-v1"
 RUNS = 10_000
+# Exact fixture/provider aliases used solely for cross-competition identity.
+UEFA_ALIASES = {}
 
 
 def name(value):
@@ -107,7 +109,8 @@ def load_actual_results():
         support = json.loads(support_path.read_text())
         by_team = support.get("participants", [])
         for comp in current.get("competitions", []):
-            code = str(comp.get("leagueCode") or "").upper()
+            code = {"CONF": "UECL"}.get(str(comp.get("leagueCode") or "").upper(),
+                                        str(comp.get("leagueCode") or "").upper())
             members = {name(v) for v in comp.get("participants", [])}
             if code not in {"CL", "EL", "CONF", "UECL"} or not members:
                 continue
@@ -143,6 +146,66 @@ def load_actual_results():
                 for fixture in participant.get("matches", []):
                     include(fixture, "date", "homeTeam", "awayTeam",
                             "homeGoals", "awayGoals", "normalizedStats")
+    # UEFA teams also play REAL national-league matches. Use those completed
+    # games to fit the same matchup model when a UEFA-only history has too few
+    # repeated matchups. Never infer invented stats or missing player reports.
+    # Non-participant domestic opponents are namespaced by domestic league to
+    # avoid accidentally merging unrelated clubs with identical short names.
+    if current_path.is_file() and support_path.is_file():
+        for comp in current.get("competitions", []):
+            code = {"CONF": "UECL"}.get(
+                str(comp.get("leagueCode") or "").upper(),
+                str(comp.get("leagueCode") or "").upper()
+            )
+            if code not in ("CL", "EL", "UECL"):
+                continue
+            members = {name(x) for x in comp.get("participants", []) if name(x)}
+            if not members:
+                continue
+            aliases = {member: member for member in members}
+            # Provider and canonical names in the same exact UEFA fixture
+            # refer to one identified club, even when spellings differ.
+            for fixture in comp.get("fixtures", []):
+                for side in ("Home", "Away"):
+                    canonical = name(fixture.get("homeTeam" if side == "Home" else "awayTeam"))
+                    provider = name(fixture.get("providerHomeTeam" if side == "Home" else "providerAwayTeam"))
+                    if canonical in members and provider:
+                        aliases[provider] = canonical
+            for participant in support.get("participants", []):
+                candidate = [name(participant.get("providerTeam")),
+                             name(participant.get("canonicalTeam"))]
+                candidate += [name(x) for x in participant.get("aliases", [])]
+                matching = {aliases[x] for x in candidate if x in aliases}
+                if len(matching) == 1:
+                    dest = next(iter(matching))
+                    for synonym in candidate:
+                        if len(synonym) >= 4:
+                            aliases[synonym] = dest
+            UEFA_ALIASES[code] = aliases
+            domestic_codes = set()
+            for domestic_code, records in list(leagues.items()):
+                if domestic_code in ("CL", "EL", "UECL", "CONF"):
+                    continue
+                if any(aliases.get(x["_home"]) in members or
+                       aliases.get(x["_away"]) in members for x in records):
+                    domestic_codes.add(domestic_code)
+            unified = {}
+            for domestic_code in sorted(domestic_codes):
+                for row in leagues[domestic_code].values():
+                    item = dict(row)
+                    for side in ("_home", "_away"):
+                        raw_team = item[side]
+                        # One verified participant identity across domestic/UEFA;
+                        # nonparticipants remain unambiguously domestic.
+                        item[side] = aliases.get(raw_team, domestic_code + ":" + raw_team)
+                    unified[domestic_code + "|" + str(row.get("fixture_id") or
+                                    (row["_date"],row["_home"],row["_away"]))] = item
+            for key,row in leagues[code].items():
+                item = dict(row)
+                for side in ("_home", "_away"):
+                    item[side] = aliases.get(item[side], "support:" + item[side])
+                unified["uefa|" + key] = item
+            leagues[code] = unified
     return {k: sorted(v.values(), key=lambda x: x["_date"]) for k, v in leagues.items()}
 
 
@@ -434,6 +497,8 @@ def run(db_path):
             # This is identity matching, never a fallback model prediction.
             def history_name(keys):
                 choices = [name(row[k]) for k in keys]
+                aliases = UEFA_ALIASES.get(league, {})
+                choices = [aliases.get(v, v) for v in choices]
                 return next((v for v in choices if v in m.history),
                             next((v for v in choices if v), ""))
             h = history_name(("canonical_home_team", "home_team", "provider_home_team"))
