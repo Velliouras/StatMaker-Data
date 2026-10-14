@@ -97,6 +97,51 @@ def load_actual_results():
             identifier = str(match.get("fixture_id") or "")
             key = identifier or f"{date}|{home}|{away}"
             leagues[code][key] = dict(match, _home=home, _away=away, _date=date)
+    # UEFA clubs also have actual completed matches in the current season and
+    # real team-specific support history. No synthetic competitor or results.
+    current_path = ROOT / "data/statmaker/uefa_current_stats.json"
+    support_path = ROOT / "data/statmaker/uefa_team_support_history.json"
+    if current_path.is_file() and support_path.is_file():
+        current = json.loads(current_path.read_text())
+        support = json.loads(support_path.read_text())
+        by_team = support.get("participants", [])
+        for comp in current.get("competitions", []):
+            code = str(comp.get("leagueCode") or "").upper()
+            members = {name(v) for v in comp.get("participants", [])}
+            if code not in {"CL", "EL", "CONF", "UECL"} or not members:
+                continue
+            def include(raw, when, home_key, away_key, hg_key, ag_key, stats_key):
+                h, a = name(raw.get(home_key)), name(raw.get(away_key))
+                if not h or not a or h == a:
+                    return
+                date = kickoff(raw.get(when))
+                try:
+                    hg, ag = int(raw[hg_key]), int(raw[ag_key])
+                except (TypeError, KeyError, ValueError):
+                    return
+                if date <= 0 or hg < 0 or ag < 0:
+                    return
+                key = f"{date}|{h}|{a}"
+                row = {
+                    "status": "FT", "_date": date, "_home": h, "_away": a,
+                    "home_goals": hg, "away_goals": ag,
+                    "normalized_stats": raw.get(stats_key) or {},
+                }
+                leagues[code][key] = row
+            for fixture in comp.get("fixtures", []):
+                if fixture.get("status") == "FT":
+                    include(fixture, "kickoff", "homeTeam", "awayTeam",
+                            "homeGoals", "awayGoals", "normalizedStats")
+            for participant in by_team:
+                aliases = {name(v) for v in [
+                    participant.get("providerTeam"), participant.get("canonicalTeam"),
+                    *participant.get("aliases", [])
+                ]}
+                if not members.intersection(aliases):
+                    continue
+                for fixture in participant.get("matches", []):
+                    include(fixture, "date", "homeTeam", "awayTeam",
+                            "homeGoals", "awayGoals", "normalizedStats")
     return {k: sorted(v.values(), key=lambda x: x["_date"]) for k, v in leagues.items()}
 
 
@@ -385,7 +430,8 @@ def run(db_path):
             # This is identity matching, never a fallback model prediction.
             def history_name(keys):
                 choices = [name(row[k]) for k in keys]
-                return next((v for v in choices if v in m.history), choices[0])
+                return next((v for v in choices if v in m.history),
+                            next((v for v in choices if v), ""))
             h = history_name(("canonical_home_team", "home_team", "provider_home_team"))
             a = history_name(("canonical_away_team", "away_team", "provider_away_team"))
             spec = quote_market(row, h, a)
