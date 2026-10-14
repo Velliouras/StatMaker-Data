@@ -114,8 +114,10 @@ def main():
         sha256=sha, bytes=output.stat().st_size, generatedAt=now
     )
     metadata = manifest.setdefault("metadata", {})
-    metadata["bettingV2DirectModel"] = "betting-v2-opponent-adjusted-count-v2"
+    metadata["bettingV2DirectModel"] = "betting-v2-monotone-matchup-scenarios-v3"
     metadata["bettingV2DirectBaseSha256"] = base_sha
+    metadata["bettingV2DirectIncreasingStrength"] = True
+    metadata["bettingV2DirectFavouriteScenario"] = "goal-periods-condition-on-FT-winner; attacking-counts-condition-on-team-count-dominance; raw-P-WIN-unchanged"
     metadata["bettingV2DirectUefaQuoteRef"] = quote_ref
     metadata["bettingV2DirectRows"] = count
     metadata["bettingV2DirectFixtures"] = fixtures

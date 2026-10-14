@@ -11,7 +11,7 @@ import zipfile
 import materialize_betting_v2_direct as direct
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURES = {'74173144', '74173166', '74173164', '74173178', '74173208'}
+FIXTURES = {'74173144','74173166','74173164','74173178','74173208','74173148','74173156','74172952','68823386','67817908','72723266','72037390'}
 
 
 def main():
@@ -24,6 +24,14 @@ def main():
     model = direct.MatchupLeague(history['GLOBAL'],cutoff)
     models = {code:model for code in ('UECL','D1')}
     audit = dict(bundle=artifact, replayCutoff=cutoff, externalProviderCalls=0, fixtures=[])
+    audit['increasingCoefficients'] = {
+        metric:{key:float(model.models[metric].coef_[i]/model.feature_scales[metric][i])
+                for key,i in model.columns[metric].items()
+                if key in ('elo_gap','recent_for','recent_opponent_against','xg_for','opponent_xg_against','goal_strength_gap')}
+        for metric in ('GOALS_FT','CORNERS','SOT')
+    }
+    print('AUDIT_INCREASING_COEFFICIENTS',json.dumps(audit['increasingCoefficients']))
+
     with tempfile.TemporaryDirectory() as td:
         bundle = Path(td) / 'bundle'
         with zipfile.ZipFile(ROOT / artifact['path']) as z:
@@ -36,7 +44,7 @@ def main():
                 if str(fixture['id']) not in FIXTURES:
                     continue
                 f = dict(fixture)
-                model = models[direct.league_code(f['league_code'])]
+                model = next(iter(models.values()))
                 aliases = direct.UEFA_ALIASES.get(direct.league_code(f['league_code']), {})
                 def resolved(side):
                     keys = ('canonical_'+side+'_team', side+'_team', 'provider_'+side+'_team')

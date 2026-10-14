@@ -39,7 +39,7 @@ METRIC_COLUMNS = {
     "CARDS": ("HY", "AY"),
     "FOULS": ("HF", "AF"),
 }
-MODEL = "betting-v2-opponent-adjusted-count-v2"
+MODEL = "betting-v2-monotone-matchup-scenarios-v3"
 RUNS = 10_000
 # Exact fixture/provider aliases used solely for cross-competition identity.
 UEFA_ALIASES = {}
@@ -278,6 +278,17 @@ def sampled_distribution(pairs):
     }
 
 
+def scenario_distributions(pairs,winner_pairs=None):
+    """Conditional market events from actual shared sample indices."""
+    basis = pairs if winner_pairs is None else winner_pairs
+    if len(pairs)!=len(basis):
+        raise ValueError('Scenario samples are not aligned')
+    home = [v for v,(h,a) in zip(pairs,basis) if h>a]
+    away = [v for v,(h,a) in zip(pairs,basis) if a>h]
+    return (sampled_distribution(home) if home else None,
+            sampled_distribution(away) if away else None)
+
+
 def stage_betting_v2_quotes(con,db_path,uefa_exact_feed_dir):
     """Independent period/source/price bindings; leave legacy tables intact."""
     directory = Path(db_path).resolve().parent.parent/'files/app_ready_odds'
@@ -386,6 +397,12 @@ def run(db_path,uefa_exact_feed_dir,as_of=None):
                 league_training_sample INTEGER NOT NULL,
                 prediction_home_mean REAL NOT NULL,
                 prediction_away_mean REAL NOT NULL,
+                match_home_win_probability REAL NOT NULL,
+                match_away_win_probability REAL NOT NULL,
+                home_scenario_probability REAL,
+                away_scenario_probability REAL,
+                home_scenario_sample INTEGER NOT NULL,
+                away_scenario_sample INTEGER NOT NULL,
                 PRIMARY KEY (competition_id,snapshot_version,match_key,market_ordinal)
             );
             CREATE INDEX idx_prepared_betting_v2_scope
@@ -410,6 +427,7 @@ def run(db_path,uefa_exact_feed_dir,as_of=None):
         """).fetchall()
         models = {}
         draws = {}
+        scenarios = {}
         predictions = {}
         pending = []
         for row in matches:
@@ -449,35 +467,50 @@ def run(db_path,uefa_exact_feed_dir,as_of=None):
                 counts["no_actual_history_or_fitted_model"] += 1
                 continue
             hr, ar, hs, ass, training = prediction
+            # All goal periods share the same full-time winner scenario.
+            # Other attacking counts use their own team-count dominance,
+            # without inventing goal/corner correlation.
+            full_key = (*key[:3],'GOALS_FT')
+            if full_key not in draws:
+                full = m.predict(h,a,'GOALS_FT')
+                if full is None:
+                    counts['no_actual_fulltime_matchup'] += 1
+                    continue
+                seed = "|".join(map(str,full_key))+"|"+MODEL
+                pairs = samples(full[0],full[1],seed)
+                draws[full_key] = sampled_distribution(pairs)
+                scenarios[full_key] = scenario_distributions(pairs)
+                half = m.predict(h,a,'GOALS_1H')
+                if half is not None:
+                    first,second = split_goal_periods(pairs,half[0]/full[0],half[1]/full[1],seed+'|periods')
+                    for period,values in (('GOALS_1H',first),('GOALS_2H',second)):
+                        period_key = (*key[:3],period)
+                        draws[period_key] = sampled_distribution(values)
+                        scenarios[period_key] = scenario_distributions(values,pairs)
             if metric in ('GOALS_FT','GOALS_1H','GOALS_2H'):
-                full_key = (*key[:3],'GOALS_FT')
-                if full_key not in draws:
-                    full = m.predict(h,a,'GOALS_FT')
-                    if full is None:
-                        continue
-                    seed = "|".join(map(str,full_key))+"|"+MODEL
-                    pairs = samples(full[0],full[1],seed)
-                    draws[full_key] = sampled_distribution(pairs)
-                    half = m.predict(h,a,'GOALS_1H')
-                    if half is not None:
-                        first,second = split_goal_periods(pairs,half[0]/full[0],half[1]/full[1],seed+'|periods')
-                        draws[(*key[:3],'GOALS_1H')] = sampled_distribution(first)
-                        draws[(*key[:3],'GOALS_2H')] = sampled_distribution(second)
                 if key not in draws:
                     continue
             elif key not in draws:
-                draws[key] = sampled_distribution(samples(hr,ar,"|".join(map(str,key))+"|"+MODEL))
+                values = samples(hr,ar,"|".join(map(str,key))+"|"+MODEL)
+                draws[key] = sampled_distribution(values)
+                scenarios[key] = scenario_distributions(values) if metric in ('CORNERS','SHOTS','SOT') else (None,None)
+            full_counts = draws[full_key]
+            scenario_home,scenario_away = scenarios[key]
+            support_home = evaluate(scenario_home,spec)[0] if scenario_home else None
+            support_away = evaluate(scenario_away,spec)[0] if scenario_away else None
             win, push = evaluate(draws[key], spec)
             if not (math.isfinite(win) and math.isfinite(push) and win + push <= 1.000001):
                 continue
             pending.append((
                 row["competition_id"], row["snapshot_version"], row["match_key"], row["ordinal"],
                 row["market"], row["selection"], row["team"], row["line"], row["odd"],
-                win, push, MODEL, metric, RUNS, hs, ass, training,hr,ar
+                win, push, MODEL, metric, RUNS, hs, ass, training,hr,ar,
+                full_counts['HOME']/RUNS,full_counts['AWAY']/RUNS,support_home,support_away,
+                scenario_home['runs'] if scenario_home else 0,scenario_away['runs'] if scenario_away else 0
             ))
         con.executemany("""
             INSERT INTO prepared_betting_v2_forecasts VALUES
-            (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         """, pending)
         con.commit()
         counts["fixtures_from_quotes"] = len({(r[0], r[1], r[2]) for r in pending})

@@ -4,6 +4,7 @@ Real UEFA results connect domestic competitions. Prices never enter the fit.
 Observed xG and form are lagged; first/second-half goals split the same FT basis.
 """
 from collections import defaultdict
+from .monotone_count import fit_monotone_count
 from datetime import datetime, timezone
 import json
 import math
@@ -279,8 +280,7 @@ class OpponentMatchup:
                 records = [(self.count_strength_features(f),v) for f,v in records]
             x,columns,scales = matrix([f for f,_ in records])
             self.columns[metric],self.feature_scales[metric] = columns,scales
-            self.models[metric] = PoissonRegressor(alpha=2.0/len(records),solver='newton-cholesky',
-                max_iter=80,tol=1e-6).fit(x,np.asarray([v for _,v in records]))
+            self.models[metric] = fit_monotone_count(x,np.asarray([v for _,v in records]),columns,metric,2.0/len(records))
         if self.period_train:
             records = []
             for f,first,second in self.period_train:

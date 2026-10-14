@@ -9,6 +9,8 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 from betting_v2.opponent_matchup import Identities,OpponentMatchup,load_competitive_history,timestamp
 from materialize_betting_v2_direct import split_goal_periods,stage_betting_v2_quotes
 from merge_betting_v2_manifest import merged
+from materialize_betting_v2_direct import sampled_distribution,scenario_distributions,evaluate
+from betting_v2.monotone_count import fit_monotone_count
 
 class MatchupContractTest(unittest.TestCase):
     def test_alias_country_and_diacritic_identity(self):
@@ -82,4 +84,48 @@ class MatchupContractTest(unittest.TestCase):
         latest['artifacts'][0]['sha256']='new-base'
         with self.assertRaises(ValueError):merged(source,latest)
 
+
+class IncreasingStrengthTest(unittest.TestCase):
+    def test_increasing_elo_cannot_lower_expected_goals(self):
+        import numpy as np
+        from scipy.sparse import csr_matrix
+        x=csr_matrix(np.asarray([[0.],[1.],[2.],[3.]]))
+        # This data would make an unconstrained fit learn the inverted sign.
+        fit=fit_monotone_count(x,np.asarray([6.,4.,2.,1.]),{'elo_gap':0},'GOALS_FT',.2)
+        self.assertGreaterEqual(fit.coef_[0],0.)
+        values=fit.predict(x)
+        self.assertTrue(np.all(np.diff(values)>=-1e-12))
+
+    def test_attack_and_opponent_xga_do_not_have_inverted_effects(self):
+        import numpy as np
+        from scipy.sparse import csr_matrix
+        x=csr_matrix(np.asarray([[0.,0.],[1.,0.],[0.,1.],[1.,1.],[2.,2.]]))
+        fit=fit_monotone_count(x,np.asarray([8.,6.,6.,4.,1.]),
+            {'recent_for':0,'opponent_xg_against':1},'SOT',.2)
+        self.assertTrue((fit.coef_>=0).all())
+        low,high=fit.predict(csr_matrix([[0.,0.],[2.,2.]]))
+        self.assertGreaterEqual(high,low-1e-12)
+
+class ScenarioProbabilityTest(unittest.TestCase):
+    def test_conditioning_does_not_replace_raw_market_probability(self):
+        full=[(1,0),(3,0),(2,1),(0,2),(1,1)]
+        spec=('GOALS_FT','DC','AWAY_OR_DRAW','',None)
+        before=evaluate(sampled_distribution(full),spec)[0]
+        home,away=scenario_distributions(full)
+        self.assertEqual(before,.4)
+        self.assertEqual(evaluate(home,spec)[0],0.)
+        self.assertEqual(evaluate(away,spec)[0],1.)
+        self.assertEqual(evaluate(sampled_distribution(full),spec)[0],before)
+
+    def test_halftime_support_uses_fulltime_winner_indices(self):
+        full=[(2,0),(1,2),(3,1),(0,0)]
+        first=[(0,0),(1,0),(2,0),(0,0)]
+        home,away=scenario_distributions(first,full)
+        spec=('GOALS_1H','DC','AWAY_OR_DRAW','',None)
+        self.assertEqual(home['runs'],2)
+        self.assertEqual(away['runs'],1)
+        self.assertEqual(evaluate(home,spec)[0],.5)
+        self.assertEqual(evaluate(away,spec)[0],0.)
+
 if __name__=='__main__':unittest.main()
+
