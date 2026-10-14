@@ -76,6 +76,24 @@ jobs:
                  GROUP BY f.competition_id,f.league_code,f.match_key
                  ORDER BY f.kickoff ASC LIMIT 24
               """)
+              show('UEFA_IDENTITY_COVERAGE',"""
+                 SELECT competition_id,league_code,usable_for_stats,team_mapping_status,
+                        COUNT(*) fixtures
+                 FROM prepared_fixture_matches
+                 WHERE competition_id IN ('champions_league','europa_league','conference_league')
+                 GROUP BY competition_id,league_code,usable_for_stats,team_mapping_status
+                 ORDER BY competition_id,fixtures DESC
+              """)
+              show('UEFA_FORECAST_MARKETS',"""
+                 SELECT f.competition_id,f.league_code,f.home_team,f.away_team,
+                        f.team_mapping_status,f.usable_for_stats,
+                        v.market,v.selection,v.odd,v.win_probability
+                 FROM prepared_betting_v2_forecasts v
+                 JOIN prepared_fixture_matches f ON f.competition_id=v.competition_id
+                     AND f.snapshot_version=v.snapshot_version AND f.match_key=v.match_key
+                 WHERE f.competition_id IN ('champions_league','europa_league','conference_league')
+                 ORDER BY f.kickoff ASC LIMIT 40
+              """)
               show('COUNT_LINE_COVERAGE',"""
                  SELECT market,COUNT(*) total,
                  SUM(CASE WHEN line IS NOT NULL THEN 1 ELSE 0 END) explicit_line,
