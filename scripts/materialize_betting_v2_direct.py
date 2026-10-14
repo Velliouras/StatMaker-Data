@@ -18,6 +18,7 @@ import json
 import math
 from pathlib import Path
 import random
+import re
 import sqlite3
 import sys
 
@@ -310,9 +311,12 @@ def quote_market(row, home, away):
     metric, scope = found
     text = str(row["selection"] or "").strip().casefold()
     if scope in ("TOTAL", "TEAM"):
-        side = "OVER" if text.startswith("over") else "UNDER" if text.startswith("under") else ""
-        if not side or row["line"] is None:
+        # Real provider selections are frequently "Corners Over 9.5" or
+        # "Shots on Target Under 4.5", not just "Over".
+        tokens = re.findall(r"\\b(over|under)\\b", text, flags=re.IGNORECASE)
+        if len(tokens) != 1 or row["line"] is None:
             return None
+        side = tokens[0].upper()
         line = float(row["line"])
         if line < 0 or line * 2 != int(line * 2):
             return None
