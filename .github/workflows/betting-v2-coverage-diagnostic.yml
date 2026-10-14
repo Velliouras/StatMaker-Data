@@ -83,3 +83,21 @@ jobs:
               """)
               db.close()
           PY
+          python - <<'PY'
+          import sys,collections
+          sys.path.insert(0,"scripts")
+          from materialize_betting_v2_direct import load_actual_results,name
+          data=load_actual_results()
+          from pathlib import Path
+          import json
+          u=json.loads(Path("data/statmaker/uefa_current_stats.json").read_text())
+          for comp in u['competitions']:
+              code=comp['leagueCode']
+              hist=data.get(code,[])
+              by_team=collections.Counter(t for x in hist for t in (x['_home'],x['_away']))
+              members=[name(n) for n in comp.get('participants',[])]
+              covered=[n for n in members if by_team[n]]
+              print("UEFA_HISTORY",code,"matches",len(hist),"teams",len(by_team),
+                    "members",len(members),"directly_covered",len(covered),
+                    "missing_members",[n for n in members if not by_team[n]][:25])
+          PY
