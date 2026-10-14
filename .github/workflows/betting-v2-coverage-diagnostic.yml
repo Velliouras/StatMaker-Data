@@ -1,0 +1,85 @@
+name: Betting V2 Coverage Diagnostic
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/betting-v2-coverage-diagnostic'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect actual App-Ready SQLite source coverage and V2 odds thresholds
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,sqlite3,zipfile,tempfile,collections
+          from pathlib import Path
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          print('PUBLISHED',manifest['generatedAt'],manifest.get('metadata',{}).get('bettingV2DirectModel'))
+          bundle=next(a for a in manifest['artifacts'] if a['id']=='app_ready_betting_bundle')
+          with tempfile.TemporaryDirectory() as t:
+              with zipfile.ZipFile(bundle['path']) as z:
+                  z.extract('databases/statmaker_prepared_betting.db',t)
+              db=sqlite3.connect(str(Path(t)/'databases/statmaker_prepared_betting.db'))
+              db.row_factory=sqlite3.Row
+              def show(label,sql):
+                  rows=db.execute(sql).fetchall()
+                  print(label,json.dumps([dict(x) for x in rows],ensure_ascii=False))
+              show('FIXTURE_SCOPE',"""
+                  SELECT f.competition_id,f.league_code,
+                  COUNT(DISTINCT f.match_key) fixtures,
+                  COUNT(q.ordinal) quotes,
+                  COUNT(v.market_ordinal) forecasts
+                  FROM prepared_fixture_matches f
+                  LEFT JOIN prepared_fixture_markets q
+                    ON q.competition_id=f.competition_id
+                   AND q.snapshot_version=f.snapshot_version
+                   AND q.match_key=f.match_key
+                  LEFT JOIN prepared_betting_v2_forecasts v
+                    ON v.competition_id=f.competition_id
+                   AND v.snapshot_version=f.snapshot_version
+                   AND v.match_key=f.match_key
+                   AND v.market_ordinal=q.ordinal
+                  WHERE f.usable_for_stats=1
+                  GROUP BY f.competition_id,f.league_code
+                  ORDER BY forecasts DESC
+              """)
+              show('V2_MARKET_FAMILY',"""
+                 SELECT competition_id,market,metric_key,
+                 COUNT(*) n,
+                 SUM(CASE WHEN odd>1.8 AND odd<3 AND win_probability>=0.6
+                           AND win_probability*odd+push_probability>1 THEN 1 ELSE 0 END) eligible
+                 FROM prepared_betting_v2_forecasts
+                 GROUP BY competition_id,market,metric_key
+                 ORDER BY n DESC LIMIT 130
+              """)
+              show('V2_ELIGIBLE_COMP',"""
+                 SELECT competition_id,
+                 COUNT(*) forecasts,
+                 SUM(CASE WHEN odd>1.8 AND odd<3 AND win_probability>=0.6
+                         AND win_probability*odd+push_probability>1 THEN 1 ELSE 0 END) eligible
+                 FROM prepared_betting_v2_forecasts GROUP BY competition_id
+              """)
+              show('UEFA_NEXT_FIXTURES',"""
+                 SELECT f.competition_id,f.league_code,f.home_team,f.away_team,f.kickoff,
+                 COUNT(q.ordinal) offers,COUNT(v.market_ordinal) forecasts
+                 FROM prepared_fixture_matches f
+                 LEFT JOIN prepared_fixture_markets q ON q.competition_id=f.competition_id
+                   AND q.snapshot_version=f.snapshot_version AND q.match_key=f.match_key
+                 LEFT JOIN prepared_betting_v2_forecasts v ON v.competition_id=f.competition_id
+                   AND v.snapshot_version=f.snapshot_version AND v.match_key=f.match_key
+                   AND v.market_ordinal=q.ordinal
+                 WHERE f.competition_id IN ('champions_league','europa_league','conference_league')
+                 GROUP BY f.competition_id,f.league_code,f.match_key
+                 ORDER BY f.kickoff ASC LIMIT 24
+              """)
+              show('MARKET_1X2_ODDS',"""
+                 SELECT market,selection,COUNT(*) n FROM prepared_fixture_markets
+                 WHERE UPPER(market) IN ('1X2','MATCH_RESULT','DOUBLE_CHANCE','MATCH_GOALS','MATCH_CORNERS')
+                 GROUP BY market,selection ORDER BY n DESC LIMIT 40
+              """)
+              db.close()
+          PY
