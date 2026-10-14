@@ -225,6 +225,8 @@ def samples(home_rate, away_rate, seed):
 
 
 def quote_market(row, home, away):
+    home_aliases = {name(row[k]) for k in ("home_team", "canonical_home_team", "provider_home_team")}
+    away_aliases = {name(row[k]) for k in ("away_team", "canonical_away_team", "provider_away_team")}
     raw = name(row["market"]).upper()
     # Map named bookmaker markets to a SINGLE actual count family.
     targets = {
@@ -272,9 +274,9 @@ def quote_market(row, home, away):
         team_side = ""
         if scope == "TEAM":
             team = name(row["team"])
-            if not team or team not in (home, away):
+            if not team or (team in home_aliases) == (team in away_aliases):
                 return None
-            team_side = "HOME" if team == home else "AWAY"
+            team_side = "HOME" if team in home_aliases else "AWAY"
         return metric, scope, side, team_side, line
     side = {
         "1": "HOME", "home": "HOME", "x": "DRAW", "draw": "DRAW",
@@ -285,9 +287,9 @@ def quote_market(row, home, away):
         "yes": "YES", "no": "NO"
     }.get(text, "")
     if not side:
-        if name(text) == home:
+        if name(text) in home_aliases and name(text) not in away_aliases:
             side = "HOME"
-        elif name(text) == away:
+        elif name(text) in away_aliases and name(text) not in home_aliases:
             side = "AWAY"
     allowed = {
         "RESULT": {"HOME", "DRAW", "AWAY"},
@@ -355,6 +357,7 @@ def run(db_path):
             SELECT f.competition_id,f.snapshot_version,f.match_key,
                    f.league_code,f.date,f.kickoff,f.home_team,f.away_team,
                    f.canonical_home_team,f.canonical_away_team,
+                   f.provider_home_team,f.provider_away_team,
                    q.ordinal,q.market,q.selection,q.team,q.line,q.odd
             FROM prepared_fixture_matches f
             JOIN prepared_fixture_markets q ON q.competition_id=f.competition_id
@@ -372,19 +375,24 @@ def run(db_path):
             if time < now - 86400:
                 continue
             league = str(row["league_code"] or "").upper()
-            h = name(row["canonical_home_team"] or row["home_team"])
-            a = name(row["canonical_away_team"] or row["away_team"])
-            spec = quote_market(row, h, a)
-            if not spec:
-                counts["unsupported"] += 1
-                continue
-            metric = spec[0]
             # All quoted fixtures are future relative to this publication.
             # Train once per league using only results already completed now.
             model_key = league
             if model_key not in models:
                 models[model_key] = MatchupLeague(history.get(league, []), now)
             m = models[model_key]
+            # Prefer an exact observed team alias in historical fixtures.
+            # This is identity matching, never a fallback model prediction.
+            def history_name(keys):
+                choices = [name(row[k]) for k in keys]
+                return next((v for v in choices if v in m.history), choices[0])
+            h = history_name(("canonical_home_team", "home_team", "provider_home_team"))
+            a = history_name(("canonical_away_team", "away_team", "provider_away_team"))
+            spec = quote_market(row, h, a)
+            if not spec:
+                counts["unsupported"] += 1
+                continue
+            metric = spec[0]
             key = (row["competition_id"], row["snapshot_version"], row["match_key"], metric)
             prediction = m.predict(h, a, metric)
             if prediction is None:
