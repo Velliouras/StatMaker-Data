@@ -76,6 +76,16 @@ jobs:
                  GROUP BY f.competition_id,f.league_code,f.match_key
                  ORDER BY f.kickoff ASC LIMIT 24
               """)
+              show('COUNT_LINE_COVERAGE',"""
+                 SELECT market,COUNT(*) total,
+                 SUM(CASE WHEN line IS NOT NULL THEN 1 ELSE 0 END) explicit_line,
+                 MIN(selection) example
+                 FROM prepared_fixture_markets WHERE market IN
+                 ('MATCH_CORNERS','TEAM_CORNERS','MATCH_SHOTS','TEAM_SHOTS',
+                 'MATCH_SHOTS_ON_TARGET','TEAM_SHOTS_ON_TARGET',
+                 'MATCH_GOALS','TEAM_GOALS')
+                 GROUP BY market ORDER BY total DESC
+              """)
               show('MARKET_1X2_ODDS',"""
                  SELECT market,selection,COUNT(*) n FROM prepared_fixture_markets
                  WHERE UPPER(market) IN ('1X2','MATCH_RESULT','DOUBLE_CHANCE','MATCH_GOALS','MATCH_CORNERS')
