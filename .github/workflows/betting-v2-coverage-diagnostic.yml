@@ -63,6 +63,21 @@ jobs:
                          AND win_probability*odd+push_probability>1 THEN 1 ELSE 0 END) eligible
                  FROM prepared_betting_v2_forecasts GROUP BY competition_id
               """)
+              show('ELIGIBLE_BY_DATE_MARKET',"""
+                 SELECT SUBSTR(f.kickoff,1,10) AS day, v.competition_id, v.market,
+                        COUNT(*) AS eligible
+                 FROM prepared_betting_v2_forecasts v
+                 JOIN prepared_fixture_matches f
+                   ON f.competition_id=v.competition_id
+                  AND f.snapshot_version=v.snapshot_version
+                  AND f.match_key=v.match_key
+                 WHERE v.odd>1.8 AND v.odd<3 AND v.win_probability>=0.60
+                       AND v.win_probability*v.odd+v.push_probability>1.0
+                       AND f.kickoff>='2026-10-14T00:00:00'
+                       AND f.kickoff<'2026-10-22T00:00:00'
+                 GROUP BY day,v.competition_id,v.market
+                 ORDER BY day, v.competition_id,v.market
+              """)
               show('UEFA_NEXT_FIXTURES',"""
                  SELECT f.competition_id,f.league_code,f.home_team,f.away_team,f.kickoff,
                  COUNT(q.ordinal) offers,COUNT(v.market_ordinal) forecasts
