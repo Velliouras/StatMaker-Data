@@ -19,9 +19,10 @@ def main():
     artifact = next(v for v in manifest['artifacts'] if v['id'] == 'app_ready_betting_bundle')
     output = ROOT / 'reports/betting_v2/favorite_audit'
     output.mkdir(parents=True, exist_ok=True)
-    history = direct.load_actual_results()
     cutoff = direct.kickoff(artifact['generatedAt'])
-    models = {code: direct.MatchupLeague(history.get(code, []), cutoff) for code in ('UECL', 'D1')}
+    history = direct.load_actual_results(cutoff)
+    model = direct.MatchupLeague(history['GLOBAL'],cutoff)
+    models = {code:model for code in ('UECL','D1')}
     audit = dict(bundle=artifact, replayCutoff=cutoff, externalProviderCalls=0, fixtures=[])
     with tempfile.TemporaryDirectory() as td:
         bundle = Path(td) / 'bundle'
@@ -46,11 +47,12 @@ def main():
                             homeElo=model.elo[home], awayElo=model.elo[away], forecasts=[], metrics={})
                 for metric in ('GOALS_FT', 'CORNERS', 'SOT'):
                     item['metrics'][metric] = dict(prediction=model.predict(home, away, metric),
-                        features=model.features(home, away, metric), fit=model.models.get(metric))
-                item['homeRecent'] = [v for v in history.get('UECL', [])
+                        context=model.context(home,away,metric))
+                item['homeRecent'] = [v for v in history['GLOBAL']
                     if v['_date'] < cutoff and home in (v['_home'], v['_away'])][-12:]
-                item['awayRecent'] = [v for v in history.get('UECL', [])
+                item['awayRecent'] = [v for v in history['GLOBAL']
                     if v['_date'] < cutoff and away in (v['_home'], v['_away'])][-12:]
+                item['periodQuotes'] = [dict(v) for v in con.execute('SELECT * FROM prepared_betting_v2_quotes WHERE competition_id=? AND snapshot_version=? AND match_key=?',(f['competition_id'],f['snapshot_version'],f['match_key']))]
                 for v in con.execute('SELECT * FROM prepared_betting_v2_forecasts '
                     'WHERE competition_id=? AND snapshot_version=? AND match_key=? '
                     'AND odd>1.8 AND odd<3 AND win_probability>=0.6',
@@ -63,6 +65,37 @@ def main():
                     matches = list(feed.get('matches', [])) + [v for g in feed.get('leagues', []) for v in g.get('matches', [])]
                     item['sourceQuotes'] = [m for m in matches if str(m.get('id')) == str(f['id'])]
                 audit['fixtures'].append(item)
+        case_selections = {
+            '74173144':('TEAM_SHOTS_ON_TARGET','Ajax Amsterdam Under 5.5'),
+            '74173166':('TEAM_TOTAL_GOALS','AS Monaco Under 1.5'),
+            '74173164':('TEAM_TOTAL_GOALS','FK Borac Banja Luka Over 0.5'),
+            '74173178':('TEAM_TOTAL_GOALS','Atalanta BC Under 1.5'),
+            '74173208':('DOUBLE_CHANCE','X2'),
+        }
+        audit['caseSelections'] = []
+        with sqlite3.connect(db) as con:
+            con.row_factory = sqlite3.Row
+            for fid,(market,selection) in case_selections.items():
+                rows = [dict(v) for v in con.execute(
+                    'SELECT f.id,v.market,v.selection,v.odd,v.win_probability,v.push_probability,'
+                    'v.prediction_home_mean,v.prediction_away_mean FROM prepared_fixture_matches f '
+                    'JOIN prepared_betting_v2_forecasts v USING(competition_id,snapshot_version,match_key) '
+                    'WHERE f.id=? AND v.market=? AND v.selection=?',(fid,market,selection))]
+                audit['caseSelections'].extend(rows)
+            audit['atalantaX2'] = [dict(v) for v in con.execute(
+                "SELECT v.market,v.selection,v.odd,v.win_probability FROM prepared_fixture_matches f "
+                "JOIN prepared_betting_v2_forecasts v USING(competition_id,snapshot_version,match_key) "
+                "WHERE f.id='74173178' AND v.market='DOUBLE_CHANCE' AND v.selection='X2'")]
+        m = models['D1']
+        aliases = direct.UEFA_ALIASES.get('D1',{})
+        bayern = aliases.get('bayernmunchen')
+        gladbach = next((v for k,v in aliases.items() if 'gladbach' in k),None)
+        dortmund = aliases.get('borussiadortmund')
+        audit['bayernGladbach'] = m.predict(bayern,gladbach,'GOALS_FT') if bayern and gladbach else None
+        audit['bayernDortmund'] = m.predict(bayern,dortmund,'GOALS_FT') if bayern and dortmund else None
+        print('AUDIT_CASE_SELECTIONS',json.dumps(audit['caseSelections']))
+        print('AUDIT_ATALANTA_X2',json.dumps(audit['atalantaX2']))
+        print('AUDIT_BAYERN_MATCHUPS',audit['bayernGladbach'],audit['bayernDortmund'])
         for code in ('D1',):
             m = models[code]
             names = sorted(v for v in m.history if any(x in v for x in ('bayern', 'gladbach', 'dortmund')))
@@ -72,7 +105,7 @@ def main():
         # while omitting unrelated legacy simulation matrices.
         replay_db = output / 'statmaker_prepared_betting.db'
         with sqlite3.connect(db) as source, sqlite3.connect(replay_db) as target:
-            for table in ('prepared_fixture_matches', 'prepared_fixture_markets', 'prepared_betting_v2_forecasts'):
+            for table in ('prepared_fixture_matches','prepared_fixture_markets','prepared_betting_v2_quotes','prepared_betting_v2_feed_meta','prepared_betting_v2_forecasts'):
                 ddl = source.execute('SELECT sql FROM sqlite_master WHERE type=\'table\' AND name=?', (table,)).fetchone()[0]
                 target.execute(ddl)
                 records = source.execute('SELECT * FROM '+table).fetchall()
@@ -91,6 +124,8 @@ def main():
             paths.update(ROOT / ('config/'+s) for s in ('uefa_club_competitions.json', 'uefa_simulation_2026_27.json'))
             paths.update((ROOT / 'scripts/betting_v2').rglob('*.py'))
             paths.add(ROOT / 'scripts/materialize_betting_v2_direct.py')
+            paths.add(ROOT / 'scripts/odds_api_io_market_audit.py')
+            paths.update((ROOT / 'data/api_football/league_tables').glob('*_fixtures.json'))
             for path in sorted(paths):
                 if path.is_file():
                     z.write(path, path.relative_to(ROOT).as_posix())

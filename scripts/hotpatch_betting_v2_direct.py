@@ -45,6 +45,7 @@ def main():
     manifest = json.loads(MANIFEST.read_text())
     betting = next(x for x in manifest["artifacts"] if x["id"] == "app_ready_betting_bundle")
     original = ROOT / betting["path"]
+    base_sha = betting["sha256"]
     if not original.is_file():
         raise SystemExit("Existing App-Ready betting bundle is unavailable")
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -58,8 +59,19 @@ def main():
         internal = extracted / "bundle_manifest.json"
         if not db.is_file() or not internal.is_file():
             raise SystemExit("Existing ZIP lacks prepared betting DB or its manifest")
-        subprocess.run(["python", str(ROOT / "scripts/materialize_betting_v2_direct.py"),
-                        str(db)], cwd=ROOT, check=True)
+        exact_feeds = scratch / "uefa_exact_feeds"
+        exact_feeds.mkdir()
+        # Three normalized repository snapshots; zero provider requests.
+        subprocess.run(["git","fetch","--no-tags","origin",
+                        "build/uefa-qualifier-feed-20260720"],cwd=ROOT,check=True)
+        quote_ref = subprocess.check_output(["git","rev-parse","FETCH_HEAD"],cwd=ROOT,text=True).strip()
+        for competition in ("champions_league","europa_league","conference_league"):
+            relative = f"odds/odds_api_io/{competition}_odds.json"
+            payload = subprocess.check_output(["git","show",f"{quote_ref}:{relative}"],cwd=ROOT)
+            json.loads(payload)
+            (exact_feeds / (competition+"_odds.json")).write_bytes(payload)
+        subprocess.run(["python",str(ROOT/"scripts/materialize_betting_v2_direct.py"),str(db),
+                        "--uefa-exact-feed-dir",str(exact_feeds)],cwd=ROOT,check=True)
         import sqlite3
         with sqlite3.connect(db) as con:
             count = int(con.execute("SELECT count(*) FROM prepared_betting_v2_forecasts").fetchone()[0])
@@ -67,7 +79,7 @@ def main():
                 "SELECT COUNT(DISTINCT competition_id || '|' || snapshot_version || '|' || match_key)"
                 " FROM prepared_betting_v2_forecasts"
             ).fetchone()[0])
-            quote_count = int(con.execute("SELECT count(*) FROM prepared_fixture_markets").fetchone()[0])
+            quote_count = int(con.execute("SELECT count(*) FROM prepared_betting_v2_quotes").fetchone()[0])
             scopes = dict(con.execute(
                 "SELECT competition_id,count(*) FROM prepared_betting_v2_forecasts GROUP BY competition_id"
             ).fetchall())
@@ -102,13 +114,15 @@ def main():
         sha256=sha, bytes=output.stat().st_size, generatedAt=now
     )
     metadata = manifest.setdefault("metadata", {})
-    metadata["bettingV2DirectModel"] = "betting-v2-matchup-poisson-fit-v1"
+    metadata["bettingV2DirectModel"] = "betting-v2-opponent-adjusted-count-v2"
+    metadata["bettingV2DirectBaseSha256"] = base_sha
+    metadata["bettingV2DirectUefaQuoteRef"] = quote_ref
     metadata["bettingV2DirectRows"] = count
     metadata["bettingV2DirectFixtures"] = fixtures
     metadata["bettingV2DirectQuoteCount"] = quote_count
-    metadata["bettingV2DirectQuoteSource"] = "full-exact-feeds-from-the-same-immutable-bundle"
+    metadata["bettingV2DirectQuoteSource"] = "period-verified-quotes-with-bookmaker-and-source-hash-in-same-immutable-bundle"
     metadata["bettingV2DirectScopes"] = scopes
-    metadata["bettingV2DirectSource"] = "historical-results-stats-elo-xg-where-available"
+    metadata["bettingV2DirectSource"] = "deduplicated-competitive-club-graph-uefa-qualifying-bridges-opponent-adjusted-counts-lagged-elo-and-xg"
     metadata["bettingV2DirectCertificateRequired"] = False
     manifest["generatedAt"] = now
     manifest["contentVersion"] = hashlib.sha256(

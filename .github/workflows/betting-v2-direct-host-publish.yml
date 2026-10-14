@@ -17,6 +17,10 @@ concurrency:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -28,6 +32,7 @@ jobs:
           git fetch --no-tags origin +main:refs/remotes/origin/main
           git reset --hard refs/remotes/origin/main
           python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_betting_v2_opponent_matchup.py -v
           python scripts/hotpatch_betting_v2_direct.py
       - name: Publish only updated immutable App-Ready betting bundle
         shell: bash
@@ -49,7 +54,7 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
-            cp "$stage/update_manifest.json" data/statmaker/app_ready/update_manifest.json
+            python scripts/merge_betting_v2_manifest.py "$stage/update_manifest.json" data/statmaker/app_ready/update_manifest.json
             cp "$stage/$name" "data/statmaker/app_ready/$name"
             git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$name"
             if git diff --cached --quiet; then
@@ -64,3 +69,10 @@ jobs:
             sleep $((attempt*2))
           done
           [[ "$done_publish" == "true" ]]
+      - name: Audit the published favorite fixtures from cached histories
+        run: python scripts/audit_betting_v2_favorites.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: betting-v2-favorite-audit
+          path: reports/betting_v2/favorite_audit/
+          retention-days: 7
