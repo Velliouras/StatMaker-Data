@@ -104,6 +104,7 @@ class MatchupLeague:
         self.elo = defaultdict(lambda: 1500.0)
         self.train = defaultdict(list)
         self.count = defaultdict(int)
+        self.xg = defaultdict(list)
         self.matches = 0
         for row in matches:
             if row["_date"] >= cutoff:
@@ -127,6 +128,15 @@ class MatchupLeague:
                     continue
                 self.history[h][metric].append((values[0], values[1], True))
                 self.history[a][metric].append((values[1], values[0], False))
+            # Optional observed xG is an explicit feature, not a requirement.
+            stats = row.get("normalized_stats") or {}
+            try:
+                hx, ax = float(stats["HxG"]), float(stats["AxG"])
+                if math.isfinite(hx) and math.isfinite(ax) and hx >= 0 and ax >= 0:
+                    self.xg[h].append((hx, ax))
+                    self.xg[a].append((ax, hx))
+            except (TypeError, ValueError, KeyError):
+                pass
             self.matches += 1
         self.models = {}
         for metric, rows in self.train.items():
@@ -158,11 +168,17 @@ class MatchupLeague:
         goal_a = self.history[away]["GOALS_FT"]
         home_goal_form = average([x[0] - x[1] for x in goal_h], 0)
         away_goal_form = average([x[0] - x[1] for x in goal_a], 0)
+        hx = self.xg[home]
+        ax = self.xg[away]
+        # Missing provider xG never becomes a fabricated xG estimate:
+        # the observed flags distinguish unavailable data from actual zero.
         return [
             (self.elo[home] - self.elo[away] + 65) / 400.0,
             hf, aa, af, ha, hh, ad, ag, hd,
             home_goal_form, away_goal_form,
             min(len(h), 12) / 12.0, min(len(a), 12) / 12.0,
+            average([v[0] for v in hx], 0.0), average([v[1] for v in ax], 0.0),
+            float(bool(hx)), float(bool(ax)),
         ]
 
     def predict(self, home, away, metric):
@@ -345,9 +361,11 @@ def run(db_path):
                 counts["unsupported"] += 1
                 continue
             metric = spec[0]
-            model_key = (league, time)
+            # All quoted fixtures are future relative to this publication.
+            # Train once per league using only results already completed now.
+            model_key = league
             if model_key not in models:
-                models[model_key] = MatchupLeague(history.get(league, []), time)
+                models[model_key] = MatchupLeague(history.get(league, []), now)
             m = models[model_key]
             key = (row["competition_id"], row["snapshot_version"], row["match_key"], metric)
             prediction = m.predict(h, a, metric)
