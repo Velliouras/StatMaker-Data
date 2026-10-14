@@ -475,6 +475,11 @@ def run(db_path):
             JOIN prepared_fixture_markets q ON q.competition_id=f.competition_id
               AND q.snapshot_version=f.snapshot_version AND q.match_key=f.match_key
             WHERE f.usable_for_stats=1
+               OR (f.competition_id IN
+                      ('champions_league','europa_league','conference_league')
+                   AND f.team_mapping_status='provider_identity'
+                   AND TRIM(f.id)<>'' AND TRIM(f.home_team)<>''
+                   AND TRIM(f.away_team)<>'')
             ORDER BY f.competition_id,f.snapshot_version,f.match_key,q.ordinal
         """).fetchall()
         models = {}
