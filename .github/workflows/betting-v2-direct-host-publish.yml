@@ -1,0 +1,66 @@
+name: Betting V2 Direct Host Publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/betting-v2-direct-hot-publish'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-targeted-writers
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Materialize independent V2 forecasts from existing data (no emulator)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin +main:refs/remotes/origin/main
+          git reset --hard refs/remotes/origin/main
+          python -m pip install --quiet numpy scipy scikit-learn
+          python scripts/hotpatch_betting_v2_direct.py
+      - name: Publish only updated immutable App-Ready betting bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          stage="$(mktemp -d)"
+          cp data/statmaker/app_ready/update_manifest.json "$stage/update_manifest.json"
+          name="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          print(Path(next(x for x in d['artifacts'] if x['id']=='app_ready_betting_bundle')['path']).name)
+          PY
+          )"
+          cp "data/statmaker/app_ready/$name" "$stage/$name"
+          done_publish=false
+          for attempt in 1 2 3 4 5; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp "$stage/update_manifest.json" data/statmaker/app_ready/update_manifest.json
+            cp "$stage/$name" "data/statmaker/app_ready/$name"
+            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$name"
+            if git diff --cached --quiet; then
+              done_publish=true
+              break
+            fi
+            git commit -m "Publish direct Betting V2 model forecasts to App-Ready"
+            if git push origin HEAD:main; then
+              done_publish=true
+              break
+            fi
+            sleep $((attempt*2))
+          done
+          [[ "$done_publish" == "true" ]]
