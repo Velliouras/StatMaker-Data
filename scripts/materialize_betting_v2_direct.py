@@ -21,6 +21,7 @@ import random
 import re
 import sqlite3
 import sys
+import unicodedata
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -34,6 +35,7 @@ METRIC_COLUMNS = {
     "SHOTS": ("HS", "AS"),
     "SOT": ("HST", "AST"),
     "YELLOW_CARDS": ("HY", "AY"),
+    "CARDS": ("HY", "AY"),
     "FOULS": ("HF", "AF"),
 }
 MODEL = "betting-v2-matchup-poisson-fit-v1"
@@ -43,7 +45,13 @@ UEFA_ALIASES = {}
 
 
 def name(value):
-    return "".join(ch for ch in str(value or "").casefold() if ch.isalnum())
+    text = unicodedata.normalize("NFKD", str(value or "").casefold())
+    return "".join(ch for ch in text if ch.isalnum())
+
+
+def league_code(value):
+    code = str(value or "").upper()
+    return "UECL" if code == "CONF" else code
 
 
 def kickoff(value):
@@ -64,6 +72,13 @@ def metric_values(row, metric):
             return None
     elif metric == "GOALS_1H":
         raw = (row.get("hthg"), row.get("htag"))
+    elif metric == "CARDS":
+        stats = row.get("normalized_stats") or {}
+        try:
+            raw = (float(stats["HY"]) + float(stats["HR"]),
+                   float(stats["AY"]) + float(stats["AR"]))
+        except (TypeError, KeyError, ValueError):
+            return None
     else:
         keys = METRIC_COLUMNS[metric]
         stats = row.get("normalized_stats") or {}
@@ -80,6 +95,7 @@ def metric_values(row, metric):
 def load_actual_results():
     index = json.loads((ROOT / "data/statmaker/domestic_enriched/index.json").read_text())
     leagues = defaultdict(dict)
+    UEFA_ALIASES.clear()
     for league in index.get("leagues", []):
         relative = league.get("output_path") or ""
         if not relative.startswith("data/statmaker/domestic_enriched/"):
@@ -88,7 +104,7 @@ def load_actual_results():
         if not path.is_file():
             continue
         data = json.loads(path.read_text())
-        code = str(league.get("league_code") or "").upper()
+        code = league_code(league.get("league_code"))
         for match in data.get("matches", []):
             if match.get("status") != "FT":
                 continue
@@ -97,115 +113,157 @@ def load_actual_results():
             date = kickoff(match.get("date_utc"))
             if not home or not away or home == away or date <= 0:
                 continue
-            identifier = str(match.get("fixture_id") or "")
-            key = identifier or f"{date}|{home}|{away}"
+            key = str(match.get("fixture_id") or f"{date}|{home}|{away}")
             leagues[code][key] = dict(match, _home=home, _away=away, _date=date)
-    # UEFA clubs also have actual completed matches in the current season and
-    # real team-specific support history. No synthetic competitor or results.
+
     current_path = ROOT / "data/statmaker/uefa_current_stats.json"
-    support_path = ROOT / "data/statmaker/uefa_team_support_history.json"
-    if current_path.is_file() and support_path.is_file():
-        current = json.loads(current_path.read_text())
-        support = json.loads(support_path.read_text())
-        by_team = support.get("participants", [])
-        for comp in current.get("competitions", []):
-            code = {"CONF": "UECL"}.get(str(comp.get("leagueCode") or "").upper(),
-                                        str(comp.get("leagueCode") or "").upper())
-            members = {name(v) for v in comp.get("participants", [])}
-            if code not in {"CL", "EL", "CONF", "UECL"} or not members:
+    if not current_path.is_file():
+        return {k: sorted(v.values(), key=lambda x: x["_date"]) for k, v in leagues.items()}
+    current = json.loads(current_path.read_text())
+    # The main support file contains observed shots/cards/corners; the separate
+    # team-specific file supplies real games for teams outside domestic coverage.
+    participants = []
+    for filename in ("uefa_support_history.json", "uefa_team_support_history.json"):
+        path = ROOT / "data/statmaker" / filename
+        if path.is_file():
+            participants.extend(json.loads(path.read_text()).get("participants", []))
+    groups = []
+    domestic_alias_path = ROOT / "mappings/domestic_team_aliases.json"
+    if domestic_alias_path.is_file():
+        for teams in json.loads(domestic_alias_path.read_text()).get("aliases", {}).values():
+            for canonical, synonyms in teams.items():
+                groups.append((name(canonical), {name(v) for v in [canonical, *synonyms]}))
+    for participant in participants:
+        canonical = name(participant.get("canonicalTeam") or participant.get("providerTeam"))
+        synonyms = {name(v) for v in [
+            participant.get("canonicalTeam"), participant.get("providerTeam"),
+            *participant.get("aliases", [])
+        ] if v}
+        groups.append((canonical, synonyms))
+
+    configs = []
+    for filename in ("uefa_club_competitions.json", "uefa_simulation_2026_27.json"):
+        path = ROOT / "config" / filename
+        if path.is_file():
+            configs.extend(json.loads(path.read_text()).get("competitions", []))
+    exact_path = ROOT / "mappings/uefa_betting_team_aliases.json"
+    exact = json.loads(exact_path.read_text()).get("aliases", {}) if exact_path.is_file() else {}
+    stats_fields = {
+        "HS": "homeShots", "AS": "awayShots",
+        "HST": "homeShotsOnTarget", "AST": "awayShotsOnTarget",
+        "HC": "homeCorners", "AC": "awayCorners",
+        "HY": "homeYellowCards", "AY": "awayYellowCards",
+        "HR": "homeRedCards", "AR": "awayRedCards",
+        "HF": "homeFouls", "AF": "awayFouls",
+        "HxG": "homeXg", "AxG": "awayXg",
+    }
+    domestic = dict(leagues)
+    for comp in current.get("competitions", []):
+        code = league_code(comp.get("leagueCode"))
+        members = {name(v) for v in comp.get("participants", []) if name(v)}
+        if code not in ("CL", "EL", "UECL") or not members:
+            continue
+        aliases = {v: v for v in members}
+        ambiguous = set()
+
+        def add_alias(key, target):
+            if not key or target not in members or key in ambiguous:
+                return
+            previous = aliases.get(key)
+            if previous is not None and previous != target:
+                if key not in members:
+                    aliases.pop(key, None)
+                    ambiguous.add(key)
+                return
+            aliases[key] = target
+
+        for config in configs:
+            if league_code(config.get("leagueCode")) == code:
+                for synonym, canonical in config.get("aliases", {}).items():
+                    add_alias(name(synonym), name(canonical))
+        for synonym, canonical in exact.get(code, {}).items():
+            add_alias(name(synonym), name(canonical))
+        for fixture in comp.get("fixtures", []):
+            for side in ("Home", "Away"):
+                canonical = name(fixture.get("homeTeam" if side == "Home" else "awayTeam"))
+                provider = name(fixture.get("providerHomeTeam" if side == "Home" else "providerAwayTeam"))
+                add_alias(provider, canonical)
+        # Expand only explicit aliases belonging to one identified participant.
+        # Short aliases such as Inter/LAR must not link an unrelated club.
+        for _ in range(3):
+            for canonical, synonyms in groups:
+                targets = {aliases[v] for v in synonyms if v in aliases and
+                           (len(v) >= 4 or v == canonical and canonical in members)}
+                if len(targets) == 1:
+                    target = next(iter(targets))
+                    for synonym in synonyms:
+                        if len(synonym) >= 4 or synonym == canonical and canonical in members:
+                            add_alias(synonym, target)
+        UEFA_ALIASES[code] = aliases
+
+        def canonical_team(value, namespace):
+            key = name(value)
+            return aliases.get(key, namespace + ":" + key)
+
+        unified = {}
+
+        def include_row(row):
+            # One physical result, including when both participant support
+            # lists contain it. Prefer the complete domestic provider record.
+            key = (datetime.fromtimestamp(row["_date"], timezone.utc).date().isoformat(),
+                   row["_home"], row["_away"])
+            unified.setdefault(key, row)
+
+        for domestic_code, records in domestic.items():
+            if domestic_code in ("CL", "EL", "UECL"):
                 continue
-            def include(raw, when, home_key, away_key, hg_key, ag_key, stats_key):
-                h, a = name(raw.get(home_key)), name(raw.get(away_key))
-                if not h or not a or h == a:
-                    return
-                date = kickoff(raw.get(when))
-                try:
-                    hg, ag = int(raw[hg_key]), int(raw[ag_key])
-                except (TypeError, KeyError, ValueError):
-                    return
-                if date <= 0 or hg < 0 or ag < 0:
-                    return
-                key = f"{date}|{h}|{a}"
-                row = {
-                    "status": "FT", "_date": date, "_home": h, "_away": a,
-                    "home_goals": hg, "away_goals": ag,
-                    "normalized_stats": raw.get(stats_key) or {},
-                }
-                leagues[code][key] = row
-            for fixture in comp.get("fixtures", []):
-                if fixture.get("status") == "FT":
-                    include(fixture, "kickoff", "homeTeam", "awayTeam",
-                            "homeGoals", "awayGoals", "normalizedStats")
-            for participant in by_team:
-                aliases = {name(v) for v in [
-                    participant.get("providerTeam"), participant.get("canonicalTeam"),
-                    *participant.get("aliases", [])
-                ]}
-                if not members.intersection(aliases):
-                    continue
-                for fixture in participant.get("matches", []):
-                    include(fixture, "date", "homeTeam", "awayTeam",
-                            "homeGoals", "awayGoals", "normalizedStats")
-    # UEFA teams also play REAL national-league matches. Use those completed
-    # games to fit the same matchup model when a UEFA-only history has too few
-    # repeated matchups. Never infer invented stats or missing player reports.
-    # Non-participant domestic opponents are namespaced by domestic league to
-    # avoid accidentally merging unrelated clubs with identical short names.
-    if current_path.is_file() and support_path.is_file():
-        for comp in current.get("competitions", []):
-            code = {"CONF": "UECL"}.get(
-                str(comp.get("leagueCode") or "").upper(),
-                str(comp.get("leagueCode") or "").upper()
-            )
-            if code not in ("CL", "EL", "UECL"):
+            if not any(aliases.get(row["_home"]) in members or
+                       aliases.get(row["_away"]) in members for row in records.values()):
                 continue
-            members = {name(x) for x in comp.get("participants", []) if name(x)}
-            if not members:
-                continue
-            aliases = {member: member for member in members}
-            # Provider and canonical names in the same exact UEFA fixture
-            # refer to one identified club, even when spellings differ.
-            for fixture in comp.get("fixtures", []):
-                for side in ("Home", "Away"):
-                    canonical = name(fixture.get("homeTeam" if side == "Home" else "awayTeam"))
-                    provider = name(fixture.get("providerHomeTeam" if side == "Home" else "providerAwayTeam"))
-                    if canonical in members and provider:
-                        aliases[provider] = canonical
-            for participant in support.get("participants", []):
-                candidate = [name(participant.get("providerTeam")),
-                             name(participant.get("canonicalTeam"))]
-                candidate += [name(x) for x in participant.get("aliases", [])]
-                matching = {aliases[x] for x in candidate if x in aliases}
-                if len(matching) == 1:
-                    dest = next(iter(matching))
-                    for synonym in candidate:
-                        if len(synonym) >= 4:
-                            aliases[synonym] = dest
-            UEFA_ALIASES[code] = aliases
-            domestic_codes = set()
-            for domestic_code, records in list(leagues.items()):
-                if domestic_code in ("CL", "EL", "UECL", "CONF"):
-                    continue
-                if any(aliases.get(x["_home"]) in members or
-                       aliases.get(x["_away"]) in members for x in records.values()):
-                    domestic_codes.add(domestic_code)
-            unified = {}
-            for domestic_code in sorted(domestic_codes):
-                for row in leagues[domestic_code].values():
-                    item = dict(row)
-                    for side in ("_home", "_away"):
-                        raw_team = item[side]
-                        # One verified participant identity across domestic/UEFA;
-                        # nonparticipants remain unambiguously domestic.
-                        item[side] = aliases.get(raw_team, domestic_code + ":" + raw_team)
-                    unified[domestic_code + "|" + str(row.get("fixture_id") or
-                                    (row["_date"],row["_home"],row["_away"]))] = item
-            for key,row in leagues[code].items():
+            for row in records.values():
                 item = dict(row)
-                for side in ("_home", "_away"):
-                    item[side] = aliases.get(item[side], "support:" + item[side])
-                unified["uefa|" + key] = item
-            leagues[code] = unified
+                item["_home"] = canonical_team(row["_home"], domestic_code)
+                item["_away"] = canonical_team(row["_away"], domestic_code)
+                include_row(item)
+
+        def include_actual(raw, when):
+            home, away = raw.get("homeTeam"), raw.get("awayTeam")
+            date = kickoff(raw.get(when))
+            try:
+                hg, ag = int(raw["homeGoals"]), int(raw["awayGoals"])
+            except (TypeError, ValueError, KeyError):
+                return
+            if not name(home) or not name(away) or name(home) == name(away) or date <= 0 or hg < 0 or ag < 0:
+                return
+            stats = dict(raw.get("normalizedStats") or {})
+            for key, field in stats_fields.items():
+                if key not in stats and raw.get(field) is not None:
+                    stats[key] = raw[field]
+            item = dict(
+                status="FT", _date=date,
+                _home=canonical_team(home, "support"), _away=canonical_team(away, "support"),
+                home_goals=hg, away_goals=ag, normalized_stats=stats
+            )
+            for key, fields in (("hthg", ("homeHalfGoals", "homeHalfTimeGoals")),
+                                ("htag", ("awayHalfGoals", "awayHalfTimeGoals"))):
+                item[key] = next((raw[v] for v in fields if raw.get(v) is not None), None)
+            include_row(item)
+
+        for fixture in comp.get("fixtures", []):
+            if fixture.get("status") == "FT":
+                include_actual(fixture, "kickoff")
+        for participant in participants:
+            canonical = name(participant.get("canonicalTeam") or participant.get("providerTeam"))
+            synonyms = {name(v) for v in [
+                participant.get("canonicalTeam"), participant.get("providerTeam"),
+                *participant.get("aliases", [])
+            ] if v}
+            targets = {aliases[v] for v in synonyms if v in aliases and
+                       (len(v) >= 4 or v == canonical and canonical in members)}
+            if len(targets) == 1:
+                for fixture in participant.get("matches", []):
+                    include_actual(fixture, "date")
+        leagues[code] = unified
     return {k: sorted(v.values(), key=lambda x: x["_date"]) for k, v in leagues.items()}
 
 
@@ -307,7 +365,7 @@ class MatchupLeague:
         except (OverflowError, ValueError, ArithmeticError):
             return None
         ceiling = {"GOALS_FT": 12, "GOALS_1H": 8, "GOALS_2H": 8, "CORNERS": 32,
-                   "SHOTS": 65, "SOT": 28, "YELLOW_CARDS": 16, "FOULS": 55}[metric]
+                   "SHOTS": 65, "SOT": 28, "YELLOW_CARDS": 16, "CARDS": 18, "FOULS": 55}[metric]
         if any(not math.isfinite(v) or v <= 0 or v > ceiling for v in (home_rate, away_rate)):
             return None
         return (home_rate, away_rate,
@@ -349,21 +407,31 @@ def quote_market(row, home, away):
         "DOUBLECHANCE": ("GOALS_FT", "DC"),
         "DC": ("GOALS_FT", "DC"),
         "DRAWNOBET": ("GOALS_FT", "DNB"),
+        "HALFTIME1X2": ("GOALS_1H", "RESULT"),
+        "HALFTIMEDOUBLECHANCE": ("GOALS_1H", "DC"),
         "BTTS": ("GOALS_FT", "BTTS"),
         "MATCHGOALS": ("GOALS_FT", "TOTAL"),
         "TEAMGOALS": ("GOALS_FT", "TEAM"),
+        "TEAMTOTALGOALS": ("GOALS_FT", "TEAM"),
         "FIRSTHALFGOALS": ("GOALS_1H", "TOTAL"),
         "MATCHFIRSTHALFGOALS": ("GOALS_1H", "TOTAL"),
+        "TEAMFIRSTHALFGOALS": ("GOALS_1H", "TEAM"),
         "SECONDHALFGOALS": ("GOALS_2H", "TOTAL"),
         "MATCHSECONDHALFGOALS": ("GOALS_2H", "TOTAL"),
+        "TEAMSECONDHALFGOALS": ("GOALS_2H", "TEAM"),
         "MATCHCORNERS": ("CORNERS", "TOTAL"),
         "TEAMCORNERS": ("CORNERS", "TEAM"),
+        "MOSTCORNERS": ("CORNERS", "RESULT"),
         "MATCHSHOTS": ("SHOTS", "TOTAL"),
         "TEAMSHOTS": ("SHOTS", "TEAM"),
+        "MOSTSHOTS": ("SHOTS", "RESULT"),
         "MATCHSHOTSONTARGET": ("SOT", "TOTAL"),
         "TEAMSHOTSONTARGET": ("SOT", "TEAM"),
+        "MOSTSHOTSONTARGET": ("SOT", "RESULT"),
         "MATCHYELLOWCARDS": ("YELLOW_CARDS", "TOTAL"),
         "TEAMYELLOWCARDS": ("YELLOW_CARDS", "TEAM"),
+        "MATCHCARDS": ("CARDS", "TOTAL"),
+        "TEAMCARDS": ("CARDS", "TEAM"),
         "MATCHFOULS": ("FOULS", "TOTAL"),
         "TEAMFOULS": ("FOULS", "TEAM"),
     }
@@ -414,6 +482,24 @@ def quote_market(row, home, away):
 
 def evaluate(counts, spec):
     _, scope, side, team_side, line = spec
+    if isinstance(counts, dict):
+        total = counts["runs"]
+        if scope == "RESULT":
+            return counts[side] / total, 0.0
+        if scope == "DC":
+            wins = {"HOME_OR_DRAW": counts["HOME"] + counts["DRAW"],
+                    "AWAY_OR_DRAW": counts["AWAY"] + counts["DRAW"],
+                    "HOME_OR_AWAY": counts["HOME"] + counts["AWAY"]}[side]
+            return wins / total, 0.0
+        if scope == "DNB":
+            return counts[side] / total, counts["DRAW"] / total
+        if scope == "BTTS":
+            yes = counts["BTTS"]
+            return (yes if side == "YES" else total - yes) / total, 0.0
+        values = counts[team_side + "_COUNTS" if team_side else "TOTAL"]
+        below, through = bisect.bisect_left(values, line), bisect.bisect_right(values, line)
+        wins = total - through if side == "OVER" else below
+        return wins / total, (through - below) / total
     wins = pushes = 0
     for h, a in counts:
         if scope == "RESULT":
@@ -439,12 +525,89 @@ def evaluate(counts, spec):
     return wins / len(counts), pushes / len(counts)
 
 
+def sampled_distribution(pairs):
+    """Index the SAME 10,000 sampled pairs once for every actual market line."""
+    return {
+        "runs": len(pairs),
+        "HOME": sum(h > a for h, a in pairs),
+        "DRAW": sum(h == a for h, a in pairs),
+        "AWAY": sum(a > h for h, a in pairs),
+        "BTTS": sum(h > 0 and a > 0 for h, a in pairs),
+        "HOME_COUNTS": sorted(h for h, _ in pairs),
+        "AWAY_COUNTS": sorted(a for _, a in pairs),
+        "TOTAL": sorted(h + a for h, a in pairs),
+    }
+
+
+def restore_fixture_quotes(con, db_path):
+    """Append exact quotes from this bundle's full feeds, preserving old ordinals.
+
+    catalog_payload contains ONE representative per market for filter menus;
+    it is not a complete probability/price input. No external/provider call.
+    Conflicting unattributed prices are retained so Android rejects ambiguity.
+    """
+    directory = Path(db_path).resolve().parent.parent / "files/app_ready_odds"
+    totals = {}
+    for competition in ("domestic", "champions_league", "europa_league", "conference_league"):
+        path = directory / f"{competition}.json"
+        if not path.is_file():
+            raise ValueError(f"Full same-bundle odds input missing: {path}")
+        payload = json.loads(path.read_text())
+        matches = list(payload.get("matches", []))
+        matches.extend(m for group in payload.get("leagues", []) for m in group.get("matches", []))
+        stored = defaultdict(list)
+        for fixture in con.execute("SELECT * FROM prepared_fixture_matches WHERE competition_id=?", (competition,)):
+            if fixture["id"]:
+                stored[str(fixture["id"])].append(dict(fixture))
+        existing = defaultdict(set)
+        next_ordinal = defaultdict(int)
+        for row in con.execute("SELECT * FROM prepared_fixture_markets WHERE competition_id=?", (competition,)):
+            key = (row["snapshot_version"], row["match_key"])
+            existing[key].add((row["market"], row["selection"], row["team"], row["line"], row["odd"]))
+            next_ordinal[key] = max(next_ordinal[key], row["ordinal"] + 1)
+        pending = []
+        for match in matches:
+            for fixture in stored.get(str(match.get("id") or ""), []):
+                # Same provider fixture and kickoff, not a team-name/fuzzy join.
+                if kickoff(match.get("kickoff")) != kickoff(fixture["kickoff"]):
+                    continue
+                key = (fixture["snapshot_version"], fixture["match_key"])
+                for quote in match.get("markets", []):
+                    if quote.get("exactBookmakerOdds") is not True or not quote.get("bookmaker"):
+                        continue
+                    try:
+                        odd = float(quote.get("odds", quote.get("odd")))
+                        line = None if quote.get("line") is None else float(quote["line"])
+                    except (ValueError, TypeError):
+                        continue
+                    if not math.isfinite(odd) or odd <= 1 or line is not None and not math.isfinite(line):
+                        continue
+                    market = str(quote.get("market") or "").strip()
+                    selection = str(quote.get("selection") or "").strip()
+                    team = str(quote.get("team") or "").strip() or None
+                    offer = dict(fixture, market=market, selection=selection, team=team, line=line, odd=odd)
+                    if quote_market(offer, "", "") is None:
+                        continue
+                    identity = (market, selection, team, line, odd)
+                    if identity in existing[key]:
+                        continue
+                    existing[key].add(identity)
+                    ordinal = next_ordinal[key]
+                    next_ordinal[key] += 1
+                    pending.append((competition, *key, ordinal, market, selection, team, line, odd))
+        con.executemany("INSERT INTO prepared_fixture_markets VALUES (?,?,?,?,?,?,?,?,?)", pending)
+        totals[competition] = len(pending)
+    return totals
+
+
 def run(db_path):
     history = load_actual_results()
     now = datetime.now(timezone.utc).timestamp()
     counts = defaultdict(int)
     with sqlite3.connect(db_path) as con:
         con.row_factory = sqlite3.Row
+        restored = restore_fixture_quotes(con, db_path)
+        print("BETTING_V2_FULL_QUOTES_RESTORED", json.dumps(restored, sort_keys=True), flush=True)
         con.executescript("""
             DROP TABLE IF EXISTS prepared_betting_v2_forecasts;
             CREATE TABLE prepared_betting_v2_forecasts (
@@ -491,7 +654,7 @@ def run(db_path):
             # local kickoff cutoff at query time. Include today's quotes.
             if time < now - 86400:
                 continue
-            league = str(row["league_code"] or "").upper()
+            league = league_code(row["league_code"])
             # All quoted fixtures are future relative to this publication.
             # Train once per league using only results already completed now.
             model_key = league
@@ -520,7 +683,7 @@ def run(db_path):
                 continue
             hr, ar, hs, ass, training = prediction
             if key not in draws:
-                draws[key] = samples(hr, ar, "|".join(map(str, key)) + "|" + MODEL)
+                draws[key] = sampled_distribution(samples(hr, ar, "|".join(map(str, key)) + "|" + MODEL))
             win, push = evaluate(draws[key], spec)
             if not (math.isfinite(win) and math.isfinite(push) and win + push <= 1.000001):
                 continue
@@ -536,6 +699,7 @@ def run(db_path):
         con.commit()
         counts["fixtures_from_quotes"] = len({(r[0], r[1], r[2]) for r in pending})
         counts["forecasts"] = len(pending)
+        counts["restored_exact_quotes"] = sum(restored.values())
     return dict(counts)
 
 
@@ -544,3 +708,4 @@ if __name__ == "__main__":
     parser.add_argument("prepared_db", type=Path)
     args = parser.parse_args()
     print("BETTING_V2_DIRECT_MODEL", json.dumps(run(args.prepared_db), sort_keys=True))
+
