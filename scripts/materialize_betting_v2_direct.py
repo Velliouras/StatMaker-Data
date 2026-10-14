@@ -187,7 +187,7 @@ def load_actual_results():
                 if domestic_code in ("CL", "EL", "UECL", "CONF"):
                     continue
                 if any(aliases.get(x["_home"]) in members or
-                       aliases.get(x["_away"]) in members for x in records):
+                       aliases.get(x["_away"]) in members for x in records.values()):
                     domestic_codes.add(domestic_code)
             unified = {}
             for domestic_code in sorted(domestic_codes):
