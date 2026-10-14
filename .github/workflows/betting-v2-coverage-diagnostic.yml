@@ -129,3 +129,45 @@ jobs:
                     "members",len(members),"directly_covered",len(covered),
                     "missing_members",[n for n in members if not by_team[n]][:25])
           PY
+          python - <<'PY'
+          import sys,json,sqlite3,tempfile,zipfile,collections
+          from pathlib import Path
+          sys.path.insert(0,"scripts")
+          import materialize_betting_v2_direct as m
+          h=m.load_actual_results()
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          bundle=next(x for x in manifest['artifacts'] if x['id']=='app_ready_betting_bundle')
+          with tempfile.TemporaryDirectory() as t:
+              with zipfile.ZipFile(bundle['path']) as z:
+                  z.extract('databases/statmaker_prepared_betting.db',t)
+              db=sqlite3.connect(str(Path(t)/'databases/statmaker_prepared_betting.db'))
+              db.row_factory=sqlite3.Row
+              for comp in ('champions_league','europa_league','conference_league'):
+                  rows=db.execute("""SELECT id,league_code,home_team,away_team,
+                          canonical_home_team,canonical_away_team,
+                          provider_home_team,provider_away_team,
+                          home_team_logo,away_team_logo
+                          FROM prepared_fixture_matches WHERE competition_id=?""",(comp,)).fetchall()
+                  total=collections.Counter()
+                  sample=[]
+                  for row in rows:
+                      league=row['league_code']
+                      alias=m.UEFA_ALIASES.get(league,{})
+                      known={t for f in h.get(league,[]) for t in (f['_home'],f['_away'])}
+                      home=[m.name(row[k]) for k in ('home_team','canonical_home_team','provider_home_team')]
+                      away=[m.name(row[k]) for k in ('away_team','canonical_away_team','provider_away_team')]
+                      home_ok=any(alias.get(v,v) in known for v in home)
+                      away_ok=any(alias.get(v,v) in known for v in away)
+                      total[str((home_ok,away_ok))]+=1
+                      if not (home_ok and away_ok) and len(sample)<12:
+                          sample.append(dict(id=row['id'],home=row['home_team'],away=row['away_team'],
+                               canonicalHome=row['canonical_home_team'],
+                               canonicalAway=row['canonical_away_team'],
+                               providerHome=row['provider_home_team'],
+                               providerAway=row['provider_away_team'],
+                               homeLogo=row['home_team_logo'],
+                               awayLogo=row['away_team_logo'],
+                               homeFound=home_ok,awayFound=away_ok))
+                  print('UEFA_IDENTITY_GAPS',comp,len(rows),dict(total),json.dumps(sample,ensure_ascii=False))
+              db.close()
+          PY
