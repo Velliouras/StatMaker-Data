@@ -20,6 +20,8 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
+from odds_api_io_market_audit import classify_provider_market, provider_market_text
+
 LINE_MARKETS = {
     "MATCH_GOALS",
     "FIRST_HALF_GOALS",
@@ -296,8 +298,54 @@ def dedupe_markets_by_bookmaker(markets: Iterable[Dict[str, Any]]) -> List[Dict[
 
 
 def install_parser_guard(odds_module: Any) -> None:
-    """Install bookmaker-preserving dedupe on the shared Odds-API parser."""
+    """Preserve bookmaker identity and the raw market's quantity/period."""
     odds_module.dedupe_markets = dedupe_markets_by_bookmaker
+    if getattr(odds_module, "_statmaker_exact_market_semantics_installed", False):
+        return
+    original = odds_module.normalize_market
+
+    def exact_market_semantics(
+        market: Dict[str, Any], bookmaker: str, home: str, away: str,
+        debug: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
+        audit = classify_provider_market(provider_market_text(market))
+        raw_name = odds_module.raw_market_name(market)
+        # These explicitly identified markets cannot be settled from a
+        # full-time count or result. Unrecognized markets still reach the
+        # established expansion chain and retain its existing rules.
+        if audit["status"] == "unsupported" and audit["reason"] != (
+            "unrecognized or unsupported provider market"
+        ):
+            odds_module.record_market_audit(
+                debug, raw_name,
+                {"bookmaker": bookmaker, "fixture": f"{home} - {away}"},
+                classification_text=provider_market_text(market),
+            )
+            odds_module.record_skipped_market(
+                debug, raw_name, audit["reason"], family_override=audit["family"]
+            )
+            return []
+        rows = original(market, bookmaker, home, away, debug)
+        family = audit["family"]
+        goal_families = {
+            "MATCH_GOALS", "TEAM_TOTAL_GOALS", "FIRST_HALF_GOALS",
+            "TEAM_FIRST_HALF_GOALS", "SECOND_HALF_GOALS", "TEAM_SECOND_HALF_GOALS",
+        }
+        period_goals = goal_families - {"MATCH_GOALS", "TEAM_TOTAL_GOALS"}
+        result: List[Dict[str, Any]] = []
+        for raw in rows:
+            quote = dict(raw)
+            if family in period_goals and quote.get("market") in goal_families:
+                quote["market"] = family
+            elif family == "HALF_TIME_DOUBLE_CHANCE" and quote.get("market") == "DOUBLE_CHANCE":
+                quote["market"] = family
+            quote["providerMarketName"] = raw_name
+            quote["providerMarketFamily"] = family
+            result.append(quote)
+        return result
+
+    odds_module.normalize_market = exact_market_semantics
+    odds_module._statmaker_exact_market_semantics_installed = True
 
 
 def sanitize_match(
@@ -490,3 +538,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

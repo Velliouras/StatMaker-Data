@@ -13,6 +13,9 @@ SUPPORTED_FAMILIES = {
     "BTTS",
     "MATCH_GOALS",
     "FIRST_HALF_GOALS",
+    "TEAM_FIRST_HALF_GOALS",
+    "SECOND_HALF_GOALS",
+    "TEAM_SECOND_HALF_GOALS",
     "TEAM_TOTAL_GOALS",
     "MATCH_CORNERS",
     "TEAM_CORNERS",
@@ -23,6 +26,7 @@ SUPPORTED_FAMILIES = {
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
     "DOUBLE_CHANCE",
+    "HALF_TIME_DOUBLE_CHANCE",
 }
 
 AUDIT_ONLY_FAMILIES = {
@@ -56,12 +60,34 @@ def _is_team_market(name: str) -> bool:
 
 def classify_provider_market(raw_name: str) -> Dict[str, str]:
     name = normalize_market_text(raw_name)
-    half_time = bool(re.search(r"\b(1h|ht)\b", name)) or any(
+    half_time = bool(re.search(r"(?<!\d)1h\b|\bht\b", name)) or any(
         token in name for token in ("first half", "1st half", "half time", "halftime")
     )
-    second_half = bool(re.search(r"\b2h\b", name)) or any(
+    second_half = bool(re.search(r"(?<!\d)2h\b", name)) or any(
         token in name for token in ("second half", "2nd half")
     )
+
+    # These markets have a different measured quantity or period. A matching
+    # word such as 'corner'/'total' does not make them full-time count totals.
+    unsupported_reason = None
+    if "corner" in name and any(token in name for token in (
+        "time of", "minute", "first match", "last match", "race", "multicorner"
+    )):
+        unsupported_reason = "special corner market is not a match corner total"
+    elif any(token in name for token in ("tackle", "offside", "goalkeeper save", "total save")):
+        unsupported_reason = "non-goal statistic must not become a goals total"
+    elif (half_time or second_half) and any(token in name for token in ("corner", "shot", "card", "booking")):
+        unsupported_reason = "period-specific count must not become a full-time count"
+    elif (second_half and "double chance" in name) or (
+        (half_time or second_half) and "draw no bet" in name
+    ):
+        unsupported_reason = "period-specific result market has no full-time settlement"
+    elif second_half and (name.startswith("ml") or any(token in name for token in (
+        "match result", "match winner", "moneyline", "1x2", "money line"
+    ))):
+        unsupported_reason = "second-half result must not become a full-time result"
+    if unsupported_reason:
+        return {"family": "UNSUPPORTED", "status": "unsupported", "reason": unsupported_reason}
 
     if any(
         token in name
@@ -86,6 +112,8 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
         family = "CORRECT_SCORE"
     elif any(token in name for token in ("draw no bet", "drawn no bet")) or re.search(r"\bdnb\b", name):
         family = "DRAW_NO_BET"
+    elif half_time and "double chance" in name:
+        family = "HALF_TIME_DOUBLE_CHANCE"
     elif "double chance" in name or re.search(r"\b(1x|x2|12)\b", name):
         family = "DOUBLE_CHANCE"
     elif "asian total" in name:
@@ -105,7 +133,9 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
     elif any(token in name for token in ("both teams", "btts", "both teams to score")):
         family = "BTTS"
     elif half_time and any(token in name for token in ("goal", "total", "over under", "goal line")):
-        family = "FIRST_HALF_GOALS"
+        family = "TEAM_FIRST_HALF_GOALS" if _is_team_market(name) else "FIRST_HALF_GOALS"
+    elif second_half and any(token in name for token in ("goal", "total", "over under", "goal line")):
+        family = "TEAM_SECOND_HALF_GOALS" if _is_team_market(name) else "SECOND_HALF_GOALS"
     elif _is_team_market(name) and any(token in name for token in ("goal", "total", "over under")):
         family = "TEAM_TOTAL_GOALS"
     elif any(token in name for token in ("total", "over under", "goals", "goal line")):
@@ -274,3 +304,4 @@ def run_market_audit_self_check() -> Dict[str, Any]:
         "supportedFamilies": sorted(SUPPORTED_FAMILIES),
         "auditOnlyFamilies": sorted(AUDIT_ONLY_FAMILIES),
     }
+

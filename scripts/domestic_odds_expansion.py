@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
+from odds_api_io_market_audit import classify_provider_market
+
 TEAM_NAME_PREFIX_TOKENS = {
     "club", "clube", "deportivo", "deportes", "sporting", "atletico",
     "association", "asociacion", "fotbal", "fotboll", "football",
@@ -551,9 +553,31 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
         debug: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         raw_name = odds_module.raw_market_name(market)
+        # The legacy word-based mapper cannot settle these special/period
+        # markets as full-time counts. Apply the shared semantic audit first.
+        audit = classify_provider_market(odds_module.provider_market_text(market))
+        if audit["status"] == "unsupported":
+            odds_module.record_market_audit(
+                debug, raw_name,
+                {"bookmaker": bookmaker, "fixture": f"{home} - {away}",
+                 "marketSample": odds_module.compact(market, 700)},
+                classification_text=odds_module.provider_market_text(market)
+            )
+            odds_module.record_raw_market(debug, raw_name, audit["family"])
+            odds_module.record_skipped_market(debug, raw_name, audit["reason"],
+                                              family_override=audit["family"])
+            return []
         if "double chance" in odds_module.normalize_text(raw_name):
-            return normalize_double_chance(odds_module, market, bookmaker, home, away, debug)
-        return original_normalize_market(market, bookmaker, home, away, debug)
+            result = normalize_double_chance(odds_module, market, bookmaker, home, away, debug)
+            if audit["family"] == "HALF_TIME_DOUBLE_CHANCE":
+                for quote in result:
+                    quote["market"] = "HALF_TIME_DOUBLE_CHANCE"
+        else:
+            result = original_normalize_market(market, bookmaker, home, away, debug)
+        for quote in result:
+            quote["providerMarketName"] = raw_name
+            quote["providerMarketFamily"] = audit["family"]
+        return result
 
     def expanded_canonical_team_info(
         name: str,
@@ -588,3 +612,4 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
     odds_module.build_output = installed_build_output
     pipeline_module.generated_aliases = expanded_generated_aliases
     odds_module._statmaker_domestic_expansion_installed = True
+

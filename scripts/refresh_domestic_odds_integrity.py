@@ -378,7 +378,6 @@ def install_rate_limit_wait_guard(
 
 
 def main() -> int:
-    install_parser_guard(target.odds_fetch)
     scope.install_odds_registry_load_guard(target.pipeline)
 
     # Install the existing market/league expansions first, then install the single
@@ -387,6 +386,9 @@ def main() -> int:
     target.domestic_odds_expansion.install(target.odds_fetch, target.pipeline)
     domestic_market_expansion_v18.install(target.odds_fetch, target.pipeline)
     canonical_team_identity.install_domestic(target.odds_fetch, target.pipeline)
+    # Guard the final expansion chain so every emitted quote retains its raw
+    # quantity/period and source label, including markets emitted by v18.
+    install_parser_guard(target.odds_fetch)
 
     # Fail closed on clearly stale imminent provider odds. This uses only timestamps
     # already present in the Odds-API.io payload and therefore consumes no extra API
@@ -410,3 +412,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

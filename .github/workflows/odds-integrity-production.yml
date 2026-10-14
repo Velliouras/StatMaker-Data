@@ -315,6 +315,7 @@ jobs:
       - name: Save shared scripts before UEFA checkout
         run: |
           cp scripts/odds_market_integrity.py "$RUNNER_TEMP/odds_market_integrity.py"
+          cp scripts/odds_api_io_market_audit.py "$RUNNER_TEMP/odds_api_io_market_audit.py"
           cp scripts/build_statmaker_update_manifest.py "$RUNNER_TEMP/build_statmaker_update_manifest.py"
 
       - name: Switch to live UEFA feed branch

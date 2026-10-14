@@ -38,7 +38,7 @@ from odds_api_io_market_audit import (
     run_market_audit_self_check,
 )
 
-SCRIPT_VERSION = "domestic-odds-api-io-v5-strict-provider-country-market-audit"
+SCRIPT_VERSION = "domestic-odds-api-io-v6-exact-count-periods"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
 DEFAULT_BOOKMAKERS = "Bet365,Unibet"
@@ -55,6 +55,9 @@ SUPPORTED_MARKETS = {
     "1X2",
     "MATCH_GOALS",
     "FIRST_HALF_GOALS",
+    "TEAM_FIRST_HALF_GOALS",
+    "SECOND_HALF_GOALS",
+    "TEAM_SECOND_HALF_GOALS",
     "BTTS",
     "TEAM_TOTAL_GOALS",
     "MATCH_CORNERS",
@@ -66,6 +69,7 @@ SUPPORTED_MARKETS = {
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
     "DOUBLE_CHANCE",
+    "HALF_TIME_DOUBLE_CHANCE",
 }
 EMITTED_MARKET_COUNT_KEYS = [
     "1X2",
@@ -73,6 +77,10 @@ EMITTED_MARKET_COUNT_KEYS = [
     "MATCH_GOALS",
     "TEAM_TOTAL_GOALS",
     "FIRST_HALF_GOALS",
+    "TEAM_FIRST_HALF_GOALS",
+    "SECOND_HALF_GOALS",
+    "TEAM_SECOND_HALF_GOALS",
+    "HALF_TIME_DOUBLE_CHANCE",
     "MATCH_CORNERS",
     "TEAM_CORNERS",
     "MATCH_CARDS",
@@ -706,6 +714,14 @@ def market_family_from_name(name: str) -> str:
         return "SHOTS"
     if any(token in n for token in ["moneyline", "match result", "match winner", "1x2", "winner"]):
         return "1X2"
+    if (re.search(r"(?<!\d)2h\b", n) or "second half" in n or "2nd half" in n) and any(
+        token in n for token in ["goal", "total", "over under"]
+    ):
+        return "TEAM_SECOND_HALF_GOALS" if is_team_market(name) else "SECOND_HALF_GOALS"
+    if (re.search(r"(?<!\d)1h\b|\bht\b", n) or any(token in n for token in (
+        "first half", "1st half", "half time", "halftime"
+    ))) and any(token in n for token in ("goal", "total", "over under", "goal line")):
+        return "TEAM_FIRST_HALF_GOALS" if is_team_market(name) else "FIRST_HALF_GOALS"
     if any(token in n for token in ["team total", "team goals"]):
         return "TEAM_TOTAL_GOALS"
     if (
@@ -778,6 +794,11 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
             family_override=audit["family"],
         )
         return []
+    if audit["family"] in {
+        "FIRST_HALF_GOALS", "TEAM_FIRST_HALF_GOALS",
+        "SECOND_HALF_GOALS", "TEAM_SECOND_HALF_GOALS",
+    }:
+        family = audit["family"]
     rows = outcome_rows(market)
     out: List[Dict[str, Any]] = []
     if not rows:
@@ -864,6 +885,9 @@ def normalize_market(market: Dict[str, Any], bookmaker: str, home: str, away: st
     base_market = {
         "MATCH_GOALS": "MATCH_GOALS",
         "FIRST_HALF_GOALS": "FIRST_HALF_GOALS",
+        "TEAM_FIRST_HALF_GOALS": "TEAM_FIRST_HALF_GOALS",
+        "SECOND_HALF_GOALS": "SECOND_HALF_GOALS",
+        "TEAM_SECOND_HALF_GOALS": "TEAM_SECOND_HALF_GOALS",
         "TEAM_TOTAL_GOALS": "TEAM_TOTAL_GOALS",
         "CORNERS": "TEAM_CORNERS" if is_team_market(raw_name) else "MATCH_CORNERS",
         "CARDS": "TEAM_CARDS" if is_team_market(raw_name) else "MATCH_CARDS",
@@ -1190,3 +1214,4 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
