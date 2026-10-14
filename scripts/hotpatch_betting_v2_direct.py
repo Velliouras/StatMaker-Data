@@ -67,6 +67,18 @@ def main():
                 "SELECT COUNT(DISTINCT competition_id || '|' || snapshot_version || '|' || match_key)"
                 " FROM prepared_betting_v2_forecasts"
             ).fetchone()[0])
+            quote_count = int(con.execute("SELECT count(*) FROM prepared_fixture_markets").fetchone()[0])
+            scopes = dict(con.execute(
+                "SELECT competition_id,count(*) FROM prepared_betting_v2_forecasts GROUP BY competition_id"
+            ).fetchall())
+            eligible_markets = con.execute(
+                "SELECT competition_id,market,count(*) FROM prepared_betting_v2_forecasts "
+                "WHERE odd>1.8 AND odd<3 AND win_probability>=0.6 "
+                "AND win_probability*odd+push_probability>1 "
+                "GROUP BY competition_id,market ORDER BY competition_id,market"
+            ).fetchall()
+            print("BETTING_V2_FORECAST_SCOPES", json.dumps(scopes, sort_keys=True))
+            print("BETTING_V2_RAW_QUALIFYING_MARKETS", json.dumps(eligible_markets))
             check = con.execute("PRAGMA quick_check").fetchone()
             if not check or check[0] != "ok":
                 raise SystemExit("Prepared SQLite cannot be published: quick_check failed")
@@ -93,6 +105,9 @@ def main():
     metadata["bettingV2DirectModel"] = "betting-v2-matchup-poisson-fit-v1"
     metadata["bettingV2DirectRows"] = count
     metadata["bettingV2DirectFixtures"] = fixtures
+    metadata["bettingV2DirectQuoteCount"] = quote_count
+    metadata["bettingV2DirectQuoteSource"] = "full-exact-feeds-from-the-same-immutable-bundle"
+    metadata["bettingV2DirectScopes"] = scopes
     metadata["bettingV2DirectSource"] = "historical-results-stats-elo-xg-where-available"
     metadata["bettingV2DirectCertificateRequired"] = False
     manifest["generatedAt"] = now
@@ -105,3 +120,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
