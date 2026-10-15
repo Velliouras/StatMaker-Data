@@ -57,8 +57,12 @@ jobs:
           set -euo pipefail
           git config user.name "statmaker-data-bot"
           git config user.email "statmaker-data-bot@users.noreply.github.com"
-          git add data/api_football/schedule_scorers/events/
-          git add data/api_football/schedule_scorers/fixtures/
+          if [ -d data/api_football/schedule_scorers/events ]; then
+            git add data/api_football/schedule_scorers/events/
+          fi
+          if [ -d data/api_football/schedule_scorers/fixtures ]; then
+            git add data/api_football/schedule_scorers/fixtures/
+          fi
           git add data/statmaker/schedule_scorers/domestic_match_context.json
           if ! git diff --cached --quiet; then
             git commit -m "Publish verified Domestic venues and scorer timelines [skip ci]"
