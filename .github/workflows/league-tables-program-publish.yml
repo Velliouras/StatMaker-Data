@@ -1,6 +1,17 @@
 name: League Tables UEFA and Program Publish
 
 on:
+  # The UEFA producer publishes via GITHUB_TOKEN; its commit does not fire
+  # downstream push workflows. workflow_run is the reliable hand-off.
+  workflow_run:
+    workflows:
+      - "UEFA Current Stats Refresh"
+    types: [completed]
+    branches: [main]
+  # Fallback when the upstream daily schedule is delayed/skipped.
+  # Run after the 05:25 UTC UEFA stats refresh, with a bounded provider budget.
+  schedule:
+    - cron: "45 6 * * *"
   push:
     branches: [main]
     paths:
@@ -18,6 +29,7 @@ concurrency:
 
 jobs:
   publish:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
