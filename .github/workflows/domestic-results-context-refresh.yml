@@ -1,0 +1,73 @@
+name: Domestic Results Venue and Scorers Refresh
+
+on:
+  schedule:
+    - cron: '10 7 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/domestic-results-context-refresh'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-domestic-results-context
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate producer syntax and canonical plan
+        run: |
+          python -m py_compile scripts/refresh_domestic_match_context.py
+          python scripts/refresh_domestic_match_context.py --max-requests 64 --quota-reserve 1500
+      - name: Fetch actual venues and verified event scorers with strict budget
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          test -n "$API_FOOTBALL_KEY" || { echo "Missing API_FOOTBALL_KEY"; exit 1; }
+          python scripts/refresh_domestic_match_context.py --execute --max-requests 64 --quota-reserve 1500
+      - name: Validate read model before publication
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('data/statmaker/schedule_scorers/domestic_match_context.json').read_text())
+          assert data['contract']=='statmaker-domestic-match-context-v1'
+          assert data['schemaVersion']==1
+          for v in data['fixtureVenues'].values():
+              assert isinstance(v,str) and v.strip()
+          assert all(x['fixtureId'] and x['team'] and x['player'] for x in data['goalEvents'])
+          assert data['apiCallsDuringGeneration']<=64
+          print('DOMESTIC_CONTEXT_OK',data['coverage'])
+          PY
+      - name: Publish only verified domestic match context
+        run: |
+          set -euo pipefail
+          git config user.name "statmaker-data-bot"
+          git config user.email "statmaker-data-bot@users.noreply.github.com"
+          git add data/api_football/schedule_scorers/events/
+          git add data/api_football/schedule_scorers/fixtures/
+          git add data/statmaker/schedule_scorers/domestic_match_context.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish verified Domestic venues and scorer timelines [skip ci]"
+            for attempt in 1 2 3 4; do
+              if git push origin HEAD:main; then exit 0; fi
+              git fetch --depth=2 origin main
+              git rebase origin/main
+              sleep $((attempt * 2))
+            done
+            echo "Could not publish domestic results context" >&2
+            exit 1
+          fi
