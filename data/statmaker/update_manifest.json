@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "2a9264a57726c0cd578e56735a5c3788913269ce6faec85b0766c4b1cca6a27d",
-  "generatedAt": "2026-10-15T22:44:20Z",
+  "contentVersion": "c511484aa465a4eccdfb05026f28d2770e207831fd3648c6e2c4f469e3d8a52d",
+  "generatedAt": "2026-10-15T23:12:34.545634Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "00e634a1afd8cfd70088779c3c940ff3ff8824f747a362b669309283f4ee74bf",
-      "bytes": 96514,
-      "generatedAt": "2026-10-15T22:44:19Z"
+      "sha256": "0b9a51c8787318247244a670f8e42573ee417f08b1b6666aa627060510e27ba6",
+      "bytes": 96515,
+      "generatedAt": "2026-10-15T23:12:28Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "574a912edcace7e8efd5852c5ede6ff5f1ba641f583797097ba28df0229c8d89",
-      "bytes": 21122569,
+      "sha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
+      "bytes": 21123835,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "609362f9504b96b97e3b22ab7d3dc53e06fa930a49e1c5db51047384022fde37",
+      "sha256": "8a77d99fa9fb95ad4d0a7490ad8ef92a21a7a162025835c2c2e20427a62be217",
       "bytes": 8702841,
-      "generatedAt": "2026-10-15T18:27:19.176692Z"
+      "generatedAt": "2026-10-15T23:12:34.545634Z"
     },
     {
       "id": "uefa_team_logos",
@@ -92,7 +92,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "574a912edcace7e8efd5852c5ede6ff5f1ba641f583797097ba28df0229c8d89",
+    "targetSha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
     "transitions": [
       {
         "fromSha256": "66317fe98da912062011149f389960063bf03687c0acab04bcb78e1b808723fa",
@@ -305,6 +305,65 @@
               "AGoalsPrevented": null,
               "HFreeKicks": null,
               "AFreeKicks": null
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "574a912edcace7e8efd5852c5ede6ff5f1ba641f583797097ba28df0229c8d89",
+        "toSha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1564359,
+            "league_id": 41,
+            "league_code": "E2",
+            "country": "England",
+            "league": "League One",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-10-15",
+            "home_team": "Mansfield Town",
+            "away_team": "Oxford United",
+            "stats": {
+              "HS": 24,
+              "AS": 7,
+              "HST": 4,
+              "AST": 2,
+              "HC": 11,
+              "AC": 3,
+              "HF": 13,
+              "AF": 12,
+              "HY": 2,
+              "AY": 0,
+              "HR": 0,
+              "AR": 2,
+              "HPossession": 51,
+              "APossession": 49,
+              "HSaves": 1,
+              "ASaves": 3,
+              "HPasses": 357,
+              "APasses": 378,
+              "HPassesAccurate": 261,
+              "APassesAccurate": 279,
+              "HxG": 3.42,
+              "AxG": 0.83,
+              "HShotsOffGoal": 10,
+              "AShotsOffGoal": 2,
+              "HBlockedShots": 10,
+              "ABlockedShots": 3,
+              "HShotsInsideBox": 20,
+              "AShotsInsideBox": 3,
+              "HShotsOutsideBox": 4,
+              "AShotsOutsideBox": 4,
+              "HOffsides": 2,
+              "AOffsides": 0,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 11,
+              "AFreeKicks": 13
             }
           }
         ]
