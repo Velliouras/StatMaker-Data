@@ -18,7 +18,8 @@ def normalized(value):
 
 def timestamp(value):
     try:
-        return datetime.fromisoformat(str(value).replace('Z','+00:00')).timestamp()
+        parsed = datetime.fromisoformat(str(value).replace('Z','+00:00'))
+        return (parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)).timestamp()
     except (ValueError,TypeError):
         return 0.0
 
@@ -214,10 +215,12 @@ def mean(values):
 
 class OpponentMatchup:
     """Symmetric count fit with club/league attack and opponent defence."""
-    def __init__(self,matches,cutoff,metric_values):
+    def __init__(self,matches,cutoff,metric_values,*,feature_exclusions=(),use_goal_strength=True):
         import numpy as np
         from scipy.sparse import csr_matrix
         from sklearn.linear_model import PoissonRegressor,LogisticRegression
+        self.feature_exclusions = frozenset(feature_exclusions)
+        self.use_goal_strength = use_goal_strength
         self.history = defaultdict(lambda:defaultdict(list))
         self.elo = defaultdict(lambda:1500.0)
         self.xg = defaultdict(list)
@@ -225,9 +228,17 @@ class OpponentMatchup:
         self.train = defaultdict(list)
         self.period_train,self.period_model,self.matches = [],None,0
         metrics = ('GOALS_FT','GOALS_1H','GOALS_2H','CORNERS','SHOTS','SOT','YELLOW_CARDS','CARDS','FOULS')
+        pending = []
+        active_day = None
         for row in matches:
             if row['_date']>=cutoff:
                 break
+            day = int(row['_date']//86400)
+            if active_day != day:
+                for observed in pending:
+                    self.observe(observed, metric_values)
+                pending = []
+                active_day = day
             h,a = row['_home'],row['_away']
             self.groups[h],self.groups[a] = row['_home_group'],row['_away_group']
             targets = {m:metric_values(row,m) for m in metrics}
@@ -240,23 +251,10 @@ class OpponentMatchup:
                 for team,opp,venue,total,first in ((h,a,True,full[0],half[0]),(a,h,False,full[1],half[1])):
                     if total>0 and 0<=first<=total:
                         self.period_train.append((self.features(team,opp,'GOALS_FT',venue),first,total-first))
-            if full is not None:
-                expected = 1/(1+10**(-(self.elo[h]-self.elo[a]+65)/400))
-                actual = 1 if full[0]>full[1] else 0 if full[0]<full[1] else 0.5
-                change = 20*(actual-expected)
-                self.elo[h]+=change;self.elo[a]-=change
-            for metric,target in targets.items():
-                if target is not None:
-                    self.history[h][metric].append((target[0],target[1],True))
-                    self.history[a][metric].append((target[1],target[0],False))
-            stats = row.get('normalized_stats') or {}
-            try:
-                hx,ax = float(stats['HxG']),float(stats['AxG'])
-                if all(math.isfinite(v) and v>=0 for v in (hx,ax)):
-                    self.xg[h].append((hx,ax));self.xg[a].append((ax,hx))
-            except (KeyError,TypeError,ValueError):
-                pass
+            pending.append(row)
             self.matches+=1
+        for observed in pending:
+            self.observe(observed, metric_values)
         def matrix(features):
             keys = sorted({key for values in features for key in values})
             columns = {key:i for i,key in enumerate(keys)}
@@ -293,6 +291,29 @@ class OpponentMatchup:
                 x,self.period_columns,self.period_scales = matrix([f for f,_,_ in records])
                 self.period_model = LogisticRegression(C=0.5,solver='newton-cholesky',max_iter=80,tol=1e-6).fit(
                     x,[label for _,label,_ in records],sample_weight=[w for _,_,w in records])
+    def observe(self, row, metric_values):
+        """Update only after all predictions for the UTC day have been made."""
+        h,a = row['_home'],row['_away']
+        self.groups[h],self.groups[a] = row['_home_group'],row['_away_group']
+        targets = {m:metric_values(row,m) for m in
+            ('GOALS_FT','GOALS_1H','GOALS_2H','CORNERS','SHOTS','SOT','YELLOW_CARDS','CARDS','FOULS')}
+        full = targets['GOALS_FT']
+        if full is not None:
+            expected = 1/(1+10**(-(self.elo[h]-self.elo[a]+65)/400))
+            actual = 1 if full[0]>full[1] else 0 if full[0]<full[1] else 0.5
+            change = 20*(actual-expected)
+            self.elo[h]+=change;self.elo[a]-=change
+        for metric,target in targets.items():
+            if target is not None:
+                self.history[h][metric].append((target[0],target[1],True))
+                self.history[a][metric].append((target[1],target[0],False))
+        stats = row.get('normalized_stats') or {}
+        try:
+            hx,ax = float(stats['HxG']),float(stats['AxG'])
+            if all(math.isfinite(v) and v>=0 for v in (hx,ax)):
+                self.xg[h].append((hx,ax));self.xg[a].append((ax,hx))
+        except (KeyError,TypeError,ValueError):
+            pass
     def features(self,team,opponent,metric,home):
         t,o = self.history[team][metric],self.history[opponent][metric]
         tx,ox = self.xg[team],self.xg[opponent]
@@ -307,6 +328,9 @@ class OpponentMatchup:
         tv,ov = [v for v in t if v[2]==home][-8:],[v for v in o if v[2]!=home][-8:]
         values.update(venue_for=mean([v[0] for v in tv]),venue_opponent_against=mean([v[1] for v in ov]),
             venue_for_observed=float(bool(tv)),venue_opponent_observed=float(bool(ov)))
+        for key in list(values):
+            if 'xg' in getattr(self,'feature_exclusions',()) and 'xg' in key:
+                values.pop(key)
         return values
     def count_strength_features(self,features):
         """Joint pre-cutoff goal strength transfers opponent quality to other counts."""
@@ -321,6 +345,8 @@ class OpponentMatchup:
         values['goal_strength_gap'] = (effect('attack:'+team)-effect('defence:'+team)
             +effect('league_attack:'+gt)-effect('league_defence:'+gt)
             -effect('attack:'+opp)+effect('defence:'+opp)-effect('league_attack:'+go)+effect('league_defence:'+go))
+        if not getattr(self,'use_goal_strength',True):
+            values.pop('goal_strength_gap')
         values.pop('league_attack:'+gt);values.pop('league_defence:'+go)
         # League corner/shot tempo is shared; it cannot act as league strength.
         values['league_tempo:'+gt] = 1.0

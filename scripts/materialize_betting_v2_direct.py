@@ -25,7 +25,7 @@ import unicodedata
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from betting_v2.opponent_matchup import OpponentMatchup, load_competitive_history, normalized
+from betting_v2.opponent_matchup import OpponentMatchup, load_competitive_history, normalized, timestamp
 from odds_api_io_market_audit import classify_provider_market
 
 METRIC_COLUMNS = {
@@ -55,23 +55,22 @@ def league_code(value):
 
 
 def kickoff(value):
-    try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp()
-    except (TypeError, ValueError):
-        return 0.0
+    return timestamp(value)
 
 
 def metric_values(row, metric):
     if metric == "GOALS_FT":
         raw = (row.get("home_goals"), row.get("away_goals"))
-    elif metric == "GOALS_2H":
+    elif metric in ("GOALS_1H", "GOALS_2H"):
         try:
-            raw = (int(row["home_goals"]) - int(row["hthg"]),
-                   int(row["away_goals"]) - int(row["htag"]))
+            full = tuple(float(row[k]) for k in ("home_goals", "away_goals"))
+            half = tuple(float(row[k]) for k in ("hthg", "htag"))
+            if not all(math.isfinite(f) and math.isfinite(h) and f.is_integer()
+                       and h.is_integer() and 0 <= h <= f for f,h in zip(full,half)):
+                return None
+            raw = half if metric == "GOALS_1H" else tuple(f-h for f,h in zip(full,half))
         except (ValueError, TypeError, KeyError):
             return None
-    elif metric == "GOALS_1H":
-        raw = (row.get("hthg"), row.get("htag"))
     elif metric == "CARDS":
         stats = row.get("normalized_stats") or {}
         try:
@@ -85,7 +84,7 @@ def metric_values(row, metric):
         raw = (stats.get(keys[0]), stats.get(keys[1]))
     try:
         vals = tuple(float(v) for v in raw)
-        if all(v >= 0 and math.isfinite(v) for v in vals):
+        if all(v >= 0 and math.isfinite(v) and v.is_integer() for v in vals):
             return vals
     except (TypeError, ValueError):
         pass

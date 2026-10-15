@@ -1,0 +1,77 @@
+name: Betting offline research
+on:
+  workflow_dispatch:
+    inputs:
+      resume_run_id:
+        description: Optional completed run of this workflow on main
+        required: false
+        type: string
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: betting-offline-research
+  cancel-in-progress: false
+jobs:
+  research:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      OPENBLAS_NUM_THREADS: '2'
+      OMP_NUM_THREADS: '2'
+      GH_TOKEN: ${{ github.token }}
+      RESUME_RUN: ${{ inputs.resume_run_id }}
+      OUTPUT: reports/betting_v2/corrected_20261015
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate completed resume run
+        if: inputs.resume_run_id != ''
+        run: |
+          [[ "$RESUME_RUN" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RESUME_RUN" > /tmp/resume-run.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          run=json.loads(Path('/tmp/resume-run.json').read_text())
+          assert run['status']=='completed'
+          assert run['head_branch']=='main'
+          assert run['path']=='.github/workflows/betting-offline-research.yml'
+          assert run['repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('RESUME_SHA='+run['head_sha']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        if: inputs.resume_run_id != ''
+        with:
+          ref: ${{ env.RESUME_SHA }}
+      - name: Restore checkpoint
+        if: inputs.resume_run_id != ''
+        run: |
+          mkdir -p "$OUTPUT"
+          gh run download "$RESUME_RUN" -R "$GITHUB_REPOSITORY" -n corrected-research -D "$OUTPUT"
+          # Prior run has been verified completed, so no writer owns this lock.
+          rm -f "$OUTPUT/running.lock"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install numpy==2.3.5 scipy==1.17.0 scikit-learn==1.8.0
+      - name: Focused tests
+        run: |
+          python -m unittest discover -s tests -p test_corrected_training.py
+          python -m unittest discover -s tests -p test_exact_forecast_adapter.py
+          python -m unittest discover -s tests -p test_corrected_prices.py
+      - name: Offline research
+        run: |
+          mkdir -p "$OUTPUT"
+          set -o pipefail
+          python -u scripts/betting_v2/validated_walk_forward.py --output "$OUTPUT" | tee "$OUTPUT/resume.log"
+          python -u scripts/betting_v2/summarize_corrected.py --output "$OUTPUT" | tee "$OUTPUT/summary.log"
+          python -u scripts/betting_v2/replay_corrected_prices.py --output "$OUTPUT" | tee "$OUTPUT/priced_replay.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: corrected-research
+          path: reports/betting_v2/corrected_20261015
+          retention-days: 30
+          if-no-files-found: warn

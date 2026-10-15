@@ -1,3 +1,5 @@
+> Superseded for performance conclusions by corrected_20261015. The earlier Work experiment had timezone-dependent duplicate rows. Retained as historical evidence only.
+
 # StatMaker V2 — recovery and measured calibration experiment, 15 October 2026
 
 ## Delivery decision
