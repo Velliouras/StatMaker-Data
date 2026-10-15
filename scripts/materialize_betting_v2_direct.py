@@ -515,6 +515,8 @@ def run(db_path,uefa_exact_feed_dir,as_of=None):
         counts["fixtures_from_quotes"] = len({(r[0], r[1], r[2]) for r in pending})
         counts["forecasts"] = len(pending)
         counts["staged_exact_quotes"] = sum(restored.values())
+    from betting_v2.live_exact import run as exact_run
+    counts['exact_v4'] = exact_run(db_path,ROOT,now)
     return dict(counts)
 
 

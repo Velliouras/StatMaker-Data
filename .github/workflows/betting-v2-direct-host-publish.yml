@@ -33,7 +33,9 @@ jobs:
           git reset --hard refs/remotes/origin/main
           python -m pip install --quiet numpy scipy scikit-learn
           python -m unittest discover -s tests -p test_betting_v2_opponent_matchup.py -v
+          python -m unittest discover -s tests -p test_live_exact.py -v
           python scripts/validate_betting_favourite_policy.py
+          python scripts/validate_exact_uat_contract.py
           python scripts/hotpatch_betting_v2_direct.py
       - name: Publish only updated immutable App-Ready betting bundle
         shell: bash

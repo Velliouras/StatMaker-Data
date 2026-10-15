@@ -83,6 +83,11 @@ def main():
             scopes = dict(con.execute(
                 "SELECT competition_id,count(*) FROM prepared_betting_v2_forecasts GROUP BY competition_id"
             ).fetchall())
+            exact_count = con.execute('SELECT count(*) FROM prepared_betting_v4_forecasts').fetchone()[0]
+            exact_scopes = dict(con.execute('SELECT competition_id,count(*) FROM prepared_betting_v4_forecasts GROUP BY competition_id'))
+            if exact_count == 0:
+                raise SystemExit('Exact UAT model produced no forecasts')
+            print('BETTING_V4_EXACT_UAT_SCOPES',json.dumps(exact_scopes,sort_keys=True))
             eligible_markets = con.execute(
                 "SELECT competition_id,market,count(*) FROM prepared_betting_v2_forecasts "
                 "WHERE odd>1.8 AND odd<3 AND win_probability>=0.6 "
@@ -120,6 +125,9 @@ def main():
     metadata["bettingV2DirectFavouriteScenario"] = "goal-periods-condition-on-FT-winner; attacking-counts-condition-on-team-count-dominance; raw-P-WIN-unchanged"
     metadata["bettingV2DirectUefaQuoteRef"] = quote_ref
     metadata["bettingV2DirectRows"] = count
+    metadata['bettingV2DirectExactUatModel'] = 'betting-v2-joint-count-v4'
+    metadata['bettingV2DirectExactUatRows'] = exact_count
+    metadata['bettingV2DirectExactUatScopes'] = exact_scopes
     metadata["bettingV2DirectFixtures"] = fixtures
     metadata["bettingV2DirectQuoteCount"] = quote_count
     metadata["bettingV2DirectQuoteSource"] = "period-verified-quotes-with-bookmaker-and-source-hash-in-same-immutable-bundle"
