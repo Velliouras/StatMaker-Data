@@ -1,9 +1,10 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from betting_v2.research_git_archive import (
-    absolute_time, extract_snapshot, remove_conflicts, exact_join, settle_selected)
+    absolute_time, extract_snapshot, remove_conflicts, exact_join, settle_selected, retain_packets, pick_summary, load_snapshot)
 from betting_v2.research_quotes import feature_cutoff
 
 
@@ -72,6 +73,28 @@ class GitArchiveResearchTests(unittest.TestCase):
         scored, missing = settle_selected([pick], {'f': dict(normalized_stats=dict(HC=6, AC=4))})
         self.assertFalse(missing); self.assertEqual(scored[0]['actualPush'], 1.)
         self.assertEqual(scored[0]['y'], 0.)
+
+    def test_whole_fixture_packet_retains_books_without_mixing_times(self):
+        early = [dict(fixture='f', observed=1., sourceReceipt='a', bookmaker=b) for b in ('Bet365', 'Unibet')]
+        late = [dict(fixture='f', observed=2., sourceReceipt='b', bookmaker='Bet365')]
+        chosen = {}; retain_packets(chosen, early); retain_packets(chosen, late)
+        self.assertEqual(chosen['f'][1], early)
+        chosen = {}; retain_packets(chosen, early, latest=True); retain_packets(chosen, late, latest=True)
+        self.assertEqual(chosen['f'][1], late)
+        with self.assertRaises(ValueError): retain_packets({}, early + late)
+
+    def test_expected_return_uses_model_push_and_actual_return_uses_settled_push(self):
+        rows = [dict(fixture='f', p=.6, push=.1, odd=2., y=0., actualPush=1.)]
+        result = pick_summary(rows)
+        self.assertAlmostEqual(result['expectedProfitUnits'], .3)
+        self.assertEqual(result['profitUnits'], 0.)
+        self.assertNotIn('conditionalBrier', result)
+
+    def test_cached_payload_must_match_independent_git_blob_metadata(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = dict(self.source, expectedGitBlobSha1='c' * 40, expectedBytes=2)
+            (Path(folder) / (source['sha'] + '.json')).write_text('{}')
+            with self.assertRaises(ValueError): load_snapshot(source, {}, Path(folder))
 
 
 if __name__ == '__main__': unittest.main()

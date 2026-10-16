@@ -7,7 +7,7 @@ import argparse
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-import gzip, hashlib, json, math, sys, time, urllib.request
+import fcntl, hashlib, json, math, os, sys, tempfile, time, urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -136,6 +136,9 @@ def exact_join(quotes, history, period):
 
 def load_snapshot(source, manifest, cache):
     target = cache / (source['sha'] + '.json')
+    if target.exists():
+        try: json.loads(target.read_bytes())
+        except (ValueError, OSError): target.unlink(missing_ok=True)
     if not target.exists():
         url = f"https://raw.githubusercontent.com/{manifest['repository']}/{source['sha']}/{manifest['sourcePath']}"
         for attempt in range(3):
@@ -144,43 +147,71 @@ def load_snapshot(source, manifest, cache):
                     raw = response.read(150_000_001)
                 if len(raw) > 150_000_000: raise ValueError('Oversized archive payload')
                 json.loads(raw)
-                target.write_bytes(raw)
+                pending = target.with_suffix('.json.' + str(os.getpid()) + '.tmp')
+                pending.write_bytes(raw); pending.replace(target)
                 break
             except (OSError, ValueError):
                 if attempt == 2: raise
                 time.sleep(1 + attempt)
     raw = target.read_bytes()
+    blob = hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest()
+    if source.get('expectedGitBlobSha1') != blob or source.get('expectedBytes') != len(raw):
+        raise ValueError('Archive payload does not match independently recorded Git tree blob')
     binding = dict(source, sha256=digest(raw), bytes=len(raw),
-        gitBlobSha1=hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest())
+        gitBlobSha1=blob, gitTreeBlobVerified=True)
     return binding, json.loads(raw)
 
 
 def collect(out, cache, history):
     manifest = read(out / 'manifest.json'); cache.mkdir(parents=True, exist_ok=True)
-    counters = Counter(); quotes = []; bindings = []
+    counters = Counter(); bindings = []; mapped_count = 0; joined_count = 0
+    packets = {'earliest': {}, 'latest': {}}; metric_counts = Counter(); metric_fixtures = defaultdict(set)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        for binding, doc in pool.map(lambda source: load_snapshot(source, manifest, cache), manifest['snapshots']):
+        sources = iter(manifest['snapshots'])
+        pending = [pool.submit(load_snapshot, source, manifest, cache) for source in list(manifest['snapshots'])[:2]]
+        next(sources, None); next(sources, None)
+        while pending:
+            binding, doc = pending.pop(0).result()
             rows, rejected = extract_snapshot(doc, binding, manifest['maxMarketAgeSeconds'])
-            bindings.append(binding); counters.update(rejected); quotes.extend(rows)
+            bindings.append(binding); counters.update(rejected)
+            rows, conflicts = remove_conflicts(rows); counters['conflictingQuoteKeys'] += conflicts
+            mapped_count += len(rows)
+            joined, rejected = exact_join(rows, history, manifest['period']); counters.update(rejected)
+            joined_count += len(joined)
+            for row in joined:
+                metric_counts[row['spec'][0]] += 1; metric_fixtures[row['spec'][0]].add(row['fixture'])
+            for packet in packets: retain_packets(packets[packet], joined, latest=packet == 'latest')
             print('ARCHIVE_SNAPSHOT', binding['committedAtUTC'], binding['bytes'], len(rows), flush=True)
-    quotes, conflicts = remove_conflicts(quotes); counters['conflictingQuoteKeys'] = conflicts
-    joined, rejected = exact_join(quotes, history, manifest['period']); counters.update(rejected)
-    for packet, latest in [('earliest', False), ('latest', True)]:
-        rows = one_fixture_receipt(joined, latest=latest)
+            del doc, rows, joined
+            source = next(sources, None)
+            if source is not None: pending.append(pool.submit(load_snapshot, source, manifest, cache))
+    for packet, chosen in packets.items():
+        rows = [r for _, group in chosen.values() for r in group]
         write(out / ('quotes_' + packet + '.json.gz'), rows, zipped=True)
     write(out / 'source_bindings.json', bindings)
-    metrics = sorted({q['spec'][0] for q in joined})
+    metrics = sorted(metric_counts)
     summary = dict(snapshots=len(bindings), downloadedBytes=sum(b['bytes'] for b in bindings),
         historyFixtures=len(history), historySha256=digest(json.dumps(history, sort_keys=True, separators=(',', ':')).encode()),
-        mappedQuotesBeforeJoins=len(quotes), joinedQuotesBeforePacketChoice=len(joined),
-        fixtures=len({q['fixture'] for q in joined}), counters=dict(counters),
-        byMetric={m:dict(quotes=sum(q['spec'][0] == m for q in joined),
-            fixtures=len({q['fixture'] for q in joined if q['spec'][0] == m})) for m in metrics},
+        mappedQuotesBeforeJoins=mapped_count, joinedQuotesBeforePacketChoice=joined_count,
+        fixtures=len(packets['earliest']), counters=dict(counters),
+        byMetric={m:dict(quotes=metric_counts[m], fixtures=len(metric_fixtures[m])) for m in metrics},
         providerCalls=0, llmCalls=0, newMeanFits=0, appChanges=0,
         historicalCommitDatesAreExecutionProof=False, untouchedHoldout=False,
         identityRule='Existing approved canonical names plus unique exact kickoff; numeric cross-provider fixture ID not independently verified')
     write(out / 'coverage.json', summary)
     return summary
+
+
+def retain_packets(chosen, rows, latest=False):
+    grouped = defaultdict(list)
+    for row in rows: grouped[row['fixture']].append(row)
+    for fixture, group in grouped.items():
+        rank = group[0]['observed'], group[0]['sourceReceipt']
+        if any((r['observed'], r['sourceReceipt']) != rank for r in group):
+            raise ValueError('Input packet mixed multiple observation times')
+        previous = chosen.get(fixture)
+        if previous is None or (rank > previous[0] if latest else rank < previous[0]):
+            chosen[fixture] = rank, group
 
 
 def settle_selected(picks, truth):
@@ -193,6 +224,20 @@ def settle_selected(picks, truth):
         y, push = outcome_extended(*actual, row['spec'])
         scored.append(dict(row, y=y, actualPush=push))
     return scored, dict(missing)
+
+
+def pick_summary(rows):
+    result = stats(rows)
+    if rows:
+        result.update(expectedProfitUnits=sum(r['p'] * r['odd'] + r['push'] - 1 for r in rows),
+                      meanOdd=sum(r['odd'] for r in rows) / len(rows))
+        nonpush = [r for r in rows if not r['actualPush'] and r['push'] < 1]
+        if nonpush:
+            probabilities = [min(1 - 1e-12, max(1e-12, r['p'] / (1 - r['push']))) for r in nonpush]
+            result['conditionalBrier'] = sum((p - r['y']) ** 2 for p, r in zip(probabilities, nonpush)) / len(nonpush)
+            result['conditionalLogLoss'] = -sum(r['y'] * math.log(p) + (1 - r['y']) * math.log1p(-p)
+                for p, r in zip(probabilities, nonpush)) / len(nonpush)
+    return result
 
 
 def replay(out, history):
@@ -249,8 +294,8 @@ def replay(out, history):
         for name in ('control_point', 'control_conservative', 'coupled_point', 'coupled_conservative'):
             # Selection precedes all actual-label lookups, including missing labels.
             selected = select_scope(options[name]); scored, missing = settle_selected(selected, truth)
-            reports[name] = dict(overall=stats(scored), selectedBeforeSettlement=len(selected), missingActual=missing,
-                byMetric={m:dict(scored=stats([r for r in scored if r['spec'][0] == m]),
+            reports[name] = dict(overall=pick_summary(scored), selectedBeforeSettlement=len(selected), missingActual=missing,
+                byMetric={m:dict(scored=pick_summary([r for r in scored if r['spec'][0] == m]),
                     selected=sum(r['spec'][0] == m for r in selected), missing=missing.get(m, 0)) for m in COUNT_METRICS},
                 picks=scored, unscored=[r for r in selected if r['fixture'] not in {s['fixture'] for s in scored if s['spec'][0] == r['spec'][0]}])
         write(out / ('priced_' + packet + '.json'), dict(reports=reports, diagnostics=dict(diagnostics),
@@ -270,9 +315,19 @@ def main():
     parser.add_argument('--cache', type=Path, default=Path('/tmp/statmaker-git-price-cache'))
     parser.add_argument('--collect-only', action='store_true'); parser.add_argument('--replay-only', action='store_true')
     args = parser.parse_args(); args.output.mkdir(parents=True, exist_ok=True)
-    history = direct.load_actual_results(absolute_time('2026-10-16T00:00:00Z'))['GLOBAL']
-    if not args.replay_only: print('ARCHIVE_COVERAGE', collect(args.output, args.cache, history), flush=True)
-    if not args.collect_only: replay(args.output, history)
+    lockpath = Path(tempfile.gettempdir()) / ('statmaker-git-archive-' + digest(str(args.output.resolve()).encode())[:16] + '.lock')
+    with lockpath.open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        history_path = args.output / 'history.json.gz'
+        if history_path.exists(): history = read(history_path)
+        else:
+            history = direct.load_actual_results(absolute_time('2026-10-16T00:00:00Z'))['GLOBAL']
+            write(history_path, history, zipped=True)
+        coverage = args.output / 'coverage.json'
+        if coverage.exists() and read(coverage)['historySha256'] != digest(json.dumps(history, sort_keys=True, separators=(',', ':')).encode()):
+            raise ValueError('Frozen history input changed')
+        if not args.replay_only: print('ARCHIVE_COVERAGE', collect(args.output, args.cache, history), flush=True)
+        if not args.collect_only: replay(args.output, history)
 
 
 if __name__ == '__main__': main()
