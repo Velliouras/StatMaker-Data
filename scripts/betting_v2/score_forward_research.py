@@ -22,6 +22,20 @@ def settled(rows,actual,freeze_time):
         y,push=outcome(*labels,r['spec']);scored.append(dict(r,y=y,actualPush=push))
     return scored,missing
 
+def paired_comparisons(events,baseline='full'):
+    result={};base=events.get(baseline,{})
+    for variant,rows in events.items():
+        if variant==baseline:continue
+        paired=[]
+        for key,c in rows.items():
+            b=base.get(key)
+            if b is None:continue
+            if b['y']!=c['y']:raise ValueError('Paired label mismatch')
+            paired.append(dict(fixture=c['fixture'],p=b['winProbability']/(1-b['pushProbability']),
+                q=c['winProbability']/(1-c['pushProbability']),y=c['y']))
+        result[variant]=summary(paired) if paired else None
+    return result
+
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--frozen',type=Path,required=True)
     ap.add_argument('--expected-sha256',required=True);ap.add_argument('--output',type=Path,required=True);args=ap.parse_args()
@@ -35,15 +49,9 @@ def main():
         models[variant]=dict(selected=stats(picks),selectedUnscored=missing,forecastScored=len(rows),forecastUnscored=missing_rows,
             byTier={t:stats([r for r in picks if r['tier']==t]) for t in ('HIGH','CONFIRMED','DEVELOPING')})
         events[variant]={(r['fixture'],r['bookmaker'],tuple(r['spec'])):r for r in rows if not r['actualPush']}
-    paired=[]
-    for key,c in events.get('oof_goal_stack',{}).items():
-        b=events.get('full',{}).get(key)
-        if b is not None:
-            if b['y']!=c['y']:raise ValueError('Paired label mismatch')
-            paired.append(dict(fixture=c['fixture'],p=b['winProbability']/(1-b['pushProbability']),
-                q=c['winProbability']/(1-c['pushProbability']),y=c['y']))
+    comparisons=paired_comparisons(events)
     write(args.output,dict(frozenSha256=args.expected_sha256,scoredAtUTC=datetime.now(timezone.utc).isoformat(),
-        models=models,pairedScores=summary(paired) if paired else None,providerCalls=0,
+        models=models,pairedScores=comparisons.get('oof_goal_stack'),pairedScoresByModel=comparisons,providerCalls=0,
         refits=0,calibrationUpdates=0,thresholdUpdates=0,executionEvidence=False))
     print(json.dumps(models),flush=True)
 if __name__=='__main__':main()

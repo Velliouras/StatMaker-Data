@@ -59,8 +59,10 @@ class PriorGoalBank:
         return effect('attack:'+team)-effect('defence:'+team)+effect('league_attack:'+g)-effect('league_defence:'+g)-effect('attack:'+opponent)+effect('defence:'+opponent)-effect('league_attack:'+og)+effect('league_defence:'+og)
 
 class ChronologicalStack(OpponentMatchup):
-    def __init__(self,history,cutoff,metric_values,*,bank,goal_anchor=None):
-        initialize(self);self.bank=bank
+    def __init__(self,history,cutoff,metric_values,*,bank,goal_anchor=None,ridge_factor=1.):
+        if not math.isfinite(ridge_factor) or ridge_factor<=0:
+            raise ValueError('Regularization factor must be positive and finite')
+        initialize(self);self.bank=bank;self.ridge_factor=ridge_factor
         metrics=('GOALS_FT','GOALS_1H','GOALS_2H','CORNERS','SHOTS','SOT','YELLOW_CARDS','CARDS','FOULS')
         for _,batch in groupby((r for r in history if r['_date']<cutoff),lambda r:int(r['_date']//86400)):
             batch=list(batch)
@@ -93,7 +95,7 @@ class ChronologicalStack(OpponentMatchup):
             if not records:continue
             if metric!='GOALS_FT':records=[(self.count_strength_features(f),y) for f,y in records]
             x,columns,scales=matrix([f for f,_ in records]);self.columns[metric],self.feature_scales[metric]=columns,scales
-            self.models[metric]=fit_monotone_count(x,np.asarray([y for _,y in records]),columns,metric,2./len(records))
+            self.models[metric]=fit_monotone_count(x,np.asarray([y for _,y in records]),columns,metric,2.*ridge_factor/len(records))
         records=[]
         for f,first,second in self.period_train:
             values=self.count_strength_features(f)
@@ -101,7 +103,7 @@ class ChronologicalStack(OpponentMatchup):
             if second>0:records.append((values,0,second))
         if len({y for _,y,_ in records})==2:
             x,self.period_columns,self.period_scales=matrix([f for f,_,_ in records])
-            self.period_model=LogisticRegression(C=.5,solver='newton-cholesky',max_iter=80,tol=1e-6).fit(x,[y for _,y,_ in records],sample_weight=[w for _,_,w in records])
+            self.period_model=LogisticRegression(C=.5/ridge_factor,solver='newton-cholesky',max_iter=80,tol=1e-6).fit(x,[y for _,y,_ in records],sample_weight=[w for _,_,w in records])
     def count_strength_features(self,features):
         f=dict(features);prior=f.pop('_prior_goal_strength',None);result=super().count_strength_features(f)
         if prior is not None:result['goal_strength_gap']=prior

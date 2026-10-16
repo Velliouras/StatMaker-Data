@@ -1,0 +1,370 @@
+{
+  "signature": "d4a6febfe4552384bb6347e207bc9b63e60916ebeeb7c0f1b3ff88303b93241b",
+  "folds": [
+    {
+      "testFrom": "2026-10-01",
+      "testBefore": "2026-10-15",
+      "profileFrom": "2026-09-01",
+      "selectionFromUTC": 1789948800.0,
+      "selectionBefore": "2026-10-01",
+      "choices": {
+        "GOALS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.2061005314981251
+        },
+        "CORNERS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.21578276187111442
+        },
+        "SHOTS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.17335947562193751
+        },
+        "SOT": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.19100810258452872
+        },
+        "YELLOW_CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "half_shrink",
+          "validationBrier": 0.18738779815810974
+        },
+        "CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.1925964353789333
+        },
+        "FOULS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.1844786793783428
+        }
+      },
+      "commonValidationEvents": 20071,
+      "coverage": {
+        "full": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        },
+        "no_xg": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        },
+        "no_goal_stack": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        },
+        "oof_goal_stack": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        },
+        "oof_ridge_10": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        },
+        "oof_ridge_50": {
+          "profileRows": 13807,
+          "validationRows": 949,
+          "maxProfileTimestamp": 1789947000.0,
+          "maxSelectionTimestamp": 1790811000.0
+        }
+      },
+      "validationScores": {
+        "full::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21843151731113344,
+            "GOALS_1H": 0.19625625783192446,
+            "GOALS_2H": 0.21284070759679652,
+            "CORNERS": 0.2284920257481736,
+            "SHOTS": 0.17827809413984766,
+            "SOT": 0.19600325829854362,
+            "YELLOW_CARDS": 0.2024346177072599,
+            "CARDS": 0.22817979031609914,
+            "FOULS": 0.199939121563733
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "full::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21960151347589296,
+            "GOALS_1H": 0.19655423345052203,
+            "GOALS_2H": 0.21303030008236631,
+            "CORNERS": 0.23082602332629354,
+            "SHOTS": 0.1812253919057185,
+            "SOT": 0.1977000391255615,
+            "YELLOW_CARDS": 0.2026349655736095,
+            "CARDS": 0.25197879506154913,
+            "FOULS": 0.20073433890764858
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "full::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.2212495913865535,
+            "GOALS_1H": 0.19697361156054657,
+            "GOALS_2H": 0.21342035569884646,
+            "CORNERS": 0.23470965531479973,
+            "SHOTS": 0.18773491037718024,
+            "SOT": 0.20013045572950222,
+            "YELLOW_CARDS": 0.2041508691540029,
+            "CARDS": 0.3013235360542079,
+            "FOULS": 0.20192710277011042
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_xg::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21844709618259497,
+            "GOALS_1H": 0.19619243731047284,
+            "GOALS_2H": 0.21320914541708005,
+            "CORNERS": 0.22850944036900192,
+            "SHOTS": 0.1782096893743252,
+            "SOT": 0.1957919481798707,
+            "YELLOW_CARDS": 0.20236772826436006,
+            "CARDS": 0.227926931949336,
+            "FOULS": 0.20026509149653662
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_xg::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21967093439959404,
+            "GOALS_1H": 0.19649111168583774,
+            "GOALS_2H": 0.21339965293018873,
+            "CORNERS": 0.23085257613021998,
+            "SHOTS": 0.1812410243820149,
+            "SOT": 0.19762149594657222,
+            "YELLOW_CARDS": 0.20271852954380332,
+            "CARDS": 0.25172943611932147,
+            "FOULS": 0.20108139208401132
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_xg::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.22141154723534268,
+            "GOALS_1H": 0.19692761851474108,
+            "GOALS_2H": 0.2138096860965187,
+            "CORNERS": 0.23473760491428863,
+            "SHOTS": 0.18794419179068683,
+            "SOT": 0.20023193653089108,
+            "YELLOW_CARDS": 0.2044542037096263,
+            "CARDS": 0.3011036310788191,
+            "FOULS": 0.20230961941501446
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_goal_stack::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21844310694526733,
+            "GOALS_1H": 0.19632670151400156,
+            "GOALS_2H": 0.21281625579573893,
+            "CORNERS": 0.22845053527625697,
+            "SHOTS": 0.17818518253416193,
+            "SOT": 0.19568742053119764,
+            "YELLOW_CARDS": 0.2024431705656992,
+            "CARDS": 0.2286052731865694,
+            "FOULS": 0.19994682293177432
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_goal_stack::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21960795364373267,
+            "GOALS_1H": 0.1966266369251356,
+            "GOALS_2H": 0.21299666057270802,
+            "CORNERS": 0.23079178194644626,
+            "SHOTS": 0.18112587376858516,
+            "SOT": 0.19734674834450172,
+            "YELLOW_CARDS": 0.20262037383237053,
+            "CARDS": 0.25231105283614275,
+            "FOULS": 0.2007419417753718
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "no_goal_stack::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.22125027942490866,
+            "GOALS_1H": 0.19704674807145184,
+            "GOALS_2H": 0.2133774868196766,
+            "CORNERS": 0.23469659128256382,
+            "SHOTS": 0.18762060549572582,
+            "SOT": 0.19974297259757542,
+            "YELLOW_CARDS": 0.20412481718279032,
+            "CARDS": 0.3014579595088971,
+            "FOULS": 0.20193430053172345
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_goal_stack::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21842587372715033,
+            "GOALS_1H": 0.19612321613708483,
+            "GOALS_2H": 0.2126936358745563,
+            "CORNERS": 0.22833767059023397,
+            "SHOTS": 0.17818307804997696,
+            "SOT": 0.1956893149166609,
+            "YELLOW_CARDS": 0.20243294702076264,
+            "CARDS": 0.22860913509769992,
+            "FOULS": 0.19968553702348577
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_goal_stack::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21959855000117964,
+            "GOALS_1H": 0.19642809380875423,
+            "GOALS_2H": 0.21288106478728594,
+            "CORNERS": 0.23068388252032357,
+            "SHOTS": 0.18112179937261708,
+            "SOT": 0.19734840915850818,
+            "YELLOW_CARDS": 0.2026117441986003,
+            "CARDS": 0.25231658148220215,
+            "FOULS": 0.20047589555574102
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_goal_stack::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.2212495913865535,
+            "GOALS_1H": 0.1968542889754175,
+            "GOALS_2H": 0.21326963702289659,
+            "CORNERS": 0.23459104006748194,
+            "SHOTS": 0.18761430953438993,
+            "SOT": 0.19974422803466702,
+            "YELLOW_CARDS": 0.2041165845382301,
+            "CARDS": 0.30145769013256035,
+            "FOULS": 0.20166365309864043
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_10::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21842587372715033,
+            "GOALS_1H": 0.19192089697991596,
+            "GOALS_2H": 0.2089828136215673,
+            "CORNERS": 0.22120287696826185,
+            "SHOTS": 0.17581490007487244,
+            "SOT": 0.1916167602396704,
+            "YELLOW_CARDS": 0.19254884426210497,
+            "CARDS": 0.19636710681357103,
+            "FOULS": 0.1935962921594914
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_10::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21959855000117964,
+            "GOALS_1H": 0.19227814331199783,
+            "GOALS_2H": 0.20925325355351432,
+            "CORNERS": 0.22235900460056157,
+            "SHOTS": 0.1782961147274704,
+            "SOT": 0.19293443705953517,
+            "YELLOW_CARDS": 0.19227463092030397,
+            "CARDS": 0.20723773373640528,
+            "FOULS": 0.1940968026431733
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_10::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.2212495913865535,
+            "GOALS_1H": 0.1927544092793461,
+            "GOALS_2H": 0.20972291458783068,
+            "CORNERS": 0.22452238621898166,
+            "SHOTS": 0.18423095366420825,
+            "SOT": 0.19488981495953128,
+            "YELLOW_CARDS": 0.19292814977156325,
+            "CARDS": 0.2467510858778419,
+            "FOULS": 0.19485133776841004
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_50::joint": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21842587372715033,
+            "GOALS_1H": 0.19167434485844959,
+            "GOALS_2H": 0.20820137590877538,
+            "CORNERS": 0.21578276187111442,
+            "SHOTS": 0.17335947562193751,
+            "SOT": 0.19100810258452872,
+            "YELLOW_CARDS": 0.1879029573633506,
+            "CARDS": 0.1925964353789333,
+            "FOULS": 0.1844786793783428
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_50::half_shrink": {
+          "brierByMetric": {
+            "GOALS_FT": 0.21959855000117964,
+            "GOALS_1H": 0.1920278792149184,
+            "GOALS_2H": 0.20849163872101603,
+            "CORNERS": 0.21610044087441685,
+            "SHOTS": 0.17495592603898694,
+            "SOT": 0.19213187415983213,
+            "YELLOW_CARDS": 0.18738779815810974,
+            "CARDS": 0.19641689152123554,
+            "FOULS": 0.18468761833963368
+          },
+          "events": 20071,
+          "fixtures": 139
+        },
+        "oof_ridge_50::identity": {
+          "brierByMetric": {
+            "GOALS_FT": 0.2212495913865535,
+            "GOALS_1H": 0.1925004587424631,
+            "GOALS_2H": 0.2089809191803136,
+            "CORNERS": 0.2171205948161455,
+            "SHOTS": 0.17942766284057748,
+            "SOT": 0.19371996863964497,
+            "YELLOW_CARDS": 0.18743349645529095,
+            "CARDS": 0.22629427286962417,
+            "FOULS": 0.18503355431916169
+          },
+          "events": 20071,
+          "fixtures": 139
+        }
+      }
+    }
+  ],
+  "status": "COMPLETE",
+  "rule": "Minimum mean of per-metric validation Brier; coherent goal-period group; common event cohort",
+  "noTestRowsRead": true,
+  "previouslyInspectedDevelopmentPeriods": true,
+  "equivalentScoringImplementation": {
+    "path": "scripts/betting_v2/research_event_grid.py",
+    "sha256": "cf633df0f91e93905f0e7f6028c8b2c39873405394b7e16f556f6d6ea5784ce8",
+    "mathematicalRuleUnchanged": true,
+    "maxVerifiedProbabilityDifference": 5.551115123125783e-16
+  }
+}

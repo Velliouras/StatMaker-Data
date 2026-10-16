@@ -1,0 +1,5653 @@
+{
+  "signature": "d4a6febfe4552384bb6347e207bc9b63e60916ebeeb7c0f1b3ff88303b93241b",
+  "folds": [
+    {
+      "testFrom": "2026-08-01",
+      "choices": {
+        "GOALS": {
+          "candidate": "oof_ridge_50",
+          "mode": "half_shrink",
+          "validationBrier": 0.21273224691692358
+        },
+        "CORNERS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.21785662137960335
+        },
+        "SHOTS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.18065362447302497
+        },
+        "SOT": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.19518084178600228
+        },
+        "YELLOW_CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.19088727217537294
+        },
+        "CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.21621499135435218
+        },
+        "FOULS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.18162597568642402
+        }
+      },
+      "paired": {
+        "GOALS_FT": {
+          "n": 46440,
+          "fixtures": 1976,
+          "baseline": {
+            "brier": 0.21881692873131842,
+            "logLoss": 0.6304525981848438,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4088,
+                "predicted": 0.14277732939359192,
+                "observed": 0.21453033268101762
+              },
+              {
+                "lo": 0.2,
+                "n": 12827,
+                "predicted": 0.30104598992968934,
+                "observed": 0.3306307008653621
+              },
+              {
+                "lo": 0.4,
+                "n": 12610,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 6438,
+                "predicted": 0.6511472366295524,
+                "observed": 0.6234855545200373
+              },
+              {
+                "lo": 0.7,
+                "n": 6389,
+                "predicted": 0.7471274343012703,
+                "observed": 0.7156049460009392
+              },
+              {
+                "lo": 0.8,
+                "n": 4088,
+                "predicted": 0.8572226706064081,
+                "observed": 0.7854696673189824
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.2195110045689219,
+            "logLoss": 0.6327372942877628,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4280,
+                "predicted": 0.14039302867871442,
+                "observed": 0.21845794392523366
+              },
+              {
+                "lo": 0.2,
+                "n": 12665,
+                "predicted": 0.30025047218244316,
+                "observed": 0.33130675088827477
+              },
+              {
+                "lo": 0.4,
+                "n": 12550,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 6238,
+                "predicted": 0.6503966875065357,
+                "observed": 0.6224751522924014
+              },
+              {
+                "lo": 0.7,
+                "n": 6427,
+                "predicted": 0.7476510398543004,
+                "observed": 0.713552201649292
+              },
+              {
+                "lo": 0.8,
+                "n": 4280,
+                "predicted": 0.8596069713212855,
+                "observed": 0.7815420560747663
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            0.00044539068549444424,
+            0.0009435325063578353
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_1H": {
+          "n": 44838,
+          "fixtures": 1934,
+          "baseline": {
+            "brier": 0.19710201891322598,
+            "logLoss": 0.5809144975931869,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 7183,
+                "predicted": 0.11996127330779838,
+                "observed": 0.1637198941946262
+              },
+              {
+                "lo": 0.2,
+                "n": 10157,
+                "predicted": 0.3006991792213124,
+                "observed": 0.3182041941518165
+              },
+              {
+                "lo": 0.4,
+                "n": 10158,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5136,
+                "predicted": 0.6494235927902685,
+                "observed": 0.6370716510903427
+              },
+              {
+                "lo": 0.7,
+                "n": 5021,
+                "predicted": 0.750320427022169,
+                "observed": 0.7275443138816968
+              },
+              {
+                "lo": 0.8,
+                "n": 7183,
+                "predicted": 0.8800387266922016,
+                "observed": 0.8362801058053738
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.19497132356428995,
+            "logLoss": 0.5753535243039996,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 7223,
+                "predicted": 0.12153204732498124,
+                "observed": 0.16004430292122387
+              },
+              {
+                "lo": 0.2,
+                "n": 10190,
+                "predicted": 0.3018724768111964,
+                "observed": 0.31756624141315015
+              },
+              {
+                "lo": 0.4,
+                "n": 10012,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5276,
+                "predicted": 0.6490788709314823,
+                "observed": 0.6281273692191054
+              },
+              {
+                "lo": 0.7,
+                "n": 4914,
+                "predicted": 0.7507894461252359,
+                "observed": 0.7407407407407407
+              },
+              {
+                "lo": 0.8,
+                "n": 7223,
+                "predicted": 0.8784679526750189,
+                "observed": 0.8399556970787762
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.003186236734240927,
+            -0.0010184049646863728
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_2H": {
+          "n": 45058,
+          "fixtures": 1934,
+          "baseline": {
+            "brier": 0.20801625320571482,
+            "logLoss": 0.6066432457905625,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5502,
+                "predicted": 0.1348054680437518,
+                "observed": 0.19574700109051255
+              },
+              {
+                "lo": 0.2,
+                "n": 11522,
+                "predicted": 0.30234930858669407,
+                "observed": 0.3109703176531852
+              },
+              {
+                "lo": 0.4,
+                "n": 11010,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5961,
+                "predicted": 0.6499948836441412,
+                "observed": 0.6468713303137058
+              },
+              {
+                "lo": 0.7,
+                "n": 5561,
+                "predicted": 0.74873435804017,
+                "observed": 0.7342204639453336
+              },
+              {
+                "lo": 0.8,
+                "n": 5502,
+                "predicted": 0.8651945319562483,
+                "observed": 0.8042529989094874
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.205665752721961,
+            "logLoss": 0.6004808225388771,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5513,
+                "predicted": 0.1363874105359176,
+                "observed": 0.17830582260112463
+              },
+              {
+                "lo": 0.2,
+                "n": 11478,
+                "predicted": 0.30114493724469854,
+                "observed": 0.3127722599756055
+              },
+              {
+                "lo": 0.4,
+                "n": 11076,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5885,
+                "predicted": 0.6504203619488534,
+                "observed": 0.6451996601529312
+              },
+              {
+                "lo": 0.7,
+                "n": 5593,
+                "predicted": 0.7498184481023328,
+                "observed": 0.7314500268192383
+              },
+              {
+                "lo": 0.8,
+                "n": 5513,
+                "predicted": 0.8636125894640823,
+                "observed": 0.8216941773988754
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.003341064190654647,
+            -0.0013971651984048968
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CORNERS": {
+          "n": 26775,
+          "fixtures": 1275,
+          "baseline": {
+            "brier": 0.22826714287680694,
+            "logLoss": 0.655943523849509,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3361,
+                "predicted": 0.11848758246950779,
+                "observed": 0.2058911038381434
+              },
+              {
+                "lo": 0.2,
+                "n": 6810,
+                "predicted": 0.30744050567527165,
+                "observed": 0.3563876651982379
+              },
+              {
+                "lo": 0.4,
+                "n": 8108,
+                "predicted": 0.49991447515185666,
+                "observed": 0.4969166255550074
+              },
+              {
+                "lo": 0.6,
+                "n": 3724,
+                "predicted": 0.6494105423980351,
+                "observed": 0.6178839957035446
+              },
+              {
+                "lo": 0.7,
+                "n": 2861,
+                "predicted": 0.7460604581761718,
+                "observed": 0.6763369451240825
+              },
+              {
+                "lo": 0.8,
+                "n": 1911,
+                "predicted": 0.8644181038240818,
+                "observed": 0.7148090005232862
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21550871048306705,
+            "logLoss": 0.6197156929991984,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2447,
+                "predicted": 0.12996685521582652,
+                "observed": 0.1438496117695137
+              },
+              {
+                "lo": 0.2,
+                "n": 7401,
+                "predicted": 0.3092045672346742,
+                "observed": 0.3221186326172139
+              },
+              {
+                "lo": 0.4,
+                "n": 8839,
+                "predicted": 0.49927829738633356,
+                "observed": 0.4986989478447788
+              },
+              {
+                "lo": 0.6,
+                "n": 4080,
+                "predicted": 0.6489377631076501,
+                "observed": 0.6416666666666667
+              },
+              {
+                "lo": 0.7,
+                "n": 2989,
+                "predicted": 0.744848717241639,
+                "observed": 0.727333556373369
+              },
+              {
+                "lo": 0.8,
+                "n": 1019,
+                "predicted": 0.8404399835827024,
+                "observed": 0.7988223748773308
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.015752982682574575,
+            -0.009780100754061986
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SHOTS": {
+          "n": 26880,
+          "fixtures": 1280,
+          "baseline": {
+            "brier": 0.18538474178246908,
+            "logLoss": 0.5512817590945488,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5519,
+                "predicted": 0.10015388456447612,
+                "observed": 0.1250226490306215
+              },
+              {
+                "lo": 0.2,
+                "n": 5764,
+                "predicted": 0.3003155394660541,
+                "observed": 0.3138445523941707
+              },
+              {
+                "lo": 0.4,
+                "n": 5791,
+                "predicted": 0.5001013162438174,
+                "observed": 0.4995682956311518
+              },
+              {
+                "lo": 0.6,
+                "n": 2829,
+                "predicted": 0.6495028690272197,
+                "observed": 0.6415694591728526
+              },
+              {
+                "lo": 0.7,
+                "n": 2841,
+                "predicted": 0.7502836678608523,
+                "observed": 0.7293206617388244
+              },
+              {
+                "lo": 0.8,
+                "n": 4136,
+                "predicted": 0.8827721717523426,
+                "observed": 0.8513056092843327
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17774667858377638,
+            "logLoss": 0.5297800836279593,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5280,
+                "predicted": 0.10519728904924251,
+                "observed": 0.10151515151515152
+              },
+              {
+                "lo": 0.2,
+                "n": 5889,
+                "predicted": 0.29990848332441516,
+                "observed": 0.30056036678553233
+              },
+              {
+                "lo": 0.4,
+                "n": 6024,
+                "predicted": 0.49970825274593306,
+                "observed": 0.5031540504648074
+              },
+              {
+                "lo": 0.6,
+                "n": 2935,
+                "predicted": 0.6507371431253267,
+                "observed": 0.6459965928449745
+              },
+              {
+                "lo": 0.7,
+                "n": 2864,
+                "predicted": 0.7503950711944771,
+                "observed": 0.7506983240223464
+              },
+              {
+                "lo": 0.8,
+                "n": 3888,
+                "predicted": 0.8768286373475311,
+                "observed": 0.878858024691358
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.009508231511641691,
+            -0.0056885825054769955
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SOT": {
+          "n": 26880,
+          "fixtures": 1280,
+          "baseline": {
+            "brier": 0.19568662045735544,
+            "logLoss": 0.5779723569926222,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5168,
+                "predicted": 0.12188737426668815,
+                "observed": 0.15924922600619196
+              },
+              {
+                "lo": 0.2,
+                "n": 6304,
+                "predicted": 0.29926088466453316,
+                "observed": 0.3164657360406091
+              },
+              {
+                "lo": 0.4,
+                "n": 5703,
+                "predicted": 0.49964222766853333,
+                "observed": 0.49377520603191305
+              },
+              {
+                "lo": 0.6,
+                "n": 2945,
+                "predicted": 0.6498891067744997,
+                "observed": 0.6356536502546689
+              },
+              {
+                "lo": 0.7,
+                "n": 3069,
+                "predicted": 0.7492525983762,
+                "observed": 0.725643532095145
+              },
+              {
+                "lo": 0.8,
+                "n": 3691,
+                "predicted": 0.872583626281071,
+                "observed": 0.8309401246274722
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.1895460456865114,
+            "logLoss": 0.5611594130981361,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4777,
+                "predicted": 0.135065952194926,
+                "observed": 0.14276742725559974
+              },
+              {
+                "lo": 0.2,
+                "n": 6663,
+                "predicted": 0.2962679096958942,
+                "observed": 0.3015158337085397
+              },
+              {
+                "lo": 0.4,
+                "n": 5865,
+                "predicted": 0.49922878392672104,
+                "observed": 0.49582267689684567
+              },
+              {
+                "lo": 0.6,
+                "n": 2945,
+                "predicted": 0.6498880889413436,
+                "observed": 0.6376910016977929
+              },
+              {
+                "lo": 0.7,
+                "n": 3280,
+                "predicted": 0.751759174438392,
+                "observed": 0.7524390243902439
+              },
+              {
+                "lo": 0.8,
+                "n": 3350,
+                "predicted": 0.8576386663405056,
+                "observed": 0.8522388059701492
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.008329257838826149,
+            -0.0038818405485391257
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "YELLOW_CARDS": {
+          "n": 22230,
+          "fixtures": 1235,
+          "baseline": {
+            "brier": 0.18514080885639206,
+            "logLoss": 0.553640606243583,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4454,
+                "predicted": 0.10477815433607318,
+                "observed": 0.14616075437808712
+              },
+              {
+                "lo": 0.2,
+                "n": 4444,
+                "predicted": 0.2983953194506575,
+                "observed": 0.32065706570657065
+              },
+              {
+                "lo": 0.4,
+                "n": 4434,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2174,
+                "predicted": 0.6506679234259873,
+                "observed": 0.640294388224471
+              },
+              {
+                "lo": 0.7,
+                "n": 2270,
+                "predicted": 0.750387284067481,
+                "observed": 0.7167400881057269
+              },
+              {
+                "lo": 0.8,
+                "n": 4454,
+                "predicted": 0.8952218456639268,
+                "observed": 0.8538392456219129
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.177269295179783,
+            "logLoss": 0.5301371769127903,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4183,
+                "predicted": 0.11260646320902898,
+                "observed": 0.11809705952665552
+              },
+              {
+                "lo": 0.2,
+                "n": 4695,
+                "predicted": 0.30013853231120813,
+                "observed": 0.30543130990415335
+              },
+              {
+                "lo": 0.4,
+                "n": 4474,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2325,
+                "predicted": 0.6501512518079782,
+                "observed": 0.6636559139784947
+              },
+              {
+                "lo": 0.7,
+                "n": 2370,
+                "predicted": 0.7486278187111092,
+                "observed": 0.7248945147679325
+              },
+              {
+                "lo": 0.8,
+                "n": 4183,
+                "predicted": 0.8873935367909711,
+                "observed": 0.8819029404733445
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.010644120956957569,
+            -0.00513817198082872
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CARDS": {
+          "n": 4194,
+          "fixtures": 233,
+          "baseline": {
+            "brier": 0.21512648231605683,
+            "logLoss": 0.6342512224697615,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 766,
+                "predicted": 0.10626737936512012,
+                "observed": 0.21018276762402088
+              },
+              {
+                "lo": 0.2,
+                "n": 877,
+                "predicted": 0.3027846713148294,
+                "observed": 0.3694412770809578
+              },
+              {
+                "lo": 0.4,
+                "n": 908,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 442,
+                "predicted": 0.6491737850294942,
+                "observed": 0.579185520361991
+              },
+              {
+                "lo": 0.7,
+                "n": 435,
+                "predicted": 0.7460299546525476,
+                "observed": 0.6827586206896552
+              },
+              {
+                "lo": 0.8,
+                "n": 766,
+                "predicted": 0.8937326206348798,
+                "observed": 0.7898172323759791
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.18881524363395444,
+            "logLoss": 0.5563202824210647,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 620,
+                "predicted": 0.11458657220938567,
+                "observed": 0.12903225806451613
+              },
+              {
+                "lo": 0.2,
+                "n": 957,
+                "predicted": 0.30671557355610374,
+                "observed": 0.30616509926854757
+              },
+              {
+                "lo": 0.4,
+                "n": 1040,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 518,
+                "predicted": 0.6468405421288854,
+                "observed": 0.6563706563706564
+              },
+              {
+                "lo": 0.7,
+                "n": 439,
+                "predicted": 0.748086094041107,
+                "observed": 0.7380410022779044
+              },
+              {
+                "lo": 0.8,
+                "n": 620,
+                "predicted": 0.8854134277906144,
+                "observed": 0.8709677419354839
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.0352597792468208,
+            -0.01693943386342993
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "FOULS": {
+          "n": 18018,
+          "fixtures": 1001,
+          "baseline": {
+            "brier": 0.1872598613988934,
+            "logLoss": 0.5578406032946179,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3414,
+                "predicted": 0.11467769091816722,
+                "observed": 0.14821323960164032
+              },
+              {
+                "lo": 0.2,
+                "n": 3799,
+                "predicted": 0.2990313213637556,
+                "observed": 0.3169255067122927
+              },
+              {
+                "lo": 0.4,
+                "n": 3592,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1854,
+                "predicted": 0.6498424522089804,
+                "observed": 0.6370010787486515
+              },
+              {
+                "lo": 0.7,
+                "n": 1945,
+                "predicted": 0.7497028811021299,
+                "observed": 0.7269922879177377
+              },
+              {
+                "lo": 0.8,
+                "n": 3414,
+                "predicted": 0.8853223090818326,
+                "observed": 0.8517867603983597
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.1810573333964358,
+            "logLoss": 0.5416288799192834,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3320,
+                "predicted": 0.1194556691810569,
+                "observed": 0.1358433734939759
+              },
+              {
+                "lo": 0.2,
+                "n": 3955,
+                "predicted": 0.2978042934920184,
+                "observed": 0.30290771175726927
+              },
+              {
+                "lo": 0.4,
+                "n": 3468,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1904,
+                "predicted": 0.6504908811048464,
+                "observed": 0.6391806722689075
+              },
+              {
+                "lo": 0.7,
+                "n": 2051,
+                "predicted": 0.7501947253122572,
+                "observed": 0.7508532423208191
+              },
+              {
+                "lo": 0.8,
+                "n": 3320,
+                "predicted": 0.8805443308189431,
+                "observed": 0.8641566265060241
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.007849806565732654,
+            -0.004686215353940047
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        }
+      },
+      "candidatePredictionRows": {
+        "full": 12148,
+        "no_xg": 12148,
+        "no_goal_stack": 12148,
+        "oof_goal_stack": 12148,
+        "oof_ridge_10": 12148,
+        "oof_ridge_50": 12148
+      },
+      "commonPredictionRows": 12148
+    },
+    {
+      "testFrom": "2026-09-01",
+      "choices": {
+        "GOALS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.205577660536014
+        },
+        "CORNERS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.21453808361791107
+        },
+        "SHOTS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.17340747693640696
+        },
+        "SOT": {
+          "candidate": "oof_ridge_50",
+          "mode": "identity",
+          "validationBrier": 0.18801350087798344
+        },
+        "YELLOW_CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.18107559518446706
+        },
+        "CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.2038801356041923
+        },
+        "FOULS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.18022403795868483
+        }
+      },
+      "paired": {
+        "GOALS_FT": {
+          "n": 42280,
+          "fixtures": 1801,
+          "baseline": {
+            "brier": 0.21847822690355645,
+            "logLoss": 0.6292567274204195,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3861,
+                "predicted": 0.1434167257234959,
+                "observed": 0.21263921263921265
+              },
+              {
+                "lo": 0.2,
+                "n": 11479,
+                "predicted": 0.3006762425018211,
+                "observed": 0.33217179196794144
+              },
+              {
+                "lo": 0.4,
+                "n": 11600,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5714,
+                "predicted": 0.6504427969017477,
+                "observed": 0.6183059152957648
+              },
+              {
+                "lo": 0.7,
+                "n": 5765,
+                "predicted": 0.747772293291415,
+                "observed": 0.7169124024284476
+              },
+              {
+                "lo": 0.8,
+                "n": 3861,
+                "predicted": 0.856583274276504,
+                "observed": 0.7873607873607874
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21848694513681205,
+            "logLoss": 0.629284290238787,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3864,
+                "predicted": 0.14335094105734172,
+                "observed": 0.21247412008281574
+              },
+              {
+                "lo": 0.2,
+                "n": 11481,
+                "predicted": 0.3006844815403474,
+                "observed": 0.33237522863862035
+              },
+              {
+                "lo": 0.4,
+                "n": 11590,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5719,
+                "predicted": 0.6504541030550602,
+                "observed": 0.6181150550795593
+              },
+              {
+                "lo": 0.7,
+                "n": 5762,
+                "predicted": 0.7478122964358526,
+                "observed": 0.7167650121485595
+              },
+              {
+                "lo": 0.8,
+                "n": 3864,
+                "predicted": 0.8566490589426582,
+                "observed": 0.7875258799171843
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            5.8224681873840994e-06,
+            1.1807918360473844e-05
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_1H": {
+          "n": 41532,
+          "fixtures": 1790,
+          "baseline": {
+            "brier": 0.1975346601816838,
+            "logLoss": 0.5810935520062567,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 6647,
+                "predicted": 0.12173200774011347,
+                "observed": 0.16293064540394162
+              },
+              {
+                "lo": 0.2,
+                "n": 9442,
+                "predicted": 0.3015223826623258,
+                "observed": 0.32291887312010165
+              },
+              {
+                "lo": 0.4,
+                "n": 9354,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 4829,
+                "predicted": 0.6495436562080998,
+                "observed": 0.6276661834748395
+              },
+              {
+                "lo": 0.7,
+                "n": 4613,
+                "predicted": 0.749702871682941,
+                "observed": 0.7288098851073055
+              },
+              {
+                "lo": 0.8,
+                "n": 6647,
+                "predicted": 0.8782679922598865,
+                "observed": 0.8370693545960584
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.1944121111492139,
+            "logLoss": 0.5726067198208058,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 6341,
+                "predicted": 0.12664534425107332,
+                "observed": 0.15060715975398203
+              },
+              {
+                "lo": 0.2,
+                "n": 9666,
+                "predicted": 0.30213924583584817,
+                "observed": 0.31678046761845646
+              },
+              {
+                "lo": 0.4,
+                "n": 9518,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 4968,
+                "predicted": 0.6483899346859548,
+                "observed": 0.6340579710144928
+              },
+              {
+                "lo": 0.7,
+                "n": 4698,
+                "predicted": 0.7501747241870729,
+                "observed": 0.7352064708386548
+              },
+              {
+                "lo": 0.8,
+                "n": 6341,
+                "predicted": 0.8733546557489267,
+                "observed": 0.849392840246018
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.004352103629279064,
+            -0.0018220268016448924
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_2H": {
+          "n": 41764,
+          "fixtures": 1790,
+          "baseline": {
+            "brier": 0.21139877064005977,
+            "logLoss": 0.6147663177045063,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4995,
+                "predicted": 0.1367797841958606,
+                "observed": 0.2002002002002002
+              },
+              {
+                "lo": 0.2,
+                "n": 10828,
+                "predicted": 0.3028975437635148,
+                "observed": 0.3212966383450314
+              },
+              {
+                "lo": 0.4,
+                "n": 10118,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5652,
+                "predicted": 0.6499994521281857,
+                "observed": 0.6401273885350318
+              },
+              {
+                "lo": 0.7,
+                "n": 5176,
+                "predicted": 0.7485371894706639,
+                "observed": 0.7208268933539412
+              },
+              {
+                "lo": 0.8,
+                "n": 4995,
+                "predicted": 0.8632202158041392,
+                "observed": 0.7997997997997998
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.2085235110791471,
+            "logLoss": 0.6072087076846824,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4722,
+                "predicted": 0.14088647857206668,
+                "observed": 0.193138500635324
+              },
+              {
+                "lo": 0.2,
+                "n": 11017,
+                "predicted": 0.30256996340759895,
+                "observed": 0.3103385676681492
+              },
+              {
+                "lo": 0.4,
+                "n": 10286,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 5745,
+                "predicted": 0.6498415529025832,
+                "observed": 0.6489120974760662
+              },
+              {
+                "lo": 0.7,
+                "n": 5272,
+                "predicted": 0.7492881243765446,
+                "observed": 0.7340667678300455
+              },
+              {
+                "lo": 0.8,
+                "n": 4722,
+                "predicted": 0.8591135214279334,
+                "observed": 0.806861499364676
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.00407376617359775,
+            -0.0017465073465923085
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CORNERS": {
+          "n": 29526,
+          "fixtures": 1406,
+          "baseline": {
+            "brier": 0.22535320008872034,
+            "logLoss": 0.6449889783323652,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3478,
+                "predicted": 0.11914351671457017,
+                "observed": 0.19062679700977572
+              },
+              {
+                "lo": 0.2,
+                "n": 7520,
+                "predicted": 0.309001451587522,
+                "observed": 0.3550531914893617
+              },
+              {
+                "lo": 0.4,
+                "n": 9403,
+                "predicted": 0.49974184734053495,
+                "observed": 0.4978198447304052
+              },
+              {
+                "lo": 0.6,
+                "n": 4151,
+                "predicted": 0.6488672633624786,
+                "observed": 0.6133461816429776
+              },
+              {
+                "lo": 0.7,
+                "n": 3072,
+                "predicted": 0.7461735154275478,
+                "observed": 0.6813151041666666
+              },
+              {
+                "lo": 0.8,
+                "n": 1902,
+                "predicted": 0.8607583032462847,
+                "observed": 0.7397476340694006
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21421770060515893,
+            "logLoss": 0.6162814885277823,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2463,
+                "predicted": 0.12678490065183162,
+                "observed": 0.12911084043848964
+              },
+              {
+                "lo": 0.2,
+                "n": 8082,
+                "predicted": 0.31102899143802504,
+                "observed": 0.3135362534026231
+              },
+              {
+                "lo": 0.4,
+                "n": 10382,
+                "predicted": 0.49940069963596195,
+                "observed": 0.49971103833558084
+              },
+              {
+                "lo": 0.6,
+                "n": 4570,
+                "predicted": 0.6487526247256422,
+                "observed": 0.6494529540481401
+              },
+              {
+                "lo": 0.7,
+                "n": 3107,
+                "predicted": 0.7446016625149785,
+                "observed": 0.7389765046668813
+              },
+              {
+                "lo": 0.8,
+                "n": 922,
+                "predicted": 0.8361578707609972,
+                "observed": 0.8199566160520607
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.013605760374810323,
+            -0.008494228668619645
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SHOTS": {
+          "n": 29526,
+          "fixtures": 1406,
+          "baseline": {
+            "brier": 0.18492010876909604,
+            "logLoss": 0.5502082589943437,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 6096,
+                "predicted": 0.09821734398295176,
+                "observed": 0.12040682414698163
+              },
+              {
+                "lo": 0.2,
+                "n": 6264,
+                "predicted": 0.3017636519678353,
+                "observed": 0.32263729246487866
+              },
+              {
+                "lo": 0.4,
+                "n": 6395,
+                "predicted": 0.49961314401135765,
+                "observed": 0.4988272087568413
+              },
+              {
+                "lo": 0.6,
+                "n": 3189,
+                "predicted": 0.6495052550656961,
+                "observed": 0.6309187833176544
+              },
+              {
+                "lo": 0.7,
+                "n": 2997,
+                "predicted": 0.7497152335595263,
+                "observed": 0.7223890557223891
+              },
+              {
+                "lo": 0.8,
+                "n": 4585,
+                "predicted": 0.885021741727016,
+                "observed": 0.8588876772082878
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.1749808703709399,
+            "logLoss": 0.5218721203723564,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5896,
+                "predicted": 0.10213704410953238,
+                "observed": 0.09379240162822253
+              },
+              {
+                "lo": 0.2,
+                "n": 6451,
+                "predicted": 0.30393099634975107,
+                "observed": 0.30305379011006045
+              },
+              {
+                "lo": 0.4,
+                "n": 6467,
+                "predicted": 0.4998823368635783,
+                "observed": 0.5002319468068657
+              },
+              {
+                "lo": 0.6,
+                "n": 3373,
+                "predicted": 0.6497301060334572,
+                "observed": 0.6546101393418322
+              },
+              {
+                "lo": 0.7,
+                "n": 2966,
+                "predicted": 0.7487809683969416,
+                "observed": 0.7444369521240728
+              },
+              {
+                "lo": 0.8,
+                "n": 4373,
+                "predicted": 0.8808548040395638,
+                "observed": 0.8920649439743883
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.012003927198583165,
+            -0.007935886803695573
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SOT": {
+          "n": 29526,
+          "fixtures": 1406,
+          "baseline": {
+            "brier": 0.1978152050767344,
+            "logLoss": 0.5839897558991319,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 5855,
+                "predicted": 0.12061807870983773,
+                "observed": 0.161400512382579
+              },
+              {
+                "lo": 0.2,
+                "n": 6658,
+                "predicted": 0.29852174805303716,
+                "observed": 0.32111745268849506
+              },
+              {
+                "lo": 0.4,
+                "n": 6419,
+                "predicted": 0.4993635906678255,
+                "observed": 0.5019473438230254
+              },
+              {
+                "lo": 0.6,
+                "n": 3106,
+                "predicted": 0.6497151057878529,
+                "observed": 0.6274951706374758
+              },
+              {
+                "lo": 0.7,
+                "n": 3286,
+                "predicted": 0.7506407634593494,
+                "observed": 0.7163724893487523
+              },
+              {
+                "lo": 0.8,
+                "n": 4202,
+                "predicted": 0.8748662053344869,
+                "observed": 0.8215135649690624
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.18889104480056582,
+            "logLoss": 0.5597888973162325,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 6386,
+                "predicted": 0.12724382666394451,
+                "observed": 0.14688380833072345
+              },
+              {
+                "lo": 0.2,
+                "n": 6322,
+                "predicted": 0.2981608794872865,
+                "observed": 0.31809553938627017
+              },
+              {
+                "lo": 0.4,
+                "n": 6131,
+                "predicted": 0.49939496724396254,
+                "observed": 0.5026912412330778
+              },
+              {
+                "lo": 0.6,
+                "n": 2933,
+                "predicted": 0.649167357832485,
+                "observed": 0.6358677122400272
+              },
+              {
+                "lo": 0.7,
+                "n": 3015,
+                "predicted": 0.7516261113932864,
+                "observed": 0.7180762852404643
+              },
+              {
+                "lo": 0.8,
+                "n": 4739,
+                "predicted": 0.8715966896516677,
+                "observed": 0.8438489132728424
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.011261778307927935,
+            -0.006517509152298718
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "YELLOW_CARDS": {
+          "n": 25218,
+          "fixtures": 1401,
+          "baseline": {
+            "brier": 0.1893477021706439,
+            "logLoss": 0.56429981796217,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4852,
+                "predicted": 0.1068202321861067,
+                "observed": 0.15313272877164055
+              },
+              {
+                "lo": 0.2,
+                "n": 5186,
+                "predicted": 0.2987595121706486,
+                "observed": 0.32009255688391824
+              },
+              {
+                "lo": 0.4,
+                "n": 5142,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2557,
+                "predicted": 0.6512382333914727,
+                "observed": 0.644114196323817
+              },
+              {
+                "lo": 0.7,
+                "n": 2629,
+                "predicted": 0.7498733385701867,
+                "observed": 0.7147204260174972
+              },
+              {
+                "lo": 0.8,
+                "n": 4852,
+                "predicted": 0.8931797678138934,
+                "observed": 0.8468672712283595
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17629842389319994,
+            "logLoss": 0.5267972456823731,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4320,
+                "predicted": 0.11959201798094272,
+                "observed": 0.11087962962962963
+              },
+              {
+                "lo": 0.2,
+                "n": 5694,
+                "predicted": 0.2999485941271819,
+                "observed": 0.29557428872497366
+              },
+              {
+                "lo": 0.4,
+                "n": 5190,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2830,
+                "predicted": 0.6513019156258987,
+                "observed": 0.6551236749116608
+              },
+              {
+                "lo": 0.7,
+                "n": 2864,
+                "predicted": 0.7482221661377559,
+                "observed": 0.7531424581005587
+              },
+              {
+                "lo": 0.8,
+                "n": 4320,
+                "predicted": 0.8804079820190573,
+                "observed": 0.8891203703703704
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.015984555705521174,
+            -0.010141404841558762
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CARDS": {
+          "n": 20628,
+          "fixtures": 1146,
+          "baseline": {
+            "brier": 0.24739614702498283,
+            "logLoss": 0.7192919957143696,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 3582,
+                "predicted": 0.10851718266208955,
+                "observed": 0.2895030709101061
+              },
+              {
+                "lo": 0.2,
+                "n": 4396,
+                "predicted": 0.29954454786124984,
+                "observed": 0.4119654231119199
+              },
+              {
+                "lo": 0.4,
+                "n": 4672,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2175,
+                "predicted": 0.6501004451275576,
+                "observed": 0.5673563218390805
+              },
+              {
+                "lo": 0.7,
+                "n": 2221,
+                "predicted": 0.7497675368975724,
+                "observed": 0.6082845565060784
+              },
+              {
+                "lo": 0.8,
+                "n": 3582,
+                "predicted": 0.8914828173379106,
+                "observed": 0.7104969290898939
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21101356524507664,
+            "logLoss": 0.6157200967246231,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2433,
+                "predicted": 0.12202405818839289,
+                "observed": 0.21126181668721744
+              },
+              {
+                "lo": 0.2,
+                "n": 5359,
+                "predicted": 0.30068884606620766,
+                "observed": 0.30845306960253777
+              },
+              {
+                "lo": 0.4,
+                "n": 5044,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2622,
+                "predicted": 0.6497675311488568,
+                "observed": 0.6361556064073226
+              },
+              {
+                "lo": 0.7,
+                "n": 2737,
+                "predicted": 0.7467731118958314,
+                "observed": 0.7446108878333942
+              },
+              {
+                "lo": 0.8,
+                "n": 2433,
+                "predicted": 0.8779759418116071,
+                "observed": 0.7887381833127826
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.04159555487575168,
+            -0.03148513878602655
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "FOULS": {
+          "n": 23004,
+          "fixtures": 1278,
+          "baseline": {
+            "brier": 0.19118696224800322,
+            "logLoss": 0.5710949176082665,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4490,
+                "predicted": 0.10952021212595082,
+                "observed": 0.16146993318485522
+              },
+              {
+                "lo": 0.2,
+                "n": 4810,
+                "predicted": 0.29963695104692845,
+                "observed": 0.32224532224532226
+              },
+              {
+                "lo": 0.4,
+                "n": 4404,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2412,
+                "predicted": 0.6499158259035401,
+                "observed": 0.6388888888888888
+              },
+              {
+                "lo": 0.7,
+                "n": 2398,
+                "predicted": 0.7511047929044768,
+                "observed": 0.7168473728106756
+              },
+              {
+                "lo": 0.8,
+                "n": 4490,
+                "predicted": 0.8904797878740492,
+                "observed": 0.8385300668151447
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17854571266098,
+            "logLoss": 0.5339712995923133,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 4407,
+                "predicted": 0.11702505731875178,
+                "observed": 0.13274336283185842
+              },
+              {
+                "lo": 0.2,
+                "n": 4856,
+                "predicted": 0.2982449209307287,
+                "observed": 0.29695222405271826
+              },
+              {
+                "lo": 0.4,
+                "n": 4478,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2389,
+                "predicted": 0.651169920236014,
+                "observed": 0.6622017580577647
+              },
+              {
+                "lo": 0.7,
+                "n": 2467,
+                "predicted": 0.7507408692811284,
+                "observed": 0.7426023510336441
+              },
+              {
+                "lo": 0.8,
+                "n": 4407,
+                "predicted": 0.8829749426812483,
+                "observed": 0.8672566371681416
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.01528593102602661,
+            -0.010054372131224896
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        }
+      },
+      "candidatePredictionRows": {
+        "full": 13424,
+        "no_xg": 13424,
+        "no_goal_stack": 13424,
+        "oof_goal_stack": 13424,
+        "oof_ridge_10": 13424,
+        "oof_ridge_50": 13424
+      },
+      "commonPredictionRows": 13424
+    },
+    {
+      "testFrom": "2026-10-01",
+      "choices": {
+        "GOALS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.2061005314981251
+        },
+        "CORNERS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.21578276187111442
+        },
+        "SHOTS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.17335947562193751
+        },
+        "SOT": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.19100810258452872
+        },
+        "YELLOW_CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "half_shrink",
+          "validationBrier": 0.18738779815810974
+        },
+        "CARDS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.1925964353789333
+        },
+        "FOULS": {
+          "candidate": "oof_ridge_50",
+          "mode": "joint",
+          "validationBrier": 0.1844786793783428
+        }
+      },
+      "paired": {
+        "GOALS_FT": {
+          "n": 16946,
+          "fixtures": 720,
+          "baseline": {
+            "brier": 0.21366887407145607,
+            "logLoss": 0.6164976515916162,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1582,
+                "predicted": 0.14106449512959407,
+                "observed": 0.18394437420986093
+              },
+              {
+                "lo": 0.2,
+                "n": 4659,
+                "predicted": 0.3013238160461569,
+                "observed": 0.32753809830435715
+              },
+              {
+                "lo": 0.4,
+                "n": 4464,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2312,
+                "predicted": 0.6504754072088612,
+                "observed": 0.638840830449827
+              },
+              {
+                "lo": 0.7,
+                "n": 2347,
+                "predicted": 0.7461581591708853,
+                "observed": 0.7055815935236472
+              },
+              {
+                "lo": 0.8,
+                "n": 1582,
+                "predicted": 0.858935504870406,
+                "observed": 0.816055625790139
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21366997734722812,
+            "logLoss": 0.6165005051287994,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1581,
+                "predicted": 0.14105182728969268,
+                "observed": 0.1834282099936749
+              },
+              {
+                "lo": 0.2,
+                "n": 4659,
+                "predicted": 0.3012871692757547,
+                "observed": 0.3277527366387637
+              },
+              {
+                "lo": 0.4,
+                "n": 4466,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2313,
+                "predicted": 0.6505377977514022,
+                "observed": 0.6389969736273238
+              },
+              {
+                "lo": 0.7,
+                "n": 2346,
+                "predicted": 0.7462102097805905,
+                "observed": 0.7050298380221653
+              },
+              {
+                "lo": 0.8,
+                "n": 1581,
+                "predicted": 0.8589481727103073,
+                "observed": 0.8165717900063251
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -1.2877352173917459e-06,
+            3.4852422770609966e-06
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_1H": {
+          "n": 16636,
+          "fixtures": 716,
+          "baseline": {
+            "brier": 0.19682891265527752,
+            "logLoss": 0.5795021666984698,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2643,
+                "predicted": 0.12080588937158261,
+                "observed": 0.15891032917139614
+              },
+              {
+                "lo": 0.2,
+                "n": 3746,
+                "predicted": 0.3010188673624854,
+                "observed": 0.3192738921516284
+              },
+              {
+                "lo": 0.4,
+                "n": 3858,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1909,
+                "predicted": 0.6494933097848355,
+                "observed": 0.6380303823991619
+              },
+              {
+                "lo": 0.7,
+                "n": 1837,
+                "predicted": 0.7504085979754377,
+                "observed": 0.7250952640174197
+              },
+              {
+                "lo": 0.8,
+                "n": 2643,
+                "predicted": 0.8791941106284173,
+                "observed": 0.8410896708286039
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.19301780048012115,
+            "logLoss": 0.569835518594741,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2504,
+                "predicted": 0.12573221782901503,
+                "observed": 0.14616613418530353
+              },
+              {
+                "lo": 0.2,
+                "n": 3846,
+                "predicted": 0.30144526541024064,
+                "observed": 0.3086323452938117
+              },
+              {
+                "lo": 0.4,
+                "n": 3936,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1971,
+                "predicted": 0.6489835586173649,
+                "observed": 0.6397767630644343
+              },
+              {
+                "lo": 0.7,
+                "n": 1875,
+                "predicted": 0.7506639547719405,
+                "observed": 0.7456
+              },
+              {
+                "lo": 0.8,
+                "n": 2504,
+                "predicted": 0.8742677821709852,
+                "observed": 0.8538338658146964
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.0060861109688840455,
+            -0.001708426326252118
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "GOALS_2H": {
+          "n": 16704,
+          "fixtures": 716,
+          "baseline": {
+            "brier": 0.2059115722706885,
+            "logLoss": 0.5999568051983151,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1994,
+                "predicted": 0.13625731265114932,
+                "observed": 0.17402206619859578
+              },
+              {
+                "lo": 0.2,
+                "n": 4327,
+                "predicted": 0.30351836494635026,
+                "observed": 0.3212387335336261
+              },
+              {
+                "lo": 0.4,
+                "n": 4062,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2271,
+                "predicted": 0.6496225858709452,
+                "observed": 0.6323205636283575
+              },
+              {
+                "lo": 0.7,
+                "n": 2056,
+                "predicted": 0.7482408279981645,
+                "observed": 0.7300583657587548
+              },
+              {
+                "lo": 0.8,
+                "n": 1994,
+                "predicted": 0.8637426873488506,
+                "observed": 0.8259779338014042
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.20412616522652594,
+            "logLoss": 0.5957167055805653,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1864,
+                "predicted": 0.14059696094650623,
+                "observed": 0.16523605150214593
+              },
+              {
+                "lo": 0.2,
+                "n": 4391,
+                "predicted": 0.30281057068628475,
+                "observed": 0.30676383511728533
+              },
+              {
+                "lo": 0.4,
+                "n": 4194,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 2318,
+                "predicted": 0.6506380018721987,
+                "observed": 0.6574633304572908
+              },
+              {
+                "lo": 0.7,
+                "n": 2073,
+                "predicted": 0.7492425932352954,
+                "observed": 0.733236854799807
+              },
+              {
+                "lo": 0.8,
+                "n": 1864,
+                "predicted": 0.8594030390534937,
+                "observed": 0.8347639484978541
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.00373640339564603,
+            0.0002613728544356636
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CORNERS": {
+          "n": 11655,
+          "fixtures": 555,
+          "baseline": {
+            "brier": 0.2210436095995336,
+            "logLoss": 0.637254714676885,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1393,
+                "predicted": 0.12082514730203053,
+                "observed": 0.18449389806173727
+              },
+              {
+                "lo": 0.2,
+                "n": 2985,
+                "predicted": 0.30910539076512594,
+                "observed": 0.3423785594639866
+              },
+              {
+                "lo": 0.4,
+                "n": 3643,
+                "predicted": 0.499751996867831,
+                "observed": 0.4949217677738128
+              },
+              {
+                "lo": 0.6,
+                "n": 1633,
+                "predicted": 0.6481254523363461,
+                "observed": 0.6203306797305572
+              },
+              {
+                "lo": 0.7,
+                "n": 1232,
+                "predicted": 0.746126386566905,
+                "observed": 0.7094155844155844
+              },
+              {
+                "lo": 0.8,
+                "n": 769,
+                "predicted": 0.8592950349404184,
+                "observed": 0.7555266579973993
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.21619039096317474,
+            "logLoss": 0.6216809834813222,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1023,
+                "predicted": 0.1262265848066983,
+                "observed": 0.14760508308895406
+              },
+              {
+                "lo": 0.2,
+                "n": 3197,
+                "predicted": 0.3108881478102601,
+                "observed": 0.31654676258992803
+              },
+              {
+                "lo": 0.4,
+                "n": 3998,
+                "predicted": 0.4997197034968913,
+                "observed": 0.4977488744372186
+              },
+              {
+                "lo": 0.6,
+                "n": 1779,
+                "predicted": 0.6483884226532867,
+                "observed": 0.643620011242271
+              },
+              {
+                "lo": 0.7,
+                "n": 1244,
+                "predicted": 0.7456220640146864,
+                "observed": 0.7355305466237942
+              },
+              {
+                "lo": 0.8,
+                "n": 414,
+                "predicted": 0.8406873649234484,
+                "observed": 0.8140096618357487
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.008583787669936498,
+            -0.001469839418386007
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SHOTS": {
+          "n": 11655,
+          "fixtures": 555,
+          "baseline": {
+            "brier": 0.17511894776206158,
+            "logLoss": 0.524663724481793,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2617,
+                "predicted": 0.09401239264366922,
+                "observed": 0.1150171952617501
+              },
+              {
+                "lo": 0.2,
+                "n": 2367,
+                "predicted": 0.30085243660429345,
+                "observed": 0.296155471060414
+              },
+              {
+                "lo": 0.4,
+                "n": 2324,
+                "predicted": 0.5002864022240294,
+                "observed": 0.5025817555938038
+              },
+              {
+                "lo": 0.6,
+                "n": 1170,
+                "predicted": 0.6497798778934195,
+                "observed": 0.6709401709401709
+              },
+              {
+                "lo": 0.7,
+                "n": 1174,
+                "predicted": 0.7494545316244426,
+                "observed": 0.7257240204429302
+              },
+              {
+                "lo": 0.8,
+                "n": 2003,
+                "predicted": 0.8932022840629625,
+                "observed": 0.8701947079380928
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17014740949716842,
+            "logLoss": 0.5109781110138863,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2562,
+                "predicted": 0.096658610569504,
+                "observed": 0.10265417642466823
+              },
+              {
+                "lo": 0.2,
+                "n": 2373,
+                "predicted": 0.3019341650850972,
+                "observed": 0.292456805731142
+              },
+              {
+                "lo": 0.4,
+                "n": 2426,
+                "predicted": 0.4999818550960593,
+                "observed": 0.5004122011541632
+              },
+              {
+                "lo": 0.6,
+                "n": 1212,
+                "predicted": 0.6511415014621158,
+                "observed": 0.6542904290429042
+              },
+              {
+                "lo": 0.7,
+                "n": 1126,
+                "predicted": 0.7481252761490009,
+                "observed": 0.7602131438721137
+              },
+              {
+                "lo": 0.8,
+                "n": 1956,
+                "predicted": 0.8902568122674315,
+                "observed": 0.8844580777096115
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.008367605716815244,
+            -0.0017326018968295645
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "SOT": {
+          "n": 11697,
+          "fixtures": 557,
+          "baseline": {
+            "brier": 0.1919470940810105,
+            "logLoss": 0.5687746751217059,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2384,
+                "predicted": 0.11834213976347388,
+                "observed": 0.1568791946308725
+              },
+              {
+                "lo": 0.2,
+                "n": 2600,
+                "predicted": 0.2994982536710245,
+                "observed": 0.3076923076923077
+              },
+              {
+                "lo": 0.4,
+                "n": 2496,
+                "predicted": 0.4994794490279511,
+                "observed": 0.4979967948717949
+              },
+              {
+                "lo": 0.6,
+                "n": 1215,
+                "predicted": 0.6485283355191407,
+                "observed": 0.6444444444444445
+              },
+              {
+                "lo": 0.7,
+                "n": 1254,
+                "predicted": 0.7492025487045331,
+                "observed": 0.7384370015948963
+              },
+              {
+                "lo": 0.8,
+                "n": 1748,
+                "predicted": 0.8781546056946273,
+                "observed": 0.8260869565217391
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.1883414400921297,
+            "logLoss": 0.5585987317311983,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 2237,
+                "predicted": 0.12810833522271672,
+                "observed": 0.14036656236030398
+              },
+              {
+                "lo": 0.2,
+                "n": 2682,
+                "predicted": 0.2977260114325523,
+                "observed": 0.2994034302759135
+              },
+              {
+                "lo": 0.4,
+                "n": 2664,
+                "predicted": 0.49912007327781555,
+                "observed": 0.49924924924924924
+              },
+              {
+                "lo": 0.6,
+                "n": 1199,
+                "predicted": 0.649259783136187,
+                "observed": 0.6513761467889908
+              },
+              {
+                "lo": 0.7,
+                "n": 1305,
+                "predicted": 0.7511340547354106,
+                "observed": 0.7478927203065134
+              },
+              {
+                "lo": 0.8,
+                "n": 1610,
+                "predicted": 0.8674361458525326,
+                "observed": 0.8484472049689441
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.006455407131915917,
+            -0.0005910948861655305
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "YELLOW_CARDS": {
+          "n": 9954,
+          "fixtures": 553,
+          "baseline": {
+            "brier": 0.18933203335291707,
+            "logLoss": 0.5599119018472875,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1836,
+                "predicted": 0.11272436267743685,
+                "observed": 0.14814814814814814
+              },
+              {
+                "lo": 0.2,
+                "n": 2168,
+                "predicted": 0.3030714552614334,
+                "observed": 0.32287822878228783
+              },
+              {
+                "lo": 0.4,
+                "n": 1946,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1132,
+                "predicted": 0.647981149428139,
+                "observed": 0.6439929328621908
+              },
+              {
+                "lo": 0.7,
+                "n": 1036,
+                "predicted": 0.7504116060237055,
+                "observed": 0.7133204633204633
+              },
+              {
+                "lo": 0.8,
+                "n": 1836,
+                "predicted": 0.8872756373225632,
+                "observed": 0.8518518518518519
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17959541745936886,
+            "logLoss": 0.5357557752024588,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1653,
+                "predicted": 0.12947208104124516,
+                "observed": 0.11978221415607986
+              },
+              {
+                "lo": 0.2,
+                "n": 2283,
+                "predicted": 0.3032348713527056,
+                "observed": 0.2952255803766973
+              },
+              {
+                "lo": 0.4,
+                "n": 2082,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1208,
+                "predicted": 0.650308466862152,
+                "observed": 0.6647350993377483
+              },
+              {
+                "lo": 0.7,
+                "n": 1075,
+                "predicted": 0.7489694518439939,
+                "observed": 0.7497674418604651
+              },
+              {
+                "lo": 0.8,
+                "n": 1653,
+                "predicted": 0.8705279189587548,
+                "observed": 0.8802177858439202
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.013810244317150604,
+            -0.005584753849780224
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "CARDS": {
+          "n": 8604,
+          "fixtures": 478,
+          "baseline": {
+            "brier": 0.21597797824419032,
+            "logLoss": 0.6332206166778204,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1526,
+                "predicted": 0.11261443692073139,
+                "observed": 0.2182175622542595
+              },
+              {
+                "lo": 0.2,
+                "n": 1870,
+                "predicted": 0.3018069617531135,
+                "observed": 0.35508021390374334
+              },
+              {
+                "lo": 0.4,
+                "n": 1812,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 950,
+                "predicted": 0.6500416419409911,
+                "observed": 0.6052631578947368
+              },
+              {
+                "lo": 0.7,
+                "n": 920,
+                "predicted": 0.747914588780148,
+                "observed": 0.6858695652173913
+              },
+              {
+                "lo": 0.8,
+                "n": 1526,
+                "predicted": 0.8873855630792686,
+                "observed": 0.7817824377457405
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.18857046644101108,
+            "logLoss": 0.5584693433416632,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1365,
+                "predicted": 0.13378749658666156,
+                "observed": 0.14871794871794872
+              },
+              {
+                "lo": 0.2,
+                "n": 2007,
+                "predicted": 0.3020534112017189,
+                "observed": 0.29895366218236175
+              },
+              {
+                "lo": 0.4,
+                "n": 1860,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 1028,
+                "predicted": 0.6474844365866441,
+                "observed": 0.6478599221789884
+              },
+              {
+                "lo": 0.7,
+                "n": 979,
+                "predicted": 0.7509344258499286,
+                "observed": 0.7568947906026557
+              },
+              {
+                "lo": 0.8,
+                "n": 1365,
+                "predicted": 0.8662125034133386,
+                "observed": 0.8512820512820513
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.035148148483945034,
+            -0.02047211571690226
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        },
+        "FOULS": {
+          "n": 9450,
+          "fixtures": 525,
+          "baseline": {
+            "brier": 0.18047460655970285,
+            "logLoss": 0.5380843787917372,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1961,
+                "predicted": 0.10651423781208116,
+                "observed": 0.14227434982151962
+              },
+              {
+                "lo": 0.2,
+                "n": 1874,
+                "predicted": 0.2987513519558099,
+                "observed": 0.3121664887940235
+              },
+              {
+                "lo": 0.4,
+                "n": 1780,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 918,
+                "predicted": 0.6501665685644076,
+                "observed": 0.6318082788671024
+              },
+              {
+                "lo": 0.7,
+                "n": 956,
+                "predicted": 0.7503002682977888,
+                "observed": 0.7416317991631799
+              },
+              {
+                "lo": 0.8,
+                "n": 1961,
+                "predicted": 0.8934857621879188,
+                "observed": 0.8577256501784803
+              }
+            ]
+          },
+          "candidate": {
+            "brier": 0.17307930870345106,
+            "logLoss": 0.519055931885996,
+            "bins": [
+              {
+                "lo": 0,
+                "n": 1902,
+                "predicted": 0.11130575775064223,
+                "observed": 0.12407991587802314
+              },
+              {
+                "lo": 0.2,
+                "n": 1890,
+                "predicted": 0.2933335603648254,
+                "observed": 0.29788359788359786
+              },
+              {
+                "lo": 0.4,
+                "n": 1866,
+                "predicted": 0.5,
+                "observed": 0.5
+              },
+              {
+                "lo": 0.6,
+                "n": 836,
+                "predicted": 0.6492714463597725,
+                "observed": 0.6543062200956937
+              },
+              {
+                "lo": 0.7,
+                "n": 1054,
+                "predicted": 0.7521903621951709,
+                "observed": 0.7400379506641366
+              },
+              {
+                "lo": 0.8,
+                "n": 1902,
+                "predicted": 0.8886942422493578,
+                "observed": 0.8759200841219769
+              }
+            ]
+          },
+          "pairedBrierDelta95": [
+            -0.010591349343687939,
+            -0.0043387473136340445
+          ],
+          "roi": null,
+          "yield_": null,
+          "pricedBets": 0,
+          "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+        }
+      },
+      "candidatePredictionRows": {
+        "full": 5375,
+        "no_xg": 5375,
+        "no_goal_stack": 5375,
+        "oof_goal_stack": 5375,
+        "oof_ridge_10": 5375,
+        "oof_ridge_50": 5375
+      },
+      "commonPredictionRows": 5375
+    }
+  ],
+  "selectedVsFull": {
+    "GOALS_FT": {
+      "n": 105666,
+      "fixtures": 4497,
+      "baseline": {
+        "brier": 0.21785579414172665,
+        "logLoss": 0.6277360958010241,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 9531,
+            "predicted": 0.14275204405355568,
+            "observed": 0.20868744098205855
+          },
+          {
+            "lo": 0.2,
+            "n": 28965,
+            "predicted": 0.30094414498413863,
+            "observed": 0.33074400138097704
+          },
+          {
+            "lo": 0.4,
+            "n": 28674,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 14464,
+            "predicted": 0.6507615592080014,
+            "observed": 0.6238938053097345
+          },
+          {
+            "lo": 0.7,
+            "n": 14501,
+            "predicted": 0.7472269256016753,
+            "observed": 0.7145024481070271
+          },
+          {
+            "lo": 0.8,
+            "n": 9531,
+            "predicted": 0.8572479559464443,
+            "observed": 0.7913125590179415
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.21816450446398344,
+        "logLoss": 0.6287517015684538,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 9725,
+            "predicted": 0.14167538693423862,
+            "observed": 0.21038560411311055
+          },
+          {
+            "lo": 0.2,
+            "n": 28805,
+            "predicted": 0.3005911364142028,
+            "observed": 0.3311577851067523
+          },
+          {
+            "lo": 0.4,
+            "n": 28606,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 14270,
+            "predicted": 0.6504425703038998,
+            "observed": 0.623405746320953
+          },
+          {
+            "lo": 0.7,
+            "n": 14535,
+            "predicted": 0.7474824105505495,
+            "observed": 0.7134502923976608
+          },
+          {
+            "lo": 0.8,
+            "n": 9725,
+            "predicted": 0.8583246130657614,
+            "observed": 0.7896143958868894
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        0.0002049533034748917,
+        0.0004114756520909075
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "GOALS_1H": {
+      "n": 103006,
+      "fixtures": 4440,
+      "baseline": {
+        "brier": 0.19723235172349296,
+        "logLoss": 0.580758593579043,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 16473,
+            "predicted": 0.12081129407075475,
+            "observed": 0.16262975778546712
+          },
+          {
+            "lo": 0.2,
+            "n": 23345,
+            "predicted": 0.30108342589798326,
+            "observed": 0.32028271578496464
+          },
+          {
+            "lo": 0.4,
+            "n": 23370,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 11874,
+            "predicted": 0.6494836295080836,
+            "observed": 0.6334007074279939
+          },
+          {
+            "lo": 0.7,
+            "n": 11471,
+            "predicted": 0.7500862004735938,
+            "observed": 0.7276610583209834
+          },
+          {
+            "lo": 0.8,
+            "n": 16473,
+            "predicted": 0.8791887059292453,
+            "observed": 0.8373702422145328
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.19443034517418478,
+        "logLoss": 0.5733548268807891,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 16068,
+            "predicted": 0.12420447965946284,
+            "observed": 0.15415733134179735
+          },
+          {
+            "lo": 0.2,
+            "n": 23702,
+            "predicted": 0.30191194750329864,
+            "observed": 0.31579613534722806
+          },
+          {
+            "lo": 0.4,
+            "n": 23466,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 12215,
+            "predicted": 0.6487832920662422,
+            "observed": 0.6324191567744576
+          },
+          {
+            "lo": 0.7,
+            "n": 11487,
+            "predicted": 0.7505175509434722,
+            "observed": 0.7392704796726735
+          },
+          {
+            "lo": 0.8,
+            "n": 16068,
+            "predicted": 0.8757955203405371,
+            "observed": 0.8458426686582027
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.0035221351762155574,
+        -0.0020526549602139146
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "GOALS_2H": {
+      "n": 103526,
+      "fixtures": 4440,
+      "baseline": {
+        "brier": 0.20904122150149854,
+        "logLoss": 0.6088413571032864,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 12491,
+            "predicted": 0.13582673834452308,
+            "observed": 0.1940597230005604
+          },
+          {
+            "lo": 0.2,
+            "n": 26677,
+            "predicted": 0.30276145378153785,
+            "observed": 0.31682722944858865
+          },
+          {
+            "lo": 0.4,
+            "n": 25190,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 13884,
+            "predicted": 0.6499358468268618,
+            "observed": 0.6417458945548833
+          },
+          {
+            "lo": 0.7,
+            "n": 12793,
+            "predicted": 0.7485752677343678,
+            "observed": 0.7281325725005863
+          },
+          {
+            "lo": 0.8,
+            "n": 12491,
+            "predicted": 0.8641732616554769,
+            "observed": 0.8059402769994396
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.20657020329964945,
+        "logLoss": 0.602426262192276,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 12099,
+            "predicted": 0.13879184075593853,
+            "observed": 0.18208116373253988
+          },
+          {
+            "lo": 0.2,
+            "n": 26886,
+            "predicted": 0.30200089609609626,
+            "observed": 0.31079372163951496
+          },
+          {
+            "lo": 0.4,
+            "n": 25556,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 13948,
+            "predicted": 0.650218127318189,
+            "observed": 0.6487668482936622
+          },
+          {
+            "lo": 0.7,
+            "n": 12938,
+            "predicted": 0.7495100840722103,
+            "observed": 0.7328025970010821
+          },
+          {
+            "lo": 0.8,
+            "n": 12099,
+            "predicted": 0.8612081592440615,
+            "observed": 0.8179188362674601
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.003149284002461408,
+        -0.0017663526454796603
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "CORNERS": {
+      "n": 67956,
+      "fixtures": 3236,
+      "baseline": {
+        "brier": 0.2257621785600775,
+        "logLoss": 0.6479786350707977,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 8232,
+            "predicted": 0.11916027040877299,
+            "observed": 0.195821185617104
+          },
+          {
+            "lo": 0.2,
+            "n": 17315,
+            "predicted": 0.30840544909157763,
+            "observed": 0.35339301183944555
+          },
+          {
+            "lo": 0.4,
+            "n": 21154,
+            "predicted": 0.4998097607858473,
+            "observed": 0.4969745674576912
+          },
+          {
+            "lo": 0.6,
+            "n": 9508,
+            "predicted": 0.6489526434342853,
+            "observed": 0.6163230963399243
+          },
+          {
+            "lo": 0.7,
+            "n": 7165,
+            "predicted": 0.7461202677579737,
+            "observed": 0.684159106769016
+          },
+          {
+            "lo": 0.8,
+            "n": 4582,
+            "predicted": 0.8620391032412561,
+            "observed": 0.7319947621126146
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.2150646971264913,
+        "logLoss": 0.6185606388368894,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 5933,
+            "predicted": 0.12800099465293127,
+            "observed": 0.13837856059329176
+          },
+          {
+            "lo": 0.2,
+            "n": 18680,
+            "predicted": 0.3102820513627057,
+            "observed": 0.31745182012847967
+          },
+          {
+            "lo": 0.4,
+            "n": 23219,
+            "predicted": 0.49940903177565493,
+            "observed": 0.4989878978422843
+          },
+          {
+            "lo": 0.6,
+            "n": 10429,
+            "predicted": 0.6487629276417294,
+            "observed": 0.6454118323904497
+          },
+          {
+            "lo": 0.7,
+            "n": 7340,
+            "predicted": 0.7448752082974887,
+            "observed": 0.7336512261580381
+          },
+          {
+            "lo": 0.8,
+            "n": 2355,
+            "predicted": 0.8388069932869303,
+            "observed": 0.8097664543524417
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.012428721060532751,
+        -0.0090083984433923
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "SHOTS": {
+      "n": 68061,
+      "fixtures": 3241,
+      "baseline": {
+        "brier": 0.1834252262939999,
+        "logLoss": 0.546257892895546,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 14232,
+            "predicted": 0.0981950990289418,
+            "observed": 0.12120573355817875
+          },
+          {
+            "lo": 0.2,
+            "n": 14395,
+            "predicted": 0.3010339703265869,
+            "observed": 0.31476207016325114
+          },
+          {
+            "lo": 0.4,
+            "n": 14510,
+            "predicted": 0.4999158082073895,
+            "observed": 0.49972432804962097
+          },
+          {
+            "lo": 0.6,
+            "n": 7188,
+            "predicted": 0.6495490166969685,
+            "observed": 0.6416249304396215
+          },
+          {
+            "lo": 0.7,
+            "n": 7012,
+            "predicted": 0.7499018932540898,
+            "observed": 0.7257558471192241
+          },
+          {
+            "lo": 0.8,
+            "n": 10724,
+            "predicted": 0.885682074148095,
+            "observed": 0.8580753450205147
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.1752454997222165,
+        "logLoss": 0.5231297623881604,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 13738,
+            "predicted": 0.10229153141133153,
+            "observed": 0.09841316057650314
+          },
+          {
+            "lo": 0.2,
+            "n": 14713,
+            "predicted": 0.3019988914223245,
+            "observed": 0.3003466322300007
+          },
+          {
+            "lo": 0.4,
+            "n": 14917,
+            "predicted": 0.4998282206543743,
+            "observed": 0.5014413085741101
+          },
+          {
+            "lo": 0.6,
+            "n": 7520,
+            "predicted": 0.6503506200127352,
+            "observed": 0.6511968085106383
+          },
+          {
+            "lo": 0.7,
+            "n": 6956,
+            "predicted": 0.7493394044149061,
+            "observed": 0.749568717653824
+          },
+          {
+            "lo": 0.8,
+            "n": 10217,
+            "predicted": 0.88112265096088,
+            "observed": 0.8855828521092297
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.00946086446610778,
+        -0.006973462292376147
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "SOT": {
+      "n": 68103,
+      "fixtures": 3243,
+      "baseline": {
+        "brier": 0.19596718591625853,
+        "logLoss": 0.5790014516766964,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 13407,
+            "predicted": 0.12070265251379624,
+            "observed": 0.15976728574625196
+          },
+          {
+            "lo": 0.2,
+            "n": 15562,
+            "predicted": 0.298984312749454,
+            "observed": 0.3169901040997301
+          },
+          {
+            "lo": 0.4,
+            "n": 14618,
+            "predicted": 0.4994920794680656,
+            "observed": 0.4980845532904638
+          },
+          {
+            "lo": 0.6,
+            "n": 7266,
+            "predicted": 0.6495871821750248,
+            "observed": 0.6336361134048996
+          },
+          {
+            "lo": 0.7,
+            "n": 7609,
+            "predicted": 0.7498438387724358,
+            "observed": 0.7237481929294257
+          },
+          {
+            "lo": 0.8,
+            "n": 9641,
+            "predicted": 0.8745885499609124,
+            "observed": 0.8259516647650659
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.18905517409794834,
+        "logLoss": 0.5601254184293909,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 13400,
+            "predicted": 0.13017667735853197,
+            "observed": 0.14432835820895523
+          },
+          {
+            "lo": 0.2,
+            "n": 15667,
+            "predicted": 0.29728137646546715,
+            "observed": 0.3078445139465118
+          },
+          {
+            "lo": 0.4,
+            "n": 14660,
+            "predicted": 0.499278529134724,
+            "observed": 0.49931787175989084
+          },
+          {
+            "lo": 0.6,
+            "n": 7077,
+            "predicted": 0.649482939442592,
+            "observed": 0.6392539211530309
+          },
+          {
+            "lo": 0.7,
+            "n": 7600,
+            "predicted": 0.7515990472945256,
+            "observed": 0.7380263157894736
+          },
+          {
+            "lo": 0.8,
+            "n": 9699,
+            "predicted": 0.8660850025077355,
+            "observed": 0.8475100525827405
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.008403899968769599,
+        -0.0054757902824573235
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "YELLOW_CARDS": {
+      "n": 57402,
+      "fixtures": 3189,
+      "baseline": {
+        "brier": 0.1877157868055439,
+        "logLoss": 0.5594109361547116,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 11142,
+            "predicted": 0.1069768081004877,
+            "observed": 0.1495243223837731
+          },
+          {
+            "lo": 0.2,
+            "n": 11798,
+            "predicted": 0.29941469272440185,
+            "observed": 0.3208170876419732
+          },
+          {
+            "lo": 0.4,
+            "n": 11522,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 5863,
+            "predicted": 0.6503979003006559,
+            "observed": 0.6426743987719598
+          },
+          {
+            "lo": 0.7,
+            "n": 5935,
+            "predicted": 0.7501638695492436,
+            "observed": 0.7152485256950295
+          },
+          {
+            "lo": 0.8,
+            "n": 11142,
+            "predicted": 0.8930231918995123,
+            "observed": 0.8504756776162269
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.17724613900170466,
+        "logLoss": 0.5296441826200252,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 10156,
+            "predicted": 0.11832293257603574,
+            "observed": 0.1153012997243009
+          },
+          {
+            "lo": 0.2,
+            "n": 12672,
+            "predicted": 0.30061102552553054,
+            "observed": 0.2991635101010101
+          },
+          {
+            "lo": 0.4,
+            "n": 11746,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 6363,
+            "predicted": 0.6506928665164736,
+            "observed": 0.6600660066006601
+          },
+          {
+            "lo": 0.7,
+            "n": 6309,
+            "predicted": 0.7485018822152727,
+            "observed": 0.7419559359644952
+          },
+          {
+            "lo": 0.8,
+            "n": 10156,
+            "predicted": 0.8816770674239641,
+            "observed": 0.8846987002756991
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.012205392629002752,
+        -0.00855129596439162
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "CARDS": {
+      "n": 33426,
+      "fixtures": 1857,
+      "baseline": {
+        "brier": 0.23526005841195183,
+        "logLoss": 0.6864666756575768,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 5874,
+            "predicted": 0.10928821784649692,
+            "observed": 0.2606401089547157
+          },
+          {
+            "lo": 0.2,
+            "n": 7143,
+            "predicted": 0.30053465037372,
+            "observed": 0.39185216295674086
+          },
+          {
+            "lo": 0.4,
+            "n": 7392,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 3567,
+            "predicted": 0.6499699582224321,
+            "observed": 0.5789178581440987
+          },
+          {
+            "lo": 0.7,
+            "n": 3576,
+            "predicted": 0.7488361720920309,
+            "observed": 0.6373042505592841
+          },
+          {
+            "lo": 0.8,
+            "n": 5874,
+            "predicted": 0.8907117821535031,
+            "observed": 0.7393598910452843
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.20245136267979133,
+        "logLoss": 0.5935305346084228,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 4418,
+            "predicted": 0.1246147897652721,
+            "observed": 0.18039837030330466
+          },
+          {
+            "lo": 0.2,
+            "n": 8323,
+            "predicted": 0.30171086462139224,
+            "observed": 0.305899315150787
+          },
+          {
+            "lo": 0.4,
+            "n": 7944,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 4168,
+            "predicted": 0.64884065938247,
+            "observed": 0.6415547024952015
+          },
+          {
+            "lo": 0.7,
+            "n": 4155,
+            "predicted": 0.7478923238146851,
+            "observed": 0.7468110709987966
+          },
+          {
+            "lo": 0.8,
+            "n": 4418,
+            "predicted": 0.8753852102347278,
+            "observed": 0.8196016296966954
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.03671085975855244,
+        -0.02905983977280046
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    },
+    "FOULS": {
+      "n": 50472,
+      "fixtures": 2804,
+      "baseline": {
+        "brier": 0.18777932505602155,
+        "logLoss": 0.5601826132193078,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 9865,
+            "predicted": 0.11070753264973476,
+            "observed": 0.15306639635073493
+          },
+          {
+            "lo": 0.2,
+            "n": 10483,
+            "predicted": 0.2992591584433675,
+            "observed": 0.3185156920728799
+          },
+          {
+            "lo": 0.4,
+            "n": 9776,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 5184,
+            "predicted": 0.6499339869631393,
+            "observed": 0.6369598765432098
+          },
+          {
+            "lo": 0.7,
+            "n": 5299,
+            "predicted": 0.7504450752257529,
+            "observed": 0.7250424608416682
+          },
+          {
+            "lo": 0.8,
+            "n": 9865,
+            "predicted": 0.8892924673502651,
+            "observed": 0.8469336036492651
+          }
+        ]
+      },
+      "candidate": {
+        "brier": 0.17841884756771628,
+        "logLoss": 0.5339123373460509,
+        "bins": [
+          {
+            "lo": 0,
+            "n": 9629,
+            "predicted": 0.11673338877625605,
+            "observed": 0.1321009450617925
+          },
+          {
+            "lo": 0.2,
+            "n": 10701,
+            "predicted": 0.2972146290898114,
+            "observed": 0.29931782076441454
+          },
+          {
+            "lo": 0.4,
+            "n": 9812,
+            "predicted": 0.5,
+            "observed": 0.5
+          },
+          {
+            "lo": 0.6,
+            "n": 5129,
+            "predicted": 0.6506084044110421,
+            "observed": 0.6523688828231624
+          },
+          {
+            "lo": 0.7,
+            "n": 5572,
+            "predicted": 0.7508140251051136,
+            "observed": 0.7451543431442929
+          },
+          {
+            "lo": 0.8,
+            "n": 9629,
+            "predicted": 0.883266611223744,
+            "observed": 0.8678990549382075
+          }
+        ]
+      },
+      "pairedBrierDelta95": [
+        -0.0107689898799655,
+        -0.007959288002554807
+      ],
+      "roi": null,
+      "yield_": null,
+      "pricedBets": 0,
+      "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+    }
+  },
+  "ridgeVsFull": {
+    "oof_ridge_10": {
+      "GOALS_FT": {
+        "n": 105666,
+        "fixtures": 4497,
+        "baseline": {
+          "brier": 0.21785579414172665,
+          "logLoss": 0.6277360958010241,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9531,
+              "predicted": 0.14275204405355568,
+              "observed": 0.20868744098205855
+            },
+            {
+              "lo": 0.2,
+              "n": 28965,
+              "predicted": 0.30094414498413863,
+              "observed": 0.33074400138097704
+            },
+            {
+              "lo": 0.4,
+              "n": 28674,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14464,
+              "predicted": 0.6507615592080014,
+              "observed": 0.6238938053097345
+            },
+            {
+              "lo": 0.7,
+              "n": 14501,
+              "predicted": 0.7472269256016753,
+              "observed": 0.7145024481070271
+            },
+            {
+              "lo": 0.8,
+              "n": 9531,
+              "predicted": 0.8572479559464443,
+              "observed": 0.7913125590179415
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.2178593682373719,
+          "logLoss": 0.6277473159728657,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9533,
+              "predicted": 0.14272552277792808,
+              "observed": 0.20853876009650688
+            },
+            {
+              "lo": 0.2,
+              "n": 28967,
+              "predicted": 0.30094260220540014,
+              "observed": 0.3308592536334449
+            },
+            {
+              "lo": 0.4,
+              "n": 28666,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14470,
+              "predicted": 0.6507749406878188,
+              "observed": 0.6238424326192121
+            },
+            {
+              "lo": 0.7,
+              "n": 14497,
+              "predicted": 0.7472499310314847,
+              "observed": 0.7143546940746361
+            },
+            {
+              "lo": 0.8,
+              "n": 9533,
+              "predicted": 0.857274477222072,
+              "observed": 0.7914612399034932
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          2.3931594179851797e-06,
+          4.769452606753346e-06
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "GOALS_1H": {
+        "n": 103006,
+        "fixtures": 4440,
+        "baseline": {
+          "brier": 0.19723235172349296,
+          "logLoss": 0.580758593579043,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 16473,
+              "predicted": 0.12081129407075475,
+              "observed": 0.16262975778546712
+            },
+            {
+              "lo": 0.2,
+              "n": 23345,
+              "predicted": 0.30108342589798326,
+              "observed": 0.32028271578496464
+            },
+            {
+              "lo": 0.4,
+              "n": 23370,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 11874,
+              "predicted": 0.6494836295080836,
+              "observed": 0.6334007074279939
+            },
+            {
+              "lo": 0.7,
+              "n": 11471,
+              "predicted": 0.7500862004735938,
+              "observed": 0.7276610583209834
+            },
+            {
+              "lo": 0.8,
+              "n": 16473,
+              "predicted": 0.8791887059292453,
+              "observed": 0.8373702422145328
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.19470579198415225,
+          "logLoss": 0.5738985509232668,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 15886,
+              "predicted": 0.1242148734546445,
+              "observed": 0.1543497419111167
+            },
+            {
+              "lo": 0.2,
+              "n": 23773,
+              "predicted": 0.3014841304629128,
+              "observed": 0.31384343583056407
+            },
+            {
+              "lo": 0.4,
+              "n": 23688,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 12168,
+              "predicted": 0.6489844461887776,
+              "observed": 0.6356015779092702
+            },
+            {
+              "lo": 0.7,
+              "n": 11605,
+              "predicted": 0.750450239145207,
+              "observed": 0.7391641533821629
+            },
+            {
+              "lo": 0.8,
+              "n": 15886,
+              "predicted": 0.8757851265453556,
+              "observed": 0.8456502580888833
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.003074183393607123,
+          -0.001979369716558878
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "GOALS_2H": {
+        "n": 103526,
+        "fixtures": 4440,
+        "baseline": {
+          "brier": 0.20904122150149854,
+          "logLoss": 0.6088413571032864,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 12491,
+              "predicted": 0.13582673834452308,
+              "observed": 0.1940597230005604
+            },
+            {
+              "lo": 0.2,
+              "n": 26677,
+              "predicted": 0.30276145378153785,
+              "observed": 0.31682722944858865
+            },
+            {
+              "lo": 0.4,
+              "n": 25190,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 13884,
+              "predicted": 0.6499358468268618,
+              "observed": 0.6417458945548833
+            },
+            {
+              "lo": 0.7,
+              "n": 12793,
+              "predicted": 0.7485752677343678,
+              "observed": 0.7281325725005863
+            },
+            {
+              "lo": 0.8,
+              "n": 12491,
+              "predicted": 0.8641732616554769,
+              "observed": 0.8059402769994396
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.206812401963405,
+          "logLoss": 0.6028901590105347,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 11892,
+              "predicted": 0.13935100649754548,
+              "observed": 0.18264379414732593
+            },
+            {
+              "lo": 0.2,
+              "n": 27045,
+              "predicted": 0.302527772507143,
+              "observed": 0.3108522832316509
+            },
+            {
+              "lo": 0.4,
+              "n": 25652,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14134,
+              "predicted": 0.6499807645880684,
+              "observed": 0.6482241403707373
+            },
+            {
+              "lo": 0.7,
+              "n": 12911,
+              "predicted": 0.7494623395443079,
+              "observed": 0.7339477964526373
+            },
+            {
+              "lo": 0.8,
+              "n": 11892,
+              "predicted": 0.8606489935024545,
+              "observed": 0.8173562058526741
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.002752540011099326,
+          -0.0017140626320640954
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "CORNERS": {
+        "n": 67956,
+        "fixtures": 3236,
+        "baseline": {
+          "brier": 0.2257621785600775,
+          "logLoss": 0.6479786350707977,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 8232,
+              "predicted": 0.11916027040877299,
+              "observed": 0.195821185617104
+            },
+            {
+              "lo": 0.2,
+              "n": 17315,
+              "predicted": 0.30840544909157763,
+              "observed": 0.35339301183944555
+            },
+            {
+              "lo": 0.4,
+              "n": 21154,
+              "predicted": 0.4998097607858473,
+              "observed": 0.4969745674576912
+            },
+            {
+              "lo": 0.6,
+              "n": 9508,
+              "predicted": 0.6489526434342853,
+              "observed": 0.6163230963399243
+            },
+            {
+              "lo": 0.7,
+              "n": 7165,
+              "predicted": 0.7461202677579737,
+              "observed": 0.684159106769016
+            },
+            {
+              "lo": 0.8,
+              "n": 4582,
+              "predicted": 0.8620391032412561,
+              "observed": 0.7319947621126146
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.21958213226661422,
+          "logLoss": 0.6297395722401904,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 7247,
+              "predicted": 0.1258871027762513,
+              "observed": 0.16420587829446667
+            },
+            {
+              "lo": 0.2,
+              "n": 17885,
+              "predicted": 0.30921259041462634,
+              "observed": 0.3385518590998043
+            },
+            {
+              "lo": 0.4,
+              "n": 22080,
+              "predicted": 0.4996643561525209,
+              "observed": 0.49741847826086955
+            },
+            {
+              "lo": 0.6,
+              "n": 9837,
+              "predicted": 0.6484559617934019,
+              "observed": 0.6342380807156653
+            },
+            {
+              "lo": 0.7,
+              "n": 7322,
+              "predicted": 0.7455977576781415,
+              "observed": 0.698033324228353
+            },
+            {
+              "lo": 0.8,
+              "n": 3585,
+              "predicted": 0.8498499093127492,
+              "observed": 0.7760111576011157
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.007223800272083617,
+          -0.0051900380836899865
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "SHOTS": {
+        "n": 68061,
+        "fixtures": 3241,
+        "baseline": {
+          "brier": 0.1834252262939999,
+          "logLoss": 0.546257892895546,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 14232,
+              "predicted": 0.0981950990289418,
+              "observed": 0.12120573355817875
+            },
+            {
+              "lo": 0.2,
+              "n": 14395,
+              "predicted": 0.3010339703265869,
+              "observed": 0.31476207016325114
+            },
+            {
+              "lo": 0.4,
+              "n": 14510,
+              "predicted": 0.4999158082073895,
+              "observed": 0.49972432804962097
+            },
+            {
+              "lo": 0.6,
+              "n": 7188,
+              "predicted": 0.6495490166969685,
+              "observed": 0.6416249304396215
+            },
+            {
+              "lo": 0.7,
+              "n": 7012,
+              "predicted": 0.7499018932540898,
+              "observed": 0.7257558471192241
+            },
+            {
+              "lo": 0.8,
+              "n": 10724,
+              "predicted": 0.885682074148095,
+              "observed": 0.8580753450205147
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.17954537216157562,
+          "logLoss": 0.5344463758991445,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 14117,
+              "predicted": 0.1004207457698714,
+              "observed": 0.1105050648154707
+            },
+            {
+              "lo": 0.2,
+              "n": 14392,
+              "predicted": 0.3012255176759896,
+              "observed": 0.3102418010005559
+            },
+            {
+              "lo": 0.4,
+              "n": 14746,
+              "predicted": 0.4996573672172244,
+              "observed": 0.4995931099959311
+            },
+            {
+              "lo": 0.6,
+              "n": 7220,
+              "predicted": 0.6498191072641136,
+              "observed": 0.6445983379501385
+            },
+            {
+              "lo": 0.7,
+              "n": 6991,
+              "predicted": 0.7491920530124606,
+              "observed": 0.7352310113002432
+            },
+            {
+              "lo": 0.8,
+              "n": 10595,
+              "predicted": 0.8834242140190354,
+              "observed": 0.8705993393109958
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.004634826035885851,
+          -0.0031680284304323927
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "SOT": {
+        "n": 68103,
+        "fixtures": 3243,
+        "baseline": {
+          "brier": 0.19596718591625853,
+          "logLoss": 0.5790014516766964,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 13407,
+              "predicted": 0.12070265251379624,
+              "observed": 0.15976728574625196
+            },
+            {
+              "lo": 0.2,
+              "n": 15562,
+              "predicted": 0.298984312749454,
+              "observed": 0.3169901040997301
+            },
+            {
+              "lo": 0.4,
+              "n": 14618,
+              "predicted": 0.4994920794680656,
+              "observed": 0.4980845532904638
+            },
+            {
+              "lo": 0.6,
+              "n": 7266,
+              "predicted": 0.6495871821750248,
+              "observed": 0.6336361134048996
+            },
+            {
+              "lo": 0.7,
+              "n": 7609,
+              "predicted": 0.7498438387724358,
+              "observed": 0.7237481929294257
+            },
+            {
+              "lo": 0.8,
+              "n": 9641,
+              "predicted": 0.8745885499609124,
+              "observed": 0.8259516647650659
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.19148517750099683,
+          "logLoss": 0.5659106270624505,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 12679,
+              "predicted": 0.12818781227501724,
+              "observed": 0.14551620790283146
+            },
+            {
+              "lo": 0.2,
+              "n": 16170,
+              "predicted": 0.2982698957774726,
+              "observed": 0.30742115027829314
+            },
+            {
+              "lo": 0.4,
+              "n": 15046,
+              "predicted": 0.4993814006963165,
+              "observed": 0.4983384288182906
+            },
+            {
+              "lo": 0.6,
+              "n": 7360,
+              "predicted": 0.6499610630696528,
+              "observed": 0.6417119565217392
+            },
+            {
+              "lo": 0.7,
+              "n": 7857,
+              "predicted": 0.750082948732736,
+              "observed": 0.7381952399134529
+            },
+            {
+              "lo": 0.8,
+              "n": 8991,
+              "predicted": 0.8665192755178285,
+              "observed": 0.8445111778445111
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.005479670194596849,
+          -0.0035230288216964714
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "YELLOW_CARDS": {
+        "n": 57402,
+        "fixtures": 3189,
+        "baseline": {
+          "brier": 0.1877157868055439,
+          "logLoss": 0.5594109361547116,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 11142,
+              "predicted": 0.1069768081004877,
+              "observed": 0.1495243223837731
+            },
+            {
+              "lo": 0.2,
+              "n": 11798,
+              "predicted": 0.29941469272440185,
+              "observed": 0.3208170876419732
+            },
+            {
+              "lo": 0.4,
+              "n": 11522,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5863,
+              "predicted": 0.6503979003006559,
+              "observed": 0.6426743987719598
+            },
+            {
+              "lo": 0.7,
+              "n": 5935,
+              "predicted": 0.7501638695492436,
+              "observed": 0.7152485256950295
+            },
+            {
+              "lo": 0.8,
+              "n": 11142,
+              "predicted": 0.8930231918995123,
+              "observed": 0.8504756776162269
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.1795172666726009,
+          "logLoss": 0.5354462535624361,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 10489,
+              "predicted": 0.11488643646876956,
+              "observed": 0.12327199923729622
+            },
+            {
+              "lo": 0.2,
+              "n": 12264,
+              "predicted": 0.299538447506807,
+              "observed": 0.3056099151989563
+            },
+            {
+              "lo": 0.4,
+              "n": 11896,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 6097,
+              "predicted": 0.6504359182612045,
+              "observed": 0.652452025586354
+            },
+            {
+              "lo": 0.7,
+              "n": 6167,
+              "predicted": 0.7499193588678378,
+              "observed": 0.7358521161018323
+            },
+            {
+              "lo": 0.8,
+              "n": 10489,
+              "predicted": 0.8851135635312304,
+              "observed": 0.8767280007627037
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.009431583289909968,
+          -0.0069194244407203755
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "CARDS": {
+        "n": 33426,
+        "fixtures": 1857,
+        "baseline": {
+          "brier": 0.23526005841195183,
+          "logLoss": 0.6864666756575768,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 5874,
+              "predicted": 0.10928821784649692,
+              "observed": 0.2606401089547157
+            },
+            {
+              "lo": 0.2,
+              "n": 7143,
+              "predicted": 0.30053465037372,
+              "observed": 0.39185216295674086
+            },
+            {
+              "lo": 0.4,
+              "n": 7392,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 3567,
+              "predicted": 0.6499699582224321,
+              "observed": 0.5789178581440987
+            },
+            {
+              "lo": 0.7,
+              "n": 3576,
+              "predicted": 0.7488361720920309,
+              "observed": 0.6373042505592841
+            },
+            {
+              "lo": 0.8,
+              "n": 5874,
+              "predicted": 0.8907117821535031,
+              "observed": 0.7393598910452843
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.209391407540145,
+          "logLoss": 0.610979624358888,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 4785,
+              "predicted": 0.1211303818551785,
+              "observed": 0.20041797283176593
+            },
+            {
+              "lo": 0.2,
+              "n": 7964,
+              "predicted": 0.3022415495967425,
+              "observed": 0.32483676544450024
+            },
+            {
+              "lo": 0.4,
+              "n": 7928,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 4078,
+              "predicted": 0.6497564956557883,
+              "observed": 0.6280039234919078
+            },
+            {
+              "lo": 0.7,
+              "n": 3886,
+              "predicted": 0.7481320920553881,
+              "observed": 0.7246525990735976
+            },
+            {
+              "lo": 0.8,
+              "n": 4785,
+              "predicted": 0.8788696181448215,
+              "observed": 0.799582027168234
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.02877209380035851,
+          -0.023070700437927825
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "FOULS": {
+        "n": 50472,
+        "fixtures": 2804,
+        "baseline": {
+          "brier": 0.18777932505602155,
+          "logLoss": 0.5601826132193078,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9865,
+              "predicted": 0.11070753264973476,
+              "observed": 0.15306639635073493
+            },
+            {
+              "lo": 0.2,
+              "n": 10483,
+              "predicted": 0.2992591584433675,
+              "observed": 0.3185156920728799
+            },
+            {
+              "lo": 0.4,
+              "n": 9776,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5184,
+              "predicted": 0.6499339869631393,
+              "observed": 0.6369598765432098
+            },
+            {
+              "lo": 0.7,
+              "n": 5299,
+              "predicted": 0.7504450752257529,
+              "observed": 0.7250424608416682
+            },
+            {
+              "lo": 0.8,
+              "n": 9865,
+              "predicted": 0.8892924673502651,
+              "observed": 0.8469336036492651
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.18327335476883608,
+          "logLoss": 0.5467289606602098,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9741,
+              "predicted": 0.11231034310213102,
+              "observed": 0.14002669130479417
+            },
+            {
+              "lo": 0.2,
+              "n": 10607,
+              "predicted": 0.2982254511533527,
+              "observed": 0.3144150089563496
+            },
+            {
+              "lo": 0.4,
+              "n": 9776,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5234,
+              "predicted": 0.6506620436539317,
+              "observed": 0.6400458540313336
+            },
+            {
+              "lo": 0.7,
+              "n": 5373,
+              "predicted": 0.7515647688687342,
+              "observed": 0.7299460264284385
+            },
+            {
+              "lo": 0.8,
+              "n": 9741,
+              "predicted": 0.887689656897869,
+              "observed": 0.8599733086952058
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.005385773521324774,
+          -0.0036641560236117137
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      }
+    },
+    "oof_ridge_50": {
+      "GOALS_FT": {
+        "n": 105666,
+        "fixtures": 4497,
+        "baseline": {
+          "brier": 0.21785579414172665,
+          "logLoss": 0.6277360958010241,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9531,
+              "predicted": 0.14275204405355568,
+              "observed": 0.20868744098205855
+            },
+            {
+              "lo": 0.2,
+              "n": 28965,
+              "predicted": 0.30094414498413863,
+              "observed": 0.33074400138097704
+            },
+            {
+              "lo": 0.4,
+              "n": 28674,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14464,
+              "predicted": 0.6507615592080014,
+              "observed": 0.6238938053097345
+            },
+            {
+              "lo": 0.7,
+              "n": 14501,
+              "predicted": 0.7472269256016753,
+              "observed": 0.7145024481070271
+            },
+            {
+              "lo": 0.8,
+              "n": 9531,
+              "predicted": 0.8572479559464443,
+              "observed": 0.7913125590179415
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.2178593682373719,
+          "logLoss": 0.6277473159728657,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9533,
+              "predicted": 0.14272552277792808,
+              "observed": 0.20853876009650688
+            },
+            {
+              "lo": 0.2,
+              "n": 28967,
+              "predicted": 0.30094260220540014,
+              "observed": 0.3308592536334449
+            },
+            {
+              "lo": 0.4,
+              "n": 28666,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14470,
+              "predicted": 0.6507749406878188,
+              "observed": 0.6238424326192121
+            },
+            {
+              "lo": 0.7,
+              "n": 14497,
+              "predicted": 0.7472499310314847,
+              "observed": 0.7143546940746361
+            },
+            {
+              "lo": 0.8,
+              "n": 9533,
+              "predicted": 0.857274477222072,
+              "observed": 0.7914612399034932
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          2.3931594179851797e-06,
+          4.769452606753346e-06
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "GOALS_1H": {
+        "n": 103006,
+        "fixtures": 4440,
+        "baseline": {
+          "brier": 0.19723235172349296,
+          "logLoss": 0.580758593579043,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 16473,
+              "predicted": 0.12081129407075475,
+              "observed": 0.16262975778546712
+            },
+            {
+              "lo": 0.2,
+              "n": 23345,
+              "predicted": 0.30108342589798326,
+              "observed": 0.32028271578496464
+            },
+            {
+              "lo": 0.4,
+              "n": 23370,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 11874,
+              "predicted": 0.6494836295080836,
+              "observed": 0.6334007074279939
+            },
+            {
+              "lo": 0.7,
+              "n": 11471,
+              "predicted": 0.7500862004735938,
+              "observed": 0.7276610583209834
+            },
+            {
+              "lo": 0.8,
+              "n": 16473,
+              "predicted": 0.8791887059292453,
+              "observed": 0.8373702422145328
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.19433141955275957,
+          "logLoss": 0.5729473130480301,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 15796,
+              "predicted": 0.12503962784454428,
+              "observed": 0.15307672828564192
+            },
+            {
+              "lo": 0.2,
+              "n": 23828,
+              "predicted": 0.30170011032819505,
+              "observed": 0.3137485311398355
+            },
+            {
+              "lo": 0.4,
+              "n": 23758,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 12251,
+              "predicted": 0.6488862381286212,
+              "observed": 0.6347236960248143
+            },
+            {
+              "lo": 0.7,
+              "n": 11577,
+              "predicted": 0.7505903487765423,
+              "observed": 0.7407791310356742
+            },
+            {
+              "lo": 0.8,
+              "n": 15796,
+              "predicted": 0.8749603721554556,
+              "observed": 0.8469232717143581
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.0036096298181911308,
+          -0.002164430784989958
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "GOALS_2H": {
+        "n": 103526,
+        "fixtures": 4440,
+        "baseline": {
+          "brier": 0.20904122150149854,
+          "logLoss": 0.6088413571032864,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 12491,
+              "predicted": 0.13582673834452308,
+              "observed": 0.1940597230005604
+            },
+            {
+              "lo": 0.2,
+              "n": 26677,
+              "predicted": 0.30276145378153785,
+              "observed": 0.31682722944858865
+            },
+            {
+              "lo": 0.4,
+              "n": 25190,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 13884,
+              "predicted": 0.6499358468268618,
+              "observed": 0.6417458945548833
+            },
+            {
+              "lo": 0.7,
+              "n": 12793,
+              "predicted": 0.7485752677343678,
+              "observed": 0.7281325725005863
+            },
+            {
+              "lo": 0.8,
+              "n": 12491,
+              "predicted": 0.8641732616554769,
+              "observed": 0.8059402769994396
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.20643999686564896,
+          "logLoss": 0.601947300700149,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 11825,
+              "predicted": 0.1396572160404421,
+              "observed": 0.18215644820295984
+            },
+            {
+              "lo": 0.2,
+              "n": 27037,
+              "predicted": 0.302236790042305,
+              "observed": 0.3083182305729186
+            },
+            {
+              "lo": 0.4,
+              "n": 25802,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 14082,
+              "predicted": 0.6501362635112977,
+              "observed": 0.6519670501349241
+            },
+            {
+              "lo": 0.7,
+              "n": 12955,
+              "predicted": 0.7495333882562797,
+              "observed": 0.734851408722501
+            },
+            {
+              "lo": 0.8,
+              "n": 11825,
+              "predicted": 0.8603427839595579,
+              "observed": 0.8178435517970402
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.0032716376235259414,
+          -0.00189712353264192
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "CORNERS": {
+        "n": 67956,
+        "fixtures": 3236,
+        "baseline": {
+          "brier": 0.2257621785600775,
+          "logLoss": 0.6479786350707977,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 8232,
+              "predicted": 0.11916027040877299,
+              "observed": 0.195821185617104
+            },
+            {
+              "lo": 0.2,
+              "n": 17315,
+              "predicted": 0.30840544909157763,
+              "observed": 0.35339301183944555
+            },
+            {
+              "lo": 0.4,
+              "n": 21154,
+              "predicted": 0.4998097607858473,
+              "observed": 0.4969745674576912
+            },
+            {
+              "lo": 0.6,
+              "n": 9508,
+              "predicted": 0.6489526434342853,
+              "observed": 0.6163230963399243
+            },
+            {
+              "lo": 0.7,
+              "n": 7165,
+              "predicted": 0.7461202677579737,
+              "observed": 0.684159106769016
+            },
+            {
+              "lo": 0.8,
+              "n": 4582,
+              "predicted": 0.8620391032412561,
+              "observed": 0.7319947621126146
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.2150646971264913,
+          "logLoss": 0.6185606388368894,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 5933,
+              "predicted": 0.12800099465293127,
+              "observed": 0.13837856059329176
+            },
+            {
+              "lo": 0.2,
+              "n": 18680,
+              "predicted": 0.3102820513627057,
+              "observed": 0.31745182012847967
+            },
+            {
+              "lo": 0.4,
+              "n": 23219,
+              "predicted": 0.49940903177565493,
+              "observed": 0.4989878978422843
+            },
+            {
+              "lo": 0.6,
+              "n": 10429,
+              "predicted": 0.6487629276417294,
+              "observed": 0.6454118323904497
+            },
+            {
+              "lo": 0.7,
+              "n": 7340,
+              "predicted": 0.7448752082974887,
+              "observed": 0.7336512261580381
+            },
+            {
+              "lo": 0.8,
+              "n": 2355,
+              "predicted": 0.8388069932869303,
+              "observed": 0.8097664543524417
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.012428721060532751,
+          -0.0090083984433923
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "SHOTS": {
+        "n": 68061,
+        "fixtures": 3241,
+        "baseline": {
+          "brier": 0.1834252262939999,
+          "logLoss": 0.546257892895546,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 14232,
+              "predicted": 0.0981950990289418,
+              "observed": 0.12120573355817875
+            },
+            {
+              "lo": 0.2,
+              "n": 14395,
+              "predicted": 0.3010339703265869,
+              "observed": 0.31476207016325114
+            },
+            {
+              "lo": 0.4,
+              "n": 14510,
+              "predicted": 0.4999158082073895,
+              "observed": 0.49972432804962097
+            },
+            {
+              "lo": 0.6,
+              "n": 7188,
+              "predicted": 0.6495490166969685,
+              "observed": 0.6416249304396215
+            },
+            {
+              "lo": 0.7,
+              "n": 7012,
+              "predicted": 0.7499018932540898,
+              "observed": 0.7257558471192241
+            },
+            {
+              "lo": 0.8,
+              "n": 10724,
+              "predicted": 0.885682074148095,
+              "observed": 0.8580753450205147
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.1752454997222165,
+          "logLoss": 0.5231297623881604,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 13738,
+              "predicted": 0.10229153141133153,
+              "observed": 0.09841316057650314
+            },
+            {
+              "lo": 0.2,
+              "n": 14713,
+              "predicted": 0.3019988914223245,
+              "observed": 0.3003466322300007
+            },
+            {
+              "lo": 0.4,
+              "n": 14917,
+              "predicted": 0.4998282206543743,
+              "observed": 0.5014413085741101
+            },
+            {
+              "lo": 0.6,
+              "n": 7520,
+              "predicted": 0.6503506200127352,
+              "observed": 0.6511968085106383
+            },
+            {
+              "lo": 0.7,
+              "n": 6956,
+              "predicted": 0.7493394044149061,
+              "observed": 0.749568717653824
+            },
+            {
+              "lo": 0.8,
+              "n": 10217,
+              "predicted": 0.88112265096088,
+              "observed": 0.8855828521092297
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.00946086446610778,
+          -0.006973462292376147
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "SOT": {
+        "n": 68103,
+        "fixtures": 3243,
+        "baseline": {
+          "brier": 0.19596718591625853,
+          "logLoss": 0.5790014516766964,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 13407,
+              "predicted": 0.12070265251379624,
+              "observed": 0.15976728574625196
+            },
+            {
+              "lo": 0.2,
+              "n": 15562,
+              "predicted": 0.298984312749454,
+              "observed": 0.3169901040997301
+            },
+            {
+              "lo": 0.4,
+              "n": 14618,
+              "predicted": 0.4994920794680656,
+              "observed": 0.4980845532904638
+            },
+            {
+              "lo": 0.6,
+              "n": 7266,
+              "predicted": 0.6495871821750248,
+              "observed": 0.6336361134048996
+            },
+            {
+              "lo": 0.7,
+              "n": 7609,
+              "predicted": 0.7498438387724358,
+              "observed": 0.7237481929294257
+            },
+            {
+              "lo": 0.8,
+              "n": 9641,
+              "predicted": 0.8745885499609124,
+              "observed": 0.8259516647650659
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.1888992246465182,
+          "logLoss": 0.5594363158396769,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 12409,
+              "predicted": 0.1334864497882384,
+              "observed": 0.13836731404625674
+            },
+            {
+              "lo": 0.2,
+              "n": 16278,
+              "predicted": 0.29688987877037404,
+              "observed": 0.3002211573903428
+            },
+            {
+              "lo": 0.4,
+              "n": 15414,
+              "predicted": 0.49922251338907225,
+              "observed": 0.4987673543531854
+            },
+            {
+              "lo": 0.6,
+              "n": 7279,
+              "predicted": 0.649564177535028,
+              "observed": 0.6452809451847781
+            },
+            {
+              "lo": 0.7,
+              "n": 7960,
+              "predicted": 0.7515709618990676,
+              "observed": 0.7486180904522614
+            },
+            {
+              "lo": 0.8,
+              "n": 8763,
+              "predicted": 0.8598761693005129,
+              "observed": 0.8538171858952414
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.008556457741393821,
+          -0.00561434712323491
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "YELLOW_CARDS": {
+        "n": 57402,
+        "fixtures": 3189,
+        "baseline": {
+          "brier": 0.1877157868055439,
+          "logLoss": 0.5594109361547116,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 11142,
+              "predicted": 0.1069768081004877,
+              "observed": 0.1495243223837731
+            },
+            {
+              "lo": 0.2,
+              "n": 11798,
+              "predicted": 0.29941469272440185,
+              "observed": 0.3208170876419732
+            },
+            {
+              "lo": 0.4,
+              "n": 11522,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5863,
+              "predicted": 0.6503979003006559,
+              "observed": 0.6426743987719598
+            },
+            {
+              "lo": 0.7,
+              "n": 5935,
+              "predicted": 0.7501638695492436,
+              "observed": 0.7152485256950295
+            },
+            {
+              "lo": 0.8,
+              "n": 11142,
+              "predicted": 0.8930231918995123,
+              "observed": 0.8504756776162269
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.17730660292837558,
+          "logLoss": 0.5297727254478724,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 10206,
+              "predicted": 0.11776851964076576,
+              "observed": 0.11512835586909662
+            },
+            {
+              "lo": 0.2,
+              "n": 12642,
+              "predicted": 0.30060112560089913,
+              "observed": 0.3001898433792122
+            },
+            {
+              "lo": 0.4,
+              "n": 11706,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 6340,
+              "predicted": 0.6507054003969287,
+              "observed": 0.659621451104101
+            },
+            {
+              "lo": 0.7,
+              "n": 6302,
+              "predicted": 0.7483859618592361,
+              "observed": 0.7402411932719771
+            },
+            {
+              "lo": 0.8,
+              "n": 10206,
+              "predicted": 0.8822314803592344,
+              "observed": 0.8848716441309034
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.012164973609464372,
+          -0.00846641642672241
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "CARDS": {
+        "n": 33426,
+        "fixtures": 1857,
+        "baseline": {
+          "brier": 0.23526005841195183,
+          "logLoss": 0.6864666756575768,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 5874,
+              "predicted": 0.10928821784649692,
+              "observed": 0.2606401089547157
+            },
+            {
+              "lo": 0.2,
+              "n": 7143,
+              "predicted": 0.30053465037372,
+              "observed": 0.39185216295674086
+            },
+            {
+              "lo": 0.4,
+              "n": 7392,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 3567,
+              "predicted": 0.6499699582224321,
+              "observed": 0.5789178581440987
+            },
+            {
+              "lo": 0.7,
+              "n": 3576,
+              "predicted": 0.7488361720920309,
+              "observed": 0.6373042505592841
+            },
+            {
+              "lo": 0.8,
+              "n": 5874,
+              "predicted": 0.8907117821535031,
+              "observed": 0.7393598910452843
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.20245136267979133,
+          "logLoss": 0.5935305346084228,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 4418,
+              "predicted": 0.1246147897652721,
+              "observed": 0.18039837030330466
+            },
+            {
+              "lo": 0.2,
+              "n": 8323,
+              "predicted": 0.30171086462139224,
+              "observed": 0.305899315150787
+            },
+            {
+              "lo": 0.4,
+              "n": 7944,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 4168,
+              "predicted": 0.64884065938247,
+              "observed": 0.6415547024952015
+            },
+            {
+              "lo": 0.7,
+              "n": 4155,
+              "predicted": 0.7478923238146851,
+              "observed": 0.7468110709987966
+            },
+            {
+              "lo": 0.8,
+              "n": 4418,
+              "predicted": 0.8753852102347278,
+              "observed": 0.8196016296966954
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.03671085975855244,
+          -0.02905983977280046
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      },
+      "FOULS": {
+        "n": 50472,
+        "fixtures": 2804,
+        "baseline": {
+          "brier": 0.18777932505602155,
+          "logLoss": 0.5601826132193078,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9865,
+              "predicted": 0.11070753264973476,
+              "observed": 0.15306639635073493
+            },
+            {
+              "lo": 0.2,
+              "n": 10483,
+              "predicted": 0.2992591584433675,
+              "observed": 0.3185156920728799
+            },
+            {
+              "lo": 0.4,
+              "n": 9776,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5184,
+              "predicted": 0.6499339869631393,
+              "observed": 0.6369598765432098
+            },
+            {
+              "lo": 0.7,
+              "n": 5299,
+              "predicted": 0.7504450752257529,
+              "observed": 0.7250424608416682
+            },
+            {
+              "lo": 0.8,
+              "n": 9865,
+              "predicted": 0.8892924673502651,
+              "observed": 0.8469336036492651
+            }
+          ]
+        },
+        "candidate": {
+          "brier": 0.17841884756771628,
+          "logLoss": 0.5339123373460509,
+          "bins": [
+            {
+              "lo": 0,
+              "n": 9629,
+              "predicted": 0.11673338877625605,
+              "observed": 0.1321009450617925
+            },
+            {
+              "lo": 0.2,
+              "n": 10701,
+              "predicted": 0.2972146290898114,
+              "observed": 0.29931782076441454
+            },
+            {
+              "lo": 0.4,
+              "n": 9812,
+              "predicted": 0.5,
+              "observed": 0.5
+            },
+            {
+              "lo": 0.6,
+              "n": 5129,
+              "predicted": 0.6506084044110421,
+              "observed": 0.6523688828231624
+            },
+            {
+              "lo": 0.7,
+              "n": 5572,
+              "predicted": 0.7508140251051136,
+              "observed": 0.7451543431442929
+            },
+            {
+              "lo": 0.8,
+              "n": 9629,
+              "predicted": 0.883266611223744,
+              "observed": 0.8678990549382075
+            }
+          ]
+        },
+        "pairedBrierDelta95": [
+          -0.0107689898799655,
+          -0.007959288002554807
+        ],
+        "roi": null,
+        "yield_": null,
+        "pricedBets": 0,
+        "priceLimitation": "Fixed event grid, no bookmaker prices joined; not an ROI backtest"
+      }
+    }
+  },
+  "probabilityBands": {
+    "CARDS": {
+      "60-70": {
+        "events": 4168,
+        "fixtures": 1714,
+        "predicted": 0.64884065938247,
+        "observed": 0.6415547024952015,
+        "observedMinusPredicted95": [
+          -0.019837535481103674,
+          0.005779501261689602
+        ]
+      },
+      "70-80": {
+        "events": 4155,
+        "fixtures": 1735,
+        "predicted": 0.7478923238146851,
+        "observed": 0.7468110709987966,
+        "observedMinusPredicted95": [
+          -0.014066633945731996,
+          0.013313689139577551
+        ]
+      },
+      "80-100": {
+        "events": 4418,
+        "fixtures": 1857,
+        "predicted": 0.8753852102347278,
+        "observed": 0.8196016296966954,
+        "observedMinusPredicted95": [
+          -0.06941490455347513,
+          -0.04313927206007431
+        ]
+      }
+    },
+    "CORNERS": {
+      "60-70": {
+        "events": 10429,
+        "fixtures": 3219,
+        "predicted": 0.6487629276417294,
+        "observed": 0.6454118323904497,
+        "observedMinusPredicted95": [
+          -0.012381231873654001,
+          0.005689653533429413
+        ]
+      },
+      "70-80": {
+        "events": 7340,
+        "fixtures": 3176,
+        "predicted": 0.7448752082974887,
+        "observed": 0.7336512261580381,
+        "observedMinusPredicted95": [
+          -0.02257697299488634,
+          -0.0004567822762509167
+        ]
+      },
+      "80-100": {
+        "events": 2355,
+        "fixtures": 1420,
+        "predicted": 0.8388069932869303,
+        "observed": 0.8097664543524417,
+        "observedMinusPredicted95": [
+          -0.04669062859182242,
+          -0.010533917083240495
+        ]
+      }
+    },
+    "FOULS": {
+      "60-70": {
+        "events": 5129,
+        "fixtures": 2166,
+        "predicted": 0.6506084044110421,
+        "observed": 0.6523688828231624,
+        "observedMinusPredicted95": [
+          -0.009507179725906643,
+          0.012719650335773679
+        ]
+      },
+      "70-80": {
+        "events": 5572,
+        "fixtures": 2609,
+        "predicted": 0.7508140251051136,
+        "observed": 0.7451543431442929,
+        "observedMinusPredicted95": [
+          -0.0180564373301551,
+          0.007022982521211752
+        ]
+      },
+      "80-100": {
+        "events": 9629,
+        "fixtures": 2804,
+        "predicted": 0.883266611223744,
+        "observed": 0.8678990549382075,
+        "observedMinusPredicted95": [
+          -0.024065609720465588,
+          -0.007327988536844363
+        ]
+      }
+    },
+    "GOALS_1H": {
+      "60-70": {
+        "events": 12215,
+        "fixtures": 4394,
+        "predicted": 0.6487832920662422,
+        "observed": 0.6324191567744576,
+        "observedMinusPredicted95": [
+          -0.02328317069346176,
+          -0.00946554880844038
+        ]
+      },
+      "70-80": {
+        "events": 11487,
+        "fixtures": 4308,
+        "predicted": 0.7505175509434722,
+        "observed": 0.7392704796726735,
+        "observedMinusPredicted95": [
+          -0.018253365147099066,
+          -0.0038718682066074856
+        ]
+      },
+      "80-100": {
+        "events": 16068,
+        "fixtures": 4440,
+        "predicted": 0.8757955203405371,
+        "observed": 0.8458426686582027,
+        "observedMinusPredicted95": [
+          -0.037249583233190095,
+          -0.022394699428671387
+        ]
+      }
+    },
+    "GOALS_2H": {
+      "60-70": {
+        "events": 13948,
+        "fixtures": 4423,
+        "predicted": 0.650218127318189,
+        "observed": 0.6487668482936622,
+        "observedMinusPredicted95": [
+          -0.007749024127430475,
+          0.005341608536952259
+        ]
+      },
+      "70-80": {
+        "events": 12938,
+        "fixtures": 4368,
+        "predicted": 0.7495100840722103,
+        "observed": 0.7328025970010821,
+        "observedMinusPredicted95": [
+          -0.02351740200126379,
+          -0.00881744972573952
+        ]
+      },
+      "80-100": {
+        "events": 12099,
+        "fixtures": 4440,
+        "predicted": 0.8612081592440615,
+        "observed": 0.8179188362674601,
+        "observedMinusPredicted95": [
+          -0.05246591843841833,
+          -0.03516025940436422
+        ]
+      }
+    },
+    "GOALS_FT": {
+      "60-70": {
+        "events": 14270,
+        "fixtures": 4346,
+        "predicted": 0.6504425703038998,
+        "observed": 0.623405746320953,
+        "observedMinusPredicted95": [
+          -0.03451420795636865,
+          -0.019787746263883788
+        ]
+      },
+      "70-80": {
+        "events": 14535,
+        "fixtures": 4469,
+        "predicted": 0.7474824105505495,
+        "observed": 0.7134502923976608,
+        "observedMinusPredicted95": [
+          -0.042434360261555844,
+          -0.026434215073117905
+        ]
+      },
+      "80-100": {
+        "events": 9725,
+        "fixtures": 3459,
+        "predicted": 0.8583246130657614,
+        "observed": 0.7896143958868894,
+        "observedMinusPredicted95": [
+          -0.07985498762258515,
+          -0.057221465771296554
+        ]
+      }
+    },
+    "SHOTS": {
+      "60-70": {
+        "events": 7520,
+        "fixtures": 2874,
+        "predicted": 0.6503506200127352,
+        "observed": 0.6511968085106383,
+        "observedMinusPredicted95": [
+          -0.008843159745484046,
+          0.010167087611866722
+        ]
+      },
+      "70-80": {
+        "events": 6956,
+        "fixtures": 2857,
+        "predicted": 0.7493394044149061,
+        "observed": 0.749568717653824,
+        "observedMinusPredicted95": [
+          -0.010807293942771365,
+          0.009899035285687878
+        ]
+      },
+      "80-100": {
+        "events": 10217,
+        "fixtures": 3241,
+        "predicted": 0.88112265096088,
+        "observed": 0.8855828521092297,
+        "observedMinusPredicted95": [
+          -0.003314826755800349,
+          0.012179660679859802
+        ]
+      }
+    },
+    "SOT": {
+      "60-70": {
+        "events": 7077,
+        "fixtures": 3085,
+        "predicted": 0.649482939442592,
+        "observed": 0.6392539211530309,
+        "observedMinusPredicted95": [
+          -0.022137656579325232,
+          0.00012929413841257034
+        ]
+      },
+      "70-80": {
+        "events": 7600,
+        "fixtures": 3100,
+        "predicted": 0.7515990472945256,
+        "observed": 0.7380263157894736,
+        "observedMinusPredicted95": [
+          -0.023219512710558898,
+          -0.004403192449528091
+        ]
+      },
+      "80-100": {
+        "events": 9699,
+        "fixtures": 3243,
+        "predicted": 0.8660850025077355,
+        "observed": 0.8475100525827405,
+        "observedMinusPredicted95": [
+          -0.026324918590867635,
+          -0.01075085144714813
+        ]
+      }
+    },
+    "YELLOW_CARDS": {
+      "60-70": {
+        "events": 6363,
+        "fixtures": 2930,
+        "predicted": 0.6506928665164736,
+        "observed": 0.6600660066006601,
+        "observedMinusPredicted95": [
+          -0.001047538842431847,
+          0.019333272660074566
+        ]
+      },
+      "70-80": {
+        "events": 6309,
+        "fixtures": 3010,
+        "predicted": 0.7485018822152727,
+        "observed": 0.7419559359644952,
+        "observedMinusPredicted95": [
+          -0.01646843249657964,
+          0.004595404492619772
+        ]
+      },
+      "80-100": {
+        "events": 10156,
+        "fixtures": 3189,
+        "predicted": 0.8816770674239641,
+        "observed": 0.8846987002756991,
+        "observedMinusPredicted95": [
+          -0.00483841371229558,
+          0.010454992981335797
+        ]
+      }
+    }
+  },
+  "commonEvents": 657618,
+  "untouchedHoldout": false,
+  "pricedBets": 0,
+  "providerCalls": 0,
+  "productionEnabled": false,
+  "liveChanges": 0,
+  "intervals": "Paired fixture-bootstrap; marginal, no multiplicity adjustment",
+  "limitations": [
+    "Previously inspected development months",
+    "Unpriced fixed event grid, not selected betting tiers",
+    "Historical statistics publication timestamps not verified",
+    "Model/calibration menu designed after prior development inspection"
+  ]
+}
