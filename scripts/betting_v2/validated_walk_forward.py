@@ -63,6 +63,9 @@ def distribution(row,profile):
     metric=row['metric'];key=('GOALS_FT' if metric.startswith('GOALS') else metric)+'::'+row['regime']
     params={k:v for k,v in profile.get(key,{}).items() if k in ('scale','alpha','draw_tilt','btts_tilt')}
     j=JointCount.from_means(*row.get('fullMeans',row['means']),**params)
+    if metric.startswith('GOALS') and profile.get('_selected_joint'):
+        from .selected_joint_calibration import apply_tilt
+        j=apply_tilt(j,profile['_selected_joint'])
     return j.thin(*row['shares']) if 'shares' in row else j
 
 def event_rows(rows,profile):
