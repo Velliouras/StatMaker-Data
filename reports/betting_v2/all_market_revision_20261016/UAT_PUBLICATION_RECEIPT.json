@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "status": "PUBLISHED",
+  "scope": "UAT only",
+  "publicationCommit": "0d60d69cd4c39b15cc587feece8b376262436a65",
+  "sourceCommits": {
+    "training": "ccce3b4a53f2c468317f29bf2823077756ae200f",
+    "quoteDelivery": "81aa92456ef29b73df635344625f180ed17a7720",
+    "activation": "b3d2a3c54b593cefc5acf818290d54023dc321a2"
+  },
+  "research": {
+    "run": 38936391817,
+    "job": 117092852923,
+    "conclusion": "success",
+    "coreFits": 273,
+    "historyFixtures": 18764,
+    "historySha256": "1653f6779eece3b7fef7dd5265db1978ffe566ec61e312f5866374739e14e9c0",
+    "labelCoverage": {
+      "CORNERS": 14201,
+      "SHOTS": 14189,
+      "SOT": 14219,
+      "FOULS": 13231,
+      "YELLOW_CARDS": 13921,
+      "CARDS": 4615,
+      "RED_CARDS": 4633
+    },
+    "testCountForecasts": 22142,
+    "providerCalls": 0,
+    "llmCalls": 0,
+    "untouchedHoldout": false
+  },
+  "publication": {
+    "run": 38938122772,
+    "job": 117098644029,
+    "conclusion": "success",
+    "committedAtUTC": "2026-10-16T17:18:58Z",
+    "bundle": {
+      "id": "app_ready_betting_bundle",
+      "group": "prepared",
+      "path": "data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
+      "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
+      "sha256": "e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f",
+      "bytes": 49692781,
+      "generatedAt": "2026-10-16T17:16:24.879210Z"
+    },
+    "variant": "all_market_reliability_recency_uncertainty",
+    "countDeploymentSha256": "1f602eb85b409a6806c7d9dbd78c0ed3f18e10fcbea56930dc41f383c2c80e96",
+    "activeCountMetrics": [
+      "CORNERS",
+      "SHOTS",
+      "SOT",
+      "FOULS",
+      "YELLOW_CARDS",
+      "CARDS",
+      "RED_CARDS"
+    ],
+    "forecasts": 31605,
+    "fixtures": 386,
+    "forecastsWithDecisionBounds": 31605,
+    "forecastsByMetric": [
+      [
+        "CORNERS",
+        6012,
+        6012
+      ],
+      [
+        "FOULS",
+        99,
+        99
+      ],
+      [
+        "GOALS_1H",
+        4990,
+        4990
+      ],
+      [
+        "GOALS_2H",
+        3124,
+        3124
+      ],
+      [
+        "GOALS_FT",
+        14472,
+        14472
+      ],
+      [
+        "SHOTS",
+        30,
+        30
+      ],
+      [
+        "SOT",
+        2878,
+        2878
+      ]
+    ],
+    "uatQuoteDelivery": {
+      "addedFoulQuotes": 99,
+      "addedFoulFixtures": 10,
+      "quoteTable": "prepared_betting_v4_quotes",
+      "providerCalls": 0,
+      "rule": "Exact provider ID/kickoff, approved fixture, latest single prematch receipt <=24h",
+      "unsupportedFoulContract": 7303
+    },
+    "quoteRows": 41571,
+    "preservedLegacyTables": 23,
+    "preservedLegacyForecastRows": 36428,
+    "otherArtifactChanges": []
+  },
+  "android": {
+    "repository": "Velliouras/StatMaker",
+    "branch": "uat",
+    "versionName": "0.1.63",
+    "versionCode": 29866616,
+    "sourceCommit": "185edeabfb2b04f74b10f71d0f919c147eb2318a",
+    "validationHead": "75d3edd1bbb51e309a9c8d21a4117c1779ae5806",
+    "run": 38937640865,
+    "job": 117097029822,
+    "conclusion": "success",
+    "checks": [
+      "Full debug Kotlin compile",
+      "Full debug Java compile",
+      "DirectDecisionBoundsTest, DirectForecastContractTest and BettingEngineV2Test"
+    ],
+    "applicationIdUnchanged": true,
+    "uiLayoutChanges": 0
+  },
+  "verification": {
+    "pythonTestsInPublisher": 46,
+    "localKotlinSyntax": true,
+    "localQuoteContractJUnitTests": 3,
+    "downloadedPublishedBundleSha256Verified": true,
+    "zipCrcVerified": true,
+    "invalidDecisionRows": 0,
+    "legacyTableFingerprintsPreserved": true
+  },
+  "pricedDevelopmentResults": {
+    "earliestDecision": {
+      "bets": 25,
+      "fixtures": 22,
+      "wins": 13,
+      "pushes": 0,
+      "profitUnits": -0.6320000000000001,
+      "roi": -0.025280000000000004,
+      "roi95": null,
+      "meanPredicted": 0.6268511185567537,
+      "hitRate": 0.52
+    },
+    "latestDecision": {
+      "bets": 24,
+      "fixtures": 21,
+      "wins": 11,
+      "pushes": 0,
+      "profitUnits": -3.367,
+      "roi": -0.14029166666666668,
+      "roi95": null,
+      "meanPredicted": 0.6279423956015692,
+      "hitRate": 0.4583333333333333
+    },
+    "profitabilityValidated": false,
+    "roiOptimized": false
+  },
+  "cards": {
+    "trainedMetrics": [
+      "YELLOW_CARDS",
+      "CARDS",
+      "RED_CARDS"
+    ],
+    "pricedRecommendationsEnabled": false,
+    "reason": "Aggregate yellow+red counts do not prove bookmaker weighted/second-yellow/on-field/regulation settlement. Cached events: 90 files, no cached complete lineups, four card events without player IDs.",
+    "ruleSource": "https://help.bet365.gr/s/el-gr/sportsrules/soccer/card-markets"
+  },
+  "pullCommands": [
+    "git switch uat",
+    "git pull --ff-only origin uat"
+  ],
+  "afterPull": "Sync/Build in Android Studio, then Update All in UAT."
+}
