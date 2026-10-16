@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-16T18:14:21Z",
+  "generated_at": "2026-10-16T22:59:44Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/england/championship/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-16T08:07:38Z",
+    "cache_generated_at": "2026-10-16T22:58:52Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-07-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 119,
-    "fixtures_with_any_stats": 119,
-    "fixtures_with_bb_core_stats": 118,
+    "completed_fixtures": 120,
+    "fixtures_with_any_stats": 120,
+    "fixtures_with_bb_core_stats": 119,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9916,
+    "bb_core_coverage": 0.9917,
     "group_counts": {
-      "shots_total": 119,
-      "shots_on_target": 119,
-      "corners": 119,
-      "fouls": 119,
-      "yellow_cards": 118,
-      "red_cards": 84,
-      "possession": 119,
-      "passes": 119,
-      "xg": 63
+      "shots_total": 120,
+      "shots_on_target": 120,
+      "corners": 120,
+      "fouls": 120,
+      "yellow_cards": 119,
+      "red_cards": 85,
+      "possession": 120,
+      "passes": 120,
+      "xg": 64
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.9916,
-      "red_cards": 0.7059,
+      "yellow_cards": 0.9917,
+      "red_cards": 0.7083,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.5294
+      "xg": 0.5333
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -10063,6 +10063,90 @@
         "fulltime": {
           "home": 0,
           "away": 6
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1563205,
+      "date_utc": "2026-10-16T19:00:00+00:00",
+      "country": "England",
+      "league": "Championship",
+      "league_code": "E1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 40,
+      "round": "Regular Season - 11",
+      "home_team": "Burnley",
+      "away_team": "Wolves",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 20,
+        "HST": 4,
+        "AST": 8,
+        "HC": 3,
+        "AC": 6,
+        "HF": 13,
+        "AF": 9,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 5,
+        "ASaves": 3,
+        "HPasses": 426,
+        "APasses": 481,
+        "HPassesAccurate": 350,
+        "APassesAccurate": 417,
+        "HxG": 1.04,
+        "AxG": 1.85
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
         },
         "extratime": {
           "home": null,
