@@ -58,7 +58,7 @@ class RevisedModel(FactorizedModel):
             away=lower(lambda v:v['scenarios']['AWAY']['winProbability'] or 0.))
 
 
-def load_revised(root,history,cutoff):
+def load_revised(root,history,cutoff,*,include_counts=True):
     base,profile,meta=load_factorized(root,history,cutoff)
     path=Path(root)/MANIFEST
     if not path.exists():return base,profile,meta
@@ -89,4 +89,7 @@ def load_revised(root,history,cutoff):
         uncertaintyScope='FT and derived goal periods only; period coefficients/base profile uncertainty not fully propagated',
         otherCountWeights='unchanged frozen components',decisionProbabilitiesSeparate=True,
         researchDataSha256=manifest['historySha256'],profitabilityValidated=False,empiricalTiersValidated=False)
+    if include_counts:
+        from .live_counts import attach_counts
+        return attach_counts(root,history,cutoff,model,effective,meta)
     return model,effective,meta

@@ -19,14 +19,14 @@ INCREASING = {'elo_gap','recent_for','recent_opponent_against','venue_for',
               'venue_opponent_against','xg_for','opponent_xg_against'}
 
 
-def weighted_fit(x, y, weights, penalty, columns):
+def weighted_fit(x, y, weights, penalty, columns, increasing=INCREASING):
     weights = np.asarray(weights, float)
     if len(weights) != len(y) or not np.isfinite(weights).all() or np.any(weights <= 0):
         raise ValueError('Positive finite training weights required')
     weights = weights/weights.sum()
     start = np.zeros(x.shape[1]+1)
     start[0] = math.log(max(float(weights@y), 1e-6))
-    constrained = {i for k,i in columns.items() if k in INCREASING}
+    constrained = {i for k,i in columns.items() if k in increasing}
     bounds = [(None,None)]+[(0.,None) if i in constrained else (None,None) for i in range(x.shape[1])]
     def objective(theta):
         eta = np.asarray(x@theta[1:]).ravel()+theta[0]
@@ -49,6 +49,9 @@ class ReliableGoals(OpponentMatchup):
     def __init__(self, config=None):
         initialize(self)
         self.config = dict(CONFIG,**(config or {}))
+        self.metric = self.config.get('metric','GOALS_FT')
+        self.rate_ceiling = self.config.get('rateCeiling',12.)
+        self.increasing = INCREASING
         self.priors = defaultdict(lambda:[0.,0.,0.])
         self.clock = 0.
         self.fits = []
@@ -68,8 +71,8 @@ class ReliableGoals(OpponentMatchup):
         return (sum(values)+k*prior)/(n+k), n/(n+k)
 
     def features(self,team,opponent,metric,home):
-        if metric != 'GOALS_FT':
-            raise ValueError('Reliable goal core accepts FT goals only')
+        if metric != self.metric:
+            raise ValueError('Metric does not match fitted core')
         t,o = self.history[team][metric],self.history[opponent][metric]
         tx,ox = self.xg[team],self.xg[opponent]
         g,og = self.groups.get(team,'unmapped:'+team),self.groups.get(opponent,'unmapped:'+opponent)
@@ -117,19 +120,20 @@ class ReliableGoals(OpponentMatchup):
         for day,batch in groupby((r for r in history if r['_date']<cutoff),lambda r:int(r['_date']//86400)):
             batch = list(batch);self.clock = day*86400
             for r in batch:
+                self._feature_row = r
                 h,a = r['_home'],r['_away'];self.groups[h],self.groups[a] = r['_home_group'],r['_away_group']
-                y = metric_values(r,'GOALS_FT')
+                y = metric_values(r,self.metric)
                 if y is not None:
                     for t,o,v,value in [(h,a,True,y[0]),(a,h,False,y[1])]:
-                        records.append((self.features(t,o,'GOALS_FT',v),value));dates.append(r['_date']);teams.append(t)
+                        records.append((self.features(t,o,self.metric,v),value));dates.append(r['_date']);teams.append(t)
                     self.matches += 1
             for r in batch: self.observe(r,metric_values)
         if not records: raise ValueError('No prior training observations')
         x,columns,scales = matrix([f for f,_ in records])
-        self.columns['GOALS_FT'],self.feature_scales['GOALS_FT'] = columns,scales
+        self.columns[self.metric],self.feature_scales[self.metric] = columns,scales
         self.trainingBefore = cutoff
         self.clock = cutoff
-        self.train['GOALS_FT'] = range(len(records))
+        self.train[self.metric] = range(len(records))
         return x,np.asarray([y for _,y in records]),np.asarray(dates),teams
 
     def fit_bank(self,design,recency=True,bootstrap=True,seed=None):
@@ -138,20 +142,20 @@ class ReliableGoals(OpponentMatchup):
         weights = np.exp(-math.log(2)*age/self.config['halfLifeDays']) if recency else np.ones(len(y))
         weighted_counts = defaultdict(float)
         for team,w in zip(teams,weights): weighted_counts[team] += float(w)
-        columns = self.columns['GOALS_FT']
+        columns = self.columns[self.metric]
         # Adaptive team penalties centre club residuals on the league effects.
         penalty = np.full(len(columns),2*self.config['ridgeFactor']/len(y))
         for key,i in columns.items():
             if key.startswith(('attack:','defence:')):
                 team = key.split(':',1)[1]
                 penalty[i] *= math.sqrt(1+self.config['clubPriorMatches']/max(weighted_counts[team],1.))
-        self.fits = [weighted_fit(x,y,weights,penalty,columns)]
+        self.fits = [weighted_fit(x,y,weights,penalty,columns,self.increasing)]
         weeks = (dates//(7*86400)).astype(int);unique = np.unique(weeks)
         rng = np.random.default_rng(self.config['bootstrapSeed'] if seed is None else seed)
         for _ in range(self.config['bootstrapReplicas'] if bootstrap else 0):
             draws = dict(zip(unique,rng.exponential(1.,len(unique))))
             boot_weights = weights*np.asarray([max(draws[w],1e-8) for w in weeks])
-            self.fits.append(weighted_fit(x,y,boot_weights,penalty,columns))
+            self.fits.append(weighted_fit(x,y,boot_weights,penalty,columns,self.increasing))
         self._compile()
         return dict(trainingMatches=self.matches,trainingRows=len(y),columns=len(columns),recency=recency,
             halfLifeDays=self.config['halfLifeDays'] if recency else None,
@@ -166,23 +170,23 @@ class ReliableGoals(OpponentMatchup):
         self._intercept = np.asarray([f['intercept'] for f in self.fits])
 
     def predict_bank(self,home,away):
-        if not self.fits or not self.history[home]['GOALS_FT'] or not self.history[away]['GOALS_FT']:
+        if not self.fits or not self.history[home][self.metric] or not self.history[away][self.metric]:
             return None
-        columns = self.columns['GOALS_FT'];scales = self.feature_scales['GOALS_FT']
+        columns = self.columns[self.metric];scales = self.feature_scales[self.metric]
         result = []
         for team,opp,venue in [(home,away,True),(away,home,False)]:
-            values = self.features(team,opp,'GOALS_FT',venue)
+            values = self.features(team,opp,self.metric,venue)
             active = [(columns[k],v) for k,v in values.items() if k in columns and v]
             idx = [i for i,v in active];vals = np.asarray([v for i,v in active])/scales[idx]
             eta = self._intercept+(self._coef[:,idx]*vals).sum(axis=1)
             rates = np.exp(eta)
-            if not np.isfinite(rates).all() or np.any(rates <= 0) or np.any(rates > 12):
+            if not np.isfinite(rates).all() or np.any(rates <= 0) or np.any(rates > self.rate_ceiling):
                 return None
             result.append(rates)
         return np.column_stack(result)
 
     def predict(self,home,away,metric):
-        if metric != 'GOALS_FT':return None
+        if metric != self.metric:return None
         bank = self.predict_bank(home,away)
         return None if bank is None else (float(bank[0,0]),float(bank[0,1]),
             len(self.history[home][metric]),len(self.history[away][metric]),self.matches)
@@ -192,7 +196,7 @@ class ReliableGoals(OpponentMatchup):
             trainingMatches=self.matches,groups=self.groups,elo=dict(self.elo),
             history={t:dict(v) for t,v in self.history.items()},xg=dict(self.xg),
             priors=[[list(k),v] for k,v in self.priors.items()],
-            columns=self.columns['GOALS_FT'],scales=self.feature_scales['GOALS_FT'].tolist(),fits=self.fits))
+            columns=self.columns[self.metric],scales=self.feature_scales[self.metric].tolist(),fits=self.fits))
 
     @classmethod
     def restore(cls,state):
@@ -203,7 +207,7 @@ class ReliableGoals(OpponentMatchup):
             for metric,records in metrics.items():model.history[team][metric] = [tuple(r) for r in records]
         for team,records in state['xg'].items():model.xg[team] = [tuple(r) for r in records]
         model.priors.update({tuple(k):list(v) for k,v in state['priors']})
-        model.columns['GOALS_FT'] = state['columns'];model.feature_scales['GOALS_FT'] = np.asarray(state['scales'])
+        model.columns[model.metric] = state['columns'];model.feature_scales[model.metric] = np.asarray(state['scales'])
         model.fits = state['fits'];model._compile()
         return model
 

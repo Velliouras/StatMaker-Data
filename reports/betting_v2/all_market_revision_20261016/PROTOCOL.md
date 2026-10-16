@@ -1,0 +1,17 @@
+# All-market model revision — fixed before fitting, 16 October 2026
+
+Retrain CORNERS, SHOTS, SOT, FOULS, YELLOW_CARDS, CARDS and RED_CARDS. Keep the existing revised FT goal core and coherent derived goal periods. Every count core receives its own coefficients, prior-only sparse-history smoothing, adaptive club penalties, 180-day training half-life, and twelve positive weekly-weight sensitivity refits. CARDS means observed yellow plus red counts; this is explicitly not a bookmaker booking-points contract.
+
+Use the same 18,764-fixture pinned historical dataset as the preceding corrected studies, SHA256 `1653f6779eece3b7fef7dd5265db1978ffe566ec61e312f5866374739e14e9c0`. Fit before July/August/September, calibrate on the following month, and evaluate August/September/1–14 October. All months have previously been inspected and remain development evidence.
+
+Train count goal-strength features from monthly earlier-only goal fits. At evaluation/publication use an anchor fitted before the core's calibration window. Predict all matches in a UTC day before observing that day's outcomes. No target substitution, future goal-coefficient fallback, odds feature, invented price, ROI optimization, market-winner selection or threshold relaxation.
+
+Score the full available label history by count family, using a fixed probability grid, exact joint log loss and count MAE. Retain paired predictions against the old frozen chronological ridge-50 count core. Report additional and missing forecasts separately. Red cards are a new diagnostic target without a prior model comparison.
+
+Replay every frozen earliest/latest packet from scope_expansion_v2_20261016, separately, against the preceding UAT model and revised count models. Keep the current odds/probability/EV/favourite rules and one broad family per fixture. Report point and decision-sensitivity arms without selecting a profitable winner. Existing complex goal-market point contracts remain in the point comparison; complex goal decisions without matching sensitivity support are explicitly counted as unavailable. Count bands use the exact extended probability masks.
+
+Count likelihood profiles are fitted solely on preceding statistical calibration labels, independently for each parameter replica. There are no pre-October archived selected count prices adequate for a selected-price calibrator; later count quotes must not train earlier calibrators. The weekly 10th percentile is parameter/profile sensitivity, capped at the point probability, not a calibrated protection against systematic model error.
+
+Audit all saved card event files and raw card/booking offers. Bookmaker rules differ from aggregate HY+HR: Bet365's official number-of-cards rules weight yellow one/red two, exclude second yellows and restrict eligible participants/times. Do not publish or score those prices using the wrong diagnostic target. Record the exact missing contract/label evidence rather than omitting card training.
+
+Run plain Python in GitHub Actions, with zero provider API requests and zero LLM calls. Persist each metric/fold checkpoint and its hashes, including partial evidence after failure. Candidate deployment is separate from activation. The authorized final destination is the existing UAT v4 forecast table; preserve non-betting and PROD tables. No certification gate or profit claim is introduced.

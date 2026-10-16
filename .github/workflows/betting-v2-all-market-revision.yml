@@ -1,0 +1,77 @@
+name: Betting V2 All Market Revision
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-all-market-revision']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-all-market-revision
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      PYTHONPATH: scripts
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install numerical dependencies and verify chronological contracts
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_model_revision.py -v
+          python -m unittest discover -s tests -p test_reliable_counts.py -v
+          python -m unittest discover -s tests -p test_all_market_live.py -v
+          python -m unittest discover -s tests -p test_research_scope_expansion.py -v
+          python -m unittest discover -s tests -p test_research_app_markets.py -v
+      - name: Restore exact pinned training data without changing active data
+        shell: bash
+        run: |
+          set -euo pipefail
+          pinned="edb62bdc5b939ba5dac56f10e4a027db420bc7d9"
+          destination="$(mktemp -d)"
+          git fetch --no-tags --depth=1 origin "$pinned"
+          git archive "$pinned" data/statmaker/domestic_enriched data/api_football/league_tables mappings config/uefa_club_competitions.json config/uefa_simulation_2026_27.json data/statmaker/uefa_current_stats.json data/statmaker/uefa_support_history.json data/statmaker/uefa_team_support_history.json | tar -x -C "$destination"
+          echo "REVISION_DATA_ROOT=$destination" >> "$GITHUB_ENV"
+      - name: Train every count core and replay all saved market packets
+        run: >-
+          python -u scripts/betting_v2/research_all_markets.py
+          --data-root "$REVISION_DATA_ROOT"
+          --output reports/betting_v2/all_market_revision_20261016
+      - name: Audit cached card event labels without provider calls
+        if: always()
+        run: python scripts/betting_v2/audit_card_contracts.py --output reports/betting_v2/all_market_revision_20261016/card_contract_audit.json
+      - name: Preserve complete or partial evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-market-revision
+          path: reports/betting_v2/all_market_revision_20261016/
+          retention-days: 30
+      - name: Persist research checkpoint only
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$(mktemp -d)"
+          if [ ! -d reports/betting_v2/all_market_revision_20261016 ]; then exit 0; fi
+          cp -a reports/betting_v2/all_market_revision_20261016/. "$evidence/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            mkdir -p reports/betting_v2/all_market_revision_20261016
+            cp -a "$evidence/." reports/betting_v2/all_market_revision_20261016/
+            git add reports/betting_v2/all_market_revision_20261016
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Save all-market count revision and priced replay [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
