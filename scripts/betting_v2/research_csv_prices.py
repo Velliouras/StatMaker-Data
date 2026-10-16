@@ -175,6 +175,54 @@ def validate_input(doc):
                     raise ValueError('Invalid immutable FT prediction')
 
 
+def recover_schedule_aliases(rows, doc):
+    """Resolve names from >=2 dates/opponents, anchored only in existing aliases.
+
+    No names are compared fuzzily. No score, probability or price is read.
+    Newly inferred aliases cannot support another inference. Every nonempty
+    schedule constraint must agree on one country-scoped canonical identity.
+    """
+    aliases = {code:dict(values) for code, values in doc['aliases'].items()}
+    index = defaultdict(list)
+    for fold in doc['folds']:
+        for f in fold['fixtures']:
+            index[f['league'],f['utcDate']].append(f)
+    constraints = defaultdict(list)
+    for item in rows:
+        row, source = item['data'], item['source']
+        code = source['code']; day = parse_date(row.get('Date'))
+        if day is None or not doc['testFrom'] <= day < doc['testBefore']:
+            continue
+        if source['layout'] == 'main' and row.get('Div') != code:
+            continue
+        raw = {s:normalized(first(row, *keys)) for s,keys in [('home',('HomeTeam','Home')),('away',('AwayTeam','Away'))]}
+        existing = doc['aliases'].get(code,{})
+        known = {s:existing.get(v) for s,v in raw.items()}
+        for side, other in [('home','away'),('away','home')]:
+            if not raw[side] or known[side] or not known[other]:
+                continue
+            candidates = [f for f in index[code,day] if f[other] == known[other]]
+            if candidates:
+                constraints[code,raw[side]].append(dict(csvRow=item['row'],sourceUrl=source['url'],
+                    date=day,opponent=known[other],side=side,
+                    candidates=sorted({f[side] for f in candidates}),fixtures=[f['fixture'] for f in candidates]))
+    accepted, rejected = [], []
+    for (code, raw), evidence in sorted(constraints.items()):
+        common = set.intersection(*(set(v['candidates']) for v in evidence))
+        if len(common) != 1:
+            rejected.append(dict(league=code,alias=raw,reason='CONFLICTING_OR_AMBIGUOUS_SCHEDULE',evidence=evidence))
+            continue
+        if len({e['date'] for e in evidence}) < 2 or len({e['opponent'] for e in evidence}) < 2:
+            rejected.append(dict(league=code,alias=raw,reason='NEEDS_TWO_DATES_AND_DISTINCT_EXISTING_OPPONENTS',evidence=evidence))
+            continue
+        target = next(iter(common))
+        aliases.setdefault(code,{})[raw] = target
+        accepted.append(dict(league=code,alias=raw,canonical=target,evidence=evidence))
+    return dict(doc,aliases=aliases), dict(accepted=accepted,rejected=rejected,
+        labelsPricesAndProbabilitiesUsed=False,minimumDistinctDates=2,minimumDistinctExistingOpponents=2,
+        inferredAliasesUsedAsAnchors=False,method='Exact league/date/home-away schedule constraints; no fuzzy match')
+
+
 def join_rows(rows, doc):
     """Unique league/date/country-alias pair, then independent score validation.
 
@@ -295,7 +343,7 @@ def replay(doc, joined):
 def run(args):
     out = args.output
     out.mkdir(parents=True, exist_ok=True)
-    cache = out/'sources'
+    cache = args.source_cache or out/'sources'
     cache.mkdir(exist_ok=True)
     manifest = json.loads(args.manifest.read_text())
     raw = args.input.read_bytes()
@@ -321,6 +369,9 @@ def run(args):
                 errors.append(dict(source, error=type(error).__name__+': '+str(error)))
             write(out/'source_inventory.json', dict(sources=sorted(inventory, key=lambda v:v['code']), errors=errors,
                 publicCsvRequests=sum(not v['cached'] for v in inventory)+len(errors), sportsProviderCalls=0, llmCalls=0))
+    if args.resolve_schedule_aliases:
+        doc, alias_evidence = recover_schedule_aliases(rows, doc)
+        write(out/'schedule_alias_evidence.json', alias_evidence)
     joined, coverage = join_rows(rows, doc)
     write(out/'joined_quotes.json.gz', joined, zipped=True)
     write(out/'coverage.json', coverage)
@@ -336,6 +387,9 @@ def run(args):
         testFrom=doc['testFrom'], testBefore=doc['testBefore'], untouchedHoldout=False,
         testLabelsUsedForSelection=False, newFits=0, llmCalls=0, sportsProviderCalls=0,
         appPublication=False, primaryBookmaker='Bet365', secondaryBookmaker='Pinnacle',
+        scheduleAliasRecovery=args.resolve_schedule_aliases,
+        recoveredScheduleAliases=len(alias_evidence['accepted']) if args.resolve_schedule_aliases else 0,
+        sourceCache=str(cache),
         policies=list(MODES), priceView='source-labelled closing only',
         exactObservationTimesKnown=False, historicalPublicationTimesVerified=False,
         limitations=[
@@ -368,6 +422,8 @@ def main():
     parser.add_argument('--input', type=Path, required=True)
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--source-cache', type=Path)
+    parser.add_argument('--resolve-schedule-aliases', action='store_true')
     run(parser.parse_args())
 
 

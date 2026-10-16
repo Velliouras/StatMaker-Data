@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['.github/triggers/betting-v2-csv-price-research']
+    paths: ['.github/triggers/betting-v2-csv-price-research-v2']
 permissions:
   contents: write
 concurrency:
@@ -30,15 +30,17 @@ jobs:
       - name: Import official archive prices and replay immutable prior-month predictions
         run: >-
           python -u scripts/betting_v2/research_csv_prices.py
-          --input reports/betting_v2/csv_prices_20261016/frozen_predictions.json.gz
-          --manifest reports/betting_v2/csv_prices_20261016/input_manifest.json
-          --output reports/betting_v2/csv_prices_20261016
+          --input reports/betting_v2/csv_prices_v2_20261016/frozen_predictions.json.gz
+          --manifest reports/betting_v2/csv_prices_v2_20261016/input_manifest.json
+          --output reports/betting_v2/csv_prices_v2_20261016
+          --source-cache reports/betting_v2/csv_prices_20261016/sources
+          --resolve-schedule-aliases
       - name: Preserve completed evidence even on partial failure
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: historical-csv-price-research
-          path: reports/betting_v2/csv_prices_20261016/
+          name: historical-csv-price-research-v2
+          path: reports/betting_v2/csv_prices_v2_20261016/
           retention-days: 30
       - name: Persist archive research checkpoint only
         if: always()
@@ -46,15 +48,15 @@ jobs:
         run: |
           set -euo pipefail
           evidence="$(mktemp -d)"
-          cp -a reports/betting_v2/csv_prices_20261016/. "$evidence/"
+          cp -a reports/betting_v2/csv_prices_v2_20261016/. "$evidence/"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
-            mkdir -p reports/betting_v2/csv_prices_20261016
-            cp -a "$evidence/." reports/betting_v2/csv_prices_20261016/
-            git add reports/betting_v2/csv_prices_20261016
+            mkdir -p reports/betting_v2/csv_prices_v2_20261016
+            cp -a "$evidence/." reports/betting_v2/csv_prices_v2_20261016/
+            git add reports/betting_v2/csv_prices_v2_20261016
             if git diff --cached --quiet; then exit 0; fi
             git commit -m "Save historical CSV price research evidence [skip ci]"
             if git push origin HEAD:main; then exit 0; fi

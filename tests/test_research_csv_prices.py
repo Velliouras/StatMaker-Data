@@ -1,6 +1,6 @@
 import copy
 import unittest
-from betting_v2.research_csv_prices import parse_csv, row_quotes, parse_date, number, join_rows, validate_input, replay
+from betting_v2.research_csv_prices import parse_csv, row_quotes, parse_date, number, join_rows, validate_input, replay, recover_schedule_aliases
 from betting_v2.opponent_matchup import timestamp
 
 
@@ -112,6 +112,32 @@ class CsvPricesTest(unittest.TestCase):
         self.assertTrue(all(p['priceType']=='closing' and p['observedAtUTC'] is None for p in first['picks']))
         self.assertAlmostEqual(first['overall']['profitUnits'],sum(p['y']*p['odd']+p['actualPush']-1 for p in first['picks']))
         self.assertEqual(first['picks'],reports['Bet365::separate_ft_selected_period::current_preference']['picks'])
+
+    def test_schedule_recovery_requires_independent_anchors_and_ignores_labels_prices(self):
+        doc=document(); f=fixture(); f.update(fixture='g',utcDate='2026-08-28',home='england:arsenal',away='england:everton')
+        doc['folds'][0]['fixtures'].append(f); doc['aliases']['E0']['everton']='england:everton'
+        rows=[csv_item(HomeTeam='Arsenal FC'),csv_item(Date='28/08/2026',HomeTeam='Arsenal FC',AwayTeam='Everton')]
+        one,audit=recover_schedule_aliases(rows[:1],doc)
+        self.assertNotIn('arsenalfc',one['aliases']['E0'])
+        learned,audit=recover_schedule_aliases(rows,doc)
+        self.assertEqual(learned['aliases']['E0']['arsenalfc'],'england:arsenal')
+        self.assertEqual(len(audit['accepted']),1)
+        for r in rows:
+            r['data'].update(FTHG='999',FTAG='999',B365CH='999',FTR='D')
+        for fold in doc['folds']:
+            for f in fold['fixtures']:
+                f['actual']=[999,999]; f['predictions']={}
+        learned2,audit2=recover_schedule_aliases(rows,doc)
+        self.assertEqual(audit,audit2)
+        self.assertEqual(learned['aliases'],learned2['aliases'])
+
+    def test_conflicting_schedule_constraints_do_not_merge_teams(self):
+        doc=document(); f=fixture(); f.update(fixture='g',utcDate='2026-08-28',home='england:fulham',away='england:everton')
+        doc['folds'][0]['fixtures'].append(f);doc['aliases']['E0']['everton']='england:everton'
+        rows=[csv_item(HomeTeam='Arsenal FC'),csv_item(Date='28/08/2026',HomeTeam='Arsenal FC',AwayTeam='Everton')]
+        learned,audit=recover_schedule_aliases(rows,doc)
+        self.assertNotIn('arsenalfc',learned['aliases']['E0'])
+        self.assertEqual(audit['rejected'][0]['reason'],'CONFLICTING_OR_AMBIGUOUS_SCHEDULE')
 
 
 if __name__ == '__main__':

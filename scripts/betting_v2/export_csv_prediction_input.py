@@ -37,7 +37,9 @@ def export(args):
     metadata_sha = digest(json.dumps(history, sort_keys=True, separators=(',', ':')).encode())
     metadata = {f"{r['_date']}:{r['_home']}:{r['_away']}": r for r in history}
     codes = {s['code'] for s in sources()}
-    aliases = {code: dict(values) for code, values in direct.UEFA_ALIASES.items() if code in codes}
+    def code_alias(code):
+        return 'ROU' if code == 'ROM' else code
+    aliases = {code_alias(code): dict(values) for code, values in direct.UEFA_ALIASES.items() if code_alias(code) in codes}
     folds = []
     exclusions = Counter()
     for fitday, testday, endday in FOLDS:
@@ -61,8 +63,8 @@ def export(args):
             if m is None:
                 exclusions['noCurrentIdentityMetadata'] += 1
                 continue
-            league = m.get('_home_group')
-            if league != m.get('_away_group') or league not in codes:
+            league = code_alias(m.get('_home_group'))
+            if league != code_alias(m.get('_away_group')) or league not in codes:
                 exclusions['outsideCsvCompetitionScope'] += 1
                 continue
             if list(direct.metric_values(m, 'GOALS_FT')) != baseline['actual']:
