@@ -1,0 +1,700 @@
+{
+  "signature": "73f4308812ddab5511f081b3f0ffdcaccc553c85e264861f05db5992fa63ea75",
+  "folds": [
+    {
+      "testFrom": "2026-08-01",
+      "testBefore": "2026-09-01",
+      "calibrationFrom": "2026-07-01",
+      "selectionFromUTC": 1784592000.0,
+      "selectionBefore": "2026-08-01",
+      "primaryFT": {
+        "candidate": "full",
+        "mode": "joint",
+        "lockedToExistingProfile": true
+      },
+      "experimentalFT": {
+        "candidate": "goal_ridge_50",
+        "mode": "identity",
+        "validationBrier": 0.22032127525497427
+      },
+      "period": {
+        "candidate": "oof_ridge_50",
+        "mode": "identity",
+        "validationConditionalLogLoss": 0.6920168866170784,
+        "finalCalibration": {
+          "offsets": [
+            0.0,
+            0.0
+          ],
+          "fitted": false
+        }
+      },
+      "ftValidationScores": {
+        "full::joint": {
+          "brier": 0.230771614863668,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "full::half_shrink": {
+          "brier": 0.23056920301751146,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "full::identity": {
+          "brier": 0.23061859794607273,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "no_xg::joint": {
+          "brier": 0.23103980909475216,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "no_xg::half_shrink": {
+          "brier": 0.2308450683625484,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "no_xg::identity": {
+          "brier": 0.23090783874537074,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_10::joint": {
+          "brier": 0.2214887791153728,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_10::half_shrink": {
+          "brier": 0.22135478549416382,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_10::identity": {
+          "brier": 0.2212536436967127,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_50::joint": {
+          "brier": 0.22033971339729566,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_50::half_shrink": {
+          "brier": 0.22032261702931275,
+          "events": 10112,
+          "fixtures": 431
+        },
+        "goal_ridge_50::identity": {
+          "brier": 0.22032127525497427,
+          "events": 10112,
+          "fixtures": 431
+        }
+      },
+      "periodValidationScores": {
+        "full::identity": {
+          "conditionalLogLossPerGoal": 0.7114395058227374,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "full::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7124114747558321,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.040880779919612954,
+              -0.1086573208281505
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_xg::identity": {
+          "conditionalLogLossPerGoal": 0.7120201443300502,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "no_xg::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7129766161774982,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.0412210222824648,
+              -0.10821017435401883
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7116461126220556,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "no_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.712597363749798,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.043223180922147705,
+              -0.10712779292537872
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7116289318232467,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "oof_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.712580583945567,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.04263059700459625,
+              -0.10716873351924333
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_10::identity": {
+          "conditionalLogLossPerGoal": 0.6943122289239015,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_10::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6956516221055332,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.06345768406687205,
+              -0.11345720417957697
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_50::identity": {
+          "conditionalLogLossPerGoal": 0.6920168866170784,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_50::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6935291459244044,
+          "fixtures": 360,
+          "goals": 969.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.06952157866444547,
+              -0.11669583927352778
+            ],
+            "fixtures": 286,
+            "goals": 830.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        }
+      },
+      "maxSelectionTimestamp": 1785540600.0
+    },
+    {
+      "testFrom": "2026-09-01",
+      "testBefore": "2026-10-01",
+      "calibrationFrom": "2026-08-01",
+      "selectionFromUTC": 1787270400.0,
+      "selectionBefore": "2026-09-01",
+      "primaryFT": {
+        "candidate": "full",
+        "mode": "joint",
+        "lockedToExistingProfile": true
+      },
+      "experimentalFT": {
+        "candidate": "goal_ridge_50",
+        "mode": "identity",
+        "validationBrier": 0.21191412878401406
+      },
+      "period": {
+        "candidate": "oof_ridge_50",
+        "mode": "identity",
+        "validationConditionalLogLoss": 0.6874229135210517,
+        "finalCalibration": {
+          "offsets": [
+            0.0,
+            0.0
+          ],
+          "fitted": false
+        }
+      },
+      "ftValidationScores": {
+        "full::joint": {
+          "brier": 0.21660769263645352,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "full::half_shrink": {
+          "brier": 0.21717750858094423,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "full::identity": {
+          "brier": 0.21810445330780165,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "no_xg::joint": {
+          "brier": 0.21673074216538366,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "no_xg::half_shrink": {
+          "brier": 0.2173462041565449,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "no_xg::identity": {
+          "brier": 0.21832758827303772,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_10::joint": {
+          "brier": 0.2125518242305034,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_10::half_shrink": {
+          "brier": 0.21235483312280978,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_10::identity": {
+          "brier": 0.21239188390958771,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_50::joint": {
+          "brier": 0.21223243535573688,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_50::half_shrink": {
+          "brier": 0.21194895606553116,
+          "events": 23222,
+          "fixtures": 989
+        },
+        "goal_ridge_50::identity": {
+          "brier": 0.21191412878401406,
+          "events": 23222,
+          "fixtures": 989
+        }
+      },
+      "periodValidationScores": {
+        "full::identity": {
+          "conditionalLogLossPerGoal": 0.7095870735829439,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "full::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7102114899287413,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.056705682481018704,
+              -0.031040644304680225
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_xg::identity": {
+          "conditionalLogLossPerGoal": 0.7096420940263991,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "no_xg::venue_offset": {
+          "conditionalLogLossPerGoal": 0.710240502348517,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.05407454729572855,
+              -0.03559559288397994
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7097905186325965,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "no_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7104424553324877,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.06104943512776609,
+              -0.02767558384229919
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7096400136117653,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "oof_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7102935987194607,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.06073434360152855,
+              -0.027806766971566716
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_10::identity": {
+          "conditionalLogLossPerGoal": 0.6913483008659541,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_10::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6919646212942334,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.05899281516889378,
+              -0.023496222235237934
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_50::identity": {
+          "conditionalLogLossPerGoal": 0.6874229135210517,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_50::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6880219641288923,
+          "fixtures": 986,
+          "goals": 2882.0,
+          "offsetCalibration": {
+            "offsets": [
+              0.05837094030160126,
+              -0.021816298620714547
+            ],
+            "fixtures": 1103,
+            "goals": 3090.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        }
+      },
+      "maxSelectionTimestamp": 1788217200.0
+    },
+    {
+      "testFrom": "2026-10-01",
+      "testBefore": "2026-10-15",
+      "calibrationFrom": "2026-09-01",
+      "selectionFromUTC": 1789948800.0,
+      "selectionBefore": "2026-10-01",
+      "primaryFT": {
+        "candidate": "full",
+        "mode": "joint",
+        "lockedToExistingProfile": true
+      },
+      "experimentalFT": {
+        "candidate": "goal_ridge_50",
+        "mode": "joint",
+        "validationBrier": 0.21416784158508986
+      },
+      "period": {
+        "candidate": "oof_ridge_50",
+        "mode": "identity",
+        "validationConditionalLogLoss": 0.6854836264858613,
+        "finalCalibration": {
+          "offsets": [
+            0.0,
+            0.0
+          ],
+          "fitted": false
+        }
+      },
+      "ftValidationScores": {
+        "full::joint": {
+          "brier": 0.21843151731113344,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "full::half_shrink": {
+          "brier": 0.21960151347589296,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "full::identity": {
+          "brier": 0.2212495913865535,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "no_xg::joint": {
+          "brier": 0.21844709618259497,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "no_xg::half_shrink": {
+          "brier": 0.21967093439959404,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "no_xg::identity": {
+          "brier": 0.22141154723534268,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_10::joint": {
+          "brier": 0.21417716568305833,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_10::half_shrink": {
+          "brier": 0.2147904531520434,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_10::identity": {
+          "brier": 0.21565114776526917,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_50::joint": {
+          "brier": 0.21416784158508986,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_50::half_shrink": {
+          "brier": 0.21464086332468726,
+          "events": 3268,
+          "fixtures": 139
+        },
+        "goal_ridge_50::identity": {
+          "brier": 0.21530986122424778,
+          "events": 3268,
+          "fixtures": 139
+        }
+      },
+      "periodValidationScores": {
+        "full::identity": {
+          "conditionalLogLossPerGoal": 0.7139735171436523,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "full::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7143840182783585,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.012150820225445738,
+              -0.0991964655223801
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_xg::identity": {
+          "conditionalLogLossPerGoal": 0.7146681799767596,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "no_xg::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7150874027482887,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.014444362580304992,
+              -0.1015204822888735
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "no_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7141280075944865,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "no_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7145032162451691,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.008512314552017007,
+              -0.09486696123752986
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_goal_stack::identity": {
+          "conditionalLogLossPerGoal": 0.7132911849284244,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "oof_goal_stack::venue_offset": {
+          "conditionalLogLossPerGoal": 0.7137100580441652,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.009360081211783285,
+              -0.09825622204196335
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_10::identity": {
+          "conditionalLogLossPerGoal": 0.6891244270966782,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_10::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6895316308424458,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.0076010581644855605,
+              -0.1014589657627439
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        },
+        "oof_ridge_50::identity": {
+          "conditionalLogLossPerGoal": 0.6854836264858613,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": null
+        },
+        "oof_ridge_50::venue_offset": {
+          "conditionalLogLossPerGoal": 0.6859423879815684,
+          "fixtures": 134,
+          "goals": 385.0,
+          "offsetCalibration": {
+            "offsets": [
+              -0.009298424510576294,
+              -0.10459486423454767
+            ],
+            "fixtures": 1796,
+            "goals": 5162.0,
+            "fitted": true,
+            "penalty": 5.0
+          }
+        }
+      },
+      "maxSelectionTimestamp": 1790811000.0
+    }
+  ],
+  "status": "COMPLETE",
+  "sourceCalibrationSha256": {
+    "full_2026-08-01": "69ad663b0eb9e0f8605d82ad7aae652eb75b4191c077bd8d14739441973a5508",
+    "no_xg_2026-08-01": "7fa784ff801514d516b786a01d9a41e133f4520dee3f399a095ef325493c4901",
+    "no_goal_stack_2026-08-01": "751fe1612e149fe6391b796d49d3951a2bc979fd6e380efed26bc6340360f908",
+    "oof_goal_stack_2026-08-01": "2317a007e9acdea736b7aeab9dfbe59ea5a9100f09c1e178c4561822f7569224",
+    "oof_ridge_10_2026-08-01": "2fbaa09df592789edc3a9a06671fe9bad08cd7864864388f4a6c77a009347027",
+    "oof_ridge_50_2026-08-01": "f095b960c19ac3ea35f26d6f2d7c1d6245d447180231da76905fcbe3f4e9e519",
+    "goal_ridge_10_2026-08-01": "90f2ea229d98ac4d9b384a2ccb286343dbc7d4525700cf769a3a6e80a306b957",
+    "goal_ridge_50_2026-08-01": "670535418cf4f3d1d354ef9da3fc6db6d8321bd46ca53bee2b0dce55dd449518",
+    "full_2026-09-01": "25856472c69a46078ee9574b036c01006ea70ac149506232e2448c525a4b3a13",
+    "no_xg_2026-09-01": "00ebdd685192cfe10a7c4e6762d2ec37f78153793782606e3454d759fcbf365a",
+    "no_goal_stack_2026-09-01": "af3dd0b1c41b8fdb6e435032ba78d9bf5b81a8a0f7c7ded1ea64c9d68242515c",
+    "oof_goal_stack_2026-09-01": "b0f5e4a416426c3bc25963bb1db0b458604ba750ffd1494e561177fbdd2d25c0",
+    "oof_ridge_10_2026-09-01": "bfc36fda6e11907b31f650272173fbb7a70f0dd172c85923fa78645cf6e81a6e",
+    "oof_ridge_50_2026-09-01": "bbda7804ded41b76e5c1bc87f6248b771fa04f5fcad672c99e257dad61ee6959",
+    "goal_ridge_10_2026-09-01": "37357f716414dd4a1c507dcad16e41cfae2274a237948e9a362c391a3ccb7f0f",
+    "goal_ridge_50_2026-09-01": "38d6a3d330bd85bce562aa6a1a7cf966a8c78f5c9c5fdba5147c4c4b3639ed03",
+    "full_2026-10-01": "10d0d6143ec09083e03538541835c7337f3fbbfa603d9323cd22c6a1c57b5c30",
+    "no_xg_2026-10-01": "cbafd7ab92349ee74e767b04dcc886cd626e01766102aa9c07dac1689ae50a14",
+    "no_goal_stack_2026-10-01": "2fcba27406c42ab999f3a83482d7cf510fd2b42e3fed9696ce9dbd7d0821a1c5",
+    "oof_goal_stack_2026-10-01": "eb051d1dbbbcd1ccf30ab5eb616a023236d7c76c70eb13c6fc41226e0ebea17a",
+    "oof_ridge_10_2026-10-01": "2e7738dcf9aa640b6ddf842a7b139b5429aee98842eb7b947802decd0bc16463",
+    "oof_ridge_50_2026-10-01": "aeb89665ddb5d730f5dab1c5c504a773a9fa0856ca3a7cff964d3dcd6c6d2bcd",
+    "goal_ridge_10_2026-10-01": "1829bc725c08a83438fb8bcd0c661f1b015d56364cde3bb4985efea20a66ca9f",
+    "goal_ridge_50_2026-10-01": "ecf8672fcb805fbaeeeb538de1da13708f4349f3ccddf2221e8f98e642622cc3"
+  },
+  "ftCriterion": "FT fixed-grid Brier only",
+  "periodCriterion": "Conditional binomial cross-entropy per goal, on common prior-window fixtures",
+  "protocol": "First 2/3 prior month fits profiles/venue offsets; last 1/3 selects; entire prior month fits final offsets",
+  "primary": "Lock existing full-goal distribution exactly; select only conditional half split",
+  "experimental": "Independently select FT base/calibration, without half scores influencing FT choice",
+  "offsetPenalty": 5.0,
+  "testLabelsUsedForSelection": false,
+  "untouchedHoldout": false
+}
