@@ -1,0 +1,56 @@
+name: Betting V2 Expanded Market Research
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-expanded-market-research']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-expanded-market-research
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Install numerical dependencies and verify research rules
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_research_scope_expansion.py -v
+      - name: Scan every archived market and replay frozen models without AI or provider calls
+        run: python scripts/betting_v2/research_scope_expansion.py --output reports/betting_v2/scope_expansion_20261016
+      - name: Preserve all completed evidence and status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: expanded-market-research
+          path: reports/betting_v2/scope_expansion_20261016/
+          retention-days: 30
+      - name: Persist research checkpoint only; no app publication
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$(mktemp -d)"
+          cp -a reports/betting_v2/scope_expansion_20261016/. "$evidence/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            mkdir -p reports/betting_v2/scope_expansion_20261016
+            cp -a "$evidence/." reports/betting_v2/scope_expansion_20261016/
+            git add reports/betting_v2/scope_expansion_20261016
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Save expanded app-market research evidence [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
