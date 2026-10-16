@@ -7,6 +7,7 @@ on:
     paths:
       - '.github/triggers/betting-v2-direct-hot-publish'
       - '.github/triggers/betting-v2-revised-uat-publish'
+      - '.github/triggers/betting-v2-all-market-uat-publish'
 
 permissions:
   contents: write
@@ -38,6 +39,12 @@ jobs:
           PYTHONPATH=scripts python -m unittest discover -s tests -p test_live_revised.py -v
           PYTHONPATH=scripts python -m unittest discover -s tests -p test_model_revision.py -v
           PYTHONPATH=scripts python -m unittest discover -s tests -p test_revision_calibration.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_reliable_counts.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_all_market_live.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_uat_count_quotes.py -v
+          if [ -f reports/betting_v2/all_market_revision_20261016/deployment.json ]; then
+            PYTHONPATH=scripts python -m unittest discover -s tests -p test_all_market_deployment.py -v
+          fi
           python scripts/validate_betting_favourite_policy.py
           python scripts/validate_exact_uat_contract.py
           python scripts/hotpatch_betting_v2_direct.py

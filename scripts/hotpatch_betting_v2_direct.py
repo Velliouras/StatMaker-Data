@@ -46,7 +46,7 @@ def table_fingerprints(db):
     result={}
     with sqlite3.connect(db) as con:
         for name,sql in con.execute("SELECT name,sql FROM sqlite_master WHERE type='table' ORDER BY name"):
-            if name in ('prepared_betting_v4_forecasts','prepared_betting_v4_meta'): continue
+            if name in ('prepared_betting_v4_forecasts','prepared_betting_v4_meta','prepared_betting_v4_quotes'): continue
             h=hashlib.sha256((sql or '').encode());count=0
             quoted='"'+name.replace('"','""')+'"'
             for row in con.execute('SELECT * FROM '+quoted):
@@ -134,6 +134,11 @@ def main():
     metadata['bettingV2DirectExactUatRows'] = exact_count
     metadata['bettingV2DirectExactUatScopes'] = exact_scopes
     metadata['bettingV2DirectExactUatVariant'] = exact_meta['variant']
+    if 'countRevisionDeploymentSha256' in exact_meta:
+        metadata['bettingV2DirectExactUatCountRevisionDeploymentSha256'] = exact_meta['countRevisionDeploymentSha256']
+        metadata['bettingV2DirectExactUatRevisedCountMetrics'] = exact_meta['revisedCountMetrics']
+    if 'uatQuotes' in exact_meta:
+        metadata['bettingV2DirectExactUatQuoteDelivery'] = exact_meta['uatQuotes']
     metadata['bettingV2DirectExactUatDeploymentSha256'] = digest(ROOT/'reports/betting_v2/uat_factorized_20261016/deployment.json')
     if 'revisionDeploymentSha256' in exact_meta:
         metadata['bettingV2DirectExactUatRevisionDeploymentSha256'] = exact_meta['revisionDeploymentSha256']

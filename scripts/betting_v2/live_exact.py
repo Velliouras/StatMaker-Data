@@ -107,6 +107,9 @@ def run(db_path, root, as_of=None):
     counts = defaultdict(int); pending = []; uncertainty = []; cache = {}
     with sqlite3.connect(db_path) as con:
         con.row_factory = sqlite3.Row
+        from betting_v2.uat_count_quotes import stage as stage_uat_quotes
+        quote_meta=stage_uat_quotes(con,root,now)
+        provenance['uatQuotes']=quote_meta
         # An additive UAT table: the old forecast and non-betting tables remain.
         con.execute('DROP TABLE IF EXISTS prepared_betting_v4_forecasts')
         con.execute('CREATE TABLE prepared_betting_v4_forecasts AS '
@@ -119,7 +122,7 @@ def run(db_path, root, as_of=None):
         con.execute('DROP TABLE IF EXISTS prepared_betting_v4_meta')
         con.execute('CREATE TABLE prepared_betting_v4_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)')
         rows = con.execute('''SELECT f.*,q.ordinal,q.market,q.selection,q.team,q.line,q.odd
-            FROM prepared_fixture_matches f JOIN prepared_betting_v2_quotes q
+            FROM prepared_fixture_matches f JOIN prepared_betting_v4_quotes q
             ON q.competition_id=f.competition_id AND q.snapshot_version=f.snapshot_version
             AND q.match_key=f.match_key
             WHERE f.usable_for_stats=1 OR
