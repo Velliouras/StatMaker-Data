@@ -25,6 +25,8 @@ SUPPORTED_FAMILIES = {
     "TEAM_SHOTS",
     "MATCH_SHOTS_ON_TARGET",
     "TEAM_SHOTS_ON_TARGET",
+    "MATCH_FOULS",
+    "TEAM_FOULS",
     "DOUBLE_CHANCE",
     "HALF_TIME_DOUBLE_CHANCE",
 }
@@ -76,7 +78,7 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
         unsupported_reason = "special corner market is not a match corner total"
     elif any(token in name for token in ("tackle", "offside", "goalkeeper save", "total save")):
         unsupported_reason = "non-goal statistic must not become a goals total"
-    elif (half_time or second_half) and any(token in name for token in ("corner", "shot", "card", "booking")):
+    elif (half_time or second_half) and any(token in name for token in ("corner", "shot", "card", "booking", "foul")):
         unsupported_reason = "period-specific count must not become a full-time count"
     elif (second_half and "double chance" in name) or (
         (half_time or second_half) and "draw no bet" in name
@@ -89,7 +91,7 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
     if unsupported_reason:
         return {"family": "UNSUPPORTED", "status": "unsupported", "reason": unsupported_reason}
 
-    if any(
+    if re.fullmatch(r'to score \d+ goals?', name) or any(
         token in name
         for token in (
             "player",
@@ -106,7 +108,7 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
         family = "SECOND_HALF_BTTS"
     elif half_time and any(token in name for token in ("both teams", "btts", "both teams to score")):
         family = "HALF_TIME_BTTS"
-    elif half_time and any(token in name for token in ("result", "winner", "moneyline", "1x2", "money line")):
+    elif half_time and (name.startswith('ml ') or any(token in name for token in ("result", "winner", "moneyline", "1x2", "money line"))):
         family = "HALF_TIME_RESULT"
     elif any(token in name for token in ("correct score", "exact score")):
         family = "CORRECT_SCORE"
@@ -122,6 +124,8 @@ def classify_provider_market(raw_name: str) -> Dict[str, str]:
         family = "ASIAN_HANDICAP"
     elif _is_team_market(name) and any(token in name for token in ("alternative", "alternate", "alt line", "alt total")):
         family = "TEAM_GOALS_ALT_LINES"
+    elif 'foul' in name:
+        family = 'TEAM_FOULS' if _is_team_market(name) else 'MATCH_FOULS'
     elif "shot on target" in name or "shots on target" in name or "on target" in name:
         family = "TEAM_SHOTS_ON_TARGET" if _is_team_market(name) else "MATCH_SHOTS_ON_TARGET"
     elif "shot" in name:
