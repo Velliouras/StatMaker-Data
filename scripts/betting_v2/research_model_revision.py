@@ -161,13 +161,14 @@ def train_fold(args,history,raw_prices,aliases,fitday,testday,endday,signature):
     return saved
 
 
-def evaluate(args,frozen,joined):
+def evaluate(args,frozen,joined,model_root=None):
+    model_root=model_root or args.output
     options={a:[] for a in ARMS};brier=defaultdict(list);paired=[];coverage=Counter();eligible=set()
     for fold in frozen['folds']:
         day=fold['testFrom'];new={}
         for name in ('reliability','recency'):
-            new[name]={r['fixture']:r for r in read(args.output/(name+'_'+day+'_predictions.json.gz'))}
-        profiles={name:read(args.output/(name+'_'+day+'_profile.json')) for name in ('reliability','recency')}
+            new[name]={r['fixture']:r for r in read(model_root/(name+'_'+day+'_predictions.json.gz'))}
+        profiles={name:read(model_root/(name+'_'+day+'_profile.json')) for name in ('reliability','recency')}
         calibrator=read(args.output/('recency_'+day+'_selected_calibration.json'))
         fixtures={f['fixture']:f for f in fold['fixtures']}
         for packet in joined:

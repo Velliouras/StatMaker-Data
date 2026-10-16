@@ -1,0 +1,57 @@
+name: Betting V2 Expanding Prior Calibration
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-revision-calibration']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-revision-calibration
+  cancel-in-progress: false
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PYTHONPATH: scripts
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Verify frozen-core calibration and chronology rules
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_model_revision.py -v
+          python -m unittest discover -s tests -p test_revision_calibration.py -v
+      - name: Fit only prior selected calibration and replay all six arms
+        run: python -u scripts/betting_v2/research_revision_calibration.py --output reports/betting_v2/model_revision_calibration_20261016
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: expanding-prior-calibration
+          path: reports/betting_v2/model_revision_calibration_20261016/
+          retention-days: 30
+      - name: Persist this experiment only
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$(mktemp -d)"
+          cp -a reports/betting_v2/model_revision_calibration_20261016/. "$evidence/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            mkdir -p reports/betting_v2/model_revision_calibration_20261016
+            cp -a "$evidence/." reports/betting_v2/model_revision_calibration_20261016/
+            git add reports/betting_v2/model_revision_calibration_20261016
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Save expanding prior calibration results without core refits [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
