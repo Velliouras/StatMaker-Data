@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Host-only App-Ready hot publisher: install direct V2 forecasts in existing DB.
-
-No emulator, no re-run of legacy simulations, no certified-model
-precondition. The published immutable betting ZIP contains the same
-existing data plus the newly fitted Betting V2 table.
-"""
+"""Publish only the UAT v4 forecasts in the existing immutable betting bundle."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -15,6 +10,11 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+import sqlite3
+import sys
+
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from betting_v2.live_exact import run as materialize_exact
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "data/statmaker/app_ready"
@@ -41,6 +41,21 @@ def zip_exact(source: Path, target: Path) -> None:
                              compress_type=zipfile.ZIP_DEFLATED, compresslevel=8)
 
 
+def table_fingerprints(db):
+    """Assert that publishing UAT cannot alter any legacy or fixture table."""
+    result={}
+    with sqlite3.connect(db) as con:
+        for name,sql in con.execute("SELECT name,sql FROM sqlite_master WHERE type='table' ORDER BY name"):
+            if name in ('prepared_betting_v4_forecasts','prepared_betting_v4_meta'): continue
+            h=hashlib.sha256((sql or '').encode());count=0
+            quoted='"'+name.replace('"','""')+'"'
+            for row in con.execute('SELECT * FROM '+quoted):
+                h.update(json.dumps(row,separators=(',',':'),ensure_ascii=False,default=repr).encode())
+                h.update(b'\n');count+=1
+            result[name]=dict(rows=count,sha256=h.hexdigest())
+    return result
+
+
 def main():
     manifest = json.loads(MANIFEST.read_text())
     betting = next(x for x in manifest["artifacts"] if x["id"] == "app_ready_betting_bundle")
@@ -48,6 +63,8 @@ def main():
     base_sha = betting["sha256"]
     if not original.is_file():
         raise SystemExit("Existing App-Ready betting bundle is unavailable")
+    if digest(original)!=base_sha:
+        raise SystemExit('Existing betting bundle hash mismatch')
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     with tempfile.TemporaryDirectory() as td:
         scratch = Path(td)
@@ -59,20 +76,11 @@ def main():
         internal = extracted / "bundle_manifest.json"
         if not db.is_file() or not internal.is_file():
             raise SystemExit("Existing ZIP lacks prepared betting DB or its manifest")
-        exact_feeds = scratch / "uefa_exact_feeds"
-        exact_feeds.mkdir()
-        # Three normalized repository snapshots; zero provider requests.
-        subprocess.run(["git","fetch","--no-tags","origin",
-                        "build/uefa-qualifier-feed-20260720"],cwd=ROOT,check=True)
-        quote_ref = subprocess.check_output(["git","rev-parse","FETCH_HEAD"],cwd=ROOT,text=True).strip()
-        for competition in ("champions_league","europa_league","conference_league"):
-            relative = f"odds/odds_api_io/{competition}_odds.json"
-            payload = subprocess.check_output(["git","show",f"{quote_ref}:{relative}"],cwd=ROOT)
-            json.loads(payload)
-            (exact_feeds / (competition+"_odds.json")).write_bytes(payload)
-        subprocess.run(["python",str(ROOT/"scripts/materialize_betting_v2_direct.py"),str(db),
-                        "--uefa-exact-feed-dir",str(exact_feeds)],cwd=ROOT,check=True)
-        import sqlite3
+        preserved=table_fingerprints(db)
+        summary=materialize_exact(db,ROOT)
+        if table_fingerprints(db)!=preserved:
+            raise SystemExit('UAT publication altered a non-UAT table')
+        print('UAT_ONLY_PRESERVED_TABLES',len(preserved),json.dumps(summary,sort_keys=True))
         with sqlite3.connect(db) as con:
             count = int(con.execute("SELECT count(*) FROM prepared_betting_v2_forecasts").fetchone()[0])
             fixtures = int(con.execute(
@@ -119,15 +127,15 @@ def main():
         sha256=sha, bytes=output.stat().st_size, generatedAt=now
     )
     metadata = manifest.setdefault("metadata", {})
-    metadata["bettingV2DirectModel"] = "betting-v2-monotone-matchup-scenarios-v3"
     metadata["bettingV2DirectBaseSha256"] = base_sha
-    metadata["bettingV2DirectIncreasingStrength"] = True
-    metadata["bettingV2DirectFavouriteScenario"] = "goal-periods-condition-on-FT-winner; attacking-counts-condition-on-team-count-dominance; raw-P-WIN-unchanged"
-    metadata["bettingV2DirectUefaQuoteRef"] = quote_ref
     metadata["bettingV2DirectRows"] = count
     metadata['bettingV2DirectExactUatModel'] = 'betting-v2-joint-count-v4'
     metadata['bettingV2DirectExactUatRows'] = exact_count
     metadata['bettingV2DirectExactUatScopes'] = exact_scopes
+    metadata['bettingV2DirectExactUatVariant'] = 'separate_ft_selected_period'
+    metadata['bettingV2DirectExactUatDeploymentSha256'] = digest(ROOT/'reports/betting_v2/uat_factorized_20261016/deployment.json')
+    metadata['bettingV2DirectUatOnlyPublication'] = True
+    metadata['bettingV2DirectPreservedTables'] = preserved
     metadata["bettingV2DirectFixtures"] = fixtures
     metadata["bettingV2DirectQuoteCount"] = quote_count
     metadata["bettingV2DirectQuoteSource"] = "period-verified-quotes-with-bookmaker-and-source-hash-in-same-immutable-bundle"
@@ -144,4 +152,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

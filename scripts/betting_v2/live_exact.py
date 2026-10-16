@@ -26,7 +26,7 @@ class FrozenFit:
         return np.column_stack((1-p, p))
 
 
-def restore(state, history, fit_before, metric_values):
+def restore(state, history, fit_before, metric_values, sample_counts=None):
     model = OpponentMatchup.__new__(OpponentMatchup)
     model.feature_exclusions = frozenset()
     model.use_goal_strength = True
@@ -43,7 +43,7 @@ def restore(state, history, fit_before, metric_values):
     # Training sample metadata was not exported separately. Reconstruct counts
     # from the same source history; never call an estimator's fit method.
     before = [r for r in history if r['_date'] < fit_before]
-    if len(before) != model.matches:
+    if sample_counts is None and len(before) != model.matches:
         raise ValueError('Frozen model training source no longer matches')
     for metric, values in state['weights'].items():
         if metric == 'period':
@@ -54,10 +54,14 @@ def restore(state, history, fit_before, metric_values):
             model.models[metric] = FrozenFit(values)
             model.columns[metric] = values['columns']
             model.feature_scales[metric] = np.asarray(values['scales'])
-            model.train[metric] = range(2*sum(metric_values(r,metric) is not None for r in before))
+            count = (sample_counts['metrics'][metric] if sample_counts is not None else
+                     sum(metric_values(r,metric) is not None for r in before))
+            model.train[metric] = range(2*count)
     if 'period' not in state['weights']: model.period_model = None
-    model.period_train = range(sum(sum(v>0 for v in metric_values(r,'GOALS_FT'))
-        for r in before if metric_values(r,'GOALS_1H') is not None))
+    period_count = (sample_counts['periodObservations'] if sample_counts is not None else
+        sum(sum(v>0 for v in metric_values(r,'GOALS_FT'))
+            for r in before if metric_values(r,'GOALS_1H') is not None))
+    model.period_train = range(period_count)
     return model
 
 
@@ -98,7 +102,8 @@ def run(db_path, root, as_of=None):
     now = as_of if as_of is not None else datetime.now(timezone.utc).timestamp()
     cutoff = math.floor(now/86400)*86400
     history = direct.load_actual_results(cutoff)['GLOBAL']
-    model, profile, provenance = load_live(root,history,cutoff)
+    from betting_v2.live_factorized import load_factorized
+    model, profile, provenance = load_factorized(root,history,cutoff)
     counts = defaultdict(int); pending = []; cache = {}
     with sqlite3.connect(db_path) as con:
         con.row_factory = sqlite3.Row
