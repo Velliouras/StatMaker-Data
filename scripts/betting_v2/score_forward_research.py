@@ -9,6 +9,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 import materialize_betting_v2_direct as direct
 from betting_v2.joint_count import outcome
+from betting_v2.research_app_markets import outcome_extended,PERIOD_SCOPES
 from betting_v2.research_quotes import stats
 from betting_v2.recovery_walk_forward import summary,write
 
@@ -19,7 +20,9 @@ def settled(rows,actual,freeze_time):
         truth=actual.get(r['fixture'])
         labels=direct.metric_values(truth,r['spec'][0]) if truth is not None else None
         if labels is None:missing+=1;continue
-        y,push=outcome(*labels,r['spec']);scored.append(dict(r,y=y,actualPush=push))
+        first=direct.metric_values(truth,'GOALS_1H') if r['spec'][1] in PERIOD_SCOPES else None
+        if r['spec'][1] in PERIOD_SCOPES and first is None:missing+=1;continue
+        y,push=outcome_extended(*labels,r['spec'],first=first);scored.append(dict(r,y=y,actualPush=push))
     return scored,missing
 
 def paired_comparisons(events,baseline='full'):

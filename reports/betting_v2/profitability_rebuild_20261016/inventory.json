@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "archive": {
+    "path": "reports/betting_v2/profitability_rebuild_20261016/experiments.zip",
+    "bytes": 4341690,
+    "sha256": "83ccb46804f20ce0f0f153c2f187b486fd86b326f641dbc59e4d3bc7c278b6e8"
+  },
+  "files": 55,
+  "newMeanModelFits": 0,
+  "providerCalls": 0,
+  "llmCallsInExperiments": 0,
+  "appChanges": 0,
+  "futureCohort": {
+    "path": "frozen_20261016T175231Z.json.gz",
+    "sha256": "26c6894058f9ac28df2704b8267e862b9ecf6b8164196f218bf1cbf48780a6b0",
+    "frozenAtUTC": "2026-10-16T17:52:31.945687+00:00",
+    "models": {
+      "control": {
+        "forecasts": 41342,
+        "fixtures": 140,
+        "selected": 19
+      },
+      "coupled_market_point": {
+        "forecasts": 23260,
+        "fixtures": 140,
+        "selected": 30
+      },
+      "coupled_market_conservative": {
+        "forecasts": 23260,
+        "fixtures": 140,
+        "selected": 9
+      }
+    }
+  },
+  "combinedResults": {
+    "earliest": {
+      "combined_point": {
+        "bets": 45,
+        "fixtures": 38,
+        "wins": 27.0,
+        "pushes": 0.0,
+        "profitUnits": 5.183999999999999,
+        "roi": 0.11519999999999998,
+        "roi95": [
+          -0.20396820451584885,
+          0.4378072222222219
+        ],
+        "meanPredicted": 0.643395281101294,
+        "hitRate": 0.6
+      },
+      "combined_conservative": {
+        "bets": 14,
+        "fixtures": 12,
+        "wins": 7.0,
+        "pushes": 0.0,
+        "profitUnits": -0.843,
+        "roi": -0.06021428571428571,
+        "roi95": null,
+        "meanPredicted": 0.6260646482217753,
+        "hitRate": 0.5
+      }
+    },
+    "latest": {
+      "combined_point": {
+        "bets": 49,
+        "fixtures": 40,
+        "wins": 28.0,
+        "pushes": 0.0,
+        "profitUnits": 3.317000000000001,
+        "roi": 0.06769387755102042,
+        "roi95": [
+          -0.2266562727272727,
+          0.3720391287878784
+        ],
+        "meanPredicted": 0.6412315481935622,
+        "hitRate": 0.5714285714285714
+      },
+      "combined_conservative": {
+        "bets": 12,
+        "fixtures": 10,
+        "wins": 7.0,
+        "pushes": 0.0,
+        "profitUnits": 1.1569999999999998,
+        "roi": 0.09641666666666665,
+        "roi95": null,
+        "meanPredicted": 0.6200081151679471,
+        "hitRate": 0.5833333333333334
+      }
+    }
+  }
+}

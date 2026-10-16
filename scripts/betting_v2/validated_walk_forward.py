@@ -61,6 +61,10 @@ def grid(metric):
 
 def distribution(row,profile):
     metric=row['metric'];key=('GOALS_FT' if metric.startswith('GOALS') else metric)+'::'+row['regime']
+    if not metric.startswith('GOALS') and profile.get(key,{}).get('family')=='total_allocation':
+        from .paired_count import from_means
+        values=profile[key]
+        return from_means(*row['means'],**{k:values[k] for k in ('scale','alpha','concentration')})
     params={k:v for k,v in profile.get(key,{}).items() if k in ('scale','alpha','draw_tilt','btts_tilt')}
     j=JointCount.from_means(*row.get('fullMeans',row['means']),**params)
     if metric.startswith('GOALS') and profile.get('_selected_joint'):
