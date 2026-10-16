@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "c17ffc6f18b66dc00f56ebf54909627948f39a82897d366b05d1b3bb1b21e6f5",
-  "generatedAt": "2026-10-15T23:45:57Z",
+  "contentVersion": "cc408daa3e4a1850ee264ec79617393b0ebd86caef1b63cba0e7a68059de9c28",
+  "generatedAt": "2026-10-16T01:33:36.749799Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "0b9a51c8787318247244a670f8e42573ee417f08b1b6666aa627060510e27ba6",
-      "bytes": 96515,
-      "generatedAt": "2026-10-15T23:12:28Z"
+      "sha256": "ceadba312ccdec84299de77fb494eaf965bfba31019b834fa045023b31a32208",
+      "bytes": 96516,
+      "generatedAt": "2026-10-16T01:33:33Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
-      "bytes": 21123835,
+      "sha256": "64ec5cc54b44bbb5bdf65af8728b8c1ee6de26dd899c9c8a82bbf961e4999fa8",
+      "bytes": 21125109,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "8a77d99fa9fb95ad4d0a7490ad8ef92a21a7a162025835c2c2e20427a62be217",
-      "bytes": 8702841,
-      "generatedAt": "2026-10-15T23:12:34.545634Z"
+      "sha256": "6332dd215da4b4b840427378f55baf5d578c87100e1f687090e99d323695ac8c",
+      "bytes": 8702963,
+      "generatedAt": "2026-10-16T01:33:36.749799Z"
     },
     {
       "id": "uefa_team_logos",
@@ -92,7 +92,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
+    "targetSha256": "64ec5cc54b44bbb5bdf65af8728b8c1ee6de26dd899c9c8a82bbf961e4999fa8",
     "transitions": [
       {
         "fromSha256": "66317fe98da912062011149f389960063bf03687c0acab04bcb78e1b808723fa",
@@ -364,6 +364,65 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 11,
               "AFreeKicks": 13
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "d0e3a9fbdac4ed7320c9e8bebf0e36c51963107e6fba7a828cfd5af82bbe35c4",
+        "toSha256": "64ec5cc54b44bbb5bdf65af8728b8c1ee6de26dd899c9c8a82bbf961e4999fa8",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1493190,
+            "league_id": 128,
+            "league_code": "ARG",
+            "country": "Argentina",
+            "league": "Liga Profesional Argentina",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-10-15",
+            "home_team": "Huracan",
+            "away_team": "Gimnasia L.P.",
+            "stats": {
+              "HS": 17,
+              "AS": 11,
+              "HST": 4,
+              "AST": 6,
+              "HC": 11,
+              "AC": 3,
+              "HF": 15,
+              "AF": 11,
+              "HY": 6,
+              "AY": 1,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 56,
+              "APossession": 44,
+              "HSaves": 4,
+              "ASaves": 3,
+              "HPasses": 402,
+              "APasses": 335,
+              "HPassesAccurate": 333,
+              "APassesAccurate": 258,
+              "HxG": 1.94,
+              "AxG": 1.35,
+              "HShotsOffGoal": 10,
+              "AShotsOffGoal": 4,
+              "HBlockedShots": 3,
+              "ABlockedShots": 1,
+              "HShotsInsideBox": 11,
+              "AShotsInsideBox": 6,
+              "HShotsOutsideBox": 6,
+              "AShotsOutsideBox": 5,
+              "HOffsides": 3,
+              "AOffsides": 0,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 11,
+              "AFreeKicks": 14
             }
           }
         ]
