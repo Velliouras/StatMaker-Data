@@ -93,6 +93,7 @@ def main():
             ).fetchall())
             exact_count = con.execute('SELECT count(*) FROM prepared_betting_v4_forecasts').fetchone()[0]
             exact_scopes = dict(con.execute('SELECT competition_id,count(*) FROM prepared_betting_v4_forecasts GROUP BY competition_id'))
+            exact_meta = {k:json.loads(v) for k,v in con.execute('SELECT key,value FROM prepared_betting_v4_meta')}
             if exact_count == 0:
                 raise SystemExit('Exact UAT model produced no forecasts')
             print('BETTING_V4_EXACT_UAT_SCOPES',json.dumps(exact_scopes,sort_keys=True))
@@ -132,8 +133,12 @@ def main():
     metadata['bettingV2DirectExactUatModel'] = 'betting-v2-joint-count-v4'
     metadata['bettingV2DirectExactUatRows'] = exact_count
     metadata['bettingV2DirectExactUatScopes'] = exact_scopes
-    metadata['bettingV2DirectExactUatVariant'] = 'separate_ft_selected_period'
+    metadata['bettingV2DirectExactUatVariant'] = exact_meta['variant']
     metadata['bettingV2DirectExactUatDeploymentSha256'] = digest(ROOT/'reports/betting_v2/uat_factorized_20261016/deployment.json')
+    if 'revisionDeploymentSha256' in exact_meta:
+        metadata['bettingV2DirectExactUatRevisionDeploymentSha256'] = exact_meta['revisionDeploymentSha256']
+        metadata['bettingV2DirectExactUatUncertainty'] = exact_meta['uncertainty']
+        metadata['bettingV2DirectExactUatDecisionProbabilitiesSeparate'] = True
     metadata['bettingV2DirectUatOnlyPublication'] = True
     metadata['bettingV2DirectPreservedTables'] = preserved
     metadata["bettingV2DirectFixtures"] = fixtures

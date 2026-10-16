@@ -102,9 +102,9 @@ def run(db_path, root, as_of=None):
     now = as_of if as_of is not None else datetime.now(timezone.utc).timestamp()
     cutoff = math.floor(now/86400)*86400
     history = direct.load_actual_results(cutoff)['GLOBAL']
-    from betting_v2.live_factorized import load_factorized
-    model, profile, provenance = load_factorized(root,history,cutoff)
-    counts = defaultdict(int); pending = []; cache = {}
+    from betting_v2.live_revised import load_revised
+    model, profile, provenance = load_revised(root,history,cutoff)
+    counts = defaultdict(int); pending = []; uncertainty = []; cache = {}
     with sqlite3.connect(db_path) as con:
         con.row_factory = sqlite3.Row
         # An additive UAT table: the old forecast and non-betting tables remain.
@@ -113,6 +113,9 @@ def run(db_path, root, as_of=None):
                     'SELECT * FROM prepared_betting_v2_forecasts WHERE 0')
         con.execute('CREATE UNIQUE INDEX idx_betting_v4_scope ON prepared_betting_v4_forecasts'
                     '(competition_id,snapshot_version,match_key,market_ordinal)')
+        forecast_columns=[r[1] for r in con.execute('PRAGMA table_info(prepared_betting_v4_forecasts)')]
+        for column in ('decision_win_probability','decision_push_probability','decision_ev','decision_home_scenario_probability','decision_away_scenario_probability'):
+            con.execute('ALTER TABLE prepared_betting_v4_forecasts ADD COLUMN '+column+' REAL')
         con.execute('DROP TABLE IF EXISTS prepared_betting_v4_meta')
         con.execute('CREATE TABLE prepared_betting_v4_meta (key TEXT PRIMARY KEY,value TEXT NOT NULL)')
         rows = con.execute('''SELECT f.*,q.ordinal,q.market,q.selection,q.team,q.line,q.odd
@@ -152,6 +155,19 @@ def run(db_path, root, as_of=None):
             result = forecast(target,profile,spec,prepared)
             # Card counts lack a verified bookmaker settlement contract.
             if 'CARD' in metric: counts['unverified_card_settlement'] += 1; continue
+            if hasattr(model,'bounds'):
+                bound=model.bounds(home,away,spec,row['odd'])
+                if bound is not None:
+                    if (not all(math.isfinite(v) for v in bound.values()) or
+                            not 0<=bound['win']<=result['winProbability']+1e-12 or
+                            not 0<=bound['push']<=result['pushProbability']+1e-12 or
+                            bound['ev']>result['winProbability']*row['odd']+result['pushProbability']-1+1e-12):
+                        raise ValueError('Invalid conservative decision sensitivity')
+                    bound['win']=min(bound['win'],result['winProbability'])
+                    bound['push']=min(bound['push'],result['pushProbability'])
+                    bound['ev']=bound['win']*row['odd']+bound['push']-1
+                    uncertainty.append((bound['win'],bound['push'],bound['ev'],bound['home'],bound['away'],
+                        row['competition_id'],row['snapshot_version'],row['match_key'],row['ordinal']))
             pending.append((row['competition_id'],row['snapshot_version'],row['match_key'],row['ordinal'],
                 row['market'],row['selection'],row['team'],row['line'],row['odd'],
                 result['winProbability'],result['pushProbability'],VERSION,metric,0,*prediction[2:5],
@@ -159,11 +175,15 @@ def run(db_path, root, as_of=None):
                 full.evaluate(('GOALS_FT','RESULT','HOME','',None))[0],
                 full.evaluate(('GOALS_FT','RESULT','AWAY','',None))[0],
                 result['scenarios']['HOME']['winProbability'],result['scenarios']['AWAY']['winProbability'],0,0))
-        con.executemany('INSERT INTO prepared_betting_v4_forecasts VALUES ('+','.join('?' for _ in range(25))+')',pending)
+        con.executemany('INSERT INTO prepared_betting_v4_forecasts ('+','.join(forecast_columns)+') VALUES ('+','.join('?' for _ in range(25))+')',pending)
+        con.executemany('UPDATE prepared_betting_v4_forecasts SET decision_win_probability=?,decision_push_probability=?,decision_ev=?,'
+            'decision_home_scenario_probability=?,decision_away_scenario_probability=? '
+            'WHERE competition_id=? AND snapshot_version=? AND match_key=? AND market_ordinal=?',uncertainty)
         con.executemany('INSERT INTO prepared_betting_v4_meta VALUES (?,?)',
                         [(k,json.dumps(v)) for k,v in provenance.items()])
         con.commit()
         counts['forecasts'] = len(pending)
         counts['fixtures'] = len({r[:3] for r in pending})
         counts['providerCalls'] = 0
+        counts['uncertaintyForecasts'] = len(uncertainty)
     return dict(counts)

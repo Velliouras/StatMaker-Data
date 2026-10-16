@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - '.github/triggers/betting-v2-direct-hot-publish'
+      - '.github/triggers/betting-v2-revised-uat-publish'
 
 permissions:
   contents: write
@@ -34,6 +35,9 @@ jobs:
           python -m pip install --quiet numpy scipy scikit-learn
           python -m unittest discover -s tests -p test_betting_v2_opponent_matchup.py -v
           python -m unittest discover -s tests -p test_live_factorized.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_live_revised.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_model_revision.py -v
+          PYTHONPATH=scripts python -m unittest discover -s tests -p test_revision_calibration.py -v
           python scripts/validate_betting_favourite_policy.py
           python scripts/validate_exact_uat_contract.py
           python scripts/hotpatch_betting_v2_direct.py
