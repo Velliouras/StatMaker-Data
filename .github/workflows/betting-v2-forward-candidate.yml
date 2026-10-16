@@ -5,7 +5,7 @@ on:
     - cron: '15 5 * * *'
   push:
     branches: [main]
-    paths: ['.github/triggers/betting-v2-forward-candidate']
+    paths: ['.github/triggers/betting-v2-forward-candidate', '.github/triggers/betting-v2-forward-candidate-proof']
 permissions:
   contents: write
 concurrency:
@@ -48,14 +48,40 @@ jobs:
           cp -a "$folder/." "$evidence/"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          published=false
           for attempt in 1 2 3; do
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
             mkdir -p "$folder"
             cp -a "$evidence/." "$folder/"
             git add "$folder"
-            if git diff --cached --quiet; then exit 0; fi
+            if git diff --cached --quiet; then published=true; break; fi
             git commit -m "Freeze future candidate research and score available completed fixtures [skip ci]"
+            if git push origin HEAD:main; then published=true; break; fi
+          done
+          [[ "$published" == "true" ]]
+      - name: Record publication timing after successful evidence push
+        run: |
+          set -euo pipefail
+          python scripts/betting_v2/forward_candidate.py --output reports/betting_v2/forward_candidate_20261016 --record-publication
+          proof="reports/betting_v2/forward_candidate_20261016/publication_evidence.json"
+          saved="$(mktemp)"
+          cp "$proof" "$saved"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            python - "$saved" "$proof" <<'PY'
+          import json,sys
+          from pathlib import Path
+          incoming,target=map(Path,sys.argv[1:]);old=json.loads(target.read_text()) if target.exists() else {}
+          for key,value in json.loads(incoming.read_text()).items():
+              if key in old and old[key]['sha256']!=value['sha256']:raise ValueError('Publication proof hash changed')
+              if key not in old or value['publiclyVerifiedAtUTC']<old[key]['publiclyVerifiedAtUTC']:old[key]=value
+          target.write_text(json.dumps(old,indent=2)+'\n')
+          PY
+            git add "$proof"
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Record public-before-kickoff eligibility for forward research [skip ci]"
             if git push origin HEAD:main; then exit 0; fi
           done
           exit 1

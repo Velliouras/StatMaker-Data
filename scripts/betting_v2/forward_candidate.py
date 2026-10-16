@@ -9,6 +9,7 @@ import copy
 from datetime import datetime,timezone
 import gzip,json,math,sqlite3,tempfile,zipfile
 import fcntl
+import subprocess
 from pathlib import Path
 import sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
@@ -154,24 +155,53 @@ def freeze(out,index):
 def score(out,index):
     actual_rows=direct.load_actual_results(datetime.now(timezone.utc).timestamp())['GLOBAL']
     actual={f"{r['_date']}:{r['_home']}:{r['_away']}":r for r in actual_rows}
+    proof_path=out/'publication_evidence.json';proof=read(proof_path) if proof_path.exists() else {}
     for item in index.get('cohorts',[]):
         path=out/item['path']
         if digest(path.read_bytes())!=item['sha256']:raise ValueError('Immutable cohort hash changed')
         doc=read(path);when=datetime.fromisoformat(doc['frozenAtUTC']).timestamp();result={};events={}
+        public=proof.get(item['path']);verified=datetime.fromisoformat(public['publiclyVerifiedAtUTC']).timestamp() if public else None
+        if public and public['sha256']!=item['sha256']:raise ValueError('Publication proof hash mismatch')
         for name,data in doc['models'].items():
-            picks,missing=settled(data['selected'],actual,when);rows,missing_rows=settled(data['forecasts'],actual,when)
-            result[name]=dict(selected=stats(picks),selectedUnscored=missing,forecastScored=len(rows),forecastUnscored=missing_rows)
+            eligible_picks=public_rows(data['selected'],verified);eligible_forecasts=public_rows(data['forecasts'],verified)
+            picks,missing=settled(eligible_picks,actual,when);rows,missing_rows=settled(eligible_forecasts,actual,when)
+            result[name]=dict(selected=stats(picks),selectedUnscored=missing if public else len(data['selected']),forecastScored=len(rows),
+                forecastUnscored=missing_rows if public else len(data['forecasts']),
+                eligibleSelected=len(eligible_picks),eligibleFixtures=len({r['fixture'] for r in eligible_forecasts}),
+                selectedExcludedLatePublication=len(data['selected'])-len(eligible_picks) if public else 0,
+                fixturesExcludedLatePublication=len({r['fixture'] for r in data['forecasts'] if r['kickoff']<=verified}) if public else 0)
             events[name]={(r['fixture'],r['bookmaker'],tuple(r['spec'])):r for r in rows if not r['actualPush']}
         write(out/(path.stem.replace('.json','')+'_score.json'),dict(frozenSha256=item['sha256'],scoredAtUTC=datetime.now(timezone.utc).isoformat(),
-            models=result,pairedComparisons=paired_comparisons(events,baseline='control'),providerCalls=0,llmCalls=0,refits=0))
+            models=result,publicationVerified=bool(public),publicationEvidence=public,
+            pairedComparisons=paired_comparisons(events,baseline='control'),providerCalls=0,llmCalls=0,refits=0))
+
+
+def public_rows(rows,verified):
+    return [r for r in rows if r['kickoff']>verified] if verified is not None else []
+
+
+def record_publication(out,index):
+    path=out/'publication_evidence.json';proof=read(path) if path.exists() else {}
+    for item in index.get('cohorts',[]):
+        if item['path'] in proof:continue
+        file=out/item['path'];relative=str(file.resolve().relative_to(ROOT))
+        subprocess.run(['git','ls-files','--error-unmatch',relative],cwd=ROOT,check=True,stdout=subprocess.DEVNULL)
+        commit=subprocess.check_output(['git','log','-1','--format=%H','--',relative],cwd=ROOT,text=True).strip()
+        if not commit:raise ValueError('No committed snapshot for publication proof')
+        if digest(file.read_bytes())!=item['sha256']:raise ValueError('Publication source changed')
+        proof[item['path']]=dict(commit=commit,sha256=item['sha256'],publiclyVerifiedAtUTC=datetime.now(timezone.utc).isoformat(),
+            method='Recorded after successful Git push; later-than-verification kickoffs only')
+    write(path,proof)
 
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True);args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
+    ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True);ap.add_argument('--record-publication',action='store_true');args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
     lockpath=Path(tempfile.gettempdir())/('statmaker-forward-'+digest(str(args.output.resolve()).encode())[:16]+'.lock')
     with lockpath.open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         path=args.output/'index.json';index=read(path) if path.exists() else dict(schema=1,cohorts=[],events=[])
+        if args.record_publication:
+            record_publication(args.output,index);return
         binding=read(ROOT/'reports/betting_v2/combined_candidate_20261016/source_binding.json')
         changed=[p for p,sha in binding['files'].items() if digest((ROOT/p).read_bytes())!=sha]
         created=None if changed else freeze(args.output,index)

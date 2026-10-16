@@ -3,9 +3,14 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
 from betting_v2.research_model_revision import read
 from betting_v2.score_forward_research import settled
+from betting_v2.forward_candidate import public_rows
 
 
 class ForwardCandidateTests(unittest.TestCase):
+    def test_only_publicly_committed_before_kickoff_rows_are_eligible(self):
+        rows=[dict(kickoff=10.),dict(kickoff=20.)]
+        self.assertEqual(public_rows(rows,15.),[rows[1]])
+        self.assertEqual(public_rows(rows,None),[])
     def test_missing_result_is_unscored_not_a_loss(self):
         r=dict(fixture='f',observed=10.,kickoff=30.,spec=['CORNERS','TOTAL','OVER','',9.5])
         rows,missing=settled([r],{},20.);self.assertEqual(rows,[]);self.assertEqual(missing,1)
