@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "profile": "app_ready",
-  "contentVersion": "e5fa960e9b26735a0f005432d9200191d78c96d2c68beffcc463ccd31d079139",
-  "generatedAt": "2026-10-16T13:01:57.311968Z",
+  "contentVersion": "8eeb3fed9cd5d2d1b99b3ced08a146a42d6f5799395a3b9d3676a3d059156c66",
+  "generatedAt": "2026-10-16T17:16:24.879210Z",
   "artifactCount": 2,
   "artifacts": [
     {
@@ -17,11 +17,11 @@
     {
       "id": "app_ready_betting_bundle",
       "group": "prepared",
-      "path": "data/statmaker/app_ready/app_ready_betting_bundle-cca64e809a59ad640218226a246863eba1ab3bfd7b657aeca970ad70e8385bcd.zip",
-      "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/app_ready_betting_bundle-cca64e809a59ad640218226a246863eba1ab3bfd7b657aeca970ad70e8385bcd.zip",
-      "sha256": "cca64e809a59ad640218226a246863eba1ab3bfd7b657aeca970ad70e8385bcd",
-      "bytes": 48415376,
-      "generatedAt": "2026-10-16T13:01:57.311968Z"
+      "path": "data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
+      "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
+      "sha256": "e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f",
+      "bytes": 49692781,
+      "generatedAt": "2026-10-16T17:16:24.879210Z"
     }
   ],
   "metadata": {
@@ -73,17 +73,17 @@
       "domestic": 31910,
       "europa_league": 1349
     },
-    "bettingV2DirectBaseSha256": "5e546bc02b324376b264b69a27125fed75a0573da0fa9aa5a9686d52ba8e4d91",
+    "bettingV2DirectBaseSha256": "cca64e809a59ad640218226a246863eba1ab3bfd7b657aeca970ad70e8385bcd",
     "bettingV2DirectUefaQuoteRef": "1d49a641a49230f3018b1caace753b78c8709b6a",
     "bettingV2DirectIncreasingStrength": true,
     "bettingV2DirectFavouriteScenario": "goal-periods-condition-on-FT-winner; attacking-counts-condition-on-team-count-dominance; raw-P-WIN-unchanged",
     "bettingV2DirectExactUatModel": "betting-v2-joint-count-v4",
-    "bettingV2DirectExactUatRows": 31506,
+    "bettingV2DirectExactUatRows": 31605,
     "bettingV2DirectExactUatScopes": {
       "champions_league": 1994,
-      "domestic": 29512
+      "domestic": 29611
     },
-    "bettingV2DirectExactUatVariant": "reliability_recency_selected_calibration_uncertainty",
+    "bettingV2DirectExactUatVariant": "all_market_reliability_recency_uncertainty",
     "bettingV2DirectExactUatDeploymentSha256": "3aa9d6b21653fca4a9e58eaee9446e3cb1b5d569693b63a8815f350c06cd4c96",
     "bettingV2DirectUatOnlyPublication": true,
     "bettingV2DirectPreservedTables": {
@@ -182,6 +182,24 @@
     },
     "bettingV2DirectExactUatRevisionDeploymentSha256": "1682c1ec618324dc725f0d5908631ddd273dd22b9d7b017a4229a9d02481907c",
     "bettingV2DirectExactUatUncertainty": "12 UTC-week weighted refits; 10th percentile sensitivity, capped at point prediction",
-    "bettingV2DirectExactUatDecisionProbabilitiesSeparate": true
+    "bettingV2DirectExactUatDecisionProbabilitiesSeparate": true,
+    "bettingV2DirectExactUatCountRevisionDeploymentSha256": "1f602eb85b409a6806c7d9dbd78c0ed3f18e10fcbea56930dc41f383c2c80e96",
+    "bettingV2DirectExactUatRevisedCountMetrics": [
+      "CORNERS",
+      "SHOTS",
+      "SOT",
+      "FOULS",
+      "YELLOW_CARDS",
+      "CARDS",
+      "RED_CARDS"
+    ],
+    "bettingV2DirectExactUatQuoteDelivery": {
+      "addedFoulQuotes": 99,
+      "addedFoulFixtures": 10,
+      "quoteTable": "prepared_betting_v4_quotes",
+      "providerCalls": 0,
+      "rule": "Exact provider ID/kickoff, approved fixture, latest single prematch receipt <=24h",
+      "unsupportedFoulContract": 7303
+    }
   }
 }
