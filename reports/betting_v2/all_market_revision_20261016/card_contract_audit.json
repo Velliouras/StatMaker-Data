@@ -1,0 +1,117 @@
+{
+  "providerCalls": 0,
+  "llmCalls": 0,
+  "cachedEventCoverage": {
+    "eventFiles": 90,
+    "eventFilesWithCards": 87,
+    "cardsMissingPlayerId": 4,
+    "cardsMissingMinute": 0,
+    "eventFilesWithCachedLineups": 0,
+    "invalidQuoteReceipt": 1
+  },
+  "eventCardDetails": {
+    "Yellow Card": 327,
+    "Red Card": 11
+  },
+  "rawCardOfferCounts": {
+    "Bet365::Bookings Totals Home": 466,
+    "Bet365::Number of Cards In Match": 546,
+    "Bet365::Bookings Totals Away": 466,
+    "Bet365::Player Cards": 49044,
+    "Unibet::Bookings Spread": 196,
+    "Unibet::Bookings Totals": 762,
+    "Bet365::Bookings Spread": 364,
+    "Bet365::Bookings Totals": 348
+  },
+  "offerExamples": {
+    "Bet365::Bookings Totals Home": {
+      "providerMarketName": "Bookings Totals Home",
+      "selection": "OVER",
+      "line": 2.5,
+      "odd": 1.833,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887058"
+    },
+    "Bet365::Number of Cards In Match": {
+      "providerMarketName": "Number of Cards In Match",
+      "selection": "OVER",
+      "line": 6.5,
+      "odd": 2.1,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887058"
+    },
+    "Bet365::Bookings Totals Away": {
+      "providerMarketName": "Bookings Totals Away",
+      "selection": "OVER",
+      "line": 3.5,
+      "odd": 1.909,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887058"
+    },
+    "Bet365::Player Cards": {
+      "providerMarketName": "Player Cards",
+      "selection": "OVER",
+      "line": null,
+      "odd": 10.0,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887058"
+    },
+    "Unibet::Bookings Spread": {
+      "providerMarketName": "Bookings Spread",
+      "selection": "HOME",
+      "line": -0.5,
+      "odd": 2.45,
+      "bookmaker": "Unibet",
+      "providerEventId": "66887058"
+    },
+    "Unibet::Bookings Totals": {
+      "providerMarketName": "Bookings Totals",
+      "selection": "OVER",
+      "line": 4.5,
+      "odd": 1.44,
+      "bookmaker": "Unibet",
+      "providerEventId": "66887058"
+    },
+    "Bet365::Bookings Spread": {
+      "providerMarketName": "Bookings Spread",
+      "selection": "HOME",
+      "line": 0,
+      "odd": 2.075,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887070"
+    },
+    "Bet365::Bookings Totals": {
+      "providerMarketName": "Bookings Totals",
+      "selection": "OVER",
+      "line": 4.5,
+      "odd": 1.8,
+      "bookmaker": "Bet365",
+      "providerEventId": "66887076"
+    }
+  },
+  "eventArchiveSha256": "5fb9e535d19020c4dcb65aa3ad17fe04aaf207db21c17468ea217723ca133614",
+  "modelsTrained": [
+    "YELLOW_CARDS",
+    "CARDS",
+    "RED_CARDS"
+  ],
+  "observedLabelSemantics": {
+    "YELLOW_CARDS": "HY,AY",
+    "CARDS": "HY+HR,AY+AR",
+    "RED_CARDS": "HR,AR"
+  },
+  "bookmakerRuleEvidence": [
+    {
+      "bookmaker": "Bet365",
+      "url": "https://help.bet365.gr/s/el-gr/sportsrules/soccer/card-markets",
+      "checkedDate": "2026-10-16",
+      "paraphrase": "Number-of-cards uses yellow weight one and red weight two, omits second yellows and excludes non-playing people and cards after the match."
+    }
+  ],
+  "pricedReplayStatus": "Not graded from aggregate HY+HR: different units and missing player/period eligibility evidence.",
+  "requiredForExactCardSettlement": [
+    "Bookmaker and exact market contract retained on each quote",
+    "Eligible on-field player events during regulation, including second-yellow exclusion",
+    "Separate model target in the verified bookmaker units; never silently reuse HY+HR"
+  ]
+}
