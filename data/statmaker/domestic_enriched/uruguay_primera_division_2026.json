@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-17T01:25:50Z",
+  "generated_at": "2026-10-17T07:47:41Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/uruguay/primera-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-16T08:08:35Z",
+    "cache_generated_at": "2026-10-17T07:46:58Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 257,
-    "fixtures_with_any_stats": 16,
-    "fixtures_with_bb_core_stats": 16,
-    "any_stats_coverage": 0.0623,
-    "bb_core_coverage": 0.0623,
+    "completed_fixtures": 258,
+    "fixtures_with_any_stats": 17,
+    "fixtures_with_bb_core_stats": 17,
+    "any_stats_coverage": 0.0659,
+    "bb_core_coverage": 0.0659,
     "group_counts": {
-      "shots_total": 16,
-      "shots_on_target": 16,
-      "corners": 16,
+      "shots_total": 17,
+      "shots_on_target": 17,
+      "corners": 17,
       "fouls": 0,
-      "yellow_cards": 16,
-      "red_cards": 16,
-      "possession": 16,
+      "yellow_cards": 17,
+      "red_cards": 17,
+      "possession": 17,
       "passes": 0,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.0623,
-      "shots_on_target": 0.0623,
-      "corners": 0.0623,
+      "shots_total": 0.0659,
+      "shots_on_target": 0.0659,
+      "corners": 0.0659,
       "fouls": 0.0,
-      "yellow_cards": 0.0623,
-      "red_cards": 0.0623,
-      "possession": 0.0623,
+      "yellow_cards": 0.0659,
+      "red_cards": 0.0659,
+      "possession": 0.0659,
       "passes": 0.0,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.0623 < 0.65",
-      "low BB-core coverage: 0.0623 < 0.65",
+      "low any-stats coverage: 0.0659 < 0.65",
+      "low BB-core coverage: 0.0659 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -21657,6 +21657,90 @@
         },
         "fulltime": {
           "home": 0,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1644698,
+      "date_utc": "2026-10-16T22:00:00+00:00",
+      "country": "Uruguay",
+      "league": "Primera División",
+      "league_code": "URU",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 268,
+      "round": "Clausura - 11",
+      "home_team": "Cerro",
+      "away_team": "Cerro Largo",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 3,
+        "AS": 6,
+        "HST": 2,
+        "AST": 2,
+        "HC": 3,
+        "AC": 6,
+        "HF": null,
+        "AF": null,
+        "HY": 5,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 41,
+        "APossession": 59,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 1,
+      "home_score": 1,
+      "away_score": 1,
+      "fthg": 1,
+      "ftag": 1,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 1,
           "away": 1
         },
         "extratime": {
