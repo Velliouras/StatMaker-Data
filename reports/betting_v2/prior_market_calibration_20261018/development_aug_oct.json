@@ -1,0 +1,240 @@
+{
+  "status": "DESCRIPTIVE_DEVELOPMENT_ONLY",
+  "untouchedHoldout": false,
+  "rule": "Combine disjoint dates within each receipt policy; never combine earliest and latest. No model or selection changes.",
+  "limitations": [
+    "August-September use daily 12:00 UTC archive slots; October uses 12:00 and 23:59 UTC.",
+    "Canonical selected fixture overlap is checked across periods, not across arms or receipt policies.",
+    "Confidence intervals resample fixtures and do not account for all model selection or temporal dependence."
+  ],
+  "providerCalls": 0,
+  "llmCalls": 0,
+  "results": {
+    "earliest": {
+      "sources": [
+        {
+          "path": "reports/betting_v2/prior_market_calibration_20261018/priced_earliest.json",
+          "sha256": "37bb19b4c4f4515702b1ecedf82c447d2b907a443e3a94f9c6a5c939c889b31b",
+          "bytes": 865408
+        },
+        {
+          "path": "reports/betting_v2/git_archive_expansion_20261016/priced_earliest.json",
+          "sha256": "45443143279ff43cea5ecba34998fee776250de17235086380c8aab81fbb9206",
+          "bytes": 103258
+        }
+      ],
+      "reports": {
+        "control_point": {
+          "overall": {
+            "bets": 265,
+            "fixtures": 235,
+            "wins": 134.0,
+            "pushes": 1.0,
+            "profitUnits": -6.254999999999996,
+            "roi": -0.023603773584905646,
+            "roi95": [
+              -0.1448469824148791,
+              0.09633018042901206
+            ],
+            "meanPredicted": 0.6487768526969953,
+            "hitRate": 0.5056603773584906,
+            "expectedProfitUnits": 67.7038812289197,
+            "meanOdd": 1.9274075471698113,
+            "conditionalBrier": 0.2701655690659592,
+            "conditionalLogLoss": 0.7362608862318812
+          },
+          "sourceBets": [
+            224,
+            41
+          ]
+        },
+        "control_conservative": {
+          "overall": {
+            "bets": 107,
+            "fixtures": 94,
+            "wins": 56.0,
+            "pushes": 0.0,
+            "profitUnits": 1.4080000000000013,
+            "roi": 0.013158878504672908,
+            "roi95": [
+              -0.17124547401484863,
+              0.19298389735156654
+            ],
+            "meanPredicted": 0.6429433347357454,
+            "hitRate": 0.5233644859813084,
+            "expectedProfitUnits": 26.54728130709209,
+            "meanOdd": 1.9375700934579438,
+            "conditionalBrier": 0.26066247273101123,
+            "conditionalLogLoss": 0.7158233697636138
+          },
+          "sourceBets": [
+            97,
+            10
+          ]
+        },
+        "coupled_point": {
+          "overall": {
+            "bets": 304,
+            "fixtures": 271,
+            "wins": 152.0,
+            "pushes": 1.0,
+            "profitUnits": -10.034,
+            "roi": -0.03300657894736842,
+            "roi95": [
+              -0.13966856617647058,
+              0.07125641662186517
+            ],
+            "meanPredicted": 0.6490475594976651,
+            "hitRate": 0.5,
+            "expectedProfitUnits": 78.79202399663204,
+            "meanOdd": 1.9290164473684213,
+            "conditionalBrier": 0.271889005153559,
+            "conditionalLogLoss": 0.7400073360688786
+          },
+          "sourceBets": [
+            259,
+            45
+          ]
+        },
+        "coupled_conservative": {
+          "overall": {
+            "bets": 116,
+            "fixtures": 104,
+            "wins": 61.0,
+            "pushes": 0.0,
+            "profitUnits": 1.465000000000002,
+            "roi": 0.012629310344827603,
+            "roi95": [
+              -0.16806778273809525,
+              0.1875991452991449
+            ],
+            "meanPredicted": 0.6438741017602847,
+            "hitRate": 0.5258620689655172,
+            "expectedProfitUnits": 28.566295003215288,
+            "meanOdd": 1.929051724137931,
+            "conditionalBrier": 0.2626221904888396,
+            "conditionalLogLoss": 0.720232539811579
+          },
+          "sourceBets": [
+            104,
+            12
+          ]
+        }
+      },
+      "crossPeriodSelectedFixtureOverlap": 0
+    },
+    "latest": {
+      "sources": [
+        {
+          "path": "reports/betting_v2/prior_market_calibration_20261018/priced_latest.json",
+          "sha256": "583ded85dadbe7cf6d539458df038f3092043e34286adc30f7161d6330458125",
+          "bytes": 1584720
+        },
+        {
+          "path": "reports/betting_v2/git_archive_expansion_20261016/priced_latest.json",
+          "sha256": "3283721439c8eaecfc5612d859ce57187a217dfe8bb543664dc510b0def5d87d",
+          "bytes": 232028
+        }
+      ],
+      "reports": {
+        "control_point": {
+          "overall": {
+            "bets": 480,
+            "fixtures": 384,
+            "wins": 255.0,
+            "pushes": 2.0,
+            "profitUnits": 15.886000000000005,
+            "roi": 0.033095833333333345,
+            "roi95": [
+              -0.058773394432571645,
+              0.12538804801670148
+            ],
+            "meanPredicted": 0.658412464506664,
+            "hitRate": 0.53125,
+            "expectedProfitUnits": 132.31179179847697,
+            "meanOdd": 1.9350208333333334,
+            "conditionalBrier": 0.267071891359264,
+            "conditionalLogLoss": 0.7314743473324364
+          },
+          "sourceBets": [
+            389,
+            91
+          ]
+        },
+        "control_conservative": {
+          "overall": {
+            "bets": 192,
+            "fixtures": 146,
+            "wins": 109.0,
+            "pushes": 0.0,
+            "profitUnits": 19.719,
+            "roi": 0.102703125,
+            "roi95": [
+              -0.037770905166859936,
+              0.2419306434353134
+            ],
+            "meanPredicted": 0.6546013889873231,
+            "hitRate": 0.5677083333333334,
+            "expectedProfitUnits": 52.883221171439665,
+            "meanOdd": 1.948984375,
+            "conditionalBrier": 0.2551390108630795,
+            "conditionalLogLoss": 0.7061984618305482
+          },
+          "sourceBets": [
+            170,
+            22
+          ]
+        },
+        "coupled_point": {
+          "overall": {
+            "bets": 548,
+            "fixtures": 443,
+            "wins": 294.0,
+            "pushes": 2.0,
+            "profitUnits": 21.278,
+            "roi": 0.03882846715328467,
+            "roi95": [
+              -0.04324401091045257,
+              0.12473308536170928
+            ],
+            "meanPredicted": 0.6577641261923672,
+            "hitRate": 0.5364963503649635,
+            "expectedProfitUnits": 150.2006719058513,
+            "meanOdd": 1.9307700729927006,
+            "conditionalBrier": 0.26692940441421936,
+            "conditionalLogLoss": 0.7322273701424147
+          },
+          "sourceBets": [
+            441,
+            107
+          ]
+        },
+        "coupled_conservative": {
+          "overall": {
+            "bets": 217,
+            "fixtures": 170,
+            "wins": 126.0,
+            "pushes": 1.0,
+            "profitUnits": 27.485,
+            "roi": 0.1266589861751152,
+            "roi95": [
+              -0.00437921753607102,
+              0.25086968153430483
+            ],
+            "meanPredicted": 0.6547552788976857,
+            "hitRate": 0.5806451612903226,
+            "expectedProfitUnits": 59.2042637278994,
+            "meanOdd": 1.9416820276497697,
+            "conditionalBrier": 0.25320910822365944,
+            "conditionalLogLoss": 0.7031726896004478
+          },
+          "sourceBets": [
+            187,
+            30
+          ]
+        }
+      },
+      "crossPeriodSelectedFixtureOverlap": 0
+    }
+  }
+}
