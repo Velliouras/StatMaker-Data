@@ -166,6 +166,7 @@ def score(out,index):
             eligible_picks=public_rows(data['selected'],verified);eligible_forecasts=public_rows(data['forecasts'],verified)
             picks,missing=settled(eligible_picks,actual,when);rows,missing_rows=settled(eligible_forecasts,actual,when)
             result[name]=dict(selected=stats(picks),selectedUnscored=missing if public else len(data['selected']),forecastScored=len(rows),
+                selectedRows=picks,
                 forecastUnscored=missing_rows if public else len(data['forecasts']),
                 eligibleSelected=len(eligible_picks),eligibleFixtures=len({r['fixture'] for r in eligible_forecasts}),
                 selectedExcludedLatePublication=len(data['selected'])-len(eligible_picks) if public else 0,
@@ -174,6 +175,8 @@ def score(out,index):
         write(out/(path.stem.replace('.json','')+'_score.json'),dict(frozenSha256=item['sha256'],scoredAtUTC=datetime.now(timezone.utc).isoformat(),
             models=result,publicationVerified=bool(public),publicationEvidence=public,
             pairedComparisons=paired_comparisons(events,baseline='control'),providerCalls=0,llmCalls=0,refits=0))
+    from betting_v2.forward_summary import publish_summary
+    publish_summary(out,index)
 
 
 def public_rows(rows,verified):
@@ -195,13 +198,15 @@ def record_publication(out,index):
 
 
 def main():
-    ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True);ap.add_argument('--record-publication',action='store_true');args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
+    ap=argparse.ArgumentParser();ap.add_argument('--output',type=Path,required=True);ap.add_argument('--record-publication',action='store_true');ap.add_argument('--score-only',action='store_true');args=ap.parse_args();args.output.mkdir(parents=True,exist_ok=True)
     lockpath=Path(tempfile.gettempdir())/('statmaker-forward-'+digest(str(args.output.resolve()).encode())[:16]+'.lock')
     with lockpath.open('a') as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         path=args.output/'index.json';index=read(path) if path.exists() else dict(schema=1,cohorts=[],events=[])
         if args.record_publication:
             record_publication(args.output,index);return
+        if args.score_only:
+            score(args.output,index);return
         binding=read(ROOT/'reports/betting_v2/combined_candidate_20261016/source_binding.json')
         changed=[p for p,sha in binding['files'].items() if digest((ROOT/p).read_bytes())!=sha]
         created=None if changed else freeze(args.output,index)
