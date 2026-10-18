@@ -1,0 +1,11 @@
+# Card settlement bounds — no outcome-dependent exact-only backtest
+
+Use the already recovered Bet365 FT TOTAL/TEAM card-unit offers and pinned full cached fixture responses. No new provider calls, model fits, thresholds, bets or app changes. Existing labels are development data. This is a deterministic label/bounds audit, not evidence of a profitable strategy.
+
+Strict exact-ready labels require complete event/lineup/aggregate evidence. Exact-only readiness depends on realized card timing; dropping every match with a 90+ card would make an unrepresentative strategy backtest. Preserve those fixtures and explicitly bound the unknown count where possible. Never treat the exact-only 38 priced fixtures as a representative profitability test.
+
+Only two remaining uncertainty flags are admitted to a finite interval: ambiguous card period/final whistle or card exactly at an outgoing substitution minute. All other missing event, player, lineup, aggregate, duplicate and second-yellow-convention issues stay ungraded. Lower bound = definitely eligible event-derived units under the strict existing checks. Upper = lower plus two units for every uncertain card event in that team. This deliberately loose increment covers a possible second-yellow dismissal as well as a direct red. Do not silently assume uncertain cards count or do not count. Bounds are conditional on the already checked completeness of the cached evidence, not an independent bookmaker settlement certificate.
+
+Enumerate integer counts in each team/total interval for the actual OVER/UNDER line. Preserve all possible WIN/PUSH/LOSS states and worst/best per-contract unit profit. If every possible count gives the same market result, that contract is unambiguous even when the exact card total is unknown. Keep all offered contracts and every unresolved row; do not calculate an aggregate ROI over offers or pick a profitable subset. A future predeclared betting strategy must include its ambiguous and ungraded outcomes in coverage and profit sensitivity, rather than filter by post-match readiness.
+
+Verify the original pinned 405 cached files and old source bindings, plus exact recovered quote and readiness artifacts. Save new code/protocol/input hashes before execution. No old hash-bound source or frozen forecasts are modified.
