@@ -1,0 +1,58 @@
+name: Betting V2 Expanded Historical Replay
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-git-archive-replay-20261018']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-git-archive-replay
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PYTHONPATH: scripts
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Test archive timing and replay frozen corpus without external odds requests
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_research_git_archive.py -v
+          python -u scripts/betting_v2/research_git_archive.py --replay-only --output reports/betting_v2/git_archive_expansion_20261016
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: expanded-historical-replay
+          path: reports/betting_v2/git_archive_expansion_20261016/
+          retention-days: 30
+      - name: Persist replay outputs and resumable checkpoints
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="reports/betting_v2/git_archive_expansion_20261016"
+          saved="$(mktemp -d)"
+          for pattern in checkpoint_\*.json.gz priced_\*.json progress.json summary.json RESULTS_GR.md; do
+            for file in "$folder"/$pattern; do
+              if [ -f "$file" ]; then cp "$file" "$saved/"; fi
+            done
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp -a "$saved/." "$folder/"
+            git add "$folder"
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Save expanded historical replay and frozen-input checkpoints [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1

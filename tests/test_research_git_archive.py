@@ -4,7 +4,8 @@ import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from betting_v2.research_git_archive import (
-    absolute_time, extract_snapshot, remove_conflicts, exact_join, settle_selected, retain_packets, pick_summary, load_snapshot)
+    absolute_time, extract_snapshot, remove_conflicts, exact_join, settle_selected, retain_packets, pick_summary, load_snapshot,
+    replay_checkpoint)
 from betting_v2.research_quotes import feature_cutoff
 
 
@@ -95,6 +96,15 @@ class GitArchiveResearchTests(unittest.TestCase):
             source = dict(self.source, expectedGitBlobSha1='c' * 40, expectedBytes=2)
             (Path(folder) / (source['sha'] + '.json')).write_text('{}')
             with self.assertRaises(ValueError): load_snapshot(source, {}, Path(folder))
+
+    def test_checkpoint_cannot_resume_after_input_or_model_change(self):
+        import json
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'checkpoint.json'
+            self.assertEqual(replay_checkpoint(path, 'a')['completedCutoffs'], [])
+            path.write_text(json.dumps(dict(signature='a', options={}, diagnostics={}, completedCutoffs=[10])))
+            self.assertEqual(replay_checkpoint(path, 'a')['completedCutoffs'], [10])
+            with self.assertRaises(ValueError): replay_checkpoint(path, 'b')
 
 
 if __name__ == '__main__': unittest.main()

@@ -240,6 +240,48 @@ def pick_summary(rows):
     return result
 
 
+def replay_checkpoint(path, signature):
+    if not path.exists(): return dict(options={}, diagnostics={}, completedCutoffs=[])
+    saved = read(path)
+    if saved.get('signature') != signature:
+        raise ValueError('Replay checkpoint belongs to different data, source or model inputs')
+    return saved
+
+
+def result_report(out, results):
+    names = dict(control_point='Παλιός πυρήνας, κεντρική πιθανότητα',
+        control_conservative='Παλιός πυρήνας, συντηρητική πιθανότητα',
+        coupled_point='Νέος πυρήνας, κεντρική πιθανότητα',
+        coupled_conservative='Νέος πυρήνας, συντηρητική πιθανότητα')
+    def cell(value):
+        n = value['bets']; roi = value.get('roi')
+        return f"{n} / {roi:+.2%}" if roi is not None else f'{n} / —'
+    lines = ['# Διευρυμένος ιστορικός έλεγχος με πραγματικές αποδόσεις', '',
+        'Ανακτήθηκαν 589 αγώνες από 27 προκαθορισμένα Git snapshots: 439 επιπλέον των 150 του προηγούμενου δείγματος. '
+        'Ο έλεγχος αφορά κόρνερ, σουτ, σουτ στον στόχο και φάουλ. Οι κανόνες επιλογής και τα εκπαιδευμένα μοντέλα παρέμειναν σταθερά.', '',
+        '| Πολιτική | Πρώτη διαθέσιμη καταγραφή: επιλογές / ROI | Τελευταία: επιλογές / ROI |',
+        '|---|---:|---:|']
+    for name, label in names.items():
+        lines.append(f"| {label} | {cell(results['earliest'][name]['overall'])} | {cell(results['latest'][name]['overall'])} |")
+    lines += ['', 'Οι δύο καταγραφές αφορούν επικαλυπτόμενους αγώνες και δεν αθροίζονται. '
+        'Πρόκειται για ιστορικά δεδομένα ανάπτυξης, με μεταγενέστερη πρόσβαση στα αποτελέσματα, και όχι για ανεξάρτητη επιβεβαίωση κερδοφορίας. '
+        'Τα χρονικά στοιχεία Git δεν αποτελούν ανεξάρτητη απόδειξη εκτελέσιμων τιμών.', '',
+        '## Νέος πυρήνας ανά αγορά — τελευταία διαθέσιμη καταγραφή', '',
+        '| Αγορά | Κεντρική: επιλογές / ROI | Συντηρητική: επιλογές / ROI |', '|---|---:|---:|']
+    for metric in COUNT_METRICS:
+        point = results['latest']['coupled_point']['byMetric'][metric]['scored']
+        conservative = results['latest']['coupled_conservative']['byMetric'][metric]['scored']
+        lines.append(f'| {metric} | {cell(point)} | {cell(conservative)} |')
+    lines += ['', 'Δεν αφαιρέθηκε αγορά λόγω αρνητικού ROI. Οι επιλογές έγιναν πριν από την ανάγνωση των πραγματικών στατιστικών. '
+        'Όπου λείπει στατιστικό, η επιλογή παραμένει αβαθμολόγητη. Οι επιστροφές στις ακέραιες γραμμές υπολογίζονται χωριστά.', '',
+        'Τα πλήρη αποτελέσματα, τα διαστήματα αβεβαιότητας ανά αγώνα, το εκτιμώμενο έναντι πραγματικού κέρδους και οι επιλογές '
+        'βρίσκονται στα `priced_earliest.json`, `priced_latest.json` και `summary.json`. '
+        'Οι κάρτες εξαιρούνται μέχρι να υπάρχουν σωστοί κανόνες και στοιχεία διευθέτησης.', '',
+        'Provider API κλήσεις: 0. LLM κλήσεις μέσα στην εργασία: 0. Αλλαγές app/PROD: 0. '
+        'Οι ήδη παγωμένες μελλοντικές προβλέψεις παραμένουν αμετάβλητες.']
+    (out / 'RESULTS_GR.md').write_text('\n'.join(lines) + '\n')
+
+
 def replay(out, history):
     source = ROOT / 'reports/betting_v2/combined_candidate_20261016'
     bound = read(source / 'source_binding.json')
@@ -252,8 +294,16 @@ def replay(out, history):
         quotes = read(out / ('quotes_' + packet + '.json.gz'))
         favourites = fixture_favourite(quotes)
         count_quotes = [q for q in quotes if q['spec'][0] in COUNT_METRICS]
-        options = defaultdict(list); diagnostics = Counter()
-        for cutoff in sorted({q['featureCutoff'] for q in count_quotes}):
+        signature = digest((digest((out / ('quotes_' + packet + '.json.gz')).read_bytes()) +
+            digest(json.dumps(history, sort_keys=True, separators=(',', ':')).encode()) +
+            digest((source / 'source_binding.json').read_bytes()) + digest(Path(__file__).read_bytes())).encode())
+        checkpoint = out / ('checkpoint_' + packet + '.json.gz')
+        saved = replay_checkpoint(checkpoint, signature)
+        options = defaultdict(list, saved['options']); diagnostics = Counter(saved['diagnostics'])
+        completed = set(saved['completedCutoffs'])
+        cutoffs = sorted({q['featureCutoff'] for q in count_quotes})
+        for cutoff in cutoffs:
+            if cutoff in completed: continue
             control, old, _ = load_revised(ROOT, history, cutoff)
             import copy
             candidate = copy.copy(control); candidate.cache = {}; candidate.uncertainty_cache = {}
@@ -290,6 +340,11 @@ def replay(out, history):
                     options[name + '_conservative'].append(dict(pick, p=p, push=lower['push'], ev=ev,
                         confidence=confidence, tier='HIGH' if confidence >= .8 else 'CONFIRMED' if confidence >= .7 else 'DEVELOPING'))
             print('ARCHIVE_REPLAY', packet, cutoff, {k: len(v) for k, v in options.items()}, flush=True)
+            completed.add(cutoff)
+            write(checkpoint, dict(signature=signature, options=dict(options), diagnostics=dict(diagnostics),
+                completedCutoffs=sorted(completed)), zipped=True)
+            write(out / 'progress.json', dict(packet=packet, completedCutoffs=len(completed), totalCutoffs=len(cutoffs),
+                providerCalls=0, llmCalls=0, status='RUNNING'))
         reports = {}
         for name in ('control_point', 'control_conservative', 'coupled_point', 'coupled_conservative'):
             # Selection precedes all actual-label lookups, including missing labels.
@@ -307,6 +362,8 @@ def replay(out, history):
         historySha256=digest(json.dumps(history, sort_keys=True, separators=(',', ':')).encode()),
         frozenModelInputsVerified=True, frozenMeanFits=0, appChanges=0, untouchedHoldout=False,
         prospectiveCohortChanged=False, replayMetrics=list(COUNT_METRICS)))
+    result_report(out, results)
+    write(out / 'progress.json', dict(status='COMPLETE', packets=2, providerCalls=0, llmCalls=0))
     return results
 
 
