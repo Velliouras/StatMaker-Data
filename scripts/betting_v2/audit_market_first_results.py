@@ -8,6 +8,9 @@ from betting_v2.research_model_revision import read
 from betting_v2.research_csv_prices import write,digest
 from betting_v2.reliable_counts import metric_values
 from betting_v2.research_git_archive import absolute_time
+from betting_v2.research_scope_expansion import select_scope
+from betting_v2.research_context_market import conservative_winner
+from collections import Counter
 
 def main(out):
     manifest=read(out/'input_bindings.json');assert all(digest((ROOT/p).read_bytes())==h for p,h in manifest['files'].items())
@@ -24,6 +27,7 @@ def main(out):
             assert fav==q['_favourite'];groups[q['fixture'],q['spec'][0]].append(q)
         for key,values in groups.items():assert len({(q['sourceReceipt'],q['observed'],q['featureCutoff'],q['providerEventId'],q['kickoff']) for q in values})==1
         index={(q['fixture'],q['spec'][0],q['bookmaker'],tuple(q['spec']),q['sourceReceipt'],q['odd']) for q in rows};doc=read(out/f'priced_{packet}.json');reports={}
+        checkpoint=read(out/f'replay_checkpoint_{packet}.json.gz');options=checkpoint['options'];options['coupled_sot_matched']=[q for q in options['coupled'] if q['spec'][0]=='SOT' and q['fixture'] in set(checkpoint['matchedSotFixtures'])]
         for name,report in doc['reports'].items():
             picks=report['picks'];assert len({(r['fixture'],r['spec'][0]) for r in picks})==len(picks);profit=0.;wins=pushes=0
             for r in picks:
@@ -40,7 +44,13 @@ def main(out):
                 point=doc['reports'][name.removesuffix('_conservative')+'_point']['picks'];keys={(r['fixture'],tuple(r['spec']),r['bookmaker'],r['sourceReceipt']) for r in point};assert all((r['fixture'],tuple(r['spec']),r['bookmaker'],r['sourceReceipt']) in keys for r in picks)
             summary=report['overall'];assert summary['bets']==len(picks)
             if picks:assert abs(profit-summary['profitUnits'])<1e-10 and abs(profit/len(picks)-summary['roi'])<1e-12 and wins==summary['wins'] and pushes==summary['pushes']
-            reports[name]=dict(bets=len(picks),profitUnits=profit,verified=True)
+            kind,mode=name.rsplit('_',1);selected=select_scope(options[kind])
+            if mode=='conservative':selected=[p for w in selected if (p:=conservative_winner(w)) is not None]
+            pending=[r for r in selected if r['fixture'] not in truth or metric_values(truth[r['fixture']],r['spec'][0]) is None]
+            assert dict(Counter(r['spec'][0] for r in pending))==report['missingActual']
+            assert len(selected)==len(picks)+len(pending)
+            low=profit-len(pending);high=profit+sum(r['odd']-1 for r in pending)
+            reports[name]=dict(bets=len(picks),profitUnits=profit,selectedIncludingUnknown=len(selected),unknownOutcomes=len(pending),allSelectedProfitBounds=[low,high],allSelectedRoiBounds=[low/len(selected),high/len(selected)] if selected else None,verified=True)
         results[packet]=dict(marketPackets=len(groups),quoteRows=len(rows),reports=reports)
     write(out/'verification.json',dict(status='PASS',boundInputs=len(manifest['files']),results=results,providerCalls=0,llmCalls=0));print('MARKET_FIRST_RESULTS_VERIFIED',results)
 if __name__=='__main__':
