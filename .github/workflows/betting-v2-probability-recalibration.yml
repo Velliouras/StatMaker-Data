@@ -1,0 +1,56 @@
+name: Betting V2 Probability Recalibration
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-probability-recalibration-20261018']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-probability-recalibration
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONPATH: scripts
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Verify lagged calibration and exact price contracts
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_probability_recalibration.py -v
+      - name: Evaluate the fixed previous-month probability correction
+        run: |
+          python -u scripts/betting_v2/research_probability_recalibration.py --output reports/betting_v2/probability_recalibration_20261018
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probability-recalibration
+          path: reports/betting_v2/probability_recalibration_20261018/
+          retention-days: 30
+      - name: Persist results and checkpoints
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="reports/betting_v2/probability_recalibration_20261018"
+          saved="$(mktemp -d)"
+          cp -a "$folder/." "$saved/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            cp -a "$saved/." "$folder/"
+            git add "$folder"
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Save fixed chronological probability recalibration trial [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
