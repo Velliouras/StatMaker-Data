@@ -10,7 +10,7 @@
 - Το cross-market conservative απέδωσε −4,14% / 47 bets earliest και −8,65% / 97 latest. Μικρή βελτίωση count scores δεν έδωσε κερδοφόρες επιλογές. **Δεν προάγεται**. [Πλήρης αξιολόγηση](../cross_market_counts_20261018/ASSESSMENT_GR.md).
 - Επαληθεύτηκαν τα payouts/pushes, το dedup και τα όρια όλων των priced rows και των δύο packets. Τα 8 immutable αρχεία των forward σειρών παρέμειναν ίδια.
 
-## Υλοποιήθηκε και εκτελείται
+## Υλοποιήθηκε και ολοκληρώθηκε επιτυχώς
 
 - `gap_ratings.py`: τέσσερις attack/defence home/away αξιολογήσεις για SHOTS/SOT/CORNERS, prior MAE fit, prefix cold priors, batching ανά ημέρα.
 - `gap_goal_rates.py`: prior shared Poisson goal-rate offsets από τις προβλεπόμενες παραγωγές, διατήρηση των frozen rate banks.
@@ -19,7 +19,7 @@
 - Η ev55 είναι μόνο ερευνητική, **όχι STRONG/SOLID ή αλλαγή εφαρμογής**. Ίδια odds >1,80/<3,00 και ίδιο favorite-scenario floor 60%.
 - Πέρασαν τοπικά 18 έλεγχοι: 8 GAP, 5 goal-rate και 5 replay. Δεσμεύτηκαν 122 είσοδοι.
 - Source: `4e206e19f46a1af23cc4fa1cfd470db1b82f1fa7`, trigger: `9ef351d8288e8d2b072585a2e1da7c35739cc75c`.
-- [Action 39154279939](https://github.com/Velliouras/StatMaker-Data/actions/runs/39154279939). Έλεγξε φρέσκια κατάσταση· το παρόν checkpoint δεν αποτελεί αποτέλεσμα εκτέλεσης.
+- [Action 39154279939](https://github.com/Velliouras/StatMaker-Data/actions/runs/39154279939). Επιτυχής εκτέλεση, αποτελέσματα commit `d6ecb4a9d9170d4a7a88cea69ba7f3d7c96c6097`.
 - Workflow αποθηκεύει μηνιαίες παραμέτρους, daily checkpoint/features και τελικά reports, ακόμη και σε αποτυχία/timeout. Το resume απαιτεί ίδιο manifest signature.
 
 ## Έλεγχος δεδομένων για επόμενες αγορές
@@ -28,11 +28,10 @@
 
 Το συγκεκριμένο normalized frozen history δεν περιέχει πεδίο διαιτητή. Δεν σημαίνει ότι όλα τα raw caches του app στερούνται διαιτητών. Πριν χρησιμοποιηθεί τέτοια μεταβλητή χρειάζεται ακριβής σύνδεση και απόδειξη ότι ήταν διαθέσιμη πριν από την πρόβλεψη.
 
-## Επόμενα
+## Τελευταίο αποτέλεσμα και επόμενα
 
-1. Διάβασε το συμπέρασμα/βήματα του GAP Action και μην επινοήσεις αποτελέσματα όσο τρέχει.
-2. Αν αποτύχει τεχνικά, διόρθωσε την πραγματική αιτία, ενημέρωσε binding και συνέχισε με τεκμηριωμένο νέο signature. Μην αλλάξεις πολιτική από το παρατηρημένο ROI.
-3. Αν ολοκληρωθεί, επαλήθευσε artifacts και priced rows, σύγκρινε μήνες/αγορές/proper scores και γράψε καθαρή αξιολόγηση, ακόμη και για αρνητικό αποτέλεσμα.
-4. Κράτησε app/UAT/PROD και παλιές παγωμένες προβλέψεις ανέπαφα. Οτιδήποτε νέο σε app χρειάζεται να ακολουθήσει την υπάρχουσα UAT ροή· δεν υπάρχει αυτόματη προαγωγή από ερευνητικό ROI.
+Το GAP 60% conservative απέδωσε +7,40% / 42 earliest και +5,49% / 45 latest. Μεγάλα διαστήματα αβεβαιότητας· latest Οκτωβρίου −5,16% / 14. EV55 latest −1,37% / 149. Ο έλεγχος όλων των 24 report sets επιβεβαίωσε payouts, pushes, όρια, dedup και κέρδη. Πρόσθετος έλεγχος GAP έναντι intercept αναπαρήγαγε proper scores: συνολική υπεροχή αβέβαιη. Δες [τελική αξιολόγηση](ASSESSMENT_GR.md).
 
-Όλα τα συγκεκριμένα experiments: 0 provider calls, 0 LLM calls μέσα στους υπολογισμούς, κανένα στοίχημα. Οι συνομιλίες/tool calls εξακολουθούν να καταναλώνουν usage. Η εργασία δεν είχε ολοκληρώσει την απόδειξη κερδοφορίας όταν γράφτηκε αυτό το checkpoint.
+Συνέχεια: υλοποίηση ξεχωριστού μοντέλου SOT υπό SHOTS με beta-binomial μετασχηματισμό, όλα τα έγκυρα prior ζεύγη, χρονολογική αξιολόγηση, χωρίς ROI tuning. Αποθήκευση πηγών και πρωτοκόλλου πριν από πραγματικό fit. Χωρίς subagents. App/UAT/PROD και προηγούμενα frozen αρχεία μένουν αμετάβλητα.
+
+Όλα τα Python experiments: 0 provider calls, 0 LLM calls, κανένα στοίχημα. Οι συνομιλίες/tool calls καταναλώνουν usage. Δεν έχει αποδειχθεί σταθερή κερδοφορία.
