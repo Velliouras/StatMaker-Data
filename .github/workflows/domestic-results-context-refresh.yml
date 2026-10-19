@@ -6,6 +6,12 @@ on:
     # 32 calls each, preserving the previous 64-call daily ceiling.
     - cron: '35 23 * * *'
     - cron: '10 7 * * *'
+  workflow_run:
+    # Recovery trigger if a scheduled refresh is skipped or delayed.
+    # The stored window marker blocks duplicate provider requests.
+    workflows: ["Domestic Lineup Watch"]
+    types: [completed]
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -21,6 +27,7 @@ concurrency:
 
 jobs:
   refresh:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T07:') || contains(github.event.workflow_run.run_started_at, 'T08:') || contains(github.event.workflow_run.run_started_at, 'T09:'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 28
     steps:
@@ -31,19 +38,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Check window freshness before spending provider quota
+        id: freshness
+        run: python scripts/refresh_domestic_match_context.py --check-window >> "$GITHUB_OUTPUT"
       - name: Validate scorer refresh regression tests (offline)
+        if: steps.freshness.outputs.refresh_needed == 'true'
         run: python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -v
       - name: Validate producer syntax and canonical plan
+        if: steps.freshness.outputs.refresh_needed == 'true'
         run: |
           python -m py_compile scripts/refresh_domestic_match_context.py
           python scripts/refresh_domestic_match_context.py --max-requests 32 --quota-reserve 1500
       - name: Fetch actual venues and verified event scorers with strict budget
+        if: steps.freshness.outputs.refresh_needed == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           test -n "$API_FOOTBALL_KEY" || { echo "Missing API_FOOTBALL_KEY"; exit 1; }
           python scripts/refresh_domestic_match_context.py --execute --max-requests 32 --quota-reserve 1500
       - name: Validate read model before publication
+        if: steps.freshness.outputs.refresh_needed == 'true'
         run: |
           python - <<'PY'
           import json
@@ -58,6 +72,7 @@ jobs:
           print('DOMESTIC_CONTEXT_OK',data['coverage'])
           PY
       - name: Publish only verified domestic match context
+        if: steps.freshness.outputs.refresh_needed == 'true'
         run: |
           set -euo pipefail
           git config user.name "statmaker-data-bot"

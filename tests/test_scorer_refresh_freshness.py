@@ -11,7 +11,7 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from fetch_schedule_scorers_capped import plan, recent_leader_cache
-from refresh_domestic_match_context import fixture_priority
+from refresh_domestic_match_context import fixture_priority, refresh_window, already_refreshed
 
 
 NOW = datetime(2026, 10, 19, 8, 0, tzinfo=timezone.utc)
@@ -74,6 +74,38 @@ class ScorerRefreshRegressionTests(unittest.TestCase):
         recent_english = {"leagueCode": "E0", "date": "2026-10-18T18:00:00+00:00", "fixtureId": 2}
         self.assertLess(fixture_priority(recent_english, today),
                         fixture_priority(old_greek, today))
+
+    def test_night_window_spans_midnight(self):
+        before=datetime(2026, 10, 19, 23, 35, tzinfo=timezone.utc)
+        after=datetime(2026, 10, 20, 1, 20, tzinfo=timezone.utc)
+        self.assertEqual(refresh_window(before)[0], "postmatch-2026-10-19")
+        self.assertEqual(refresh_window(after)[0], "postmatch-2026-10-19")
+
+    def test_new_morning_window_needs_new_refresh(self):
+        now=datetime(2026, 10, 20, 7, 10, tzinfo=timezone.utc)
+        self.assertEqual(refresh_window(now)[0], "morning-2026-10-20")
+        previous={"contract":"statmaker-domestic-match-context-v1",
+                  "generatedAtUTC":"2026-10-20T01:20:00+00:00",
+                  "refreshWindowKey":"postmatch-2026-10-19",
+                  "apiCallsDuringGeneration":32}
+        self.assertFalse(already_refreshed(previous, now))
+
+    def test_duplicate_provider_spending_is_blocked(self):
+        now=datetime(2026, 10, 20, 8, 20, tzinfo=timezone.utc)
+        doc={"contract":"statmaker-domestic-match-context-v1",
+             "generatedAtUTC":"2026-10-20T07:11:00+00:00",
+             "refreshWindowKey":"morning-2026-10-20",
+             "apiCallsDuringGeneration":32}
+        self.assertTrue(already_refreshed(doc, now))
+
+    def test_legacy_good_refresh_prevents_duplicate_run(self):
+        now=datetime(2026, 10, 19, 8, 20, tzinfo=timezone.utc)
+        doc={"contract":"statmaker-domestic-match-context-v1",
+             "generatedAtUTC":"2026-10-19T06:51:22+00:00",
+             "apiCallsDuringGeneration":32}
+        self.assertTrue(already_refreshed(doc, now))
+        doc["apiCallsDuringGeneration"]=0
+        self.assertFalse(already_refreshed(doc, now))
 
     def test_recent_priority_leagues_outrank_other_recent_leagues(self):
         today = date(2026, 10, 19)
