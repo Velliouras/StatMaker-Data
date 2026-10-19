@@ -1,0 +1,7 @@
+# Post-hoc EV55 threshold sensitivity
+
+Exploratory policy diagnostic, not an untouched holdout or ROI-optimized threshold choice. Compare exactly two existing probability floors,0.60 and0.55, on the same frozen coupled raw point winners after reference/bank availability and before market correction. No winner replacement after the correction or conservative gate. This differs from the original residual-primary policy which ranked after market adjustment; the0.60 fixed-winner comparator separates that ordering effect from the probability-floor effect.
+
+Use the exact already published market_residual earliest/latest banks and same quote references, labels, raw favourite/scenario/odds/positive-EV guards. Models fit only prior months, with no new fits here. Keep favourite-scenario lower support>=0.60. Only offered-side global win probability floor changes in this research sensitivity; the active STRONG60 rule and app remain unchanged. Every0.60 offer is checked for exact parity with the published residual candidate formula.
+
+Evaluate point/conservative, first/latest, monthly outcomes and exact later price matches, preserving unknown labels. Do not sum overlapping packets. Report that lowering a probability floor can increase opportunities without increasing ROI; positive estimated EV is not proof of future profit. Store pending projections from the already published source forecast cohort as RESEARCH_EV55, not STRONG and not executable fills.

@@ -1,0 +1,99 @@
+name: Betting V2 EV55 Research Shadow
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Betting V2 Forward Market Residual']
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths: ['.github/triggers/betting-v2-ev55-shadow-20261019']
+permissions:
+  contents: write
+concurrency:
+  group: betting-v2-ev55-shadow
+  cancel-in-progress: false
+jobs:
+  research:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PYTHONPATH: scripts
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Verify research math and freeze new fixtures from cached inputs
+        run: |
+          python -m pip install --quiet numpy scipy scikit-learn
+          python -m unittest discover -s tests -p test_ev55_shadow.py -v
+          if [ ! -f reports/betting_v2/ev55_sensitivity_20261019/summary.json ]; then
+            python scripts/betting_v2/audit_ev55_sensitivity.py --output reports/betting_v2/ev55_sensitivity_20261019
+          fi
+          python -u scripts/betting_v2/forward_ev55_shadow.py --output reports/betting_v2/forward_ev55_shadow_20261019
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ev55-shadow-research
+          path: reports/betting_v2/forward_ev55_shadow_20261019/
+          retention-days: 30
+      - name: Save immutable forecasts and updated scores only
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="reports/betting_v2/forward_ev55_shadow_20261019"
+          evidence="$(mktemp -d)"
+          history="reports/betting_v2/ev55_sensitivity_20261019"
+          history_saved="$(mktemp -d)"
+          cp -a "$history/." "$history_saved/"
+          if [ ! -d "$folder" ]; then exit 0; fi
+          cp -a "$folder/." "$evidence/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          published=false
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            mkdir -p "$folder"
+            cp -a "$evidence/." "$folder/"
+            mkdir -p "$history"
+            cp -a "$history_saved/." "$history/"
+            git add "$folder" "$history"
+            if git diff --cached --quiet; then published=true; break; fi
+            git commit -m "Freeze independent research-only EV55 projections and score cached outcomes [skip ci]"
+            if git push origin HEAD:main; then published=true; break; fi
+          done
+          [[ "$published" == "true" ]]
+      - name: Record publication timing after successful evidence push
+        run: |
+          set -euo pipefail
+          python scripts/betting_v2/forward_ev55_shadow.py --output reports/betting_v2/forward_ev55_shadow_20261019 --record-publication
+          proof="reports/betting_v2/forward_ev55_shadow_20261019/publication_evidence.json"
+          saved="$(mktemp -d)"
+          cp -a "reports/betting_v2/forward_ev55_shadow_20261019/." "$saved/"
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            for pattern in '*_score.json' summary.json RESULTS_GR.md; do
+              for file in "$saved"/$pattern; do
+                if [ -f "$file" ]; then cp "$file" "reports/betting_v2/forward_ev55_shadow_20261019/"; fi
+              done
+            done
+            python - "$saved/publication_evidence.json" "$proof" <<'PY'
+          import json,sys
+          from pathlib import Path
+          incoming,target=map(Path,sys.argv[1:]);old=json.loads(target.read_text()) if target.exists() else {}
+          for key,value in json.loads(incoming.read_text()).items():
+              if key in old and old[key]['sha256']!=value['sha256']:raise ValueError('Publication proof hash changed')
+              if key not in old or value['publiclyVerifiedAtUTC']<old[key]['publiclyVerifiedAtUTC']:old[key]=value
+          target.write_text(json.dumps(old,indent=2)+'\n')
+          PY
+            git add reports/betting_v2/forward_ev55_shadow_20261019
+            if git diff --cached --quiet; then exit 0; fi
+            git commit -m "Record EV55 research forecast publication eligibility and initial scores [skip ci]"
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
