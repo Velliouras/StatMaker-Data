@@ -39,6 +39,12 @@ history; no old entries are deleted. Singles filtering does not create or remove
   observation ledger is reused only when its exact payload hash still agrees.
   Without observation evidence the provider last-change time is a conservative
   lower bound; stale or future evidence remains rejected.
+  Published read models separately add `latestQuoteObservedAt` when the identical
+  first-issued event/book/market/line/side/price is observed again. This annotation
+  does not modify `ledger.json`, original odds/probability/time or Performance.
+  Changed, missing or stale prices are removed from current Singles candidates.
+  UAT Android 0.1.66 uses this clock for current visibility, keeping the original
+  snapshot clock in Performance; older clients retain their original 24h display rule.
 - `1.80 < odd < 3.00`, conservative win probability >=0.60 and
   `EV = pWin*odd + pPush - 1 > 0`. Minimum 8 prior fixtures for both teams.
 - Team props: same-book 1X2 favourite must agree with ELO and have >=60% count

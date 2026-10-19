@@ -129,6 +129,21 @@ class ContractTest(unittest.TestCase):
 
 
 class SourceContractTest(unittest.TestCase):
+    def test_reobservation_does_not_reprice_or_mutate_first_issue(self):
+        from .feed import observe_issued_quote,timestamp
+        m=dict(id='7',kickoff='2026-10-22T15:00:00Z',providerHomeTeam='H',providerAwayTeam='A')
+        row=dict(match=m,market='MATCH_SHOTS',scope='TOTAL',teamSide='',selection='Shots Over 24.5',line=24.5,
+                 odd=1.91,bookmaker='B',quoteUpdatedAt='2026-10-19T15:00:00Z',winProbability=.65)
+        before=copy.deepcopy(row);now=timestamp('2026-10-20T20:00:00Z')
+        market=dict(_observedAt=now-3600,_kickoff=m['kickoff'],_home='H',_away='A',odds=[dict(hdp=24.5,over='1.91')])
+        key=('7','B','Total Shots')
+        observed=observe_issued_quote(row,{key:[market]},now)
+        self.assertEqual(observed['latestQuoteObservedAt'],'2026-10-20T19:00:00Z')
+        self.assertEqual(row,before)
+        for field in before:self.assertEqual(observed[field],before[field])
+        self.assertIsNone(observe_issued_quote(row,{key:[dict(market,odds=[dict(hdp=24.5,over='1.99')])]},now)['latestQuoteObservedAt'])
+        self.assertIsNone(observe_issued_quote(row,{},now)['latestQuoteObservedAt'])
+
     def test_recent_observation_accepts_unchanged_price_without_rewriting_provider_clock(self):
         from .sources import latest_markets
         from .feed import timestamp

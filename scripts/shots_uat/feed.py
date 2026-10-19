@@ -149,14 +149,13 @@ def favourite(match, bookmaker, raw, now):
     return side if side in ("HOME", "AWAY") and list(odds.values()).count(odds[side]) == 1 else None
 
 
-def new_candidates(history_rows, now, known):
+def load_quote_sources(now):
     odds_path = ROOT / "odds/odds_api_io/domestic_odds.json"
     raw_path = ROOT / "odds/odds_api_io/domestic_provider_markets.json"
     odds_bytes, raw_bytes = odds_path.read_bytes(), raw_path.read_bytes()
     odds, raw_doc = json.loads(odds_bytes), json.loads(raw_bytes)
-    from .sources import (Identities, UEFA, latest_markets, receipts, uefa_packet,
+    from .sources import (UEFA, latest_markets, receipts, uefa_packet,
                           read, domestic_observations, apply_observations)
-    from zoneinfo import ZoneInfo
     observation_path = OUT / "observations.json"
     observations = domestic_observations(odds, raw_doc, read(observation_path, {}).get("leagues", {}), now)
     write(observation_path, dict(schemaVersion=1, leagues=observations))
@@ -170,6 +169,14 @@ def new_candidates(history_rows, now, known):
             league, markets, proof = uefa_packet(path, competition_id)
             league["_sourceOddsSha256"] = proof["sha256"]
             leagues.append(league); raw = latest_markets(raw, markets); source_packets.append(proof)
+    return leagues, raw, dict(oddsGeneratedAt=odds["generatedAt"], oddsSha256=digest(odds_bytes),
+        providerSha256=digest(raw_bytes), observedDomesticLeagues=len(observations), uefa=source_packets)
+
+
+def new_candidates(history_rows, now, known):
+    from .sources import Identities
+    from zoneinfo import ZoneInfo
+    leagues, raw, sources = load_quote_sources(now)
     audit = Counter(); identity = Identities(ROOT, history_rows)
     model = Bank(OUT / "model")
     if now < model.meta["calibrationBefore"]:
@@ -250,7 +257,7 @@ def new_candidates(history_rows, now, known):
                     modelBankSha256=digest((OUT / "model/bank.json").read_bytes()), metric=metric, scope=scope,
                     featureCutoff=iso(now), quoteUpdatedAt=iso(updated), issuedAt=iso(now), publishedAt=None,
                     publicationCommit=None, outcome="PENDING", settlementReturn=None, settledAt=None,
-                    sourceOddsSha256=league["_sourceOddsSha256"], sourceProviderSha256=digest(raw_bytes),
+                    sourceOddsSha256=league["_sourceOddsSha256"], sourceProviderSha256=sources["providerSha256"],
                     quoteObservationSemantics="OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
                     providerMarketUpdatedAt=q.get("providerMarketUpdatedAt"),
                     quoteObservationEvidence=q["quoteObservationEvidence"],
@@ -268,8 +275,22 @@ def new_candidates(history_rows, now, known):
         coverage_comp[row["competitionId"]]["newSelections"] += 1
         coverage_day[day]["newSelections"] += 1
     coverage = dict(byCompetition={k: dict(v) for k, v in coverage_comp.items()}, byDay={k: dict(v) for k, v in coverage_day.items()})
-    return selected, dict(audit), dict(oddsGeneratedAt=odds["generatedAt"], oddsSha256=digest(odds_bytes),
-        providerSha256=digest(raw_bytes), observedDomesticLeagues=len(observations), uefa=source_packets, coverage=coverage)
+    return selected, dict(audit), dict(sources, coverage=coverage)
+
+
+def observe_issued_quote(row, raw, now):
+    """Refresh display evidence only, leaving the first-issued ledger immutable."""
+    names = {"MATCH_SHOTS": "Total Shots", "MATCH_SHOTS_ON_TARGET": "Total Shots on Target",
+             "TEAM_SHOTS": "Total Shots", "TEAM_SHOTS_ON_TARGET": "Total Shots on Target"}
+    name = names[row["market"]]
+    if row["scope"] == "TEAM":
+        name += " Home" if row["teamSide"] == "HOME" else " Away"
+    quote = dict(selection=row["selection"], line=row["line"], odds=row["odd"], bookmaker=row["bookmaker"],
+                 providerMarketName=name, exactBookmakerOdds=True)
+    binding = bind_quote(row["match"], quote, raw)
+    observed = binding[1] if binding else 0.
+    recent = now - 86400 <= observed <= now and observed >= timestamp(row["quoteUpdatedAt"])
+    return dict(row, latestQuoteObservedAt=iso(observed) if recent else None)
 
 
 def settle(row, actual, now):
@@ -342,8 +363,9 @@ def main():
         write(ledger_path, ledger); return
     ledger["rows"] = [settle(r, actual, now) for r in verify_publication(ledger["rows"])]
     write(ledger_path, ledger)
-    issued = [r for r in ledger["rows"] if r.get("publishedAt")]
-    live = [r for r in issued if timestamp(r["kickoff"]) > now and now - timestamp(r["quoteUpdatedAt"]) <= 86400]
+    _, raw, _ = load_quote_sources(now)
+    issued = [observe_issued_quote(r, raw, now) for r in ledger["rows"] if r.get("publishedAt")]
+    live = [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt")]
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,
                    generatedAt=iso(now), apiCalls=0, prodWrites=0, probabilitiesNotEmpiricallyCertified=True,
