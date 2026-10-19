@@ -1,35 +1,25 @@
-import copy,sys,unittest
+import unittest,sys
 from pathlib import Path
-import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
-from betting_v2.market_residual import fit_residual,probabilities,groups
-
+from betting_v2.market_residual import fit,bank,predict,candidate
 
 class MarketResidualTests(unittest.TestCase):
-    def test_market_identity_and_normalized_binary_and_three_way_predictions(self):
-        for p,q in [([.7,.3],[.5,.5]),([.6,.2,.2],[.4,.3,.3])]:
-            np.testing.assert_allclose(probabilities(p,q,[0,0]),q)
-            np.testing.assert_allclose(probabilities(p,q,[1,0]),p)
-            self.assertAlmostEqual(probabilities(p,q,[-.6,.2]).sum(),1.)
-
-    def test_negative_statistical_deviation_is_learned_from_prior_labels_not_manual_reversal(self):
-        rows=[dict(fixture=str(i),kickoff=i,stat=[.8,.2],market=[.5,.5],y=[0.,1.]) for i in range(100)]
-        fit=fit_residual(rows,100);self.assertLess(fit['coef'][0],-.5)
-        p=probabilities([.8,.2],[.5,.5],fit['coef']);self.assertGreater(p[1],p[0])
-        with self.assertRaises(ValueError):fit_residual(rows,99)
-        self.assertEqual(fit,fit_residual([dict(r,profit=999.,odd=999.) for r in rows],100))
-
-    def test_fixture_weighting_is_invariant_to_duplicating_every_partition(self):
-        rows=[dict(fixture=str(i),kickoff=i,stat=[.6,.4],market=[.5,.5],y=[float(i%3>0),float(i%3==0)]) for i in range(100)]
-        np.testing.assert_allclose(fit_residual(rows,100)['coef'],fit_residual(rows+copy.deepcopy(rows),100)['coef'],atol=1e-8)
-
-    def test_prediction_partitions_do_not_disappear_when_event_later_pushes(self):
-        base=dict(fixture='f',sourceReceipt='r',bookmaker='A',kickoff=1.,push=.1,actualPush=0.,reference=dict(q=.5))
-        rows=[dict(base,spec=['CORNERS','TOTAL','OVER','',10.],p=.6,y=1.),dict(base,spec=['CORNERS','TOTAL','UNDER','',10.],p=.3,y=0.)]
-        pushed=[dict(r,y=0.,actualPush=1.) for r in rows]
-        first=groups(rows,for_training=False);second=groups(pushed,for_training=False)
-        self.assertEqual(len(first),1);self.assertEqual(len(second),1)
-        self.assertEqual(first[0]['stat'],second[0]['stat']);self.assertEqual(first[0]['market'],second[0]['market'])
-        self.assertFalse(groups(pushed))
+    def rows(self):return [dict(fixture=str(i),metric='SHOTS',kickoff=100000.+i,featureCutoff=0.,statOver=.75,marketOver=.5,yOver=float(i%2)) for i in range(40)]
+    def test_zero_offset_weight_is_market_and_unit_weight_is_stat(self):
+        self.assertAlmostEqual(predict(.8,.6,[0.,0.]),.6);self.assertAlmostEqual(predict(.8,.6,[0.,1.]),.8)
+    def test_market_is_retained_when_stats_have_no_signal(self):
+        r=fit(self.rows(),300000.);self.assertTrue(r['fitted']);self.assertFalse(r['roiUsed']);self.assertAlmostEqual(r['theta'][1],0.,places=6)
+    def test_future_outcomes_cannot_change_bank(self):
+        rows=self.rows();expected=bank(rows,'SHOTS',300000.);self.assertEqual(bank(rows+[dict(rows[0],kickoff=299999.,yOver=1.)],'SHOTS',300000.),expected)
+    def test_training_boundary_and_negative_weight_are_rejected(self):
+        with self.assertRaises(ValueError):fit(self.rows(),100001.)
+        with self.assertRaises(ValueError):predict(.8,.6,[0.,-.1])
+    def test_monotone_and_complementary_sides(self):
+        theta=[.1,.3];values=[predict(p,.5,theta) for p in [.1,.3,.5,.7,.9]];self.assertEqual(values,sorted(values));self.assertAlmostEqual(predict(.7,.5,[0.,.3])+predict(.3,.5,[0.,.3]),1.)
+    def test_fewer_prior_fixtures_is_inactive(self):self.assertFalse(fit(self.rows()[:29],300000.)['fitted'])
+    def test_decision_never_raises_raw_probability_or_lower(self):
+        q=dict(p=.7,push=.05,odd=2.,confidence=.7,spec=['SHOTS','TOTAL','OVER','',20.5],_lower=dict(p=.65,push=.01,support=.8))
+        fit=dict(point=dict(theta=[.2,1.]),replicas=[dict(theta=[.2,1.]) for _ in range(12)])
+        r=candidate(q,{'q':.65},fit);self.assertLessEqual(r['p'],q['p']);self.assertLessEqual(r['_lower']['p'],q['_lower']['p']);self.assertEqual(r['_lower']['support'],.8)
 
 if __name__=='__main__':unittest.main()

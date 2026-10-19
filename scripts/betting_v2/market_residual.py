@@ -1,72 +1,50 @@
-"""Regularized proper-score learning of deviations from market probabilities.
-
-Unlike a convex pool, the statistical deviation can receive a negative
-coefficient if prior data support it. Complete partitions stay normalized.
-"""
-from collections import Counter,defaultdict
+"""Prior-only logistic market residual with a nonnegative statistical weight."""
+from collections import Counter
 import numpy as np
+from scipy.special import expit,logit
 from scipy.optimize import minimize
-from .market_calibration import partition,SIDES
-
 MIN_FIXTURES=30
 PENALTY=.01
-BOUNDS=((-1.,1.),(-.5,.5))
+SEED=19102026
 
 
-def groups(rows,metric=None,cutoff=None,*,for_training=True):
-    grouped=defaultdict(list)
-    for index,r in enumerate(rows):
-        p=partition(r['spec'])
-        if p is None or not r.get('reference') or r['push']>=1:continue
-        if metric is not None and r['spec'][0]!=metric:continue
-        if cutoff is not None and r['kickoff']>=cutoff:continue
-        key=r['fixture'],r['sourceReceipt'],r['bookmaker'],p
-        grouped[key].append((index,r))
-    result=[]
-    for key,items in grouped.items():
-        expected=SIDES[key[3][1]];by={}
-        for i,r in items:
-            side=r['spec'][2]
-            if side in by:by[side]=None
-            else:by[side]=(i,r)
-        if set(by)!=set(expected) or any(v is None for v in by.values()):continue
-        ordered=[by[s] for s in expected]
-        actual_push=any(r['actualPush'] for _,r in ordered)
-        if for_training and actual_push:continue
-        y=np.asarray([r['y'] for _,r in ordered])
-        if not actual_push and abs(y.sum()-1)>1e-12:raise ValueError('Partition outcomes are not mutually exclusive')
-        ps=np.asarray([r['p']/(1-r['push']) for _,r in ordered]);pm=np.asarray([r['reference']['q'] for _,r in ordered])
-        if abs(ps.sum()-1)>1e-8 or abs(pm.sum()-1)>1e-8:raise ValueError('Partition probabilities are not normalized')
-        result.append(dict(key=key,fixture=key[0],metric=key[3][0],kickoff=ordered[0][1]['kickoff'],
-            indexes=[i for i,_ in ordered],sides=expected,stat=ps.tolist(),market=pm.tolist(),y=y.tolist()))
-    return result
-
-
-def fit_residual(partitions,cutoff):
-    if any(r['kickoff']>=cutoff for r in partitions):raise ValueError('Residual calibration crosses prediction cutoff')
-    counts=Counter(r['fixture'] for r in partitions);n=len(counts)
-    metadata=dict(fixtures=n,partitions=len(partitions),trainingBefore=cutoff,penalty=PENALTY,
-        objective='Prior fixture-weighted multiclass log loss',roiUsed=False)
-    if n<MIN_FIXTURES:return dict(metadata,coef=[0.,0.],fitted=False,reason='INSUFFICIENT_PRIOR_FIXTURES_USE_MARKET')
-    logq=np.full((len(partitions),3),-1e6);logp=logq.copy();target=np.zeros_like(logq)
-    for i,r in enumerate(partitions):
-        k=len(r['stat']);logq[i,:k]=np.log(np.maximum(r['market'],1e-12));logp[i,:k]=np.log(np.maximum(r['stat'],1e-12));target[i,:k]=r['y']
-    deviation=logp-logq;weights=np.asarray([1/counts[r['fixture']] for r in partitions]);weights/=weights.sum()
+def fit(rows,cutoff,week_weights=None):
+    if any(r['kickoff']+86400>cutoff or r['featureCutoff']>=r['kickoff'] for r in rows):raise ValueError('Residual fit crosses prior boundary')
+    counts=Counter(r['fixture'] for r in rows);meta=dict(fixtures=len(counts),events=len(rows),trainingBefore=cutoff,labelLagSeconds=86400,roiUsed=False,penalty=PENALTY,objective='Prior fixture-weighted conditional log loss with market logit offset',parameters=['market_bias','nonnegative_stat_logit_weight'])
+    if len(counts)<MIN_FIXTURES:return dict(meta,fitted=False,theta=[0.,0.],reason='INSUFFICIENT_PRIOR_FIXTURES')
+    ps=np.clip([r['statOver'] for r in rows],1e-12,1-1e-12);pm=np.asarray([r['marketOver'] for r in rows]);y=np.asarray([r['yOver'] for r in rows])
+    if not np.isfinite(ps).all() or not np.isfinite(pm).all() or np.any((pm<=0)|(pm>=1)) or np.any((y!=0)&(y!=1)):raise ValueError('Invalid residual input')
+    offset=logit(pm);gap=logit(ps)-offset;weights=np.asarray([(week_weights or {}).get(int(r['kickoff']//604800),1.)/counts[r['fixture']] for r in rows]);
+    if not np.isfinite(weights).all() or np.any(weights<=0):raise ValueError('Invalid prior weights')
+    weights/=weights.sum()
     def objective(theta):
-        z=logq+theta[0]*deviation+theta[1]*logq;z-=z.max(axis=1,keepdims=True)
-        p=np.exp(z);p/=p.sum(axis=1,keepdims=True);error=weights[:,None]*(p-target)
-        loss=-float(weights@np.sum(target*np.log(np.maximum(p,1e-15)),axis=1))+PENALTY*float(theta@theta)
-        gradient=np.asarray([np.sum(error*deviation),np.sum(error*logq)])+2*PENALTY*theta
-        return loss,gradient
-    fit=minimize(objective,[0.,0.],jac=True,bounds=BOUNDS,method='L-BFGS-B',options=dict(ftol=1e-12,gtol=1e-8,maxiter=500))
-    if not fit.success:raise ValueError('Residual calibration failed '+str(fit.message))
-    return dict(metadata,coef=fit.x.tolist(),fitted=True,reason='FITTED_PRIOR_LOG_LOSS',loss=float(fit.fun),
-        maxTrainingKickoff=max(r['kickoff'] for r in partitions))
+        z=offset+theta[0]+theta[1]*gap;e=expit(z)-y
+        return float(weights@(np.logaddexp(0,z)-y*z)+PENALTY*(theta@theta)),np.array([weights@e,weights@(e*gap)])+2*PENALTY*theta
+    f=minimize(objective,np.zeros(2),jac=True,method='L-BFGS-B',bounds=[(-2.,2.),(0.,1.)],options=dict(ftol=1e-12,gtol=1e-8,maxiter=500))
+    if not f.success or not np.isfinite(f.fun):raise ValueError('Market residual fit failed '+str(f.message))
+    return dict(meta,fitted=True,theta=f.x.tolist(),loss=float(f.fun),maxTrainingKickoff=max(r['kickoff'] for r in rows))
 
 
-def probabilities(stat,market,coef):
-    ps=np.asarray(stat);pm=np.asarray(market);theta=np.asarray(coef)
-    if theta.shape!=(2,) or not np.isfinite(theta).all():raise ValueError('Invalid residual coefficients')
-    if np.any(ps<0) or np.any(pm<0) or abs(ps.sum()-1)>1e-8 or abs(pm.sum()-1)>1e-8:raise ValueError('Invalid probability partition')
-    lp=np.log(np.maximum(ps,1e-12));lq=np.log(np.maximum(pm,1e-12))
-    z=lq+theta[0]*(lp-lq)+theta[1]*lq;z-=z.max();p=np.exp(z);return p/p.sum()
+def bank(frame,metric,cutoff):
+    rows=[r for r in frame if r['metric']==metric and r['kickoff']+86400<=cutoff];weeks=sorted({int(r['kickoff']//604800) for r in rows});rng=np.random.default_rng(SEED)
+    return dict(point=fit(rows,cutoff),replicas=[fit(rows,cutoff,dict(zip(weeks,rng.exponential(size=len(weeks)).tolist()))) for _ in range(12)],uncertainty='Weekly sensitivity, not a calibrated confidence guarantee')
+
+
+def predict(stat,market,theta):
+    if len(theta)!=2 or not np.isfinite([stat,market,*theta]).all() or not 0<=stat<=1 or not 0<market<1 or not -2<=theta[0]<=2 or not 0<=theta[1]<=1:raise ValueError('Invalid residual probability')
+    return float(expit(logit(market)+theta[0]+theta[1]*(logit(np.clip(stat,1e-12,1-1e-12))-logit(market))))
+
+
+def candidate(q,reference,parameters,kind='residual'):
+    if kind not in ('market','residual'):raise ValueError('Unknown residual decision kind')
+    side=q['spec'][2];raw=q['p']/(1-q['push']);stat=raw if side=='OVER' else 1-raw;market=reference['q'] if side=='OVER' else 1-reference['q']
+    theta=[0.,0.] if kind=='market' else parameters['point']['theta'];prob=predict(stat,market,theta);win=(prob if side=='OVER' else 1-prob)*(1-q['push']);p=min(q['p'],win);ev=p*q['odd']+q['push']-1
+    if p<.6 or not 1.8<q['odd']<3 or ev<=0:return None
+    lower=q['_lower'];low=lower['p']/(1-q['push']);ls=low if side=='OVER' else 1-low
+    replicas=[dict(theta=theta)] if kind=='market' else parameters['replicas'];mapped=[]
+    for f in replicas:
+        v=predict(ls,market,f['theta']);mapped.append((v if side=='OVER' else 1-v)*(1-q['push']))
+    point=predict(ls,market,theta);mapped_point=(point if side=='OVER' else 1-point)*(1-q['push'])
+    confidence=min(q['confidence'],p)
+    return dict(q,p=p,ev=ev,confidence=confidence,tier='HIGH' if confidence>=.8 else 'CONFIRMED' if confidence>=.7 else 'DEVELOPING',
+        _lower=dict(lower,p=min(lower['p'],p,mapped_point,float(np.quantile(mapped,.1)))),marketReference=reference,residualWinProbability=win,uncalibratedPointP=q['p'])
