@@ -30,7 +30,15 @@ history; no old entries are deleted. Singles filtering does not create or remove
 - Exact raw provider event, kickoff, team names, bookmaker, market, line, direction
   and price are bound together. All supported bookmaker lines are considered,
   including offers hidden by the normalized feed's best-price merge.
-- Actual market update age <=24h; API-Football fixture ID required for grading.
+- Verified quote observation age <=24h; API-Football fixture ID required for grading.
+  Provider `updatedAt` is the last price change, not a fetch clock. The legacy
+  Android field `quoteUpdatedAt` carries the verified observation clock when
+  available; `providerMarketUpdatedAt` separately preserves the provider clock.
+  Verified client receipts, fresh UEFA snapshots and reported domestic whole-league
+  polls are accepted. Retained rotating batches inherit no new clock. The domestic
+  observation ledger is reused only when its exact payload hash still agrees.
+  Without observation evidence the provider last-change time is a conservative
+  lower bound; stale or future evidence remains rejected.
 - `1.80 < odd < 3.00`, conservative win probability >=0.60 and
   `EV = pWin*odd + pPush - 1 > 0`. Minimum 8 prior fixtures for both teams.
 - Team props: same-book 1X2 favourite must agree with ELO and have >=60% count
@@ -54,6 +62,15 @@ workflows finish successfully. It reads existing repository caches. Android chec
 the feed at startup, on Singles opening and on its existing 15-minute Performance
 poll, with a five-minute network throttle. Settlement timing depends on the
 existing statistics collectors; it is not a live-results service.
+
+Coverage includes domestic caches plus a read-only checkout of the existing UEFA
+odds branch (Champions League, Europa League, Conference League). UEFA observations
+require a successful current odds request, no rate-limit skip and no preserved
+market rows. Country-scoped explicit aliases and exact cached kickoff/team/API
+fixture identities are required; ambiguous mappings are rejected. No new provider
+request is made. `coverage.json` reports source/identity exclusions and Athens
+calendar-day coverage, including zero-selection days. Existing first-issued rows
+are preserved when coverage expands; forecast parameters and thresholds are unchanged.
 
 `python -m unittest scripts.shots_uat.test_contract -v`
 

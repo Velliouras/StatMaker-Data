@@ -89,7 +89,7 @@ def bind_quote(match, quote, raw):
                     continue
                 price = float(odd[side]); prices.add(price)
                 if price == float(quote["odds"]):
-                    matches.append(timestamp(market.get("updatedAt")))
+                    matches.append(float(market.get("_observedAt") or timestamp(market.get("updatedAt"))))
             except (ValueError, TypeError):
                 continue
     if len(prices) != 1 or not matches or len(set(matches)) != 1 or matches[0] <= 0:
@@ -120,7 +120,11 @@ def raw_quotes(match, raw):
                     team = match[side] if side else None
                     result.append(dict(market=family, selection=f"{team or name} {direction.title()} {line:g}",
                                        team=team, line=line, odds=odd, bookmaker=book,
-                                       providerMarketName=name, exactBookmakerOdds=True))
+                                       providerMarketName=name, exactBookmakerOdds=True,
+                                       providerMarketUpdatedAt=market.get("updatedAt"),
+                                       quoteObservationEvidence=market.get("_evidence", "PROVIDER_LAST_CHANGE_LOWER_BOUND"),
+                                       quoteObservationSha256=market.get("_receiptSha256"),
+                                       quoteObservationCommit=market.get("_sourceCommit")))
     return result
 
 
@@ -130,7 +134,7 @@ def favourite(match, bookmaker, raw, now):
         if (market.get("_kickoff") != match.get("kickoff") or market.get("_home") != match.get("providerHomeTeam")
                 or market.get("_away") != match.get("providerAwayTeam")):
             continue
-        if not now - 86400 <= timestamp(market.get("updatedAt")) <= now:
+        if not now - 86400 <= float(market.get("_observedAt") or timestamp(market.get("updatedAt"))) <= now:
             continue
         for q in market.get("odds", []):
             for side in ("HOME", "AWAY", "DRAW"):
@@ -150,34 +154,57 @@ def new_candidates(history_rows, now, known):
     raw_path = ROOT / "odds/odds_api_io/domestic_provider_markets.json"
     odds_bytes, raw_bytes = odds_path.read_bytes(), raw_path.read_bytes()
     odds, raw_doc = json.loads(odds_bytes), json.loads(raw_bytes)
-    raw = raw_offer_index(raw_doc); audit = Counter()
+    from .sources import (Identities, UEFA, latest_markets, receipts, uefa_packet,
+                          read, domestic_observations, apply_observations)
+    from zoneinfo import ZoneInfo
+    observation_path = OUT / "observations.json"
+    observations = domestic_observations(odds, raw_doc, read(observation_path, {}).get("leagues", {}), now)
+    write(observation_path, dict(schemaVersion=1, leagues=observations))
+    raw = latest_markets(apply_observations(raw_offer_index(raw_doc), raw_doc, observations), receipts(ROOT, now))
+    leagues = [dict(l, competitionId="domestic", _sourceOddsSha256=digest(odds_bytes)) for l in odds["leagues"]]
+    source_packets = []
+    for competition_id, code in UEFA:
+        source_root = ROOT / ".sources/uefa" if (ROOT / ".sources/uefa").exists() else ROOT
+        path = source_root / f"odds/odds_api_io/{competition_id}_odds.json"
+        if path.exists():
+            league, markets, proof = uefa_packet(path, competition_id)
+            league["_sourceOddsSha256"] = proof["sha256"]
+            leagues.append(league); raw = latest_markets(raw, markets); source_packets.append(proof)
+    audit = Counter(); identity = Identities(ROOT, history_rows)
     model = Bank(OUT / "model")
     if now < model.meta["calibrationBefore"]:
         raise ValueError("Model calibration is not prior")
     history = History(history_rows); history.advance(now)
-    teams = set(history.teams); options = defaultdict(list)
-    for league in odds["leagues"]:
+    options = defaultdict(list); coverage_comp = defaultdict(Counter); coverage_day = defaultdict(Counter)
+    for league in leagues:
         if not league.get("enabledForBetting", True):
             continue
-        for m in league.get("matches", []):
-            ko = timestamp(m.get("kickoff"))
-            if not now + 900 < ko < now + 7 * 86400 or not m.get("usableForStats") or m.get("teamMappingStatus") != "matched":
+        for original in league.get("matches", []):
+            ko = timestamp(original.get("kickoff"))
+            if not now + 900 < ko < now + 7 * 86400:
                 continue
-            country = normalized(league["country"])
-            h, a = [country + ":" + normalized(m.get("canonical" + s + "Team") or m.get(s.lower() + "Team")) for s in ("Home", "Away")]
-            if h not in teams or a not in teams:
-                audit["unknownTeam"] += 1; continue
-            features = history.pair(h, a, league["leagueCode"], ko)
-            if min(features[0][4:6]) < 8:
-                audit["insufficientHistory"] += 1; continue
-            replicas = model.predict(features)
-            quotes = raw_quotes(m, raw)
+            comp = league.get("competitionId", "domestic")
+            day = datetime.fromtimestamp(ko, ZoneInfo("Europe/Athens")).date().isoformat()
+            counters = (coverage_comp[comp], coverage_day[day])
+            for counter in counters: counter["fixtures"] += 1
+            quotes = raw_quotes(original, raw)
             if not quotes:
                 continue
-            api = (m.get("squadContext") or {}).get("apiFootballFixtureId")
-            # API ID supports unambiguous automated result grading; provider IDs stay distinct.
-            if not api:
-                audit["missingApiFixtureId"] += 1; continue
+            for counter in counters: counter["withShotsOdds"] += 1
+            resolved, reason = identity.bind(league, original)
+            if resolved is None:
+                audit[reason] += 1
+                for counter in counters: counter[reason] += 1
+                continue
+            m, h, a, api = resolved
+            for counter in counters: counter["mapped"] += 1
+            features = history.pair(h, a, league["leagueCode"], ko)
+            if min(features[0][4:6]) < 8:
+                audit["insufficientHistory"] += 1
+                for counter in counters: counter["insufficientHistory"] += 1
+                continue
+            for counter in counters: counter["forecastable"] += 1
+            replicas = model.predict(features)
             fixture = f"api:{api}:{ko:.0f}"
             for q in quotes:
                 if q.get("market") not in MARKETS:
@@ -188,6 +215,7 @@ def new_candidates(history_rows, now, known):
                 if group in known:
                     continue
                 audit["supportedQuotes"] += 1
+                for counter in counters: counter["quotes"] += 1
                 if not 1.8 < float(q["odds"]) < 3:
                     audit["oddsBounds"] += 1; continue
                 binding = bind_quote(m, q, raw)
@@ -206,28 +234,42 @@ def new_candidates(history_rows, now, known):
                 ev = p * float(q["odds"]) + push - 1
                 if p < .6 or ev <= 0:
                     audit["probabilityOrEv"] += 1; continue
+                for counter in counters: counter["probabilityEvPassing"] += 1
                 fav = favourite(m, q["bookmaker"], raw, now)
                 if not favourite_guard(features, replicas, fav, metric, scope, team, side):
                     audit["favouriteGuard"] += 1; continue
+                for counter in counters: counter["eligibleOptions"] += 1
                 match = {k: v for k, v in m.items() if k != "markets"}
                 match.update({k: league[k] for k in ("leagueCode", "country", "competition", "season")})
                 sid = digest(json.dumps([MODEL, group, q["market"], team, side, line, q["bookmaker"], q["odds"]]).encode())
                 options[group].append(dict(selectionId=sid, groupKey=group, fixtureKey=fixture, fixtureId=str(m["id"]), apiFixtureId=int(api),
-                    competitionId="domestic", homeTeam=m["homeTeam"], awayTeam=m["awayTeam"], kickoff=m["kickoff"],
+                    competitionId=comp, homeTeam=m["homeTeam"], awayTeam=m["awayTeam"], kickoff=m["kickoff"],
                     match=match, market=q["market"], selection=q["selection"], team=q.get("team"), teamSide=team,
                     line=line, side=side, odd=float(q["odds"]), bookmaker=q["bookmaker"], winProbability=p,
                     pushProbability=push, indicativeEV=ev, model=MODEL, policyId=POLICY_ID, probabilityModel="CATBOOST_NB_BINOMIAL",
                     modelBankSha256=digest((OUT / "model/bank.json").read_bytes()), metric=metric, scope=scope,
                     featureCutoff=iso(now), quoteUpdatedAt=iso(updated), issuedAt=iso(now), publishedAt=None,
                     publicationCommit=None, outcome="PENDING", settlementReturn=None, settledAt=None,
-                    sourceOddsSha256=digest(odds_bytes), sourceProviderSha256=digest(raw_bytes),
+                    sourceOddsSha256=league["_sourceOddsSha256"], sourceProviderSha256=digest(raw_bytes),
+                    quoteObservationSemantics="OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
+                    providerMarketUpdatedAt=q.get("providerMarketUpdatedAt"),
+                    quoteObservationEvidence=q["quoteObservationEvidence"],
+                    quoteObservationSha256=q.get("quoteObservationSha256"),
+                    quoteObservationCommit=q.get("quoteObservationCommit"),
+                    identityBinding=reason,
                     bookmakerBinding="EXACT_PROVIDER_QUOTE", certified=False, category="UAT_SHOTS_EXPERIMENT",
                     historyHome=int(features[0][4]), historyAway=int(features[0][5]),
                     homeShots=replicas[0]["shots"][0], awayShots=replicas[0]["shots"][1],
                     homeSot=replicas[0]["sot"][0], awaySot=replicas[0]["sot"][1]))
     # One issued selection per fixture/metric. Tie-breaks do not use actual outcomes.
     selected = [sorted(v, key=lambda r: (-r["winProbability"], -r["indicativeEV"], r["selectionId"]))[0] for v in options.values()]
-    return selected, dict(audit), dict(oddsGeneratedAt=odds["generatedAt"], oddsSha256=digest(odds_bytes), providerSha256=digest(raw_bytes))
+    for row in selected:
+        day = datetime.fromtimestamp(timestamp(row["kickoff"]), ZoneInfo("Europe/Athens")).date().isoformat()
+        coverage_comp[row["competitionId"]]["newSelections"] += 1
+        coverage_day[day]["newSelections"] += 1
+    coverage = dict(byCompetition={k: dict(v) for k, v in coverage_comp.items()}, byDay={k: dict(v) for k, v in coverage_day.items()})
+    return selected, dict(audit), dict(oddsGeneratedAt=odds["generatedAt"], oddsSha256=digest(odds_bytes),
+        providerSha256=digest(raw_bytes), observedDomesticLeagues=len(observations), uefa=source_packets, coverage=coverage)
 
 
 def settle(row, actual, now):
@@ -296,6 +338,7 @@ def main():
             write(OUT / "preview.json", dict(selected=selected, audit=audit, source=source)); return
         ledger["rows"] += selected
         ledger["audit"] = audit; ledger["source"] = source; ledger["policyId"] = POLICY_ID
+        write(OUT / "coverage.json", dict(generatedAt=iso(now), audit=audit, source=source))
         write(ledger_path, ledger); return
     ledger["rows"] = [settle(r, actual, now) for r in verify_publication(ledger["rows"])]
     write(ledger_path, ledger)

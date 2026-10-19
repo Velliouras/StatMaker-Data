@@ -34,6 +34,8 @@ jobs:
             /config/
             /mappings/
             /data/statmaker/domestic_enriched/
+            /data/statmaker/league_tables/
+            /data/statmaker/domestic_match_context_cache.json
             /data/statmaker/uat/shots_v1/
             /data/statmaker/uefa_support_history.json
             /data/statmaker/uefa_team_support_history.json
@@ -43,6 +45,20 @@ jobs:
             /odds/odds_api_io/domestic_provider_markets.json
             /reports/betting_v2/prior_market_calibration_20261018/history.json.gz
             /reports/betting_v2/market_first_counts_20261018/quotes_*.json.gz
+            /reports/betting_v2/quote_receipts/
+      - name: Read existing UEFA odds branch
+        uses: actions/checkout@v4
+        with:
+          ref: build/uefa-qualifier-feed-20260720
+          path: .sources/uefa
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /odds/odds_api_io/champions_league_odds.json
+            /odds/odds_api_io/europa_league_odds.json
+            /odds/odds_api_io/conference_league_odds.json
+            /data/statmaker/uefa_update_manifest.json
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'

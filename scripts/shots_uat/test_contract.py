@@ -127,4 +127,90 @@ class ContractTest(unittest.TestCase):
         self.assertEqual(settle(row, [result], ko + 15000)["settlementReturn"], 1.)
 
 
+
+class SourceContractTest(unittest.TestCase):
+    def test_recent_observation_accepts_unchanged_price_without_rewriting_provider_clock(self):
+        from .sources import latest_markets
+        from .feed import timestamp
+        m = dict(id='7', kickoff='2026-10-21T15:00:00Z', providerHomeTeam='H', providerAwayTeam='A')
+        q = dict(selection='Shots Over 24.5', line=24.5, odds=1.91, bookmaker='B',
+                 providerMarketName='Total Shots', exactBookmakerOdds=True)
+        market = dict(updatedAt='2026-10-15T15:00:00Z', odds=[dict(hdp=24.5, over='1.91')],
+                      _kickoff=m['kickoff'], _home='H', _away='A')
+        key = ('7','B','Total Shots'); observed = timestamp('2026-10-20T15:00:00Z')
+        fresh = dict(market, _observedAt=observed)
+        merged = latest_markets({key:[market]}, {key:[fresh]})
+        self.assertEqual(bind_quote(m,q,merged), ('OVER',observed))
+        self.assertEqual(merged[key][0]['updatedAt'],market['updatedAt'])
+        stale_clock=bind_quote(m,q,{key:[market]})[1]
+        self.assertGreater(observed-stale_clock,86400)
+
+    def test_new_market_observation_does_not_retain_withdrawn_old_lines(self):
+        from .sources import latest_markets
+        key=('7','B','Total Shots')
+        old=dict(_observedAt=100.,odds=[dict(hdp=24.5,over='1.91')])
+        new=dict(_observedAt=200.,odds=[dict(hdp=25.5,over='1.91')])
+        self.assertEqual(latest_markets({key:[old]},{key:[new]})[key],[new])
+
+    def test_domestic_poll_cannot_refresh_rotated_or_preserved_payloads(self):
+        from .sources import poll_observations
+        league=dict(leagueCode='L', matches=[dict(id='7',providerMarkets=[{}])])
+        clock='2026-10-19T15:00:00Z'
+        archive=dict(generatedAt=clock,leagues=[league])
+        debug=dict(generatedAt=clock,leaguesRequested=['L'],leagueReports=[dict(leagueCode='L',providerMatchesArchived=1,providerMarketPayloadsArchived=1)])
+        odds=dict(generatedAt=clock,debug=debug)
+        self.assertIn('L',poll_observations(odds,archive))
+        debug['leaguesRequested']=[]
+        self.assertEqual(poll_observations(odds,archive),{})
+        debug['leaguesRequested']=['L'];archive['preservedAfterEmptyRefresh']=['L']
+        self.assertEqual(poll_observations(odds,archive),{})
+
+    def test_observation_ledger_requires_exact_payload_hash_and_prior_recent_clock(self):
+        from .sources import domestic_observations,payload_sha
+        from .feed import timestamp
+        league=dict(leagueCode='L',matches=[dict(id='7',providerMarkets=[])])
+        archive=dict(leagues=[league]);now=timestamp('2026-10-19T16:00:00Z')
+        proof=dict(payloadSha256=payload_sha(league),observedAt='2026-10-19T15:00:00Z')
+        self.assertIn('L',domestic_observations({},archive,{'L':proof},now))
+        self.assertEqual(domestic_observations({},archive,{'L':dict(proof,payloadSha256='wrong')},now),{})
+        self.assertEqual(domestic_observations({},archive,{'L':dict(proof,observedAt='2026-10-20T15:00:00Z')},now),{})
+        self.assertEqual(domestic_observations({},archive,{'L':dict(proof,observedAt='2026-10-17T15:00:00Z')},now),{})
+
+    def test_uefa_only_observes_successful_current_requests_without_preservation(self):
+        from .sources import uefa_packet
+        m=dict(id='7',kickoff='2026-10-21T15:00:00Z',providerHomeTeam='H',providerAwayTeam='A',
+               markets=[dict(exactBookmakerOdds=True,providerMarketName='Total Shots',bookmaker='B',
+                             market='MATCH_SHOTS',selection='Over 24.5',line=24.5,odds=1.91)])
+        debug=dict(oddsRefreshSkippedByRateLimit=False,preservedPreviousExactMarketRows=0,
+                   apiCalls=[dict(status=200,path='/odds/multi',params=dict(eventIds='7'))])
+        doc=dict(leagueCode='CL',country='Europe',competition='CL',season='2026',matches=[m],debug=debug,generatedAt='2026-10-19T15:00:00Z')
+        with tempfile.TemporaryDirectory() as directory:
+            path=Path(directory)/'uefa.json';path.write_text(json.dumps(doc))
+            self.assertTrue(uefa_packet(path,'champions_league')[1])
+            for key,value in [('preservedPreviousExactMarketRows',1),('oddsRefreshSkippedByRateLimit',True)]:
+                broken=copy.deepcopy(doc);broken['debug'][key]=value;path.write_text(json.dumps(broken))
+                self.assertFalse(uefa_packet(path,'champions_league')[1])
+            doc['debug']['apiCalls'][0]['params']['eventIds']='8';path.write_text(json.dumps(doc))
+            self.assertFalse(uefa_packet(path,'champions_league')[1])
+
+    def test_exact_schedule_resolves_global_name_ambiguity_and_rejects_wrong_fixture(self):
+        from .sources import Identities
+        history=[dict(_home='england:arsenal',_away='france:psg'),dict(_home='argentina:arsenal',_away='england:arsenal')]
+        ko='2026-10-21T15:00:00Z'
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);tables=root/'data/statmaker/league_tables';tables.mkdir(parents=True)
+            domestic=dict(leagueCode='E0',country='England',fixtures=[dict(fixture_id=1,date_utc=ko,home_team='Arsenal',away_team='Arsenal',home_team_id=42,away_team_id=42)])
+            european=dict(leagueCode='CL',fixtures=[dict(fixture_id=99,date_utc=ko,home_team='Arsenal',away_team='PSG',home_team_id=42,away_team_id=85)])
+            for name,doc in [('domestic',domestic),('european',european)]: (tables/(name+'.json')).write_text(json.dumps(doc))
+            identities=Identities(root,history);league=dict(leagueCode='CL',country='Europe')
+            match=dict(kickoff=ko,homeTeam='Arsenal',awayTeam='PSG')
+            bound,reason=identities.bind(league,match)
+            self.assertEqual(bound[1:4],('england:arsenal','france:psg',99))
+            self.assertEqual(reason,'cachedExactSchedule')
+            self.assertIsNone(identities.bind(league,dict(match,squadContext=dict(apiFootballFixtureId=100)))[0])
+            self.assertIsNone(identities.bind(league,dict(match,kickoff='2026-10-21T16:00:00Z'))[0])
+            european['fixtures'].append(dict(european['fixtures'][0],fixture_id=100));(tables/'european.json').write_text(json.dumps(european))
+            self.assertIsNone(Identities(root,history).bind(league,match)[0])
+
+
 if __name__ == "__main__": unittest.main()
