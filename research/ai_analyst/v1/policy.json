@@ -1,0 +1,23 @@
+{
+  "version": "statmaker-ai-analyst-shadow-v1",
+  "mode": "SHADOW_ONLY",
+  "model": "openai/gpt-4.1-mini",
+  "maximumRequestsPerRun": 2,
+  "maximumRequestsPerUTCDay": 2,
+  "automaticPromotion": false,
+  "numericProbabilityChanges": false,
+  "historyPath": "reports/betting_v2/prior_market_calibration_20261018/history.json.gz",
+  "sources": [
+    {
+      "directory": "reports/betting_v2/forward_ev55_shadow_20261019",
+      "model": "residual_conservative"
+    }
+  ],
+  "primaryComparison": "AI_SUPPORT versus original baseline on the same reviewed fixtures",
+  "notes": [
+    "Research-only source remains research-only; no STRONG/SOLID relabeling.",
+    "No AI-selected replacement or new offer, probability, stake, confidence percentage or tier.",
+    "Initial source covers corners/shots/SOT; this does not claim a completed all-market app integration.",
+    "No new API-Football/odds-provider calls; missing point-in-time context stays missing."
+  ]
+}

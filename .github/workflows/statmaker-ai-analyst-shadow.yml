@@ -1,0 +1,87 @@
+name: StatMaker Independent AI Analyst
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ['Betting V2 EV55 Research Shadow']
+    types: [completed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths: ['.github/triggers/statmaker-ai-analyst-v1']
+concurrency:
+  group: statmaker-independent-ai-analyst-v1
+  cancel-in-progress: false
+permissions: {}
+jobs:
+  analyze:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+      models: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Verify isolation and contracts
+        env:
+          PYTHONPATH: scripts
+        run: python -m unittest discover -s tests -p test_ai_analyst.py -v
+      - name: Review cached pre-published predictions with a real language model
+        env:
+          AI_GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/ai_analyst/run_shadow.py --run-live
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-ai-analyst
+          path: reports/ai_analyst/v1/
+          if-no-files-found: error
+          retention-days: 30
+  publish:
+    needs: analyze
+    if: needs.analyze.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/download-artifact@v4
+        with:
+          name: independent-ai-analyst
+          path: /tmp/independent-ai-analyst
+      - name: Publish only the independent analyst namespace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/ai_analyst/publish.py --artifact /tmp/independent-ai-analyst
+          python scripts/ai_analyst/run_shadow.py --score-only
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- reports/ai_analyst/v1
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record independent AI reviews without changing baseline forecasts [skip ci]'
+            published=false
+            for attempt in 1 2 3; do
+              git pull --rebase origin main
+              if git push origin HEAD:main; then published=true; break; fi
+            done
+            [[ "$published" == 'true' ]]
+          fi
+          export AI_PUBLISHED_COMMIT="$(git rev-parse HEAD)"
+          python scripts/ai_analyst/run_shadow.py --record-publication
+          git add -- reports/ai_analyst/v1
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Bind AI reviews to their pre-kickoff publication and separate scores [skip ci]'
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then exit 0; fi
+          done
+          exit 1
