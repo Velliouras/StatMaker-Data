@@ -9,7 +9,7 @@ Example (after independently checking account quota and setting API_FOOTBALL_KEY
  python scripts/fetch_schedule_scorers_capped.py --execute --phase leaders --max-requests 6
  python scripts/fetch_schedule_scorers_capped.py --execute --phase events --max-requests 12 --lookback 14
  python scripts/fetch_schedule_scorers_capped.py --phase build
-No Actions are scheduled by this script.
+Daily execution is controlled by the bounded Schedule scorers workflow.
 """
 from __future__ import annotations
 
@@ -47,9 +47,34 @@ def read_index(root: Path) -> list[dict]:
     return list(rows.values())
 
 
+
+def recent_leader_cache(path: Path, league_id: int, season: int,
+                        now: datetime, max_age: timedelta = timedelta(hours=20)) -> bool:
+    """Use provider provenance, never Git checkout file mtimes, for freshness."""
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+        stamp = datetime.fromisoformat(
+            str(record.get("retrievedAtUTC") or "").replace("Z", "+00:00"))
+        if stamp.tzinfo is None:
+            return False
+        age = now - stamp.astimezone(timezone.utc)
+        return (
+            record.get("sourceRequest") ==
+                "/players/topscorers?league=" + str(league_id) + "&season=" + str(season)
+            and record.get("apiFootballLeagueId") == league_id
+            and record.get("season") == season
+            and isinstance(record.get("response"), list)
+            and bool(record["response"])
+            and timedelta(0) <= age < max_age
+        )
+    except (OSError, ValueError, TypeError, AttributeError, json.JSONDecodeError):
+        return False
+
+
 def plan(root: Path, phase: str, lookback: int) -> list[tuple[str, dict, Path]]:
     archive = root / "data/api_football/schedule_scorers"
     leagues = read_index(root)
+    now = datetime.now(timezone.utc)
     result = []
     if phase in ("leaders", "both"):
         for entry in sorted(leagues, key=lambda r: r.get("league_code", "")):
@@ -61,9 +86,7 @@ def plan(root: Path, phase: str, lookback: int) -> list[tuple[str, dict, Path]]:
             if lid <= 0:
                 continue
             dest = archive / "leaders" / (code + "_" + str(season) + ".json")
-            if dest.is_file() and (
-                datetime.now(timezone.utc).timestamp() - dest.stat().st_mtime < 12 * 3600
-            ):
+            if recent_leader_cache(dest, lid, season, now):
                 continue
             result.append(("players/topscorers",
                 {"league": lid, "season": season},
@@ -210,10 +233,14 @@ def main() -> None:
     if args.execute and args.phase != "build":
         outcome = execute(root, pending, args.max_requests,
                           os.getenv("API_FOOTBALL_KEY", ""), args.quota_reserve)
+    dest = root / "data/statmaker/schedule_scorers/season_snapshot.json"
+    if args.phase != "build" and outcome["cachedFiles"] == 0 and dest.is_file():
+        print(json.dumps({"outcome": outcome, "unchanged": True,
+                          "reason": "No verified new source data"}))
+        return
     doc = build(root,
         root / "data/api_football/schedule_scorers/events",
         root / "data/api_football/schedule_scorers/leaders")
-    dest = root / "data/statmaker/schedule_scorers/season_snapshot.json"
     dest.parent.mkdir(parents=True, exist_ok=True)
     doc["apiCallsDuringGeneration"] = outcome["apiCalls"]
     dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n")
