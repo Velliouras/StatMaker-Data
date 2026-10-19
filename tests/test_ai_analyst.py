@@ -12,10 +12,11 @@ from unittest.mock import patch
 from ai_analyst.contracts import (build_packets, canonical, digest, recent_stats,
                                 utc, validate_review)
 from ai_analyst.provider import infer, ProviderError, NoRedirect
+from ai_analyst.local_provider import infer as local_infer, MODEL_ID, MODEL_SHA256, load_model, schema
 from ai_analyst.publish import merge
 from ai_analyst.run_shadow import run, score, write, OUTPUT
 
-POLICY = Path(__file__).resolve().parents[1]/'research/ai_analyst/v1/policy.json'
+POLICY = Path(__file__).resolve().parents[1]/'research/ai_analyst/v2_local/policy.json'
 NOW = 1800000000.
 
 
@@ -33,7 +34,7 @@ class AnalystTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.config = json.loads(POLICY.read_text())
         self.folder = self.config['sources'][0]['directory']
-        self.make('research/ai_analyst/v1/policy.json', self.config)
+        self.make('research/ai_analyst/v2_local/policy.json', self.config)
         self.make(self.config['historyPath'], [])
         candidate = dict(candidateId='test-source')
         self.make(self.folder+'/candidate.json', candidate)
@@ -205,6 +206,36 @@ class AnalystTests(unittest.TestCase):
 
 
 class TransportTests(unittest.TestCase):
+    def test_local_inference_uses_exact_model_and_constrained_output(self):
+        analysis=dict(fixtureRef='anon',facts=[dict(id='F001')],offers=[])
+        body=dict(model=MODEL_ID,messages=[dict(role='system',content='JSON'),
+                  dict(role='user',content=json.dumps(analysis))],max_tokens=900)
+        class Engine:
+            def create_chat_completion(self,**kwargs):
+                self.kwargs=kwargs
+                return dict(choices=[dict(finish_reason='stop',message=dict(content=json.dumps(answer(analysis))))],
+                            usage=dict(prompt_tokens=100,completion_tokens=40))
+        engine=Engine();review,meta=local_infer(body,engine=engine)
+        self.assertEqual(review,answer(analysis))
+        self.assertEqual(meta['weightsSha256'],MODEL_SHA256)
+        self.assertEqual(meta['inferenceAPIRequests'],0)
+        self.assertFalse(engine.kwargs['response_format']['schema']['additionalProperties'])
+        self.assertEqual(engine.kwargs['response_format']['schema']['properties']['reviews']['maxItems'],0)
+
+    def test_missing_local_model_does_not_make_a_provider_request(self):
+        with patch.dict('os.environ',{'AI_LOCAL_MODEL_PATH':'/missing/statmaker-model.gguf'}), \
+             patch('ai_analyst.local_provider._model',None):
+            with self.assertRaisesRegex(ProviderError,'MISSING_PINNED_LOCAL_MODEL'):
+                load_model()
+
+    def test_local_model_hash_is_checked_before_loading_runtime(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'bad.gguf';path.write_bytes(b'not-the-pinned-model')
+            with patch.dict('os.environ',{'AI_LOCAL_MODEL_PATH':str(path)}), \
+                 patch('ai_analyst.local_provider._model',None):
+                with self.assertRaisesRegex(ProviderError,'LOCAL_MODEL_HASH_MISMATCH'):
+                    load_model()
+
     def test_no_token_or_http_failure_does_not_fake_ai_success_or_expose_secret(self):
         with self.assertRaises(ProviderError):
             infer({}, '')

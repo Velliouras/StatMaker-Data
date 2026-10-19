@@ -8,7 +8,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-VERSION = 'statmaker-ai-analyst-shadow-v1'
+VERSION = 'statmaker-ai-analyst-shadow-v2-local'
 METRICS = {'GOALS_FT': ('FTHG', 'FTAG'), 'CORNERS': ('HC', 'AC'),
            'SHOTS': ('HS', 'AS'), 'SOT': ('HST', 'AST'), 'FOULS': ('HF', 'AF'),
            'YELLOW_CARDS': ('HY', 'AY')}

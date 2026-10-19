@@ -12,10 +12,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ai_analyst.contracts import (VERSION, build_packets, canonical, digest, finite,
                                 offer_key, timestamp, utc, validate_review, within)
-from ai_analyst.provider import SYSTEM, infer, request_body, ProviderError
+from ai_analyst.provider import SYSTEM, request_body, ProviderError
+from ai_analyst.local_provider import infer, MODEL_ID, MODEL_SHA256
 
-OUTPUT = 'reports/ai_analyst/v1'
-POLICY = 'research/ai_analyst/v1/policy.json'
+OUTPUT = 'reports/ai_analyst/v2_local'
+POLICY = 'research/ai_analyst/v2_local/policy.json'
 
 
 def write(root, relative, doc, immutable=False):
@@ -46,7 +47,8 @@ def load(path):
 def validate_policy(config):
     if (config['version'] != VERSION or config['mode'] != 'SHADOW_ONLY' or
         config['maximumRequestsPerUTCDay'] != 2 or config['maximumRequestsPerRun'] != 2 or
-        config['automaticPromotion'] is not False or config['numericProbabilityChanges'] is not False):
+        config['automaticPromotion'] is not False or config['numericProbabilityChanges'] is not False or
+        config['model'] != MODEL_ID or config['modelWeightsSha256'] != MODEL_SHA256):
         raise ValueError('Unexpected AI policy; new policy needs a new experiment')
 
 
@@ -87,9 +89,6 @@ def run(root, now, live=False, token='', inference=infer, clock=time.time):
             continue
         if remaining <= 0:
             break
-        if not token:
-            status['errors'].append('MISSING_MODELS_TOKEN')
-            break
         body = request_body(packet['analysis'], config['model'])
         if len(canonical(body)) > 24000:
             status['errors'].append('INPUT_EXCEEDS_FIXED_BUDGET')
@@ -115,7 +114,7 @@ def run(root, now, live=False, token='', inference=infer, clock=time.time):
                 raise ValueError('AI response arrived too late')
             doc = dict(version=VERSION, completedAtUTC=utc(completed), review=review,
                        inputPath=input_path, inputSha256=digest((root/input_path).read_bytes()),
-                       provider='GitHub Models', realLLM=True, metadata=metadata,
+                       provider='Local llama.cpp', realLLM=True, metadata=metadata,
                        researchOnly=True, reliabilityScore=None,
                        baselineProbabilitiesUnchanged=True, automaticPromotion=False)
             write(root, OUTPUT+'/reviews/'+identity+'.json', doc, immutable=True)
@@ -257,13 +256,25 @@ def main():
     parser.add_argument('--run-live', action='store_true')
     parser.add_argument('--record-publication', action='store_true')
     parser.add_argument('--score-only', action='store_true')
+    parser.add_argument('--check-work', action='store_true')
     args = parser.parse_args()
     root = args.repository_root.resolve()
     lock = Path(tempfile.gettempdir())/('statmaker-ai-'+digest(str(root).encode())[:16]+'.lock')
     with lock.open('a') as f:
         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
         now = time.time()
-        if args.record_publication:
+        if args.check_work:
+            config=load(root/POLICY);validate_policy(config)
+            packets,_=build_packets(root,config,now)
+            attempts=[load(p) for p in (root/OUTPUT/'attempts').glob('*.json')]
+            seen={r['fixtureRef'] for r in attempts}
+            available=(sum(r['budgetDayUTC']==utc(now)[:10] for r in attempts)<2
+                       and any(p['analysis']['fixtureRef'] not in seen for p in packets))
+            if os.environ.get('GITHUB_OUTPUT'):
+                with open(os.environ['GITHUB_OUTPUT'],'a') as output:
+                    output.write('needs_ai='+str(available).lower()+'\n')
+            print('New local inference needed:',available)
+        elif args.record_publication:
             record_publication(root, now)
         elif args.score_only:
             score(root, now)
