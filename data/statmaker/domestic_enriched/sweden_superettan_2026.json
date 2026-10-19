@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-19T08:49:49Z",
+  "generated_at": "2026-10-19T20:07:27Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-19T08:49:11Z",
+    "cache_generated_at": "2026-10-19T20:07:10Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 214,
-    "fixtures_with_any_stats": 120,
-    "fixtures_with_bb_core_stats": 118,
-    "any_stats_coverage": 0.5607,
-    "bb_core_coverage": 0.5514,
+    "completed_fixtures": 215,
+    "fixtures_with_any_stats": 121,
+    "fixtures_with_bb_core_stats": 119,
+    "any_stats_coverage": 0.5628,
+    "bb_core_coverage": 0.5535,
     "group_counts": {
-      "shots_total": 90,
-      "shots_on_target": 118,
-      "corners": 118,
+      "shots_total": 91,
+      "shots_on_target": 119,
+      "corners": 119,
       "fouls": 27,
-      "yellow_cards": 120,
-      "red_cards": 120,
-      "possession": 118,
+      "yellow_cards": 121,
+      "red_cards": 121,
+      "possession": 119,
       "passes": 26,
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.4206,
-      "shots_on_target": 0.5514,
-      "corners": 0.5514,
-      "fouls": 0.1262,
-      "yellow_cards": 0.5607,
-      "red_cards": 0.5607,
-      "possession": 0.5514,
-      "passes": 0.1215,
-      "xg": 0.1215
+      "shots_total": 0.4233,
+      "shots_on_target": 0.5535,
+      "corners": 0.5535,
+      "fouls": 0.1256,
+      "yellow_cards": 0.5628,
+      "red_cards": 0.5628,
+      "possession": 0.5535,
+      "passes": 0.1209,
+      "xg": 0.1209
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5607 < 0.65",
-      "low BB-core coverage: 0.5514 < 0.65",
+      "low any-stats coverage: 0.5628 < 0.65",
+      "low BB-core coverage: 0.5535 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -18046,6 +18046,90 @@
         "fulltime": {
           "home": 0,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497728,
+      "date_utc": "2026-10-19T17:05:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "league_code": "SWE2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
+      "round": "Regular Season - 27",
+      "home_team": "Varbergs BoIS FC",
+      "away_team": "Helsingborg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 14,
+        "AS": 5,
+        "HST": 5,
+        "AST": 2,
+        "HC": 4,
+        "AC": 7,
+        "HF": null,
+        "AF": null,
+        "HY": 1,
+        "AY": 3,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 0,
+      "home_score": 0,
+      "away_score": 0,
+      "fthg": 0,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 0,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 0
         },
         "extratime": {
           "home": null,
