@@ -183,7 +183,8 @@ def new_candidates(history_rows, now, known):
                 if q.get("market") not in MARKETS:
                     continue
                 metric, scope = MARKETS[q["market"]]
-                group = fixture + ":" + metric
+                # A rescheduled kickoff must not issue a second pick for the same API fixture/metric.
+                group = f"api:{api}:{metric}"
                 if group in known:
                     continue
                 audit["supportedQuotes"] += 1
