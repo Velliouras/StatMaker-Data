@@ -33,8 +33,10 @@ history; no old entries are deleted. Singles filtering does not create or remove
 - Actual market update age <=24h; API-Football fixture ID required for grading.
 - `1.80 < odd < 3.00`, conservative win probability >=0.60 and
   `EV = pWin*odd + pPush - 1 > 0`. Minimum 8 prior fixtures for both teams.
-- Same-book 1X2 favourite must agree with ELO and have >=60% count dominance across
-  every fit. Team props must follow favourite-Over or underdog-Under direction.
+- Team props: same-book 1X2 favourite must agree with ELO and have >=60% count
+  dominance across every fit, with favourite-Over or underdog-Under direction.
+  Match totals do not assert which team wins or dominates the counts, so this
+  directional gate does not apply to match totals (policy SHOTS_SOT_SCOPE_GUARD_V2).
 - Maximum one first-issued selection per fixture and metric. SHOTS and SOT are
   separate families. No quota and no SOLID picks; the app labels all as Developing.
 - Two-phase publication: commit/push the immutable issues, then verify the public
@@ -59,8 +61,15 @@ existing statistics collectors; it is not a live-results service.
 
 `python -m scripts.shots_uat.replay`
 
-`validation.json` contains an October development replay using the frozen bank:
-earliest 12 selections (+5.122u), latest 14 (+5.228u). These are overlapping quote
-variants, include just 1 and 4 SOT selections respectively, and are not an untouched
-holdout or evidence of sustainable profitability. They are never imported into
-the app's prospective Performance ledger.
+`validation.json` contains the October development replay for policy
+SHOTS_SOT_SCOPE_GUARD_V2, using the unchanged frozen numerical bank and the same
+archived quote inputs: earliest 37 selections (+17.166u), latest 38 (+7.328u).
+These are overlapping quote variants, not an untouched holdout or proof of
+sustainable profitability. They are never imported into prospective Performance.
+
+`validation-directional-guard-v1.json` preserves the earlier 12/14-selection replay.
+That policy incorrectly required directional favourite dominance for match totals,
+although a sum-of-shots bet makes no claim about the dominant team. The correction
+removes this unrelated gate from totals; odds, probability, EV, quote age, exact
+identity and all team-prop safeguards remain unchanged. No model was refitted and
+no odds/probability threshold was lowered to fill a daily quota.

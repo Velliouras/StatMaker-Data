@@ -60,7 +60,7 @@ jobs:
           fi
       - name: Replay fixed bank against archived October quotes
         run: |
-          if [ ! -f data/statmaker/uat/shots_v1/validation.json ]; then
+          if ! python -c "import json; from scripts.shots_uat.model import POLICY_ID; from scripts.shots_uat.feed import OUT; p=OUT/'validation.json'; raise SystemExit(0 if p.exists() and json.loads(p.read_text()).get('policyId') == POLICY_ID else 1)"; then
             python -m scripts.shots_uat.replay
           fi
       - name: Stage prospective issues from cached data

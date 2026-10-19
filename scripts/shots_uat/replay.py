@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from .features import History, counts
 from .feed import OUT, digest, iso, load_history, write
-from .model import Bank, conservative, favourite_guard
+from .model import Bank, conservative, favourite_guard, POLICY_ID
 from .train import ROOT
 
 
@@ -80,7 +80,7 @@ def main():
         reports[suffix] = dict(summary=summary(selected), byMarket={m: summary([r for r in selected if r["metric"] == m]) for m in ("SHOTS", "SOT")},
                                audit=dict(audit), picks=selected, quotesSha256=digest(raw))
         print("SHOTS_UAT_REPLAY", suffix, json.dumps(reports[suffix]["summary"]), dict(audit), flush=True)
-    report = dict(modelId=bank.meta["model"], generatedAt=iso(datetime.now(timezone.utc).timestamp()),
+    report = dict(modelId=bank.meta["model"], policyId=POLICY_ID, generatedAt=iso(datetime.now(timezone.utc).timestamp()),
                   status="DEVELOPMENT_REPLAY_NOT_PROSPECTIVE", trainingFixtures=bank.meta["trainingFixtures"],
                   calibrationFixtures=bank.meta["calibrationFixtures"], validationBefore=iso(bank.meta["calibrationBefore"]),
                   overlappingQuoteVariants=True, untouchedHoldout=False, profitabilityCertified=False,

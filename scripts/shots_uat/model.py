@@ -8,6 +8,7 @@ from catboost import CatBoostRegressor, CatBoostClassifier, Pool
 from .features import FEATURES
 
 SEEDS = (17, 31, 71)
+POLICY_ID = "SHOTS_SOT_SCOPE_GUARD_V2"
 
 
 def pool(x, y=None, weight=None):
@@ -112,6 +113,12 @@ def conservative(replicas, metric, scope, team, side, line):
 
 
 def favourite_guard(features, replicas, favourite, metric, scope, team, side):
+    # A+B Over/Under does not assert which team wins or has more shots.
+    # Directional favourite safeguards apply to team props only.
+    if scope == "TOTAL":
+        return True
+    if scope != "TEAM":
+        return False
     if favourite not in ("HOME", "AWAY"):
         return False
     index = 0 if favourite == "HOME" else 1
@@ -126,4 +133,4 @@ def favourite_guard(features, replicas, favourite, metric, scope, team, side):
         if dominance < .6:
             return False
     # A team prop cannot oppose the market favourite's attacking direction.
-    return scope == "TOTAL" or ((team == favourite) == (side == "OVER"))
+    return (team == favourite) == (side == "OVER")

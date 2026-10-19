@@ -13,7 +13,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from .features import History, counts, normalized
-from .model import Bank, conservative, favourite_guard
+from .model import Bank, conservative, favourite_guard, POLICY_ID
 from .train import ROOT, HISTORY
 
 OUT = ROOT / "data/statmaker/uat/shots_v1"
@@ -216,7 +216,7 @@ def new_candidates(history_rows, now, known):
                     competitionId="domestic", homeTeam=m["homeTeam"], awayTeam=m["awayTeam"], kickoff=m["kickoff"],
                     match=match, market=q["market"], selection=q["selection"], team=q.get("team"), teamSide=team,
                     line=line, side=side, odd=float(q["odds"]), bookmaker=q["bookmaker"], winProbability=p,
-                    pushProbability=push, indicativeEV=ev, model=MODEL, probabilityModel="CATBOOST_NB_BINOMIAL",
+                    pushProbability=push, indicativeEV=ev, model=MODEL, policyId=POLICY_ID, probabilityModel="CATBOOST_NB_BINOMIAL",
                     modelBankSha256=digest((OUT / "model/bank.json").read_bytes()), metric=metric, scope=scope,
                     featureCutoff=iso(now), quoteUpdatedAt=iso(updated), issuedAt=iso(now), publishedAt=None,
                     publicationCommit=None, outcome="PENDING", settlementReturn=None, settledAt=None,
@@ -295,7 +295,7 @@ def main():
         if args.preview:
             write(OUT / "preview.json", dict(selected=selected, audit=audit, source=source)); return
         ledger["rows"] += selected
-        ledger["audit"] = audit; ledger["source"] = source
+        ledger["audit"] = audit; ledger["source"] = source; ledger["policyId"] = POLICY_ID
         write(ledger_path, ledger); return
     ledger["rows"] = [settle(r, actual, now) for r in verify_publication(ledger["rows"])]
     write(ledger_path, ledger)

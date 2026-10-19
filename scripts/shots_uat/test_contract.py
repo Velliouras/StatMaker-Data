@@ -9,11 +9,29 @@ from pathlib import Path
 from unittest.mock import patch
 import numpy as np
 from .features import History, counts
-from .model import pmf, probabilities, distribution, conservative
+from .model import pmf, probabilities, distribution, conservative, favourite_guard
 from .feed import bind_quote, raw_offer_index, settle
 
 
 class ContractTest(unittest.TestCase):
+    def test_total_over_does_not_require_picking_the_dominant_team(self):
+        # Either team can contribute to the sum; swapping team order cannot change it.
+        replicas = [dict(shots=[14.7, 13.], sot=[5., 4.3], alpha=.06)]
+        swapped = [dict(shots=[13., 14.7], sot=[4.3, 5.], alpha=.06)]
+        first = conservative(replicas, "shots", "TOTAL", "", "OVER", 24.5)
+        second = conservative(swapped, "shots", "TOTAL", "", "OVER", 24.5)
+        self.assertAlmostEqual(first[0], second[0], places=12)
+        self.assertTrue(favourite_guard([[1, 67], [0, -67]], replicas, "AWAY", "shots", "TOTAL", "", "OVER"))
+        self.assertTrue(favourite_guard([[1, 67], [0, -67]], replicas, None, "shots", "TOTAL", "", "OVER"))
+
+    def test_team_prop_keeps_favourite_direction_and_elo_safeguards(self):
+        pair = [[1, 67], [0, -67]]
+        replicas = [dict(shots=[20., 8.], sot=[7., 2.5], alpha=.06)]
+        self.assertTrue(favourite_guard(pair, replicas, "HOME", "shots", "TEAM", "HOME", "OVER"))
+        self.assertFalse(favourite_guard(pair, replicas, "HOME", "shots", "TEAM", "AWAY", "OVER"))
+        self.assertFalse(favourite_guard(pair, replicas, "AWAY", "shots", "TEAM", "AWAY", "OVER"))
+        self.assertFalse(favourite_guard(pair, replicas, None, "shots", "TEAM", "HOME", "OVER"))
+
     def test_history_refresh_does_not_duplicate_renamed_api_fixture(self):
         from . import feed
         old = dict(fixture_id=1, _date=100000., _home="old", _away="a")
