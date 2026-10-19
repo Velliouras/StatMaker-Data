@@ -1,0 +1,29 @@
+name: Scorer Refresh Offline Regression
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/fetch_schedule_scorers_capped.py'
+      - 'scripts/refresh_domestic_match_context.py'
+      - '.github/workflows/schedule-scorers-manual.yml'
+      - '.github/workflows/domestic-results-context-refresh.yml'
+      - 'tests/test_scorer_refresh_freshness.py'
+      - '.github/workflows/scorer-refresh-offline-validation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify syntax, provenance freshness and prioritization without API calls
+        run: |
+          python -m py_compile scripts/fetch_schedule_scorers_capped.py scripts/refresh_domestic_match_context.py
+          python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -v
+          python -m unittest discover -s tests -p 'test_schedule_scorers_offline_builder.py' -v

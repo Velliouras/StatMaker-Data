@@ -41,6 +41,23 @@ def write(path, data):
     temp.replace(path)
 
 
+
+def fixture_priority(f, today=None):
+    """Recent completed matches first across leagues, then favored competitions."""
+    today = today or datetime.now(timezone.utc).date()
+    try:
+        match_day = datetime.fromisoformat(
+            str(f["date"]).replace("Z", "+00:00")).date()
+        age = max(0, (today - match_day).days)
+        ordinal = match_day.toordinal()
+    except (ValueError, TypeError, KeyError):
+        age, ordinal = 100000, 0
+    window = 0 if age <= 3 else 1 if age <= 14 else 2
+    code = f["leagueCode"]
+    group = PRIORITY.index(code) if code in PRIORITY else len(PRIORITY)
+    return (window, group, -ordinal, code, f["fixtureId"])
+
+
 def current_fixtures():
     index = read(ROOT / "data/statmaker/domestic_enriched/index.json")
     assert index.get("schema_version") == 3, "Unexpected canonical index"
@@ -80,13 +97,7 @@ def current_fixtures():
                              "season": int(row["api_football_season"]),
                              "home": home, "away": away, "homeGoals": h, "awayGoals": a,
                              "date": m.get("date_utc") or ""}
-    def priority(f):
-        code = f["leagueCode"]
-        group = PRIORITY.index(code) if code in PRIORITY else len(PRIORITY)
-        # Recent first within each priority competition.
-        return (group, -(int(str(f["date"])[:10].replace("-", "")) if str(f["date"])[:10].replace("-", "").isdigit() else 0),
-                code, f["fixtureId"])
-    return sorted(fixtures.values(), key=priority)
+    return sorted(fixtures.values(), key=fixture_priority)
 
 
 def http_get(endpoint, params, state, maximum, reserve):
