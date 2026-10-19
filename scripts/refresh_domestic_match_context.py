@@ -10,7 +10,7 @@ Only StatMaker-Data/main is written; requests are bounded with quota reserve.
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
@@ -26,6 +26,39 @@ COMPLETED = {"FT", "AET", "PEN"}
 PRIORITY = ("G1", "E0", "SP1", "I1", "D1", "F1")
 MAX_CALLS = 64
 RESERVE = 1500
+
+
+def refresh_window(now=None):
+    """Define one post-match and one morning refresh window in UTC."""
+    now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    if now.hour >= 20:
+        day, part = now.date(), "postmatch"
+    elif now.hour < 5:
+        day, part = now.date() - timedelta(days=1), "postmatch"
+    else:
+        day, part = now.date(), "morning"
+    start = datetime.combine(day, datetime.min.time(), timezone.utc)
+    start += timedelta(hours=20 if part == "postmatch" else 5)
+    end = start + timedelta(hours=9 if part == "postmatch" else 15)
+    return f"{part}-{day.isoformat()}", start, end
+
+
+def already_refreshed(snapshot, now=None):
+    """Deduplicate provider spending across cron and fallback triggers."""
+    if snapshot.get("contract") != CONTRACT:
+        return False
+    key, start, end = refresh_window(now)
+    if snapshot.get("refreshWindowKey") == key:
+        return True
+    try:
+        stamp = datetime.fromisoformat(
+            str(snapshot.get("generatedAtUTC") or "").replace("Z", "+00:00"))
+        calls = int(snapshot.get("apiCallsDuringGeneration") or 0)
+        # Backward compatibility for successful runs before window markers.
+        return (stamp.tzinfo is not None and start <=
+                stamp.astimezone(timezone.utc) < end and 1 <= calls <= 32)
+    except (ValueError, TypeError, AttributeError):
+        return False
 
 
 def read(path, fallback=None):
@@ -247,20 +280,33 @@ def build(fixtures, state):
             "coverage": {"completedFixtures": len(fixtures), "venues": len(venues),
                          "verifiedGoalTimelines": total_with_events},
             "apiCallsDuringGeneration": state["calls"],
-            "providerStopReason": state["stop"]}
+            "providerStopReason": state["stop"],
+            "refreshWindowKey": state.get("refreshWindowKey")}
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--execute", action="store_true")
+    ap.add_argument("--check-window", action="store_true",
+                    help="Check provider window freshness with zero network calls")
     ap.add_argument("--max-requests", type=int, default=64)
     ap.add_argument("--quota-reserve", type=int, default=1500)
     args = ap.parse_args()
     if not 1 <= args.max_requests <= MAX_CALLS or args.quota_reserve < RESERVE:
         ap.error("maximum 64 calls, minimum quota reserve 1500")
+    if args.check_window:
+        key, _, _ = refresh_window()
+        done = already_refreshed(read(OUT))
+        print("refresh_needed=" + ("false" if done else "true"))
+        print("refresh_window=" + key)
+        return
     fixtures = current_fixtures()
-    state = collect(fixtures, args.max_requests, args.quota_reserve) if args.execute else {
-        "calls": 0, "stop": None, "venuesSaved": 0, "eventsSaved": 0}
+    if not args.execute:
+        print(json.dumps({"dryRun": True, "fixtureCount": len(fixtures),
+                          "apiCalls": 0, "noFilesWritten": True}))
+        return
+    state = collect(fixtures, args.max_requests, args.quota_reserve)
+    state["refreshWindowKey"] = refresh_window()[0]
     data = build(fixtures, state)
     write(OUT, data)
     print(json.dumps({"coverage": data["coverage"], "network": state}, ensure_ascii=False))
