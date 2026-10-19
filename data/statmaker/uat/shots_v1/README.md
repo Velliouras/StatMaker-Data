@@ -1,0 +1,66 @@
+# Shots / SOT UAT v1
+
+Independent numerical UAT model, not KickoffScore's proprietary model. Only
+full-time match/team SHOTS and SHOTS_ON_TARGET Over/Under integer and half lines.
+No production app model changes, paid provider calls, LLM calls or automatic promotion.
+
+The app reads `latest.json`, verifies the content-addressed candidate file and imports
+`issued` into its separate `UAT_SHOTS_CATBOOST_V1` Performance source. The same records
+drive Daily Outcomes. A Performance setting switches back to the previous model's
+history; no old entries are deleted. Singles filtering does not create or remove issues.
+
+## Initial frozen bank
+
+- Cached history: 17,950 fixtures, SHA256
+  `a9f43dca5f0741c20dc8a3de5fcb9b8a05a4a3d9efeda4266758f4afea5693bb`.
+- Training: 7,321 fixtures whose kickoff plus 24h precedes 2026-09-01 UTC.
+- Calibration: 1,271 separate September fixtures available before 2026-10-01 UTC.
+- Three fixed CatBoost seeds, 220 trees, depth 5. No ROI parameter search.
+- Poisson objective for expected SHOTS; exposure-weighted CrossEntropy for SOT/SHOTS.
+  A negative-binomial count distribution and binomial thinning give a valid joint
+  where SOT is a subset of SHOTS. The lower envelope across three fits is a model
+  sensitivity measure, not a statistical confidence interval.
+- Inputs: lagged team/opponent counts, venue, rest, goals, ELO and available xG.
+  Actual results enter features only at kickoff +24h. Missing xG stays missing.
+- Frozen models are reused by the scheduled publisher. Retraining/version changes
+  require a deliberate model revision; no automatic refits from observed ROI.
+
+## Selection and publication
+
+- Exact raw provider event, kickoff, team names, bookmaker, market, line, direction
+  and price are bound together. All supported bookmaker lines are considered,
+  including offers hidden by the normalized feed's best-price merge.
+- Actual market update age <=24h; API-Football fixture ID required for grading.
+- `1.80 < odd < 3.00`, conservative win probability >=0.60 and
+  `EV = pWin*odd + pPush - 1 > 0`. Minimum 8 prior fixtures for both teams.
+- Same-book 1X2 favourite must agree with ELO and have >=60% count dominance across
+  every fit. Team props must follow favourite-Over or underdog-Under direction.
+- Maximum one first-issued selection per fixture and metric. SHOTS and SOT are
+  separate families. No quota and no SOLID picks; the app labels all as Developing.
+- Two-phase publication: commit/push the immutable issues, then verify the public
+  commit's timestamp before kickoff and publish the app feed. Late issues never
+  enter the prospective Performance ledger. New issues need >=15min to kickoff.
+- First-issued ID, price, probability, publication time and line never change.
+  Only pending outcomes can become WON/LOST/VOID using cached FT statistics with
+  the same API fixture ID and kickoff. Missing or inconsistent target statistics
+  stay pending. Integer-line pushes return one unit.
+
+## Operation and checks
+
+`Shots SOT UAT Feed` runs every four hours and after the existing odds/statistics
+workflows finish successfully. It reads existing repository caches. Android checks
+the feed at startup, on Singles opening and on its existing 15-minute Performance
+poll, with a five-minute network throttle. Settlement timing depends on the
+existing statistics collectors; it is not a live-results service.
+
+`python -m unittest scripts.shots_uat.test_contract -v`
+
+`python -m scripts.shots_uat.feed --preview --cached-history-only`
+
+`python -m scripts.shots_uat.replay`
+
+`validation.json` contains an October development replay using the frozen bank:
+earliest 12 selections (+5.122u), latest 14 (+5.228u). These are overlapping quote
+variants, include just 1 and 4 SOT selections respectively, and are not an untouched
+holdout or evidence of sustainable profitability. They are never imported into
+the app's prospective Performance ledger.

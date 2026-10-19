@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -40,13 +40,18 @@ jobs:
           if [ ! -f data/statmaker/uat/shots_v1/model/bank.json ]; then
             python -m scripts.shots_uat.train
           fi
+      - name: Replay fixed bank against archived October quotes
+        run: |
+          if [ ! -f data/statmaker/uat/shots_v1/validation.json ]; then
+            python -m scripts.shots_uat.replay
+          fi
       - name: Stage prospective issues from cached data
         run: python -m scripts.shots_uat.feed --stage-issues
       - name: Publish immutable issues before exposing them to the app
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/statmaker/uat/shots_v1/model data/statmaker/uat/shots_v1/ledger.json
+          git add data/statmaker/uat/shots_v1/model data/statmaker/uat/shots_v1/ledger.json data/statmaker/uat/shots_v1/validation.json
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: issue Shots/SOT selections with frozen CatBoost bank'
             for attempt in 1 2 3 4; do

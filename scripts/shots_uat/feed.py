@@ -121,11 +121,13 @@ def raw_quotes(match, raw):
     return result
 
 
-def favourite(match, bookmaker, raw):
+def favourite(match, bookmaker, raw, now):
     result = {}
     for market in raw.get((str(match["id"]), bookmaker, "ML"), []):
         if (market.get("_kickoff") != match.get("kickoff") or market.get("_home") != match.get("providerHomeTeam")
                 or market.get("_away") != match.get("providerAwayTeam")):
+            continue
+        if not now - 86400 <= timestamp(market.get("updatedAt")) <= now:
             continue
         for q in market.get("odds", []):
             for side in ("HOME", "AWAY", "DRAW"):
@@ -134,6 +136,8 @@ def favourite(match, bookmaker, raw):
     if set(result) != {"HOME", "AWAY", "DRAW"} or any(len(v) != 1 for v in result.values()):
         return None
     odds = {k: next(iter(v)) for k, v in result.items()}
+    if not all(1 < odd < 1000 for odd in odds.values()) or not .85 <= sum(1 / odd for odd in odds.values()) <= 1.25:
+        return None
     side = min(odds, key=odds.get)
     return side if side in ("HOME", "AWAY") and list(odds.values()).count(odds[side]) == 1 else None
 
@@ -198,7 +202,7 @@ def new_candidates(history_rows, now, known):
                 ev = p * float(q["odds"]) + push - 1
                 if p < .6 or ev <= 0:
                     audit["probabilityOrEv"] += 1; continue
-                fav = favourite(m, q["bookmaker"], raw)
+                fav = favourite(m, q["bookmaker"], raw, now)
                 if not favourite_guard(features, replicas, fav, metric, scope, team, side):
                     audit["favouriteGuard"] += 1; continue
                 match = {k: v for k, v in m.items() if k != "markets"}
@@ -237,6 +241,10 @@ def settle(row, actual, now):
     if any(v is None or not v.is_integer() for v in values):
         return row
     h, a = values
+    for total, target in (("HS", "HST"), ("AS", "AST")):
+        s, t = number(stats.get(total)), number(stats.get(target))
+        if s is not None and t is not None and t > s:
+            return row
     value = h + a if row["scope"] == "TOTAL" else h if row["teamSide"] == "HOME" else a
     push = value == row["line"]
     won = value > row["line"] if row["side"] == "OVER" else value < row["line"]
