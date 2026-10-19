@@ -33,6 +33,7 @@ class AnalystTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.config = json.loads(POLICY.read_text())
+        self.config['inferenceEnabled'] = True  # Synthetic unit fixture; deployed pilot is paused.
         self.folder = self.config['sources'][0]['directory']
         self.make('research/ai_analyst/v2_local/policy.json', self.config)
         self.make(self.config['historyPath'], [])
@@ -92,6 +93,16 @@ class AnalystTests(unittest.TestCase):
         self.run_live()
         status = self.run_live(inference=lambda *_: self.fail('duplicate inference'))
         self.assertEqual(status['llmCallsThisRun'], 0)
+
+    def test_quality_pause_blocks_real_generation_even_when_budget_and_future_fixture_exist(self):
+        self.config['inferenceEnabled'] = False
+        self.make('research/ai_analyst/v2_local/policy.json', self.config)
+        status = self.run_live(inference=lambda *_: self.fail('quality-paused inference'))
+        self.assertEqual(status['status'], 'PAUSED_FOR_QUALITY')
+        self.assertEqual(status['llmCallsThisRun'], 0)
+        self.assertFalse((self.root/OUTPUT/'attempts').exists())
+        summary = json.loads((self.root/OUTPUT/'summary.json').read_bytes())
+        self.assertFalse(summary['inferenceEnabled'])
 
     def test_daily_cap_includes_failed_attempts(self):
         for i in range(1, 4):

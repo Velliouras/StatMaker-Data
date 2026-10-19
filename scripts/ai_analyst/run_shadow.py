@@ -48,6 +48,7 @@ def validate_policy(config):
     if (config['version'] != VERSION or config['mode'] != 'SHADOW_ONLY' or
         config['maximumRequestsPerUTCDay'] != 2 or config['maximumRequestsPerRun'] != 2 or
         config['automaticPromotion'] is not False or config['numericProbabilityChanges'] is not False or
+        type(config.get('inferenceEnabled', True)) is not bool or
         config['model'] != MODEL_ID or config['modelWeightsSha256'] != MODEL_SHA256):
         raise ValueError('Unexpected AI policy; new policy needs a new experiment')
 
@@ -73,6 +74,13 @@ def run(root, now, live=False, token='', inference=infer, clock=time.time):
                   readyFixtures=len(packets), prepared=[], errors=[],
                   policySha256=policy_hash, inputBindings=bindings, engineWrites=0,
                   autoPromotion=False, remainingDailyRequests=max(0, remaining))
+    if live and not config.get('inferenceEnabled', True):
+        status['status'] = 'PAUSED_FOR_QUALITY'
+        status['pauseReason'] = config.get('pauseReason', '')
+        guard(root, bindings)
+        write(root, OUTPUT+'/status.json', status)
+        score(root, now)
+        return status
     for packet in packets:
         if len(status['prepared']) >= config['maximumRequestsPerRun']:
             break
@@ -162,6 +170,7 @@ def record_publication(root, now):
 def score(root, now):
     """Reuse exact baseline labels after publication; never pass labels to the LLM."""
     directory = root/OUTPUT
+    config = load(root/POLICY)
     pp = directory/'publication_evidence.json'
     proofs = load(pp) if pp.exists() else {}
     counts = {k: dict(bets=0, wins=0, pushes=0, profitUnits=0., pending=0)
@@ -222,6 +231,9 @@ def score(root, now):
                   awaitingPublication=awaiting, excludedLatePublication=late,
                   primary='AI_SUPPORT', researchOnly=True, autoPromotion=False,
                   probabilityChanges=0, engineWrites=0, realBetsPlaced=0)
+    result['inferenceEnabled'] = config.get('inferenceEnabled', True)
+    result['analysisQualityAccepted'] = config.get('analysisQualityAccepted')
+    result['pauseReason'] = config.get('pauseReason')
     write(root, OUTPUT+'/summary.json', result)
     lines = ['# Ανεξάρτητος AI αναλυτής — δοκιμή', '',
              'Οι αρχικές πιθανότητες και επιλογές παραμένουν αμετάβλητες. Το AI σχολιάζει μόνο τα δοσμένα στοιχεία.',
@@ -231,6 +243,9 @@ def score(root, now):
     for key, value in counts.items():
         roi = '—' if value['roi'] is None else f"{100*value['roi']:.2f}%"
         lines.append(f"| {key} | {value['bets']} | {value['profitUnits']:+.3f} | {roi} | {value['pending']} |")
+    if not result['inferenceEnabled']:
+        lines += ['', 'Νέες αναλύσεις AI σε παύση: η πρώτη δοκιμή δεν πέρασε τον έλεγχο ποιότητας κειμένου.',
+                  'Τα παρακάτω πρωτότυπα κείμενα διατηρούνται ως τεχνικό ιστορικό και δεν αποτελούν αποδεκτή ανάλυση χρήστη.']
     lines += ['', 'Η γνώμη του AI δεν είναι βαθμολογία HIGH/CONFIRMED, νέα πιθανότητα ή απόδειξη κερδοφορίας.',
               'Οι ελλείπουσες ενδεκάδες, απουσίες και καιρικές συνθήκες παραμένουν άγνωστες.',
               'Η βαθμολόγηση απαιτεί δημοσίευση της AI ανάλυσης πριν από τη σέντρα. Καμία αυτόματη προαγωγή στο app.']
@@ -268,7 +283,8 @@ def main():
             packets,_=build_packets(root,config,now)
             attempts=[load(p) for p in (root/OUTPUT/'attempts').glob('*.json')]
             seen={r['fixtureRef'] for r in attempts}
-            available=(sum(r['budgetDayUTC']==utc(now)[:10] for r in attempts)<2
+            available=(config.get('inferenceEnabled', True)
+                       and sum(r['budgetDayUTC']==utc(now)[:10] for r in attempts)<2
                        and any(p['analysis']['fixtureRef'] not in seen for p in packets))
             if os.environ.get('GITHUB_OUTPUT'):
                 with open(os.environ['GITHUB_OUTPUT'],'a') as output:
