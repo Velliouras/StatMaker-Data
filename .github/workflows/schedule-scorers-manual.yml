@@ -10,6 +10,10 @@ on:
     workflows: ["Domestic Lineup Watch"]
     types: [completed]
     branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/schedule-scorers-refresh'
   workflow_dispatch:
     inputs:
       phase:
