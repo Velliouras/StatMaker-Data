@@ -1,5 +1,12 @@
 import copy
 import unittest
+import gzip
+import json
+import os
+import subprocess
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 import numpy as np
 from .features import History, counts
 from .model import pmf, probabilities, distribution, conservative
@@ -7,6 +14,34 @@ from .feed import bind_quote, raw_offer_index, settle
 
 
 class ContractTest(unittest.TestCase):
+    def test_history_refresh_does_not_duplicate_renamed_api_fixture(self):
+        from . import feed
+        old = dict(fixture_id=1, _date=100000., _home="old", _away="a")
+        new = dict(old, _home="canonical")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "history.gz"
+            path.write_bytes(gzip.compress(json.dumps([old]).encode()))
+            with patch.object(feed, "HISTORY", path), patch("scripts.betting_v2.opponent_matchup.load_competitive_history", return_value=([new], {})):
+                result = feed.load_history()
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["_home"], "canonical")
+
+    def test_public_commit_precedes_kickoff_and_cannot_reprice_issue(self):
+        from . import feed
+        row = dict(selectionId="s1", publishedAt=None, kickoff="2026-10-19T15:00:00Z", odd=1.91)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory); out = root / "feed"; out.mkdir()
+            (out / "ledger.json").write_text(json.dumps(dict(rows=[row])))
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "add", "feed/ledger.json"], cwd=root, check=True)
+            env = dict(os.environ, GIT_AUTHOR_DATE="2026-10-19T10:00:00Z", GIT_COMMITTER_DATE="2026-10-19T10:00:00Z")
+            subprocess.run(["git", "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "issue"], cwd=root, env=env, check=True)
+            with patch.object(feed, "ROOT", root), patch.object(feed, "OUT", out):
+                verified = feed.verify_publication([row])[0]
+                self.assertTrue(verified["publicationCommit"])
+                self.assertLess(feed.timestamp(verified["publishedAt"]), feed.timestamp(row["kickoff"]))
+                with self.assertRaises(ValueError): feed.verify_publication([dict(row, odd=2.2)])
+
     def test_future_result_never_enters_features(self):
         rows = [dict(_date=100000., _home="h", _away="a", home_goals=2, away_goals=0,
                      normalized_stats=dict(HS=20, AS=5, HST=8, AST=1))]

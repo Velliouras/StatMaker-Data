@@ -48,9 +48,12 @@ def load_history(fresh=True):
         # Existing repository cache loader only: never calls a provider.
         from scripts.betting_v2.opponent_matchup import load_competitive_history
         current, _ = load_competitive_history(ROOT, datetime.now(timezone.utc).timestamp())
-        merged = {(r["_date"], r["_home"], r["_away"]): r for r in rows}
+        def identity(r):
+            api = r.get("fixture_id")
+            return ("api", str(api)) if api else ("teams", r["_date"], r["_home"], r["_away"])
+        merged = {identity(r): r for r in rows}
         for r in current:
-            merged[r["_date"], r["_home"], r["_away"]] = r
+            merged[identity(r)] = r
         rows = list(merged.values())
     return rows
 
