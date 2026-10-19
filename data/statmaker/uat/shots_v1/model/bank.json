@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "model": "SHOTS_SOT_CATBOOST_V1",
+  "features": [
+    "home",
+    "elo_gap",
+    "rest",
+    "opponent_rest",
+    "sample",
+    "opponent_sample",
+    "own_8_shots_for",
+    "own_8_shots_against",
+    "own_8_sot_for",
+    "own_8_sot_against",
+    "own_8_goals_for",
+    "own_8_goals_against",
+    "own_8_xg_for",
+    "own_8_xg_against",
+    "own_20_shots_for",
+    "own_20_shots_against",
+    "own_20_sot_for",
+    "own_20_sot_against",
+    "own_20_goals_for",
+    "own_20_goals_against",
+    "own_20_xg_for",
+    "own_20_xg_against",
+    "own_venue_shots_for",
+    "own_venue_shots_against",
+    "opponent_8_shots_for",
+    "opponent_8_shots_against",
+    "opponent_8_sot_for",
+    "opponent_8_sot_against",
+    "opponent_8_goals_for",
+    "opponent_8_goals_against",
+    "opponent_8_xg_for",
+    "opponent_8_xg_against",
+    "opponent_20_shots_for",
+    "opponent_20_shots_against",
+    "opponent_20_sot_for",
+    "opponent_20_sot_against",
+    "opponent_20_goals_for",
+    "opponent_20_goals_against",
+    "opponent_20_xg_for",
+    "opponent_20_xg_against",
+    "opponent_venue_shots_for",
+    "opponent_venue_shots_against",
+    "league"
+  ],
+  "trainBefore": 1788220800.0,
+  "calibrationBefore": 1790812800.0,
+  "trainingRows": 14642,
+  "calibrationRows": 2542,
+  "replicas": [
+    {
+      "seed": 17,
+      "files": [
+        {
+          "path": "shots-17.json",
+          "sha256": "d46a76b7c78816e695ce81e7b2647575ced35137abd06dfc6b537e45702a6637"
+        },
+        {
+          "path": "accuracy-17.json",
+          "sha256": "d2f533bdceca82af772be043264e4f9982acd15f5174f566fc8ced3591e42423"
+        }
+      ],
+      "meanScale": 1.0461834952398361,
+      "accuracyScale": 0.9823559111311015,
+      "alpha": 0.06062188687531674
+    },
+    {
+      "seed": 31,
+      "files": [
+        {
+          "path": "shots-31.json",
+          "sha256": "d647b37d1ce7e19ccfa966f827eae1b4db970d4ab26f0920ba777fb00b3d88c9"
+        },
+        {
+          "path": "accuracy-31.json",
+          "sha256": "2de9f5107ab828305c80aead316740e05bd2bbc08589d88e366fa0cad2ee8f6d"
+        }
+      ],
+      "meanScale": 1.0463610624364599,
+      "accuracyScale": 0.9801322940931817,
+      "alpha": 0.060615427600181106
+    },
+    {
+      "seed": 71,
+      "files": [
+        {
+          "path": "shots-71.json",
+          "sha256": "97336d8a2cbe770cec208ed0e3dc82d84bf0f30775a7080bc3f87f9494eef4d1"
+        },
+        {
+          "path": "accuracy-71.json",
+          "sha256": "d61353541308e886978287305d71f0e08e589769c01a67732a8d6ebe60dcde78"
+        }
+      ],
+      "meanScale": 1.0471601297856867,
+      "accuracyScale": 0.9805037873346037,
+      "alpha": 0.06055927996730874
+    }
+  ],
+  "historySha256": "a9f43dca5f0741c20dc8a3de5fcb9b8a05a4a3d9efeda4266758f4afea5693bb",
+  "historyFixtures": 17950,
+  "trainingFixtures": 7321,
+  "calibrationFixtures": 1271,
+  "calibrationMethod": "Prior month count mean/accuracy scaling and NB2 dispersion; no ROI threshold search"
+}
