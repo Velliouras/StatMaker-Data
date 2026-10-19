@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "profile": "app_ready",
-  "contentVersion": "4b29ff2bef86cb55a5e0c5f3a20a85c39af6b5680387b390cd608e59c4da0e5e",
-  "generatedAt": "2026-10-19T08:50:58.485766Z",
+  "contentVersion": "41fabddea668d94e8568e2d56e5be7902b10dc989c647d4b6ad83c437bc7a8b0",
+  "generatedAt": "2026-10-19T10:13:08.588344Z",
   "artifactCount": 2,
   "artifacts": [
     {
@@ -17,11 +17,11 @@
     {
       "id": "app_ready_betting_bundle",
       "group": "prepared",
-      "path": "data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
-      "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/app_ready_betting_bundle-e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f.zip",
-      "sha256": "e5ddd03973e65608a279dec01f8c6c15d09dcb05034a22324bed63bb2f25520f",
-      "bytes": 49692781,
-      "generatedAt": "2026-10-16T17:16:24.879210Z"
+      "path": "data/statmaker/app_ready/app_ready_betting_bundle-7c20b636e16ca3a1100b4bce36a21cbfa2aa139cc6c28bdba3f1fb949632502d.zip",
+      "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/app_ready/app_ready_betting_bundle-7c20b636e16ca3a1100b4bce36a21cbfa2aa139cc6c28bdba3f1fb949632502d.zip",
+      "sha256": "7c20b636e16ca3a1100b4bce36a21cbfa2aa139cc6c28bdba3f1fb949632502d",
+      "bytes": 48830046,
+      "generatedAt": "2026-10-19T10:13:08.588344Z"
     }
   ],
   "metadata": {
@@ -45,15 +45,15 @@
     "engineContract": "probability-first-prod-schema12-v6-retired-inputs-v1",
     "inputRetirementContract": "asian-and-handicap-market-types-only-before-engine-v2",
     "preparedSimulationContract": "monte-carlo-v1-prod-data-uat-engine",
-    "preparedSimulationRowCount": 19927,
+    "preparedSimulationRowCount": 19716,
     "preparedSimulationRuns": 10000,
-    "preparedMatchSimulationCount": 1335,
+    "preparedMatchSimulationCount": 1182,
     "preparedTeamEloContract": "team-elo-v1",
-    "preparedTeamEloCount": 994,
-    "preparedTeamEloLeagueCount": 59,
+    "preparedTeamEloCount": 860,
+    "preparedTeamEloLeagueCount": 52,
     "preparedLeagueSimulationContract": "league-season-monte-carlo-v3-all-domestic-elo",
-    "preparedLeagueSimulationCount": 59,
-    "preparedLeagueSimulationTeamCount": 994,
+    "preparedLeagueSimulationCount": 52,
+    "preparedLeagueSimulationTeamCount": 860,
     "preparedLeagueSimulationRuns": 10000,
     "statsHotPublish": true,
     "statsHotPublishMatchCount": 14936,
@@ -200,6 +200,20 @@
       "providerCalls": 0,
       "rule": "Exact provider ID/kickoff, approved fixture, latest single prematch receipt <=24h",
       "unsupportedFoulContract": 7303
-    }
+    },
+    "preparedMatchSimulationContract": "match-monte-carlo-v2-elo",
+    "preparedMatchSimulationExplorerRowCount": 7000,
+    "preparedMatchScoreDistributionCount": 1182,
+    "preparedMatchScoreDistributionContract": "same-run-monte-carlo-exact-score-v1",
+    "preparedMatchSimulationUsesPreparedElo": true,
+    "preparedUefaSimulationContract": "uefa-club-monte-carlo-v1",
+    "preparedUefaSimulationStrengthModel": "uefa-seeding-elo-v1",
+    "preparedUefaSimulationCount": 3,
+    "preparedUefaSimulationTeamCount": 108,
+    "preparedUefaSimulationRuns": 10000,
+    "preparedScoreEdgeContract": "exact-score-monte-carlo-10k-value-v1",
+    "preparedScoreEdgeRowCount": 2489,
+    "preparedScoreEdgeMatchCount": 300,
+    "simulationHotPublish": true
   }
 }
