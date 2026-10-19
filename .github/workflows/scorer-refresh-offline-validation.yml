@@ -8,6 +8,9 @@ on:
       - '.github/workflows/schedule-scorers-manual.yml'
       - '.github/workflows/domestic-results-context-refresh.yml'
       - 'tests/test_scorer_refresh_freshness.py'
+      - 'scripts/reconcile_top_scorers_with_events.py'
+      - 'data/statmaker/schedule_scorers/verified_g1_baseline.json'
+      - 'tests/test_scorer_goal_floor.py'
       - '.github/workflows/scorer-refresh-offline-validation.yml'
 
 permissions:
@@ -27,3 +30,4 @@ jobs:
           python -m py_compile scripts/fetch_schedule_scorers_capped.py scripts/refresh_domestic_match_context.py
           python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -v
           python -m unittest discover -s tests -p 'test_schedule_scorers_offline_builder.py' -v
+          python -m unittest discover -s tests -p 'test_scorer_goal_floor.py' -v
