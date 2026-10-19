@@ -37,7 +37,8 @@ jobs:
           python-version: '3.12'
       - name: Install pinned CPU inference runtime
         if: steps.work.outputs.needs_ai == 'true'
-        run: python -m pip install --quiet --only-binary=:all: llama-cpp-python==0.3.30 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+        run: |
+          python -m pip install --quiet --only-binary=:all: llama-cpp-python==0.3.30 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
       - name: Download and verify the pinned open-weight model
         if: steps.work.outputs.needs_ai == 'true'
         run: python -u scripts/ai_analyst/prepare_local_model.py
