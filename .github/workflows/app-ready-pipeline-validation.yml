@@ -2,6 +2,20 @@ name: App-Ready Pipeline Validation
 
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/app-ready-artifact-publisher.yml'
+      - '.github/workflows/app-ready-pipeline-validation.yml'
+      - '.github/workflows/app-ready-stats-hot-publish.yml'
+      - '.github/workflows/app-ready-simulation-hot-publish.yml'
+      - '.github/workflows/app-ready-score-edge-hot-publish.yml'
+      - 'scripts/preflight_app_ready_pipeline.py'
+      - 'scripts/validate_app_ready_exact_odds.py'
+      - 'scripts/prune_app_ready_unreferenced_bundles.py'
+      - 'tests/test_app_ready_exact_feeds.py'
+      - 'tests/test_app_ready_retention.py'
+      - 'tests/test_app_ready_workflow_routing.py'
   push:
     branches:
       - main
@@ -57,12 +71,20 @@ jobs:
             scripts/materialize_uat_direction_pattern_candidates.py \
             scripts/materialize_prepared_fixture_index.py \
             scripts/materialize_prepared_simulations.py \
+            scripts/validate_app_ready_exact_odds.py \
+            scripts/prune_app_ready_unreferenced_bundles.py \
             scripts/validate_app_ready_prepared_contract.py \
             scripts/app_ready_input_retirement.py \
             scripts/audit_result_context_generation.py \
             scripts/validate_app_ready_retirement_contract.py
           bash -n scripts/stage_app_ready_producer.sh
           bash -n scripts/run_app_ready_emulator.sh
+
+      - name: Validate exact UEFA feed and CLI wiring without provider calls
+        run: python -m unittest discover -s tests -p 'test_app_ready_exact_feeds.py' -v
+
+      - name: Validate immutable bundle retention (offline)
+        run: python -m unittest discover -s tests -p 'test_app_ready_retention.py' -v
 
       - name: Validate checkpoint compatibility contract
         run: python scripts/validate_app_ready_prepared_contract.py --self-check
