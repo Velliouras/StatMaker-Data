@@ -37,7 +37,7 @@ class ContractTest(unittest.TestCase):
     def test_restored_threshold_hides_old_p55_recommendation_but_retains_history(self):
         from .feed import current_recommendations
         row=dict(kickoff="2026-10-25T15:00:00Z",latestQuoteObservedAt="2026-10-20T07:00:00Z",
-                 odd=1.91,winProbability=.57,pushProbability=0.)
+                 odd=1.91,winProbability=.57,pushProbability=0.,metric="shots")
         higher=dict(row,winProbability=.65)
         issued=[row,higher]; original=copy.deepcopy(issued)
         self.assertEqual(current_recommendations(issued,0),[higher])

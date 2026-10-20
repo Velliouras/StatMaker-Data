@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "policyId": "MARKET_WATCH_UAT_V1",
+  "minimumWinProbability": 0.60,
+  "minimumOddsExclusive": 1.80,
+  "maximumOddsExclusive": 3.00,
+  "activationSettledFixtures": 50,
+  "activationCalendarDays": 14,
+  "activationMinimumROI": 0.03,
+  "recentWindow": 20,
+  "pauseRecentROI": -0.10,
+  "pauseDrawdownUnits": 10.0,
+  "resumeNewSettledFixtures": 20,
+  "resumeMinimumROI": 0.05,
+  "resumeCooldownDays": 7,
+  "maximumStateAgeHours": 36,
+  "markets": {
+    "SHOTS": {"name": "Σουτ", "modelId": "SHOTS_SOT_CATBOOST_V1", "source": "shots", "bootstrapActive": true, "publisherConnected": true},
+    "SOT": {"name": "Σουτ στην εστία", "modelId": "SHOTS_SOT_CATBOOST_V1", "source": "shots", "bootstrapActive": true, "publisherConnected": true},
+    "CORNERS": {"name": "Κόρνερ", "modelId": "COUNT_COUPLED_V1", "source": "coupled_conservative", "bootstrapActive": false, "publisherConnected": true},
+    "FOULS": {"name": "Φάουλ", "modelId": "COUNT_COUPLED_V1", "source": "coupled_conservative", "bootstrapActive": false, "publisherConnected": true},
+    "CARDS": {"name": "Κάρτες", "modelId": null, "source": null, "bootstrapActive": false, "publisherConnected": false},
+    "GOALS": {"name": "Γκολ / GG / 1Χ2", "modelId": null, "source": null, "bootstrapActive": false, "publisherConnected": false}
+  }
+}

@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '45 */4 * * *'
   workflow_run:
-    workflows: ['Odds Integrity Production Refresh', 'Domestic Statistics Universe', 'Domestic Historical Closure']
+    workflows: ['Odds Integrity Production Refresh', 'Domestic Statistics Universe', 'Domestic Historical Closure', 'Betting V2 Forward Market First Counts']
     types: [completed]
 
 permissions:
@@ -37,6 +37,9 @@ jobs:
             /data/statmaker/league_tables/
             /data/statmaker/domestic_match_context_cache.json
             /data/statmaker/uat/shots_v1/
+            /data/statmaker/uat/market_watch/
+            /docs/market-watch/
+            /docs/.nojekyll
             /data/statmaker/uefa_support_history.json
             /data/statmaker/uefa_team_support_history.json
             /data/statmaker/uefa_current_stats.json
@@ -45,6 +48,8 @@ jobs:
             /odds/odds_api_io/domestic_provider_markets.json
             /reports/betting_v2/prior_market_calibration_20261018/history.json.gz
             /reports/betting_v2/market_first_counts_20261018/quotes_*.json.gz
+            /reports/betting_v2/market_first_counts_20261018/priced_*.json
+            /reports/betting_v2/forward_market_first_20261018/
             /reports/betting_v2/quote_receipts/
       - name: Read existing UEFA odds branch
         uses: actions/checkout@v4
@@ -65,7 +70,7 @@ jobs:
       - name: Install numerical dependencies
         run: python -m pip install catboost==1.2.8 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.6.1
       - name: Verify leakage, probabilities, exact prices and settlement
-        run: python -m unittest scripts.shots_uat.test_contract -v
+        run: python -m unittest scripts.shots_uat.test_contract scripts.market_watch.test_policy -v
       - name: Verify existing cached history loader
         run: |
           python -c "from scripts.shots_uat.feed import load_history; print('CACHED_HISTORY', len(load_history()))"
@@ -80,12 +85,14 @@ jobs:
             python -m scripts.shots_uat.replay
           fi
       - name: Stage prospective issues from cached data
-        run: python -m scripts.shots_uat.feed --stage-issues
+        run: |
+          python -m scripts.market_watch.build
+          python -m scripts.shots_uat.feed --stage-issues
       - name: Publish immutable issues before exposing them to the app
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/statmaker/uat/shots_v1/model data/statmaker/uat/shots_v1/ledger.json data/statmaker/uat/shots_v1/validation.json data/statmaker/uat/shots_v1/observations.json data/statmaker/uat/shots_v1/coverage.json
+          git add data/statmaker/uat/shots_v1 data/statmaker/uat/market_watch docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: issue Shots/SOT selections with frozen CatBoost bank'
             for attempt in 1 2 3 4; do
@@ -99,7 +106,7 @@ jobs:
         run: python -m scripts.shots_uat.feed --publish
       - name: Publish independent UAT read model
         run: |
-          git add data/statmaker/uat/shots_v1
+          git add data/statmaker/uat/shots_v1 data/statmaker/uat/market_watch docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: refresh Shots/SOT feed and Performance Daily settlements'
             for attempt in 1 2 3 4; do

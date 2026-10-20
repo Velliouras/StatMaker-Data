@@ -320,8 +320,8 @@ def settle(row, actual, now):
                 actualCount=value, settlementSource="CACHED_FT_API_FIXTURE_STATS")
 
 
-def verify_publication(rows):
-    relative = (OUT / "ledger.json").relative_to(ROOT).as_posix()
+def verify_publication(rows, ledger_path=None):
+    relative = (ledger_path or OUT / "ledger.json").relative_to(ROOT).as_posix()
     # Prove presence in an already pushed commit; workflow invokes this only after push.
     sha, committed_at = subprocess.check_output(["git", "log", "-1", "--format=%H %cI", "--", relative], cwd=ROOT, text=True).strip().split(" ")
     committed = json.loads(subprocess.check_output(["git", "show", f"{sha}:{relative}"], cwd=ROOT, text=True))
@@ -350,30 +350,62 @@ def main():
     now = datetime.now(timezone.utc).timestamp(); actual = load_history(not args.cached_history_only)
     ledger_path = OUT / "ledger.json"
     ledger = json.loads(ledger_path.read_text()) if ledger_path.exists() else dict(schemaVersion=1, modelId=MODEL, rows=[])
+    paper_path = ROOT / "data/statmaker/uat/market_watch/paper_ledger.json"
+    paper = json.loads(paper_path.read_text()) if paper_path.exists() else dict(schemaVersion=1, modelId=MODEL, rows=[])
     if ledger["modelId"] != MODEL:
         raise ValueError("Foreign model ledger")
     if args.stage_issues or args.preview:
-        selected, audit, source = new_candidates(actual, now, {r["groupKey"] for r in ledger["rows"]})
+        selected, audit, source = new_candidates(actual, now, {r["groupKey"] for r in ledger["rows"] + paper["rows"]})
         print("SHOTS_UAT_SELECTION", len(selected), json.dumps(audit), flush=True)
         if args.preview:
             write(OUT / "preview.json", dict(selected=selected, audit=audit, source=source)); return
-        ledger["rows"] += selected
+        from scripts.market_watch.build import allowed
+        paper["rows"] += selected
+        ledger["rows"] += [r for r in selected if allowed(r["metric"].upper(), now)]
+        # A previously frozen paper prediction can become an app issue while the
+        # match is still ahead and the same exact price is freshly observed.
+        _, raw, _ = load_quote_sources(now)
+        known = {r["groupKey"] for r in ledger["rows"]}
+        for row in paper["rows"]:
+            if row["groupKey"] in known or not allowed(row["metric"].upper(), now) or timestamp(row["kickoff"]) <= now + 900:
+                continue
+            current = observe_issued_quote(row, raw, now)
+            if current.get("latestQuoteObservedAt"):
+                ledger["rows"].append(dict(row, issuedAt=iso(now), quoteUpdatedAt=current["latestQuoteObservedAt"],
+                    publishedAt=None, publicationCommit=None, monitorPaperSelectionId=row["selectionId"]))
+                known.add(row["groupKey"])
+        write(paper_path, paper)
+        if (ROOT / "config/market_watch.json").exists():
+            from scripts.market_watch.router import stage as stage_markets
+            watch_leagues, watch_raw, _ = load_quote_sources(now)
+            stage_markets(actual, now, watch_leagues, watch_raw)
         ledger["audit"] = audit; ledger["source"] = source; ledger["policyId"] = POLICY_ID
         write(OUT / "coverage.json", dict(generatedAt=iso(now), audit=audit, source=source))
         write(ledger_path, ledger); return
     ledger["rows"] = [settle(r, actual, now) for r in verify_publication(ledger["rows"])]
     write(ledger_path, ledger)
+    if paper_path.exists():
+        paper["rows"] = [settle(r, actual, now) for r in verify_publication(paper["rows"], paper_path)]
+        write(paper_path, paper)
+    if (ROOT / "config/market_watch.json").exists():
+        subprocess.run(["python", "-m", "scripts.market_watch.build"], cwd=ROOT, check=True)
     leagues, raw, _ = load_quote_sources(now)
     issued = [observe_issued_quote(r, raw, now) for r in ledger["rows"] if r.get("publishedAt")]
     from .intelligence import annotate
     issued = annotate(issued, actual, raw, leagues, now)
     live = current_recommendations(issued, now)
+    market_issued, market_live = [], []
+    if (ROOT / "config/market_watch.json").exists():
+        from scripts.market_watch.router import publish as publish_markets
+        market_issued, market_live = publish_markets(actual, now, raw)
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,
                    generatedAt=iso(now), apiCalls=0, prodWrites=0, probabilitiesNotEmpiricallyCertified=True,
                    selectionPolicyId=POLICY_ID, minimumWinProbability=MIN_WIN_PROBABILITY,
                    tierSemantics="MODEL_PROBABILITY_BANDS_NOT_EMPIRICAL_CERTIFICATION",
                    candidateCount=len(live), candidates=live, issued=issued, audit=ledger.get("audit", {}), source=ledger.get("source", {}))
+    payload.update(marketIssued=market_issued, marketCandidates=market_live, marketCandidateCount=len(market_live),
+                   marketRoutingPolicy="MARKET_WATCH_UAT_V1")
     publish_read_model(OUT / "p55", payload)
     # 0.1.66 and earlier require p>=.60 and must retain a valid independent feed.
     publish_read_model(OUT, compatible_p60_payload(payload))
@@ -391,7 +423,8 @@ def compatible_p60_payload(payload):
 def current_recommendations(issued, now):
     # Admission changes apply to current recommendations; issued history remains
     # intact for Performance, including the previously published P55 cohort.
-    return [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt")
+    from scripts.market_watch.build import allowed
+    return [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt") and allowed(r["metric"].upper(), now)
             and eligible_quote(r["winProbability"], r["pushProbability"], r["odd"])]
 
 
