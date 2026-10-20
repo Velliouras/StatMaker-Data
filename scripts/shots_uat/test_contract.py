@@ -14,6 +14,25 @@ from .feed import bind_quote, raw_offer_index, settle
 
 
 class ContractTest(unittest.TestCase):
+    def test_old_client_read_model_excludes_p55_without_losing_or_rewriting_issues(self):
+        from .feed import compatible_p60_payload
+        high=dict(selectionId="old",winProbability=.65,odd=1.91,publishedAt="original")
+        developing=dict(selectionId="new",winProbability=.57,odd=1.91,publishedAt="later")
+        payload=dict(candidates=[high,developing],issued=[high,developing],candidateCount=2)
+        legacy=compatible_p60_payload(payload)
+        self.assertEqual(legacy["candidateCount"],1)
+        self.assertEqual(legacy["candidates"],[high]);self.assertEqual(legacy["issued"],[high])
+        self.assertEqual(payload["issued"],[high,developing]);self.assertEqual(payload["candidateCount"],2)
+
+    def test_p55_admission_keeps_positive_ev_and_exact_odds_bounds(self):
+        from .model import eligible_quote
+        self.assertTrue(eligible_quote(.55, 0., 1.91))
+        self.assertFalse(eligible_quote(.549, 0., 1.91))
+        self.assertFalse(eligible_quote(.55, 0., 1.81))
+        self.assertFalse(eligible_quote(.75, 0., 1.80))
+        self.assertFalse(eligible_quote(.75, 0., 3.00))
+        self.assertFalse(eligible_quote(.95, .1, 2.))
+
     def test_total_over_does_not_require_picking_the_dominant_team(self):
         # Either team can contribute to the sum; swapping team order cannot change it.
         replicas = [dict(shots=[14.7, 13.], sot=[5., 4.3], alpha=.06)]

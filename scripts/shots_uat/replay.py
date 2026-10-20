@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from .features import History, counts
 from .feed import OUT, digest, iso, load_history, write
-from .model import Bank, conservative, favourite_guard, POLICY_ID
+from .model import Bank, conservative, favourite_guard, POLICY_ID, eligible_quote
 from .train import ROOT
 
 
@@ -54,7 +54,7 @@ def main():
                 p, push = conservative(replicas, metric, scope, team, side, line)
                 ev = p * q["odd"] + push - 1
                 audit["pricedForecasts"] += 1
-                if p < .6 or ev <= 0:
+                if not eligible_quote(p, push, q["odd"]):
                     continue
                 if not favourite_guard(pair, replicas, q.get("_favourite"), metric, scope, team, side):
                     audit["favouriteGuard"] += 1; continue

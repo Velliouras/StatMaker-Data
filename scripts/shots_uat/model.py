@@ -8,7 +8,13 @@ from catboost import CatBoostRegressor, CatBoostClassifier, Pool
 from .features import FEATURES
 
 SEEDS = (17, 31, 71)
-POLICY_ID = "SHOTS_SOT_SCOPE_GUARD_V2"
+POLICY_ID = "SHOTS_SOT_P55_UAT_V3"
+MIN_WIN_PROBABILITY = .55
+
+
+def eligible_quote(win, push, odd):
+    return (MIN_WIN_PROBABILITY <= win <= 1 and 0 <= push <= 1 and win + push <= 1.000001
+            and 1.8 < odd < 3 and win * odd + push - 1 > 0)
 
 
 def pool(x, y=None, weight=None):

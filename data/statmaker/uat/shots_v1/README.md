@@ -45,7 +45,7 @@ history; no old entries are deleted. Singles filtering does not create or remove
   Changed, missing or stale prices are removed from current Singles candidates.
   UAT Android 0.1.66 uses this clock for current visibility, keeping the original
   snapshot clock in Performance; older clients retain their original 24h display rule.
-- `1.80 < odd < 3.00`, conservative win probability >=0.60 and
+- `1.80 < odd < 3.00`, conservative win probability >=0.55 and
   `EV = pWin*odd + pPush - 1 > 0`. Minimum 8 prior fixtures for both teams.
 - Team props: same-book 1X2 favourite must agree with ELO and have >=60% count
   dominance across every fit, with favourite-Over or underdog-Under direction.
@@ -96,3 +96,22 @@ although a sum-of-shots bet makes no claim about the dominant team. The correcti
 removes this unrelated gate from totals; odds, probability, EV, quote age, exact
 identity and all team-prop safeguards remain unchanged. No model was refitted and
 no odds/probability threshold was lowered to fill a daily quota.
+
+## UAT P55 policy (20 October 2026)
+
+SHOTS_SOT_P55_UAT_V3 changes only admission pWin from .60 to .55. Exact odds
+1.80<odd<3.00, EV>0, history/identity/freshness/favourite rules and frozen fits
+remain unchanged. A fixed-grid post-hoc diagnostic on the same 19 October
+snapshot gives 19/0 Saturday picks at .60, 25/1 at .58, and 37/7 at .55. These
+are comparison counts, not a forecast of the next refreshed feed. The existing
+October development replay gives .55: 82 (+21.495u) earliest / 86 (+20.279u) latest;
+variants overlap and were inspected during development, so profitability is not
+certified. No retrospective pick is imported to prospective Performance.
+
+UAT 0.1.67 reads p55/latest.json. The root latest.json keeps only p>=.60 rows for
+0.1.66 and earlier. Both are read models of one immutable first-issued ledger.
+High >=.70, Confirmed >=.60, Developing >=.55 are explicitly model probability
+bands, not historical confirmation. Developing below .60 is not called Strong.
+Existing stored constant Developing labels are corrected when read, keeping all
+original prediction, price, date and outcome fields intact. Performance and Daily
+include all issued P55 model rows, including the below-.60 Developing band.

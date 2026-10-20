@@ -13,7 +13,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from .features import History, counts, normalized
-from .model import Bank, conservative, favourite_guard, POLICY_ID
+from .model import Bank, conservative, favourite_guard, POLICY_ID, MIN_WIN_PROBABILITY, eligible_quote
 from .train import ROOT, HISTORY
 
 OUT = ROOT / "data/statmaker/uat/shots_v1"
@@ -239,7 +239,7 @@ def new_candidates(history_rows, now, known):
                     continue
                 p, push = conservative(replicas, metric, scope, team, side, line)
                 ev = p * float(q["odds"]) + push - 1
-                if p < .6 or ev <= 0:
+                if not eligible_quote(p, push, float(q["odds"])):
                     audit["probabilityOrEv"] += 1; continue
                 for counter in counters: counter["probabilityEvPassing"] += 1
                 fav = favourite(m, q["bookmaker"], raw, now)
@@ -369,13 +369,30 @@ def main():
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,
                    generatedAt=iso(now), apiCalls=0, prodWrites=0, probabilitiesNotEmpiricallyCertified=True,
+                   selectionPolicyId=POLICY_ID, minimumWinProbability=MIN_WIN_PROBABILITY,
+                   tierSemantics="MODEL_PROBABILITY_BANDS_NOT_EMPIRICAL_CERTIFICATION",
                    candidateCount=len(live), candidates=live, issued=issued, audit=ledger.get("audit", {}), source=ledger.get("source", {}))
+    publish_read_model(OUT / "p55", payload)
+    # 0.1.66 and earlier require p>=.60 and must retain a valid independent feed.
+    publish_read_model(OUT, compatible_p60_payload(payload))
+    print("SHOTS_UAT_PUBLISHED", len(live), "future", len(issued), "issued", flush=True)
+
+
+def compatible_p60_payload(payload):
+    legacy = dict(payload, selectionPolicyId="SHOTS_SOT_SCOPE_GUARD_V2", minimumWinProbability=.60,
+                  candidates=[r for r in payload["candidates"] if r["winProbability"] >= .60],
+                  issued=[r for r in payload["issued"] if r["winProbability"] >= .60])
+    legacy["candidateCount"] = len(legacy["candidates"])
+    return legacy
+
+
+def publish_read_model(directory, payload):
+    directory.mkdir(parents=True, exist_ok=True)
     content = (json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False) + "\n").encode()
     sha = digest(content); artifact = f"candidates-{sha}.json"
-    (OUT / artifact).write_bytes(content)
-    write(OUT / "latest.json", dict(schemaVersion=1, channel="uat", artifact=artifact, sha256=sha,
-                                  generationId=generation, generatedAt=payload["generatedAt"]))
-    print("SHOTS_UAT_PUBLISHED", len(live), "future", len(issued), "issued", flush=True)
+    (directory / artifact).write_bytes(content)
+    write(directory / "latest.json", dict(schemaVersion=1, channel="uat", artifact=artifact, sha256=sha,
+        generationId=payload["generationId"], generatedAt=payload["generatedAt"]))
 
 
 if __name__ == "__main__":
