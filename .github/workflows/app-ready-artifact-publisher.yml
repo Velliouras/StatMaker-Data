@@ -1,11 +1,11 @@
 name: StatMaker App-Ready Artifact Publisher
 
-# One nightly complete betting build plus explicit on-demand migrations.
-# Ordinary stats/simulation/Score Edge updates use targeted host-only hot publishers.
-# Do not restore the former 6x/day cron, upstream workflow_run fanout or
-# broad manifest/odds pushes: those flooded a 90-minute emulator queue.
-# A full daily rebuild preserves automatic betting freshness until the remaining
-# off-device Android source phase has been migrated fully to host-side code.
+# MANUAL ONLY: the former nightly full build repeatedly failed (missing
+# --uefa-exact-feed-dir) after ~60 minutes and uploaded 30+ MB checkpoints.
+# Do not schedule or push-trigger this full emulator/rebuild pipeline.
+# Ordinary stats, simulation, Score Edge and scorer data stay on their
+# independent host-side scheduled publishers.
+# No GitHub Actions checkpoint artifacts should be uploaded from this workflow.
 on:
   workflow_dispatch:
     inputs:
@@ -19,14 +19,6 @@ on:
         required: true
         default: false
         type: boolean
-  push:
-    branches: [main]
-    paths:
-      - '.github/app-ready-rebuild-trigger'
-  schedule:
-    # One consolidated overnight update, not six competing daily builds.
-    - cron: "20 0 * * *"
-
 permissions:
   contents: write
   actions: read
@@ -320,15 +312,6 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: bash "$GITHUB_WORKSPACE/scripts/run_app_ready_emulator.sh"
-
-      - name: Save prepared checkpoint for downstream retry
-        if: ${{ always() && steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149')) && hashFiles('app-ready-checkpoint/checkpoint.json') != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-app-ready-prepared-checkpoint
-          path: app-ready-checkpoint
-          if-no-files-found: error
-          retention-days: 1
 
       - name: Materialize current v11 candidates host-side
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
