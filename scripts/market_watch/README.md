@@ -1,7 +1,7 @@
 # StatMaker Market Watch
 
 Operational UAT market routing with a separate GitHub Pages dashboard. No provider
-or LLM calls. This is not an automated betting or profitability guarantee system.
+or LLM calls. Verified receipt time establishes quote freshness; provider last-change time stays separate and may be older. This is not an automated betting or profitability guarantee system.
 
 The restored recommendation minimum is 60%, with strict 1.80 < odds < 3.00 and
 positive expected return. The 55–60% issues already published remain in historical

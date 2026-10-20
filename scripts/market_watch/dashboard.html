@@ -36,6 +36,8 @@ function detail(){const d=DATA.markets[market],m=d[windowKey];el('detailname').t
 el('markets').addEventListener('click',e=>{const b=e.target.closest('[data-market]');if(b){market=b.dataset.market;table();detail()}});el('windows').addEventListener('click',e=>{const b=e.target.closest('[data-window]');if(b){windowKey=b.dataset.window;detail()}});
 el('events').innerHTML=DATA.events.length?[...DATA.events].reverse().map(e=>`<div class="events"><time>${esc(date(e.at))}</time><div><b>${esc(DATA.markets[e.market]?.name||e.market)}</b> · ${badge(e.status)}<p>${esc(e.reason)}</p><small>${e.settled} ολοκληρωμένες · ROI ${percent(e.roi)}</small></div></div>`).join(''):'<p class="muted">Δεν έχει ενεργοποιηθεί αλλαγή κατάστασης από τον νέο μηχανισμό.</p>';
 el('quality').innerHTML=DATA.limitations.map(t=>`<p class="muted">${esc(t)}</p>`).join('')+'<p class="muted">Οι απορριφθείσες μη έγκυρες ή μη προδημοσιευμένες εγγραφές παραμένουν εκτός επίδοσης. Πηγές: αμετάβλητα UAT ledgers και προδημοσιευμένη δοκιμή coupled counts.</p>';
+const coverage=DATA.audit?.shadow||{};
+el('quality').innerHTML+=`<p class="muted">Κόρνερ/φάουλ: ${num(coverage.cornerFoulForecastContracts||0)} πλήρεις προβλέψεις με απόδοση σε ${num(coverage.cornerFoulForecastFixtures||0)} αγώνες. Οι γραμμές τιμών δεν είναι ανεξάρτητοι αγώνες ούτε τελικές προτάσεις.</p>`;
 table();detail();
 setTimeout(()=>location.reload(),300000);
 })();

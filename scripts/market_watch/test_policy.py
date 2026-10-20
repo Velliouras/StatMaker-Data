@@ -1,4 +1,4 @@
-import copy,json,tempfile,unittest,hashlib
+import copy,json,tempfile,unittest,hashlib,gzip
 from pathlib import Path
 from unittest.mock import patch
 from . import build
@@ -78,6 +78,22 @@ class MarketPolicyTest(unittest.TestCase):
             with patch.object(build,"ROOT",root),patch.object(build,"allowed",return_value=True):build.refresh_current_feed(now)
             ix=json.loads((base/"latest.json").read_text());resumed=json.loads((base/ix["artifact"]).read_text())
             self.assertEqual(resumed["candidates"],[issue]);self.assertEqual(resumed["issued"],[issue])
+
+    def test_fresh_observed_exact_price_can_have_an_old_last_change(self):
+        from .paper import observed_receipt_times
+        received="2026-10-20T07:00:00Z"
+        doc=dict(boundedMarketSnapshot=[dict(event=dict(id=1),bookmakers=[dict(bookmaker="B",markets=[dict(name="Corners Totals",updatedAt="2026-10-01T00:00:00Z",outcomes=[dict(hdp=9.5,over=1.91)])])])])
+        raw=gzip.compress(json.dumps(doc).encode())
+        from .policy import time
+        q=dict(sourceReceipt="r.gz",sourceSha256=hashlib.sha256(raw).hexdigest(),observed=time(received),
+               providerEventId="1",bookmaker="B",providerMarketName="Corners Totals",selection="OVER",providerSelectionId="",line=9.5,odd=1.91)
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);(folder/'r.gz').write_bytes(raw)
+            with patch('betting_v2.quote_receipt_capture.verify_receipt',return_value=dict(clientReceivedAtUTC=received)):
+                rows,audit=observed_receipt_times([q],folder)
+                self.assertEqual(len(rows),1);self.assertTrue(rows[0]['verifiedClientReceipt'])
+                self.assertEqual(observed_receipt_times([dict(q,odd=2.0)],folder)[0],[])
+                with self.assertRaises(ValueError):observed_receipt_times([dict(q,sourceSha256='bad')],folder)
 
 
 if __name__=="__main__":unittest.main()

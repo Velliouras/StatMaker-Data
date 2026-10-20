@@ -69,12 +69,17 @@ def shadow_records(cfg,actual,now):
         sources.extend((folder,entry,proofs.get(entry["path"])) for entry in index.get("cohorts",[]))
     sources.sort(key=lambda v:time(v[1]["frozenAtUTC"]))
     seen=set()
+    forecast_contracts=set();forecast_fixtures=set()
     for folder,entry,proof in sources:
         if not proof:audit["noPublicationProof"]+=1;continue
         raw=(folder/entry["path"]).read_bytes();digest=hashlib.sha256(raw).hexdigest()
         if digest!=entry["sha256"] or digest!=proof["sha256"]:raise ValueError("Immutable market cohort hash mismatch")
         doc=json.loads(gzip.decompress(raw));published=time(proof["publiclyVerifiedAtUTC"])
         reserved=set(map(tuple,doc.get("marketKeys",[])))
+        for q in doc["models"]["coupled_conservative"].get("forecasts",[]):
+            if q['spec'][0] in ('CORNERS','FOULS') and (q['fixture'],q['spec'][0]) not in seen and published<q['kickoff']:
+                forecast_contracts.add((q['fixture'],q['bookmaker'],tuple(q['spec'])))
+                forecast_fixtures.add(q['fixture'])
         for q in doc["models"]["coupled_conservative"]["selected"]:
             metric,scope,side,team,line=q["spec"]
             if metric not in ("CORNERS","FOULS"):continue
@@ -94,6 +99,7 @@ def shadow_records(cfg,actual,now):
             rows.append(r)
             if q["kickoff"]>now+900:candidates.append(dict(q,_monitorId=identity,_monitorP=p,_monitorPush=push))
         seen.update(reserved)
+    audit['cornerFoulForecastContracts']=len(forecast_contracts);audit['cornerFoulForecastFixtures']=len(forecast_fixtures)
     return rows,dict(audit),candidates
 
 
