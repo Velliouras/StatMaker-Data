@@ -177,6 +177,16 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         or triggers.count("cron:") != 1
     ):
         report.error("heavy publisher must run nightly once or by explicit request")
+    if "Validate exact UEFA odds before costly Android build" not in workflow:
+        report.error("missing pre-emulator UEFA exact odds preflight")
+    elif workflow.index("Validate exact UEFA odds before costly Android build") > workflow.index(
+        "Produce indexed read models off-device"
+    ):
+        report.error("UEFA exact odds must be checked before emulator")
+    if "--uefa-exact-feed-dir" not in workflow:
+        report.error("Betting V2 requires --uefa-exact-feed-dir")
+    if "actions/upload-artifact@" in workflow:
+        report.error("Full publisher must not upload Actions checkpoint artifacts")
     forbidden_trigger_paths = (
         "scripts/stage_app_ready_producer.sh",
         "scripts/run_app_ready_emulator.sh",

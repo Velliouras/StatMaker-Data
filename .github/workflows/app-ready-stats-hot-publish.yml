@@ -56,6 +56,7 @@ jobs:
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
 
+            cp data/statmaker/app_ready/update_manifest.json "$RUNNER_TEMP/app-ready-previous-manifest.json"
             python scripts/hotpatch_app_ready_stats.py
 
             bundle_name="$(python - <<'PY'
@@ -117,7 +118,10 @@ jobs:
           )
           PY
 
-            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$bundle_name"
+            # Keep ZIPs referenced by current and immediately previous manifests.
+            python scripts/prune_app_ready_unreferenced_bundles.py \
+              --previous-manifest "$RUNNER_TEMP/app-ready-previous-manifest.json"
+            git add -A data/statmaker/app_ready
             if git diff --cached --quiet; then
               echo "APP_READY_STATS_HOT_PUBLISH_ALREADY_PRESENT"
               published=true

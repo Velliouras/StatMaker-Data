@@ -80,9 +80,12 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
+            cp data/statmaker/app_ready/update_manifest.json "$publish_dir/previous_manifest.json"
             cp "$publish_dir/update_manifest.json" data/statmaker/app_ready/update_manifest.json
             cp "$publish_dir/$bundle_name" "data/statmaker/app_ready/$bundle_name"
-            git add data/statmaker/app_ready/update_manifest.json "data/statmaker/app_ready/$bundle_name"
+            python scripts/prune_app_ready_unreferenced_bundles.py \
+              --previous-manifest "$publish_dir/previous_manifest.json"
+            git add -A data/statmaker/app_ready
             if git diff --cached --quiet; then
               echo "APP_READY_SCORE_EDGE_ALREADY_PRESENT"
               published=true
