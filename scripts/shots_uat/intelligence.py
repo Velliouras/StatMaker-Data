@@ -1,7 +1,7 @@
 """Auditable game/market facts, separate from immutable numerical predictions."""
 import math
 from collections import defaultdict
-from .features import FEATURES, History
+from .features import FEATURES, History, normalized
 from .sources import Identities, timestamp
 from .train import ROOT
 
@@ -94,9 +94,15 @@ def context_facts(row, current, now):
     sides = {}
     for side in ("home", "away"):
         values = context.get(side) or {}
+        players = []; seen = set()
+        for player in values.get("unavailablePlayers", []):
+            key = ("id", str(player["id"])) if isinstance(player, dict) and player.get("id") else (
+                "name", normalized(player.get("name") if isinstance(player, dict) else player))
+            if key[1] and key not in seen:
+                players.append(player); seen.add(key)
         sides[side] = dict(injuriesCovered=bool(values.get("injuriesCovered")),
             lineupConfirmed=bool(values.get("lineupConfirmed")),
-            unavailablePlayers=values.get("unavailablePlayers", []), formation=values.get("formation"))
+            unavailablePlayers=players, formation=values.get("formation"))
     return dict(asOf=iso(clock) if clock and clock <= now else None, fresh=fresh, teams=sides,
                 usedByFrozenProbability=False, motivation="NOT_ESTABLISHED_FROM_VERIFIED_DATA")
 

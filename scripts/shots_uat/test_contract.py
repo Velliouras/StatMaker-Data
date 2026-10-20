@@ -148,6 +148,15 @@ class ContractTest(unittest.TestCase):
 
 
 class SourceContractTest(unittest.TestCase):
+    def test_context_deduplicates_provider_entries_for_the_same_player(self):
+        from .intelligence import context_facts
+        from .feed import timestamp
+        player=dict(id=667,name='M. Depay',reason='Injury')
+        context=dict(generatedAt='2026-10-20T07:00:00Z',home=dict(injuriesCovered=True,unavailablePlayers=[player,dict(player)]))
+        facts=context_facts(dict(match={}),context,timestamp('2026-10-20T08:00:00Z'))
+        self.assertEqual(facts['teams']['home']['unavailablePlayers'],[player])
+        self.assertTrue(facts['fresh']);self.assertFalse(facts['usedByFrozenProbability'])
+
     def test_game_intelligence_no_vig_uses_same_book_and_handles_pushes(self):
         from .intelligence import market_facts
         from .feed import timestamp
