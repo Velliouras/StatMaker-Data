@@ -361,13 +361,13 @@ def main():
             write(OUT / "preview.json", dict(selected=selected, audit=audit, source=source)); return
         from scripts.market_watch.build import allowed
         paper["rows"] += selected
-        ledger["rows"] += [r for r in selected if allowed(r["metric"].upper(), now)]
+        ledger["rows"] += [r for r in selected if allowed(r["market"], now)]
         # A previously frozen paper prediction can become an app issue while the
         # match is still ahead and the same exact price is freshly observed.
         _, raw, _ = load_quote_sources(now)
         known = {r["groupKey"] for r in ledger["rows"]}
         for row in paper["rows"]:
-            if row["groupKey"] in known or not allowed(row["metric"].upper(), now) or timestamp(row["kickoff"]) <= now + 900:
+            if row["groupKey"] in known or not allowed(row["market"], now) or timestamp(row["kickoff"]) <= now + 900:
                 continue
             current = observe_issued_quote(row, raw, now)
             if current.get("latestQuoteObservedAt"):
@@ -424,7 +424,7 @@ def current_recommendations(issued, now):
     # Admission changes apply to current recommendations; issued history remains
     # intact for Performance, including the previously published P55 cohort.
     from scripts.market_watch.build import allowed
-    return [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt") and allowed(r["metric"].upper(), now)
+    return [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt") and allowed(r["market"], now)
             and eligible_quote(r["winProbability"], r["pushProbability"], r["odd"])]
 
 

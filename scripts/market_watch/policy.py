@@ -42,7 +42,7 @@ def decision(records,previous,config,market,now):
     baseline=bool(prev.get("baselineAdmission",settings["bootstrapActive"]))
     pause_at=prev.get("pausedAt");pause_count=prev.get("settledAtPause",0)
     if not settings["publisherConnected"]:
-        status="UNSUPPORTED";reason="Δεν υπάρχει συνδεδεμένο μοντέλο και συμβόλαιο δημοσίευσης"
+        status="BLOCKED_CONTRACT" if settings.get("blockedReason") else "UNSUPPORTED";reason=settings.get("blockedReason","Δεν υπάρχει συνδεδεμένο μοντέλο και συμβόλαιο δημοσίευσης")
     elif old=="ACTIVE":
         hard=total["currentDrawdownUnits"]>=config["pauseDrawdownUnits"]
         weak=recent["settled"]>=config["recentWindow"] and recent["roi"]<=config["pauseRecentROI"]

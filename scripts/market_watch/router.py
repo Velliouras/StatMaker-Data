@@ -1,23 +1,24 @@
-"""Publish enabled count markets from frozen paper forecasts, at an exact live price."""
+"""Route enabled market forecasts without altering their frozen contract."""
 import hashlib,json
-from datetime import datetime,timezone
 from .build import ROOT,OUT,read,write,allowed
 from .policy import time
+from .catalog import app_market,selection_text,settlement,families
+from .quotes import current_quotes,bind
 
-MODEL="COUNT_COUPLED_V1"
-NAMES={('CORNERS','TOTAL'):'MATCH_CORNERS',('CORNERS','TEAM'):'TEAM_CORNERS',
-       ('FOULS','TOTAL'):'MATCH_FOULS',('FOULS','TEAM'):'TEAM_FOULS'}
-
+def spec_of(r):
+    return r.get('quoteSpec',{}).get('spec') or [r['metric'].upper(),r['scope'],r['side'],r['teamSide'],r['line']]
 
 def stage(actual,now,leagues,raw):
     from scripts.shots_uat.feed import bind_quote,iso,favourite
     from scripts.shots_uat.sources import Identities
-    identity=Identities(ROOT,actual);path=OUT/"market_ledger.json";ledger=read(path,dict(schemaVersion=1,modelId=MODEL,rows=[]))
-    known={r['groupKey'] for r in ledger['rows']};candidates=read(OUT/"shadow_candidates.json",{}).get('rows',[])
-    for q in candidates:
-        metric,scope,side,team,line=q['spec']
-        if line<0 or (line*2)%1 or q['featureCutoff']>q['observed']:continue
-        if not allowed(metric,now) or not now+900<q['kickoff']<now+7*86400:continue
+    identity=Identities(ROOT,actual);path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
+    issued=ledger['rows']+read(ROOT/'data/statmaker/uat/shots_v1/ledger.json',{}).get('rows',[]);used=set()
+    for r in issued:used.update((str(r['apiFixtureId']),f) for f in families(spec_of(r)))
+    candidates=read(OUT/'shadow_candidates.json',{}).get('rows',[])
+    live=current_quotes(now) if any(q.get('_monitorModel')=='ALL_MARKETS_JOINT_V1' and allowed(q['appMarket'],now) for q in candidates) else {}
+    for q in sorted(candidates,key=lambda q:(q.get('preference',1),-q['_monitorP'],-q.get('ev',0),str(q['spec']),q['bookmaker'])):
+        metric,scope,side,team,line=q['spec'];market=app_market(q['spec']);model=q.get('_monitorModel','COUNT_COUPLED_V1')
+        if q['featureCutoff']>q['observed'] or not allowed(market,now) or not now+900<q['kickoff']<now+7*86400:continue
         choices=[]
         for league in leagues:
             for m in league.get('matches',[]):
@@ -25,51 +26,53 @@ def stage(actual,now,leagues,raw):
                 bound,reason=identity.bind(league,m)
                 if bound is not None and bound[1:3]==(q['_home'],q['_away']):choices.append((league,bound,reason))
         if len(choices)!=1:continue
-        league,(m,h,a,api),reason=choices[0];group=f'api:{api}:{metric.lower()}'
-        if group in known:continue
-        quote=dict(selection=side,line=line,odds=q['odd'],bookmaker=q['bookmaker'],
-                   providerMarketName=q['sourceMarket'],exactBookmakerOdds=True)
-        binding=bind_quote(m,quote,raw)
-        if not binding or not now-86400<=binding[1]<=now:continue
-        if scope=='TEAM' and (favourite(m,q['bookmaker'],raw,now)!=q.get('_favourite') or q.get('_favourite') not in ('HOME','AWAY')):continue
+        league,(m,h,a,api),reason=choices[0];keys={(str(api),f) for f in families(q['spec'])}
+        if used&keys:continue
+        if model=='ALL_MARKETS_JOINT_V1':observed=bind(q,m,live)
+        else:
+            if line is None or line<0 or (line*2)%1:continue
+            binding=bind_quote(m,dict(selection=side,line=line,odds=q['odd'],bookmaker=q['bookmaker'],providerMarketName=q['sourceMarket'],exactBookmakerOdds=True),raw)
+            observed=binding[1] if binding else None
+        if observed is None or not now-86400<=observed<=now:continue
+        if team and (favourite(m,q['bookmaker'],raw,now)!=q.get('_favourite') or q.get('_favourite') not in ('HOME','AWAY')):continue
         p,push=q['_monitorP'],q['_monitorPush'];ev=p*q['odd']+push-1
         if p<.60 or not 1.8<q['odd']<3 or ev<=0:continue
         match={k:v for k,v in m.items() if k!='markets'};match.update({k:league[k] for k in ('leagueCode','country','competition','season')})
-        sid=hashlib.sha256(json.dumps([MODEL,group,q['spec'],q['bookmaker'],q['odd']]).encode()).hexdigest()
-        row=dict(selectionId=sid,groupKey=group,fixtureKey=f'api:{api}:{q["kickoff"]:.0f}',fixtureId=str(m['id']),apiFixtureId=int(api),
-                 competitionId=league.get('competitionId','domestic'),homeTeam=m['homeTeam'],awayTeam=m['awayTeam'],kickoff=m['kickoff'],
-                 match=match,market=NAMES[metric,scope],selection=f'{side.title()} {line:g}',team=m['homeTeam'] if team=='HOME' else m['awayTeam'] if team=='AWAY' else None,
-                 teamSide=team,line=line,side=side,odd=q['odd'],bookmaker=q['bookmaker'],winProbability=p,pushProbability=push,indicativeEV=ev,
-                 model=MODEL,policyId='MARKET_WATCH_UAT_V1',probabilityModel='COUPLED_COUNT_CONSERVATIVE',metric=metric.lower(),scope=scope,
-                 featureCutoff=iso(q['featureCutoff']),quoteUpdatedAt=iso(binding[1]),issuedAt=iso(now),publishedAt=None,publicationCommit=None,
-                 outcome='PENDING',settlementReturn=None,settledAt=None,identityBinding=reason,bookmakerBinding='EXACT_PROVIDER_QUOTE',
-                 certified=False,category='UAT_MARKET_EXPERIMENT',providerMarketName=q['sourceMarket'],monitorPaperSelectionId=q['_monitorId'])
-        ledger['rows'].append(row);known.add(group)
+        group=f'api:{api}:'+','.join(sorted(families(q['spec'])))
+        sid=hashlib.sha256(json.dumps([model,group,q['spec'],q['bookmaker'],q['odd']]).encode()).hexdigest()
+        numeric_line=float(line) if isinstance(line,(int,float)) and scope in ('TOTAL','TEAM','BTTS_TOTAL','RESULT_TOTAL') else None
+        row=dict(selectionId=sid,groupKey=group,fixtureKey=f'api:{api}:{q["kickoff"]:.0f}',fixtureId=str(m['id']),apiFixtureId=int(api),competitionId=league.get('competitionId','domestic'),
+            homeTeam=m['homeTeam'],awayTeam=m['awayTeam'],kickoff=m['kickoff'],match=match,market=market,selection=selection_text(q['spec']),
+            team=m['homeTeam'] if team=='HOME' else m['awayTeam'] if team=='AWAY' else None,teamSide=team,line=numeric_line,side=side,odd=q['odd'],bookmaker=q['bookmaker'],
+            winProbability=p,pushProbability=push,indicativeEV=ev,model=model,policyId='MARKET_WATCH_UAT_V1',probabilityModel='FROZEN_JOINT_CONSERVATIVE' if model=='ALL_MARKETS_JOINT_V1' else 'COUPLED_COUNT_CONSERVATIVE',
+            metric=metric.lower(),scope=scope,featureCutoff=iso(q['featureCutoff']),quoteUpdatedAt=iso(observed),issuedAt=iso(now),publishedAt=None,publicationCommit=None,
+            outcome='PENDING',settlementReturn=None,settledAt=None,identityBinding=reason,bookmakerBinding='EXACT_PROVIDER_QUOTE',certified=False,category='UAT_MARKET_EXPERIMENT',
+            providerMarketName=q['sourceMarket'],monitorPaperSelectionId=q['_monitorId'],quoteSpec={k:q.get(k) for k in ('providerEventId','kickoff','bookmaker','sourceMarket','selection','providerSelectionId','line','odd','spec')})
+        ledger['rows'].append(row);used.update(keys)
     write(path,ledger)
-
 
 def publish(actual,now,raw):
     from scripts.shots_uat.feed import verify_publication,bind_quote,iso
-    from materialize_betting_v2_direct import metric_values
-    from betting_v2.research_app_markets import outcome_extended
-    path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=1,modelId=MODEL,rows=[]))
+    path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
     if not path.exists():return [],[]
     ledger['rows']=verify_publication(ledger['rows'],path)
     for r in ledger['rows']:
         if r['outcome']!='PENDING' or not r.get('publishedAt') or now<time(r['kickoff'])+10800:continue
         choices=[v for v in actual if str(v.get('fixture_id'))==str(r['apiFixtureId']) and abs(v['_date']-time(r['kickoff']))<=300]
         if len(choices)!=1:continue
-        values=metric_values(choices[0],r['metric'].upper())
-        if values is None:continue
-        y,void=outcome_extended(*values,[r['metric'].upper(),r['scope'],r['side'],r['teamSide'],r['line']])
-        r.update(outcome='VOID' if void else 'WON' if y else 'LOST',settlementReturn=1. if void else r['odd'] if y else 0.,settledAt=iso(now))
+        result=settlement(choices[0],spec_of(r))
+        if result is None:continue
+        y,void=result;r.update(outcome='VOID' if void else 'WON' if y else 'LOST',settlementReturn=1. if void else r['odd'] if y else 0.,settledAt=iso(now))
     write(path,ledger);issued=[];live=[]
+    lookup=current_quotes(now) if any(r['model']=='ALL_MARKETS_JOINT_V1' and time(r['kickoff'])>now for r in ledger['rows']) else {}
     for original in ledger['rows']:
         if not original.get('publishedAt'):continue
-        r=dict(original);quote=dict(selection=r['selection'],line=r['line'],odds=r['odd'],bookmaker=r['bookmaker'],
-                                    providerMarketName=r['providerMarketName'],exactBookmakerOdds=True)
-        binding=bind_quote(r['match'],quote,raw)
-        r['latestQuoteObservedAt']=iso(binding[1]) if binding and now-86400<=binding[1]<=now else None
+        r=dict(original)
+        if r['model']=='ALL_MARKETS_JOINT_V1':observed=bind(r['quoteSpec'],r['match'],lookup)
+        else:
+            binding=bind_quote(r['match'],dict(selection=r['selection'],line=r['line'],odds=r['odd'],bookmaker=r['bookmaker'],providerMarketName=r['providerMarketName'],exactBookmakerOdds=True),raw)
+            observed=binding[1] if binding else None
+        r['latestQuoteObservedAt']=iso(observed) if observed is not None and now-86400<=observed<=now else None
         issued.append(r)
-        if time(r['kickoff'])>now and r['latestQuoteObservedAt'] and allowed(r['metric'].upper(),now):live.append(r)
+        if time(r['kickoff'])>now and r['latestQuoteObservedAt'] and allowed(r['market'],now):live.append(r)
     return issued,live

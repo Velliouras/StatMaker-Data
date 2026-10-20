@@ -4,10 +4,11 @@ from collections import Counter
 from datetime import datetime,timezone
 from pathlib import Path
 from .policy import decision,time,statistics
+from .catalog import app_market,settlement
 
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/"data/statmaker/uat/market_watch"
-sys.path.insert(0,str(ROOT/"scripts"))
+sys.path[:0]=[str(ROOT/"scripts"),str(ROOT/"scripts/betting_v2")]
 
 
 def read(path,default=None):
@@ -49,7 +50,7 @@ def shot_records(cfg,actual,now):
         if original.get("policyId") not in ("SHOTS_SOT_P60_UAT_V4","SHOTS_SOT_SCOPE_GUARD_V2"):
             audit["otherPolicy"]+=1;continue
         r=settle(original,actual,now)
-        row=dict(id=r["selectionId"],fixture=str(r["apiFixtureId"]),market=r["metric"].upper(),
+        row=dict(id=r["selectionId"],fixture=str(r["apiFixtureId"]),market=r["market"],
                  kickoff=time(r["kickoff"]),published=time(r["publishedAt"]),observed=time(r["quoteUpdatedAt"]),
                  p=r["winProbability"],push=r["pushProbability"],odd=r["odd"],outcome=r["outcome"],returned=r["settlementReturn"],
                  model=r["model"],policy=r["policyId"],source="PUBLISHED_UAT_P60",home=r["homeTeam"],away=r["awayTeam"])
@@ -59,60 +60,83 @@ def shot_records(cfg,actual,now):
 
 
 def shadow_records(cfg,actual,now):
-    rows=[];audit=Counter();candidates=[]
-    from materialize_betting_v2_direct import metric_values
-    from betting_v2.research_app_markets import outcome_extended
+    rows=[];audit=Counter();candidates=[];coverage={k:dict(contracts=set(),fixtures=set(),blocked=0) for k in cfg['markets']}
     truth={f"{r['_date']}:{r['_home']}:{r['_away']}":r for r in actual}
     sources=[]
-    for folder in (ROOT/"reports/betting_v2/forward_market_first_20261018",ROOT/"reports/market_watch/count_paper_v1"):
+    for folder,arm in ((ROOT/"reports/betting_v2/forward_market_first_20261018",'coupled_conservative'),
+                       (ROOT/"reports/market_watch/count_paper_v1",'coupled_conservative'),
+                       (ROOT/"reports/market_watch/all_paper_v1",'all_markets_conservative')):
         index=read(folder/"index.json",{});proofs=read(folder/"publication_evidence.json",{})
-        sources.extend((folder,entry,proofs.get(entry["path"])) for entry in index.get("cohorts",[]))
+        sources.extend((folder,entry,proofs.get(entry["path"]),arm) for entry in index.get("cohorts",[]))
     sources.sort(key=lambda v:time(v[1]["frozenAtUTC"]))
     seen=set()
-    forecast_contracts=set();forecast_fixtures=set()
-    for folder,entry,proof in sources:
+    for folder,entry,proof,arm in sources:
         if not proof:audit["noPublicationProof"]+=1;continue
         raw=(folder/entry["path"]).read_bytes();digest=hashlib.sha256(raw).hexdigest()
         if digest!=entry["sha256"] or digest!=proof["sha256"]:raise ValueError("Immutable market cohort hash mismatch")
         doc=json.loads(gzip.decompress(raw));published=time(proof["publiclyVerifiedAtUTC"])
-        reserved=set(map(tuple,doc.get("marketKeys",[])))
-        for q in doc["models"]["coupled_conservative"].get("forecasts",[]):
-            if q['spec'][0] in ('CORNERS','FOULS') and (q['fixture'],q['spec'][0]) not in seen and published<q['kickoff']:
-                forecast_contracts.add((q['fixture'],q['bookmaker'],tuple(q['spec'])))
-                forecast_fixtures.add(q['fixture'])
-        for q in doc["models"]["coupled_conservative"]["selected"]:
-            metric,scope,side,team,line=q["spec"]
-            if metric not in ("CORNERS","FOULS"):continue
-            key=q["fixture"],metric
-            if key in seen:audit["duplicateLaterPacket"]+=1;continue
-            lower=q.get("_lower",{});p=lower.get("p",q["p"]);push=lower.get("push",q.get("push",0.))
-            identity=hashlib.sha256(json.dumps([key,q["bookmaker"],q["spec"],q["odd"]],sort_keys=True).encode()).hexdigest()
-            r=dict(id=identity,fixture=q["fixture"],market=metric,kickoff=q["kickoff"],observed=q["observed"],published=published,
-                   p=p,push=push,odd=q["odd"],outcome="PENDING",returned=None,model="COUNT_COUPLED_V1",
-                   policy="COUNT_COUPLED_P60_CONSERVATIVE",source="PUBLISHED_PAPER",home=q["_home"],away=q["_away"])
-            if not valid_contract(r,cfg):audit["invalidOrLateContract"]+=1;continue
-            if now>q["kickoff"]+3*3600 and (label:=truth.get(q["fixture"])) is not None:
-                values=metric_values(label,metric)
-                if values is not None:
-                    y,void=outcome_extended(*values,q["spec"])
-                    r.update(outcome="VOID" if void else "WON" if y else "LOST",returned=1. if void else q["odd"] if y else 0.)
+        def market_for(q):
+            m=app_market(q['spec'])
+            if arm=='coupled_conservative' and q['spec'][0] not in ('CORNERS','FOULS'):return None
+            return m
+        for q in doc.get('blockedContracts',[]):
+            m=market_for(q)
+            if m in coverage and published<q['kickoff']:coverage[m]['blocked']+=1
+        for q in doc['models'][arm].get('forecasts',[]):
+            m=market_for(q)
+            if m in coverage and (q['fixture'],m) not in seen and published<q['kickoff']:
+                coverage[m]['contracts'].add((q['fixture'],q['bookmaker'],tuple(q['spec'])))
+                coverage[m]['fixtures'].add(q['fixture'])
+        for q in doc['models'][arm]['selected']:
+            metric,scope,side,team,line=q['spec'];market=market_for(q)
+            if market not in cfg['markets']:continue
+            key=q['fixture'],market
+            if key in seen:audit['duplicateLaterPacket']+=1;continue
+            lower=q.get('_lower',{});p=lower.get('p',q['p']);push=lower.get('push',q.get('push',0.))
+            model='COUNT_COUPLED_V1' if arm=='coupled_conservative' else 'ALL_MARKETS_JOINT_V1'
+            if model!=cfg['markets'][market]['modelId']:raise ValueError('Cannot mix model arms in one market performance series')
+            identity=hashlib.sha256(json.dumps([key,model,q['bookmaker'],q['spec'],q['odd']],sort_keys=True).encode()).hexdigest()
+            r=dict(id=identity,fixture=q['fixture'],market=market,kickoff=q['kickoff'],observed=q['observed'],published=published,
+                p=p,push=push,odd=q['odd'],outcome='PENDING',returned=None,model=model,
+                policy='MARKET_WATCH_P60_CONSERVATIVE',source='PUBLISHED_PAPER',home=q['_home'],away=q['_away'])
+            if not valid_contract(r,cfg):audit['invalidOrLateContract']+=1;continue
+            if now>q['kickoff']+10800 and (label:=truth.get(q['fixture'])) is not None:
+                result=settlement(label,q['spec'])
+                if result is not None:
+                    y,void=result;r.update(outcome='VOID' if void else 'WON' if y else 'LOST',returned=1. if void else q['odd'] if y else 0.)
             rows.append(r)
-            if q["kickoff"]>now+900:candidates.append(dict(q,_monitorId=identity,_monitorP=p,_monitorPush=push))
-        seen.update(reserved)
-    audit['cornerFoulForecastContracts']=len(forecast_contracts);audit['cornerFoulForecastFixtures']=len(forecast_fixtures)
+            if q['kickoff']>now+900:candidates.append(dict(q,_monitorId=identity,_monitorP=p,_monitorPush=push,_monitorModel=model,appMarket=market))
+        for fixture,key in doc.get('marketKeys',[]):
+            if key in cfg['markets']:seen.add((fixture,key))
+            elif key in ('CORNERS','FOULS'):
+                seen.update((fixture,prefix+key) for prefix in ('MATCH_','TEAM_'))
+    audit['byMarket']={k:dict(forecastContracts=len(v['contracts']),forecastFixtures=len(v['fixtures']),blockedContracts=v['blocked']) for k,v in coverage.items()}
+    audit['forecastContracts']=sum(len(v['contracts']) for v in coverage.values())
+    audit['forecastFixtures']=len({f for v in coverage.values() for f in v['fixtures']})
     return rows,dict(audit),candidates
 
 
 def historical():
+    # Preserve typed development history. Never assign a family's ROI to both match and team markets.
     result={}
-    validation=read(ROOT/"data/statmaker/uat/shots_v1/validation.json",{})
-    for variant,data in validation.get("variants",{}).items():
-        for market,s in data.get("byMarket",{}).items():
-            result.setdefault(market,{})[variant]=dict(s,source="COUNT_CATBOOST_P60_DEVELOPMENT",untouchedHoldout=False)
-    for variant in ("earliest","latest"):
-        d=read(ROOT/f"reports/betting_v2/market_first_counts_20261018/priced_{variant}.json",{})
-        for market,s in d.get("reports",{}).get("coupled_conservative",{}).get("byMetric",{}).items():
-            if market in ("CORNERS","FOULS"):result.setdefault(market,{})[variant]=dict(s,source="COUNT_COUPLED_DEVELOPMENT",untouchedHoldout=False)
+    validation=read(ROOT/'data/statmaker/uat/shots_v1/validation.json',{})
+    for variant,data in validation.get('variants',{}).items():
+        grouped={}
+        for q in data.get('picks',[]):
+            market=q.get('market') or app_market(q['spec'])
+            if market:grouped.setdefault(market,[]).append(q)
+        for market,rows in grouped.items():
+            profit=sum(q['returned']-1 for q in rows)
+            result.setdefault(market,{})[variant]=dict(issued=len(rows),profitUnits=profit,roi=profit/len(rows),source='COUNT_CATBOOST_P60_DEVELOPMENT',untouchedHoldout=False)
+    for variant in ('earliest','latest'):
+        d=read(ROOT/f'reports/betting_v2/market_first_counts_20261018/priced_{variant}.json',{})
+        grouped={}
+        for q in d.get('reports',{}).get('coupled_conservative',{}).get('picks',[]):
+            market=app_market(q['spec'])
+            if market and q['spec'][0] in ('CORNERS','FOULS'):grouped.setdefault(market,[]).append(q)
+        for market,rows in grouped.items():
+            profit=sum(q['y']*q['odd']+q['actualPush']-1 for q in rows)
+            result.setdefault(market,{})[variant]=dict(issued=len(rows),profitUnits=profit,roi=profit/len(rows),source='COUNT_COUPLED_DEVELOPMENT',untouchedHoldout=False)
     return result
 
 
@@ -127,7 +151,7 @@ def refresh_current_feed(now):
     if hashlib.sha256(raw).hexdigest()!=index["sha256"]:raise ValueError("Read model hash mismatch")
     payload=json.loads(raw)
     def current(rows):
-        return [r for r in rows if allowed(r["metric"].upper(),now) and r["winProbability"]>=.60
+        return [r for r in rows if allowed(r["market"],now) and r["winProbability"]>=.60
                 and time(r["kickoff"])>now and r.get("latestQuoteObservedAt")
                 and now-86400<=time(r["latestQuoteObservedAt"])<=now]
     payload["candidates"]=current(payload["issued"]);payload["candidateCount"]=len(payload["candidates"])
@@ -149,13 +173,14 @@ def main():
         data=decision(selected,old.get("markets",{}).get(metric),cfg,metric,now)
         if data["transition"]:events["events"].append(dict(at=now,market=metric,modelId=settings["modelId"],
             previous=data["previousStatus"],status=data["status"],reason=data["reason"],settled=data["total"]["settled"],roi=data["total"]["roi"]))
-        markets[metric]=dict(data,**settings,historical=history.get(metric,{}),records=selected)
+        markets[metric]=dict(data,**settings,historical=history.get(metric,{}),records=selected,coverage=b.get("byMarket",{}).get(metric,{}))
     state=dict(schemaVersion=1,policyId=cfg["policyId"],generatedAt=datetime.fromtimestamp(now,timezone.utc).isoformat(),
                policy=cfg,markets=markets,events=events["events"][-100:],audit=dict(shots=a,shadow=b),
                noProviderCalls=True,automaticUatRouting=True,profitabilityCertified=False,
                limitations=["Οι κανόνες είναι λειτουργική πολιτική UAT, όχι στατιστική πιστοποίηση.",
                    "Το ιστορικό ανάπτυξης δεν προσμετράται ως προδημοσιευμένη επίδοση.",
-                   "Οι αγορές χωρίς μοντέλο δεν ενεργοποιούνται από θετικό ROI άλλου μοντέλου."])
+                   "37 αγορές στο scope. Οι κάρτες χρειάζονται ακριβές bookmaker settlement· η κάλυψή τους καταγράφεται χωριστά.",
+                   "Κάθε αγορά αξιολογείται χωριστά. Οι κανόνες ενεργοποίησης δεν εγγυώνται μελλοντικό κέρδος."])
     write(OUT/"state.json",state);write(OUT/"events.json",events);write(OUT/"shadow_candidates.json",dict(generatedAt=state["generatedAt"],rows=candidates))
     refresh_current_feed(now)
     docs=ROOT/"docs/market-watch";write(docs/"data.json",state)

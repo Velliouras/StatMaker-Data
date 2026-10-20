@@ -1,25 +1,289 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "policyId": "MARKET_WATCH_UAT_V1",
-  "minimumWinProbability": 0.60,
-  "minimumOddsExclusive": 1.80,
-  "maximumOddsExclusive": 3.00,
+  "minimumWinProbability": 0.6,
+  "minimumOddsExclusive": 1.8,
+  "maximumOddsExclusive": 3.0,
   "activationSettledFixtures": 50,
   "activationCalendarDays": 14,
   "activationMinimumROI": 0.03,
   "recentWindow": 20,
-  "pauseRecentROI": -0.10,
+  "pauseRecentROI": -0.1,
   "pauseDrawdownUnits": 10.0,
   "resumeNewSettledFixtures": 20,
   "resumeMinimumROI": 0.05,
   "resumeCooldownDays": 7,
   "maximumStateAgeHours": 36,
   "markets": {
-    "SHOTS": {"name": "Σουτ", "modelId": "SHOTS_SOT_CATBOOST_V1", "source": "shots", "bootstrapActive": true, "publisherConnected": true},
-    "SOT": {"name": "Σουτ στην εστία", "modelId": "SHOTS_SOT_CATBOOST_V1", "source": "shots", "bootstrapActive": true, "publisherConnected": true},
-    "CORNERS": {"name": "Κόρνερ", "modelId": "COUNT_COUPLED_V1", "source": "coupled_conservative", "bootstrapActive": false, "publisherConnected": true},
-    "FOULS": {"name": "Φάουλ", "modelId": "COUNT_COUPLED_V1", "source": "coupled_conservative", "bootstrapActive": false, "publisherConnected": true},
-    "CARDS": {"name": "Κάρτες", "modelId": null, "source": null, "bootstrapActive": false, "publisherConnected": false},
-    "GOALS": {"name": "Γκολ / GG / 1Χ2", "modelId": null, "source": null, "bootstrapActive": false, "publisherConnected": false}
-  }
+    "MATCH_SHOTS": {
+      "name": "Σουτ αγώνα",
+      "modelId": "SHOTS_SOT_CATBOOST_V1",
+      "source": "shots",
+      "bootstrapActive": true,
+      "publisherConnected": true
+    },
+    "TEAM_SHOTS": {
+      "name": "Σουτ ομάδας",
+      "modelId": "SHOTS_SOT_CATBOOST_V1",
+      "source": "shots",
+      "bootstrapActive": true,
+      "publisherConnected": true
+    },
+    "MATCH_SHOTS_ON_TARGET": {
+      "name": "Σουτ στην εστία αγώνα",
+      "modelId": "SHOTS_SOT_CATBOOST_V1",
+      "source": "shots",
+      "bootstrapActive": true,
+      "publisherConnected": true
+    },
+    "TEAM_SHOTS_ON_TARGET": {
+      "name": "Σουτ στην εστία ομάδας",
+      "modelId": "SHOTS_SOT_CATBOOST_V1",
+      "source": "shots",
+      "bootstrapActive": true,
+      "publisherConnected": true
+    },
+    "MOST_SHOTS": {
+      "name": "Περισσότερα σουτ",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MOST_SHOTS_ON_TARGET": {
+      "name": "Περισσότερα σουτ στην εστία",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MATCH_CORNERS": {
+      "name": "Κόρνερ αγώνα",
+      "modelId": "COUNT_COUPLED_V1",
+      "source": "coupled_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_CORNERS": {
+      "name": "Κόρνερ ομάδας",
+      "modelId": "COUNT_COUPLED_V1",
+      "source": "coupled_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MOST_CORNERS": {
+      "name": "Περισσότερα κόρνερ",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MATCH_FOULS": {
+      "name": "Φάουλ αγώνα",
+      "modelId": "COUNT_COUPLED_V1",
+      "source": "coupled_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_FOULS": {
+      "name": "Φάουλ ομάδας",
+      "modelId": "COUNT_COUPLED_V1",
+      "source": "coupled_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "1X2": {
+      "name": "Αποτέλεσμα 1Χ2",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "DOUBLE_CHANCE": {
+      "name": "Διπλή ευκαιρία",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "DRAW_NO_BET": {
+      "name": "Draw No Bet",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "HALF_TIME_1X2": {
+      "name": "Αποτέλεσμα ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "HALF_TIME_DOUBLE_CHANCE": {
+      "name": "Διπλή ευκαιρία ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MATCH_GOALS": {
+      "name": "Γκολ αγώνα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_GOALS": {
+      "name": "Γκολ ομάδας",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "FIRST_HALF_GOALS": {
+      "name": "Γκολ 1ου ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_FIRST_HALF_GOALS": {
+      "name": "Γκολ ομάδας 1ου ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "SECOND_HALF_GOALS": {
+      "name": "Γκολ 2ου ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_SECOND_HALF_GOALS": {
+      "name": "Γκολ ομάδας 2ου ημιχρόνου",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "BTTS": {
+      "name": "GG / NG",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "CORRECT_SCORE": {
+      "name": "Ακριβές σκορ",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "WINNING_MARGIN": {
+      "name": "Περιθώριο νίκης",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "HALF_TIME_FULL_TIME": {
+      "name": "Ημίχρονο / Τελικό",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "GOAL_IN_BOTH_HALVES": {
+      "name": "Γκολ και στα δύο ημίχρονα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "TEAM_SCORE_BOTH_HALVES": {
+      "name": "Ομάδα σκοράρει και στα δύο ημίχρονα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "ODD_EVEN_GOALS": {
+      "name": "Μονά / Ζυγά γκολ",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "GOAL_BANDS": {
+      "name": "Εύρος γκολ",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "BTTS_OVER_UNDER": {
+      "name": "GG + Over/Under",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "RESULT_OVER_UNDER": {
+      "name": "Αποτέλεσμα + Over/Under",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": true
+    },
+    "MATCH_CARDS": {
+      "name": "Κάρτες αγώνα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": false,
+      "blockedReason": "Λείπει ακριβές bookmaker settlement για κάρτες/booking units· οι προσφορές καταγράφονται χωρίς πλασματικό ROI.",
+      "settlementReady": false
+    },
+    "TEAM_CARDS": {
+      "name": "Κάρτες ομάδας",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": false,
+      "blockedReason": "Λείπει ακριβές bookmaker settlement για κάρτες/booking units· οι προσφορές καταγράφονται χωρίς πλασματικό ROI.",
+      "settlementReady": false
+    },
+    "MATCH_YELLOW_CARDS": {
+      "name": "Κίτρινες αγώνα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": false,
+      "blockedReason": "Λείπει ακριβές bookmaker settlement για κάρτες/booking units· οι προσφορές καταγράφονται χωρίς πλασματικό ROI.",
+      "settlementReady": false
+    },
+    "TEAM_YELLOW_CARDS": {
+      "name": "Κίτρινες ομάδας",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": false,
+      "blockedReason": "Λείπει ακριβές bookmaker settlement για κάρτες/booking units· οι προσφορές καταγράφονται χωρίς πλασματικό ROI.",
+      "settlementReady": false
+    },
+    "RED_CARD": {
+      "name": "Κόκκινη κάρτα",
+      "modelId": "ALL_MARKETS_JOINT_V1",
+      "source": "all_markets_conservative",
+      "bootstrapActive": false,
+      "publisherConnected": false,
+      "blockedReason": "Λείπει ακριβές bookmaker settlement για κάρτες/booking units· οι προσφορές καταγράφονται χωρίς πλασματικό ROI.",
+      "settlementReady": false
+    }
+  },
+  "scope": "ALL_37_NON_HANDICAP_APP_MARKETS"
 }

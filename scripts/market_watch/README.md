@@ -94,3 +94,13 @@ python -m scripts.market_watch.build
 
 The workflow owns the two-phase paper publication sequence. Do not manually
 mark a local/retrospective forecast as publicly verified.
+
+### Expanded scope: all 37 app markets (2026-10-20)
+
+The registry now follows the app's non-handicap catalog, with separate match/team and period market gates. Existing SHOTS/SOT publications keep their original model and history. The additional source restores frozen FT/period/count states, freezes one first-receipt packet per fixture and app market, and monitors one conservative selection per market. App routing still prevents multiple issued selections in the same broad family. Historical development results do not activate a new market.
+
+The independent `ALL_MARKETS_JOINT_V1` source runs from `scripts.market_watch.all_paper`; dependencies and immutable model artifacts are bound by `config/market_watch_all_source.json`. Forecasts and publication proofs live under `reports/market_watch/all_paper_v1`. The normal workflow commits first, verifies publication second, and then updates the dashboard. It uses cached inputs only and performs no fit or paid provider/LLM calls.
+
+All five card types remain visible and their observed contracts are inventoried. Generic cards, yellow cards and red cards are never silently equated with bookmaker booking units. Without an exact compatible settlement contract they show `BLOCKED_CONTRACT` and cannot auto-enable, even if another count model has positive ROI. Missing/ambiguous quotes and labels remain missing. Asian/handicap contracts, including provider `Most Shots on Target` offers with a nonzero spread, remain excluded.
+
+UAT Android 0.1.70 consumes the optional multi-market sections, keeps the market/model identity in Daily/Performance, and accepts nullable lines only for appropriate non-total markets. The 60% minimum, strict 1.80–3.00 odds band and positive EV policy remain unchanged.
