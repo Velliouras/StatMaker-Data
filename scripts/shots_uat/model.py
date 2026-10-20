@@ -8,8 +8,8 @@ from catboost import CatBoostRegressor, CatBoostClassifier, Pool
 from .features import FEATURES
 
 SEEDS = (17, 31, 71)
-POLICY_ID = "SHOTS_SOT_P55_UAT_V3"
-MIN_WIN_PROBABILITY = .55
+POLICY_ID = "SHOTS_SOT_P60_UAT_V4"
+MIN_WIN_PROBABILITY = .60
 
 
 def eligible_quote(win, push, odd):

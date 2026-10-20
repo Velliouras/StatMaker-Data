@@ -24,14 +24,24 @@ class ContractTest(unittest.TestCase):
         self.assertEqual(legacy["candidates"],[high]);self.assertEqual(legacy["issued"],[high])
         self.assertEqual(payload["issued"],[high,developing]);self.assertEqual(payload["candidateCount"],2)
 
-    def test_p55_admission_keeps_positive_ev_and_exact_odds_bounds(self):
+    def test_restored_p60_admission_keeps_positive_ev_and_exact_odds_bounds(self):
         from .model import eligible_quote
-        self.assertTrue(eligible_quote(.55, 0., 1.91))
-        self.assertFalse(eligible_quote(.549, 0., 1.91))
+        self.assertTrue(eligible_quote(.60, 0., 1.91))
+        self.assertFalse(eligible_quote(.599, 0., 1.91))
+        self.assertFalse(eligible_quote(.55, 0., 1.91))
         self.assertFalse(eligible_quote(.55, 0., 1.81))
         self.assertFalse(eligible_quote(.75, 0., 1.80))
         self.assertFalse(eligible_quote(.75, 0., 3.00))
         self.assertFalse(eligible_quote(.95, .1, 2.))
+
+    def test_restored_threshold_hides_old_p55_recommendation_but_retains_history(self):
+        from .feed import current_recommendations
+        row=dict(kickoff="2026-10-25T15:00:00Z",latestQuoteObservedAt="2026-10-20T07:00:00Z",
+                 odd=1.91,winProbability=.57,pushProbability=0.)
+        higher=dict(row,winProbability=.65)
+        issued=[row,higher]; original=copy.deepcopy(issued)
+        self.assertEqual(current_recommendations(issued,0),[higher])
+        self.assertEqual(issued,original)
 
     def test_total_over_does_not_require_picking_the_dominant_team(self):
         # Either team can contribute to the sum; swapping team order cannot change it.

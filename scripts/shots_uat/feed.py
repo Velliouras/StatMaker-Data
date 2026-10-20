@@ -367,7 +367,7 @@ def main():
     issued = [observe_issued_quote(r, raw, now) for r in ledger["rows"] if r.get("publishedAt")]
     from .intelligence import annotate
     issued = annotate(issued, actual, raw, leagues, now)
-    live = [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt")]
+    live = current_recommendations(issued, now)
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,
                    generatedAt=iso(now), apiCalls=0, prodWrites=0, probabilitiesNotEmpiricallyCertified=True,
@@ -386,6 +386,13 @@ def compatible_p60_payload(payload):
                   issued=[r for r in payload["issued"] if r["winProbability"] >= .60])
     legacy["candidateCount"] = len(legacy["candidates"])
     return legacy
+
+
+def current_recommendations(issued, now):
+    # Admission changes apply to current recommendations; issued history remains
+    # intact for Performance, including the previously published P55 cohort.
+    return [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt")
+            and eligible_quote(r["winProbability"], r["pushProbability"], r["odd"])]
 
 
 def publish_read_model(directory, payload):
