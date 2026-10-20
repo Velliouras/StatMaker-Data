@@ -363,8 +363,10 @@ def main():
         write(ledger_path, ledger); return
     ledger["rows"] = [settle(r, actual, now) for r in verify_publication(ledger["rows"])]
     write(ledger_path, ledger)
-    _, raw, _ = load_quote_sources(now)
+    leagues, raw, _ = load_quote_sources(now)
     issued = [observe_issued_quote(r, raw, now) for r in ledger["rows"] if r.get("publishedAt")]
+    from .intelligence import annotate
+    issued = annotate(issued, actual, raw, leagues, now)
     live = [r for r in issued if timestamp(r["kickoff"]) > now and r.get("latestQuoteObservedAt")]
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,

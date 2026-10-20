@@ -148,6 +148,55 @@ class ContractTest(unittest.TestCase):
 
 
 class SourceContractTest(unittest.TestCase):
+    def test_game_intelligence_no_vig_uses_same_book_and_handles_pushes(self):
+        from .intelligence import market_facts
+        from .feed import timestamp
+        now=timestamp('2026-10-20T08:00:00Z')
+        m=dict(kickoff='2026-10-21T15:00:00Z',providerHomeTeam='H',providerAwayTeam='A')
+        row=dict(match=m,fixtureId='7',metric='shots',scope='TOTAL',teamSide='',side='OVER',line=24.,bookmaker='B',
+                 odd=1.9,winProbability=.6,pushProbability=.1,indicativeEV=.24)
+        quote=dict(_observedAt=now-60,_kickoff=m['kickoff'],_home='H',_away='A',odds=[dict(hdp=24,over='1.9',under='1.9')])
+        raw={('7','B','Total Shots'):[quote]};facts=market_facts(row,raw,now)
+        self.assertAlmostEqual(facts['currentSameBook']['marketConditionalProbability'],.5)
+        self.assertAlmostEqual(facts['edgeVsMarketPercentagePoints'],100/6)
+        self.assertAlmostEqual(facts['modelFairOdd'],1.5)
+        self.assertAlmostEqual(facts['breakEvenWinProbability'],.9/1.9)
+        raw={('7','B','Total Shots'):[dict(quote,odds=[dict(hdp=24,over='1.9')])],
+             ('7','C','Total Shots'):[dict(quote,odds=[dict(hdp=24,under='1.9')])]}
+        self.assertNotIn('marketConditionalProbability',market_facts(row,raw,now)['currentSameBook'])
+        raw[('7','B','Total Shots')].append(dict(quote,odds=[dict(hdp=24,over='1.99')]))
+        self.assertNotIn('currentSameBook',market_facts(row,raw,now))
+
+    def test_future_context_is_not_presented_as_current(self):
+        from .intelligence import context_facts
+        from .feed import timestamp
+        context=dict(generatedAt='2026-10-21T08:00:00Z',home=dict(injuriesCovered=True,unavailablePlayers=['Future news']))
+        facts=context_facts(dict(match={}),context,timestamp('2026-10-20T08:00:00Z'))
+        self.assertIsNone(facts['asOf']);self.assertFalse(facts['fresh'])
+        self.assertFalse(facts['teams']['home']['injuriesCovered'])
+        self.assertEqual(facts['teams']['home']['unavailablePlayers'],[])
+
+    def test_game_intelligence_keeps_original_prediction_and_cutoff(self):
+        from .intelligence import annotate
+        from .feed import timestamp
+        cutoff=timestamp('2026-10-19T12:00:00Z')
+        actual=[dict(_home='england:h',_away='england:a',_date=cutoff-(10-i)*86400,
+                     home_goals=2,away_goals=1,normalized_stats=dict(HS=12,AS=8,HST=4,AST=2)) for i in range(8)]
+        actual.append(dict(actual[-1],_date=cutoff-3600,normalized_stats=dict(HS=999,AS=999,HST=999,AST=999)))
+        m=dict(kickoff='2026-10-21T15:00:00Z',leagueCode='E0',providerHomeTeam='H',providerAwayTeam='A')
+        row=dict(selectionId='s',featureCutoff='2026-10-19T12:00:00Z',match=m,kickoff=m['kickoff'],fixtureId='7',apiFixtureId=99,
+                 metric='shots',scope='TOTAL',teamSide='',side='OVER',line=24.5,bookmaker='B',homeTeam='H',awayTeam='A',
+                 odd=1.9,winProbability=.6,pushProbability=0.,indicativeEV=.14)
+        before=copy.deepcopy(row)
+        with patch('scripts.shots_uat.intelligence.Identities') as identity:
+            identity.return_value.bind.return_value=((m,'england:h','england:a',99),'exact')
+            result=annotate([row],actual,{},[],cutoff+86400)[0]
+        self.assertEqual(row,before)
+        self.assertEqual({k:v for k,v in result.items() if k!='intelligence'},before)
+        facts=result['intelligence'];self.assertFalse(facts['changesPrediction'])
+        self.assertEqual(facts['historicalFacts']['home']['sample'],8)
+        self.assertEqual(facts['historicalFacts']['home']['averages']['own_8_shots_for'],12.)
+
     def test_reobservation_does_not_reprice_or_mutate_first_issue(self):
         from .feed import observe_issued_quote,timestamp
         m=dict(id='7',kickoff='2026-10-22T15:00:00Z',providerHomeTeam='H',providerAwayTeam='A')

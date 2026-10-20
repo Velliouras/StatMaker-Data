@@ -115,3 +115,20 @@ bands, not historical confirmation. Developing below .60 is not called Strong.
 Existing stored constant Developing labels are corrected when read, keeping all
 original prediction, price, date and outcome fields intact. Performance and Daily
 include all issued P55 model rows, including the below-.60 Developing band.
+
+## Game and market intelligence (UAT 0.1.68)
+
+A separate read-only intelligence block reconstructs factual historical summaries
+using each issue's original feature cutoff, plus timestamped current contextual
+information and exact same-line market comparisons. It never updates a numerical
+prediction, first-issued price, selection, policy or outcome. Facts are not causal
+feature attributions. No LLM/provider call, invented motivation or lineup
+assumption is used. Missing xG and unconfirmed/stale squad information are visible.
+Same-book/same-line opposite prices give a proportional no-margin probability
+conditional on no push; no cross-book combination is used to estimate margin.
+Break-even win probability and model fair price account for pushes. Separate
+book prices show recent cached observations, not executable price guarantees.
+Injuries/lineups are explicitly informational and have not been incorporated
+into the frozen numerical bank. This is a first explainability/market-comparison
+implementation, not a clone of OddysAI's proprietary engine or evidence of better
+predictive accuracy/profitability.
