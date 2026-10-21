@@ -40,6 +40,8 @@ def decision(records,previous,config,market,now):
     prev=previous or {};old=prev.get("status", "ACTIVE" if settings["bootstrapActive"] else "SHADOW")
     status=old;reason="Αρχική ενεργή αγορά UAT· δεν αποτελεί πιστοποίηση κερδοφορίας" if settings["bootstrapActive"] else "Συλλογή προδημοσιευμένων επιλογών"
     baseline=bool(prev.get("baselineAdmission",settings["bootstrapActive"]))
+    if settings.get('uatPilotEnabled'):
+        reason='Ενεργό δοκιμαστικά UAT με πολιτική φαβορί'
     pause_at=prev.get("pausedAt");pause_count=prev.get("settledAtPause",0)
     if not settings["publisherConnected"]:
         status="BLOCKED_CONTRACT" if settings.get("blockedReason") else "UNSUPPORTED";reason=settings.get("blockedReason","Δεν υπάρχει συνδεδεμένο μοντέλο και συμβόλαιο δημοσίευσης")
@@ -63,7 +65,9 @@ def decision(records,previous,config,market,now):
     else:
         enough=total["fixtures"]>=config["activationSettledFixtures"] and total["calendarDays"]>=config["activationCalendarDays"]
         profitable=total["roi"] is not None and total["roi"]>=config["activationMinimumROI"] and recent["roi"] is not None and recent["roi"]>0
-        if enough and profitable:
+        if settings.get('uatPilotEnabled'):
+            status='ACTIVE';baseline=True;reason='Ενεργό UAT: επιλογές υπέρ φαβορί, χωρίς αναμονή ιστορικής προαγωγής'
+        elif enough and profitable:
             status="ACTIVE";baseline=False;reason="Ενεργοποίηση: 50+ αγώνες /14+ ημέρες /ROI>=3% /θετικό πρόσφατο ROI"
         else:status="SHADOW";reason="Αναμονή: 50 αγώνες,14 ημέρες,ROI>=3% και θετικό ROI τελευταίων20"
     return dict(status=status,reason=reason,baselineAdmission=baseline,pausedAt=pause_at,settledAtPause=pause_count,

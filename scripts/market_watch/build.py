@@ -167,17 +167,29 @@ def main():
     from scripts.shots_uat.feed import load_history
     now=datetime.now(timezone.utc).timestamp();cfg=config();actual=load_history(not args.cached_history_only)
     first,a=shot_records(cfg,actual,now);second,b,candidates=shadow_records(cfg,actual,now);rows=first+second
+    from .router import settle_rows
+    from .recommend import POLICY
+    pilot=settle_rows(read(OUT/'market_ledger.json',{}).get('rows',[]),actual,now)
+    pilot=[dict(id=r['selectionId'],fixture=str(r['apiFixtureId']),market=r['market'],
+        kickoff=time(r['kickoff']),published=time(r['publishedAt']),observed=time(r['quoteUpdatedAt']),
+        p=r['winProbability'],push=r['pushProbability'],odd=r['odd'],outcome=r['outcome'],returned=r['settlementReturn'],
+        model=r['model'],policy=r['policyId'],source='PUBLISHED_UAT_FAVOURITE_POINT',home=r['homeTeam'],away=r['awayTeam'])
+        for r in pilot if r.get('publishedAt') and r.get('policyId')==POLICY]
     old=read(OUT/"state.json",{});events=read(OUT/"events.json",dict(events=[]));markets={};history=historical()
     for metric,settings in cfg["markets"].items():
-        selected=[r for r in rows if r["market"]==metric]
+        shadow=[r for r in second if r['market']==metric]
+        selected=[r for r in (pilot if settings.get('uatPilotEnabled') else rows) if r["market"]==metric]
         data=decision(selected,old.get("markets",{}).get(metric),cfg,metric,now)
         if data["transition"]:events["events"].append(dict(at=now,market=metric,modelId=settings["modelId"],
             previous=data["previousStatus"],status=data["status"],reason=data["reason"],settled=data["total"]["settled"],roi=data["total"]["roi"]))
-        markets[metric]=dict(data,**settings,historical=history.get(metric,{}),records=selected,coverage=b.get("byMarket",{}).get(metric,{}))
+        markets[metric]=dict(data,**settings,historical=history.get(metric,{}),records=selected,coverage=b.get("byMarket",{}).get(metric,{}),
+            shadowTotal=statistics(shadow),shadowPending=sum(r['outcome']=='PENDING' for r in shadow),
+            admissionMode='UAT_FAVOURITE_POINT_PILOT' if settings.get('uatPilotEnabled') else 'BASELINE_OR_MONITORED')
     state=dict(schemaVersion=1,policyId=cfg["policyId"],generatedAt=datetime.fromtimestamp(now,timezone.utc).isoformat(),
                policy=cfg,markets=markets,events=events["events"][-100:],audit=dict(shots=a,shadow=b),
                noProviderCalls=True,automaticUatRouting=True,profitabilityCertified=False,
-               limitations=["Οι κανόνες είναι λειτουργική πολιτική UAT, όχι στατιστική πιστοποίηση.",
+               limitations=["Οι συνδεδεμένες αγορές είναι ενεργές δοκιμαστικά στο UAT, χωρίς αναμονή50αγώνων/14ημερών.",
+                   "Η επίδοση των νέων επιλογών φαβορί καταγράφεται χωριστά από το παλιό conservative shadow.",
                    "Το ιστορικό ανάπτυξης δεν προσμετράται ως προδημοσιευμένη επίδοση.",
                    "37 αγορές στο scope. Οι κάρτες χρειάζονται ακριβές bookmaker settlement· η κάλυψή τους καταγράφεται χωριστά.",
                    "Κάθε αγορά αξιολογείται χωριστά. Οι κανόνες ενεργοποίησης δεν εγγυώνται μελλοντικό κέρδος."])
@@ -192,7 +204,7 @@ def main():
     for m,d in markets.items():
         roi="—" if d["total"]["roi"] is None else f"{d['total']['roi']:+.2%}"
         lines.append(f"| {d['name']} | {d['status']} | {d['total']['settled']} | {roi} | {d['pending']} |")
-    lines += ["", "[Dashboard source](index.html) · [Δεδομένα](data.json)","", "Το ιστορικό ανάπτυξης εμφανίζεται χωριστά στο dashboard. Οι αρχικές SHOTS/SOT είναι ενεργές ως UAT baseline."]
+    lines += ["", "[Dashboard source](index.html) · [Δεδομένα](data.json)","", "Συνδεδεμένες αγορές ενεργές δοκιμαστικά UAT· ξεχωριστή καταγραφή νέας πολιτικής φαβορί και παλιού shadow."]
     (docs/"README.md").write_text("\n".join(lines)+"\n")
     print(json.dumps({m:dict(status=d["status"],settled=d["total"]["settled"],pending=d["pending"],roi=d["total"]["roi"]) for m,d in markets.items()}),flush=True)
 

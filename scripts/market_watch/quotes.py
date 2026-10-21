@@ -1,8 +1,10 @@
 """Reobserve exact selections from the latest verified provider receipt."""
 import gzip,json,hashlib
+from functools import lru_cache
 from .build import ROOT
 from .paper import observed_receipt_times
 
+@lru_cache(maxsize=2)
 def current_quotes(now):
     from betting_v2.index_quote_receipts import extracted_offers
     import materialize_betting_v2_direct as direct

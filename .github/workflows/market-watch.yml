@@ -29,31 +29,15 @@ jobs:
           python-version: '3.11'
       - name: Install existing numerical runtime
         run: python -m pip install --quiet catboost==1.2.8 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.6.1
-      - name: Verify decisions and freeze rolling paper forecasts
+      - name: Verify UAT selection and update monitoring of issued predictions
         run: |
-          python -m unittest scripts.market_watch.test_policy scripts.market_watch.test_catalog -v
-          python -m scripts.market_watch.paper
-          python -m scripts.market_watch.all_paper
-      - name: Publish frozen paper forecasts before recording timing
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add reports/market_watch/count_paper_v1 reports/market_watch/all_paper_v1
-          if ! git diff --cached --quiet; then
-            git commit -m 'Freeze rolling Market Watch paper predictions before kickoff'
-            git pull --rebase origin main
-            git push origin HEAD:main
-          fi
-      - name: Verify publication timing and update monitoring
-        run: |
-          python -m scripts.market_watch.paper --record-publication
-          python -m scripts.market_watch.all_paper --record-publication
+          python -m unittest scripts.market_watch.test_policy scripts.market_watch.test_catalog scripts.market_watch.test_recommend -v
           python -m scripts.market_watch.build
       - name: Save dashboard and decision history without Actions artifacts
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add reports/market_watch/count_paper_v1 reports/market_watch/all_paper_v1 data/statmaker/uat/market_watch data/statmaker/uat/shots_v1 docs/market-watch docs/.nojekyll
+          git add data/statmaker/uat/market_watch data/statmaker/uat/shots_v1 docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'Update Market Watch decisions and dashboard from cached outcomes'
             git pull --rebase origin main

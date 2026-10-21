@@ -14,8 +14,13 @@ def stage(actual,now,leagues,raw):
     identity=Identities(ROOT,actual);path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
     issued=ledger['rows']+read(ROOT/'data/statmaker/uat/shots_v1/ledger.json',{}).get('rows',[]);used=set()
     for r in issued:used.update((str(r['apiFixtureId']),f) for f in families(spec_of(r)))
-    candidates=read(OUT/'shadow_candidates.json',{}).get('rows',[])
-    live=current_quotes(now) if any(q.get('_monitorModel')=='ALL_MARKETS_JOINT_V1' and allowed(q['appMarket'],now) for q in candidates) else {}
+    from .recommend import candidates as current_candidates, POLICY
+    from .build import config
+    cfg=config()
+    candidates=[q for q in read(OUT/'shadow_candidates.json',{}).get('rows',[])
+                if not cfg['markets'][q['appMarket']].get('uatPilotEnabled')]
+    candidates += current_candidates(actual,now,leagues,used)
+    live=current_quotes(now) if candidates else {}
     for q in sorted(candidates,key=lambda q:(q.get('preference',1),-q['_monitorP'],-q.get('ev',0),str(q['spec']),q['bookmaker'])):
         metric,scope,side,team,line=q['spec'];market=app_market(q['spec']);model=q.get('_monitorModel','COUNT_COUPLED_V1')
         if q['featureCutoff']>q['observed'] or not allowed(market,now) or not now+900<q['kickoff']<now+7*86400:continue
@@ -28,7 +33,8 @@ def stage(actual,now,leagues,raw):
         if len(choices)!=1:continue
         league,(m,h,a,api),reason=choices[0];keys={(str(api),f) for f in families(q['spec'])}
         if used&keys:continue
-        if model=='ALL_MARKETS_JOINT_V1':observed=bind(q,m,live)
+        pilot=q.get('_monitorPolicy')==POLICY
+        if model=='ALL_MARKETS_JOINT_V1' or pilot:observed=bind(q,m,live)
         else:
             if line is None or line<0 or (line*2)%1:continue
             binding=bind_quote(m,dict(selection=side,line=line,odds=q['odd'],bookmaker=q['bookmaker'],providerMarketName=q['sourceMarket'],exactBookmakerOdds=True),raw)
@@ -44,31 +50,42 @@ def stage(actual,now,leagues,raw):
         row=dict(selectionId=sid,groupKey=group,fixtureKey=f'api:{api}:{q["kickoff"]:.0f}',fixtureId=str(m['id']),apiFixtureId=int(api),competitionId=league.get('competitionId','domestic'),
             homeTeam=m['homeTeam'],awayTeam=m['awayTeam'],kickoff=m['kickoff'],match=match,market=market,selection=selection_text(q['spec']),
             team=m['homeTeam'] if team=='HOME' else m['awayTeam'] if team=='AWAY' else None,teamSide=team,line=numeric_line,side=side,odd=q['odd'],bookmaker=q['bookmaker'],
-            winProbability=p,pushProbability=push,indicativeEV=ev,model=model,policyId='MARKET_WATCH_UAT_V1',probabilityModel='FROZEN_JOINT_CONSERVATIVE' if model=='ALL_MARKETS_JOINT_V1' else 'COUPLED_COUNT_CONSERVATIVE',
+            winProbability=p,pushProbability=push,indicativeEV=ev,model=model,policyId=POLICY if pilot else 'MARKET_WATCH_UAT_V1',probabilityModel='FROZEN_JOINT_POINT' if pilot else 'FROZEN_JOINT_CONSERVATIVE' if model=='ALL_MARKETS_JOINT_V1' else 'COUPLED_COUNT_CONSERVATIVE',
             metric=metric.lower(),scope=scope,featureCutoff=iso(q['featureCutoff']),quoteUpdatedAt=iso(observed),issuedAt=iso(now),publishedAt=None,publicationCommit=None,
             outcome='PENDING',settlementReturn=None,settledAt=None,identityBinding=reason,bookmakerBinding='EXACT_PROVIDER_QUOTE',certified=False,category='UAT_MARKET_EXPERIMENT',
-            providerMarketName=q['sourceMarket'],monitorPaperSelectionId=q['_monitorId'],quoteSpec={k:q.get(k) for k in ('providerEventId','kickoff','bookmaker','sourceMarket','selection','providerSelectionId','line','odd','spec')})
+            providerMarketName=q['sourceMarket'],monitorPaperSelectionId=q['_monitorId'],modelFingerprint=q.get('_modelFingerprint'),
+            favouriteSide=q.get('_favourite'),selectionPreference=q.get('preference',1),
+            quoteSpec={k:q.get(k) for k in ('providerEventId','kickoff','bookmaker','sourceMarket','selection','providerSelectionId','line','odd','spec')})
         ledger['rows'].append(row);used.update(keys)
     write(path,ledger)
+
+def settle_rows(rows,actual,now):
+    from scripts.shots_uat.feed import iso
+    from .results import exact_settlement
+    result=[]
+    for original in rows:
+        r=dict(original);result.append(r)
+        if r['outcome']!='PENDING' or not r.get('publishedAt') or now<time(r['kickoff'])+10800:continue
+        evidence=exact_settlement(r,spec_of(r),actual,ROOT,now)
+        if evidence is None:continue
+        (y,void),source,clock=evidence
+        r.update(outcome='VOID' if void else 'WON' if y else 'LOST',settlementReturn=1. if void else r['odd'] if y else 0.,
+                 settledAt=iso(now),settlementSource=source,settlementEvidenceGeneratedAt=iso(clock) if clock else None)
+    return result
+
 
 def publish(actual,now,raw):
     from scripts.shots_uat.feed import verify_publication,bind_quote,iso
     path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
     if not path.exists():return [],[]
     ledger['rows']=verify_publication(ledger['rows'],path)
-    for r in ledger['rows']:
-        if r['outcome']!='PENDING' or not r.get('publishedAt') or now<time(r['kickoff'])+10800:continue
-        choices=[v for v in actual if str(v.get('fixture_id'))==str(r['apiFixtureId']) and abs(v['_date']-time(r['kickoff']))<=300]
-        if len(choices)!=1:continue
-        result=settlement(choices[0],spec_of(r))
-        if result is None:continue
-        y,void=result;r.update(outcome='VOID' if void else 'WON' if y else 'LOST',settlementReturn=1. if void else r['odd'] if y else 0.,settledAt=iso(now))
+    ledger['rows']=settle_rows(ledger['rows'],actual,now)
     write(path,ledger);issued=[];live=[]
-    lookup=current_quotes(now) if any(r['model']=='ALL_MARKETS_JOINT_V1' and time(r['kickoff'])>now for r in ledger['rows']) else {}
+    lookup=current_quotes(now) if any(time(r['kickoff'])>now for r in ledger['rows']) else {}
     for original in ledger['rows']:
         if not original.get('publishedAt'):continue
         r=dict(original)
-        if r['model']=='ALL_MARKETS_JOINT_V1':observed=bind(r['quoteSpec'],r['match'],lookup)
+        if r['model']=='ALL_MARKETS_JOINT_V1' or r.get('probabilityModel')=='FROZEN_JOINT_POINT':observed=bind(r['quoteSpec'],r['match'],lookup)
         else:
             binding=bind_quote(r['match'],dict(selection=r['selection'],line=r['line'],odds=r['odd'],bookmaker=r['bookmaker'],providerMarketName=r['providerMarketName'],exactBookmakerOdds=True),raw)
             observed=binding[1] if binding else None

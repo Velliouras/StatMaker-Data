@@ -27,6 +27,8 @@ def cached_rows(signature):
             ko=stamp(f.get('kickoff') or f.get('dateUtc'))
             if api<=0 or not ko:continue
             rows.append(dict(fixture_id=api,_date=ko,normalized_stats=dict(f.get('normalizedStats') or {}),
+                home_goals=f.get('homeGoals'),away_goals=f.get('awayGoals'),
+                hthg=f.get('homeHalfGoals'),htag=f.get('awayHalfGoals'),
                 _settlementSource='CACHED_EXACT_FIXTURE:'+Path(name).name,_evidenceAt=observed))
     return rows
 

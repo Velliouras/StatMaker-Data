@@ -12,7 +12,9 @@ def records(n,wins=None,first=1000000.):
 
 
 class MarketPolicyTest(unittest.TestCase):
-    def setUp(self):self.cfg=build.config()
+    def setUp(self):
+        self.cfg=copy.deepcopy(build.config())
+        for m in self.cfg['markets'].values():m['uatPilotEnabled']=False
 
     def test_one_lucky_win_does_not_activate_a_market(self):
         self.assertEqual(decision(records(1),None,self.cfg,"MATCH_CORNERS",1e9)["status"],"SHADOW")
