@@ -298,10 +298,11 @@ def settle(row, actual, now):
         return row
     if row["outcome"] != "PENDING" or now < timestamp(row["kickoff"]) + 3 * 3600:
         return row
-    choices = [r for r in actual if str(r.get("fixture_id")) == str(row["apiFixtureId"]) and abs(float(r["_date"]) - timestamp(row["kickoff"])) <= 300]
-    if len(choices) != 1:
+    from .results import exact_result
+    result = exact_result(row, actual, ROOT, now)
+    if result is None:
         return row
-    stats = choices[0].get("normalized_stats") or {}
+    stats = result.get("normalized_stats") or {}
     from .features import number
     keys = ("HS", "AS") if row["metric"] == "shots" else ("HST", "AST")
     values = [number(stats.get(k)) for k in keys]
@@ -317,7 +318,8 @@ def settle(row, actual, now):
     won = value > row["line"] if row["side"] == "OVER" else value < row["line"]
     return dict(row, outcome="VOID" if push else "WON" if won else "LOST",
                 settlementReturn=1. if push else row["odd"] if won else 0., settledAt=iso(now),
-                actualCount=value, settlementSource="CACHED_FT_API_FIXTURE_STATS")
+                actualCount=value, settlementSource=result.get("_settlementSource", "CACHED_FT_API_FIXTURE_STATS"),
+                settlementEvidenceGeneratedAt=iso(result["_evidenceAt"]) if result.get("_evidenceAt") else None)
 
 
 def verify_publication(rows, ledger_path=None):
