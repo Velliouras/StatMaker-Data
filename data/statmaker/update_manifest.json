@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "6a8eeb5c22df89bf9c276cf2272010587e6266aebce7f020edd60e313bed8789",
-  "generatedAt": "2026-10-20T23:55:04Z",
+  "contentVersion": "9761f734551c21b38353286837e6481ddfea4bad32396354af425e9dcd889a79",
+  "generatedAt": "2026-10-21T01:44:55.842479Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "cd821baea7ca38871eb6ca7704582a4f963aab8bb8818c282955789000da951c",
+      "sha256": "5e59582ef05f0e8d173f899154ea66c2a5406813f4f84f6af954b98ef7a12e79",
       "bytes": 89198,
-      "generatedAt": "2026-10-20T23:17:31Z"
+      "generatedAt": "2026-10-21T01:44:52Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "1e6ef2e6ee9d77b963c900ac83f644bee6eaa0aaf86532aee3fb60421e9cd636",
-      "bytes": 18767713,
+      "sha256": "be687b782fc81eef50629127ac62b63317a3afcb2576370ee59ff1e8ff2f9e1b",
+      "bytes": 18768957,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "66a547b45a329995e674ee10ae9f6f8fcb71b9bb71008e01e3ffeb636b566306",
-      "bytes": 8856430,
-      "generatedAt": "2026-10-20T23:17:34.300782Z"
+      "sha256": "9981bdf4109bba43d2a8d121443f8d6b659200fec68725995f02651f8e66b59a",
+      "bytes": 8856544,
+      "generatedAt": "2026-10-21T01:44:55.842479Z"
     },
     {
       "id": "uefa_team_logos",
@@ -92,7 +92,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "1e6ef2e6ee9d77b963c900ac83f644bee6eaa0aaf86532aee3fb60421e9cd636",
+    "targetSha256": "be687b782fc81eef50629127ac62b63317a3afcb2576370ee59ff1e8ff2f9e1b",
     "transitions": [
       {
         "fromSha256": "01fa296101f42390d847347b78061c6f4766f73206b532b58624078c2032131a",
@@ -1872,6 +1872,65 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 14,
               "AFreeKicks": 10
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "1e6ef2e6ee9d77b963c900ac83f644bee6eaa0aaf86532aee3fb60421e9cd636",
+        "toSha256": "be687b782fc81eef50629127ac62b63317a3afcb2576370ee59ff1e8ff2f9e1b",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1520935,
+            "league_id": 72,
+            "league_code": "BRA2",
+            "country": "Brazil",
+            "league": "Serie B",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-10-20",
+            "home_team": "Londrina",
+            "away_team": "Cuiaba",
+            "stats": {
+              "HS": 12,
+              "AS": 24,
+              "HST": 2,
+              "AST": 7,
+              "HC": 2,
+              "AC": 8,
+              "HF": 12,
+              "AF": 15,
+              "HY": 1,
+              "AY": 0,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 35,
+              "APossession": 65,
+              "HSaves": 7,
+              "ASaves": 1,
+              "HPasses": 329,
+              "APasses": 579,
+              "HPassesAccurate": 255,
+              "APassesAccurate": 502,
+              "HxG": 1.75,
+              "AxG": 1.53,
+              "HShotsOffGoal": 9,
+              "AShotsOffGoal": 9,
+              "HBlockedShots": 1,
+              "ABlockedShots": 8,
+              "HShotsInsideBox": 6,
+              "AShotsInsideBox": 16,
+              "HShotsOutsideBox": 6,
+              "AShotsOutsideBox": 8,
+              "HOffsides": 1,
+              "AOffsides": 1,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 15,
+              "AFreeKicks": 12
             }
           }
         ]
