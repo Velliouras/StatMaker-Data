@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 20
     env:
       # Result events only settle existing immutable issues; do not run the candidate pipeline.
-      RESULTS_ONLY: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'UEFA Current Stats Refresh' || github.event.workflow_run.name == 'Live Settlement Publisher' || github.event.workflow_run.name == 'Model Performance Settlement Refresh') }}
+      RESULTS_ONLY: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'UEFA Current Stats Refresh' || github.event.workflow_run.name == 'Live Settlement Publisher' || github.event.workflow_run.name == 'Model Performance Settlement Refresh') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[settlements-only]')) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,6 +116,8 @@ jobs:
         run: python -m scripts.shots_uat.feed --publish
       - name: Publish independent UAT read model
         run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/statmaker/uat/shots_v1 data/statmaker/uat/market_watch docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: refresh Shots/SOT feed and Performance Daily settlements'
