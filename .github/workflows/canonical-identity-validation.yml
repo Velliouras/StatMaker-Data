@@ -2,6 +2,14 @@ name: Canonical Team Identity Validation
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - 'StatMaker App-Ready Artifact Publisher'
+      - 'App-Ready Simulation Hot Publish'
+      - 'App-Ready Stats Hot Publish'
+      - 'App-Ready Score Edge Hot Publish'
+    types: [completed]
+    branches: [main]
   push:
     branches:
       - main
@@ -29,11 +37,13 @@ concurrency:
 
 jobs:
   validate:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 1
 
       - name: Validate canonical Domestic provider identity
