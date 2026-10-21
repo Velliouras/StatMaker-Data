@@ -1,6 +1,6 @@
 """Auditable game/market facts, separate from immutable numerical predictions."""
 import math
-from collections import defaultdict
+from collections import defaultdict, deque
 from .features import FEATURES, History, normalized
 from .sources import Identities, timestamp
 from .train import ROOT
@@ -16,6 +16,8 @@ def finite(value):
 
 
 def market_name(row):
+    if row["metric"] not in ("shots", "sot"):
+        return None
     name = "Total Shots" if row["metric"] == "shots" else "Total Shots on Target"
     return name + (" Home" if row["teamSide"] == "HOME" else " Away") if row["scope"] == "TEAM" else name
 
@@ -107,6 +109,69 @@ def context_facts(row, current, now):
                 usedByFrozenProbability=False, motivation="NOT_ESTABLISHED_FROM_VERIFIED_DATA")
 
 
+class MarketHistory:
+    """Read-only descriptive facts for each market, with the same 24h availability lag."""
+    def __init__(self, rows):
+        self.rows = sorted(rows, key=lambda r:float(r['_date']))
+        self.index = 0
+        self.teams = defaultdict(lambda:deque(maxlen=80))
+
+    def advance(self, cutoff):
+        while self.index < len(self.rows) and float(self.rows[self.index]['_date']) + 86400 <= cutoff:
+            row = self.rows[self.index]; self.index += 1
+            self.teams[row['_home']].append((row, 0))
+            self.teams[row['_away']].append((row, 1))
+
+    def facts(self, issue, home, away, elo):
+        from betting_v2.reliable_counts import metric_values
+        metric = issue['metric'].upper()
+        if metric not in ('GOALS_FT','GOALS_1H','GOALS_2H','CORNERS','SHOTS','SOT','FOULS'):
+            metric = 'GOALS_FT'
+        def average(values):
+            values = [finite(v) for v in values if finite(v) is not None and v >= 0]
+            return sum(values)/len(values) if values else None
+        def team(root, index):
+            all_rows = list(self.teams[root])
+            usable = [(r, i, metric_values(r, metric)) for r,i in all_rows]
+            usable = [(r,i,v) for r,i,v in usable if v is not None]
+            recent = usable[-8:]; venue = [(r,i,v) for r,i,v in usable if i == index][-10:]
+            form = []
+            for r,i in all_rows:
+                goals = metric_values(r, 'GOALS_FT')
+                if goals is not None:
+                    form.append('W' if goals[i] > goals[1-i] else 'D' if goals[i] == goals[1-i] else 'L')
+            xg = [((r.get('normalized_stats') or {}).get('HxG' if i == 0 else 'AxG'),
+                   (r.get('normalized_stats') or {}).get('AxG' if i == 0 else 'HxG')) for r,i,_ in recent]
+            # Counts at the issued line are historical observations, never a model hit rate.
+            hits = []
+            for r,i,values in recent:
+                if issue['scope'] == 'BTTS':
+                    positive = all(v > 0 for v in values)
+                    hits.append(positive if issue['side'] == 'YES' else not positive)
+                elif issue.get('line') is not None and issue['scope'] in ('TOTAL','TEAM'):
+                    selected = issue.get('teamSide')
+                    value = sum(values) if issue['scope'] == 'TOTAL' else values[i if selected == ('HOME' if index == 0 else 'AWAY') else 1-i]
+                    if value != issue['line']:
+                        hits.append(value > issue['line'] if issue['side'] == 'OVER' else value < issue['line'])
+            return dict(team=issue['homeTeam'] if index == 0 else issue['awayTeam'], sample=len(recent),
+                forAverage=average([v[i] for _,i,v in recent]), againstAverage=average([v[1-i] for _,i,v in recent]),
+                venueSample=len(venue), venueFor=average([v[i] for _,i,v in venue]),
+                venueAgainst=average([v[1-i] for _,i,v in venue]), formLast5=form[-5:],
+                xgFor=average([v[0] for v in xg]), xgAgainst=average([v[1] for v in xg]),
+                xgSample=sum(finite(v[0]) is not None and finite(v[1]) is not None for v in xg),
+                elo=float(elo[root]), restDays=(timestamp(issue['kickoff'])-float(all_rows[-1][0]['_date']))/86400 if all_rows else None,
+                lineHits=sum(hits) if hits else None, lineSample=len(hits),
+                lineBasis='MATCH' if issue['scope'] != 'TEAM' else 'FOR' if issue.get('teamSide') == ('HOME' if index == 0 else 'AWAY') else 'AGAINST')
+        h2h = []
+        for r,i in self.teams[home]:
+            if {r['_home'], r['_away']} != {home, away}:
+                continue
+            goals = metric_values(r, 'GOALS_FT')
+            if goals is not None:
+                h2h.append(dict(date=iso(float(r['_date'])), homeGoals=goals[i], awayGoals=goals[1-i]))
+        return dict(metric=metric, home=team(home, 0), away=team(away, 1), headToHead=h2h[-5:])
+
+
 def annotate(rows, actual, raw, leagues, now):
     identity = Identities(ROOT, actual)
     contexts = {}
@@ -121,19 +186,21 @@ def annotate(rows, actual, raw, leagues, now):
                 key = int(api), match.get("kickoff")
                 if timestamp(context.get("generatedAt")) > timestamp(contexts.get(key, {}).get("generatedAt")):
                     contexts[key] = context
-    history = History(actual); result = {}
+    history = History(actual); factual = MarketHistory(actual); result = {}
     for row in sorted(rows, key=lambda r:timestamp(r["featureCutoff"])):
-        cutoff = timestamp(row["featureCutoff"]); history.advance(cutoff)
+        cutoff = timestamp(row["featureCutoff"]); history.advance(cutoff); factual.advance(cutoff)
         bound, reason = identity.bind(row["match"], row["match"])
-        stats = None
+        stats = None; market_history = None
         if bound:
             _, h, a, _ = bound; pair = history.pair(h, a, row["match"]["leagueCode"], timestamp(row["kickoff"]))
             stats = dict(home=team_facts(history, h, pair[0], row["homeTeam"]),
                          away=team_facts(history, a, pair[1], row["awayTeam"]),
                          eloGapWithHomeAdvantage=pair[0][1], binding=reason)
+            market_history = factual.facts(row, h, a, history.elo)
         context = contexts.get((row["apiFixtureId"], row["kickoff"]))
         info = dict(schemaVersion=1, asOf=iso(now), predictionAsOf=row["featureCutoff"], changesPrediction=False,
                     historicalFacts=stats, market=market_facts(row, raw, now), context=context_facts(row, context, now),
+                    marketHistory=market_history,
                     predictedCounts={k:row.get(k) for k in ("homeShots", "awayShots", "homeSot", "awaySot")},
                     explanationSemantics="FACTUAL_INPUTS_NOT_CAUSAL_FEATURE_ATTRIBUTIONS")
         result[row["selectionId"]] = dict(row, intelligence=info)

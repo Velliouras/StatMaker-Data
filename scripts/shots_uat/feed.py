@@ -394,12 +394,18 @@ def main():
     leagues, raw, _ = load_quote_sources(now)
     issued = [observe_issued_quote(r, raw, now) for r in ledger["rows"] if r.get("publishedAt")]
     from .intelligence import annotate
-    issued = annotate(issued, actual, raw, leagues, now)
-    live = current_recommendations(issued, now)
     market_issued, market_live = [], []
     if (ROOT / "config/market_watch.json").exists():
         from scripts.market_watch.router import publish as publish_markets
         market_issued, market_live = publish_markets(actual, now, raw)
+    # Every issued market receives factual analysis. Candidate/issued copies must
+    # remain identical, and the immutable numerical ledger is never rewritten.
+    shot_count = len(issued)
+    all_issued = annotate(issued + market_issued, actual, raw, leagues, now)
+    issued, market_issued = all_issued[:shot_count], all_issued[shot_count:]
+    live = current_recommendations(issued, now)
+    live_ids = {r['selectionId'] for r in market_live}
+    market_live = [r for r in market_issued if r['selectionId'] in live_ids]
     generation = digest(json.dumps([MODEL, ledger], sort_keys=True).encode())
     payload = dict(schemaVersion=1, status="UAT_SHOTS_MODEL", modelId=MODEL, generationId=generation,
                    generatedAt=iso(now), apiCalls=0, prodWrites=0, probabilitiesNotEmpiricallyCertified=True,

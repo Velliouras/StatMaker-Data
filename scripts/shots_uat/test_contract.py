@@ -159,6 +159,56 @@ class ContractTest(unittest.TestCase):
 
 
 class SourceContractTest(unittest.TestCase):
+    def test_every_market_gets_its_own_history_even_without_shot_statistics(self):
+        from .intelligence import annotate
+        from .feed import timestamp
+        cutoff=timestamp('2026-10-19T12:00:00Z')
+        actual=[dict(_home='england:h',_away='england:a',_date=cutoff-3*86400,
+                     home_goals=2,away_goals=1,hthg=1,htag=0,normalized_stats=dict(HC=6,AC=3)),
+                dict(_home='england:a',_away='england:h',_date=cutoff-2*86400,
+                     home_goals=0,away_goals=3,hthg=0,htag=1,normalized_stats=dict(HC=2,AC=8))]
+        actual.append(dict(actual[0],_date=cutoff-3600,normalized_stats=dict(HC=999,AC=999)))
+        m=dict(kickoff='2026-10-21T15:00:00Z',leagueCode='E0',providerHomeTeam='H',providerAwayTeam='A')
+        base=dict(selectionId='s',featureCutoff='2026-10-19T12:00:00Z',match=m,kickoff=m['kickoff'],
+            fixtureId='7',apiFixtureId=99,metric='corners',scope='TEAM',teamSide='HOME',side='OVER',
+            line=5.5,bookmaker='B',homeTeam='H',awayTeam='A',odd=1.9,winProbability=.65,pushProbability=0.,indicativeEV=.235)
+        before=copy.deepcopy(base)
+        with patch('scripts.shots_uat.intelligence.Identities') as identity:
+            identity.return_value.bind.return_value=((m,'england:h','england:a',99),'exact')
+            result=annotate([base],actual,{},[],cutoff+86400)[0]
+            facts=result['intelligence']['marketHistory']
+            self.assertEqual('CORNERS',facts['metric'])
+            self.assertEqual(2,facts['home']['sample'])
+            self.assertEqual(7.,facts['home']['forAverage'])
+            self.assertEqual(2.5,facts['home']['againstAverage'])
+            self.assertEqual(6.,facts['home']['venueFor'])
+            self.assertEqual(2,facts['home']['lineHits'])
+            self.assertEqual('AGAINST',facts['away']['lineBasis'])
+            self.assertEqual(['W','W'],facts['home']['formLast5'])
+            self.assertEqual(2,len(facts['headToHead']))
+            self.assertEqual(0,result['intelligence']['historicalFacts']['home']['sample'])
+            for metric,expected in [('goals_ft',2.5),('goals_1h',1.),('goals_2h',1.5)]:
+                changed=dict(base,metric=metric,scope='TOTAL',side='OVER',line=2.5)
+                own=annotate([changed],actual,{},[],cutoff+86400)[0]['intelligence']['marketHistory']
+                self.assertEqual(expected,own['home']['forAverage'])
+            btts=dict(base,metric='goals_ft',scope='BTTS',side='YES',line=None)
+            hit=annotate([btts],actual,{},[],cutoff+86400)[0]['intelligence']['marketHistory']
+            self.assertEqual((1,2),(hit['home']['lineHits'],hit['home']['lineSample']))
+        self.assertEqual(base,before)
+        self.assertEqual(before,{k:v for k,v in result.items() if k!='intelligence'})
+
+    def test_missing_market_counts_are_unknown_and_not_zero_or_shots(self):
+        from .intelligence import MarketHistory
+        cutoff=10*86400.
+        rows=[dict(_home='h',_away='a',_date=1.,home_goals=2,away_goals=1,
+                   normalized_stats=dict(HS=12,AS=8))]
+        history=MarketHistory(rows);history.advance(cutoff)
+        issue=dict(metric='corners',scope='TOTAL',side='OVER',line=9.5,homeTeam='H',awayTeam='A',kickoff=cutoff+86400)
+        facts=history.facts(issue,'h','a',{'h':1500.,'a':1500.})
+        self.assertEqual(0,facts['home']['sample'])
+        self.assertIsNone(facts['home']['forAverage'])
+        self.assertIsNone(facts['home']['lineHits'])
+
     def test_context_deduplicates_provider_entries_for_the_same_player(self):
         from .intelligence import context_facts
         from .feed import timestamp
