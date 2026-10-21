@@ -169,11 +169,17 @@ def main():
     first,a=shot_records(cfg,actual,now);second,b,candidates=shadow_records(cfg,actual,now);rows=first+second
     from .router import settle_rows
     from .recommend import POLICY
-    pilot=settle_rows(read(OUT/'market_ledger.json',{}).get('rows',[]),actual,now)
+    live_policy=read(OUT/'market_ledger.json',{}).get('rows',[])
+    paper_policy=read(OUT/'market_paper_ledger.json',{}).get('rows',[])
+    unique_policy={}
+    for r in live_policy+paper_policy:
+        if r.get('publishedAt') and r.get('policyId')==POLICY:
+            unique_policy.setdefault(r['groupKey'],r)
+    pilot=settle_rows(list(unique_policy.values()),actual,now)
     pilot=[dict(id=r['selectionId'],fixture=str(r['apiFixtureId']),market=r['market'],
         kickoff=time(r['kickoff']),published=time(r['publishedAt']),observed=time(r['quoteUpdatedAt']),
         p=r['winProbability'],push=r['pushProbability'],odd=r['odd'],outcome=r['outcome'],returned=r['settlementReturn'],
-        model=r['model'],policy=r['policyId'],source='PUBLISHED_UAT_FAVOURITE_POINT',home=r['homeTeam'],away=r['awayTeam'])
+        model=r['model'],policy=r['policyId'],source=r.get('publicationChannel','PUBLISHED_UAT_FAVOURITE_POINT'),home=r['homeTeam'],away=r['awayTeam'])
         for r in pilot if r.get('publishedAt') and r.get('policyId')==POLICY]
     old=read(OUT/"state.json",{});events=read(OUT/"events.json",dict(events=[]));markets={};history=historical()
     for metric,settings in cfg["markets"].items():

@@ -12,6 +12,8 @@ def stage(actual,now,leagues,raw):
     from scripts.shots_uat.feed import bind_quote,iso,favourite
     from scripts.shots_uat.sources import Identities
     identity=Identities(ROOT,actual);path=OUT/'market_ledger.json';ledger=read(path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
+    paper_path=OUT/'market_paper_ledger.json';paper=read(paper_path,dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[]))
+    paper_used={(str(r['apiFixtureId']),f) for r in paper['rows'] for f in families(spec_of(r))}
     issued=ledger['rows']+read(ROOT/'data/statmaker/uat/shots_v1/ledger.json',{}).get('rows',[]);used=set()
     for r in issued:used.update((str(r['apiFixtureId']),f) for f in families(spec_of(r)))
     from .recommend import candidates as current_candidates, POLICY
@@ -23,7 +25,9 @@ def stage(actual,now,leagues,raw):
     live=current_quotes(now) if candidates else {}
     for q in sorted(candidates,key=lambda q:(q.get('preference',1),-q['_monitorP'],-q.get('ev',0),str(q['spec']),q['bookmaker'])):
         metric,scope,side,team,line=q['spec'];market=app_market(q['spec']);model=q.get('_monitorModel','COUNT_COUPLED_V1')
-        if q['featureCutoff']>q['observed'] or not allowed(market,now) or not now+900<q['kickoff']<now+7*86400:continue
+        permitted=allowed(market,now)
+        if q['featureCutoff']>q['observed'] or not now+900<q['kickoff']<now+7*86400:continue
+        if not permitted and not cfg['markets'][market].get('uatPilotEnabled'):continue
         choices=[]
         for league in leagues:
             for m in league.get('matches',[]):
@@ -57,8 +61,12 @@ def stage(actual,now,leagues,raw):
             quoteObservationSha256=q.get('sourceSha256'),quoteObservationSemantics=q.get('quoteObservationSemantics','SHA_VERIFIED_CLIENT_RECEIPT'),
             favouriteSide=q.get('_favourite'),selectionPreference=q.get('preference',1),
             quoteSpec={k:q.get(k) for k in ('providerEventId','kickoff','bookmaker','sourceMarket','selection','providerSelectionId','line','odd','spec')})
-        ledger['rows'].append(row);used.update(keys)
+        if permitted:
+            ledger['rows'].append(row);used.update(keys)
+        elif not paper_used&keys:
+            paper['rows'].append(dict(row,publicationChannel='PAPER_PAUSED_MARKET'));paper_used.update(keys)
     write(path,ledger)
+    write(paper_path,paper)
 
 def settle_rows(rows,actual,now):
     from scripts.shots_uat.feed import iso
@@ -81,6 +89,10 @@ def publish(actual,now,raw):
     if not path.exists():return [],[]
     ledger['rows']=verify_publication(ledger['rows'],path)
     ledger['rows']=settle_rows(ledger['rows'],actual,now)
+    paper_path=OUT/'market_paper_ledger.json';paper=read(paper_path)
+    if paper is not None:
+        paper['rows']=settle_rows(verify_publication(paper['rows'],paper_path),actual,now)
+        write(paper_path,paper)
     write(path,ledger);issued=[];live=[]
     lookup=current_quotes(now) if any(time(r['kickoff'])>now for r in ledger['rows']) else {}
     for original in ledger['rows']:

@@ -108,6 +108,16 @@ class FavouritePointPolicyTest(unittest.TestCase):
                 self.assertEqual(2,len(before['rows']))
                 router.stage([],now+1,[league],{})
                 self.assertEqual(before,json.loads((out/'market_ledger.json').read_text()))
+                # A paused market keeps new immutable forward evidence, while
+                # publishing no recommendations to the app. This permits recovery.
+                (out/'market_ledger.json').write_text(json.dumps(dict(schemaVersion=2,modelId='MARKET_WATCH_MODELS',rows=[])))
+                with patch.object(router,'allowed',return_value=False):
+                    router.stage([],now+2,[league],{})
+                    self.assertEqual([],json.loads((out/'market_ledger.json').read_text())['rows'])
+                    paper=json.loads((out/'market_paper_ledger.json').read_text())
+                    self.assertEqual(2,len(paper['rows']))
+                    router.stage([],now+3,[league],{})
+                    self.assertEqual(paper,json.loads((out/'market_paper_ledger.json').read_text()))
 
 
 class ExactRoutedSettlementTest(unittest.TestCase):
