@@ -42,6 +42,7 @@ class HybridSettlementCoverageTest(unittest.TestCase):
 
         with (
             patch.object(live, "betting_bundle_paths", return_value=[]),
+            patch.object(live, "requirements_from_uat_issues", return_value=[]),
             patch.object(live, "requirements_from_canonical_ledger", side_effect=ledger_rows),
         ):
             rows = live.canonical_requirements()

@@ -43,6 +43,10 @@ DOMESTIC_ALIAS_PATH = ROOT / "mappings" / "domestic_team_aliases.json"
 ENRICHED_INDEX_PATH = ROOT / "data" / "statmaker" / "domestic_enriched" / "index.json"
 CANONICAL_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger.json"
 HYBRID_UAT_LEDGER_PATH = ROOT / "data" / "statmaker" / "canonical_recommendation_ledger_uat_hybrid.json"
+UAT_ISSUE_LEDGER_PATHS = (
+    ROOT / "data/statmaker/uat/shots_v1/ledger.json",
+    ROOT / "data/statmaker/uat/market_watch/market_ledger.json",
+)
 
 SCHEMA_VERSION = 2
 DEFAULT_MAX_REQUESTS = 80
@@ -692,6 +696,48 @@ def requirements_from_canonical_ledger(
     return result
 
 
+def requirements_from_uat_issues(path: Path) -> List[SettlementRequirement]:
+    """Issued UAT wagers also require results; research paper forecasts do not spend quota."""
+    root = load_json(path, {})
+    result: List[SettlementRequirement] = []
+    if not isinstance(root, dict):
+        return result
+    for item in root.get("rows", []) or []:
+        if not isinstance(item, dict):
+            continue
+        api = as_int(item.get("apiFixtureId"))
+        proof = str(item.get("publicationCommit") or "")
+        try:
+            kickoff = dt.datetime.fromisoformat(str(item.get("kickoff") or "").replace("Z", "+00:00"))
+            published = dt.datetime.fromisoformat(str(item.get("publishedAt") or "").replace("Z", "+00:00"))
+            if not kickoff.tzinfo or not published.tzinfo or published >= kickoff:
+                continue
+        except (TypeError, ValueError):
+            continue
+        if not api or api <= 0 or not re.fullmatch(r"[a-f0-9]{40}", proof):
+            continue
+        required = {"shots": "shots", "sot": "shots_on_target", "corners": "corners",
+                    "fouls": "fouls", "goals_ft": "score", "goals_1h": "half_time",
+                    "goals_2h": "half_time"}.get(str(item.get("metric") or "").lower())
+        if item.get("scope") in ("HTFT", "BOTH_HALVES"):
+            required = "half_time"
+        home = _ledger_names(item, "homeNames", "homeTeam")
+        away = _ledger_names(item, "awayNames", "awayTeam")
+        if not required or not home or not away or not item.get("selectionId"):
+            continue
+        match = item.get("match") or {}
+        result.append(SettlementRequirement(
+            generation_id="uat-issued:" + str(item["selectionId"]),
+            competition_id=str(item.get("competitionId") or "domestic"),
+            match_key=str(item.get("fixtureKey") or "api:" + str(api)),
+            local_date=kickoff.astimezone(dt.timezone.utc).date().isoformat(),
+            league_code=normalize_league_code(match.get("leagueCode")), api_fixture_id=api,
+            home_names=home, away_names=away, required_kind=required,
+            sub_market_key=str(item.get("market") or ""),
+        ))
+    return result
+
+
 def canonical_requirements() -> List[SettlementRequirement]:
     merged: Dict[Tuple[str, str, str, str], SettlementRequirement] = {}
     for bundle in betting_bundle_paths():
@@ -708,6 +754,12 @@ def canonical_requirements() -> List[SettlementRequirement]:
     )
     for path, fallback_generation in ledger_sources:
         for row in requirements_from_canonical_ledger(path, fallback_generation):
+            key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
+            merged[key] = row
+    # These independent UAT issues never enter either recommendation ledger.
+    # They only add missing fixture/stat requirements under the existing quota cap.
+    for path in UAT_ISSUE_LEDGER_PATHS:
+        for row in requirements_from_uat_issues(path):
             key = (row.competition_id, row.match_key, row.sub_market_key, row.generation_id)
             merged[key] = row
     return list(merged.values())
