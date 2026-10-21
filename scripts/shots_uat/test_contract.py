@@ -209,6 +209,17 @@ class SourceContractTest(unittest.TestCase):
         self.assertIsNone(facts['home']['forAverage'])
         self.assertIsNone(facts['home']['lineHits'])
 
+    def test_xg_sample_and_means_use_the_same_complete_rows(self):
+        from .intelligence import MarketHistory
+        rows=[dict(_home='h',_away='a',_date=1.,home_goals=2,away_goals=1,
+                   normalized_stats=dict(HC=6,AC=3,HxG=20.)),
+              dict(_home='h',_away='a',_date=2.,home_goals=2,away_goals=1,
+                   normalized_stats=dict(HC=6,AC=3,HxG=2.,AxG=1.))]
+        history=MarketHistory(rows);history.advance(10*86400.)
+        issue=dict(metric='corners',scope='TOTAL',side='OVER',line=9.5,homeTeam='H',awayTeam='A',kickoff=11*86400.)
+        facts=history.facts(issue,'h','a',{'h':1500.,'a':1500.})['home']
+        self.assertEqual((1,2.,1.),(facts['xgSample'],facts['xgFor'],facts['xgAgainst']))
+
     def test_context_deduplicates_provider_entries_for_the_same_player(self):
         from .intelligence import context_facts
         from .feed import timestamp

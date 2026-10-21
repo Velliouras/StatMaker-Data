@@ -142,6 +142,7 @@ class MarketHistory:
                     form.append('W' if goals[i] > goals[1-i] else 'D' if goals[i] == goals[1-i] else 'L')
             xg = [((r.get('normalized_stats') or {}).get('HxG' if i == 0 else 'AxG'),
                    (r.get('normalized_stats') or {}).get('AxG' if i == 0 else 'HxG')) for r,i,_ in recent]
+            xg = [pair for pair in xg if all(finite(v) is not None and v >= 0 for v in pair)]
             # Counts at the issued line are historical observations, never a model hit rate.
             hits = []
             for r,i,values in recent:
@@ -158,7 +159,7 @@ class MarketHistory:
                 venueSample=len(venue), venueFor=average([v[i] for _,i,v in venue]),
                 venueAgainst=average([v[1-i] for _,i,v in venue]), formLast5=form[-5:],
                 xgFor=average([v[0] for v in xg]), xgAgainst=average([v[1] for v in xg]),
-                xgSample=sum(finite(v[0]) is not None and finite(v[1]) is not None for v in xg),
+                xgSample=len(xg),
                 elo=float(elo[root]), restDays=(timestamp(issue['kickoff'])-float(all_rows[-1][0]['_date']))/86400 if all_rows else None,
                 lineHits=sum(hits) if hits else None, lineSample=len(hits),
                 lineBasis='MATCH' if issue['scope'] != 'TEAM' else 'FOR' if issue.get('teamSide') == ('HOME' if index == 0 else 'AWAY') else 'AGAINST')
