@@ -149,7 +149,10 @@ def _inspect(bundle: Path) -> Tuple[int, List[Dict[str, Any]]]:
 
 
 def main() -> int:
-    bundles = settlement.betting_bundle_paths()
+    # Android loads its fixture index from the current manifest. Retained previous
+    # bundles remain available to settlement/candidate audits for issued selections;
+    # they are not a second active fixture index.
+    bundles = current_fixture_bundle_paths()
     if not bundles:
         raise SystemExit("APP_READY_FIXTURE_INDEX_NO_BUNDLES")
 
@@ -181,6 +184,22 @@ def main() -> int:
         f"fixtures={total}",
     )
     return 0
+
+
+def current_fixture_bundle_paths() -> List[Path]:
+    root = settlement.APP_READY_DIR.resolve()
+    manifest = json.loads((root / "update_manifest.json").read_text(encoding="utf-8"))
+    artifacts = [item for item in manifest.get("artifacts", [])
+                 if item.get("id") == "app_ready_betting_bundle"]
+    if len(artifacts) != 1:
+        raise SystemExit("APP_READY_FIXTURE_INDEX_CURRENT_BUNDLE_AMBIGUOUS")
+    path = Path(str(artifacts[0].get("path") or ""))
+    if path.parts[:-1] != ("data", "statmaker", "app_ready"):
+        raise SystemExit("APP_READY_FIXTURE_INDEX_CURRENT_BUNDLE_PATH_INVALID")
+    bundle = root / path.name
+    if not bundle.is_file():
+        raise SystemExit("APP_READY_FIXTURE_INDEX_CURRENT_BUNDLE_MISSING")
+    return [bundle]
 
 
 if __name__ == "__main__":

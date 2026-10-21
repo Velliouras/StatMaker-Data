@@ -19,6 +19,8 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from canonical_team_identity import identity_key
+
 COMPETITIONS = (
     "domestic",
     "champions_league",
@@ -155,6 +157,57 @@ def nullable_text(value):
         return None
     value = str(value).strip()
     return value or None
+
+
+def supplemental_rows_for_gaps(connection: sqlite3.Connection, rows: list[tuple]) -> list[tuple]:
+    """Fill free team/dates; provider fixture IDs are not cross-provider identities.
+
+    The catalog owns its fixtures and markets. Supplemental schedules must not add a
+    second fixture for either club on that league/date, including conflicting opponents.
+    Such exclusions are logged, without rewriting IDs, odds or recommendations.
+    """
+    def slots(row):
+        competition, snapshot, key, day = row[:4]
+        league = str(row[7]).strip().upper()
+        home = identity_key(row[15] or row[13])
+        away = identity_key(row[16] or row[14])
+        if not league or not day or not home or not away or home == away:
+            raise ValueError(f"Invalid supplemental fixture identity: {key}")
+        return {(competition, snapshot, league, day, home),
+                (competition, snapshot, league, day, away)}
+
+    occupied = set()
+    for row in connection.execute("""
+        SELECT competition_id, snapshot_version, match_key, local_date,
+               id, date, kickoff, league_code, country, competition, season,
+               provider_home_team, provider_away_team, home_team, away_team,
+               canonical_home_team, canonical_away_team
+        FROM prepared_fixture_matches
+    """):
+        occupied.update(slots(row))
+
+    accepted = []
+    proposed = {}
+    excluded = 0
+    for row in rows:
+        keys = slots(row)
+        if keys & occupied:
+            excluded += 1
+            print("APP_READY_SCHEDULE_FIXTURE_EXCLUDED", json.dumps({
+                "fixtureId": row[4], "leagueCode": row[7], "localDate": row[3],
+                "homeTeam": row[13], "awayTeam": row[14],
+                "reason": "CATALOG_ALREADY_OCCUPIES_TEAM_DATE",
+            }, ensure_ascii=False))
+            continue
+        fixture_key = (row[0], row[1], row[2])
+        if any(key in proposed and proposed[key] != fixture_key for key in keys):
+            raise ValueError(f"Conflicting supplemental schedule fixtures: {fixture_key}")
+        for key in keys:
+            proposed[key] = fixture_key
+        accepted.append(row)
+    print("APP_READY_SCHEDULE_GAPS", f"candidates={len(rows)}",
+          f"excluded={excluded}", f"accepted={len(accepted)}")
+    return accepted
 
 
 def all_catalog_matches(payload: dict) -> list[dict]:
@@ -419,7 +472,9 @@ def materialize(prepared_db: Path) -> dict[str, int]:
                 )
 
         domestic_snapshot = by_competition["domestic"][0]
-        supplemental_rows = supplemental_domestic_schedule_rows(domestic_snapshot)
+        supplemental_rows = supplemental_rows_for_gaps(
+            connection, supplemental_domestic_schedule_rows(domestic_snapshot)
+        )
         if supplemental_rows:
             before = connection.total_changes
             connection.executemany(

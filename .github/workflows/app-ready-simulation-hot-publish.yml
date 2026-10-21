@@ -2,8 +2,11 @@ name: App-Ready Simulation Hot Publish
 
 on:
   push:
+    branches: [main]
     paths:
       - '.github/simulation-hotpatch-trigger'
+      - 'scripts/materialize_prepared_fixture_index.py'
+      - 'tests/test_prepared_fixture_schedule_gaps.py'
   workflow_run:
     workflows:
       - "API-Football Standings Fetch"
@@ -41,7 +44,9 @@ jobs:
           # not from its original workflow_run source commit.
           git fetch --no-tags origin +main:refs/remotes/origin/main
           git reset --hard refs/remotes/origin/main
+          python -m unittest tests/test_prepared_fixture_schedule_gaps.py
           python scripts/hotpatch_app_ready_simulation.py
+          python scripts/audit_app_ready_fixture_index_uniqueness.py
 
       - name: Verify hot-patched bundle
         shell: bash
