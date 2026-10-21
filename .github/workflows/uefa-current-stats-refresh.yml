@@ -6,15 +6,17 @@ on:
       max_requests:
         description: "Maximum API-Football requests for current UEFA stats"
         required: true
-        default: "180"
+        default: "64"
         type: string
   push:
     branches: [main]
     paths:
       - '.github/uefa-current-stats-refresh-request'
   schedule:
-    # Staggered attempts; GitHub scheduled events can be delayed or omitted.
-    # Only the first successful UTC-day refresh performs provider calls.
+    # Critical: results must be refreshed AFTER UEFA matchdays, not just
+    # before evening kickoffs. Quota-free gate skips days with no missing games.
+    - cron: "35 22 * * *"
+    - cron: "35 0 * * *"
     - cron: "11,31,51 5 * * *"
     - cron: "13 6 * * *"
   workflow_run:
@@ -33,9 +35,9 @@ concurrency:
 
 jobs:
   refresh:
-    # Only use the existing lineup watchdog as a recovery clock during the
-    # European post-match morning window, never all day.
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:'))) }}
+    # GitHub may skip cron entirely: the existing independent watch provides
+    # evening/night/morning fallback. The offline due gate avoids quota spend.
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T21:') || contains(github.event.workflow_run.run_started_at, 'T22:') || contains(github.event.workflow_run.run_started_at, 'T23:') || contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -50,6 +52,7 @@ jobs:
             /scripts/*
             /config/uefa_simulation_2026_27.json
             /data/statmaker/uefa_current_stats.json
+            /data/statmaker/league_tables/
             /reports/*
 
       - name: Set up Python
@@ -57,31 +60,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Check whether UEFA data is already fresh for this UTC day
+      - name: Check whether finished UEFA matchdays are missing (no API calls)
         id: freshness
         run: |
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          from datetime import datetime, timezone
-          from pathlib import Path
-          path=Path('data/statmaker/uefa_current_stats.json')
-          today=datetime.now(timezone.utc).date().isoformat()
-          current=False
-          if path.is_file():
-              try:
-                  data=json.loads(path.read_text(encoding='utf-8'))
-                  stamp=datetime.fromisoformat(
-                      str(data.get('generatedAt','')).replace('Z','+00:00'))
-                  current=(data.get('schemaVersion')==1 and
-                           stamp.astimezone(timezone.utc).date().isoformat()==today and
-                           data.get('throughDate')==today and
-                           {c.get('competitionId') for c in data.get('competitions',[])}==
-                           {'champions_league','europa_league','conference_league'})
-              except (OSError, ValueError, TypeError, KeyError):
-                  current=False
-          print('refresh_needed=' + ('false' if current else 'true'))
-          print('UEFA_FRESHNESS',today,'already_current=',current)
-          PY
+          python scripts/uefa_postmatch_refresh_due.py --target stats >> "$GITHUB_OUTPUT"
 
       - name: Validate producer
         if: steps.freshness.outputs.refresh_needed == 'true'
@@ -92,9 +74,9 @@ jobs:
         if: steps.freshness.outputs.refresh_needed == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '180' }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '64' }}
         run: |
-          python scripts/refresh_uefa_current_stats.py             --max-requests "${INPUT_MAX_REQUESTS:-180}"
+          python scripts/refresh_uefa_current_stats.py             --max-requests "${INPUT_MAX_REQUESTS:-64}"
 
       - name: Validate current UEFA artifact
         if: steps.freshness.outputs.refresh_needed == 'true'

@@ -1,0 +1,56 @@
+name: UEFA Post-Match Refresh Offline Regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/uefa-current-stats-refresh.yml'
+      - '.github/workflows/league-tables-program-publish.yml'
+      - '.github/workflows/uefa-postmatch-offline-regression.yml'
+      - 'scripts/uefa_postmatch_refresh_due.py'
+      - 'tests/test_uefa_postmatch_refresh_due.py'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/uefa-current-stats-refresh.yml'
+      - '.github/workflows/league-tables-program-publish.yml'
+      - 'scripts/uefa_postmatch_refresh_due.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/
+            tests/
+            .github/workflows/uefa-current-stats-refresh.yml
+            .github/workflows/league-tables-program-publish.yml
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify quota-free post-match decision logic
+        run: python -m unittest discover -s tests -p 'test_uefa_postmatch_refresh_due.py' -v
+      - name: Verify late UEFA schedule, watch fallback and quota gate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          a=Path('.github/workflows/uefa-current-stats-refresh.yml').read_text()
+          b=Path('.github/workflows/league-tables-program-publish.yml').read_text()
+          assert 'cron: "35 22 * * *"' in a
+          assert 'cron: "55 22 * * *"' in b
+          assert 'Domestic Lineup Watch' in a and 'Domestic Lineup Watch' in b
+          assert 'uefa_postmatch_refresh_due.py --target stats' in a
+          assert 'uefa_postmatch_refresh_due.py --target tables' in b
+          assert '--quota-reserve 1500' in b
+          assert '--max-requests 64' in b
+          assert "if: steps.due.outputs.refresh_needed == 'true'" in b
+          print('UEFA_POSTMATCH_ROUTING_OK')
+          PY
