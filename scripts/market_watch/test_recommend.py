@@ -7,6 +7,7 @@ from unittest.mock import patch
 from . import recommend, router, build
 from .policy import decision
 from .results import exact_settlement
+from .quotes import fresh_uefa_quotes
 
 
 class FavouritePointPolicyTest(unittest.TestCase):
@@ -110,6 +111,25 @@ class FavouritePointPolicyTest(unittest.TestCase):
 
 
 class ExactRoutedSettlementTest(unittest.TestCase):
+    def test_uefa_quotes_include_goals_btts_and_corners_only_from_fresh_exact_polls(self):
+        from .policy import time
+        now=time('2026-10-21T19:05:00Z')
+        doc=dict(generatedAt='2026-10-21T14:00:00Z',debug=dict(oddsRefreshSkippedByRateLimit=False,
+            preservedPreviousExactMarketRows=0,apiCalls=[dict(status=200,path='/odds',params=dict(eventIds='e'))]),
+            matches=[dict(id='e',kickoff='2026-10-22T19:00:00Z',providerHomeTeam='H',providerAwayTeam='A',markets=[
+                dict(market='BTTS',selection='Yes',odds=1.91,bookmaker='B',providerMarketName='Both Teams To Score',exactBookmakerOdds=True),
+                dict(market='TEAM_TOTAL_GOALS',selection='H Over 1.5',line=1.5,odds=1.91,bookmaker='B',providerMarketName='Total Goals Home',exactBookmakerOdds=True),
+                dict(market='MATCH_CORNERS',selection='Under 10.5',line=10.5,odds=1.91,bookmaker='B',providerMarketName='Corners Totals',exactBookmakerOdds=True)])])
+        with tempfile.TemporaryDirectory() as tmp:
+            path=Path(tmp)/'europa_league_odds.json';path.write_text(json.dumps(doc))
+            rows=fresh_uefa_quotes(path,now)
+            self.assertEqual(['YES','OVER','UNDER'],[q['selection'] for q in rows])
+            self.assertTrue(all(q['verifiedClientReceipt'] is False for q in rows))
+            doc['debug']['preservedPreviousExactMarketRows']=1;path.write_text(json.dumps(doc))
+            self.assertEqual([],fresh_uefa_quotes(path,now))
+            doc['debug']['preservedPreviousExactMarketRows']=0;doc['debug']['apiCalls'][0]['status']=429;path.write_text(json.dumps(doc))
+            self.assertEqual([],fresh_uefa_quotes(path,now))
+
     def test_goals_and_corners_read_exact_cache_without_history_fixture_id(self):
         now=1792692000.;kickoff='2026-10-21T01:00:00Z'
         issue=dict(apiFixtureId=42,kickoff=kickoff)

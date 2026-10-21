@@ -54,6 +54,7 @@ def stage(actual,now,leagues,raw):
             metric=metric.lower(),scope=scope,featureCutoff=iso(q['featureCutoff']),quoteUpdatedAt=iso(observed),issuedAt=iso(now),publishedAt=None,publicationCommit=None,
             outcome='PENDING',settlementReturn=None,settledAt=None,identityBinding=reason,bookmakerBinding='EXACT_PROVIDER_QUOTE',certified=False,category='UAT_MARKET_EXPERIMENT',
             providerMarketName=q['sourceMarket'],monitorPaperSelectionId=q['_monitorId'],modelFingerprint=q.get('_modelFingerprint'),
+            quoteObservationSha256=q.get('sourceSha256'),quoteObservationSemantics=q.get('quoteObservationSemantics','SHA_VERIFIED_CLIENT_RECEIPT'),
             favouriteSide=q.get('_favourite'),selectionPreference=q.get('preference',1),
             quoteSpec={k:q.get(k) for k in ('providerEventId','kickoff','bookmaker','sourceMarket','selection','providerSelectionId','line','odd','spec')})
         ledger['rows'].append(row);used.update(keys)
