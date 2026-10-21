@@ -4,8 +4,8 @@
 
 | Εκδοχή | Βαθμολογημένες | Κέρδος | ROI | Εκκρεμείς |
 |---|---:|---:|---:|---:|
-| stat_point | 3 | +0.790 | +26.33% | 33 |
-| stat_conservative | 2 | -0.190 | -9.50% | 17 |
+| stat_point | 5 | +0.750 | +15.00% | 31 |
+| stat_conservative | 4 | -0.230 | -5.75% | 15 |
 | market_point | 0 | +0.000 | — | 0 |
 | market_conservative | 0 | +0.000 | — | 0 |
 | residual_point | 0 | +0.000 | — | 0 |
