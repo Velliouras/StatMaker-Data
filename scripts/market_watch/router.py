@@ -26,7 +26,7 @@ def stage(actual,now,leagues,raw):
     for q in sorted(candidates,key=lambda q:(q.get('preference',1),-q['_monitorP'],-q.get('ev',0),str(q['spec']),q['bookmaker'])):
         metric,scope,side,team,line=q['spec'];market=app_market(q['spec']);model=q.get('_monitorModel','COUNT_COUPLED_V1')
         permitted=allowed(market,now)
-        if q['featureCutoff']>q['observed'] or not now+900<q['kickoff']<now+7*86400:continue
+        if q['featureCutoff']>q['observed'] or not now+900<q['kickoff']:continue
         if not permitted and not cfg['markets'][market].get('uatPilotEnabled'):continue
         choices=[]
         for league in leagues:

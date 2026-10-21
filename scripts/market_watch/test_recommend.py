@@ -53,7 +53,7 @@ class FavouritePointPolicyTest(unittest.TestCase):
         self.assertEqual({},recommend.receipt_favourites({'g':dict(rows=rows)}))
 
     def test_point_model_is_used_without_conditioning_btts_on_winner(self):
-        now=1792692000.;ko=now+3600
+        now=1792692000.;ko=now+14*86400
         match=dict(id='e',kickoff=ko,providerHomeTeam='H',providerAwayTeam='A')
         league=dict(matches=[match],leagueCode='E0')
         quote=dict(providerEventId='e',kickoff=ko,observed=now-60,bookmaker='B',sourceReceipt='r',
@@ -83,7 +83,7 @@ class FavouritePointPolicyTest(unittest.TestCase):
 
     def test_routing_keeps_one_issue_per_family_and_preserves_existing_rows(self):
         from datetime import datetime,timezone
-        now=1792692000.;ko=now+3600;iso=lambda t:datetime.fromtimestamp(t,timezone.utc).isoformat()
+        now=1792692000.;ko=now+14*86400;iso=lambda t:datetime.fromtimestamp(t,timezone.utc).isoformat()
         match=dict(id='e',kickoff=iso(ko),homeTeam='H',awayTeam='A',providerHomeTeam='H',providerAwayTeam='A')
         league=dict(matches=[match],leagueCode='E0',country='England',competition='Premier',season='2026')
         base=dict(providerEventId='e',kickoff=ko,observed=now-60,featureCutoff=now-86400,

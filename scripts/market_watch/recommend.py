@@ -78,7 +78,7 @@ def candidates(actual, now, leagues, used):
         for match in league.get('matches', []):
             try:kickoff = time(match['kickoff'])
             except (ValueError,TypeError,KeyError):continue
-            if not now + 900 < kickoff < now + 7*86400:
+            if not now + 900 < kickoff:
                 continue
             bound, reason = identity.bind(league, match)
             if bound is not None:
@@ -86,7 +86,7 @@ def candidates(actual, now, leagues, used):
     proposals = []
     for group in lookup.values():
         for original in group['rows']:
-            if not 1.8 < original['odd'] < 3 or not now + 900 < original['kickoff'] < now + 7*86400:
+            if not 1.8 < original['odd'] < 3 or not now + 900 < original['kickoff']:
                 continue
             choices = bindings.get((str(original['providerEventId']), original['kickoff']), [])
             if len(choices) != 1:

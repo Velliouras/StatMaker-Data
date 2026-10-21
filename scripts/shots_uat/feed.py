@@ -188,7 +188,7 @@ def new_candidates(history_rows, now, known):
             continue
         for original in league.get("matches", []):
             ko = timestamp(original.get("kickoff"))
-            if not now + 900 < ko < now + 7 * 86400:
+            if not now + 900 < ko:
                 continue
             comp = league.get("competitionId", "domestic")
             day = datetime.fromtimestamp(ko, ZoneInfo("Europe/Athens")).date().isoformat()
