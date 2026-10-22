@@ -73,4 +73,41 @@ class ExactCachedResultsTest(unittest.TestCase):
         conflict=dict(quote,odds=[dict(home=2.2,draw=3.2,away=3.4)])
         self.assertIsNone(result_odds_context(row,{key:[quote,conflict]},now))
 
+    def test_selection_form_maps_each_historical_team_to_its_card_role(self):
+        from .intelligence import historical_selection_outcome
+        issue=dict(metric='GOALS_FT',scope='TEAM',side='OVER',teamSide='AWAY',line=1.5)
+        # Current home team played away; the proposed away-team total means its historical opponent.
+        self.assertEqual(historical_selection_outcome(issue,dict(home_goals=3,away_goals=1),1,0),'WON')
+        # Current away team played at home; the proposed total means that team's own goals.
+        self.assertEqual(historical_selection_outcome(issue,dict(home_goals=2,away_goals=0),0,1),'WON')
+        self.assertEqual(historical_selection_outcome(dict(issue,line=2.),dict(home_goals=2,away_goals=0),0,1),'VOID')
+        result=dict(issue,scope='RESULT',side='AWAY',teamSide='',line=None)
+        self.assertEqual(historical_selection_outcome(result,dict(home_goals=2,away_goals=1),0,0),'LOST')
+        self.assertEqual(historical_selection_outcome(result,dict(home_goals=2,away_goals=1),0,1),'WON')
+        half=dict(issue,metric='GOALS_1H',line=.5)
+        self.assertIsNone(historical_selection_outcome(half,dict(home_goals=2,away_goals=0),0,1))
+        self.assertEqual(historical_selection_outcome(half,dict(home_goals=2,away_goals=0,hthg=1,htag=0),0,1),'WON')
+
+    def test_selection_form_is_chronological_exact_line_and_excludes_future_data(self):
+        from .intelligence import MarketHistory
+        cutoff=timestamp('2026-10-20T12:00:00Z')
+        actual=[]
+        for i in range(12):
+            own=i+1
+            flip=i%2==1
+            actual.append(dict(_home='a' if flip else 'h',_away='h' if flip else 'a',
+                _date=cutoff-(14-i)*86400,home_goals=2,away_goals=1,
+                normalized_stats=dict(HS=4 if flip else own,AS=own if flip else 4)))
+        actual.append(dict(actual[0],_date=cutoff-3600,normalized_stats=dict(HS=999,AS=999)))
+        issue=dict(metric='shots',scope='TEAM',side='OVER',teamSide='HOME',line=6.,
+                   homeTeam='Home',awayTeam='Away',kickoff='2026-10-22T12:00:00Z')
+        before=copy.deepcopy(actual)
+        history=MarketHistory(actual);history.advance(cutoff)
+        facts=history.facts(issue,'h','a',dict(h=1500.,a=1500.))
+        form=facts['home']['selectionForm']
+        self.assertEqual([r['outcome'] for r in form],['LOST']*3+['VOID']+['WON']*6)
+        self.assertEqual([r['date'] for r in form],sorted(r['date'] for r in form))
+        self.assertTrue(all(timestamp(r['date'])+86400<=cutoff for r in form))
+        self.assertEqual(actual,before)
+
 if __name__=='__main__':unittest.main()

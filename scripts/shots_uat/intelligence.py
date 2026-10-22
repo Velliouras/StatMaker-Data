@@ -144,6 +144,28 @@ def context_facts(row, current, now):
                 usedByFrozenProbability=False, motivation="NOT_ESTABLISHED_FROM_VERIFIED_DATA")
 
 
+def historical_selection_outcome(issue, row, historical_side, card_side):
+    """Evaluate the issued selection with this historical team in its current card role."""
+    from scripts.market_watch.catalog import settlement
+    spec = (issue.get('quoteSpec') or {}).get('spec') or [
+        issue['metric'].upper(), issue['scope'], issue['side'], issue.get('teamSide', ''), issue.get('line')]
+    oriented = row
+    if historical_side != card_side:
+        stats = row.get('normalized_stats') or {}
+        swapped = {key: stats.get(('A' if key[0] == 'H' else 'H') + key[1:], value)
+                   if key.startswith(('H', 'A')) else value for key, value in stats.items()}
+        oriented = dict(row, normalized_stats=swapped, home_goals=row.get('away_goals'),
+                        away_goals=row.get('home_goals'), hthg=row.get('htag'), htag=row.get('hthg'))
+    try:
+        outcome = settlement(oriented, spec)
+    except (KeyError, TypeError, ValueError):
+        return None
+    if outcome is None:
+        return None
+    won, push = outcome
+    return 'VOID' if push else 'WON' if won else 'LOST'
+
+
 class MarketHistory:
     """Read-only descriptive facts for each market, with the same 24h availability lag."""
     def __init__(self, rows):
@@ -189,7 +211,16 @@ class MarketHistory:
                     value = sum(values) if issue['scope'] == 'TOTAL' else values[i if selected == ('HOME' if index == 0 else 'AWAY') else 1-i]
                     if value != issue['line']:
                         hits.append(value > issue['line'] if issue['side'] == 'OVER' else value < issue['line'])
+            selection_form = []
+            for r, i, _ in reversed(usable):
+                outcome = historical_selection_outcome(issue, r, i, index)
+                if outcome is not None:
+                    selection_form.append(dict(date=iso(float(r['_date'])), outcome=outcome))
+                    if len(selection_form) == 10:
+                        break
+            selection_form.reverse()
             return dict(team=issue['homeTeam'] if index == 0 else issue['awayTeam'], sample=len(recent),
+                selectionForm=selection_form,
                 forAverage=average([v[i] for _,i,v in recent]), againstAverage=average([v[1-i] for _,i,v in recent]),
                 venueSample=len(venue), venueFor=average([v[i] for _,i,v in venue]),
                 venueAgainst=average([v[1-i] for _,i,v in venue]), formLast5=form[-5:],
