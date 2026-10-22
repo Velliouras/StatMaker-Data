@@ -16,6 +16,8 @@ permissions:
 
 concurrency:
   group: statmaker-shots-uat
+  # Result publications must not be discarded when another trigger arrives during a run.
+  queue: max
   cancel-in-progress: false
 
 jobs:
