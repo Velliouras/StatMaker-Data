@@ -12,6 +12,8 @@ import time
 import unicodedata
 import urllib.parse
 import urllib.request
+from collections import Counter
+from datetime import datetime
 from dataclasses import dataclass
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -21,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_simulation_2026_27.json"
 
 MODEL_VERSION = "uefa-club-monte-carlo-v1"
+MATCH_MODEL_VERSION = "uefa-match-monte-carlo-v1"
 STRENGTH_MODEL = "uefa-seeding-elo-v1"
 TIE_BREAK_MODEL = "points-goal-difference-goals-for"
 API_BASE = "https://v3.football.api-sports.io"
@@ -585,12 +588,120 @@ def simulate_competition(
     return meta, rows
 
 
+def materialize_match_simulations(
+    con: sqlite3.Connection, config: dict[str, Any], runs: int = 10_000,
+    now_ms: int | None = None,
+) -> dict[str, int]:
+    """Expose the existing UEFA ScoreModel per fixture; no new ratings/API calls.
+
+    These are explorer-only rows. Legacy betting simulations, issued picks and
+    domestic forecasts are untouched. Resolve identities through explicit aliases
+    and reject fixtures that predate their published rating snapshot.
+    """
+    required = {"prepared_match_simulations", "prepared_fixture_matches",
+                "prepared_uefa_simulation_meta", "prepared_uefa_team_simulations"}
+    tables = {r[0] for r in con.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if not required <= tables:
+        raise ValueError("UEFA match simulation requires the complete prepared snapshot")
+    runs = max(10_000, min(50_000, runs))
+    now_ms = int(time.time() * 1000) if now_ms is None else now_ms
+    con.execute("DELETE FROM prepared_match_simulations WHERE simulation_model=?",
+                (MATCH_MODEL_VERSION,))
+    counts: dict[str, int] = {}
+    for competition in config.get("competitions", []):
+        cid = competition["competitionId"]
+        meta_rows = con.execute(
+            "SELECT season,base_home_goals,base_away_goals,completed_league_matches,"
+            "generated_at_ms FROM prepared_uefa_simulation_meta "
+            "WHERE competition_id=? AND model_version=? AND strength_model=?",
+            (cid, MODEL_VERSION, STRENGTH_MODEL),
+        ).fetchall()
+        aliases, _, _ = participant_maps(competition)
+        counts[cid] = 0
+        for season, base_home, base_away, completed, source_ms in meta_rows:
+            team_rows = con.execute(
+                "SELECT team_name,strength_rating,current_played,generated_at_ms "
+                "FROM prepared_uefa_team_simulations WHERE competition_id=? AND season=?",
+                (cid, season),
+            ).fetchall()
+            ratings = {name: float(rating) for name, rating, _, _ in team_rows}
+            played = {name: int(n) for name, _, n, _ in team_rows}
+            if len(ratings) != 36 or not all(math.isfinite(r) for r in ratings.values()):
+                raise ValueError(f"Incomplete UEFA strength snapshot: {cid}/{season}")
+            if not all(math.isfinite(v) and v > 0 for v in (base_home, base_away)):
+                raise ValueError(f"Invalid UEFA scoring environment: {cid}/{season}")
+            rating_ms = max(int(source_ms), *(int(r[3]) for r in team_rows))
+            model = ScoreModel(ratings, base_home, base_away)
+            fixtures = con.execute(
+                "SELECT fm.snapshot_version,fm.match_key,fm.kickoff,fm.home_team,fm.away_team "
+                "FROM prepared_fixture_matches fm "
+                "WHERE fm.competition_id=? AND fm.season=? AND NOT EXISTS ("
+                "SELECT 1 FROM prepared_match_simulations ms "
+                "WHERE ms.competition_id=fm.competition_id "
+                "AND ms.snapshot_version=fm.snapshot_version AND ms.match_key=fm.match_key)",
+                (cid, season),
+            ).fetchall()
+            for version, key, kickoff, raw_home, raw_away in fixtures:
+                home, away = aliases.get(norm(raw_home)), aliases.get(norm(raw_away))
+                if home not in ratings or away not in ratings or home == away:
+                    continue  # Never guess a team's identity or seed an unknown team.
+                try:
+                    instant = datetime.fromisoformat(str(kickoff).replace("Z", "+00:00"))
+                    if instant.tzinfo is None:
+                        continue
+                    kickoff_ms = int(instant.timestamp() * 1000)
+                except (ValueError, TypeError):
+                    continue
+                if kickoff_ms < max(now_ms, rating_ms):
+                    continue
+                seed = f"{cid}|{version}|{key}|{MATCH_MODEL_VERSION}|{rating_ms}|{runs}"
+                rng = random.Random(int(hashlib.sha256(seed.encode()).hexdigest()[:16], 16))
+                scores = Counter(model.draw(home, away, rng) for _ in range(runs))
+                home_wins = sum(n for (h, a), n in scores.items() if h > a)
+                draws = sum(n for (h, a), n in scores.items() if h == a)
+                home_mean, away_mean = goal_means(home, away, ratings, base_home, base_away)
+                distribution = json.dumps([
+                    {"homeGoals": h, "awayGoals": a, "probability": n / runs}
+                    for (h, a), n in sorted(scores.items())
+                ], separators=(",", ":"))
+                con.execute(
+                    "INSERT INTO prepared_match_simulations("
+                    "competition_id,snapshot_version,match_key,simulation_runs,simulation_model,"
+                    "elo_model_version,home_elo_rating,away_elo_rating,elo_weight,"
+                    "home_win_probability,draw_probability,away_win_probability,"
+                    "expected_home_goals,expected_away_goals,score_distribution_json,"
+                    "history_home_sample,history_away_sample,history_league_sample,generated_at_ms"
+                    ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (cid, version, key, runs, MATCH_MODEL_VERSION, STRENGTH_MODEL,
+                     ratings[home], ratings[away], 1.0, home_wins / runs, draws / runs,
+                     (runs - home_wins - draws) / runs, home_mean, away_mean, distribution,
+                     played[home], played[away], int(completed), now_ms),
+                )
+                counts[cid] += 1
+    return counts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
     parser.add_argument("--runs", type=int, default=10_000)
+    parser.add_argument("--matches-only", action="store_true",
+                        help="Reuse published UEFA ratings and fixtures without API calls")
     args = parser.parse_args()
     runs = max(1_000, min(50_000, int(args.runs)))
+
+    if args.matches_only:
+        if not args.db.is_file():
+            raise SystemExit(f"Prepared DB missing: {args.db}")
+        con = sqlite3.connect(args.db)
+        try:
+            counts = materialize_match_simulations(
+                con, json.loads(CONFIG_PATH.read_text(encoding="utf-8")), runs)
+            con.commit()
+        finally:
+            con.close()
+        print("PREPARED_UEFA_MATCH_SIMULATION_OK", counts)
+        return 0
 
     api_key = os.getenv("API_FOOTBALL_KEY", "").strip()
     if not api_key:
@@ -714,6 +825,7 @@ def main() -> int:
             )
             team_rows += len(rows)
 
+        match_counts = materialize_match_simulations(con, config, runs)
         con.commit()
         quick = con.execute("PRAGMA quick_check").fetchone()
         if not quick or quick[0] != "ok":

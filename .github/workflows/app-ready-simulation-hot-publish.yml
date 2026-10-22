@@ -37,6 +37,7 @@ jobs:
       - name: Hot-patch latest App-Ready betting bundle
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          UEFA_MATCH_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[uefa-match-only]') }}
         shell: bash
         run: |
           set -euo pipefail
@@ -45,7 +46,12 @@ jobs:
           git fetch --no-tags origin +main:refs/remotes/origin/main
           git reset --hard refs/remotes/origin/main
           python -m unittest tests/test_prepared_fixture_schedule_gaps.py
-          python scripts/hotpatch_app_ready_simulation.py
+          python -m unittest tests/test_prepared_uefa_match_simulations.py
+          if [[ "$UEFA_MATCH_ONLY" == "true" ]]; then
+            python scripts/hotpatch_app_ready_simulation.py --uefa-match-only
+          else
+            python scripts/hotpatch_app_ready_simulation.py
+          fi
           python scripts/audit_app_ready_fixture_index_uniqueness.py
 
       - name: Verify hot-patched bundle

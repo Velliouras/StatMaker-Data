@@ -41,7 +41,13 @@ def main() -> int:
         "--score-edge-only", action="store_true",
         help="Re-materialize Score Edge from the existing 10k simulation rows only",
     )
+    parser.add_argument(
+        "--uefa-match-only", action="store_true",
+        help="Add UEFA explorer match rows from published ratings; no API/engine refresh",
+    )
     args = parser.parse_args()
+    if args.uefa_match_only and args.score_edge_only:
+        parser.error("Choose only one targeted simulation update")
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
     betting = next((x for x in artifacts if x.get("id") == "app_ready_betting_bundle"), None)
@@ -66,7 +72,13 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
-        if not args.score_edge_only:
+        if args.uefa_match_only:
+            subprocess.run(
+                ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
+                 str(db_path), "--matches-only", "--runs", "10000"],
+                cwd=ROOT, check=True,
+            )
+        elif not args.score_edge_only:
             # Refresh the fixture index first so schedule-only upcoming domestic fixtures
             # become eligible for Match Simulation even when bookmaker selections are absent.
             subprocess.run(
@@ -126,15 +138,11 @@ def main() -> int:
 
 
         # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
-        subprocess.run(
-            [
-                "python",
-                str(ROOT / "scripts/materialize_prepared_score_edge.py"),
-                str(db_path),
-            ],
-            cwd=ROOT,
-            check=True,
-        )
+        if not args.uefa_match_only:
+            subprocess.run(
+                ["python", str(ROOT / "scripts/materialize_prepared_score_edge.py"),
+                 str(db_path)], cwd=ROOT, check=True,
+            )
 
         con = sqlite3.connect(db_path)
         try:
@@ -147,6 +155,12 @@ def main() -> int:
             ).fetchone()[0])
             match_explorer_rows = int(con.execute(
                 "SELECT COUNT(*) FROM prepared_match_explorer_simulations"
+            ).fetchone()[0])
+            uefa_match_rows = int(con.execute(
+                "SELECT COUNT(*) FROM prepared_match_simulations "
+                "WHERE competition_id IN ('champions_league','europa_league','conference_league') "
+                "AND simulation_model='uefa-match-monte-carlo-v1' "
+                "AND elo_model_version='uefa-seeding-elo-v1' AND simulation_runs>=10000"
             ).fetchone()[0])
             match_score_distribution_rows = int(con.execute(
                 "SELECT COUNT(*) FROM prepared_match_simulations "
@@ -180,7 +194,7 @@ def main() -> int:
                 f"Invalid hot-patched simulation rows={rows} match_rows={match_rows} runs={runs}"
             )
         if (
-            match_elo_rows != match_rows
+            match_elo_rows + uefa_match_rows != match_rows
             or match_explorer_rows <= 0
             or match_score_distribution_rows != match_rows
         ):
@@ -246,6 +260,8 @@ def main() -> int:
     metadata["preparedMatchScoreDistributionCount"] = match_score_distribution_rows
     metadata["preparedMatchScoreDistributionContract"] = "same-run-monte-carlo-exact-score-v1"
     metadata["preparedMatchSimulationUsesPreparedElo"] = True
+    metadata["preparedUefaMatchSimulationContract"] = "uefa-match-monte-carlo-v1"
+    metadata["preparedUefaMatchSimulationCount"] = uefa_match_rows
     metadata["preparedTeamEloContract"] = "team-elo-v1"
     metadata["preparedTeamEloCount"] = elo_rows
     metadata["preparedTeamEloLeagueCount"] = elo_meta_rows
