@@ -37,4 +37,40 @@ class ExactCachedResultsTest(unittest.TestCase):
         self.assertEqual(r['outcome'],'VOID');self.assertEqual(r['settlementReturn'],1.0)
         self.assertEqual(r['line'],40.);self.assertEqual(r['publishedAt'],self.row['publishedAt'])
 
+    def test_final_shots_and_routed_results_do_not_wait_three_hours(self):
+        from scripts.market_watch.router import settle_rows
+        self.fixture.update(homeGoals=2,awayGoals=1,homeHalfGoals=1,awayHalfGoals=0)
+        clock='2026-10-20T20:50:00Z';now=timestamp('2026-10-20T20:55:00Z')
+        for status in ('2H','FT'):
+            self.path.write_text(json.dumps(dict(generatedAt=clock,fixtures=[dict(self.fixture,status=status)])))
+            cached_rows.cache_clear()
+            market=dict(self.row,quoteSpec=dict(spec=['GOALS_FT','TOTAL','OVER','',2.5]),line=2.5,side='OVER')
+            with patch('scripts.shots_uat.feed.ROOT',self.root):
+                shot=settle(self.row,[],now)
+            with patch('scripts.market_watch.router.ROOT',self.root):
+                routed=settle_rows([market],[],now)[0]
+            self.assertEqual(shot['outcome'],'LOST' if status=='FT' else 'PENDING')
+            self.assertEqual(routed['outcome'],'WON' if status=='FT' else 'PENDING')
+            self.assertEqual(shot['odd'],self.row['odd'])
+            self.assertEqual(routed['line'],2.5)
+
+    def test_header_odds_use_one_bound_complete_fresh_book_without_repricing_the_pick(self):
+        from .intelligence import result_odds_context
+        match=dict(kickoff=self.row['kickoff'],providerHomeTeam='H',providerAwayTeam='A')
+        row=dict(self.row,match=match,fixtureId='event7',bookmaker='BookA')
+        now=timestamp('2026-10-20T17:00:00Z')
+        quote=dict(_observedAt=now-60,_kickoff=match['kickoff'],_home='H',_away='A',
+                   odds=[dict(home=2.1,draw=3.2,away=3.4)])
+        before=copy.deepcopy(row);key=('event7','BookA','ML')
+        context=result_odds_context(row,{key:[quote]},now)
+        self.assertEqual((context['home'],context['draw'],context['away']),(2.1,3.2,3.4))
+        self.assertEqual(context['bookmaker'],'BookA')
+        self.assertEqual(context['apiFixtureId'],row['apiFixtureId'])
+        self.assertEqual(row,before)
+        for changed in (dict(quote,_kickoff='2026-10-19T19:00:00Z'),dict(quote,_home='Other'),
+                        dict(quote,_observedAt=now-86401),dict(quote,odds=[dict(home=2.1,away=3.4)])):
+            self.assertIsNone(result_odds_context(row,{key:[changed]},now))
+        conflict=dict(quote,odds=[dict(home=2.2,draw=3.2,away=3.4)])
+        self.assertIsNone(result_odds_context(row,{key:[quote,conflict]},now))
+
 if __name__=='__main__':unittest.main()

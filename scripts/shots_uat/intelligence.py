@@ -15,6 +15,41 @@ def finite(value):
     return float(value) if isinstance(value, (float, int)) and math.isfinite(value) else None
 
 
+def result_odds_context(row, raw, now):
+    """One complete same-book FT 1X2 quote, bound to the actual provider fixture."""
+    match = row["match"]
+    books = sorted({book for event, book, name in raw if event == str(row["fixtureId"]) and name == "ML"},
+                   key=lambda book: (book != row["bookmaker"], book))
+    for book in books:
+        groups = defaultdict(lambda: defaultdict(set))
+        for market in raw.get((str(row["fixtureId"]), book, "ML"), []):
+            clock = float(market.get("_observedAt") or timestamp(market.get("updatedAt")))
+            if (not now - 86400 <= clock <= now or market.get("_kickoff") != match["kickoff"]
+                    or market.get("_home") != match.get("providerHomeTeam")
+                    or market.get("_away") != match.get("providerAwayTeam")):
+                continue
+            for quote in market.get("odds", []):
+                for side in ("home", "draw", "away"):
+                    try:
+                        odd = float(quote[side])
+                    except (TypeError, ValueError, KeyError):
+                        continue
+                    if math.isfinite(odd) and 1 < odd < 1000:
+                        groups[clock][side].add(odd)
+        if not groups:
+            continue
+        clock = max(groups)
+        sides = groups[clock]
+        if any(len(sides[side]) != 1 for side in ("home", "draw", "away")):
+            continue
+        prices = {side: next(iter(sides[side])) for side in ("home", "draw", "away")}
+        if not .85 <= sum(1 / odd for odd in prices.values()) <= 1.25:
+            continue
+        return dict(prices, bookmaker=book, observedAt=iso(clock),
+                    apiFixtureId=row["apiFixtureId"], kickoff=row["kickoff"])
+    return None
+
+
 def market_name(row):
     if row["metric"] not in ("shots", "sot"):
         return None
@@ -205,4 +240,7 @@ def annotate(rows, actual, raw, leagues, now):
                     predictedCounts={k:row.get(k) for k in ("homeShots", "awayShots", "homeSot", "awaySot")},
                     explanationSemantics="FACTUAL_INPUTS_NOT_CAUSAL_FEATURE_ATTRIBUTIONS")
         result[row["selectionId"]] = dict(row, intelligence=info)
+        result_context = result_odds_context(row, raw, now)
+        if result_context is not None:
+            result[row["selectionId"]]["match"] = dict(row["match"], contextOneXTwo=result_context)
     return [result[r["selectionId"]] for r in rows]

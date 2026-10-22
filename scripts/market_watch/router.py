@@ -74,7 +74,7 @@ def settle_rows(rows,actual,now):
     result=[]
     for original in rows:
         r=dict(original);result.append(r)
-        if r['outcome']!='PENDING' or not r.get('publishedAt') or now<time(r['kickoff'])+10800:continue
+        if r['outcome']!='PENDING' or not r.get('publishedAt') or now<time(r['kickoff'])+90*60:continue
         evidence=exact_settlement(r,spec_of(r),actual,ROOT,now)
         if evidence is None:continue
         (y,void),source,clock=evidence

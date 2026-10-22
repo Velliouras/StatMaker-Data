@@ -296,7 +296,7 @@ def observe_issued_quote(row, raw, now):
 def settle(row, actual, now):
     if row.get("publishedAt") is None or timestamp(row["publishedAt"]) >= timestamp(row["kickoff"]):
         return row
-    if row["outcome"] != "PENDING" or now < timestamp(row["kickoff"]) + 3 * 3600:
+    if row["outcome"] != "PENDING" or now < timestamp(row["kickoff"]) + 90 * 60:
         return row
     from .results import exact_result
     result = exact_result(row, actual, ROOT, now)
