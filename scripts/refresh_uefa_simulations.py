@@ -57,12 +57,22 @@ def main():
     config = json.loads(sim.CONFIG_PATH.read_text())
     fingerprint = sim.cached_source_fingerprint(config)
     before = json.loads(MANIFEST.read_text())
-    if before.get("metadata", {}).get(FINGERPRINT_KEY) == fingerprint:
+    current_bundle = next(a for a in before["artifacts"] if a["id"] == "app_ready_betting_bundle")
+    if (before.get("metadata", {}).get(FINGERPRINT_KEY) == fingerprint
+            and before.get("metadata", {}).get("preparedUefaSimulationValidatedBundleSha256") == current_bundle["sha256"]):
         print("UEFA_SIMULATION_CURRENT source=" + fingerprint)
         return 0
     with tempfile.TemporaryDirectory() as td:
         before_db = bundle_db(before, Path(td) / "before")
         with sqlite3.connect(before_db) as con:
+            for comp in config["competitions"]:
+                fixtures, _, _, _ = sim.cached_competition(comp, int(config["season"]))
+                completed = sum(f.status in sim.FINISHED for f in fixtures)
+                old = con.execute("SELECT completed_league_matches FROM prepared_uefa_simulation_meta "
+                                  "WHERE competition_id=?", (comp["competitionId"],)).fetchone()
+                if old and int(old[0]) > completed:
+                    print("UEFA_SIMULATION_WAITING_FOR_NEWER_TABLES " + comp["competitionId"])
+                    return 0
             protected_before = unaffected_digest(con)
             previous = con.execute("SELECT team_name,current_position,current_played,current_points "
                 "FROM prepared_uefa_team_simulations WHERE team_name='Panathinaikos'").fetchall()
@@ -88,6 +98,8 @@ def main():
         if fingerprint != sim.cached_source_fingerprint(config):
             raise ValueError("UEFA results changed during generation")
         after.setdefault("metadata", {})[FINGERPRINT_KEY] = fingerprint
+        after["metadata"]["preparedUefaSimulationValidatedBundleSha256"] = next(
+            a["sha256"] for a in after["artifacts"] if a["id"] == "app_ready_betting_bundle")
         after["metadata"]["preparedUefaSimulationInputContract"] = "published-league-tables-results-v1"
         after["contentVersion"] = hashlib.sha256(
             (after["contentVersion"] + "|" + fingerprint).encode()).hexdigest()

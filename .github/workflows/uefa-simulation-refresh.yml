@@ -11,7 +11,7 @@ on:
       - 'scripts/hotpatch_app_ready_simulation.py'
       - 'tests/test_cached_uefa_simulations.py'
   workflow_run:
-    workflows: ["League Tables UEFA and Program Publish"]
+    workflows: ["League Tables UEFA and Program Publish", "StatMaker App-Ready Artifact Publisher", "App-Ready Simulation Hot Publish"]
     types: [completed]
     branches: [main]
   schedule:
