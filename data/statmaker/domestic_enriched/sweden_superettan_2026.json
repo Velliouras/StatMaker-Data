@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-23T18:32:37Z",
+  "generated_at": "2026-10-23T23:18:19Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/sweden/superettan/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-23T08:32:01Z",
+    "cache_generated_at": "2026-10-23T23:17:47Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 216,
-    "fixtures_with_any_stats": 122,
-    "fixtures_with_bb_core_stats": 120,
-    "any_stats_coverage": 0.5648,
-    "bb_core_coverage": 0.5556,
+    "completed_fixtures": 217,
+    "fixtures_with_any_stats": 123,
+    "fixtures_with_bb_core_stats": 121,
+    "any_stats_coverage": 0.5668,
+    "bb_core_coverage": 0.5576,
     "group_counts": {
-      "shots_total": 92,
-      "shots_on_target": 120,
-      "corners": 120,
+      "shots_total": 93,
+      "shots_on_target": 121,
+      "corners": 121,
       "fouls": 27,
-      "yellow_cards": 122,
-      "red_cards": 122,
-      "possession": 120,
+      "yellow_cards": 123,
+      "red_cards": 123,
+      "possession": 121,
       "passes": 26,
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.4259,
-      "shots_on_target": 0.5556,
-      "corners": 0.5556,
-      "fouls": 0.125,
-      "yellow_cards": 0.5648,
-      "red_cards": 0.5648,
-      "possession": 0.5556,
-      "passes": 0.1204,
-      "xg": 0.1204
+      "shots_total": 0.4286,
+      "shots_on_target": 0.5576,
+      "corners": 0.5576,
+      "fouls": 0.1244,
+      "yellow_cards": 0.5668,
+      "red_cards": 0.5668,
+      "possession": 0.5576,
+      "passes": 0.1198,
+      "xg": 0.1198
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5648 < 0.65",
-      "low BB-core coverage: 0.5556 < 0.65",
+      "low any-stats coverage: 0.5668 < 0.65",
+      "low BB-core coverage: 0.5576 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -18214,6 +18214,90 @@
         "fulltime": {
           "home": 2,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497733,
+      "date_utc": "2026-10-23T17:00:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "league_code": "SWE2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
+      "round": "Regular Season - 28",
+      "home_team": "Oddevold",
+      "away_team": "GIF Sundsvall",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 29,
+        "AS": 4,
+        "HST": 12,
+        "AST": 2,
+        "HC": 10,
+        "AC": 1,
+        "HF": null,
+        "AF": null,
+        "HY": 0,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 51,
+        "APossession": 49,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 7,
+      "away_goals": 0,
+      "home_score": 7,
+      "away_score": 0,
+      "fthg": 7,
+      "ftag": 0,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 7,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 7,
+          "away": 0
         },
         "extratime": {
           "home": null,
