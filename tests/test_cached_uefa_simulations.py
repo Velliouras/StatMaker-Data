@@ -1,6 +1,7 @@
 import copy
 import json
 import sqlite3
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -22,6 +23,13 @@ class CachedUefaSimulationTests(unittest.TestCase):
         path = root / "data/statmaker/league_tables/UECL.json"
         path.parent.mkdir(parents=True)
         path.write_text(json.dumps(source))
+        for relative in ("config/uefa_clubelo_aliases.json", "data/statmaker/uefa_clubelo_strengths.json"):
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(sim.ROOT / relative, target)
+        (root / "data/statmaker/domestic_enriched").mkdir()
+        (root / "data/statmaker/domestic_enriched/index.json").write_text('{"leagues":[]}')
+        (root / "data/statmaker/uefa_current_stats.json").write_text('{"competitions":[]}')
         return root
 
     def test_all_published_competitions_share_the_tables_results_and_ranks_without_api(self):

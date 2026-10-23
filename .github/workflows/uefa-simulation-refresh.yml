@@ -3,13 +3,16 @@ name: UEFA Simulation Refresh
 on:
   workflow_dispatch:
   push:
-    branches: [main, fix/uefa-league-simulation-refresh]
+    branches: [main, fix/uefa-league-simulation-refresh, fix/uefa-probability-model-v2]
     paths:
       - '.github/workflows/uefa-simulation-refresh.yml'
       - 'scripts/refresh_uefa_simulations.py'
       - 'scripts/materialize_prepared_uefa_simulations.py'
       - 'scripts/hotpatch_app_ready_simulation.py'
       - 'tests/test_cached_uefa_simulations.py'
+      - 'tests/test_uefa_simulation_model_v2.py'
+      - 'scripts/uefa_club_strengths.py'
+      - 'config/uefa_clubelo_aliases.json'
   workflow_run:
     workflows: ["League Tables UEFA and Program Publish", "StatMaker App-Ready Artifact Publisher", "App-Ready Simulation Hot Publish"]
     types: [completed]
@@ -41,6 +44,9 @@ jobs:
             /scripts/*
             /tests/*
             /config/uefa_simulation_2026_27.json
+            /config/uefa_clubelo_aliases.json
+            /data/statmaker/domestic_enriched/
+            /data/statmaker/uefa_clubelo_strengths.json
             /data/statmaker/league_tables/
             /data/statmaker/uefa_current_stats.json
             /data/statmaker/app_ready/
@@ -52,7 +58,7 @@ jobs:
 
       - name: Validate cached inputs and stale-current-position regression without provider access
         run: |
-          python -m unittest tests/test_cached_uefa_simulations.py tests/test_prepared_uefa_match_simulations.py
+          python -m unittest tests/test_cached_uefa_simulations.py tests/test_prepared_uefa_match_simulations.py tests/test_uefa_simulation_model_v2.py
 
       - name: Refresh UEFA and verify every current table plus protected data
         run: python -m scripts.refresh_uefa_simulations
@@ -65,7 +71,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
-            git add -A data/statmaker/app_ready reports/uefa_simulation_refresh.json
+            git add -A data/statmaker/app_ready data/statmaker/uefa_clubelo_strengths.json reports/uefa_simulation_refresh.json
             if git diff --cached --quiet; then
               echo "UEFA simulations already current"
               exit 0
