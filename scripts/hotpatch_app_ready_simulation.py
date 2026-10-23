@@ -45,8 +45,10 @@ def main() -> int:
         "--uefa-match-only", action="store_true",
         help="Add UEFA explorer match rows from published ratings; no API/engine refresh",
     )
+    parser.add_argument("--uefa-only", action="store_true",
+                        help="Refresh UEFA league/match simulation from published tables; no API calls")
     args = parser.parse_args()
-    if args.uefa_match_only and args.score_edge_only:
+    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only)) > 1:
         parser.error("Choose only one targeted simulation update")
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
@@ -72,7 +74,13 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
-        if args.uefa_match_only:
+        if args.uefa_only:
+            subprocess.run(
+                ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
+                 str(db_path), "--cached-league-tables", "--runs", "10000"],
+                cwd=ROOT, check=True,
+            )
+        elif args.uefa_match_only:
             subprocess.run(
                 ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
                  str(db_path), "--matches-only", "--runs", "10000"],
@@ -138,7 +146,7 @@ def main() -> int:
 
 
         # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
-        if not args.uefa_match_only:
+        if not args.uefa_match_only and not args.uefa_only:
             subprocess.run(
                 ["python", str(ROOT / "scripts/materialize_prepared_score_edge.py"),
                  str(db_path)], cwd=ROOT, check=True,
