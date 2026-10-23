@@ -10,6 +10,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from scripts import materialize_prepared_uefa_simulations as sim
+from scripts import uefa_club_strengths as strengths
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "data/statmaker/app_ready/update_manifest.json"
@@ -31,7 +32,7 @@ def bundle_db(manifest, folder):
 def unaffected_digest(con):
     """Every non-UEFA table and every domestic match row must remain identical."""
     h = hashlib.sha256()
-    excluded = {"prepared_uefa_simulation_meta", "prepared_uefa_team_simulations"}
+    excluded = {"prepared_uefa_simulation_meta", "prepared_uefa_team_simulations", "prepared_uefa_strength_evidence"}
     tables = con.execute("SELECT name,sql FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()
     counts = {}
     for table, schema in tables:
@@ -55,6 +56,7 @@ def unaffected_digest(con):
 
 def main():
     config = json.loads(sim.CONFIG_PATH.read_text())
+    public_rating_refreshed = strengths.refresh_snapshot(ROOT)
     fingerprint = sim.cached_source_fingerprint(config)
     before = json.loads(MANIFEST.read_text())
     current_bundle = next(a for a in before["artifacts"] if a["id"] == "app_ready_betting_bundle")
@@ -84,12 +86,36 @@ def main():
             verified = sim.verify_cached_simulations(con, config)
             if protected_before != unaffected_digest(con):
                 raise ValueError("UEFA refresh modified protected prepared/history/performance/domestic data")
+            evidence = con.execute("SELECT algorithm,COUNT(*) FROM prepared_uefa_strength_evidence GROUP BY algorithm").fetchall()
+            if evidence != [(strengths.ALGORITHM, 108)]:
+                raise ValueError("Incomplete or obsolete UEFA club-strength evidence")
+            profiles = con.execute("SELECT COUNT(*),SUM(CASE WHEN xg_samples>0 THEN 1 ELSE 0 END),"
+                                   "SUM(xg_samples) FROM prepared_uefa_strength_evidence").fetchone()
+            pana_strength = con.execute("SELECT source_elo,xg_attack,xg_defense,xg_samples,source_as_of "
+                "FROM prepared_uefa_strength_evidence WHERE team_name='Panathinaikos'").fetchall()
+            pana_probabilities = con.execute("SELECT top8_probability,playoff_probability,round16_probability,"
+                "quarterfinal_probability,semifinal_probability,final_probability,winner_probability,"
+                "expected_league_position FROM prepared_uefa_team_simulations WHERE team_name='Panathinaikos'").fetchall()
             current = con.execute("SELECT team_name,current_position,current_played,current_points "
                 "FROM prepared_uefa_team_simulations WHERE team_name='Panathinaikos'").fetchall()
             probabilities = con.execute("SELECT competition_id,SUM(winner_probability),MIN(top8_probability),"
                 "MAX(top8_probability) FROM prepared_uefa_team_simulations GROUP BY competition_id").fetchall()
             if any(abs(r[1]-1) > 1e-8 or r[2] < 0 or r[3] > 1 for r in probabilities):
                 raise ValueError("Invalid simulated probability mass")
+            stage_mass = con.execute("SELECT competition_id,SUM(top8_probability),SUM(playoff_probability),"
+                "SUM(round16_probability),SUM(quarterfinal_probability),SUM(semifinal_probability),"
+                "SUM(final_probability),SUM(winner_probability) FROM prepared_uefa_team_simulations "
+                "GROUP BY competition_id").fetchall()
+            expected = (8, 16, 16, 8, 4, 2, 1)
+            if len(stage_mass) != 3 or any(any(abs(a-b)>1e-8 for a,b in zip(row[1:], expected))
+                                           for row in stage_mass):
+                raise ValueError("Invalid number of qualifiers in a simulated stage")
+            for row in con.execute("SELECT top8_probability,playoff_probability,round16_probability,"
+                "quarterfinal_probability,semifinal_probability,final_probability,winner_probability "
+                "FROM prepared_uefa_team_simulations"):
+                if not (0 <= row[0] <= row[2] <= row[0]+row[1] <= 1.00000001
+                        and 1 >= row[2] >= row[3] >= row[4] >= row[5] >= row[6] >= 0):
+                    raise ValueError("Contradictory per-team progression probabilities")
         # Keep the initial manifest for retention; never discard the last usable generation.
         previous_path = Path(td) / "previous_manifest.json"
         previous_path.write_text(json.dumps(before))
@@ -100,12 +126,20 @@ def main():
         after.setdefault("metadata", {})[FINGERPRINT_KEY] = fingerprint
         after["metadata"]["preparedUefaSimulationValidatedBundleSha256"] = next(
             a["sha256"] for a in after["artifacts"] if a["id"] == "app_ready_betting_bundle")
+        after["metadata"]["preparedUefaSimulationAlgorithm"] = strengths.ALGORITHM
+        after["metadata"]["preparedUefaSimulationTieBreak"] = sim.TIE_BREAK_MODEL
+        after["metadata"]["preparedUefaSimulationRatingSource"] = strengths.SOURCE_URL
         after["metadata"]["preparedUefaSimulationInputContract"] = "published-league-tables-results-v1"
         after["contentVersion"] = hashlib.sha256(
             (after["contentVersion"] + "|" + fingerprint).encode()).hexdigest()
         MANIFEST.write_text(json.dumps(after, ensure_ascii=False, indent=2) + "\n")
         report = {"sourceFingerprint": fingerprint, "generatedAt": after["generatedAt"],
-                  "apiRequestsUsed": 0, "verified": verified,
+                  "apiRequestsUsed": 0, "publicRatingRefreshed": public_rating_refreshed,
+                  "algorithm": strengths.ALGORITHM, "verified": verified,
+                  "stageMassVerified": True,
+                  "xgCoverage": {"teams": profiles[0], "withObservedXg": profiles[1], "samples": profiles[2]},
+                  "panathinaikosStrength": pana_strength, "panathinaikosProbabilities": pana_probabilities,
+                  "tieBreakLimitation": "Exact sporting criteria1-8; unresolved future fair-play/coefficient ties sampled without alphabetical bias",
                   "panathinaikosBefore": previous, "panathinaikosAfter": current,
                   "protectedTablesUnchanged": True, "protectedDigest": protected_before[0],
                   "preparedBundle": next(a["sha256"] for a in after["artifacts"]

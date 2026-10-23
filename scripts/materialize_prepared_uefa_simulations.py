@@ -19,13 +19,20 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
 
+try:
+    from . import uefa_club_strengths as club_strengths
+except ImportError:
+    import uefa_club_strengths as club_strengths
+
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_simulation_2026_27.json"
 
 MODEL_VERSION = "uefa-club-monte-carlo-v1"
 MATCH_MODEL_VERSION = "uefa-match-monte-carlo-v1"
 STRENGTH_MODEL = "uefa-seeding-elo-v1"
-TIE_BREAK_MODEL = "points-goal-difference-goals-for"
+# Wire IDs stay compatible with installed APK1.0.2; the actual algorithm is separately versioned.
+STRENGTH_ALGORITHM = club_strengths.ALGORITHM
+TIE_BREAK_MODEL = "uefa-sporting-criteria-1-8-unobserved-ties-random-v2"
 API_BASE = "https://v3.football.api-sports.io"
 FINISHED = {"FT", "AET", "PEN"}
 RATING_SCALE = 400.0
@@ -196,6 +203,9 @@ class TableRow:
     points: int = 0
     gf: int = 0
     ga: int = 0
+    away_gf: int = 0
+    wins: int = 0
+    away_wins: int = 0
 
     @property
     def gd(self) -> int:
@@ -274,26 +284,36 @@ def apply_result(table: dict[str, TableRow], home: str, away: str, hg: int, ag: 
     h.gf += hg
     h.ga += ag
     a.gf += ag
+    a.away_gf += ag
     a.ga += hg
     if hg > ag:
         h.points += 3
+        h.wins += 1
     elif hg < ag:
         a.points += 3
+        a.wins += 1
+        a.away_wins += 1
     else:
         h.points += 1
         a.points += 1
 
 
-def ranking(table: dict[str, TableRow]) -> list[str]:
-    return sorted(
-        table,
-        key=lambda team: (
-            -table[team].points,
-            -table[team].gd,
-            -table[team].gf,
-            team.casefold(),
-        ),
-    )
+def ranking(table: dict[str, TableRow], opponents=None, tie_order=None) -> list[str]:
+    """UEFA Article18 criteria1-8. Unknown future fair-play/coefficient ties are marginalised.
+
+    Fair-play totals include future cards/officials and are not available in this snapshot.
+    Never silently substitute alphabetical order or use a coefficient ahead of unknown fair-play.
+    Each simulation assigns an exchangeable random order only after all eight sporting criteria.
+    """
+    opponents = opponents or {t: () for t in table}
+    tie_order = tie_order or {t: 0 for t in table}
+    def key(team):
+        r = table[team]
+        rivals = [table[t] for t in opponents.get(team, ())]
+        return (-r.points, -r.gd, -r.gf, -r.away_gf, -r.wins, -r.away_wins,
+                -sum(t.points for t in rivals), -sum(t.gd for t in rivals),
+                -sum(t.gf for t in rivals), tie_order[team])
+    return sorted(table, key=key)
 
 
 def elo_expected(home_rating: float, away_rating: float, home_advantage: float = HOME_ADVANTAGE) -> float:
@@ -344,58 +364,79 @@ def draw_from_cdf(rng: random.Random, cdf: list[float]) -> int:
 
 
 class ScoreModel:
-    def __init__(self, ratings: dict[str, float], base_home: float, base_away: float):
+    def __init__(self, ratings: dict[str, float], base_home: float, base_away: float, profiles=None):
         self.ratings = ratings
         self.base_home = base_home
         self.base_away = base_away
-        self.cache: dict[tuple[str, str], tuple[list[float], list[float]]] = {}
+        self.profiles = profiles or {}
+        self.cache = {}
 
-    def draw(self, home: str, away: str, rng: random.Random) -> tuple[int, int]:
-        key = (home, away)
+    def means(self, home, away, neutral=False):
+        if neutral:
+            base = (self.base_home + self.base_away)/2
+            shift = max(-.85, min(.85, GOAL_LOG_COEFF * max(-1.5, min(1.5,
+                (self.ratings[home]-self.ratings[away])/RATING_SCALE))))
+            hm, am = base*math.exp(shift), base*math.exp(-shift)
+        else:
+            hm, am = goal_means(home, away, self.ratings, self.base_home, self.base_away)
+        h = self.profiles.get(home, {})
+        a = self.profiles.get(away, {})
+        hm *= math.sqrt(h.get("attack", 1.0) * a.get("defense", 1.0))
+        am *= math.sqrt(a.get("attack", 1.0) * h.get("defense", 1.0))
+        return max(.15, min(4.5, hm)), max(.15, min(4.5, am))
+
+    def draw(self, home, away, rng, neutral=False, extra_time=False):
+        key = (home, away, neutral, extra_time)
         cdfs = self.cache.get(key)
         if cdfs is None:
-            hm, am = goal_means(home, away, self.ratings, self.base_home, self.base_away)
-            cdfs = (poisson_cdf(hm), poisson_cdf(am))
+            hm, am = self.means(home, away, neutral)
+            divisor = 3 if extra_time else 1
+            cdfs = (poisson_cdf(hm/divisor), poisson_cdf(am/divisor))
             self.cache[key] = cdfs
         return draw_from_cdf(rng, cdfs[0]), draw_from_cdf(rng, cdfs[1])
 
-    def neutral_win_probability(self, team_a: str, team_b: str) -> float:
-        exponent = (self.ratings[team_b] - self.ratings[team_a]) / RATING_SCALE
-        return 1.0 / (1.0 + 10.0 ** exponent)
+    def neutral_win_probability(self, a, b):
+        # Compatibility helper; shoot-outs use an exchangeable coin without keeper-level evidence.
+        return 1/(1+10**((self.ratings[b]-self.ratings[a])/RATING_SCALE))
 
-    def draw_neutral(self, team_a: str, team_b: str, rng: random.Random) -> tuple[int, int]:
-        # Final venue is neutral: use the mean scoring environment and no home advantage.
-        base = max(0.15, (self.base_home + self.base_away) / 2.0)
-        diff = (self.ratings[team_a] - self.ratings[team_b]) / RATING_SCALE
-        diff = max(-1.5, min(1.5, diff))
-        shift = max(-0.85, min(0.85, GOAL_LOG_COEFF * diff))
-        a_cdf = poisson_cdf(max(0.15, min(4.50, base * math.exp(shift))))
-        b_cdf = poisson_cdf(max(0.15, min(4.50, base * math.exp(-shift))))
-        return draw_from_cdf(rng, a_cdf), draw_from_cdf(rng, b_cdf)
+    def draw_neutral(self, a, b, rng):
+        return self.draw(a, b, rng, neutral=True)
 
 
-def two_leg_winner(team_a: str, team_b: str, model: ScoreModel, rng: random.Random) -> str:
-    # One home leg each; away goals do not apply.
-    a_home = model.draw(team_a, team_b, rng)
-    b_home = model.draw(team_b, team_a, rng)
-    a_goals = a_home[0] + b_home[1]
-    b_goals = a_home[1] + b_home[0]
-    if a_goals > b_goals:
-        return team_a
-    if b_goals > a_goals:
-        return team_b
-    return team_a if rng.random() < model.neutral_win_probability(team_a, team_b) else team_b
+def two_leg_winner(team_a, team_b, model, rng):
+    # A is the seeded bracket path: first leg at B, return leg (and extra time) at A.
+    first = model.draw(team_b, team_a, rng)
+    second = model.draw(team_a, team_b, rng)
+    a_goals, b_goals = first[1]+second[0], first[0]+second[1]
+    if a_goals == b_goals:
+        extra = model.draw(team_a, team_b, rng, extra_time=True)
+        a_goals += extra[0]
+        b_goals += extra[1]
+    if a_goals != b_goals:
+        return team_a if a_goals > b_goals else team_b
+    return team_a if rng.random() < .5 else team_b
 
 
-def final_winner(team_a: str, team_b: str, model: ScoreModel, rng: random.Random) -> str:
-    # UEFA final is one match at a neutral venue.
-    a, b = model.draw_neutral(team_a, team_b, rng)
-    if a > b:
-        return team_a
-    if b > a:
-        return team_b
-    p = model.neutral_win_probability(team_a, team_b)
-    return team_a if rng.random() < p else team_b
+def final_winner(team_a, team_b, model, rng):
+    a, b = model.draw(team_a, team_b, rng, neutral=True)
+    if a == b:
+        extra = model.draw(team_a, team_b, rng, neutral=True, extra_time=True)
+        a += extra[0]
+        b += extra[1]
+    if a != b:
+        return team_a if a > b else team_b
+    return team_a if rng.random() < .5 else team_b
+
+
+def quarterfinal_pairs(group_winners):
+    # Index0/1 is a fixed half of Annex B. No redraw after the round of16.
+    return [(group_winners[0][side], group_winners[3][side]) for side in (0, 1)] + [
+            (group_winners[1][side], group_winners[2][side]) for side in (0, 1)]
+
+
+def semifinal_pairs(quarter_winners):
+    return [(quarter_winners[0], quarter_winners[2]),
+            (quarter_winners[1], quarter_winners[3])]
 
 
 def random_two_ties(seed_pair: list[str], unseed_pair: list[str], rng: random.Random) -> list[tuple[str, str]]:
@@ -412,9 +453,17 @@ def simulate_competition(
     logos: dict[str, str],
     runs: int,
     api_league_id: int,
+    strength_inputs=None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    alias_map, pot_by_team, ratings = participant_maps(competition)
+    alias_map, pot_by_team, _ = participant_maps(competition)
     del alias_map
+    if strength_inputs is None:
+        config = json.loads(CONFIG_PATH.read_text())
+        snapshot, mapped, _ = club_strengths.load_catalog(ROOT)
+        profiles = club_strengths.xg_profiles(config, ROOT, goal_means)
+        strength_inputs = (snapshot, mapped, profiles)
+    snapshot, mapped, profiles = strength_inputs
+    ratings = {t: float(mapped[t]["elo"]) for t in pot_by_team}
     teams = list(pot_by_team)
     expected_fixtures = int(competition["expectedLeaguePhaseFixtures"])
     if len(fixtures) != expected_fixtures:
@@ -433,7 +482,9 @@ def simulate_competition(
     base_table = {team: TableRow() for team in teams}
     for f in completed:
         apply_result(base_table, f.home, f.away, int(f.home_goals), int(f.away_goals))
-        update_ratings(ratings, f)
+        # ClubElo already includes results through its published day. Never count them twice.
+        if f.date > snapshot["throughDate"]:
+            update_ratings(ratings, f)
 
     if len(completed) >= 20:
         base_home = sum(int(f.home_goals) for f in completed) / len(completed)
@@ -443,9 +494,13 @@ def simulate_competition(
         base_away = DEFAULT_AWAY_GOALS
     base_home = max(0.9, min(2.2, base_home))
     base_away = max(0.8, min(2.0, base_away))
-    model = ScoreModel(ratings, base_home, base_away)
+    model = ScoreModel(ratings, base_home, base_away, profiles)
+    opponents = {t: [] for t in teams}
+    for f in fixtures:
+        opponents[f.home].append(f.away)
+        opponents[f.away].append(f.home)
 
-    current_order = ranking(base_table)
+    current_order = ranking(base_table, opponents)
     current_pos = {team: idx + 1 for idx, team in enumerate(current_order)}
 
     counters = {
@@ -458,7 +513,9 @@ def simulate_competition(
 
     seed_material = f"{competition['competitionId']}|{competition['season'] if 'season' in competition else '2026'}|{runs}|{MODEL_VERSION}"
     seed = int(hashlib.sha256(seed_material.encode("utf-8")).hexdigest()[:16], 16)
-    rng = random.Random(seed)
+    league_rng = random.Random(seed)
+    tie_rng = random.Random(seed ^ 0x544945)
+    rng = random.Random(seed ^ 0x4B4F)
 
     for _ in range(runs):
         table = {
@@ -467,14 +524,17 @@ def simulate_competition(
                 points=base_table[team].points,
                 gf=base_table[team].gf,
                 ga=base_table[team].ga,
+                away_gf=base_table[team].away_gf,
+                wins=base_table[team].wins,
+                away_wins=base_table[team].away_wins,
             )
             for team in teams
         }
         for f in future:
-            hg, ag = model.draw(f.home, f.away, rng)
+            hg, ag = model.draw(f.home, f.away, league_rng)
             apply_result(table, f.home, f.away, hg, ag)
 
-        order = ranking(table)
+        order = ranking(table, opponents, {t: tie_rng.random() for t in teams})
         for idx, team in enumerate(order):
             counters[team]["position_total"] += idx + 1
         for team in order[:8]:
@@ -508,23 +568,18 @@ def simulate_competition(
             playoff_winners[1], playoff_winners[0],
         ]
         r16_group_winners: list[list[str]] = []
-        for seeded, opponents in zip(r16_seed_groups, r16_opponent_groups):
+        for seeded, round_opponents in zip(r16_seed_groups, r16_opponent_groups):
             group_winners = []
-            for a, b in random_two_ties(list(seeded), list(opponents), rng):
+            # The play-off winners already occupy fixed bracket halves. Only draw the seed pair.
+            seeds = list(seeded)
+            rng.shuffle(seeds)
+            for a, b in zip(seeds, round_opponents):
                 winner = two_leg_winner(a, b, model, rng)
                 group_winners.append(winner)
                 counters[winner]["qf"] += 1
             r16_group_winners.append(group_winners)
 
-        # Preserve the four seeded bracket paths. Cross the 1/2 path with 7/8
-        # and the 3/4 path with 5/6, matching the fixed-path concept in Annex B.
-        qf_pairs: list[tuple[str, str]] = []
-        for left_idx, right_idx in ((0, 3), (1, 2)):
-            left = r16_group_winners[left_idx][:]
-            right = r16_group_winners[right_idx][:]
-            rng.shuffle(left)
-            rng.shuffle(right)
-            qf_pairs.extend([(left[0], right[0]), (left[1], right[1])])
+        qf_pairs = quarterfinal_pairs(r16_group_winners)
 
         sf_entrants: list[str] = []
         for a, b in qf_pairs:
@@ -532,10 +587,10 @@ def simulate_competition(
             sf_entrants.append(winner)
             counters[winner]["sf"] += 1
 
-        # The first two quarter-finals form one semi-final side, the other two the other side.
+        # Opposite halves keep league seeds1 and2 apart until the final.
         finalists: list[str] = []
-        for i, j in ((0, 1), (2, 3)):
-            winner = two_leg_winner(sf_entrants[i], sf_entrants[j], model, rng)
+        for a, b in semifinal_pairs(sf_entrants):
+            winner = two_leg_winner(a, b, model, rng)
             finalists.append(winner)
             counters[winner]["final"] += 1
 
@@ -631,7 +686,12 @@ def materialize_match_simulations(
             if not all(math.isfinite(v) and v > 0 for v in (base_home, base_away)):
                 raise ValueError(f"Invalid UEFA scoring environment: {cid}/{season}")
             rating_ms = max(int(source_ms), *(int(r[3]) for r in team_rows))
-            model = ScoreModel(ratings, base_home, base_away)
+            profiles = {}
+            if con.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='prepared_uefa_strength_evidence'").fetchone():
+                profiles = {r[0]: {"attack": r[1], "defense": r[2]} for r in con.execute(
+                    "SELECT team_name,xg_attack,xg_defense FROM prepared_uefa_strength_evidence "
+                    "WHERE competition_id=? AND season=?", (cid, season))}
+            model = ScoreModel(ratings, base_home, base_away, profiles)
             fixtures = con.execute(
                 "SELECT fm.snapshot_version,fm.match_key,fm.kickoff,fm.home_team,fm.away_team "
                 "FROM prepared_fixture_matches fm "
@@ -659,7 +719,7 @@ def materialize_match_simulations(
                 scores = Counter(model.draw(home, away, rng) for _ in range(runs))
                 home_wins = sum(n for (h, a), n in scores.items() if h > a)
                 draws = sum(n for (h, a), n in scores.items() if h == a)
-                home_mean, away_mean = goal_means(home, away, ratings, base_home, base_away)
+                home_mean, away_mean = model.means(home, away)
                 distribution = json.dumps([
                     {"homeGoals": h, "awayGoals": a, "probability": n / runs}
                     for (h, a), n in sorted(scores.items())
@@ -755,7 +815,10 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
 
 
 def cached_source_fingerprint(config: dict[str, Any], root: Path = ROOT) -> str:
-    inputs = {}
+    snapshot, mapped, _ = club_strengths.load_catalog(root)
+    profiles = club_strengths.xg_profiles(config, root, goal_means)
+    inputs = {"algorithm": STRENGTH_ALGORITHM, "sourceAsOf": snapshot["sourceAsOf"],
+              "ratings": mapped, "xgProfiles": profiles}
     for comp in config["competitions"]:
         fixtures, _, ranks, league_id = cached_competition(comp, int(config["season"]), root)
         inputs[comp["competitionId"]] = {"season": config["season"], "league": league_id,
@@ -821,6 +884,8 @@ def main() -> int:
     config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     season = int(config.get("season") or 2026)
     results: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
+    snapshot, mapped, _ = club_strengths.load_catalog(ROOT)
+    profiles = club_strengths.xg_profiles(config, ROOT, goal_means)
     api_key = "" if args.cached_league_tables else os.getenv("API_FOOTBALL_KEY", "").strip()
     if not args.cached_league_tables and not api_key:
         raise SystemExit("API_FOOTBALL_KEY is required for UEFA simulation materialization")
@@ -832,7 +897,7 @@ def main() -> int:
             fixture_payload = api_get(api_key, "fixtures", {"league": league_id, "season": season})
             fixtures, logos = parse_fixtures(fixture_payload, competition)
             ranks = None
-        meta, rows = simulate_competition(competition, fixtures, logos, runs, league_id)
+        meta, rows = simulate_competition(competition, fixtures, logos, runs, league_id, (snapshot, mapped, profiles))
         if ranks is not None:
             for row in rows:
                 row["current_position"] = ranks[row["team_name"]]
@@ -897,6 +962,11 @@ def main() -> int:
             """
         )
 
+        con.execute("DROP TABLE IF EXISTS prepared_uefa_strength_evidence")
+        con.execute("CREATE TABLE prepared_uefa_strength_evidence(competition_id TEXT,season TEXT,"
+                    "team_name TEXT,algorithm TEXT,source_name TEXT,source_country TEXT,"
+                    "source_elo REAL,source_as_of TEXT,xg_attack REAL,xg_defense REAL,xg_samples INTEGER,"
+                    "PRIMARY KEY(competition_id,season,team_name))")
         team_rows = 0
         for meta, rows in results:
             con.execute(
@@ -941,6 +1011,12 @@ def main() -> int:
                     for row in rows
                 ],
             )
+            con.executemany("INSERT INTO prepared_uefa_strength_evidence VALUES(?,?,?,?,?,?,?,?,?,?,?)", [
+                (meta["competition_id"], meta["season"], r["team_name"], STRENGTH_ALGORITHM,
+                 mapped[r["team_name"]]["name"], mapped[r["team_name"]]["country"],
+                 mapped[r["team_name"]]["elo"], snapshot["sourceAsOf"],
+                 profiles[r["team_name"]]["attack"], profiles[r["team_name"]]["defense"],
+                 profiles[r["team_name"]]["samples"]) for r in rows])
             team_rows += len(rows)
 
         match_counts = materialize_match_simulations(con, config, runs)
