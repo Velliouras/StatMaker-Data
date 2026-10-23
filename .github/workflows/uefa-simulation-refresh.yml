@@ -1,0 +1,82 @@
+name: UEFA Simulation Refresh
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, fix/uefa-league-simulation-refresh]
+    paths:
+      - '.github/workflows/uefa-simulation-refresh.yml'
+      - 'scripts/refresh_uefa_simulations.py'
+      - 'scripts/materialize_prepared_uefa_simulations.py'
+      - 'scripts/hotpatch_app_ready_simulation.py'
+      - 'tests/test_cached_uefa_simulations.py'
+  workflow_run:
+    workflows: ["League Tables UEFA and Program Publish"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    # Recovery if a workflow completion event is missed. Unchanged inputs cost no API/compute.
+    - cron: "17 */3 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-targeted-writers
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/*
+            /tests/*
+            /config/uefa_simulation_2026_27.json
+            /data/statmaker/league_tables/
+            /data/statmaker/uefa_current_stats.json
+            /data/statmaker/app_ready/
+            /reports/uefa_simulation_refresh.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate cached inputs and stale-current-position regression without provider access
+        run: |
+          python -m unittest tests/test_cached_uefa_simulations.py tests/test_prepared_uefa_match_simulations.py
+
+      - name: Refresh UEFA and verify every current table plus protected data
+        run: python -m scripts.refresh_uefa_simulations
+
+      - name: Publish verified UEFA simulation data
+        if: ${{ github.ref_name == 'main' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3; do
+            git add -A data/statmaker/app_ready reports/uefa_simulation_refresh.json
+            if git diff --cached --quiet; then
+              echo "UEFA simulations already current"
+              exit 0
+            fi
+            git commit -m "Refresh UEFA simulations from published matchday results"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git reset --hard refs/remotes/origin/main
+            python -m scripts.refresh_uefa_simulations
+          done
+          echo "Unable to publish UEFA simulations after 3 fresh-generation attempts" >&2
+          exit 1

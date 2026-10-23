@@ -681,12 +681,119 @@ def materialize_match_simulations(
     return counts
 
 
+
+CACHED_UEFA_TABLES = {"champions_league": ("CL", 2), "europa_league": ("EL", 3),
+                      "conference_league": ("UECL", 848)}
+
+
+def cached_competition(competition: dict[str, Any], season: int, root: Path = ROOT):
+    """One source for current table, completed results and remaining schedule; no API."""
+    cid = competition["competitionId"]
+    code, league_id = CACHED_UEFA_TABLES[cid]
+    source = json.loads((root / "data/statmaker/league_tables" / (code + ".json")).read_text())
+    if (source.get("contract") != "statmaker-league-tables-v1" or source.get("leagueCode") != code
+            or source.get("country") != "UEFA" or int(source.get("season") or 0) != season
+            or int(source.get("apiFootballLeagueId") or 0) != league_id):
+        raise ValueError(f"{cid}: wrong cached competition/season")
+    raw = source.get("fixtures") or []
+    ids = [int(f.get("fixture_id") or 0) for f in raw]
+    if len(set(ids)) != len(ids) or any(i <= 0 for i in ids):
+        raise ValueError(f"{cid}: duplicate or missing fixture identity")
+    response = []
+    for f in raw:
+        status = str(f.get("status") or "").upper()
+        if status in FINISHED and any(type(f.get(k)) is not int or f[k] < 0
+                                     for k in ("home_goals", "away_goals")):
+            raise ValueError(f"{cid}: invalid finished goals")
+        response.append({
+            "fixture": {"id": f["fixture_id"], "date": f["date_utc"], "status": {"short": status}},
+            "league": {"round": f.get("round", "")},
+            "teams": {"home": {"name": f["home_team"], "logo": f.get("home_logo")},
+                      "away": {"name": f["away_team"], "logo": f.get("away_logo")}},
+            "goals": {"home": f.get("home_goals"), "away": f.get("away_goals")}})
+    fixtures, logos = parse_fixtures({"response": response}, competition)
+    aliases, pots, _ = participant_maps(competition)
+    counts = Counter(t for f in fixtures for t in (f.home, f.away))
+    if (len(fixtures) != int(competition["expectedLeaguePhaseFixtures"])
+            or set(counts) != set(pots)
+            or any(n != int(competition["leagueMatchesPerTeam"]) for n in counts.values())):
+        raise ValueError(f"{cid}: incomplete league-phase schedule")
+    table = {t: TableRow() for t in pots}
+    finished = {}
+    for f in fixtures:
+        if f.status in FINISHED:
+            apply_result(table, f.home, f.away, f.home_goals, f.away_goals)
+            finished[f.fixture_id] = (f.home_goals, f.away_goals)
+    stats_path = root / "data/statmaker/uefa_current_stats.json"
+    if stats_path.is_file():
+        stats = json.loads(stats_path.read_text())
+        if int(stats.get("season") or 0) == season:
+            for comp in stats.get("competitions") or []:
+                if comp.get("competitionId") == cid:
+                    for f in comp.get("fixtures") or []:
+                        if f.get("status") in FINISHED and finished.get(int(f["fixtureId"])) != (f["homeGoals"], f["awayGoals"]):
+                            raise ValueError(f"{cid}: tables are behind published UEFA results")
+    ranks = {}
+    for row in source.get("standings") or []:
+        team = resolve_team(str(row.get("team") or ""), aliases, list(pots))
+        if team is None or team in ranks:
+            raise ValueError(f"{cid}: unknown/duplicate standing")
+        t = table[team]
+        if (t.played, t.points, t.gf, t.ga) != tuple(int(row.get(k, -1))
+                    for k in ("played", "points", "goalsFor", "goalsAgainst")):
+            raise ValueError(f"{cid}/{team}: standings disagree with completed fixtures")
+        ranks[team] = int(row["rank"])
+    if set(ranks) != set(pots) or set(ranks.values()) != set(range(1, 37)):
+        raise ValueError(f"{cid}: incomplete standings")
+    return fixtures, logos, ranks, league_id
+
+
+def cached_source_fingerprint(config: dict[str, Any], root: Path = ROOT) -> str:
+    inputs = {}
+    for comp in config["competitions"]:
+        fixtures, _, ranks, league_id = cached_competition(comp, int(config["season"]), root)
+        inputs[comp["competitionId"]] = {"season": config["season"], "league": league_id,
+            "fixtures": [vars(f) for f in fixtures], "ranks": ranks}
+    return hashlib.sha256(json.dumps(inputs, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+
+
+def verify_cached_simulations(con: sqlite3.Connection, config: dict[str, Any], root: Path = ROOT):
+    verified = {}
+    for comp in config["competitions"]:
+        fixtures, _, ranks, _ = cached_competition(comp, int(config["season"]), root)
+        cid = comp["competitionId"]
+        completed = sum(f.status in FINISHED for f in fixtures)
+        meta = con.execute("SELECT completed_league_matches,remaining_league_matches,simulation_runs "
+            "FROM prepared_uefa_simulation_meta WHERE competition_id=? AND season=?",
+            (cid, "2026-2027")).fetchall()
+        if len(meta) != 1 or meta[0][:2] != (completed, len(fixtures)-completed) or meta[0][2] < 10000:
+            raise ValueError(f"{cid}: stale simulation match counts")
+        table = {t: TableRow() for t in ranks}
+        for f in fixtures:
+            if f.status in FINISHED:
+                apply_result(table, f.home, f.away, f.home_goals, f.away_goals)
+        rows = con.execute("SELECT team_name,current_position,current_played,current_points,"
+            "current_goal_difference,current_goals_for FROM prepared_uefa_team_simulations "
+            "WHERE competition_id=? AND season=?", (cid, "2026-2027")).fetchall()
+        if len(rows) != 36 or {r[0] for r in rows} != set(ranks):
+            raise ValueError(f"{cid}: incomplete simulation teams")
+        for team, position, played, points, gd, gf in rows:
+            t = table[team]
+            if (position, played, points, gd, gf) != (ranks[team], t.played, t.points, t.gd, t.gf):
+                raise ValueError(f"{cid}/{team}: stale simulation current standing")
+        verified[cid] = {"completed": completed, "remaining": len(fixtures)-completed,
+                         "teams": 36, "runs": meta[0][2]}
+    return verified
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
     parser.add_argument("--runs", type=int, default=10_000)
     parser.add_argument("--matches-only", action="store_true",
                         help="Reuse published UEFA ratings and fixtures without API calls")
+    parser.add_argument("--cached-league-tables", action="store_true",
+                        help="Refresh UEFA from published results/schedule; zero provider calls")
     args = parser.parse_args()
     runs = max(1_000, min(50_000, int(args.runs)))
 
@@ -703,22 +810,27 @@ def main() -> int:
         print("PREPARED_UEFA_MATCH_SIMULATION_OK", counts)
         return 0
 
-    api_key = os.getenv("API_FOOTBALL_KEY", "").strip()
-    if not api_key:
-        raise SystemExit("API_FOOTBALL_KEY is required for UEFA simulation materialization")
     if not args.db.is_file():
         raise SystemExit(f"Prepared DB missing: {args.db}")
-
     config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
     season = int(config.get("season") or 2026)
     results: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
-
+    api_key = "" if args.cached_league_tables else os.getenv("API_FOOTBALL_KEY", "").strip()
+    if not args.cached_league_tables and not api_key:
+        raise SystemExit("API_FOOTBALL_KEY is required for UEFA simulation materialization")
     for competition in config.get("competitions") or []:
-        league_id = find_league_id(api_key, competition, season)
-        fixture_payload = api_get(api_key, "fixtures", {"league": league_id, "season": season})
-        fixtures, logos = parse_fixtures(fixture_payload, competition)
-        result = simulate_competition(competition, fixtures, logos, runs, league_id)
-        results.append(result)
+        if args.cached_league_tables:
+            fixtures, logos, ranks, league_id = cached_competition(competition, season)
+        else:
+            league_id = find_league_id(api_key, competition, season)
+            fixture_payload = api_get(api_key, "fixtures", {"league": league_id, "season": season})
+            fixtures, logos = parse_fixtures(fixture_payload, competition)
+            ranks = None
+        meta, rows = simulate_competition(competition, fixtures, logos, runs, league_id)
+        if ranks is not None:
+            for row in rows:
+                row["current_position"] = ranks[row["team_name"]]
+        results.append((meta, rows))
 
     generated_at_ms = int(time.time() * 1000)
     con = sqlite3.connect(args.db)
@@ -826,6 +938,8 @@ def main() -> int:
             team_rows += len(rows)
 
         match_counts = materialize_match_simulations(con, config, runs)
+        if args.cached_league_tables:
+            print('UEFA_CACHED_STANDINGS_VERIFIED', verify_cached_simulations(con, config))
         con.commit()
         quick = con.execute("PRAGMA quick_check").fetchone()
         if not quick or quick[0] != "ok":
