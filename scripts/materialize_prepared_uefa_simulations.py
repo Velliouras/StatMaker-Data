@@ -743,7 +743,7 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
     for row in source.get("standings") or []:
         team = resolve_team(str(row.get("team") or ""), aliases, list(pots))
         if team is None or team in ranks:
-            raise ValueError(f"{cid}: unknown/duplicate standing: {row.get(\'team\')}")
+            raise ValueError(f"{cid}: unknown/duplicate standing: {row.get('team')}")
         t = table[team]
         if (t.played, t.points, t.gf, t.ga) != tuple(int(row.get(k, -1))
                     for k in ("played", "points", "goalsFor", "goalsAgainst")):
