@@ -713,6 +713,12 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
             "goals": {"home": f.get("home_goals"), "away": f.get("away_goals")}})
     fixtures, logos = parse_fixtures({"response": response}, competition)
     aliases, pots, _ = participant_maps(competition)
+    # Explicit provider standing spellings; participant identity is also checked against all results.
+    standing_aliases = {
+        "champions_league": {"Sabah FC": "Sabah"},
+        "europa_league": {"Ferencvarosi TC": "Ferencváros"},
+    }
+    aliases.update({norm(a): t for a, t in standing_aliases.get(cid, {}).items()})
     counts = Counter(t for f in fixtures for t in (f.home, f.away))
     if (len(fixtures) != int(competition["expectedLeaguePhaseFixtures"])
             or set(counts) != set(pots)
@@ -737,7 +743,7 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
     for row in source.get("standings") or []:
         team = resolve_team(str(row.get("team") or ""), aliases, list(pots))
         if team is None or team in ranks:
-            raise ValueError(f"{cid}: unknown/duplicate standing")
+            raise ValueError(f"{cid}: unknown/duplicate standing: {row.get(\'team\')}")
         t = table[team]
         if (t.played, t.points, t.gf, t.ga) != tuple(int(row.get(k, -1))
                     for k in ("played", "points", "goalsFor", "goalsAgainst")):
