@@ -1,0 +1,87 @@
+name: Fixture Calendar Metadata
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/build_statmaker_update_manifest.py
+      - tests/test_fixture_calendar_manifest.py
+      - .github/workflows/fixture-calendar-metadata.yml
+permissions:
+  contents: write
+concurrency:
+  group: statmaker-canonical-main-writer
+  queue: max
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - branch: main
+            manifest: data/statmaker/update_manifest.json
+          - branch: build/uefa-qualifier-feed-20260720
+            manifest: data/statmaker/uefa_update_manifest.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: code
+          sparse-checkout: |
+            scripts/build_statmaker_update_manifest.py
+            tests/test_fixture_calendar_manifest.py
+            tests/test_statmaker_update_manifest.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify manifest and calendar contracts
+        working-directory: code
+        run: python -m unittest discover -s tests -p 'test*manifest.py' -v
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+          path: data
+          sparse-checkout: |
+            odds/odds_api_io/domestic_odds.json
+            odds/odds_api_io/champions_league_odds.json
+            odds/odds_api_io/europa_league_odds.json
+            odds/odds_api_io/conference_league_odds.json
+            data/statmaker/update_manifest.json
+            data/statmaker/uefa_update_manifest.json
+          sparse-checkout-cone-mode: false
+      - name: Publish date metadata from existing API data only
+        working-directory: data
+        env:
+          CALENDAR_BRANCH: ${{ matrix.branch }}
+          CALENDAR_MANIFEST: ${{ matrix.manifest }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for attempt in 1 2 3; do
+            git fetch origin "$CALENDAR_BRANCH" --depth=1
+            git reset --hard FETCH_HEAD
+            python - <<'PY'
+          import json, os, sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('../code').resolve()))
+          from scripts.build_statmaker_update_manifest import attach_fixture_calendar, write_manifest
+          path = Path(os.environ['CALENDAR_MANIFEST'])
+          manifest = json.loads(path.read_text(encoding='utf-8'))
+          attach_fixture_calendar(Path.cwd(), manifest)
+          write_manifest(path, manifest)
+          groups = manifest['fixtureCalendar']['groups']
+          dates = sorted({day for group in groups for day in group['dates']})
+          print('CALENDAR_METADATA', manifest['profile'], 'groups=', len(groups), 'dates=', len(dates),
+                'first=', dates[0] if dates else None, 'last=', dates[-1] if dates else None)
+          PY
+            if git diff --quiet -- "$CALENDAR_MANIFEST"; then exit 0; fi
+            git add "$CALENDAR_MANIFEST"
+            git commit -m 'Publish complete API fixture dates in existing update manifest'
+            if git push origin "HEAD:refs/heads/$CALENDAR_BRANCH"; then exit 0; fi
+          done
+          exit 1

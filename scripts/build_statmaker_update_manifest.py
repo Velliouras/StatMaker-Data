@@ -15,6 +15,8 @@ import argparse
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -102,6 +104,49 @@ def _raw_url(repository: str, branch: str, relative_path: str) -> str:
     return f"https://raw.githubusercontent.com/{repository}/{branch}/{relative_path}"
 
 
+def fixture_calendar_groups(payload: Any, artifact_id: str, source_sha256: str) -> list[dict[str, Any]]:
+    """All API fixture dates, including unpriced games; no rolling horizon or model gates."""
+    if not isinstance(payload, dict):
+        return []
+    scopes: dict[tuple[str, str], set[str]] = {}
+    containers = [payload] + [value for value in payload.get("leagues", []) if isinstance(value, dict)]
+    for container in containers:
+        for match in container.get("matches", []) or []:
+            if not isinstance(match, dict):
+                continue
+            raw = str(match.get("kickoff") or match.get("date") or "").strip()
+            try:
+                moment = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                if moment.tzinfo is None:
+                    moment = moment.replace(tzinfo=timezone.utc)
+                day = moment.astimezone(ZoneInfo("Europe/Athens")).date().isoformat()
+            except (ValueError, TypeError):
+                continue
+            league = str(match.get("leagueCode") or container.get("leagueCode") or "").strip()
+            country = str(match.get("country") or container.get("country") or payload.get("country") or "").strip()
+            if not league:
+                continue
+            scopes.setdefault((country, league), set()).add(day)
+    return [{"artifactId": artifact_id, "sourceSha256": source_sha256,
+             "country": country, "leagueCode": league, "dates": sorted(dates)}
+            for (country, league), dates in sorted(scopes.items())]
+
+
+def attach_fixture_calendar(root: Path, manifest: dict[str, Any]) -> None:
+    """Metadata-only publication for an existing manifest, with source hash verification."""
+    groups: list[dict[str, Any]] = []
+    declared = {item["id"]: item for item in manifest.get("artifacts", [])}
+    for spec in PROFILES[manifest["profile"]]:
+        if spec.group != "odds" or spec.artifact_id not in declared:
+            continue
+        path = root / spec.path
+        expected = declared[spec.artifact_id]["sha256"]
+        if _sha256(path) != expected:
+            raise ValueError(f"Manifest/source mismatch: {spec.artifact_id}")
+        groups.extend(fixture_calendar_groups(_read_json(path), spec.artifact_id, expected))
+    manifest["fixtureCalendar"] = {"schemaVersion": 1, "groups": groups}
+
+
 def build_manifest(
     root: Path,
     branch: str,
@@ -111,6 +156,7 @@ def build_manifest(
 ) -> dict[str, Any]:
     artifacts: list[dict[str, Any]] = []
     missing_required: list[str] = []
+    calendar_groups: list[dict[str, Any]] = []
 
     for spec in specs:
         path = root / spec.path
@@ -130,6 +176,8 @@ def build_manifest(
                 "generatedAt": _timestamp(payload),
             }
         )
+        if spec.group == "odds":
+            calendar_groups.extend(fixture_calendar_groups(payload, spec.artifact_id, artifacts[-1]["sha256"]))
 
     if missing_required:
         raise FileNotFoundError("Missing required artifacts: " + ", ".join(sorted(missing_required)))
@@ -164,6 +212,7 @@ def build_manifest(
         "generatedAt": generated_candidates[0] if generated_candidates else "",
         "artifactCount": len(artifacts),
         "artifacts": artifacts,
+        "fixtureCalendar": {"schemaVersion": 1, "groups": calendar_groups},
     }
 
 
@@ -312,3 +361,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
