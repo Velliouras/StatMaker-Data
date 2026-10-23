@@ -420,6 +420,8 @@ def main():
     updates = price_updates(all_issued, raw, current_quotes(now), now, allowed, eligible_quote)
     payload.update(priceUpdates=updates, priceUpdateCount=len(updates))
     validate_price_updates(payload)
+    from .daily import attach_daily
+    attach_daily(payload, OUT / "p55", OUT / "daily_membership.json")
     publish_read_model(OUT / "p55", payload)
     # 0.1.66 and earlier require p>=.60 and must retain a valid independent feed.
     publish_read_model(OUT, compatible_p60_payload(payload))
@@ -434,6 +436,9 @@ def compatible_p60_payload(payload):
     admitted = {r["selectionId"] for r in legacy["issued"] + legacy.get("marketIssued", [])}
     legacy["priceUpdates"] = [r for r in payload.get("priceUpdates", []) if r["selectionId"] in admitted]
     legacy["priceUpdateCount"] = len(legacy["priceUpdates"])
+    if "dailySelectionIds" in payload:
+        legacy["dailySelectionIds"] = [key for key in payload["dailySelectionIds"] if key in admitted]
+        legacy["dailySelectionCount"] = len(legacy["dailySelectionIds"])
     return legacy
 
 
@@ -456,4 +461,5 @@ def publish_read_model(directory, payload):
 
 if __name__ == "__main__":
     main()
+
 

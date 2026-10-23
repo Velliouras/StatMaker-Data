@@ -43,6 +43,8 @@ def publish(root=ROOT):
             raise ValueError("Candidates are not exact published issues")
     from .repricing import validate_price_updates
     validate_price_updates(payload)
+    from .daily import validate_daily
+    validate_daily(payload)
     target = root / TARGET
     target.mkdir(parents=True, exist_ok=True)
     destination = target / artifact
@@ -62,4 +64,5 @@ def publish(root=ROOT):
 if __name__ == "__main__":
     result = publish()
     print("PRODUCTION_SINGLES_PUBLISHED", result["generationId"], result["sha256"])
+
 
