@@ -414,6 +414,12 @@ def main():
                    candidateCount=len(live), candidates=live, issued=issued, audit=ledger.get("audit", {}), source=ledger.get("source", {}))
     payload.update(marketIssued=market_issued, marketCandidates=market_live, marketCandidateCount=len(market_live),
                    marketRoutingPolicy="MARKET_WATCH_UAT_V1")
+    from .repricing import price_updates, validate_price_updates
+    from scripts.market_watch.build import allowed
+    from scripts.market_watch.quotes import current_quotes
+    updates = price_updates(all_issued, raw, current_quotes(now), now, allowed, eligible_quote)
+    payload.update(priceUpdates=updates, priceUpdateCount=len(updates))
+    validate_price_updates(payload)
     publish_read_model(OUT / "p55", payload)
     # 0.1.66 and earlier require p>=.60 and must retain a valid independent feed.
     publish_read_model(OUT, compatible_p60_payload(payload))
@@ -425,6 +431,9 @@ def compatible_p60_payload(payload):
                   candidates=[r for r in payload["candidates"] if r["winProbability"] >= .60],
                   issued=[r for r in payload["issued"] if r["winProbability"] >= .60])
     legacy["candidateCount"] = len(legacy["candidates"])
+    admitted = {r["selectionId"] for r in legacy["issued"] + legacy.get("marketIssued", [])}
+    legacy["priceUpdates"] = [r for r in payload.get("priceUpdates", []) if r["selectionId"] in admitted]
+    legacy["priceUpdateCount"] = len(legacy["priceUpdates"])
     return legacy
 
 
@@ -447,3 +456,4 @@ def publish_read_model(directory, payload):
 
 if __name__ == "__main__":
     main()
+

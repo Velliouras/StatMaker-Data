@@ -41,6 +41,8 @@ def publish(root=ROOT):
         rows = payload.get(key, [])
         if len(rows) != payload.get(count_key, 0) or any(by_id.get(r["selectionId"]) != r for r in rows):
             raise ValueError("Candidates are not exact published issues")
+    from .repricing import validate_price_updates
+    validate_price_updates(payload)
     target = root / TARGET
     target.mkdir(parents=True, exist_ok=True)
     destination = target / artifact
@@ -60,3 +62,4 @@ def publish(root=ROOT):
 if __name__ == "__main__":
     result = publish()
     print("PRODUCTION_SINGLES_PUBLISHED", result["generationId"], result["sha256"])
+
