@@ -38,10 +38,4 @@ jobs:
       - name: Retrospective A/B replay on historical pre-match snapshots
         run: |
           python scripts/value_first_retrospective_audit.py --days 30 --snapshot-local-hour 11
-      - name: Archive report without publishing to Data or Android
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: value-first-readonly-audit
-          path: reports/value_first_retrospective_audit.json
-          if-no-files-found: warn
+      # Persistent Actions artifact uploads are disabled by repository policy.

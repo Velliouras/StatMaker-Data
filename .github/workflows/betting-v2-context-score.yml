@@ -31,15 +31,7 @@ jobs:
           folder="reports/betting_v2/forward_context_20261018"
           python -u scripts/betting_v2/forward_context.py --output "$folder" --score-only
           git diff --exit-code -- "$folder/candidate.json" "$folder/PROTOCOL.md" "$folder/index.json" "$folder/publication_evidence.json" "$folder/*.json.gz"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: contextual-model-scores
-          path: |
-            reports/betting_v2/forward_context_20261018/*_score.json
-            reports/betting_v2/forward_context_20261018/summary.json
-            reports/betting_v2/forward_context_20261018/RESULTS_GR.md
-            reports/betting_v2/forward_context_20261018/status.json
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Publish score reports without replacing frozen evidence
         shell: bash
         run: |

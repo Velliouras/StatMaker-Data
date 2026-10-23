@@ -31,13 +31,7 @@ jobs:
           python -m unittest discover -s tests -p test_uefa_club_odds_api_io.py -v
       - name: Scan every archived market and replay frozen models without AI or provider calls
         run: python scripts/betting_v2/research_scope_expansion.py --output reports/betting_v2/scope_expansion_v2_20261016
-      - name: Preserve all completed evidence and status
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: expanded-market-research-v2
-          path: reports/betting_v2/scope_expansion_v2_20261016/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist research checkpoint only; no app publication
         if: always()
         shell: bash

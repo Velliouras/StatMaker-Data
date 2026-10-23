@@ -38,9 +38,4 @@ jobs:
           python -m unittest discover -s tests -p 'test_package_uat_prepared_from_prod_snapshot.py' -v
       - name: Audit actual prepared betting bundle, read-only
         run: python scripts/audit_value_first_market_gates.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: statmaker-uat-market-funnel
-          path: reports/uat_value_first_market_funnel.json
-          if-no-files-found: warn
+      # Persistent Actions artifact uploads are disabled by repository policy.

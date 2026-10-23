@@ -46,11 +46,4 @@ jobs:
           python3 scripts/betting_v2/phase2_model_validation.py \
             --repository-root . \
             --output "${RUNNER_TEMP}/betting-v2-phase2-model-validation.json"
-      - name: Save model evidence (not App-Ready)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: betting-v2-phase2-chronological-model-evidence
-          path: ${{ runner.temp }}/betting-v2-phase2-model-validation.json
-          if-no-files-found: warn
-          retention-days: 14
+      # Persistent Actions artifact uploads are disabled by repository policy.

@@ -34,12 +34,7 @@ jobs:
             python scripts/betting_v2/audit_ev55_sensitivity.py --output reports/betting_v2/ev55_sensitivity_20261019
           fi
           python -u scripts/betting_v2/forward_ev55_shadow.py --output reports/betting_v2/forward_ev55_shadow_20261019
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: ev55-shadow-research
-          path: reports/betting_v2/forward_ev55_shadow_20261019/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Save immutable forecasts and updated scores only
         shell: bash
         run: |

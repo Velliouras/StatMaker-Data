@@ -31,12 +31,7 @@ jobs:
         run: python -u scripts/betting_v2/research_gap_attack.py --output reports/betting_v2/gap_attack_model_20261018
       - name: Compare goal and BTTS decisions on archived prices
         run: python -u scripts/betting_v2/research_gap_goals.py --output reports/betting_v2/gap_attack_model_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gap-attacking-statistics-research
-          path: reports/betting_v2/gap_attack_model_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Save research evidence and resumable checkpoints
         if: always()
         shell: bash

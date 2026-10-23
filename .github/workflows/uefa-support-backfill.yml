@@ -127,15 +127,7 @@ jobs:
           )
           PY
 
-      - name: Upload UEFA source repair evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase1-uefa-participant-source-evidence
-          path: ${{ runner.temp }}/phase1_uefa_feed_source.json
-          if-no-files-found: warn
-          retention-days: 14
-
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Rebuild main update manifest
         run: |
           python scripts/build_statmaker_update_manifest.py \

@@ -47,13 +47,7 @@ jobs:
       - name: Audit cached card event labels without provider calls
         if: always()
         run: python scripts/betting_v2/audit_card_contracts.py --output reports/betting_v2/all_market_revision_20261016/card_contract_audit.json
-      - name: Preserve complete or partial evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: all-market-revision
-          path: reports/betting_v2/all_market_revision_20261016/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist research checkpoint only
         if: always()
         shell: bash

@@ -29,12 +29,7 @@ jobs:
           python -m unittest discover -s tests -p test_context_market.py -v
           python -m unittest discover -s tests -p test_forward_context.py -v
           python -u scripts/betting_v2/forward_context.py --output reports/betting_v2/forward_context_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: forward-context-research
-          path: reports/betting_v2/forward_context_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Save immutable forecasts and updated scores only
         if: always()
         shell: bash

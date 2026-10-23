@@ -17,8 +17,4 @@ jobs:
           python-version: '3.11'
       - run: pip install numpy scipy scikit-learn
       - run: python scripts/audit_betting_v2_favorites.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: betting-v2-favorite-audit
-          path: reports/betting_v2/favorite_audit/
-          retention-days: 7
+      # Persistent Actions artifact uploads are disabled by repository policy.

@@ -26,12 +26,7 @@ jobs:
           python -m pip install --quiet numpy scipy scikit-learn
           python -m unittest discover -s tests -p test_research_git_archive.py -v
           python -u scripts/betting_v2/research_git_archive.py --replay-only --output reports/betting_v2/git_archive_expansion_20261016
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: expanded-historical-replay
-          path: reports/betting_v2/git_archive_expansion_20261016/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist replay outputs and resumable checkpoints
         if: always()
         shell: bash

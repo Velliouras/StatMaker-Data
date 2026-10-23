@@ -29,12 +29,7 @@ jobs:
           python -m unittest discover -s tests -p test_context_market.py -v
           python -m unittest discover -s tests -p test_forward_market_first.py -v
           python -u scripts/betting_v2/forward_market_first.py --output reports/betting_v2/forward_market_first_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: forward-market-first-research
-          path: reports/betting_v2/forward_market_first_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Save immutable forecasts and updated scores only
         shell: bash
         run: |

@@ -37,11 +37,4 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           python3 scripts/betting_v2/phase1_provider_market_coverage.py --root . --include-prior-season --output "${RUNNER_TEMP}/official-market-coverage.json"
-      - name: Publish read-only evidence artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase1-six-league-provider-coverage
-          path: ${{ runner.temp }}/official-market-coverage.json
-          if-no-files-found: warn
-          retention-days: 14
+      # Persistent Actions artifact uploads are disabled by repository policy.

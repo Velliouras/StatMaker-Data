@@ -28,12 +28,7 @@ jobs:
       - name: Evaluate the fixed previous-month probability correction
         run: |
           python -u scripts/betting_v2/research_probability_recalibration.py --output reports/betting_v2/probability_recalibration_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: probability-recalibration
-          path: reports/betting_v2/probability_recalibration_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist results and checkpoints
         if: always()
         shell: bash

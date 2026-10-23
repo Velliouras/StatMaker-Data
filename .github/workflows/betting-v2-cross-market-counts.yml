@@ -28,12 +28,7 @@ jobs:
           python -m unittest discover -s tests -p test_cross_market_replay.py -v
       - name: Compare frozen baseline and new prior-only corner counts
         run: python -u scripts/betting_v2/research_cross_market.py --output reports/betting_v2/cross_market_counts_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: cross-market-corner-research
-          path: reports/betting_v2/cross_market_counts_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Save research reports and resumable checkpoints
         if: always()
         shell: bash

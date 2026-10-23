@@ -52,12 +52,4 @@ jobs:
             -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
             -Pkotlin.compiler.execution.strategy=in-process
 
-      - name: Upload focused Betting V2 test report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: statmaker-betting-v2-uat-regressions
-          path: statmaker-uat/app/build/test-results/testDebugUnitTest
-          if-no-files-found: ignore
-
-# Betting V2 UAT verification: constructor compatibility restored, legacy diagnostic disabled.
+      # Persistent Actions artifact uploads are disabled by repository policy.

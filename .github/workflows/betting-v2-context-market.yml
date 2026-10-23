@@ -28,12 +28,7 @@ jobs:
       - name: Fit prior contextual models and compare with market benchmarks
         run: |
           python -u scripts/betting_v2/research_context_market.py --output reports/betting_v2/context_market_model_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: contextual-market-model
-          path: reports/betting_v2/context_market_model_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist parameter banks, results and checkpoints
         if: always()
         shell: bash

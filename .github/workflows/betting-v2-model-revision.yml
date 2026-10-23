@@ -43,13 +43,7 @@ jobs:
           python -u scripts/betting_v2/research_model_revision.py
           --data-root "$REVISION_DATA_ROOT"
           --output reports/betting_v2/model_revision_20261016
-      - name: Preserve complete or partial research evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: betting-model-revision
-          path: reports/betting_v2/model_revision_20261016/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist research checkpoint only
         if: always()
         shell: bash

@@ -17,6 +17,9 @@ jobs:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    outputs:
+      evidence: ${{ steps.transfer.outputs.evidence }}
+      evidence_sha256: ${{ steps.transfer.outputs.evidence_sha256 }}
     permissions:
       contents: read
     steps:
@@ -48,13 +51,9 @@ jobs:
       - name: Update scores without loading a model when no inference is needed
         if: steps.work.outputs.needs_ai != 'true'
         run: python scripts/ai_analyst/run_shadow.py --score-only
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: independent-ai-analyst
-          path: reports/ai_analyst/v2_local/
-          if-no-files-found: error
-          retention-days: 30
+      - name: Transfer verified evidence through bounded job outputs
+        id: transfer
+        run: python scripts/ai_analyst/job_transfer.py pack reports/ai_analyst/v2_local
   publish:
     needs: analyze
     if: needs.analyze.result == 'success'
@@ -68,10 +67,11 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
-      - uses: actions/download-artifact@v4
-        with:
-          name: independent-ai-analyst
-          path: /tmp/independent-ai-analyst
+      - name: Restore verified evidence without an Actions artifact
+        env:
+          AI_EVIDENCE: ${{ needs.analyze.outputs.evidence }}
+          AI_EVIDENCE_SHA256: ${{ needs.analyze.outputs.evidence_sha256 }}
+        run: python scripts/ai_analyst/job_transfer.py unpack /tmp/independent-ai-analyst
       - name: Publish only the independent analyst namespace
         shell: bash
         run: |

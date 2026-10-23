@@ -35,13 +35,7 @@ jobs:
           --output reports/betting_v2/csv_prices_v2_20261016
           --source-cache reports/betting_v2/csv_prices_20261016/sources
           --resolve-schedule-aliases
-      - name: Preserve completed evidence even on partial failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: historical-csv-price-research-v2
-          path: reports/betting_v2/csv_prices_v2_20261016/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist archive research checkpoint only
         if: always()
         shell: bash

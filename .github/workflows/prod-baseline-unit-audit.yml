@@ -38,9 +38,4 @@ jobs:
           ./gradlew :app:testDebugUnitTest --no-daemon \
             -Dorg.gradle.jvmargs="-Xmx4096m -Dfile.encoding=UTF-8" \
             -Pkotlin.compiler.execution.strategy=in-process
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: statmaker-prod-unit-baseline
-          path: statmaker-prod/app/build/test-results/testDebugUnitTest
-          if-no-files-found: ignore
+      # Persistent Actions artifact uploads are disabled by repository policy.

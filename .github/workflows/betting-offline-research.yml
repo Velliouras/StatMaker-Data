@@ -68,10 +68,4 @@ jobs:
           python -u scripts/betting_v2/validated_walk_forward.py --output "$OUTPUT" | tee "$OUTPUT/resume.log"
           python -u scripts/betting_v2/summarize_corrected.py --output "$OUTPUT" | tee "$OUTPUT/summary.log"
           python -u scripts/betting_v2/replay_corrected_prices.py --output "$OUTPUT" | tee "$OUTPUT/priced_replay.log"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: corrected-research
-          path: reports/betting_v2/corrected_20261015
-          retention-days: 30
-          if-no-files-found: warn
+      # Persistent Actions artifact uploads are disabled by repository policy.

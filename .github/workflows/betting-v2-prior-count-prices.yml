@@ -28,12 +28,7 @@ jobs:
       - name: Evaluate frozen August and September models and previous-month price caps
         run: |
           python -u scripts/betting_v2/research_prior_count_prices.py --stage replay --output reports/betting_v2/prior_market_calibration_20261018
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: prior-count-price-calibration
-          path: reports/betting_v2/prior_market_calibration_20261018/
-          retention-days: 30
+      # Persistent Actions artifact uploads are disabled by repository policy.
       - name: Persist development results and resumable checkpoints
         if: always()
         shell: bash
