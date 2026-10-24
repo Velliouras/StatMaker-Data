@@ -8,7 +8,7 @@ on:
     types: [completed]
   push:
     branches: [main]
-    paths: ['.github/triggers/market-watch']
+    paths: ['.github/triggers/market-watch', '.github/workflows/market-watch.yml', 'scripts/market_watch/build.py', 'scripts/market_watch/test_refresh.py']
 permissions:
   contents: write
 concurrency:
@@ -31,7 +31,7 @@ jobs:
         run: python -m pip install --quiet catboost==1.2.8 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.6.1
       - name: Verify UAT selection and update monitoring of issued predictions
         run: |
-          python -m unittest scripts.market_watch.test_policy scripts.market_watch.test_catalog scripts.market_watch.test_recommend scripts.shots_uat.test_production -v
+          python -m unittest scripts.market_watch.test_policy scripts.market_watch.test_catalog scripts.market_watch.test_recommend scripts.market_watch.test_refresh scripts.shots_uat.test_production scripts.shots_uat.test_repricing scripts.shots_uat.test_daily -v
           python -m scripts.market_watch.build
           python -m scripts.shots_uat.publish_production
       - name: Save dashboard and decision history without Actions artifacts
@@ -44,3 +44,4 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
+

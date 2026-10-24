@@ -143,6 +143,8 @@ def historical():
 def refresh_current_feed(now):
     """Apply pause/resume immediately to existing public issues, without repricing."""
     from scripts.shots_uat.feed import publish_read_model,compatible_p60_payload,digest
+    from scripts.shots_uat.repricing import validate_price_updates
+    from scripts.shots_uat.daily import attach_daily
     base=ROOT/"data/statmaker/uat/shots_v1";index=read(base/"p55/latest.json")
     if not index:return
     path=base/"p55"/index["artifact"]
@@ -150,15 +152,30 @@ def refresh_current_feed(now):
     raw=path.read_bytes()
     if hashlib.sha256(raw).hexdigest()!=index["sha256"]:raise ValueError("Read model hash mismatch")
     payload=json.loads(raw)
+    # Check the source at its own publication time before expiring valid live rows.
+    # A refresh must not disguise an invalid quote as a normally expired overlay.
+    if "priceUpdates" in payload:validate_price_updates(payload)
+    repriced_ids={r["selectionId"] for r in payload.get("priceUpdates",[])}
+    issued={r["selectionId"]:r for r in payload.get("issued",[])+payload.get("marketIssued",[])}
     def current(rows):
-        return [r for r in rows if allowed(r["market"],now) and r["winProbability"]>=.60
+        return [r for r in rows if r["selectionId"] not in repriced_ids
+                and r.get("outcome","PENDING")=="PENDING"
+                and allowed(r["market"],now) and r["winProbability"]>=.60
                 and time(r["kickoff"])>now and r.get("latestQuoteObservedAt")
                 and now-86400<=time(r["latestQuoteObservedAt"])<=now]
     payload["candidates"]=current(payload["issued"]);payload["candidateCount"]=len(payload["candidates"])
     payload["marketCandidates"]=current(payload.get("marketIssued",[]));payload["marketCandidateCount"]=len(payload["marketCandidates"])
     payload["minimumWinProbability"]=.60
     payload["generatedAt"]=datetime.fromtimestamp(now,timezone.utc).isoformat()
-    payload["generationId"]=digest(json.dumps([payload["generationId"],payload["generatedAt"],payload["candidates"],payload["marketCandidates"]],sort_keys=True).encode())
+    # The source overlay is valid only while its issue is pending, pre-kickoff,
+    # allowed by Market Watch and backed by the same fresh observed price.
+    payload["priceUpdates"]=[r for r in payload.get("priceUpdates",[])
+        if issued[r["selectionId"]]["outcome"]=="PENDING" and time(r["kickoff"])>now
+        and allowed(r["market"],now) and now-86400<=time(r["observedAt"])<=now]
+    payload["priceUpdateCount"]=len(payload["priceUpdates"])
+    validate_price_updates(payload)
+    attach_daily(payload,base/"p55",base/"daily_membership.json")
+    payload["generationId"]=digest(json.dumps([payload["generationId"],payload["generatedAt"],payload["candidates"],payload["marketCandidates"],payload["priceUpdates"],payload["dailySelectionIds"]],sort_keys=True).encode())
     publish_read_model(base/"p55",payload);publish_read_model(base,compatible_p60_payload(payload))
 
 
@@ -216,3 +233,4 @@ def main():
 
 
 if __name__=="__main__":main()
+

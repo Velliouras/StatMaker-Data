@@ -18,6 +18,7 @@ on:
       - 'scripts/canonical_team_identity.py'
       - 'scripts/validate_domestic_cache_provider_identity.py'
       - 'scripts/domestic_odds_expansion.py'
+      - 'tests/test_sau_provider_aliases.py'
       - 'scripts/refresh_live_settlements.py'
       - 'scripts/audit_app_ready_fixture_team_date_uniqueness.py'
       - 'scripts/audit_app_ready_fixture_index_uniqueness.py'
@@ -45,6 +46,9 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+
+      - name: Verify strict Saudi cross-provider aliases
+        run: python -m unittest discover -s tests -p test_sau_provider_aliases.py -v
 
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
@@ -108,3 +112,4 @@ jobs:
               raise SystemExit('SETTLEMENT_REGISTRY_IDENTITY_AMBIGUOUS ' + json.dumps(ambiguous[:20], ensure_ascii=False))
           print('SETTLEMENT_REGISTRY_IDENTITY_OK', f'groups={len(grouped)}')
           PY
+

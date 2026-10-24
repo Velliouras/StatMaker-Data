@@ -101,6 +101,7 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
     },
     "SAU": {
         "Al-Ettifaq": ("Al-Ittifaq FC",),
+        "Al Diriyah": ("Diriyah Club",),
     },
     "UAE": {
         "Khorfakkan": ("Khor Fakkan Club",),
@@ -612,4 +613,5 @@ def install(odds_module: Any, pipeline_module: Any) -> None:
     odds_module.build_output = installed_build_output
     pipeline_module.generated_aliases = expanded_generated_aliases
     odds_module._statmaker_domestic_expansion_installed = True
+
 
