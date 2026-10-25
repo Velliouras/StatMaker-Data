@@ -77,17 +77,6 @@ LEAGUE_BASELINES = {
     "URU": 1500.0,
 }
 
-# Active same-season scopes that are already fully cached in StatMaker-Data but are
-# tagged historical_support because betting readiness/odds coverage is a separate concern.
-# League Simulation is score/Elo driven and may safely use these caches without any API call.
-SIMULATION_CACHE_CURRENT_CODES = {
-    "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
-    "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
-    "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
-    "KOR", "SWZ",
-    "ARG", "COL", "ECU", "MEX", "MAR", "PER", "USA", "URU",
-}
-
 # Current participants that may not yet appear in a newly-started fixture cache.
 # Keep these explicit: they are part of the competition, not synthetic clubs.
 EXTRA_CURRENT_TEAMS: dict[str, tuple[str, ...]] = {
@@ -96,6 +85,8 @@ EXTRA_CURRENT_TEAMS: dict[str, tuple[str, ...]] = {
 
 
 def is_simulation_current_entry(row: dict[str, Any]) -> bool:
+    # Cached goals are sufficient for Elo even when richer stats/odds readiness
+    # gives this same target season a historical_support label.
     code = str(row.get("league_code") or "")
     role = str(row.get("stats_role") or "")
     lifecycle = str(row.get("lifecycle") or "")
@@ -106,7 +97,7 @@ def is_simulation_current_entry(row: dict[str, Any]) -> bool:
         and (
             role == "current_target"
             or (
-                code in SIMULATION_CACHE_CURRENT_CODES
+                code in LEAGUE_BASELINES
                 and role == "historical_support"
                 and app_season
                 and app_season == target_app_season

@@ -208,16 +208,9 @@ RULES: dict[str, LeagueRule] = {
     "URU": LeagueRule(UNORDERED, 1, format_label="Apertura/Intermedio/Clausura + championship playoff"),
 }
 
-SIMULATION_CACHE_CURRENT_CODES = {
-    "BRA", "BRA2", "CHL", "CHN", "EST", "HUN", "IRL", "LVA", "LTU",
-    "NOR", "NOR2", "POL", "RUS", "SWE", "SWE2", "SVN", "UAE",
-    "BGR", "CZE", "DNK", "FIN", "FIN2", "ISL", "ROM", "SRB", "SVK",
-    "KOR", "SWZ",
-    "ARG", "COL", "ECU", "MEX", "MAR", "PER", "USA", "URU",
-}
-
-
 def is_simulation_current_entry(row: dict[str, Any]) -> bool:
+    # Stats readiness may label a current score cache historical_support. It
+    # remains a current simulation input whenever the season and known rule agree.
     code = str(row.get("league_code") or "")
     role = str(row.get("stats_role") or "")
     lifecycle = str(row.get("lifecycle") or "")
@@ -228,7 +221,7 @@ def is_simulation_current_entry(row: dict[str, Any]) -> bool:
         and (
             role == "current_target"
             or (
-                code in SIMULATION_CACHE_CURRENT_CODES
+                code in RULES
                 and role == "historical_support"
                 and app_season
                 and app_season == target_app_season
@@ -369,13 +362,13 @@ def current_season_fixtures(entry: dict[str, Any], payload: dict[str, Any]) -> l
     for row in (payload.get("fixtures") or []):
         if not isinstance(row, dict):
             continue
-        # API-Football includes the cross-division promotion/relegation tie in
-        # Finland's league endpoint. It does not award league-table points and
-        # its lower-division participant is not a thirteenth Veikkausliiga club.
-        # Keep the separate Relegation Group rounds: those do affect positions.
+        # Finnish endpoints also contain cross-division playoff ties. They do
+        # not award league-table points or add a club to the current division.
+        # Keep Relegation Group and FIN2 Group Stage rounds, which do count.
         source = row.get("source_league")
         round_name = str(source.get("round") or "").strip().casefold() if isinstance(source, dict) else ""
-        if str(entry.get("league_code") or "").upper() == "FIN" and round_name == "relegation":
+        code = str(entry.get("league_code") or "").upper()
+        if (code == "FIN" and round_name == "relegation") or (code == "FIN2" and round_name == "final"):
             continue
         if str(row.get("status") or "").upper() not in FINISHED_STATUSES:
             continue

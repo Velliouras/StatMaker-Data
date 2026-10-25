@@ -5,9 +5,24 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import materialize_prepared_league_simulations as simulation
+import materialize_prepared_team_elo as elo
 
 
 class LeagueSimulationPhasesTest(unittest.TestCase):
+    def test_cached_current_score_only_leagues_keep_elo_and_simulation_coverage(self):
+        for code in ("SP1", "SP2", "E1", "E2", "E3", "SC0", "SC1", "SC2", "SC3", "AUT", "N1", "P1"):
+            with self.subTest(league=code):
+                row = {"league_code": code, "stats_role": "historical_support", "lifecycle": "active",
+                       "app_season": "2026-2027", "target_app_season": "2026-2027"}
+                self.assertTrue(elo.is_simulation_current_entry(row))
+                self.assertTrue(simulation.is_simulation_current_entry(row))
+                old = dict(row, app_season="2025-2026")
+                self.assertFalse(elo.is_simulation_current_entry(old))
+                self.assertFalse(simulation.is_simulation_current_entry(old))
+                inactive = dict(row, lifecycle="inactive")
+                self.assertFalse(elo.is_simulation_current_entry(inactive))
+                self.assertFalse(simulation.is_simulation_current_entry(inactive))
+
     def entry(self, code="FIN"):
         return {"league_code": code, "app_season": "2026",
                 "target_season_start": "2026-04-01", "target_season_end": "2026-11-30"}
@@ -27,6 +42,12 @@ class LeagueSimulationPhasesTest(unittest.TestCase):
                     self.fixture("KuPS", "VPS", "Championship Group - 28", 2),
                     self.fixture("Inter Turku", "SJK", "Regular Season - 22", 3)]
         self.assertEqual(fixtures, simulation.current_season_fixtures(self.entry(), {"fixtures": fixtures}))
+
+    def test_finnish_second_division_playoff_does_not_add_roster_outsider(self):
+        regular = self.fixture("KäPa", "Club B", "Group Stage", 1)
+        playoff = self.fixture("Rops", "KäPa", "Final", 1646600)
+        self.assertEqual([regular], simulation.current_season_fixtures(
+            self.entry("FIN2"), {"fixtures": [regular, playoff]}))
 
     def test_other_competitions_keep_their_existing_phase_rules(self):
         tie = self.fixture("Club A", "Club B", "Relegation")
