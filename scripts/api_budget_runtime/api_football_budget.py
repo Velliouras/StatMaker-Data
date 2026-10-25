@@ -146,6 +146,9 @@ class Ledger:
             if not 0 <= consumed <= lease['reserved']:
                 raise ValueError('Invalid lease completion')
             state['committed'] += consumed
+            state['estimatedAllocated'] = max(state['committed'], state.get('observedUsed', 0)) + sum(
+                item['reserved'] for item in state['leases'].values())
+            state['updatedAtUtc'] = utcnow().isoformat()
             if self.store.write(state, sha):
                 return
             self.pause(.1*(attempt+1))

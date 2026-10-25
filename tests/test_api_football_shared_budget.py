@@ -49,6 +49,7 @@ class SharedBudgetTest(unittest.TestCase):
         store=Store();self.claim(store,used=5990)
         budget.Ledger(store).finish('2026-10-25','one',2)
         self.assertEqual(store.state['committed'],5992)
+        self.assertEqual(store.state['estimatedAllocated'],5992)
         self.assertEqual(self.claim(store,'two',used=5992),8)
 
     def test_killed_worker_reservation_is_not_reclaimed_by_age(self):
