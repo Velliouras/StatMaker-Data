@@ -117,6 +117,10 @@ jobs:
         env: {TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"}
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
+      - name: Validate every cached League Simulation format before costly Android build
+        if: steps.preflight.outputs.generate == 'true'
+        run: python scripts/preflight_league_simulations.py
+
       - name: Validate exact UEFA odds before costly Android build
         if: steps.preflight.outputs.generate == 'true'
         shell: bash

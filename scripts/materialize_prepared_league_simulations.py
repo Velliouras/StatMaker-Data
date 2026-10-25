@@ -369,6 +369,14 @@ def current_season_fixtures(entry: dict[str, Any], payload: dict[str, Any]) -> l
     for row in (payload.get("fixtures") or []):
         if not isinstance(row, dict):
             continue
+        # API-Football includes the cross-division promotion/relegation tie in
+        # Finland's league endpoint. It does not award league-table points and
+        # its lower-division participant is not a thirteenth Veikkausliiga club.
+        # Keep the separate Relegation Group rounds: those do affect positions.
+        source = row.get("source_league")
+        round_name = str(source.get("round") or "").strip().casefold() if isinstance(source, dict) else ""
+        if str(entry.get("league_code") or "").upper() == "FIN" and round_name == "relegation":
+            continue
         if str(row.get("status") or "").upper() not in FINISHED_STATUSES:
             continue
         if fixture_goals(row) is None:

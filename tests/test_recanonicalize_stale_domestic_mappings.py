@@ -12,6 +12,9 @@ import refresh_domestic_live_july_odds as target
 
 
 class RecanonicalizeStaleMappingsTest(unittest.TestCase):
+    def setUp(self):
+        target.domestic_odds_expansion.install(target.odds_fetch, pipeline)
+
     def aliases(self):
         registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
         return pipeline.generated_aliases(registry)
