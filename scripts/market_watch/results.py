@@ -1,6 +1,6 @@
 """Exact FT/period/count settlements for routed markets from existing caches."""
 from pathlib import Path
-from scripts.shots_uat.results import SOURCES, cached_rows, stamp
+from scripts.shots_uat.results import SOURCES, cached_rows, fixture_matches, stamp
 from .catalog import settlement
 
 
@@ -16,7 +16,7 @@ def exact_settlement(issue, spec, actual, root, now):
     rows += [dict(r, _evidenceAt=0.) for r in actual]
     usable = []
     for row in rows:
-        if str(row.get('fixture_id')) != str(issue['apiFixtureId']) or abs(row.get('_date',0)-stamp(issue['kickoff'])) > 300:
+        if not fixture_matches(issue,row):
             continue
         labels = metric_values(row, spec[0])
         half = metric_values(row, 'GOALS_1H') if spec[1] in PERIOD_SCOPES else ()

@@ -37,6 +37,45 @@ class ExactCachedResultsTest(unittest.TestCase):
         self.assertEqual(r['outcome'],'VOID');self.assertEqual(r['settlementReturn'],1.0)
         self.assertEqual(r['line'],40.);self.assertEqual(r['publishedAt'],self.row['publishedAt'])
 
+    def test_same_day_hour_correction_uses_exact_id_and_both_clubs_without_rewriting_issue(self):
+        self.row.update(homeTeam='Home Club',awayTeam='Away Club',winProbability=.65)
+        self.fixture.update(kickoff='2026-10-20T20:00:00Z',homeTeam='HOME CLUB',awayTeam='Away Club')
+        self.write();before=copy.deepcopy(self.row)
+        with patch('scripts.shots_uat.feed.ROOT',self.root):resolved=settle(self.row,[],self.now)
+        self.assertEqual(resolved['outcome'],'LOST')
+        self.assertEqual(resolved['actualCount'],19)
+        for key in ('odd','line','kickoff','winProbability','publishedAt'):
+            self.assertEqual(resolved[key],before[key])
+        self.assertEqual(self.row,before)
+
+    def test_hour_correction_also_settles_exact_corners_and_btts(self):
+        from scripts.market_watch.results import exact_settlement
+        self.row.update(homeTeam='Home Club',awayTeam='Away Club')
+        self.fixture.update(kickoff='2026-10-20T20:00:00Z',homeTeam='Home Club',awayTeam='Away Club',
+                            homeGoals=3,awayGoals=0,normalizedStats=dict(HC=6,AC=3))
+        self.write()
+        corner=exact_settlement(self.row,('CORNERS','TOTAL','UNDER','',9.5),[],self.root,self.now)
+        btts=exact_settlement(self.row,('GOALS_FT','BTTS','YES','',None),[],self.root,self.now)
+        self.assertEqual(corner[0],(1.,0.))
+        self.assertEqual(btts[0],(0.,0.))
+
+    def test_hour_correction_rejects_wrong_clubs_unbound_rows_other_days_and_late_publication(self):
+        self.row.update(homeTeam='Home Club',awayTeam='Away Club')
+        base=dict(self.fixture,kickoff='2026-10-20T20:00:00Z',homeTeam='Home Club',awayTeam='Away Club')
+        for changed in (dict(base,fixtureId=111),dict(base,homeTeam='Other Club'),
+                        dict(base,homeTeam='Away Club',awayTeam='Home Club'),dict(base,awayTeam=None),
+                        dict(base,kickoff='2026-10-21T20:00:00Z'),dict(base,kickoff='2026-10-20T19:30:00Z')):
+            with self.subTest(fixture=changed):
+                self.write(changed)
+                self.assertIsNone(exact_result(self.row,[],self.root,self.now))
+        self.write(dict(base,kickoff='2026-10-20T18:00:00Z'))
+        late=dict(self.row,publishedAt='2026-10-20T18:30:00Z')
+        self.assertIsNone(exact_result(late,[],self.root,self.now))
+        self.path.unlink();cached_rows.cache_clear()
+        historical=dict(fixture_id=self.row['apiFixtureId'],_date=timestamp(base['kickoff']),
+                        home_team='Home Club',away_team='Away Club',normalized_stats=self.fixture['normalizedStats'])
+        self.assertIsNone(exact_result(self.row,[historical],self.root,self.now))
+
     def test_final_shots_and_routed_results_do_not_wait_three_hours(self):
         from scripts.market_watch.router import settle_rows
         self.fixture.update(homeGoals=2,awayGoals=1,homeHalfGoals=1,awayHalfGoals=0)
