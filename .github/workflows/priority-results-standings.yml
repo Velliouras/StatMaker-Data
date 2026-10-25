@@ -1,0 +1,65 @@
+name: Priority Results and Official Standings
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  schedule:
+    - cron: '1,16,31,46 * * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/triggers/priority-results-standings'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-priority-results-standings
+  cancel-in-progress: false
+
+env:
+  STATMAKER_API_BUDGET_ENFORCE: 'true'
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: rolling
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /config/api_football_refresh_policy.json
+            /data/statmaker/league_tables/
+            /data/statmaker/priority_refresh/
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Refresh current-season scores and official tables in priority order
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: python -m scripts.refresh_priority_matches --max-requests 180
+      - name: Publish verified read model without artifacts
+        run: |
+          set -euo pipefail
+          git config user.name 'statmaker-data-bot'
+          git config user.email 'statmaker-data-bot@users.noreply.github.com'
+          git add data/statmaker/priority_refresh
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'Refresh priority results and official standings [skip ci]'
+          for attempt in 1 2 3 4; do
+            git fetch --no-tags origin +main:refs/remotes/origin/main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

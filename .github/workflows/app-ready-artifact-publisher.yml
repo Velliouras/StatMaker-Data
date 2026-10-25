@@ -31,8 +31,16 @@ concurrency:
   group: statmaker-app-ready-full-rebuild
   cancel-in-progress: false
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   publish:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     runs-on: ubuntu-latest
     env:
       APP_READY_UAT_SOURCE: "true"
@@ -44,6 +52,9 @@ jobs:
         # Recovery reruns must validate current canonical inputs and alias fixes.
         with: {ref: main, fetch-depth: 1}
 
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Validate canonical Domestic provider identity
         run: python scripts/validate_domestic_cache_provider_identity.py
 

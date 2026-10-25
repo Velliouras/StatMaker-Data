@@ -26,6 +26,13 @@ concurrency:
   queue: max
   cancel-in-progress: false
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   publish:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
@@ -35,6 +42,9 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Hot-patch latest App-Ready betting bundle
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}

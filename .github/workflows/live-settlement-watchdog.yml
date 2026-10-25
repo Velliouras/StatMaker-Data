@@ -28,7 +28,14 @@ permissions:
 
 concurrency:
   group: statmaker-live-settlement-watchdog
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
   ensure-fresh-live-settlement:
@@ -40,12 +47,17 @@ jobs:
           ref: main
           fetch-depth: 1
           sparse-checkout: |
+            /scripts/api_budget_runtime/
+            /config/api_football_refresh_policy.json
             .github/workflows/live-settlement-watchdog.yml
             tests/test_live_settlement_watchdog.py
             scripts/api_football_usage.py
             tests/test_api_football_usage.py
             data/statmaker/monitoring/
           sparse-checkout-cone-mode: false
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Verify settlement cadence recovery
         run: |
           python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -v
@@ -209,3 +221,7 @@ jobs:
           done
           echo "Could not publish API-Football usage snapshot" >&2
           exit 1
+
+  refresh-priority-results-and-standings:
+    uses: ./.github/workflows/priority-results-standings.yml
+    secrets: inherit

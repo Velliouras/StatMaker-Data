@@ -42,9 +42,16 @@ concurrency:
   group: statmaker-schedule-scorers-bounded-manual
   cancel-in-progress: false
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   scorer-refresh:
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:'))) }}
+    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -52,6 +59,9 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'

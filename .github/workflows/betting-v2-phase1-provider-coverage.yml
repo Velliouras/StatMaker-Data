@@ -8,14 +8,22 @@ on:
       - '.github/triggers/betting-v2-phase1-official-coverage'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: betting-v2-phase1-provider-coverage
   cancel-in-progress: false
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   official-coverage:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -27,8 +35,13 @@ jobs:
           persist-credentials: false
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            /scripts/api_budget_runtime/
+            /config/api_football_refresh_policy.json
             /scripts/*
             /data/statmaker/domestic_enriched/index.json
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Validate producer source
         run: |
           python3 -m py_compile scripts/betting_v2/phase1_provider_market_coverage.py scripts/api_football_stats_coverage_gate.py scripts/api_football_fetch_fixture_stats.py

@@ -37,8 +37,16 @@ concurrency:
   queue: max
   cancel-in-progress: false
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: rolling
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   publish:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -47,6 +55,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -212,6 +223,7 @@ jobs:
           exit 1
 
   publish-daily:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     name: Publish settled Daily and Performance
     needs: publish
     # Completion includes the app-facing PROD pointer. Do not rely on a second

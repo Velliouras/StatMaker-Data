@@ -13,8 +13,16 @@ concurrency:
   group: scoped-performance-identity-repair
   cancel-in-progress: true
 
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: background
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
 jobs:
   repair:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -23,6 +31,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify shared API budget guard before provider work
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -102,7 +113,7 @@ jobs:
         run: |
           set -euo pipefail
           python -m py_compile scripts/refresh_live_settlements.py scripts/materialize_canonical_recommendation_ledger.py scripts/reconcile_canonical_ledger_identity.py
-          PYTHONPATH=scripts python - <<'PY'
+          PYTHONPATH="${GITHUB_WORKSPACE}/scripts/api_budget_runtime:scripts" python - <<'PY'
           import refresh_live_settlements as live
           assert live.team_matches('Galatasaray', ('Galatasaray Istanbul',))
           assert live.team_matches('Galatasaray Istanbul', ('Galatasaray',))
@@ -110,7 +121,7 @@ jobs:
           print('UEFA_SETTLEMENT_EXACT_ALIAS_OK')
           PY
           python scripts/materialize_canonical_recommendation_ledger.py --backfill-dates 0
-          PYTHONPATH=scripts python - <<'PY'
+          PYTHONPATH="${GITHUB_WORKSPACE}/scripts/api_budget_runtime:scripts" python - <<'PY'
           import json
           from pathlib import Path
           import refresh_live_settlements as live
@@ -132,7 +143,7 @@ jobs:
           set -euo pipefail
           python scripts/refresh_live_settlements.py --max-requests 4
           python scripts/reconcile_canonical_ledger_identity.py
-          PYTHONPATH=scripts python - <<'PY'
+          PYTHONPATH="${GITHUB_WORKSPACE}/scripts/api_budget_runtime:scripts" python - <<'PY'
           import json
           from pathlib import Path
           import refresh_live_settlements as live
