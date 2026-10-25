@@ -339,7 +339,10 @@ def current_entries(index: dict[str, Any]) -> list[dict[str, Any]]:
         if str(row.get("league_code") or "") not in RULES
     })
     if missing_rules:
-        raise SystemExit(f"Missing League Simulation rules for active leagues: {missing_rules}")
+        # A newly active competition without a verified format must not stop
+        # every already-supported league. Never invent its simulation rules.
+        print(f"LEAGUE_SIMULATION_UNSUPPORTED_FORMAT skipped={missing_rules}", flush=True)
+        all_current = [row for row in all_current if str(row.get("league_code") or "") in RULES]
     return sorted(
         all_current,
         key=lambda row: (str(row.get("country") or ""), str(row.get("league_code") or "")),

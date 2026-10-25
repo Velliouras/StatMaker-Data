@@ -10,7 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts/api_budget_runtime'))
-from scripts.refresh_priority_matches import refresh, merge_matches, standings, due, FOLDER
+from scripts.refresh_priority_matches import refresh, merge_matches, standings, due, current_policy, FOLDER
 from api_football_budget import BudgetStop
 
 NOW = datetime(2026,10,25,19,0,tzinfo=timezone.utc)
@@ -82,6 +82,20 @@ class PriorityRefreshTest(unittest.TestCase):
     def test_utc_and_cadence_boundaries(self):
         self.assertFalse(due(NOW.isoformat(),15,NOW+timedelta(minutes=14,seconds=59)))
         self.assertTrue(due(NOW.isoformat(),15,NOW+timedelta(minutes=15)))
+        self.assertTrue(due((NOW+timedelta(seconds=90)).isoformat(),15,NOW+timedelta(minutes=15,seconds=30)))
+        self.assertFalse(due((NOW+timedelta(minutes=1)).isoformat(),15,NOW+timedelta(minutes=8)))
+
+    def test_season_rollover_uses_the_catalogue_including_single_year_leagues(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);self.setup_root(root)
+            folder=root/'data/statmaker/domestic_enriched';folder.mkdir(parents=True)
+            rows=[dict(league_code=c,lifecycle='active',stats_role='current_target',api_football_league_id=i,
+                       api_football_season=y,app_season=label,country=country,league=c)
+                  for c,i,y,label,country in [('E0',39,2027,'2027-2028','England'),('SWE',113,2027,'2027','Sweden')]]
+            (folder/'index.json').write_text(json.dumps({'leagues':rows}))
+            policy=current_policy(root,json.loads((root/'config/api_football_refresh_policy.json').read_text()))
+            self.assertEqual(policy['leagueIds']['39']['season'],2027)
+            self.assertEqual(policy['leagueIds']['113']['displaySeason'],'2027')
 
     def test_every_provider_workflow_has_startup_guard_and_write_permission(self):
         found=[]

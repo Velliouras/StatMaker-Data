@@ -1,6 +1,8 @@
 import json
 import sys
 import unittest
+from unittest import mock
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
@@ -22,6 +24,16 @@ class LeagueSimulationPhasesTest(unittest.TestCase):
                 inactive = dict(row, lifecycle="inactive")
                 self.assertFalse(elo.is_simulation_current_entry(inactive))
                 self.assertFalse(simulation.is_simulation_current_entry(inactive))
+
+    def test_new_unverified_format_does_not_block_supported_leagues(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "fixtures.json").write_text("{}")
+            base = {"stats_role":"current_target", "lifecycle":"active", "completed_fixtures":11,
+                    "cache_path":"fixtures.json", "app_season":"2026-2027", "country":"Test"}
+            with mock.patch.object(simulation, "ROOT", root):
+                rows = simulation.current_entries({"leagues":[dict(base, league_code="E0"), dict(base, league_code="AUS")]})
+            self.assertEqual(["E0"], [r["league_code"] for r in rows])
 
     def entry(self, code="FIN"):
         return {"league_code": code, "app_season": "2026",

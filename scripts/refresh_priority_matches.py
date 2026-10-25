@@ -14,7 +14,7 @@ import time
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from scripts.build_league_tables_program import CONTRACT, COMPLETED, instant, normalize_fixture, read, write
+from scripts.build_league_tables_program import CONTRACT, COMPLETED, current_leagues, instant, normalize_fixture, read, write
 from api_football_budget import BudgetStop, priority
 
 FOLDER = 'data/statmaker/priority_refresh'
@@ -23,7 +23,31 @@ TIERS = ('primary', 'europe', 'background')
 
 def due(stamp, minutes, now):
     parsed = instant(stamp)
-    return parsed is None or (now-parsed).total_seconds() >= minutes*60
+    # A delayed run must not cause the next quarter-hour to be skipped.
+    # Independent cron/watchdog wakeups share the same UTC time bucket.
+    return parsed is None or now.timestamp()//(minutes*60) > parsed.timestamp()//(minutes*60)
+
+
+def current_policy(root, policy):
+    if not (root/'data/statmaker/domestic_enriched/index.json').is_file():
+        return policy
+    primary = {'E0','SP1','D1','I1','F1','G1','G2','CL','EL','UECL'}
+    europe = set(policy.get('europeCountries') or [r['country'] for r in policy['leagueIds'].values()
+                                                 if r['tier'] in ('primary','europe')])
+    rows = {}
+    for code, r in current_leagues(root).items():
+        rows[str(r['api_football_league_id'])] = dict(code=code, season=int(r['api_football_season']),
+            country=r['country'], competition=r['league'], displaySeason=r['app_season'],
+            tier='primary' if code in primary else 'europe' if r['country'] in europe else 'background')
+    for r in read(root/'data/statmaker/uefa_current_stats.json').get('competitions', []):
+        code = {'CONF':'UECL'}.get(r['leagueCode'],r['leagueCode'])
+        if code in ('CL','EL','UECL'):
+            rows[str(r['apiFootballLeagueId'])] = dict(code=code, season=int(r['season']), country='UEFA',
+                competition=r['name'], displaySeason=r['displaySeason'], tier='primary')
+    if rows:
+        policy = {**policy, 'leagueIds': rows}
+        write(root/'config/api_football_refresh_policy.json', policy)
+    return policy
 
 
 def merge_matches(old, raw, league_id, season, code, aliases):
@@ -100,7 +124,7 @@ class Provider:
 
 
 def refresh(root, provider, now):
-    policy = read(root/'config/api_football_refresh_policy.json')
+    policy = current_policy(root, read(root/'config/api_football_refresh_policy.json'))
     folder = root/FOLDER
     docs, specs = {}, policy['leagueIds']
     for league_id, row in specs.items():
