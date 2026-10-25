@@ -103,7 +103,7 @@ def validate_source(root: Path, private_root: Path | None, report: Report) -> No
         (
             "bash \"$GITHUB_WORKSPACE/scripts/stage_app_ready_producer.sh\"",
             'APP_READY_UAT_SOURCE: "true"',
-            "expected_rules='pattern-policy-v2-final-read-model-v6-probability-first-prod'",
+            "expected_rules='pattern-policy-v2-final-read-model-v7-all-markets-fixture-value-v1'",
             "expected_schema=12",
             "expected_statmaker_commit=str(json.load(response).get('sha') or '').strip()",
             'f.write(f"statmaker_commit={expected_statmaker_commit}\\n")',

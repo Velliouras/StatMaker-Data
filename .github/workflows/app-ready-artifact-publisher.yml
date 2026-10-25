@@ -84,7 +84,7 @@ jobs:
           p=Path('data/statmaker/app_ready/update_manifest.json'); old=json.loads(p.read_text()) if p.is_file() else {}
           m=old.get('metadata',{})
           changed=m.get('mainContentVersion')!=main.get('contentVersion') or m.get('uefaContentVersion')!=uefa.get('contentVersion')
-          expected_rules='pattern-policy-v2-final-read-model-v6-probability-first-prod'
+          expected_rules='pattern-policy-v2-final-read-model-v7-all-markets-fixture-value-v1'
           expected_schema=12
           expected_simulation_contract='monte-carlo-v1-prod-data-uat-engine'
           expected_elo_contract='team-elo-v1'
@@ -724,7 +724,7 @@ jobs:
           metadata=manifest.get('metadata',{})
           assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
           assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 12
-          assert metadata.get('preparedPatternRulesFingerprint') == 'pattern-policy-v2-final-read-model-v6-probability-first-prod'
+          assert metadata.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
           assert metadata.get('statmakerCommit') == os.environ.get('EXPECTED_STATMAKER_COMMIT')
           assert metadata.get('engineContract') == 'probability-first-prod-schema12-v6-retired-inputs-v1'
           assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
@@ -787,4 +787,3 @@ jobs:
             sleep $((attempt * 2))
           done
           exit 1
-

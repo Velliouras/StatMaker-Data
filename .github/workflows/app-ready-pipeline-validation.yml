@@ -41,6 +41,7 @@ on:
       - 'scripts/preflight_league_simulations.py'
       - 'scripts/hotpatch_app_ready_simulation.py'
       - 'tests/test_simulation_recovery_cli.py'
+      - 'tests/test_app_ready_published_verifier.py'
       - 'tests/test_prepared_league_simulation_phases.py'
 
 permissions:
@@ -96,6 +97,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_prepared_league_simulation_phases.py' -v
           python -m unittest discover -s tests -p 'test_simulation_recovery_cli.py' -v
+          python -m unittest discover -s tests -p 'test_app_ready_published_verifier.py' -v
           python scripts/preflight_league_simulations.py
 
       - name: Validate checkpoint compatibility contract

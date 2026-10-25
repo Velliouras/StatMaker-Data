@@ -38,7 +38,7 @@ jobs:
       - name: Hot-patch latest App-Ready betting bundle
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          CACHED_RECOVERY: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher' }}
+          CACHED_RECOVERY: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[cached-recovery]')) }}
           UEFA_MATCH_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[uefa-match-only]') }}
         shell: bash
         run: |
