@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-25T01:22:20Z",
+  "generated_at": "2026-10-25T08:25:09Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/peru/primera-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-25T01:22:06Z",
+    "cache_generated_at": "2026-10-25T08:24:45Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 265,
-    "fixtures_with_any_stats": 264,
-    "fixtures_with_bb_core_stats": 256,
+    "completed_fixtures": 266,
+    "fixtures_with_any_stats": 265,
+    "fixtures_with_bb_core_stats": 257,
     "any_stats_coverage": 0.9962,
-    "bb_core_coverage": 0.966,
+    "bb_core_coverage": 0.9662,
     "group_counts": {
-      "shots_total": 264,
-      "shots_on_target": 264,
-      "corners": 263,
-      "fouls": 264,
-      "yellow_cards": 256,
-      "red_cards": 125,
-      "possession": 263,
-      "passes": 263,
-      "xg": 83
+      "shots_total": 265,
+      "shots_on_target": 265,
+      "corners": 264,
+      "fouls": 265,
+      "yellow_cards": 257,
+      "red_cards": 126,
+      "possession": 264,
+      "passes": 264,
+      "xg": 84
     },
     "group_coverage": {
       "shots_total": 0.9962,
       "shots_on_target": 0.9962,
       "corners": 0.9925,
       "fouls": 0.9962,
-      "yellow_cards": 0.966,
-      "red_cards": 0.4717,
+      "yellow_cards": 0.9662,
+      "red_cards": 0.4737,
       "possession": 0.9925,
       "passes": 0.9925,
-      "xg": 0.3132
+      "xg": 0.3158
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -22327,6 +22327,90 @@
         "fulltime": {
           "home": 3,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1549526,
+      "date_utc": "2026-10-25T02:30:00+00:00",
+      "country": "Peru",
+      "league": "Primera División",
+      "league_code": "PER",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 281,
+      "round": "Clausura - 13",
+      "home_team": "Universitario",
+      "away_team": "Juan Pablo II College",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 30,
+        "AS": 2,
+        "HST": 11,
+        "AST": 0,
+        "HC": 9,
+        "AC": 1,
+        "HF": 8,
+        "AF": 17,
+        "HY": 0,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 70,
+        "APossession": 30,
+        "HSaves": 0,
+        "ASaves": 8,
+        "HPasses": 542,
+        "APasses": 245,
+        "HPassesAccurate": 469,
+        "APassesAccurate": 182,
+        "HxG": 2.04,
+        "AxG": 0.12
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": 0,
+      "htag": 0,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
         },
         "extratime": {
           "home": null,
