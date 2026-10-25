@@ -2,13 +2,20 @@ name: Shots SOT UAT Feed
 
 on:
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      results_only:
+        description: Settle existing immutable issues without generating new picks
+        type: boolean
+        required: false
+        default: false
   push:
     branches: [main]
     paths: ['.github/triggers/shots-uat', '.github/triggers/betting-production-release']
   schedule:
     - cron: '45 */4 * * *'
   workflow_run:
-    workflows: ['Odds Integrity Production Refresh', 'Domestic Statistics Universe', 'Domestic Historical Closure', 'Betting V2 Forward Market First Counts', 'UEFA Current Stats Refresh', 'Live Settlement Publisher', 'Model Performance Settlement Refresh']
+    workflows: ['Odds Integrity Production Refresh', 'Domestic Statistics Universe', 'Domestic Historical Closure', 'Betting V2 Forward Market First Counts', 'UEFA Current Stats Refresh', 'Model Performance Settlement Refresh']
     types: [completed]
 
 permissions:
@@ -27,7 +34,7 @@ jobs:
     timeout-minutes: 20
     env:
       # Result events only settle existing immutable issues; do not run the candidate pipeline.
-      RESULTS_ONLY: ${{ github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'UEFA Current Stats Refresh' || github.event.workflow_run.name == 'Live Settlement Publisher' || github.event.workflow_run.name == 'Model Performance Settlement Refresh') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[settlements-only]')) }}
+      RESULTS_ONLY: ${{ inputs.results_only || (github.event_name == 'workflow_run' && (github.event.workflow_run.name == 'UEFA Current Stats Refresh' || github.event.workflow_run.name == 'Model Performance Settlement Refresh')) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[settlements-only]')) }}
     steps:
       - uses: actions/checkout@v4
         with:

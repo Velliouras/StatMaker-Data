@@ -21,6 +21,7 @@ on:
       - 'scripts/materialize_canonical_recommendation_ledger.py'
       - 'scripts/apply_fixture_disposition_overrides.py'
       - 'data/statmaker/fixture_disposition_overrides.json'
+      - 'tests/test_daily_settlement_publication.py'
   schedule:
     # Keep the exact 15-minute cadence, but avoid the heavily contended :00/:15/:30/:45
     # boundaries where GitHub scheduled events are more likely to be delayed.
@@ -66,6 +67,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_hybrid_ledger_selector.py'
           python -m unittest discover -s tests -p 'test_hybrid_settlement_coverage.py'
           python -m unittest discover -s tests -p 'test_uat_issue_settlement_requirements.py'
+          python -m unittest discover -s tests -p 'test_daily_settlement_publication.py' -v
 
       - name: Validate settlement registry identity
         shell: bash
@@ -208,3 +210,12 @@ jobs:
 
           echo "Could not publish live settlement feed after retries."
           exit 1
+
+  publish-daily:
+    name: Publish settled Daily and Performance
+    needs: publish
+    # Completion includes the app-facing PROD pointer. Do not rely on a second
+    # workflow_run event after a keeper-dispatched publisher.
+    uses: ./.github/workflows/shots-uat.yml
+    with:
+      results_only: true
