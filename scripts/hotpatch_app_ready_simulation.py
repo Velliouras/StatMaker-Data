@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import shutil
 import sqlite3
 import subprocess
@@ -33,6 +34,18 @@ def deterministic_zip(source: Path, target: Path) -> None:
             info.compress_type = zipfile.ZIP_DEFLATED
             info.external_attr = 0o100644 << 16
             zf.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
+
+
+def run_uefa_materializer(db_path: Path, *, cached: bool | None = None, matches_only: bool = False) -> None:
+    if cached is None:
+        cached = os.environ.get("CACHED_RECOVERY", "").strip().lower() == "true"
+    command = ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
+               str(db_path), "--runs", "10000"]
+    if matches_only:
+        command.append("--matches-only")
+    elif cached:
+        command.append("--cached-league-tables")
+    subprocess.run(command, cwd=ROOT, check=True)
 
 
 def main() -> int:
@@ -75,17 +88,9 @@ def main() -> int:
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
         if args.uefa_only:
-            subprocess.run(
-                ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
-                 str(db_path), "--cached-league-tables", "--runs", "10000"],
-                cwd=ROOT, check=True,
-            )
+            run_uefa_materializer(db_path, cached=True)
         elif args.uefa_match_only:
-            subprocess.run(
-                ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
-                 str(db_path), "--matches-only", "--runs", "10000"],
-                cwd=ROOT, check=True,
-            )
+            run_uefa_materializer(db_path, matches_only=True)
         elif not args.score_edge_only:
             # Refresh the fixture index first so schedule-only upcoming domestic fixtures
             # become eligible for Match Simulation even when bookmaker selections are absent.
@@ -132,17 +137,7 @@ def main() -> int:
                 cwd=ROOT,
                 check=True,
             )
-            subprocess.run(
-                [
-                    "python",
-                    str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
-                    str(db_path),
-                    "--runs",
-                    "10000",
-                ],
-                cwd=ROOT,
-                check=True,
-            )
+            run_uefa_materializer(db_path)
 
 
         # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
