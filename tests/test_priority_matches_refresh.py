@@ -54,6 +54,31 @@ class PriorityRefreshTest(unittest.TestCase):
             e=json.loads((root/FOLDER/'E0.json').read_text());p=json.loads((root/FOLDER/'P1.json').read_text())
             self.assertNotEqual(e['resultsCheckedAtUTC'],p['resultsCheckedAtUTC'])
 
+    def test_five_minute_and_event_wakeups_do_not_multiply_provider_requests(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);self.setup_root(root);self.run_refresh(root,FakeProvider())
+            calls=[]
+            for minute in (5,8,10,15,16,20,25,30):
+                provider=FakeProvider();self.run_refresh(root,provider,NOW+timedelta(minutes=minute))
+                calls.append(provider.calls)
+            # Only the 15-minute results bucket and 30-minute table bucket spend quota.
+            self.assertEqual(calls,[0,0,0,3,0,0,0,4])
+
+    def test_completion_fallback_has_no_self_or_watchdog_loop(self):
+        doc=yaml.safe_load((ROOT/'.github/workflows/priority-results-standings.yml').read_text())
+        triggers=doc.get('on',doc.get(True))
+        self.assertEqual(triggers['schedule'],[{'cron':'2-59/5 * * * *'}])
+        fallback=triggers['workflow_run']
+        self.assertEqual(fallback['types'],['completed']);self.assertEqual(fallback['branches'],['main'])
+        for name in ('Shots SOT UAT Feed','Live Settlement Publisher','Market Watch Dashboard',
+                     'Shared API Budget and Cadence Regression'):
+            self.assertIn(name,fallback['workflows'])
+        self.assertNotIn(doc['name'],fallback['workflows'])
+        self.assertNotIn('Live Settlement Watchdog',fallback['workflows'])
+        self.assertIn('workflow_run.head_repository.full_name == github.repository',doc['jobs']['refresh']['if'])
+        self.assertEqual(doc['concurrency']['group'],'statmaker-priority-results-standings')
+        self.assertFalse(doc['concurrency']['cancel-in-progress'])
+
     def test_background_quota_stop_keeps_verified_priority_publication(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);self.setup_root(root);index=self.run_refresh(root,FakeProvider(stop='background'))
