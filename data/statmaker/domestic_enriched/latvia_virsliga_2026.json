@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-26T08:59:23Z",
+  "generated_at": "2026-10-26T20:03:11Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/latvia/virsliga/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-26T08:57:55Z",
+    "cache_generated_at": "2026-10-26T20:02:39Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 169,
-    "fixtures_with_any_stats": 16,
-    "fixtures_with_bb_core_stats": 16,
-    "any_stats_coverage": 0.0947,
-    "bb_core_coverage": 0.0947,
+    "completed_fixtures": 170,
+    "fixtures_with_any_stats": 17,
+    "fixtures_with_bb_core_stats": 17,
+    "any_stats_coverage": 0.1,
+    "bb_core_coverage": 0.1,
     "group_counts": {
-      "shots_total": 16,
-      "shots_on_target": 16,
-      "corners": 16,
-      "fouls": 16,
-      "yellow_cards": 16,
-      "red_cards": 15,
-      "possession": 16,
-      "passes": 16,
-      "xg": 12
+      "shots_total": 17,
+      "shots_on_target": 17,
+      "corners": 17,
+      "fouls": 17,
+      "yellow_cards": 17,
+      "red_cards": 16,
+      "possession": 17,
+      "passes": 17,
+      "xg": 13
     },
     "group_coverage": {
-      "shots_total": 0.0947,
-      "shots_on_target": 0.0947,
-      "corners": 0.0947,
-      "fouls": 0.0947,
-      "yellow_cards": 0.0947,
-      "red_cards": 0.0888,
-      "possession": 0.0947,
-      "passes": 0.0947,
-      "xg": 0.071
+      "shots_total": 0.1,
+      "shots_on_target": 0.1,
+      "corners": 0.1,
+      "fouls": 0.1,
+      "yellow_cards": 0.1,
+      "red_cards": 0.0941,
+      "possession": 0.1,
+      "passes": 0.1,
+      "xg": 0.0765
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.0947 < 0.65",
-      "low BB-core coverage: 0.0947 < 0.65",
+      "low any-stats coverage: 0.1 < 0.65",
+      "low BB-core coverage: 0.1 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -14266,6 +14266,90 @@
         "fulltime": {
           "home": 0,
           "away": 3
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1515941,
+      "date_utc": "2026-10-26T16:00:00+00:00",
+      "country": "Latvia",
+      "league": "Virsliga",
+      "league_code": "LVA",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 365,
+      "round": "Regular Season - 34",
+      "home_team": "Grobiņa",
+      "away_team": "Riga",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 3,
+        "AS": 23,
+        "HST": 2,
+        "AST": 10,
+        "HC": 1,
+        "AC": 5,
+        "HF": 11,
+        "AF": 9,
+        "HY": 2,
+        "AY": 3,
+        "HR": 1,
+        "AR": 0,
+        "HPossession": 22,
+        "APossession": 78,
+        "HSaves": 5,
+        "ASaves": 0,
+        "HPasses": 189,
+        "APasses": 740,
+        "HPassesAccurate": 111,
+        "APassesAccurate": 651,
+        "HxG": 0.45,
+        "AxG": 2.6
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 5,
+      "home_score": 2,
+      "away_score": 5,
+      "fthg": 2,
+      "ftag": 5,
+      "hthg": 0,
+      "htag": 4,
+      "goals": {
+        "home": 2,
+        "away": 5
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 4
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 5
         },
         "extratime": {
           "home": null,
