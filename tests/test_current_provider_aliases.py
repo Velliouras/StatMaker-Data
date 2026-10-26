@@ -11,6 +11,8 @@ import update_domestic_odds_api_io as odds
 
 class CurrentProviderAliasesTest(unittest.TestCase):
     CASES = {
+        "DNK": {"Broendby IF": "Brondby"},
+        "EGY": {"Asyut Petroleum": "Asyut Petrol"},
         "HUN": {
             "Puskas Akademia FC Felcsut": "Puskas Academy",
             "Ferencvarosi Budapest": "Ferencvarosi TC",

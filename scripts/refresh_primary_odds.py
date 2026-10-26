@@ -17,6 +17,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from odds_market_integrity import _choose_bookmaker
+from domestic_betting_identity import betting_identity_ready, reconcile_feed
 
 CONTRACT = 'api-football-primary-unibet-fallback-v1'
 BOOKMAKERS = ('Bet365',)
@@ -233,11 +234,17 @@ def refresh(feeds, previous_feeds, index, state, key, now, max_requests=96, open
     report=dict(contract=CONTRACT,generatedAt=now.isoformat(),apiCalls=0,matchedFixtures=0,unmatchedFixtures=0,primaryQuotes=0,fallbackQuotes=0,errors=[])
     targets=defaultdict(list)
     for feed,previous in zip(feeds,previous_feeds):
+        domestic = isinstance(feed.get('leagues'), list)
+        if domestic:
+            report['identityRepair'] = reconcile_feed(feed)
         old_groups=previous.get('leagues') or [previous]
         old={(g.get('leagueCode') or previous.get('leagueCode'),str(m['id'])):m for g in old_groups for m in g.get('matches',[])}
         for league in feed.get('leagues') or [feed]:
             code=league.get('leagueCode') or feed.get('leagueCode')
             for match in league.get('matches',[]):
+                if domestic and not betting_identity_ready(match):
+                    match['markets'] = []
+                    continue
                 start=utc(match.get('kickoff'))
                 if not start or start<=now:continue
                 fixture=index.resolve(code,match)
@@ -317,6 +324,8 @@ def refresh(feeds, previous_feeds, index, state, key, now, max_requests=96, open
         feed['oddsProviderPolicy']=CONTRACT
         for league in feed.get('leagues') or [feed]:
             for match in league.get('matches',[]):
+                if isinstance(feed.get('leagues'), list) and match.get('markets'):
+                    match['scheduleOnly'] = False
                 for q in match.get('markets',[]):
                     if q.get('oddsProvider')=='api-football':report['primaryQuotes']+=1
                     elif q.get('bookmaker')=='Unibet':report['fallbackQuotes']+=1
@@ -330,10 +339,13 @@ def restore_archived_unibet(feed, archive, now):
     from odds_market_integrity import install_parser_guard
     domestic_market_expansion_v18.install(odds)
     install_parser_guard(odds)
+    reconcile_feed(feed)
     by_event={(l.get('leagueCode'),str(m.get('id'))):m for l in archive.get('leagues',[]) for m in l.get('matches',[])}
     restored=0
     for league in feed.get('leagues',[]):
         for match in league.get('matches',[]):
+            if not betting_identity_ready(match):
+                continue
             previous=by_event.get((league.get('leagueCode'),str(match.get('id'))))
             if not previous or utc(previous.get('kickoff')) != utc(match.get('kickoff')):continue
             if any(norm(previous.get(k)) != norm(match.get(k)) for k in ('homeTeam','awayTeam')):continue

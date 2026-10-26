@@ -55,6 +55,11 @@ VERIFIED_PROVIDER_COUNTRY_ALIASES: Dict[str, Sequence[str]] = {
 # valid exact-odds fixture is never discarded merely because the two providers
 # use different city/suffix labels.
 VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    # Confirmed against current-season fixtures: Brondby (407) v Aarhus
+    # 2026-11-01 17:00Z, and Asyut Petrol (18021) v El Gouna 2026-10-30 15:00Z.
+    "DNK": {
+        "Brondby": ("Broendby IF",),
+    },
     "HUN": {
         "Puskas Academy": ("Puskas Akademia FC Felcsut",),
         "Ferencvarosi TC": ("Ferencvarosi Budapest",),
@@ -111,6 +116,7 @@ VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
         "Jeonbuk Motors": ("Jeonbuk FC",),
     },
     "EGY": {
+        "Asyut Petrol": ("Asyut Petroleum",),
         "Olympic El Qanah": ("El Qanah FC",),
     },
     "SAU": {

@@ -16,6 +16,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 import domestic_live_july_pipeline as pipeline
 import domestic_odds_expansion
+from domestic_betting_identity import reconcile_feed
 import domestic_market_expansion_v15
 import rebuild_domestic_corners_from_archive as corner_rebuild
 import rebuild_domestic_expanded_markets_from_archive as expanded_rebuild
@@ -334,7 +335,11 @@ def main() -> int:
         corner_report = dict((feed.get("debug") or {}).get("cornerArchiveRebuild") or {})
 
     archive_rehydrate_report = archive_rehydrate.rebuild(feed, archive, registry)
-    if int(archive_rehydrate_report.get("matchesRehydrated") or 0) > 0:
+    identity_report = reconcile_feed(feed)
+    feed.setdefault("debug", {})["bettingIdentityRepair"] = identity_report
+    if int(archive_rehydrate_report.get("matchesRehydrated") or 0) > 0 or any(
+        identity_report[key] for key in ("mappedFixtures", "suppressedFixtures", "scheduleFlagsRepaired")
+    ):
         pipeline.write_json(pipeline.ODDS_PATH, feed)
 
     validation = validate_feed(feed, registry, today)

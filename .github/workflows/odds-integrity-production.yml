@@ -98,6 +98,7 @@ jobs:
             tests/test_betting_v2_verify_forward_fixture_ids.py \
             tests/test_betting_v2_future_fixture_crosswalk.py \
             tests/test_domestic_schedule_only_validation.py \
+            tests/test_domestic_betting_identity.py \
             tests/test_domestic_provider_league_guard.py \
             tests/test_domestic_global_event_fallback.py \
             tests/test_rehydrate_domestic_betting_from_archive.py \
@@ -105,6 +106,10 @@ jobs:
             tests/test_domestic_market_expansion.py \
             tests/test_domestic_proposal_readiness.py \
             tests/test_statmaker_update_manifest.py
+
+      - name: Repair cached Domestic identity before provider work
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
+        run: python scripts/domestic_betting_identity.py --write
 
       - name: Validate current Domestic feed without writing
         if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
@@ -367,6 +372,8 @@ jobs:
       - name: Preserve verified primary-provider runtime and UEFA fixture context
         run: |
           cp scripts/refresh_primary_odds.py "$RUNNER_TEMP/refresh_primary_odds.py"
+          cp scripts/domestic_betting_identity.py "$RUNNER_TEMP/domestic_betting_identity.py"
+          cp scripts/canonical_team_identity.py "$RUNNER_TEMP/canonical_team_identity.py"
           cp .github/domestic-odds-refresh-request "$RUNNER_TEMP/odds-refresh-request"
           cp -R scripts/api_budget_runtime "$RUNNER_TEMP/api_budget_runtime"
           mkdir -p "$RUNNER_TEMP/primary-context/data/api_football/league_tables"

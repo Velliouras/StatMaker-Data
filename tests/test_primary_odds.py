@@ -11,7 +11,8 @@ import refresh_primary_odds as p
 
 NOW=datetime(2026,10,26,12,tzinfo=timezone.utc)
 FIXTURE=dict(id=10,leagueId=39,season=2026,kickoff='2026-10-27T12:00:00Z',home='Alpha',away='Beta',homeId=1,awayId=2)
-MATCH=dict(id='70000001',homeTeam='Alpha',awayTeam='Beta',kickoff=FIXTURE['kickoff'])
+MATCH=dict(id='70000001',homeTeam='Alpha',awayTeam='Beta',kickoff=FIXTURE['kickoff'],
+           canonicalHomeTeam='Alpha',canonicalAwayTeam='Beta',teamMappingStatus='matched',usableForStats=True)
 
 
 def quotes(book='Bet365',family='MATCH_SHOTS',price='1.91',provider='api-football'):
