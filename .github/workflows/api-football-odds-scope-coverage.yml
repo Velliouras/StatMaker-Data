@@ -8,6 +8,11 @@ on:
 
 permissions:
   contents: write
+  actions: write
+
+concurrency:
+  group: statmaker-odds-coverage-audit
+  cancel-in-progress: true
 
 env:
   STATMAKER_API_BUDGET_ENFORCE: "true"
@@ -18,42 +23,51 @@ env:
 
 jobs:
   probe:
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 12
     steps:
-      - name: Checkout repository
+      - name: Stop superseded diagnostic runs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const {data} = await github.rest.actions.listWorkflowRuns({owner, repo, workflow_id: "api-football-odds-scope-coverage.yml", status: "in_progress", per_page: 20});
+            for (const run of data.workflow_runs) {
+              if (run.id < context.runId && run.head_sha === "8ed5d856c49c3f6a707cff872d308b7ede7ef05c") {
+                await github.rest.actions.cancelWorkflowRun({owner, repo, run_id: run.id});
+                core.info("Stopped superseded coverage diagnostic " + run.id);
+              }
+            }
+      - name: Checkout diagnostic inputs only
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Verify shared API budget guard before provider work
-        run: |
-          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
-      - name: Set up Python
-        uses: actions/setup-python@v5
+          fetch-depth: 1
+          sparse-checkout: |
+            scripts/
+            config/
+            tests/
+            odds/odds_api_io/
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Probe real final-scope and UEFA odds coverage
+      - name: Verify shared budget and diagnostic regressions
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False)"
+          python -m unittest discover -s tests -p test_odds_provider_coverage_audit.py -q
+      - name: Audit all configured leagues and all available bookmakers
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python scripts/probe_api_football_odds_scope_coverage.py
-
-      - name: Probe free Unibet coverage without changing feeds
-        env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-        run: python scripts/audit_unibet_free_coverage.py
-
-      - name: Commit coverage report
+        run: python scripts/audit_odds_provider_coverage.py
+      - name: Publish diagnostic report only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add reports/api_football_odds_scope_coverage.json reports/unibet_free_coverage_audit.json
+          git add --sparse reports/odds_provider_coverage_audit.json
           if git diff --cached --quiet; then
-            echo "No coverage report changes."
+            echo "No diagnostic report changes."
           else
-            git commit -m "Probe API-Football odds scope coverage"
-            git pull --rebase origin main
+            git commit -m "Report current odds provider coverage"
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
           fi
