@@ -107,12 +107,15 @@ jobs:
             tests/test_statmaker_update_manifest.py
 
       - name: Validate current Domestic feed without writing
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json
 
       - name: Snapshot current Domestic odds
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: cp odds/odds_api_io/domestic_odds.json "$RUNNER_TEMP/domestic_odds_before.json"
 
       - name: Refresh imminent schedule and rotating Domestic exact odds
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
           ODDS_API_IO_BOOKMAKERS: "Unibet"
@@ -140,6 +143,7 @@ jobs:
           python scripts/refresh_domestic_odds_schedule_priority.py --cycle-size "$cycle_size"
 
       - name: Preserve unexpired Domestic matches omitted by rotation
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: |
           python - <<'PY'
           import datetime as dt
@@ -198,17 +202,20 @@ jobs:
           PY
 
       - name: Enforce verified full-time Domestic corner scope
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         # Canonical corner identity is rebuilt only from exact raw provider payloads.
         # This runs after restored rotating fixtures so stale 1H/2H/specialty rows
         # cannot re-enter MATCH_CORNERS or TEAM_CORNERS through preservation.
         run: python scripts/clean_domestic_corner_scopes.py
 
       - name: Enrich Domestic team logos
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python scripts/enrich_domestic_odds_team_logos.py
 
       - name: Sanitize Domestic betting feed
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: |
           python scripts/odds_market_integrity.py \
             odds/odds_api_io/domestic_odds.json \
@@ -216,9 +223,11 @@ jobs:
             --report-dir reports
 
       - name: Validate primary provider contracts
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: python -m unittest discover -s tests -p test_primary_odds.py -v
 
       - name: Prefer paid API-Football prices and retain free Unibet alternatives
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
@@ -230,12 +239,14 @@ jobs:
           python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json --write --report-dir reports
 
       - name: Annotate Domestic odds movement
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: |
           python scripts/annotate_domestic_odds_movement.py \
             "$RUNNER_TEMP/domestic_odds_before.json" \
             odds/odds_api_io/domestic_odds.json
 
       - name: Restore cached Domestic match context
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         # Zero provider calls. A rotating odds rebuild may replace match objects, so restore
         # cached injuries/availability, confirmed formations and current-squad continuity.
         run: |
@@ -244,9 +255,11 @@ jobs:
           python scripts/refresh_domestic_squads.py --attach-only
 
       - name: Build market-specific Domestic proposal readiness
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: python scripts/build_domestic_proposal_readiness.py
 
       - name: Build Domestic update manifest
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: |
           python scripts/build_statmaker_update_manifest.py \
             --profile main \
@@ -254,12 +267,14 @@ jobs:
             --output data/statmaker/update_manifest.json
 
       - name: Summarize observed V2 quote evidence (offline, shadow-only)
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         # Does not call Odds-API.io, nor read any API key.
         # A research-report failure must not block the canonical feed.
         continue-on-error: true
         run: python scripts/betting_v2/index_quote_receipts.py --repository-root .
 
       - name: Freeze current pre-match V2 research forecasts
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         # Strictly from existing completed xG/Elo stats and provider schedule.
         # No provider calls, no App-Ready writes and no betting certification.
         # Persist a compressed immutable as-of snapshot only if eligible games exist.
@@ -267,22 +282,27 @@ jobs:
         run: python scripts/betting_v2/freeze_prematch_shadow.py --repository-root . --horizon-days 2 --archive
 
       - name: Verify independent fixture IDs for frozen V2 research snapshots
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         continue-on-error: true
         run: python scripts/betting_v2/verify_forward_fixture_ids.py --repository-root .
 
       - name: Publish read-only Betting V2 Android UAT preview
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         continue-on-error: true
         run: python scripts/betting_v2/publish_forward_shadow_preview.py --repository-root .
 
       - name: Attach cached bookmaker market evidence to V2 research preview
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         continue-on-error: true
         run: python scripts/betting_v2/attach_shadow_market_evidence.py --repository-root .
 
       - name: Precompute real Betting V2 UAT proposals from latest odds
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         continue-on-error: true
         run: python scripts/betting_v2/precompute_real_betting_v2.py --repository-root .
 
       - name: Commit Domestic feed
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -427,5 +447,9 @@ jobs:
             echo "No UEFA odds changes."
           else
             git commit -m "Sanitize UEFA exact odds integrity"
-            git push origin HEAD:build/uefa-qualifier-feed-20260720
+            for attempt in 1 2 3 4; do
+              if git push origin HEAD:build/uefa-qualifier-feed-20260720; then break; fi
+              if [ "$attempt" = 4 ]; then exit 1; fi
+              sleep "$((attempt * 3))"
+            done
           fi
