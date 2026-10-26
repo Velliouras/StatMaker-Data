@@ -367,6 +367,7 @@ jobs:
       - name: Preserve verified primary-provider runtime and UEFA fixture context
         run: |
           cp scripts/refresh_primary_odds.py "$RUNNER_TEMP/refresh_primary_odds.py"
+          cp .github/domestic-odds-refresh-request "$RUNNER_TEMP/odds-refresh-request"
           cp -R scripts/api_budget_runtime "$RUNNER_TEMP/api_budget_runtime"
           mkdir -p "$RUNNER_TEMP/primary-context/data/api_football/league_tables"
           cp config/api_football_refresh_policy.json "$RUNNER_TEMP/primary-context/policy.json"
@@ -391,6 +392,18 @@ jobs:
           import update_uefa_qualifier_odds_build as target
           from odds_market_integrity import install_parser_guard
 
+          # UEFA may use the last bounded requests, preserving five hourly calls.
+          target.base.odds.RATE_LIMIT_STOP_BELOW = 5
+          from pathlib import Path
+          import os
+          request = Path(os.environ['RUNNER_TEMP']) / 'odds-refresh-request'
+          selected = next((line.split('=', 1)[1].strip() for line in request.read_text().splitlines() if line.startswith('UEFA=')), '')
+          if selected:
+              codes = set(selected.split(','))
+              if not codes.issubset({'CL', 'EL', 'UECL'}):
+                  raise ValueError('Unknown UEFA competition target')
+              original = target.load_competitions
+              target.load_competitions = lambda: [row for row in original() if row.get('leagueCode') in codes]
           install_parser_guard(target.base.odds)
           raise SystemExit(target.main())
           PY
