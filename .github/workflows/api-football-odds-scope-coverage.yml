@@ -42,11 +42,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          sparse-checkout-cone-mode: false
           sparse-checkout: |
             /scripts/
-            config/
-            tests/
-            odds/odds_api_io/
+            /config/
+            /tests/
+            /odds/odds_api_io/
+            /reports/odds_provider_coverage_audit.json
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -58,7 +60,13 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-        run: python scripts/audit_odds_provider_coverage.py
+          AUDIT_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          if [[ "$AUDIT_COMMIT_MESSAGE" == *'[unibet-only]'* ]]; then
+            python scripts/audit_odds_provider_coverage.py --unibet-only
+          else
+            python scripts/audit_odds_provider_coverage.py
+          fi
       - name: Publish diagnostic report only
         run: |
           git config user.name "github-actions[bot]"

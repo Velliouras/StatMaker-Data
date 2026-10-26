@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import argparse
 from datetime import datetime, timedelta, timezone
 import gzip
 import json
@@ -165,7 +166,10 @@ def feed_events(feed, now):
     groups = feed.get('leagues') if isinstance(feed.get('leagues'), list) else [feed]
     result = []
     for group in groups:
-        future = [m for m in group.get('matches', []) if utc(m.get('kickoff')) and now < utc(m['kickoff']) <= now + timedelta(days=14)]
+        future = [m for m in group.get('matches', [])
+                  if str(m.get('scheduleSource', '')).lower() != 'api-football'
+                  and m.get('teamMappingStatus') != 'schedule_only_api_football'
+                  and utc(m.get('kickoff')) and now < utc(m['kickoff']) <= now + timedelta(days=14)]
         for match in sorted(future, key=lambda m: m['kickoff'])[:2]:
             if str(match.get('id', '')).isdigit():
                 result.append(dict(eventId=str(match['id']), leagueCode=group.get('leagueCode') or feed.get('leagueCode'), kickoff=match['kickoff']))
@@ -217,16 +221,29 @@ def summary(report):
 
 
 def main():
+    args = argparse.ArgumentParser()
+    args.add_argument('--unibet-only', action='store_true')
+    args = args.parse_args()
     now = datetime.now(timezone.utc)
     report = dict(schemaVersion=1, generatedAt=now.isoformat(), productionProviderChanged=False,
                   sampleOnly=True, requests=dict(apiFootball=0, unibet=0), requestLimits=dict(apiFootball=APIF_LIMIT, unibet=UNIBET_LIMIT),
                   apiFootballScopes=[], unibetFixtures=[], errors=[], completed={})
+    if args.unibet_only:
+        previous = json.loads(OUTPUT.read_text())
+        if previous.get('schemaVersion') != 1 or previous.get('completed', {}).get('apiFootball') is not True:
+            raise ValueError('A complete prior API-Football audit is required')
+        report.update(apiFootballScopes=previous['apiFootballScopes'],
+                      apiFootballCatalogue=previous.get('apiFootballCatalogue', []),
+                      retainedApiFootballEvidence=dict(generatedAt=previous['generatedAt'], requests=previous['requests']['apiFootball']))
+        report['completed']['apiFootball'] = True
     api_key, unibet_key = os.getenv('API_FOOTBALL_KEY', ''), os.getenv('ODDS_API_IO_KEY', '')
     client = Client(api_key, unibet_key, report)
     policy = json.loads((ROOT/'config/api_football_refresh_policy.json').read_text())
     report['configuredScopeCount'] = len(policy['leagueIds'])
     for name, key, task in [('apiFootball', api_key, lambda:probe_api(client, report, policy, now)),
                             ('unibet', unibet_key, lambda:probe_unibet(client, report, now))]:
+        if args.unibet_only and name == 'apiFootball':
+            continue
         try:
             if not key:
                 raise StopAudit('credential unavailable')

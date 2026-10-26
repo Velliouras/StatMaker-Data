@@ -53,5 +53,12 @@ class CoverageAuditTest(unittest.TestCase):
         feed = dict(leagueCode='CL', matches=[dict(id='1',kickoff='2026-10-26T13:00:00Z'),dict(id='2',kickoff='2026-10-26T11:00:00Z'),dict(id='3',kickoff='bad')])
         self.assertEqual([e['eventId'] for e in audit.feed_events(feed,now)],['1'])
 
+    def test_api_football_schedule_id_is_never_sent_to_odds_api(self):
+        now = datetime(2026,10,26,12,tzinfo=timezone.utc)
+        feed = dict(leagueCode='T1', matches=[
+            dict(id='1584440',kickoff='2026-10-26T16:00:00Z',scheduleSource='api-football',scheduleOnly=True),
+            dict(id='74165976',kickoff='2026-10-27T16:00:00Z',scheduleSource='odds-api-io-events',scheduleOnly=True)])
+        self.assertEqual([e['eventId'] for e in audit.feed_events(feed,now)],['74165976'])
+
 
 if __name__ == '__main__':unittest.main()
