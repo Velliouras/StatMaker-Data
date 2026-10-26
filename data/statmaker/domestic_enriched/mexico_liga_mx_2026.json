@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-25T22:48:22Z",
+  "generated_at": "2026-10-26T01:26:47Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/mexico/liga-mx/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-25T08:23:16Z",
+    "cache_generated_at": "2026-10-26T01:25:55Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-01-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 120,
-    "fixtures_with_any_stats": 120,
-    "fixtures_with_bb_core_stats": 112,
+    "completed_fixtures": 121,
+    "fixtures_with_any_stats": 121,
+    "fixtures_with_bb_core_stats": 113,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.9333,
+    "bb_core_coverage": 0.9339,
     "group_counts": {
-      "shots_total": 120,
-      "shots_on_target": 120,
-      "corners": 119,
-      "fouls": 119,
-      "yellow_cards": 112,
-      "red_cards": 87,
-      "possession": 120,
-      "passes": 119,
-      "xg": 81
+      "shots_total": 121,
+      "shots_on_target": 121,
+      "corners": 120,
+      "fouls": 120,
+      "yellow_cards": 113,
+      "red_cards": 88,
+      "possession": 121,
+      "passes": 120,
+      "xg": 82
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 0.9917,
       "fouls": 0.9917,
-      "yellow_cards": 0.9333,
-      "red_cards": 0.725,
+      "yellow_cards": 0.9339,
+      "red_cards": 0.7273,
       "possession": 1.0,
       "passes": 0.9917,
-      "xg": 0.675
+      "xg": 0.6777
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -10147,6 +10147,90 @@
         "fulltime": {
           "home": 1,
           "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1551016,
+      "date_utc": "2026-10-25T23:00:00+00:00",
+      "country": "Mexico",
+      "league": "Liga MX",
+      "league_code": "MEX",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 262,
+      "round": "Apertura - 14",
+      "home_team": "Atlas",
+      "away_team": "Puebla",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 16,
+        "AS": 12,
+        "HST": 6,
+        "AST": 4,
+        "HC": 7,
+        "AC": 3,
+        "HF": 9,
+        "AF": 13,
+        "HY": 0,
+        "AY": 1,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 52,
+        "APossession": 48,
+        "HSaves": 2,
+        "ASaves": 2,
+        "HPasses": 420,
+        "APasses": 401,
+        "HPassesAccurate": 360,
+        "APassesAccurate": 335,
+        "HxG": 1.38,
+        "AxG": 1.1
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 3,
+      "home_score": 4,
+      "away_score": 3,
+      "fthg": 4,
+      "ftag": 3,
+      "hthg": 1,
+      "htag": 1,
+      "goals": {
+        "home": 4,
+        "away": 3
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 1
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 3
         },
         "extratime": {
           "home": null,
