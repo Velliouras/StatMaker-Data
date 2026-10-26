@@ -80,3 +80,9 @@ No additional cron-job.org job or Android build is needed.
   the whole selected season; only new network work has a 14-day domestic window.
 - All three producers retain the common 6,000-call daily stop, 4,500 background
   stop and 1,500-call provider reserve. Exhaustion preserves verified caches.
+
+The six domestic scorer lists are also reconciled against complete verified
+team-season goal timelines. This zero-request step runs even when the provider
+top-20 cache is fresh, and adds omitted players by numeric provider player ID.
+Own goals are excluded; both sides' event counts must match the final score.
+Unknown assists remain null. New season totals require complete team coverage.

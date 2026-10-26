@@ -19,6 +19,7 @@ on:
       - 'tests/test_scorer_refresh_freshness.py'
       - 'tests/test_schedule_scorers_offline_builder.py'
       - 'tests/test_scorer_goal_floor.py'
+      - 'tests/test_event_leaderboard_reconciliation.py'
       - 'tests/test_uefa_postmatch_refresh_due.py'
       - 'tests/test_live_settlement_watchdog.py'
       - '.github/workflows/**'
@@ -51,5 +52,6 @@ jobs:
           python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -q
           python -m unittest discover -s tests -p 'test_schedule_scorers_offline_builder.py' -q
           python -m unittest discover -s tests -p 'test_scorer_goal_floor.py' -q
+          python -m unittest discover -s tests -p 'test_event_leaderboard_reconciliation.py' -q
           python -m unittest discover -s tests -p 'test_uefa_postmatch_refresh_due.py' -q
           python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -q

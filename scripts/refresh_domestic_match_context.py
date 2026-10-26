@@ -96,8 +96,9 @@ def fixture_priority(f, today=None):
     return (window, group, -ordinal, code, f["fixtureId"])
 
 
-def current_fixtures():
-    index = read(ROOT / "data/statmaker/domestic_enriched/index.json")
+def current_fixtures(root=None):
+    root = root or ROOT
+    index = read(root / "data/statmaker/domestic_enriched/index.json")
     assert index.get("schema_version") == 3, "Unexpected canonical index"
     leagues = {}
     for row in index.get("leagues", []):
@@ -116,7 +117,7 @@ def current_fixtures():
         name = str(row.get("output_path") or "")
         if not name.startswith("data/statmaker/domestic_enriched/") or ".." in Path(name).parts:
             continue
-        archive = read(ROOT / name)
+        archive = read(root / name)
         if (archive.get("competition") or {}).get("league_code") != code:
             continue
         for m in archive.get("matches", []):
@@ -135,7 +136,7 @@ def current_fixtures():
                              "season": int(row["api_football_season"]),
                              "home": home, "away": away, "homeGoals": h, "awayGoals": a,
                              "date": m.get("date_utc") or ""}
-    for code, season, row in priority_completed(ROOT, leagues):
+    for code, season, row in priority_completed(root, leagues):
         fid = row["fixture_id"]
         if fid in fixtures and fixtures[fid]["leagueCode"] != code:
             raise ValueError("Fast result fixture league collision: " + str(fid))
@@ -280,12 +281,13 @@ def normalized(value):
     return "".join(ch for ch in str(value or "").casefold() if ch.isalnum())
 
 
-def build(fixtures, state):
+def build(fixtures, state, cache=None):
+    cache = cache or CACHE
     events, venues = [], {}
     total_with_events = 0
     for f in fixtures:
         fid = f["fixtureId"]
-        fixed = read(CACHE / "fixtures" / ("fixture_" + str(fid) + ".json"))
+        fixed = read(cache / "fixtures" / ("fixture_" + str(fid) + ".json"))
         fixture = fixed.get("response") or {}
         same = fixed.get("fixtureId") == fid and fixed.get("leagueCode") == f["leagueCode"]
         if isinstance(f.get("venue"), str) and f["venue"].strip():
@@ -294,7 +296,7 @@ def build(fixtures, state):
             name = ((fixture.get("fixture") or {}).get("venue") or {}).get("name")
             if isinstance(name, str) and name.strip():
                 venues[str(fid)] = name.strip()
-        row = read(CACHE / "events" / ("fixture_" + str(fid) + ".json"))
+        row = read(cache / "events" / ("fixture_" + str(fid) + ".json"))
         if (row.get("sourceRequest") != "/fixtures/events?fixture=" + str(fid) or
             row.get("fixtureId") != fid or row.get("leagueCode") != f["leagueCode"] or
             not isinstance(row.get("response"), list)):
@@ -330,10 +332,13 @@ def build(fixtures, state):
                 scored = []
                 break
             scored.append({"fixtureId": str(fid), "team": team, "player": player.strip(),
+                           "playerId": (ev.get("player") or {}).get("id"),
                            "minute": minute, "extraMinute": extra,
                            "ownGoal": ev["detail"] == "Own Goal",
                            "penalty": ev["detail"] == "Penalty"})
-        if len(scored) == f["homeGoals"] + f["awayGoals"]:
+        if (len(scored) == f["homeGoals"] + f["awayGoals"] and
+                sum(g["team"] == f["home"] for g in scored) == f["homeGoals"] and
+                sum(g["team"] == f["away"] for g in scored) == f["awayGoals"]):
             events.extend(scored)
             total_with_events += 1
     return {"contract": CONTRACT, "schemaVersion": 1,
