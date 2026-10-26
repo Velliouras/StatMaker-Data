@@ -1,11 +1,11 @@
 {
   "audit": {
-    "favouriteGuard": 8,
+    "favouriteGuard": 11,
     "missingApiFixtureId": 1,
-    "oddsBounds": 900,
-    "probabilityOrEv": 584,
-    "staleQuote": 158,
-    "supportedQuotes": 1650
+    "oddsBounds": 949,
+    "probabilityOrEv": 692,
+    "staleQuote": 83,
+    "supportedQuotes": 1736
   },
   "modelId": "SHOTS_SOT_CATBOOST_V1",
   "policyId": "SHOTS_SOT_P60_UAT_V4",
@@ -7839,6 +7839,117 @@
       "team": null,
       "teamSide": "",
       "winProbability": 0.6239926760530253
+    },
+    {
+      "apiFixtureId": 1520940,
+      "awayShots": 15.777206809949417,
+      "awaySot": 5.266539427350429,
+      "awayTeam": "Cuiaba",
+      "bookmaker": "Bet365",
+      "bookmakerBinding": "EXACT_PROVIDER_QUOTE",
+      "category": "UAT_SHOTS_EXPERIMENT",
+      "certified": false,
+      "competitionId": "domestic",
+      "featureCutoff": "2026-10-26T06:17:10.768554Z",
+      "fixtureId": "68823410",
+      "fixtureKey": "api:1520940:1793053800",
+      "groupKey": "api:1520940:sot",
+      "historyAway": 34,
+      "historyHome": 34,
+      "homeShots": 13.980351542665176,
+      "homeSot": 4.420030773207883,
+      "homeTeam": "America Mineiro",
+      "identityBinding": "cachedExactSchedule",
+      "indicativeEV": 0.15538777486433442,
+      "issuedAt": "2026-10-26T06:17:10.768554Z",
+      "kickoff": "2026-10-26T22:30:00Z",
+      "line": 8.5,
+      "market": "MATCH_SHOTS_ON_TARGET",
+      "match": {
+        "awayTeam": "Cuiaba",
+        "awayTeamLogo": "https://media.api-sports.io/football/teams/1193.png",
+        "canonicalAwayTeam": "Cuiaba",
+        "canonicalHomeTeam": "America Mineiro",
+        "competition": "Serie B",
+        "country": "Brazil",
+        "date": "2026-10-26",
+        "homeTeam": "America Mineiro",
+        "homeTeamLogo": "https://media.api-sports.io/football/teams/125.png",
+        "id": "68823410",
+        "kickoff": "2026-10-26T22:30:00Z",
+        "leagueCode": "BRA2",
+        "providerAwayTeam": "Cuiaba EC MT",
+        "providerHomeTeam": "America FC MG",
+        "scheduleOnly": false,
+        "scheduleSource": "odds-api-io-events",
+        "scheduleVerified": true,
+        "season": "2026",
+        "squadContext": {
+          "apiFootballFixtureId": 1520940,
+          "away": {
+            "formation": null,
+            "formationSample": 0,
+            "injuriesCovered": true,
+            "lineupConfirmed": false,
+            "lineupContinuity": null,
+            "lineupCovered": false,
+            "recentArrivals": 2,
+            "recentDepartures": 3,
+            "squadContinuity": 1.0,
+            "squadContinuitySample": 11,
+            "squadCovered": true,
+            "teamId": 1193,
+            "unavailablePlayers": [],
+            "usualFormation": null
+          },
+          "generatedAt": "2026-10-26T06:15:09Z",
+          "home": {
+            "formation": null,
+            "formationSample": 0,
+            "injuriesCovered": true,
+            "lineupConfirmed": false,
+            "lineupContinuity": null,
+            "lineupCovered": false,
+            "recentArrivals": 1,
+            "recentDepartures": 1,
+            "squadContinuity": null,
+            "squadContinuitySample": 0,
+            "squadCovered": true,
+            "teamId": 125,
+            "unavailablePlayers": [],
+            "usualFormation": null
+          }
+        },
+        "teamMappingStatus": "matched",
+        "usableForStats": true
+      },
+      "metric": "sot",
+      "model": "SHOTS_SOT_CATBOOST_V1",
+      "modelBankSha256": "0007fa8b9c6ed09138c91c36d7e31891676496b180516bc385ec17650a97d985",
+      "odd": 1.909,
+      "outcome": "PENDING",
+      "policyId": "SHOTS_SOT_P60_UAT_V4",
+      "probabilityModel": "CATBOOST_NB_BINOMIAL",
+      "providerMarketUpdatedAt": "2026-10-26T05:11:22.502Z",
+      "publicationCommit": null,
+      "publishedAt": null,
+      "pushProbability": 0.0,
+      "quoteObservationCommit": null,
+      "quoteObservationEvidence": "VERIFIED_PROVIDER_POLL_WINDOW",
+      "quoteObservationSemantics": "OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
+      "quoteObservationSha256": "f4090c1bfa8e944f107fd33a8eaa1844d28909b321c5382cd378c22eb928a3d5",
+      "quoteUpdatedAt": "2026-10-26T06:14:17Z",
+      "scope": "TOTAL",
+      "selection": "Total Shots on Target Over 8.5",
+      "selectionId": "2e98772fc0acabc2e1a2be27f823977bf9539c83a25c950a127d35282c19c014",
+      "settledAt": null,
+      "settlementReturn": null,
+      "side": "OVER",
+      "sourceOddsSha256": "5bcd029c03f8069b2e4661bf0cc5efbb4cafc2b69c3584fc4365611a0d415500",
+      "sourceProviderSha256": "a6a71e05d66c4f08104eb6cc7627bfc8967a481802080d4dd80bfcc263534abd",
+      "team": null,
+      "teamSide": "",
+      "winProbability": 0.6052319407356388
     }
   ],
   "schemaVersion": 1,
@@ -7852,13 +7963,15 @@
           "fixtures": 36
         },
         "domestic": {
-          "fixtures": 679,
-          "forecastable": 85,
-          "mapped": 85,
+          "eligibleOptions": 1,
+          "fixtures": 682,
+          "forecastable": 89,
+          "mapped": 89,
           "missingApiFixtureId": 1,
-          "probabilityEvPassing": 8,
-          "quotes": 1650,
-          "withShotsOdds": 86
+          "newSelections": 1,
+          "probabilityEvPassing": 12,
+          "quotes": 1736,
+          "withShotsOdds": 90
         },
         "europa_league": {
           "fixtures": 36
@@ -7874,11 +7987,13 @@
           "withShotsOdds": 5
         },
         "2026-10-27": {
+          "eligibleOptions": 1,
           "fixtures": 42,
           "forecastable": 9,
           "mapped": 9,
-          "probabilityEvPassing": 1,
-          "quotes": 204,
+          "newSelections": 1,
+          "probabilityEvPassing": 2,
+          "quotes": 210,
           "withShotsOdds": 9
         },
         "2026-10-28": {
@@ -7893,11 +8008,11 @@
           "fixtures": 37,
           "forecastable": 7,
           "mapped": 7,
-          "quotes": 122,
+          "quotes": 120,
           "withShotsOdds": 7
         },
         "2026-10-30": {
-          "fixtures": 52,
+          "fixtures": 53,
           "forecastable": 8,
           "mapped": 8,
           "probabilityEvPassing": 2,
@@ -7909,16 +8024,17 @@
           "forecastable": 39,
           "mapped": 39,
           "missingApiFixtureId": 1,
-          "probabilityEvPassing": 3,
-          "quotes": 758,
+          "probabilityEvPassing": 4,
+          "quotes": 760,
           "withShotsOdds": 40
         },
         "2026-11-01": {
-          "fixtures": 144,
-          "forecastable": 10,
-          "mapped": 10,
-          "quotes": 194,
-          "withShotsOdds": 10
+          "fixtures": 146,
+          "forecastable": 14,
+          "mapped": 14,
+          "probabilityEvPassing": 2,
+          "quotes": 274,
+          "withShotsOdds": 14
         },
         "2026-11-02": {
           "fixtures": 1
@@ -7997,30 +8113,30 @@
         }
       }
     },
-    "observedDomesticLeagues": 14,
-    "oddsGeneratedAt": "2026-10-25T23:19:32Z",
-    "oddsSha256": "59bdeb25c260bba8fb24e5d3befe25f1dfae6ef8a789c67f8296b3ad0e7d6f85",
-    "providerSha256": "9eb8b20fcfdc96863a9fa0b6adf158894dcd255c88c7e4575b6fbf115dc36516",
+    "observedDomesticLeagues": 24,
+    "oddsGeneratedAt": "2026-10-26T06:14:17Z",
+    "oddsSha256": "5bcd029c03f8069b2e4661bf0cc5efbb4cafc2b69c3584fc4365611a0d415500",
+    "providerSha256": "a6a71e05d66c4f08104eb6cc7627bfc8967a481802080d4dd80bfcc263534abd",
     "uefa": [
       {
         "freshOddsEvents": 54,
-        "observedAt": "2026-10-25T23:21:10Z",
+        "observedAt": "2026-10-26T06:16:03Z",
         "path": "champions_league_odds.json",
-        "sha256": "9a5aaeca39da244cd00e024c1ea8ae1a174f4a5a371f895af6c125fe34979816",
+        "sha256": "133ece9e4f7f76c71a03184f520177086ddfd80f18e2c9c93efe3dd1be508d39",
         "totalFixtures": 54
       },
       {
         "freshOddsEvents": 90,
-        "observedAt": "2026-10-25T23:21:11Z",
+        "observedAt": "2026-10-26T06:16:04Z",
         "path": "europa_league_odds.json",
-        "sha256": "b80459ae848ff353b7bbe464db46b7d3a06140d37517060bf90d05e89f6631fa",
+        "sha256": "82cec34af897fd03645c5975c36d13eca38703b7fa1b36b02ad8fbbb3c09a60b",
         "totalFixtures": 36
       },
       {
         "freshOddsEvents": 126,
-        "observedAt": "2026-10-25T23:21:12Z",
+        "observedAt": "2026-10-26T06:16:05Z",
         "path": "conference_league_odds.json",
-        "sha256": "4abadea4e003107798aa9c006b053f1a20c486e1c54866f2dee673b94429afd6",
+        "sha256": "ed2d0adeb5a20edca593aa41e0fb47f9ffc9df8dcf332a92106dd475e9ccfbc2",
         "totalFixtures": 36
       }
     ]
