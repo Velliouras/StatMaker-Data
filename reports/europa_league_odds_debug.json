@@ -11,10 +11,105 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 327,
-      "bodyLength": 230413,
-      "rateLimitRemaining": 91,
+      "durationMs": 344,
+      "bodyLength": 230412,
+      "rateLimitRemaining": 43,
       "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 72}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 50}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 66}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-East\", \"slug\": \"algeria-ligue-2-center-east\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-West\", \"slug\": \"algeria-ligue-2-center-west\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Centre-East\", \"slug\": \"algeria-ligue-2-centre-east\", \"eventsCount\": 1}, {\"name\": \"Algeria - Ligue 2, Centre-West\", \"slug\": \"algeria-ligue-2-centre-west\", \"eventsCount\": 3}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 40}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount..."
+    },
+    {
+      "path": "/events",
+      "params": {
+        "apiKey": "***",
+        "sport": "football",
+        "league": "international-clubs-uefa-champions-league",
+        "status": "pending,live",
+        "from": "2026-10-26T21:55:42Z",
+        "to": "2026-12-10T21:55:42Z",
+        "limit": 500
+      },
+      "status": 200,
+      "durationMs": 198,
+      "bodyLength": 17770,
+      "rateLimitRemaining": 42,
+      "sample": "[{\"id\": 74165976, \"home\": \"FC Shakhtar Donetsk\", \"away\": \"Sporting CP\", \"homeId\": 3313, \"awayId\": 3001, \"date\": \"2026-11-03T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165978, \"home\": \"Galatasaray Istanbul\", \"away\": \"VfB Stuttgart\", \"homeId\": 3061, \"awayId\": 2677, \"date\": \"2026-11-03T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165980, \"home\": \"Atletico Madrid\", \"away\": \"Bayern Munich\", \"homeId\": 2836, \"awayId\": 2672, \"date\": \"2026-11-03T20:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165984, \"home\": \"FC Barcelona\", \"away\": \"Aston Villa\", \"homeId\": 2817, \"awayId\": 40, \"date\": \"2026-11-03T20:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pend..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74165976,74165978,74165980,74165984,74165986,74165988,74165990,74165992,74165994,74165996",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 232,
+      "bodyLength": 79711,
+      "rateLimitRemaining": 41,
+      "sample": "[{\"id\": 74165978, \"home\": \"Galatasaray Istanbul\", \"away\": \"VfB Stuttgart\", \"homeId\": 3061, \"awayId\": 2677, \"date\": \"2026-11-03T17:45:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1029226844\"}, \"bookmakerIds\": {\"Unibet\": \"1029226844\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-26T15:21:57.8Z\", \"odds\": [{\"home\": \"2.20\", \"draw\": \"3.50\", \"away\": \"2.65\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-26T15:21:57.8Z\", \"odds\": [{\"home\": \"1.68\", \"away\": \"2.02\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-26T15:21:57.8Z\", \"odds\": [{\"1X\": \"1.38\", \"12\": \"1.23\", \"X2\": \"1.54\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T15:21:57.8Z\", \"odds\": [{\"hdp\": -0.75, \"home\": \"2.60\", \"away\": \"1.46\"}, {\"hdp\": -0.5, \"home\": \"2.17\", \"away\": \"1.58\"}, {\"hdp\": -0.25, \"home\": \"1.93\", \"away\": \"1.75\"}, {\"hdp\": 0.25, \"home\": \"1.52\", \"away\": \"2.30\"}, {\"hdp\": 0.5, \"home\": \"1.42\", \"away\": \"2.60\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-26T15:21:57.8Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.54\", \"under\": \"2.28\"}, {\"hdp\": 3, \"over\": \"1.72\", \"under\": \"2.06\"}, {\"hdp\": 3.25, \"over\": \"1.90\", \"under\": \"1.77\"}, {\"hdp\": 3.5, \"over\": \"2.10\", \"under\": \"1.62\"}, {\"hdp\": 3.75, \"over\"..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74165998,74166000,74166002,74166004,74166006,74166008,74166010,74166012,74166014,74166016",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 228,
+      "bodyLength": 63191,
+      "rateLimitRemaining": 40,
+      "sample": "[{\"id\": 74165998, \"home\": \"Fenerbahce Istanbul\", \"away\": \"Liverpool FC\", \"homeId\": 3052, \"awayId\": 44, \"date\": \"2026-11-04T17:45:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028943225\"}, \"bookmakerIds\": {\"Unibet\": \"1028943225\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"home\": \"4.40\", \"draw\": \"3.90\", \"away\": \"1.58\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"home\": \"3.40\", \"away\": \"1.26\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-24T05:38:16.281Z\", \"odds\": [{\"1X\": \"2.12\", \"12\": \"1.19\", \"X2\": \"1.15\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"hdp\": 0.5, \"home\": \"2.18\", \"away\": \"1.58\"}, {\"hdp\": 0.75, \"home\": \"1.95\", \"away\": \"1.73\"}, {\"hdp\": 1, \"home\": \"1.72\", \"away\": \"1.96\"}, {\"hdp\": 1.25, \"home\": \"1.58\", \"away\": \"2.28\"}, {\"hdp\": 1.5, \"home\": \"1.48\", \"away\": \"2.55\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.56\", \"under\": \"2.23\"}, {\"hdp\": 3, \"over\": \"1.70\", \"under\": \"1.98\"}, {\"hdp\": 3.25, \"over\": \"1.93\", \"under\": \"1.75\"}, {\"hdp\": 3.5, \"over\": \"2.15\", \"under\": \"1.60\"}, {\"hdp\": 3.75, \"over\"..."
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74166018,74166020,74166022,74166024,74166026,74166028,74166030,74166032,74166034,74166036",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 203,
+      "bodyLength": 2,
+      "rateLimitRemaining": 39,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74166038,74166040,74166042,74166044,74166046,74166048,74166050,74166052,74166054,74166056",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 235,
+      "bodyLength": 2,
+      "rateLimitRemaining": 38,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74166058,74166060,74166062,74166064,74166066,74166068,74166070,74166072,74166074,74166076",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 342,
+      "bodyLength": 2,
+      "rateLimitRemaining": 37,
+      "sample": []
+    },
+    {
+      "path": "/odds/multi",
+      "params": {
+        "apiKey": "***",
+        "eventIds": "74166078,74166080,74166082,74166084",
+        "bookmakers": "Unibet"
+      },
+      "status": 200,
+      "durationMs": 211,
+      "bodyLength": 2,
+      "rateLimitRemaining": 36,
+      "sample": []
     },
     {
       "path": "/events",
@@ -23,14 +118,14 @@
         "sport": "football",
         "league": "international-clubs-uefa-europa-league",
         "status": "pending,live",
-        "from": "2026-10-26T20:38:39Z",
-        "to": "2026-12-10T20:38:39Z",
+        "from": "2026-10-26T21:55:44Z",
+        "to": "2026-12-10T21:55:44Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 296,
+      "durationMs": 199,
       "bodyLength": 17659,
-      "rateLimitRemaining": 90,
+      "rateLimitRemaining": 35,
       "sample": "[{\"id\": 74173022, \"home\": \"AC Milan\", \"away\": \"Ferencvarosi Budapest\", \"homeId\": 2692, \"awayId\": 1925, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173024, \"home\": \"Sparta Prague\", \"away\": \"AFC Bournemouth\", \"homeId\": 2218, \"awayId\": 60, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173026, \"home\": \"Crystal Palace\", \"away\": \"TSG Hoffenheim\", \"homeId\": 7, \"awayId\": 2569, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173028, \"home\": \"Lillestroem SK\", \"away\": \"FC Viktoria Plzen\", \"homeId\": 664, \"awayId\": 4502, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0..."
     },
     {
@@ -41,10 +136,10 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 346,
+      "durationMs": 235,
       "bodyLength": 76912,
-      "rateLimitRemaining": 89,
-      "sample": "[{\"id\": 74173038, \"home\": \"Stade Rennais FC\", \"away\": \"Olympiacos Piraeus\", \"homeId\": 1658, \"awayId\": 3245, \"date\": \"2026-11-05T17:45:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028946351\"}, \"bookmakerIds\": {\"Unibet\": \"1028946351\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-26T11:00:26.449Z\", \"odds\": [{\"home\": \"2.12\", \"draw\": \"3.50\", \"away\": \"3.30\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-26T10:59:35.867Z\", \"odds\": [{\"home\": \"1.52\", \"away\": \"2.30\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-26T10:59:35.867Z\", \"odds\": [{\"1X\": \"1.28\", \"12\": \"1.25\", \"X2\": \"1.64\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T10:59:35.867Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"2.00\", \"away\": \"1.68\"}, {\"hdp\": -0.25, \"home\": \"1.77\", \"away\": \"1.91\"}, {\"hdp\": 0.25, \"home\": \"1.40\", \"away\": \"2.70\"}, {\"hdp\": 0.5, \"home\": \"1.32\", \"away\": \"3.00\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-26T10:59:35.867Z\", \"odds\": [{\"hdp\": 2.25, \"over\": \"1.58\", \"under\": \"2.18\"}, {\"hdp\": 2.5, \"over\": \"1.78\", \"under\": \"1.89\"}, {\"hdp\": 2.75, \"over\": \"2.00\", \"under\": \"1.70\"}, {\"hdp\": 3, \"over\": \"2.35\", \"under\": \"1.50\"}, {\"hdp\": 3.25, \"over\": \"2.65\", \"under\": \"1.40\"}]}, {\"name\": \"Bot..."
+      "rateLimitRemaining": 34,
+      "sample": "[{\"id\": 74173032, \"home\": \"PFC Levski Sofia\", \"away\": \"Jagiellonia Bialystok\", \"homeId\": 3273, \"awayId\": 7691, \"date\": \"2026-11-05T17:45:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028946359\"}, \"bookmakerIds\": {\"Unibet\": \"1028946359\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"home\": \"2.10\", \"draw\": \"3.40\", \"away\": \"3.30\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"home\": \"1.50\", \"away\": \"2.30\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"1X\": \"1.28\", \"12\": \"1.26\", \"X2\": \"1.64\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"hdp\": -0.5, \"home\": \"2.00\", \"away\": \"1.68\"}, {\"hdp\": 0.5, \"home\": \"1.30\", \"away\": \"3.05\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"hdp\": 2.5, \"over\": \"1.80\", \"under\": \"1.87\"}, {\"hdp\": 3, \"over\": \"2.40\", \"under\": \"1.48\"}, {\"hdp\": 3.25, \"over\": \"2.70\", \"under\": \"1.38\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"yes\": \"1.65\", \"no\": \"2.07\"}]}, {\"name\": \"ML HT\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"home\": \"2.63\", \"..."
     },
     {
       "path": "/odds/multi",
@@ -54,10 +149,10 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 329,
+      "durationMs": 276,
       "bodyLength": 62045,
-      "rateLimitRemaining": 88,
-      "sample": "[{\"id\": 74173056, \"home\": \"SL Benfica\", \"away\": \"KKS Lech Poznan\", \"homeId\": 3006, \"awayId\": 3121, \"date\": \"2026-11-05T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028946343\"}, \"bookmakerIds\": {\"Unibet\": \"1028946343\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"home\": \"1.22\", \"draw\": \"6.25\", \"away\": \"12.00\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"home\": \"1.05\", \"away\": \"8.00\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"1X\": \"1.04\", \"12\": \"1.09\", \"X2\": \"3.75\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"hdp\": -2.5, \"home\": \"2.35\", \"away\": \"1.50\"}, {\"hdp\": -2, \"home\": \"1.89\", \"away\": \"1.77\"}, {\"hdp\": -1.5, \"home\": \"1.56\", \"away\": \"2.23\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"hdp\": 3, \"over\": \"1.52\", \"under\": \"2.33\"}, {\"hdp\": 3.5, \"over\": \"1.89\", \"under\": \"1.79\"}, {\"hdp\": 4, \"over\": \"2.45\", \"under\": \"1.46\"}]}, {\"name\": \"Both Teams To Score\", \"updatedAt\": \"2026-10-26T10:42:32.579Z\", \"odds\": [{\"yes\": \"1.78\", \"no\": \"1.89\"}]}, {\"name\": \"ML HT\", \"updatedAt\": \"2026-10-26T10:42:32.57..."
+      "rateLimitRemaining": 33,
+      "sample": "[{\"id\": 74173042, \"home\": \"Bayer Leverkusen\", \"away\": \"Olympique Marseille\", \"homeId\": 2681, \"awayId\": 1641, \"date\": \"2026-11-05T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028946360\"}, \"bookmakerIds\": {\"Unibet\": \"1028946360\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-26T11:20:21.073Z\", \"odds\": [{\"home\": \"1.46\", \"draw\": \"4.60\", \"away\": \"6.10\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-26T11:20:21.073Z\", \"odds\": [{\"home\": \"1.16\", \"away\": \"4.40\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-26T11:04:13.567Z\", \"odds\": [{\"1X\": \"1.09\", \"12\": \"1.16\", \"X2\": \"2.50\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T11:04:13.567Z\", \"odds\": [{\"hdp\": -1.75, \"home\": \"2.43\", \"away\": \"1.47\"}, {\"hdp\": -1.5, \"home\": \"2.10\", \"away\": \"1.62\"}, {\"hdp\": -1.25, \"home\": \"1.89\", \"away\": \"1.78\"}, {\"hdp\": -1, \"home\": \"1.66\", \"away\": \"2.05\"}, {\"hdp\": -0.75, \"home\": \"1.50\", \"away\": \"2.33\"}, {\"hdp\": -0.5, \"home\": \"1.42\", \"away\": \"2.60\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-26T11:20:21.073Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.57\", \"under\": \"2.20\"}, {\"hdp\": 3, \"over\": \"1.73\", \"under\": \"1.96\"}, {\"hdp\": 3.25, \"over\": \"1.95\", \"under\": \"1.73\"}, {\"hdp\": 3.5, \"..."
     },
     {
       "path": "/odds/multi",
@@ -67,9 +162,9 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 330,
+      "durationMs": 227,
       "bodyLength": 2,
-      "rateLimitRemaining": 87,
+      "rateLimitRemaining": 32,
       "sample": []
     },
     {
@@ -80,9 +175,9 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 315,
+      "durationMs": 244,
       "bodyLength": 2,
-      "rateLimitRemaining": 86,
+      "rateLimitRemaining": 31,
       "sample": []
     },
     {
@@ -93,9 +188,9 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 327,
+      "durationMs": 247,
       "bodyLength": 2,
-      "rateLimitRemaining": 85,
+      "rateLimitRemaining": 30,
       "sample": []
     },
     {
@@ -106,9 +201,9 @@
         "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 313,
+      "durationMs": 217,
       "bodyLength": 2,
-      "rateLimitRemaining": 84,
+      "rateLimitRemaining": 29,
       "sample": []
     }
   ],
@@ -1048,7 +1143,7 @@
       }
     ]
   },
-  "rateLimitRemaining": 84,
+  "rateLimitRemaining": 29,
   "providerIdentityTeams": [
     {
       "eventId": "74173022",
@@ -1447,12 +1542,12 @@
     "Corners Totals": 18,
     "Anytime Goalscorer": 18,
     "To Score 3+ Goals": 4,
-    "Double Chance HT": 18,
-    "To Score 2+ Goals": 18,
     "Both Teams To Score HT": 18,
-    "Correct Score": 18,
     "Totals 2H": 18,
     "Corners Totals Away": 18,
+    "Correct Score": 18,
+    "To Score 2+ Goals": 18,
+    "Double Chance HT": 18,
     "Corners Totals Home": 18
   },
   "classifiedMarketCounts": {
@@ -1522,11 +1617,6 @@
       "reason": "recognized audit-only family; not emitted to app markets",
       "count": 4
     },
-    "To Score 2+ Goals|recognized audit-only family; not emitted to app markets": {
-      "market": "To Score 2+ Goals",
-      "reason": "recognized audit-only family; not emitted to app markets",
-      "count": 18
-    },
     "Both Teams To Score HT|recognized audit-only family; not emitted to app markets": {
       "market": "Both Teams To Score HT",
       "reason": "recognized audit-only family; not emitted to app markets",
@@ -1534,6 +1624,11 @@
     },
     "Correct Score|recognized audit-only family; not emitted to app markets": {
       "market": "Correct Score",
+      "reason": "recognized audit-only family; not emitted to app markets",
+      "count": 18
+    },
+    "To Score 2+ Goals|recognized audit-only family; not emitted to app markets": {
+      "market": "To Score 2+ Goals",
       "reason": "recognized audit-only family; not emitted to app markets",
       "count": 18
     },
@@ -1663,15 +1758,15 @@
       "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "market": "To Score 2+ Goals",
-      "reason": "recognized audit-only family; not emitted to app markets"
-    },
-    {
       "market": "Both Teams To Score HT",
       "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
       "market": "Correct Score",
+      "reason": "recognized audit-only family; not emitted to app markets"
+    },
+    {
+      "market": "To Score 2+ Goals",
       "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
@@ -1739,11 +1834,11 @@
       "reason": "period-specific result market has no full-time settlement"
     },
     {
-      "market": "Both Teams To Score HT",
-      "reason": "recognized audit-only family; not emitted to app markets"
+      "market": "ML 2H",
+      "reason": "second-half result must not become a full-time result"
     },
     {
-      "market": "Correct Score",
+      "market": "Both Teams To Score HT",
       "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
@@ -1751,8 +1846,8 @@
       "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
-      "market": "ML 2H",
-      "reason": "second-half result must not become a full-time result"
+      "market": "Correct Score",
+      "reason": "recognized audit-only family; not emitted to app markets"
     },
     {
       "market": "Draw No Bet",
