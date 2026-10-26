@@ -23,6 +23,11 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from build_statmaker_schedule_scorers import build, TOP_LEAGUES
+from scorer_refresh_sources import recent_final
+try:
+    from api_football_budget import BudgetStop
+except ImportError:
+    from api_budget_runtime.api_football_budget import BudgetStop
 
 BASE = "https://v3.football.api-sports.io"
 HARD_CAP = 40
@@ -86,7 +91,8 @@ def plan(root: Path, phase: str, lookback: int) -> list[tuple[str, dict, Path]]:
             if lid <= 0:
                 continue
             dest = archive / "leaders" / (code + "_" + str(season) + ".json")
-            if recent_leader_cache(dest, lid, season, now):
+            max_age = timedelta(minutes=30) if recent_final(root, entry, now) else timedelta(hours=20)
+            if recent_leader_cache(dest, lid, season, now, max_age):
                 continue
             result.append(("players/topscorers",
                 {"league": lid, "season": season},
@@ -167,7 +173,11 @@ def execute(root: Path, requests: list, maximum: int, api_key: str,
         if not api_key:
             stopped = "Missing API_FOOTBALL_KEY"
             break
-        rows, remaining = get_data(api_key, endpoint, params)
+        try:
+            rows, remaining = get_data(api_key, endpoint, params)
+        except BudgetStop as exc:
+            stopped = "shared_budget_stop:" + str(exc)
+            break
         sent += 1
         if remaining is None or remaining < reserve:
             stopped = "Provider remaining quota unknown or below reserve"

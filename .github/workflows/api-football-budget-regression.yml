@@ -8,6 +8,19 @@ on:
       - 'config/api_football_refresh_policy.json'
       - 'tests/test_api_football_shared_budget.py'
       - 'tests/test_priority_matches_refresh.py'
+      - 'scripts/scorer_refresh_sources.py'
+      - 'scripts/refresh_domestic_match_context.py'
+      - 'scripts/fetch_schedule_scorers_capped.py'
+      - 'scripts/build_statmaker_schedule_scorers.py'
+      - 'scripts/reconcile_top_scorers_with_events.py'
+      - 'scripts/uefa_postmatch_refresh_due.py'
+      - 'scripts/build_league_tables_program.py'
+      - 'tests/test_watchdog_scorers.py'
+      - 'tests/test_scorer_refresh_freshness.py'
+      - 'tests/test_schedule_scorers_offline_builder.py'
+      - 'tests/test_scorer_goal_floor.py'
+      - 'tests/test_uefa_postmatch_refresh_due.py'
+      - 'tests/test_live_settlement_watchdog.py'
       - '.github/workflows/**'
   workflow_dispatch:
 permissions:
@@ -34,3 +47,9 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_api_football_shared_budget.py' -q
           python -m unittest discover -s tests -p 'test_priority_matches_refresh.py' -q
+          python -m unittest discover -s tests -p 'test_watchdog_scorers.py' -q
+          python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -q
+          python -m unittest discover -s tests -p 'test_schedule_scorers_offline_builder.py' -q
+          python -m unittest discover -s tests -p 'test_scorer_goal_floor.py' -q
+          python -m unittest discover -s tests -p 'test_uefa_postmatch_refresh_due.py' -q
+          python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -q

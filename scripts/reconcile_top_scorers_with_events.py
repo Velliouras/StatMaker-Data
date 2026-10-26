@@ -17,6 +17,7 @@ import argparse
 import json
 from pathlib import Path
 import unicodedata
+from scorer_refresh_sources import priority_completed
 
 
 CONTRACT = "statmaker-schedule-scorers-v1"
@@ -99,6 +100,11 @@ def reconcile(root: Path):
     baseline = read(folder / "verified_g1_baseline.json")
     context = read(folder / "domestic_match_context.json")
     games = read(root / "data/statmaker/domestic_enriched/greece_super_league_2026.json")
+    matches = {m["fixture_id"]: m for m in games.get("matches", [])}
+    for _, _, row in priority_completed(root, {TARGET_LEAGUE: {
+            "api_football_season": TARGET_SEASON, "api_football_league_id": 197}}):
+        matches[row["fixture_id"]] = row
+    games["matches"] = list(matches.values())
     if doc.get("contract") != CONTRACT or baseline.get("contract") != BASE_CONTRACT:
         raise ValueError("Unsupported scorer provenance contract")
     if baseline.get("leagueCode") != TARGET_LEAGUE or baseline.get("season") != TARGET_SEASON:

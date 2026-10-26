@@ -1,6 +1,11 @@
 name: Domestic Results Venue and Scorers Refresh
 
 on:
+  workflow_call:
+    inputs:
+      watchdog:
+        type: boolean
+        default: false
   schedule:
     # Two windows after European evening matches and the following morning.
     # 32 calls each, preserving the previous 64-call daily ceiling.
@@ -30,11 +35,12 @@ env:
   STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
   STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
   STATMAKER_API_BUDGET_PROFILE: rolling
+  WATCHDOG_REFRESH: ${{ inputs.watchdog }}
   PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
   refresh:
-    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T07:') || contains(github.event.workflow_run.run_started_at, 'T08:') || contains(github.event.workflow_run.run_started_at, 'T09:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
+    if: ${{ inputs.watchdog || ((github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T07:') || contains(github.event.workflow_run.run_started_at, 'T08:') || contains(github.event.workflow_run.run_started_at, 'T09:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 28
     steps:
@@ -42,6 +48,19 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /scripts/
+            /tests/
+            /config/
+            /data/statmaker/domestic_enriched/index.json
+            /data/statmaker/priority_refresh/
+            /data/statmaker/schedule_scorers/
+            /data/api_football/schedule_scorers/
+      - name: Include selected current-season scorer archives
+        run: python scripts/scorer_refresh_sources.py
       - name: Verify shared API budget guard before provider work
         run: |
           python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
@@ -50,7 +69,11 @@ jobs:
           python-version: '3.11'
       - name: Check window freshness before spending provider quota
         id: freshness
-        run: python scripts/refresh_domestic_match_context.py --check-window >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          args=()
+          if [ "$WATCHDOG_REFRESH" = "true" ]; then args+=(--watchdog); fi
+          python scripts/refresh_domestic_match_context.py --check-window "${args[@]}" >> "$GITHUB_OUTPUT"
       - name: Validate scorer refresh regression tests (offline)
         if: steps.freshness.outputs.refresh_needed == 'true'
         run: python -m unittest discover -s tests -p 'test_scorer_refresh_freshness.py' -v
@@ -65,7 +88,9 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: |
           test -n "$API_FOOTBALL_KEY" || { echo "Missing API_FOOTBALL_KEY"; exit 1; }
-          python scripts/refresh_domestic_match_context.py --execute --max-requests 32 --quota-reserve 1500
+          args=()
+          if [ "$WATCHDOG_REFRESH" = "true" ]; then args+=(--watchdog); fi
+          python scripts/refresh_domestic_match_context.py --execute --max-requests 32 --quota-reserve 1500 "${args[@]}"
       - name: Validate read model before publication
         if: steps.freshness.outputs.refresh_needed == 'true'
         run: |

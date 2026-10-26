@@ -225,3 +225,27 @@ jobs:
   refresh-priority-results-and-standings:
     uses: ./.github/workflows/priority-results-standings.yml
     secrets: inherit
+
+  refresh-domestic-scorer-events:
+    needs: refresh-priority-results-and-standings
+    uses: ./.github/workflows/domestic-results-context-refresh.yml
+    with:
+      watchdog: true
+    secrets: inherit
+
+  refresh-scorer-leaderboards:
+    needs: refresh-domestic-scorer-events
+    uses: ./.github/workflows/schedule-scorers-manual.yml
+    with:
+      watchdog: true
+      phase: leaders
+      max_requests: '6'
+      lookback: '14'
+    secrets: inherit
+
+  refresh-uefa-scorers:
+    needs: refresh-priority-results-and-standings
+    uses: ./.github/workflows/league-tables-program-publish.yml
+    with:
+      watchdog: true
+    secrets: inherit

@@ -16,6 +16,10 @@ from pathlib import Path
 import time
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+try:
+    from api_football_budget import BudgetStop, priority
+except ImportError:
+    from api_budget_runtime.api_football_budget import BudgetStop, priority
 
 COMPLETED = {"FT", "AET", "PEN"}
 CANCELLED = {"CANC", "ABD", "AWD", "WO"}
@@ -62,8 +66,9 @@ def current_leagues(root):
 
 
 class Provider:
-    def __init__(self, root, execute, budget, reserve):
+    def __init__(self, root, execute, budget, reserve, fresh_seconds=3600):
         self.root, self.execute, self.budget, self.reserve = root, execute, budget, reserve
+        self.fresh_seconds = fresh_seconds
         self.calls = 0
         self.stop = None
 
@@ -71,7 +76,7 @@ class Provider:
         path = self.root / "data/api_football/league_tables" / (key + ".json")
         cached = read(path)
         stamp = instant(cached.get("fetchedAtUTC"))
-        fresh = stamp and (datetime.now(timezone.utc) - stamp).total_seconds() < 3600
+        fresh = stamp and 0 <= (datetime.now(timezone.utc) - stamp).total_seconds() < self.fresh_seconds
         valid_cache = (cached.get("params") == params and isinstance(cached.get("response"), list)
                        and (validator is None or validator(cached["response"])))
         if valid_cache and (permanent or fresh):
@@ -87,7 +92,7 @@ class Provider:
                                    "User-Agent": "StatMaker-League-Tables-Program"})
         self.calls += 1
         try:
-            with urlopen(request, timeout=25) as response:
+            with priority("primary"), urlopen(request, timeout=25) as response:
                 body = response.read(4_000_001)
                 if len(body) > 4_000_000:
                     raise ValueError("oversized_provider_response")
@@ -103,6 +108,9 @@ class Provider:
                          "response": payload["response"]})
             time.sleep(0.2)
             return payload["response"]
+        except BudgetStop as exc:
+            self.stop = "shared_budget_stop:" + str(exc)
+            return cached["response"] if valid_cache else []
         except (OSError, ValueError, TypeError):
             self.stop = "provider_response_unavailable"
             return cached["response"] if valid_cache else []
@@ -185,7 +193,8 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
         old = history.get(match["fixture_id"])
         if old:
             match["normalized_stats"] = old.get("normalizedStats") or {}
-            if old.get("status") in COMPLETED:
+            if old.get("status") in COMPLETED and not (match["status"] in COMPLETED and
+                    all(type(match.get(k)) is int and match[k] >= 0 for k in ("home_goals", "away_goals"))):
                 match.update(status=old["status"], home_goals=old.get("homeGoals"), away_goals=old.get("awayGoals"))
         fixtures[match["fixture_id"]] = match
     # Completed current-season results remain readable if a calendar refresh is unavailable.
@@ -200,6 +209,13 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
         if match:
             match["normalized_stats"] = old.get("normalizedStats") or {}
             fixtures[fid] = match
+    previous = read(root / "data/statmaker/league_tables" / (code + ".json"))
+    if previous.get("season") == season and previous.get("apiFootballLeagueId") == league_id:
+        for old in previous.get("fixtures", []):
+            fid = old.get("fixture_id")
+            if (old.get("status") in COMPLETED and fid and
+                    (fid not in fixtures or fixtures[fid].get("status") not in COMPLETED)):
+                fixtures[fid] = old
     if standings_raw is None:
         standings_raw = provider.get(f"{code}_{season}_standings", "standings", {"league": league_id, "season": season})
     standings = []
@@ -252,11 +268,21 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
                     "completedFixtures": len(completed), "verifiedFixtures": validated, "players": leaders}}
 
 
-def build(root, provider):
+def build(root, provider, uefa_only=False):
     output = root / "data/statmaker/league_tables"
     catalogue = []
     warnings = []
-    for code, league in current_leagues(root).items():
+    if uefa_only:
+        old_index = read(output / "index.json")
+        for row in old_index.get("leagues", []):
+            code = str(row.get("leagueCode") or "")
+            if code in UEFA or not code or "/" in code or ".." in code:
+                continue
+            doc = read(output / (code + ".json"))
+            if (doc.get("contract") == CONTRACT and doc.get("leagueCode") == code and
+                    doc.get("season") == row.get("season")):
+                catalogue.append(row)
+    for code, league in ({} if uefa_only else current_leagues(root)).items():
         cache_path = str(league.get("cache_path") or "")
         if not cache_path.startswith("data/api_football/fixture_stats/") or ".." in Path(cache_path).parts:
             continue
@@ -294,7 +320,11 @@ def build(root, provider):
         old = read(output / (code + ".json"))
         if old.get("season") == doc["season"]:
             incoming = {f["fixture_id"]: f for f in old.get("fixtures", [])}
-            incoming.update({f["fixture_id"]: f for f in doc["fixtures"]})
+            for f in doc["fixtures"]:
+                prior = incoming.get(f["fixture_id"])
+                if prior and prior.get("status") in COMPLETED and f.get("status") not in COMPLETED:
+                    continue
+                incoming[f["fixture_id"]] = f
             doc["fixtures"] = list(incoming.values())
             if not doc["standings"]:
                 doc["standings"] = old.get("standings", [])
@@ -307,6 +337,11 @@ def build(root, provider):
     index = {"contract": CONTRACT, "schemaVersion": 1, "generatedAtUTC": now(),
              "leagues": catalogue, "warnings": warnings, "apiCalls": provider.calls,
              "providerStopReason": provider.stop}
+    for row in catalogue:
+        path = output / (row["leagueCode"] + ".json")
+        doc = read(path)
+        doc["generatedAtUTC"] = index["generatedAtUTC"]
+        write(path, doc)
     write(output / "index.json", index)
     print(json.dumps({"leagues": len(catalogue), "apiCalls": provider.calls, "stop": provider.stop,
                       "warnings": warnings}, ensure_ascii=False), flush=True)
@@ -316,14 +351,17 @@ def build(root, provider):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--uefa-only", action="store_true",
+                        help="Preserve domestic programmes without scanning full statistics caches")
     parser.add_argument("--max-requests", type=int, default=64)
     parser.add_argument("--quota-reserve", type=int, default=1500)
     args = parser.parse_args()
     if not 1 <= args.max_requests <= 64 or args.quota_reserve < 1500:
         parser.error("Maximum 64 provider calls, minimum reserve 1500")
     root = Path(__file__).resolve().parents[1]
-    provider = Provider(root, args.execute, args.max_requests, args.quota_reserve)
-    build(root, provider)
+    provider = Provider(root, args.execute, args.max_requests, args.quota_reserve,
+                        fresh_seconds=900 if args.uefa_only else 3600)
+    build(root, provider, uefa_only=args.uefa_only)
 
 
 if __name__ == "__main__":

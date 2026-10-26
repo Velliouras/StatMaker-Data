@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import re
+from scorer_refresh_sources import priority_completed
 
 TOP_LEAGUES = ("E0", "SP1", "I1", "D1", "F1", "G1")
 COMPLETED = {"FT", "AET", "PEN"}
@@ -88,6 +89,13 @@ def canonical_index(root: Path):
             fixtures[fid] = {"leagueCode": code, "home": str(m.get("home_team") or ""),
                              "away": str(m.get("away_team") or ""),
                              "totalGoals": h + a}
+    for code, _, row in priority_completed(root, leagues):
+        fid = str(row["fixture_id"])
+        if fid in fixtures and fixtures[fid]["leagueCode"] != code:
+            raise ValueError("Fast result fixture league collision: " + fid)
+        fixtures[fid] = {"leagueCode": code, "home": row["home_team"],
+                         "away": row["away_team"],
+                         "totalGoals": row["home_goals"] + row["away_goals"]}
     return leagues, fixtures
 
 

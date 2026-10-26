@@ -1,6 +1,11 @@
 name: League Tables UEFA and Program Publish
 
 on:
+  workflow_call:
+    inputs:
+      watchdog:
+        type: boolean
+        default: false
   # The UEFA producer publishes via GITHUB_TOKEN; its commit does not fire
   # downstream push workflows. workflow_run is the reliable hand-off.
   workflow_run:
@@ -38,11 +43,12 @@ env:
   STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
   STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
   STATMAKER_API_BUDGET_PROFILE: rolling
+  WATCHDOG_REFRESH: ${{ inputs.watchdog }}
   PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
   publish:
-    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.name != 'Domestic Lineup Watch' || (github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T21:') || contains(github.event.workflow_run.run_started_at, 'T22:') || contains(github.event.workflow_run.run_started_at, 'T23:') || contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
+    if: ${{ inputs.watchdog || ((github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.name != 'Domestic Lineup Watch' || (github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T21:') || contains(github.event.workflow_run.run_started_at, 'T22:') || contains(github.event.workflow_run.run_started_at, 'T23:') || contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -56,6 +62,7 @@ jobs:
             /scripts/
             /data/statmaker/domestic_enriched/index.json
             /data/statmaker/uefa_current_stats.json
+            /data/statmaker/priority_refresh/
             /data/statmaker/league_tables/
             /data/api_football/league_tables/
       - name: Verify shared API budget guard before provider work
@@ -67,12 +74,14 @@ jobs:
       - name: Check completed UEFA matchday gaps before spending quota
         id: due
         run: |
-          python scripts/uefa_postmatch_refresh_due.py --target tables >> "$GITHUB_OUTPUT"
+          args=()
+          if [ "$WATCHDOG_REFRESH" = "true" ]; then args+=(--watchdog); fi
+          python scripts/uefa_postmatch_refresh_due.py --target tables "${args[@]}" >> "$GITHUB_OUTPUT"
           # Explicit manual trigger requests always run; a genuine data
           # change is already covered by the same published due check.
 
       - name: Include only current-season fixture caches
-        if: steps.due.outputs.refresh_needed == 'true'
+        if: steps.due.outputs.refresh_needed == 'true' && !inputs.watchdog
         run: |
           python - <<'PY'
           import subprocess
@@ -87,7 +96,10 @@ jobs:
         if: steps.due.outputs.refresh_needed == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-        run: python scripts/build_league_tables_program.py --execute --max-requests 64 --quota-reserve 1500
+        run: |
+          args=()
+          if [ "$WATCHDOG_REFRESH" = "true" ]; then args+=(--uefa-only); fi
+          python scripts/build_league_tables_program.py --execute --max-requests 64 --quota-reserve 1500 "${args[@]}"
       - name: Validate current-season published read models
         if: steps.due.outputs.refresh_needed == 'true'
         run: |

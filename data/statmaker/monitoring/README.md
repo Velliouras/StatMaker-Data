@@ -62,3 +62,21 @@
 επιτυχημένη ανάκτηση, όχι προγραμματισμένο χρόνο. Ένα επιτυχές χειροκίνητο run
 δεν αποδεικνύει ότι λειτουργεί το cron. Για αυστηρή χρονική εγγύηση απαιτείται
 χρονιστής εκτός του GitHub scheduler.
+
+### Scorers on the external Watchdog
+
+The existing 15-minute external dispatch also invokes domestic match scorers,
+the six existing domestic top-scorer leaderboards, and UEFA league-phase scorers.
+No additional cron-job.org job or Android build is needed.
+
+- Domestic scorer timelines consume the verified priority-results feed, so new
+  finals do not wait for the nightly enriched archive. Recent gaps are checked
+  once per UTC half-hour, with at most 32 provider calls per needed run.
+- Leaderboards retain their normal 20-hour cache on quiet days. A verified final
+  in the last six hours shortens the cache to 30 minutes (at most six calls).
+- UEFA retries missing verified league-phase goal events with a 30-minute gate
+  and a 64-call run ceiling. Qualifiers before the phase start are excluded.
+- Complete score-reconciled event caches are reused. Published history retains
+  the whole selected season; only new network work has a 14-day domestic window.
+- All three producers retain the common 6,000-call daily stop, 4,500 background
+  stop and 1,500-call provider reserve. Exhaustion preserves verified caches.

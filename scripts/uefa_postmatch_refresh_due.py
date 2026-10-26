@@ -35,12 +35,49 @@ def load(path):
         return {}
 
 
-def due(root: Path, target: str, at: datetime | None = None):
+def watchdog_tables_due(root, docs, now):
+    """Retry verified result/scorer gaps even when older than the cron lookback."""
+    current = load(root / "data/statmaker/uefa_current_stats.json")
+    phases = {{"CONF": "UECL"}.get(c.get("leagueCode"), c.get("leagueCode")):
+              str(c.get("phaseStart") or str(c.get("season")) + "-09-01")
+              for c in current.get("competitions", [])}
+    missing = []
+    for code, doc in docs.items():
+        completed = {int(f["fixture_id"]): f for f in doc.get("fixtures", [])
+                     if f.get("status") in COMPLETED}
+        fast = load(root / "data/statmaker/priority_refresh" / (code + ".json"))
+        valid_fast = (fast.get("contract") == "statmaker-league-tables-v1" and
+                      fast.get("leagueCode") == code and fast.get("season") == doc.get("season") and
+                      fast.get("apiFootballLeagueId") == doc.get("apiFootballLeagueId"))
+        if valid_fast:
+            for f in fast.get("fixtures", []):
+                stamp = parse_date(f.get("date_utc"))
+                if (f.get("status") not in COMPLETED or stamp is None or
+                        stamp > now or stamp.date().isoformat() < phases.get(code, str(doc.get("season")) + "-09-01")):
+                    continue
+                if any(type(f.get(k)) is not int or f[k] < 0 for k in ("fixture_id", "home_goals", "away_goals")):
+                    continue
+                old = completed.get(f["fixture_id"])
+                if old is None or any(old.get(k) != f[k] for k in ("home_goals", "away_goals")):
+                    missing.append(code)
+        if int((doc.get("scorers") or {}).get("verifiedFixtures") or 0) < len(completed):
+            missing.append(code)
+    if not missing:
+        return False, "uefa-scorer-events-complete"
+    stamps = [parse_date(doc.get("generatedAtUTC")) for doc in docs.values()]
+    if all(stamps) and all(int(stamp.timestamp()) // 1800 == int(now.timestamp()) // 1800 for stamp in stamps):
+        return False, "uefa-scorer-half-hour-cooldown"
+    return True, "incomplete-uefa-scorers:" + ",".join(sorted(set(missing)))
+
+
+def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
     now = (at or datetime.now(timezone.utc)).astimezone(timezone.utc)
     tables_dir = root / "data/statmaker/league_tables"
     docs = {code: load(tables_dir / f"{code}.json") for code in LEAGUES}
     if any(doc.get("contract") != "statmaker-league-tables-v1" for doc in docs.values()):
         return True, "missing-uefa-tables"
+    if watchdog and target == "tables":
+        return watchdog_tables_due(root, docs, now)
 
     recent = []
     for code, doc in docs.items():
@@ -102,8 +139,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", choices=["stats", "tables"], required=True)
     parser.add_argument("--root", type=Path, default=Path("."))
+    parser.add_argument("--watchdog", action="store_true")
     args = parser.parse_args()
-    needed, reason = due(args.root, args.target)
+    needed, reason = due(args.root, args.target, watchdog=args.watchdog)
     print("refresh_needed=" + str(needed).lower())
     print("refresh_reason=" + reason)
 

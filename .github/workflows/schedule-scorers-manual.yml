@@ -1,6 +1,20 @@
 name: Schedule Scorers Bounded Manual Refresh
 
 on:
+  workflow_call:
+    inputs:
+      watchdog:
+        type: boolean
+        default: false
+      phase:
+        type: string
+        default: 'leaders'
+      max_requests:
+        type: string
+        default: '6'
+      lookback:
+        type: string
+        default: '14'
   # Daily refresh and fallback: missing schedule runs must not leave leaders stale.
   # Provenance timestamp freshness skips duplicates without spending provider calls.
   schedule:
@@ -46,12 +60,12 @@ env:
   STATMAKER_API_BUDGET_ENFORCE: "true"
   STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
   STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
-  STATMAKER_API_BUDGET_PROFILE: background
+  STATMAKER_API_BUDGET_PROFILE: rolling
   PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
   scorer-refresh:
-    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
+    if: ${{ inputs.watchdog || ((github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -59,6 +73,19 @@ jobs:
         with:
           ref: main
           fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /scripts/
+            /tests/
+            /config/
+            /data/statmaker/domestic_enriched/index.json
+            /data/statmaker/priority_refresh/
+            /data/statmaker/schedule_scorers/
+            /data/api_football/schedule_scorers/
+      - name: Include selected current-season scorer archives
+        run: python scripts/scorer_refresh_sources.py
       - name: Verify shared API budget guard before provider work
         run: |
           python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
@@ -72,9 +99,9 @@ jobs:
       - name: Import only bounded verified scorer data
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          REQUEST_PHASE: ${{ github.event_name == 'workflow_dispatch' && inputs.phase || 'leaders' }}
-          MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '6' }}
-          LOOKBACK: ${{ github.event_name == 'workflow_dispatch' && inputs.lookback || '14' }}
+          REQUEST_PHASE: ${{ inputs.phase || 'leaders' }}
+          MAX_REQUESTS: ${{ inputs.max_requests || '6' }}
+          LOOKBACK: ${{ inputs.lookback || '14' }}
         run: |
           test -n "$API_FOOTBALL_KEY" || { echo 'Missing API_FOOTBALL_KEY'; exit 1; }
           python scripts/fetch_schedule_scorers_capped.py --execute \
@@ -88,7 +115,7 @@ jobs:
           python scripts/reconcile_top_scorers_with_events.py
       - name: Publish only scorer cache and read model
         env:
-          REQUEST_PHASE: ${{ github.event_name == 'workflow_dispatch' && inputs.phase || 'leaders' }}
+          REQUEST_PHASE: ${{ inputs.phase || 'leaders' }}
         run: |
           set -euo pipefail
           git config user.name 'statmaker-data-bot'
