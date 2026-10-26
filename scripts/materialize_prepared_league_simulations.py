@@ -208,6 +208,11 @@ RULES: dict[str, LeagueRule] = {
     "URU": LeagueRule(UNORDERED, 1, format_label="Apertura/Intermedio/Clausura + championship playoff"),
 }
 
+TABLE_PHASE_PREFIXES = {
+    "FIN": ("regular season", "championship group", "relegation group"),
+    "FIN2": ("regular season", "group stage"),
+}
+
 def is_simulation_current_entry(row: dict[str, Any]) -> bool:
     # Stats readiness may label a current score cache historical_support. It
     # remains a current simulation input whenever the season and known rule agree.
@@ -365,13 +370,13 @@ def current_season_fixtures(entry: dict[str, Any], payload: dict[str, Any]) -> l
     for row in (payload.get("fixtures") or []):
         if not isinstance(row, dict):
             continue
-        # Finnish endpoints also contain cross-division playoff ties. They do
-        # not award league-table points or add a club to the current division.
-        # Keep Relegation Group and FIN2 Group Stage rounds, which do count.
+        # Finnish endpoints also contain cross-division playoff ties. The two
+        # legs can have different phase labels (Relegation, then Final). Only
+        # the documented table phases contribute points or define the roster.
         source = row.get("source_league")
         round_name = str(source.get("round") or "").strip().casefold() if isinstance(source, dict) else ""
         code = str(entry.get("league_code") or "").upper()
-        if (code == "FIN" and round_name == "relegation") or (code == "FIN2" and round_name == "final"):
+        if code in TABLE_PHASE_PREFIXES and round_name and not round_name.startswith(TABLE_PHASE_PREFIXES[code]):
             continue
         if str(row.get("status") or "").upper() not in FINISHED_STATUSES:
             continue
@@ -1185,7 +1190,12 @@ def main() -> int:
             fixtures = current_season_fixtures(entry, payload)
             result = simulate_league(entry, fixtures, runs, elo_scope)
             if result is None:
-                raise SystemExit(f"{league_code}: league simulation contract failed")
+                teams = build_table(fixtures)
+                missing = sorted(set(teams) - set(elo_scope.teams))
+                phases = sorted({str((f.get("source_league") or {}).get("round") or "") for f in fixtures})
+                raise SystemExit(f"{league_code}: league simulation contract failed "
+                                 f"fixtures={len(fixtures)} teams={len(teams)} "
+                                 f"missing_elo={missing} phases={phases}")
             meta, rows = result
 
             con.execute(

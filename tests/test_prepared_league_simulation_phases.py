@@ -49,6 +49,17 @@ class LeagueSimulationPhasesTest(unittest.TestCase):
         tie = self.fixture("PK-35", "FF Jaro", "Relegation", 1646596)
         self.assertEqual([], simulation.current_season_fixtures(self.entry(), {"fixtures": [tie]}))
 
+    def test_return_leg_labelled_final_does_not_add_a_thirteenth_team(self):
+        first = self.fixture("PK-35", "FF Jaro", "Relegation", 1646596)
+        second = self.fixture("FF Jaro", "PK-35", "Final", 1646597)
+        self.assertEqual([], simulation.current_season_fixtures(self.entry(), {"fixtures": [first, second]}))
+
+    def test_other_non_table_playoff_labels_cannot_change_finnish_roster(self):
+        for phase in ("Play-offs", "Semi-finals", "Final", "Relegation"):
+            with self.subTest(phase=phase):
+                tie = self.fixture("Outside Division", "FF Jaro", phase)
+                self.assertEqual([], simulation.current_season_fixtures(self.entry(), {"fixtures": [tie]}))
+
     def test_relegation_group_and_championship_group_results_still_count(self):
         fixtures = [self.fixture("FF Jaro", "Lahti", "Relegation Group - 27", 1),
                     self.fixture("KuPS", "VPS", "Championship Group - 28", 2),
@@ -70,6 +81,7 @@ class LeagueSimulationPhasesTest(unittest.TestCase):
         fixtures = [self.fixture(home, away, "Regular Season - 1", i * 12 + j)
                     for i, home in enumerate(teams) for j, away in enumerate(teams) if home != away]
         fixtures.append(self.fixture("PK-35", teams[0], "Relegation", 1646596))
+        fixtures.append(self.fixture(teams[0], "PK-35", "Final", 1646597))
         rows = simulation.current_season_fixtures(self.entry(), {"fixtures": fixtures})
         scope = simulation.EloScope(
             model_version=simulation.ELO_MODEL_VERSION, rating_scale=400.0, home_advantage=65.0,

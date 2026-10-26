@@ -62,6 +62,10 @@ jobs:
           if [[ "$CACHED_RECOVERY" == "true" ]]; then unset API_FOOTBALL_KEY; fi
           python -m unittest tests/test_prepared_fixture_schedule_gaps.py
           python -m unittest tests/test_prepared_uefa_match_simulations.py
+          if [[ "$UEFA_MATCH_ONLY" != "true" ]]; then
+            python -m unittest tests/test_prepared_league_simulation_phases.py
+            python scripts/preflight_league_simulations.py
+          fi
           if [[ "$UEFA_MATCH_ONLY" == "true" ]]; then
             python scripts/hotpatch_app_ready_simulation.py --uefa-match-only
           else

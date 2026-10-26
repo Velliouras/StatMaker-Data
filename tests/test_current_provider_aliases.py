@@ -11,6 +11,11 @@ import update_domestic_odds_api_io as odds
 
 class CurrentProviderAliasesTest(unittest.TestCase):
     CASES = {
+        "HUN": {
+            "Puskas Akademia FC Felcsut": "Puskas Academy",
+            "Ferencvarosi Budapest": "Ferencvarosi TC",
+        },
+        "UKR": {"FC Kryvbas Kriviy Rih": "Kryvbas KR"},
         "SC1": {
             "Queens Park FC": "Queen's Park",
             "Inverness Caledonian Thistle FC": "Inverness CT",
@@ -30,7 +35,7 @@ class CurrentProviderAliasesTest(unittest.TestCase):
             SimpleNamespace(ALIASES_PATH="aliases"), pipeline,
             [{"leagueCode": code, "targetAppSeason": "2026-2027"}])[code]
 
-    def test_the_three_overnight_failures_resolve_in_the_strict_validator(self):
+    def test_verified_provider_names_resolve_in_the_strict_validator(self):
         for code, names in self.CASES.items():
             for provider, expected in names.items():
                 with self.subTest(code=code, provider=provider):

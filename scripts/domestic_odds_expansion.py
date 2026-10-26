@@ -55,6 +55,13 @@ VERIFIED_PROVIDER_COUNTRY_ALIASES: Dict[str, Sequence[str]] = {
 # valid exact-odds fixture is never discarded merely because the two providers
 # use different city/suffix labels.
 VERIFIED_TEAM_ALIASES: Dict[str, Dict[str, Sequence[str]]] = {
+    "HUN": {
+        "Puskas Academy": ("Puskas Akademia FC Felcsut",),
+        "Ferencvarosi TC": ("Ferencvarosi Budapest",),
+    },
+    "UKR": {
+        "Kryvbas KR": ("FC Kryvbas Kriviy Rih",),
+    },
     "SC1": {
         "Queen's Park": ("Queens Park FC",),
         "Inverness CT": ("Inverness Caledonian Thistle FC",),
