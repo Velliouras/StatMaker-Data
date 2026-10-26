@@ -1,7 +1,9 @@
 {
   "competitionId": "europa_league",
   "leagueCode": "EL",
-  "warnings": [],
+  "warnings": [
+    "Odds rate-limit guard active after fixture refresh; fixtures published without new odds."
+  ],
   "apiCalls": [
     {
       "path": "/leagues",
@@ -11,10 +13,10 @@
         "all": "true"
       },
       "status": 200,
-      "durationMs": 168,
-      "bodyLength": 228755,
-      "rateLimitRemaining": 45,
-      "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 72}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 50}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 66}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-East\", \"slug\": \"algeria-ligue-2-center-east\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-West\", \"slug\": \"algeria-ligue-2-center-west\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Centre-East\", \"slug\": \"algeria-ligue-2-centre-east\", \"eventsCount\": 1}, {\"name\": \"Algeria - Ligue 2, Centre-West\", \"slug\": \"algeria-ligue-2-centre-west\", \"eventsCount\": 3}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 35}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount..."
+      "durationMs": 423,
+      "bodyLength": 230320,
+      "rateLimitRemaining": 25,
+      "sample": "[{\"name\": \"Albania - Kategoria e Pare\", \"slug\": \"albania-kategoria-e-pare\", \"eventsCount\": 72}, {\"name\": \"Albania - Kategoria Superiore\", \"slug\": \"albania-kategoria-superiore\", \"eventsCount\": 50}, {\"name\": \"Albania - Kupa e Shqiperise\", \"slug\": \"albania-kupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Albania - Superkupa e Shqiperise\", \"slug\": \"albania-superkupa-e-shqiperise\", \"eventsCount\": 0}, {\"name\": \"Algeria - Coupe d Algerie\", \"slug\": \"algeria-coupe-d-algerie\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 1\", \"slug\": \"algeria-ligue-1\", \"eventsCount\": 66}, {\"name\": \"Algeria - Ligue 2\", \"slug\": \"algeria-ligue-2\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-East\", \"slug\": \"algeria-ligue-2-center-east\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Center-West\", \"slug\": \"algeria-ligue-2-center-west\", \"eventsCount\": 0}, {\"name\": \"Algeria - Ligue 2, Centre-East\", \"slug\": \"algeria-ligue-2-centre-east\", \"eventsCount\": 1}, {\"name\": \"Algeria - Ligue 2, Centre-West\", \"slug\": \"algeria-ligue-2-centre-west\", \"eventsCount\": 3}, {\"name\": \"Algeria - Supercoupe\", \"slug\": \"algeria-supercoupe\", \"eventsCount\": 0}, {\"name\": \"Andorra - Copa Constitucio\", \"slug\": \"andorra-copa-constitucio\", \"eventsCount\": 0}, {\"name\": \"Andorra - Primera Divisio\", \"slug\": \"andorra-primera-divisio\", \"eventsCount\": 40}, {\"name\": \"Andorra - Second Divisio\", \"slug\": \"andorra-second-divisio\", \"eventsCount..."
     },
     {
       "path": "/events",
@@ -23,14 +25,14 @@
         "sport": "football",
         "league": "international-clubs-uefa-champions-league",
         "status": "pending,live",
-        "from": "2026-10-26T06:16:01Z",
-        "to": "2026-12-10T06:16:01Z",
+        "from": "2026-10-26T14:32:53Z",
+        "to": "2026-12-10T14:32:53Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 158,
+      "durationMs": 253,
       "bodyLength": 17770,
-      "rateLimitRemaining": 44,
+      "rateLimitRemaining": 24,
       "sample": "[{\"id\": 74165976, \"home\": \"FC Shakhtar Donetsk\", \"away\": \"Sporting CP\", \"homeId\": 3313, \"awayId\": 3001, \"date\": \"2026-11-03T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165978, \"home\": \"Galatasaray Istanbul\", \"away\": \"VfB Stuttgart\", \"homeId\": 3061, \"awayId\": 2677, \"date\": \"2026-11-03T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165980, \"home\": \"Atletico Madrid\", \"away\": \"Bayern Munich\", \"homeId\": 2836, \"awayId\": 2672, \"date\": \"2026-11-03T20:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74165984, \"home\": \"FC Barcelona\", \"away\": \"Aston Villa\", \"homeId\": 2817, \"awayId\": 40, \"date\": \"2026-11-03T20:00:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"status\": \"pend..."
     },
     {
@@ -38,38 +40,38 @@
       "params": {
         "apiKey": "***",
         "eventIds": "74165976,74165978,74165980,74165984,74165986,74165988,74165990,74165992,74165994,74165996",
-        "bookmakers": "Bet365,Unibet"
+        "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 376,
-      "bodyLength": 520881,
-      "rateLimitRemaining": 43,
-      "sample": "[{\"id\": 74165984, \"home\": \"FC Barcelona\", \"away\": \"Aston Villa\", \"homeId\": 2817, \"awayId\": 40, \"date\": \"2026-11-03T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E203238435/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1029226846\"}, \"bookmakerIds\": {\"Bet365\": \"203238435\", \"Bet365_4\": \"203238435-bot365\", \"Unibet\": \"1029226846\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-25T07:46:11.181Z\", \"odds\": [{\"home\": \"1.250\", \"draw\": \"6.250\", \"away\": \"10.000\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-24T21:42:20.097Z\", \"odds\": [{\"home\": \"1.071\", \"away\": \"9.000\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-25T09:48:48.697Z\", \"odds\": [{\"1X\": \"1.062\", \"12\": \"1.125\", \"X2\": \"3.750\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T02:55:15.999Z\", \"odds\": [{\"hdp\": -4.5, \"home\": \"7.000\", \"away\": \"1.100\"}, {\"hdp\": -4, \"home\": \"6.000\", \"away\": \"1.125\"}, {\"hdp\": -3.75, \"home\": \"4.500\", \"away\": \"1.190\"}, {\"hdp\": -3.5, \"home\": \"3.700\", \"away\": \"1.260\"}, {\"hdp\": -3.25, \"home\": \"3.450\", \"away\": \"1.300\"}, {\"hdp\": -3, \"home\": \"3.100\", \"away\": \"1.350\"}, {\"hdp\": -2.75, \"home\": \"2.600\", \"away\": \"1.475\"}, {\"hdp\": -2.5, \"home\": \"2.300\", \"away\": \"1.6..."
+      "durationMs": 303,
+      "bodyLength": 79718,
+      "rateLimitRemaining": 23,
+      "sample": "[{\"id\": 74165984, \"home\": \"FC Barcelona\", \"away\": \"Aston Villa\", \"homeId\": 2817, \"awayId\": 40, \"date\": \"2026-11-03T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1029226846\"}, \"bookmakerIds\": {\"Unibet\": \"1029226846\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-25T23:56:16.256Z\", \"odds\": [{\"home\": \"1.18\", \"draw\": \"6.40\", \"away\": \"9.50\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-25T23:56:16.256Z\", \"odds\": [{\"home\": \"1.06\", \"away\": \"7.00\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-23T07:39:05.265Z\", \"odds\": [{\"1X\": \"1.04\", \"12\": \"1.08\", \"X2\": \"3.80\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-25T23:56:16.256Z\", \"odds\": [{\"hdp\": -2.5, \"home\": \"2.25\", \"away\": \"1.55\"}, {\"hdp\": -2.25, \"home\": \"2.04\", \"away\": \"1.67\"}, {\"hdp\": -2, \"home\": \"1.82\", \"away\": \"1.85\"}, {\"hdp\": -1.75, \"home\": \"1.65\", \"away\": \"2.07\"}, {\"hdp\": -1.5, \"home\": \"1.53\", \"away\": \"2.28\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-25T23:56:16.256Z\", \"odds\": [{\"hdp\": 3.5, \"over\": \"1.65\", \"under\": \"2.07\"}, {\"hdp\": 3.75, \"over\": \"1.79\", \"under\": \"1.88\"}, {\"hdp\": 4, \"over\": \"2.00\", \"under\": \"1.68\"}, {\"hdp\": 4.25, \"over\": \"2.23\", \"under\": \"1.56\"}, {\"hdp\": 4.5, \"over\": \"2..."
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
         "eventIds": "74165998,74166000,74166002,74166004,74166006,74166008,74166010,74166012,74166014,74166016",
-        "bookmakers": "Bet365,Unibet"
+        "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 325,
-      "bodyLength": 418888,
-      "rateLimitRemaining": 42,
-      "sample": "[{\"id\": 74166002, \"home\": \"FC Porto\", \"away\": \"SSC Napoli\", \"homeId\": 3002, \"awayId\": 2714, \"date\": \"2026-11-04T20:00:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Bet365\": \"https://www.bet365.com/#/AC/B1/C1/D8/E203238477/F3/I1/\", \"Unibet\": \"https://www.unibet.com/betting/sports/event/1028943213\"}, \"bookmakerIds\": {\"Bet365\": \"203238477\", \"Bet365_4\": \"203238477-bot365\", \"Unibet\": \"1028943213\"}, \"bookmakers\": {\"Bet365\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-22T02:43:58.272Z\", \"odds\": [{\"home\": \"2.150\", \"draw\": \"3.400\", \"away\": \"3.300\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-22T04:59:45.441Z\", \"odds\": [{\"home\": \"1.533\", \"away\": \"2.375\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-22T06:37:29.279Z\", \"odds\": [{\"1X\": \"1.333\", \"12\": \"1.300\", \"X2\": \"1.666\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-26T05:03:08.656Z\", \"odds\": [{\"hdp\": -2.5, \"home\": \"10.000\", \"away\": \"1.062\"}, {\"hdp\": -1.75, \"home\": \"5.250\", \"away\": \"1.160\"}, {\"hdp\": -1.5, \"home\": \"3.900\", \"away\": \"1.240\"}, {\"hdp\": -1.25, \"home\": \"3.550\", \"away\": \"1.275\"}, {\"hdp\": -1, \"home\": \"3.300\", \"away\": \"1.325\"}, {\"hdp\": -0.75, \"home\": \"2.425\", \"away\": \"1.525\"}, {\"hdp\": -0.5, \"home\": \"2.100\", \"away\": \"1.700\"}, {\"hdp\": -0.25, \"home\": \"1.875\", \"away\": \"1.9..."
+      "durationMs": 277,
+      "bodyLength": 63191,
+      "rateLimitRemaining": 22,
+      "sample": "[{\"id\": 74165998, \"home\": \"Fenerbahce Istanbul\", \"away\": \"Liverpool FC\", \"homeId\": 3052, \"awayId\": 44, \"date\": \"2026-11-04T17:45:00Z\", \"status\": \"pending\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Champions League\", \"slug\": \"international-clubs-uefa-champions-league\"}, \"urls\": {\"Unibet\": \"https://www.unibet.com/betting/sports/event/1028943225\"}, \"bookmakerIds\": {\"Unibet\": \"1028943225\"}, \"bookmakers\": {\"Unibet\": [{\"name\": \"ML\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"home\": \"4.40\", \"draw\": \"3.90\", \"away\": \"1.58\"}]}, {\"name\": \"Draw No Bet\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"home\": \"3.40\", \"away\": \"1.26\"}]}, {\"name\": \"Double Chance\", \"updatedAt\": \"2026-10-24T05:38:16.281Z\", \"odds\": [{\"1X\": \"2.12\", \"12\": \"1.19\", \"X2\": \"1.15\"}]}, {\"name\": \"Spread\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"hdp\": 0.5, \"home\": \"2.18\", \"away\": \"1.58\"}, {\"hdp\": 0.75, \"home\": \"1.95\", \"away\": \"1.73\"}, {\"hdp\": 1, \"home\": \"1.72\", \"away\": \"1.96\"}, {\"hdp\": 1.25, \"home\": \"1.58\", \"away\": \"2.28\"}, {\"hdp\": 1.5, \"home\": \"1.48\", \"away\": \"2.55\"}]}, {\"name\": \"Totals\", \"updatedAt\": \"2026-10-24T10:16:35.875Z\", \"odds\": [{\"hdp\": 2.75, \"over\": \"1.56\", \"under\": \"2.23\"}, {\"hdp\": 3, \"over\": \"1.70\", \"under\": \"1.98\"}, {\"hdp\": 3.25, \"over\": \"1.93\", \"under\": \"1.75\"}, {\"hdp\": 3.5, \"over\": \"2.15\", \"under\": \"1.60\"}, {\"hdp\": 3.75, \"over\"..."
     },
     {
       "path": "/odds/multi",
       "params": {
         "apiKey": "***",
         "eventIds": "74166018,74166020,74166022,74166024,74166026,74166028,74166030,74166032,74166034,74166036",
-        "bookmakers": "Bet365,Unibet"
+        "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 147,
+      "durationMs": 274,
       "bodyLength": 2,
-      "rateLimitRemaining": 41,
+      "rateLimitRemaining": 21,
       "sample": []
     },
     {
@@ -77,12 +79,12 @@
       "params": {
         "apiKey": "***",
         "eventIds": "74166038,74166040,74166042,74166044,74166046,74166048,74166050,74166052,74166054,74166056",
-        "bookmakers": "Bet365,Unibet"
+        "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 152,
+      "durationMs": 282,
       "bodyLength": 2,
-      "rateLimitRemaining": 40,
+      "rateLimitRemaining": 20,
       "sample": []
     },
     {
@@ -90,25 +92,12 @@
       "params": {
         "apiKey": "***",
         "eventIds": "74166058,74166060,74166062,74166064,74166066,74166068,74166070,74166072,74166074,74166076",
-        "bookmakers": "Bet365,Unibet"
+        "bookmakers": "Unibet"
       },
       "status": 200,
-      "durationMs": 154,
+      "durationMs": 316,
       "bodyLength": 2,
-      "rateLimitRemaining": 39,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "74166078,74166080,74166082,74166084",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 163,
-      "bodyLength": 2,
-      "rateLimitRemaining": 38,
+      "rateLimitRemaining": 19,
       "sample": []
     },
     {
@@ -118,67 +107,15 @@
         "sport": "football",
         "league": "international-clubs-uefa-europa-league",
         "status": "pending,live",
-        "from": "2026-10-26T06:16:03Z",
-        "to": "2026-12-10T06:16:03Z",
+        "from": "2026-10-26T14:32:55Z",
+        "to": "2026-12-10T14:32:55Z",
         "limit": 500
       },
       "status": 200,
-      "durationMs": 159,
+      "durationMs": 272,
       "bodyLength": 11773,
-      "rateLimitRemaining": 37,
+      "rateLimitRemaining": 18,
       "sample": "[{\"id\": 74173022, \"home\": \"AC Milan\", \"away\": \"Ferencvarosi Budapest\", \"homeId\": 2692, \"awayId\": 1925, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173024, \"home\": \"Sparta Prague\", \"away\": \"AFC Bournemouth\", \"homeId\": 2218, \"awayId\": 60, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173026, \"home\": \"Crystal Palace\", \"away\": \"TSG Hoffenheim\", \"homeId\": 7, \"awayId\": 2569, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0, \"away\": 0}}, {\"id\": 74173028, \"home\": \"Lillestroem SK\", \"away\": \"FC Viktoria Plzen\", \"homeId\": 664, \"awayId\": 4502, \"date\": \"2026-11-05T17:45:00Z\", \"sport\": {\"name\": \"Football\", \"slug\": \"football\"}, \"league\": {\"name\": \"International Clubs - UEFA Europa League\", \"slug\": \"international-clubs-uefa-europa-league\"}, \"status\": \"pending\", \"scores\": {\"home\": 0..."
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "74173022,74173024,74173026,74173028,74173030,74173032,74173034,74173036,74173038,74173040",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 150,
-      "bodyLength": 2,
-      "rateLimitRemaining": 36,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "74173042,74173044,74173046,74173048,74173052,74173054,74173056,74173058,74173060,74173062",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 165,
-      "bodyLength": 2,
-      "rateLimitRemaining": 35,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "74173064,74173066,74173068,74173070,74173072,74173074,74173076,74173078,74173080,74173082",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 172,
-      "bodyLength": 2,
-      "rateLimitRemaining": 34,
-      "sample": []
-    },
-    {
-      "path": "/odds/multi",
-      "params": {
-        "apiKey": "***",
-        "eventIds": "74173084,74173086,74173088,74173090,74173092,74173094",
-        "bookmakers": "Bet365,Unibet"
-      },
-      "status": 200,
-      "durationMs": 167,
-      "bodyLength": 2,
-      "rateLimitRemaining": 33,
-      "sample": []
     }
   ],
   "providerRawMarketNames": {},
@@ -189,7 +126,7 @@
   "auditOnlyMarketExamples": {},
   "unsupportedMarketCounts": {},
   "unsupportedMarketExamples": {},
-  "rateLimitRemaining": 33,
+  "rateLimitRemaining": 18,
   "providerIdentityTeams": [
     {
       "eventId": "74173022",
@@ -673,6 +610,6 @@
   "matchesEmitted": 36,
   "marketsEmitted": 0,
   "fixtureRefreshAttempted": true,
-  "oddsRefreshSkippedByRateLimit": false,
+  "oddsRefreshSkippedByRateLimit": true,
   "preservedPreviousExactMarketRows": 0
 }
