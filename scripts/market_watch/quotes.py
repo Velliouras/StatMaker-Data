@@ -67,6 +67,24 @@ def current_quotes(now):
             key=str(q['providerEventId']),q['kickoff'],q['bookmaker'],q['providerMarketName']
             if key not in groups or q['observed']>groups[key]['observed']:groups[key]=dict(observed=q['observed'],rows=[q])
             elif q['observed']==groups[key]['observed']:groups[key]['rows'].append(q)
+    from scripts.shots_uat.primary_quotes import packet
+    paths=[ROOT/'odds/odds_api_io/domestic_odds.json']+[source/f'odds/odds_api_io/{competition}_odds.json' for competition,_ in UEFA]
+    for path in paths:
+        markets,active=packet(path,now)
+        if not active:continue
+        groups={k:v for k,v in groups.items() if k[0] not in active or (k[2],k[3]) in active[k[0]]}
+        for (eid,book,name),blocks in markets.items():
+            for market in blocks:
+                ko=direct.kickoff(market['_kickoff']);observed=market['_observedAt'];rows=[]
+                for odd in market['odds']:
+                    for side,price in odd.items():
+                        if side=='hdp':continue
+                        rows.append(dict(providerEventId=eid,kickoff=ko,observed=observed,bookmaker=book,
+                            providerMarketName=name,selection=side.upper(),providerSelectionId='',line=odd.get('hdp'),odd=price,
+                            sourceReceipt='api-football-snapshot:'+market['_receiptSha256'],sourceSha256=market['_receiptSha256'],
+                            _providerHome=market['_home'],_providerAway=market['_away'],
+                            quoteObservationSemantics='API_FOOTBALL_NORMALIZED_SNAPSHOT',verifiedClientReceipt=False))
+                groups[eid,ko,book,name]=dict(observed=observed,rows=rows)
     return groups
 
 def bind(q,match,lookup):

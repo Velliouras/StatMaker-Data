@@ -50,7 +50,7 @@ jobs:
           # start from the latest main instead of the stale trigger SHA so the
           # generated large JSON artifacts do not hit avoidable rebase conflicts.
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Verify shared API budget guard before provider work
         run: |
@@ -115,7 +115,7 @@ jobs:
       - name: Refresh imminent schedule and rotating Domestic exact odds
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          ODDS_API_IO_BOOKMAKERS: "Unibet"
           # Client-side raw response receipts are research evidence, never live STRONG.
           STATMAKER_V2_CAPTURE_ODDS_RECEIPTS: "1"
           ODDS_API_IO_DOMESTIC_RATE_LIMIT_RESERVE: "45"
@@ -215,6 +215,20 @@ jobs:
             --write \
             --report-dir reports
 
+      - name: Validate primary provider contracts
+        run: python -m unittest discover -s tests -p test_primary_odds.py -v
+
+      - name: Prefer paid API-Football prices and retain free Unibet alternatives
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          python scripts/refresh_primary_odds.py \
+            --feeds odds/odds_api_io/domestic_odds.json \
+            --previous "$RUNNER_TEMP/domestic_odds_before.json" \
+            --archive odds/odds_api_io/domestic_provider_markets.json \
+            --max-requests 96
+          python scripts/odds_market_integrity.py odds/odds_api_io/domestic_odds.json --write --report-dir reports
+
       - name: Annotate Domestic odds movement
         run: |
           python scripts/annotate_domestic_odds_movement.py \
@@ -289,6 +303,7 @@ jobs:
             reports/domestic_proposal_readiness.json \
             reports/domestic_lineup_watch.json \
             reports/domestic_squad_context.json
+          git add data/api_football/odds_refresh_state.json reports/primary_odds_refresh.json
           # Record only raw responses actually observed in this same provider cycle.
           # No subsequent API call and no app-facing odds schema mutation.
           if [ -d reports/betting_v2/quote_receipts ]; then
@@ -329,15 +344,28 @@ jobs:
           cp scripts/odds_api_io_market_audit.py "$RUNNER_TEMP/odds_api_io_market_audit.py"
           cp scripts/build_statmaker_update_manifest.py "$RUNNER_TEMP/build_statmaker_update_manifest.py"
 
+      - name: Preserve verified primary-provider runtime and UEFA fixture context
+        run: |
+          cp scripts/refresh_primary_odds.py "$RUNNER_TEMP/refresh_primary_odds.py"
+          cp -R scripts/api_budget_runtime "$RUNNER_TEMP/api_budget_runtime"
+          mkdir -p "$RUNNER_TEMP/primary-context/data/api_football/league_tables"
+          cp config/api_football_refresh_policy.json "$RUNNER_TEMP/primary-context/policy.json"
+          cp data/api_football/league_tables/*_fixtures.json "$RUNNER_TEMP/primary-context/data/api_football/league_tables/"
+
       - name: Switch to live UEFA feed branch
         run: |
           git fetch origin build/uefa-qualifier-feed-20260720
           git checkout -B build/uefa-qualifier-feed-20260720 origin/build/uefa-qualifier-feed-20260720
 
+      - name: Snapshot UEFA prices before refreshing
+        run: |
+          mkdir -p "$RUNNER_TEMP/uefa_odds_before"
+          cp odds/odds_api_io/*_odds.json "$RUNNER_TEMP/uefa_odds_before/"
+
       - name: Refresh CL EL and Conference exact odds
         env:
           ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
-          ODDS_API_IO_BOOKMAKERS: ${{ vars.ODDS_API_IO_BOOKMAKERS || 'Bet365,Unibet' }}
+          ODDS_API_IO_BOOKMAKERS: "Unibet"
         run: |
           PYTHONPATH="${GITHUB_WORKSPACE}/scripts/api_budget_runtime:$RUNNER_TEMP:scripts" python - <<'PY'
           import update_uefa_qualifier_odds_build as target
@@ -346,6 +374,21 @@ jobs:
           install_parser_guard(target.base.odds)
           raise SystemExit(target.main())
           PY
+
+      - name: Prefer API-Football prices in UEFA feeds
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+        run: |
+          export PYTHONPATH="$RUNNER_TEMP/api_budget_runtime:$RUNNER_TEMP:scripts"
+          export STATMAKER_API_BUDGET_POLICY="$RUNNER_TEMP/primary-context/policy.json"
+          python "$RUNNER_TEMP/refresh_primary_odds.py" \
+            --feeds odds/odds_api_io/champions_league_odds.json odds/odds_api_io/europa_league_odds.json odds/odds_api_io/conference_league_odds.json \
+            --fixture-root "$RUNNER_TEMP/primary-context" \
+            --policy "$RUNNER_TEMP/primary-context/policy.json" \
+            --previous-dir "$RUNNER_TEMP/uefa_odds_before" \
+            --state data/api_football/uefa_odds_refresh_state.json \
+            --report reports/uefa_primary_odds_refresh.json \
+            --max-requests 24
 
       - name: Sanitize UEFA betting feeds
         run: |
@@ -379,6 +422,7 @@ jobs:
             reports/champions_league_odds_integrity.json \
             reports/europa_league_odds_integrity.json \
             reports/conference_league_odds_integrity.json
+          git add data/api_football/uefa_odds_refresh_state.json reports/uefa_primary_odds_refresh.json
           if git diff --cached --quiet; then
             echo "No UEFA odds changes."
           else

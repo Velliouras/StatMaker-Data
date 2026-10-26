@@ -41,7 +41,7 @@ from odds_api_io_market_audit import (
 SCRIPT_VERSION = "domestic-odds-api-io-v6-exact-count-periods"
 BASE_URL = "https://api.odds-api.io/v3"
 SPORT = "football"
-DEFAULT_BOOKMAKERS = "Bet365,Unibet"
+DEFAULT_BOOKMAKERS = "Unibet"
 RATE_LIMIT_STOP_BELOW = 20
 MAX_EVENTS_PER_MULTI_CALL = 10
 

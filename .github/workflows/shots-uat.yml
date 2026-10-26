@@ -43,6 +43,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /scripts/
+            /tests/test_primary_snapshot_bindings.py
             /config/
             /mappings/
             /data/statmaker/domestic_enriched/
@@ -92,6 +93,8 @@ jobs:
         run: python -m pip install catboost==1.2.8 numpy==2.2.6 scipy==1.15.3 scikit-learn==1.6.1
       - name: Verify leakage, probabilities, exact prices and settlement
         run: python -m unittest scripts.shots_uat.test_contract scripts.shots_uat.test_results scripts.shots_uat.test_production scripts.shots_uat.test_repricing scripts.shots_uat.test_daily scripts.market_watch.test_policy scripts.market_watch.test_catalog scripts.market_watch.test_recommend -v
+      - name: Verify API-Football quote binding and repricing
+        run: python -m unittest discover -s tests -p test_primary_snapshot_bindings.py -v
       - name: Verify existing cached history loader
         run: |
           python -c "from scripts.shots_uat.feed import load_history; print('CACHED_HISTORY', len(load_history()))"

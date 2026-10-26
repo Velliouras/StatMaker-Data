@@ -169,6 +169,11 @@ def load_quote_sources(now):
             league, markets, proof = uefa_packet(path, competition_id)
             league["_sourceOddsSha256"] = proof["sha256"]
             leagues.append(league); raw = latest_markets(raw, markets); source_packets.append(proof)
+    from .primary_quotes import merge as merge_primary
+    raw = merge_primary(raw, odds_path, now)
+    for competition_id, _code in UEFA:
+        source_root = ROOT / ".sources/uefa" if (ROOT / ".sources/uefa").exists() else ROOT
+        raw = merge_primary(raw, source_root / f"odds/odds_api_io/{competition_id}_odds.json", now)
     return leagues, raw, dict(oddsGeneratedAt=odds["generatedAt"], oddsSha256=digest(odds_bytes),
         providerSha256=digest(raw_bytes), observedDomesticLeagues=len(observations), uefa=source_packets)
 
