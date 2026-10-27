@@ -84,6 +84,7 @@ jobs:
             ! -name 'StreakKickoffLocalizationTest.kt' \
             ! -name 'StreakPatternScannerBttsTest.kt' \
             ! -name 'StreakPatternScannerWdlTest.kt' \
+            ! -name 'StreakPatternDiscoveryTest.kt' \
             -delete
 
       - name: Run focused regression tests
@@ -98,6 +99,7 @@ jobs:
             --tests "com.statmaker.app.StreakKickoffLocalizationTest" \
             --tests "com.statmaker.app.StreakPatternScannerBttsTest" \
             --tests "com.statmaker.app.StreakPatternScannerWdlTest" \
+            --tests "com.statmaker.app.StreakPatternDiscoveryTest" \
             --no-daemon --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
             -Dorg.gradle.workers.max=2 \
