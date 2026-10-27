@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-26T20:03:12Z",
+  "generated_at": "2026-10-27T00:02:46Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/portugal/liga-portugal/2026/fixture_stats.json",
-    "cache_generated_at": "2026-10-26T08:57:20Z",
+    "cache_generated_at": "2026-10-27T00:01:42Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-07-01",
@@ -45,32 +45,32 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 80,
-    "fixtures_with_any_stats": 80,
-    "fixtures_with_bb_core_stats": 78,
+    "completed_fixtures": 81,
+    "fixtures_with_any_stats": 81,
+    "fixtures_with_bb_core_stats": 79,
     "any_stats_coverage": 1.0,
-    "bb_core_coverage": 0.975,
+    "bb_core_coverage": 0.9753,
     "group_counts": {
-      "shots_total": 80,
-      "shots_on_target": 80,
-      "corners": 80,
-      "fouls": 80,
-      "yellow_cards": 78,
-      "red_cards": 52,
-      "possession": 80,
-      "passes": 80,
-      "xg": 51
+      "shots_total": 81,
+      "shots_on_target": 81,
+      "corners": 81,
+      "fouls": 81,
+      "yellow_cards": 79,
+      "red_cards": 53,
+      "possession": 81,
+      "passes": 81,
+      "xg": 52
     },
     "group_coverage": {
       "shots_total": 1.0,
       "shots_on_target": 1.0,
       "corners": 1.0,
       "fouls": 1.0,
-      "yellow_cards": 0.975,
-      "red_cards": 0.65,
+      "yellow_cards": 0.9753,
+      "red_cards": 0.6543,
       "possession": 1.0,
       "passes": 1.0,
-      "xg": 0.6375
+      "xg": 0.642
     },
     "bb_ready_candidate": true,
     "notes": [
@@ -6783,6 +6783,90 @@
         "halftime": {
           "home": 0,
           "away": 1
+        },
+        "fulltime": {
+          "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1575524,
+      "date_utc": "2026-10-26T18:45:00+00:00",
+      "country": "Portugal",
+      "league": "Liga Portugal",
+      "league_code": "P1",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 94,
+      "round": "Regular Season - 9",
+      "home_team": "Santa Clara",
+      "away_team": "Benfica",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 13,
+        "AS": 16,
+        "HST": 6,
+        "AST": 3,
+        "HC": 2,
+        "AC": 3,
+        "HF": 17,
+        "AF": 13,
+        "HY": 4,
+        "AY": 5,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 38,
+        "APossession": 62,
+        "HSaves": 2,
+        "ASaves": 5,
+        "HPasses": 306,
+        "APasses": 483,
+        "HPassesAccurate": 221,
+        "APassesAccurate": 391,
+        "HxG": 1.6,
+        "AxG": 1.83
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 1,
+      "away_goals": 2,
+      "home_score": 1,
+      "away_score": 2,
+      "fthg": 1,
+      "ftag": 2,
+      "hthg": 1,
+      "htag": 0,
+      "goals": {
+        "home": 1,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 1,
+          "away": 0
         },
         "fulltime": {
           "home": 1,
