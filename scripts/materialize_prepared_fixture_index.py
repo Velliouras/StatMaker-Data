@@ -210,7 +210,21 @@ def supplemental_rows_for_gaps(connection: sqlite3.Connection, rows: list[tuple]
     return accepted
 
 
-def all_catalog_matches(payload: dict) -> list[dict]:
+def catalog_fixture_identity(match: dict):
+    """Exact cross-provider game identity; a provider's event ID is only an alias."""
+    league = str(match.get("leagueCode") or "").strip().upper()
+    home = identity_key(match.get("canonicalHomeTeam") or match.get("homeTeam"))
+    away = identity_key(match.get("canonicalAwayTeam") or match.get("awayTeam"))
+    try:
+        kickoff = datetime.fromisoformat(str(match.get("kickoff") or "").replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if not league or not home or not away or home == away or kickoff.tzinfo is None:
+        return None
+    return league, kickoff.astimezone(timezone.utc), home, away
+
+
+def all_catalog_matches(payload: dict, preferred_keys=frozenset()) -> list[dict]:
     indexed: dict[str, dict] = {}
     for match in payload.get("matches") or []:
         if isinstance(match, dict):
@@ -221,7 +235,58 @@ def all_catalog_matches(payload: dict) -> list[dict]:
         for match in league.get("matches") or []:
             if isinstance(match, dict):
                 indexed.setdefault(match_key(match), match)
-    return list(indexed.values())
+    grouped: dict[tuple, list[dict]] = {}
+    for key, match in indexed.items():
+        fixture = catalog_fixture_identity(match)
+        grouped.setdefault(("fixture", fixture) if fixture else ("event", key), []).append(match)
+
+    result = []
+    for matches in grouped.values():
+        if len(matches) == 1:
+            result.append(matches[0])
+            continue
+        selected = [match for match in matches if match_key(match) in preferred_keys]
+        chosen = max(selected or matches, key=lambda match: len(match.get("markets") or []))
+        merged = dict(chosen)
+        markets = []
+        seen = set()
+        # Keep the selected event's exact prices. Alternatives add only missing
+        # selections/lines; existing provider records and issued selections remain
+        # available in their original tables and catalog_payload.
+        for match in [chosen] + [match for match in matches if match is not chosen]:
+            for market in match.get("markets") or []:
+                key = tuple(market.get(field) for field in ("market", "selection", "team", "line"))
+                if key not in seen:
+                    seen.add(key)
+                    markets.append(market)
+            for field in ("venue", "homeTeamLogo", "awayTeamLogo", "squadContext"):
+                if not merged.get(field) and match.get(field):
+                    merged[field] = match[field]
+        merged["markets"] = markets
+        result.append(merged)
+        print("APP_READY_CATALOG_PROVIDER_FIXTURES_MERGED", json.dumps({
+            "leagueCode": chosen.get("leagueCode"), "kickoff": chosen.get("kickoff"),
+            "keptId": match_key(chosen), "providerIds": [match_key(match) for match in matches],
+            "markets": len(markets),
+        }, ensure_ascii=False))
+    return result
+
+
+def recommended_fixture_keys(connection: sqlite3.Connection, competition: str, snapshot: str) -> set[str]:
+    tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if not {"prepared_pattern_candidates", "prepared_selections"}.issubset(tables):
+        return set()
+    generation = ""
+    if "prepared_pattern_generation" in tables:
+        generation = """ AND c.generation_id=(SELECT generation_id FROM prepared_pattern_generation
+            WHERE state='ready' ORDER BY built_at_ms DESC LIMIT 1)"""
+    return {str(row[0]) for row in connection.execute("""
+        SELECT DISTINCT s.match_key
+        FROM prepared_pattern_candidates c
+        JOIN prepared_selections s ON s.competition_id=c.competition_id
+          AND s.snapshot_version=c.snapshot_version AND s.selection_key=c.selection_key
+        WHERE c.competition_id=? AND c.snapshot_version=? AND c.recommendation_eligible=1
+        """ + generation, (competition, snapshot))}
 
 
 def create_schema(connection: sqlite3.Connection) -> None:
@@ -369,7 +434,7 @@ def materialize(prepared_db: Path) -> dict[str, int]:
         for competition_id in COMPETITIONS:
             snapshot_version, raw_payload = by_competition[competition_id]
             payload = json.loads(raw_payload)
-            matches = all_catalog_matches(payload)
+            matches = all_catalog_matches(payload, recommended_fixture_keys(connection, competition_id, snapshot_version))
             if not matches:
                 raise SystemExit(f"Empty catalog_payload for {competition_id}")
 

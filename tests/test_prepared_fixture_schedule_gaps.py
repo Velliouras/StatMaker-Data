@@ -103,5 +103,53 @@ class ScheduleGapsTest(unittest.TestCase):
             db.close()
 
 
+class CatalogProviderIdentityTest(unittest.TestCase):
+    def match(self, key, kickoff="2026-10-31T13:00:00Z", league="T1", away="Rizespor", odd=1.91):
+        return dict(id=key, kickoff=kickoff, date=kickoff[:10], leagueCode=league,
+            homeTeam="Kocaelispor", awayTeam=away, canonicalHomeTeam="Kocaelispor", canonicalAwayTeam=away,
+            markets=[dict(market="1X2", selection="Home", team=None, line=None, odd=odd)])
+
+    def collect(self, matches, preferred=frozenset()):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return index.all_catalog_matches({"matches": matches, "leagues": [{"matches": matches}]}, preferred)
+
+    def test_two_provider_ids_for_exact_same_game_become_one_fixture_with_all_markets(self):
+        api = self.match("1584454", kickoff="2026-10-31T13:00:00+00:00")
+        odds = self.match("72723300")
+        odds["markets"].append(dict(market="BTTS", selection="Yes", team=None, line=None, odd=1.85))
+        result = self.collect([api, odds])
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["id"], "72723300")
+        self.assertEqual(result[0]["markets"], odds["markets"])
+        self.assertEqual(len(api["markets"]), 1)  # inputs/receipts are not rewritten
+
+    def test_existing_recommendation_key_and_its_price_are_preserved(self):
+        api = self.match("1584454", odd=1.93)
+        odds = self.match("72723300", odd=1.95)
+        odds["markets"].append(dict(market="BTTS", selection="Yes", odd=1.85))
+        result = self.collect([api, odds], {"1584454"})
+        self.assertEqual(result[0]["id"], "1584454")
+        self.assertEqual(result[0]["markets"][0]["odd"], 1.93)
+        self.assertEqual(len(result[0]["markets"]), 2)
+
+    def test_different_opponents_kickoffs_or_leagues_are_never_merged(self):
+        api = self.match("1584454")
+        for other in (self.match("other", away="Trabzonspor"),
+                      self.match("other", kickoff="2026-10-31T16:00:00Z"),
+                      self.match("other", league="OTHER")):
+            self.assertEqual(len(self.collect([api, other])), 2)
+
+    def test_unknown_kickoff_timezone_is_not_guessed(self):
+        self.assertEqual(len(self.collect([self.match("api", kickoff="2026-10-31T13:00:00"),
+                                           self.match("odds")])), 2)
+
+    def test_multiple_referenced_provider_ids_remain_unchanged_in_source_records(self):
+        api, odds = self.match("api", odd=1.93), self.match("odds", odd=1.95)
+        result = self.collect([api, odds], {"api", "odds"})
+        self.assertEqual(len(result), 1)
+        self.assertEqual((api["id"], api["markets"][0]["odd"]), ("api", 1.93))
+        self.assertEqual((odds["id"], odds["markets"][0]["odd"]), ("odds", 1.95))
+
+
 if __name__ == "__main__":
     unittest.main()
