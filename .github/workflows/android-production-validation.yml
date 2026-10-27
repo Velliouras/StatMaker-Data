@@ -21,6 +21,10 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/android-production-validation-request
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
       - name: Resolve requested StatMaker ref
         id: source
