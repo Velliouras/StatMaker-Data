@@ -99,6 +99,7 @@ jobs:
             tests/test_betting_v2_future_fixture_crosswalk.py \
             tests/test_domestic_schedule_only_validation.py \
             tests/test_domestic_betting_identity.py \
+            tests/test_canonical_identity_universe.py \
             tests/test_domestic_provider_league_guard.py \
             tests/test_domestic_global_event_fallback.py \
             tests/test_rehydrate_domestic_betting_from_archive.py \
@@ -262,6 +263,11 @@ jobs:
       - name: Build market-specific Domestic proposal readiness
         if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
         run: python scripts/build_domestic_proposal_readiness.py
+
+      - name: Validate canonical identities before Domestic publication
+        if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}
+        # Offline and read-only: never publish a forged/stale 'matched' flag.
+        run: python scripts/domestic_betting_identity.py --check-only
 
       - name: Build Domestic update manifest
         if: ${{ !contains(github.event.head_commit.message, '[uefa-only-recovery]') }}

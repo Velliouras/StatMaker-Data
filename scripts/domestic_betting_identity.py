@@ -11,6 +11,14 @@ from typing import Any, Mapping
 import canonical_team_identity as identity
 
 
+def feed_indexes():
+    import domestic_live_july_pipeline as pipeline
+    import update_domestic_odds_api_io as odds
+
+    registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
+    return identity.domestic_indexes(odds, pipeline, registry)
+
+
 def betting_identity_ready(match: Mapping[str, Any]) -> bool:
     return (
         match.get("teamMappingStatus") == "matched"
@@ -32,11 +40,7 @@ def reconcile_feed(feed: dict, indexes=None) -> dict:
     sufficient. Provider names and raw market provenance remain unchanged.
     """
     if indexes is None:
-        import domestic_live_july_pipeline as pipeline
-        import update_domestic_odds_api_io as odds
-
-        registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get("leagues", [])
-        indexes = identity.domestic_indexes(odds, pipeline, registry)
+        indexes = feed_indexes()
 
     report = {"mappedFixtures": 0, "suppressedFixtures": 0, "suppressedQuotes": 0,
               "scheduleFlagsRepaired": 0, "extraApiCalls": 0}
@@ -80,6 +84,39 @@ def reconcile_feed(feed: dict, indexes=None) -> dict:
     return report
 
 
+def validate_feed_identity(feed: Mapping[str, Any], indexes=None) -> dict:
+    """Read-only publication gate, including rows already labelled 'matched'."""
+    if indexes is None:
+        indexes = feed_indexes()
+    errors = []
+    checked = skipped = 0
+    for league in feed.get("leagues", []):
+        code = str(league.get("leagueCode") or "").upper()
+        index = indexes.get(code)
+        for match in league.get("matches", []):
+            if not match.get("markets"):
+                skipped += 1
+                continue
+            checked += 1
+            label = f"{code}: id={match.get('id')}"
+            if not betting_identity_ready(match):
+                errors.append(f"{label} inconsistent canonical betting identity")
+            if index is None:
+                errors.append(f"{label} missing canonical identity index")
+                continue
+            for side in ("Home", "Away"):
+                provider = str(match.get(f"provider{side}Team") or "").strip()
+                stored = match.get(f"{side.lower()}Team")
+                resolved, policy, _ = index.resolve(provider)
+                if resolved is None:
+                    errors.append(f"{label} unresolved {side.lower()}={provider!r} policy={policy}")
+                elif not identity.equivalent(resolved, stored):
+                    errors.append(f"{label} {side.lower()} resolved={resolved!r} stored={stored!r}")
+    if errors:
+        raise RuntimeError("DOMESTIC_BETTING_IDENTITY_INVALID\n - " + "\n - ".join(errors[:80]))
+    return {"bettingMatches": checked, "scheduleOnlySkipped": skipped, "extraApiCalls": 0}
+
+
 def main():
     import argparse
     import json
@@ -87,10 +124,12 @@ def main():
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--feed", type=Path, default=Path("odds/odds_api_io/domestic_odds.json"))
-    parser.add_argument("--write", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--write", action="store_true")
+    mode.add_argument("--check-only", action="store_true")
     args = parser.parse_args()
     feed = json.loads(args.feed.read_text(encoding="utf-8-sig"))
-    report = reconcile_feed(feed)
+    report = validate_feed_identity(feed) if args.check_only else reconcile_feed(feed)
     if args.write:
         args.feed.write_text(json.dumps(feed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report))

@@ -16,6 +16,8 @@ on:
     paths:
       - '.github/workflows/canonical-identity-validation.yml'
       - 'scripts/canonical_team_identity.py'
+      - 'scripts/domestic_betting_identity.py'
+      - 'tests/test_canonical_identity_universe.py'
       - 'scripts/validate_domestic_cache_provider_identity.py'
       - 'scripts/domestic_odds_expansion.py'
       - 'tests/test_sau_provider_aliases.py'
@@ -59,7 +61,10 @@ jobs:
         run: python -m unittest discover -s tests -p test_recanonicalize_stale_domestic_mappings.py -v
 
       - name: Validate canonical Domestic provider identity
-        run: python scripts/validate_domestic_cache_provider_identity.py
+        run: |
+          python -m unittest discover -s tests -p test_canonical_identity_universe.py -v
+          python scripts/domestic_betting_identity.py --check-only
+          python scripts/validate_domestic_cache_provider_identity.py
 
       - name: Validate settlement candidate identity from App-Ready bundles
         shell: bash

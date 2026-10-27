@@ -239,13 +239,18 @@ def domestic_indexes(
         if isinstance(row, dict)
     }
 
+    # The rolling refresh registry is a polling queue, not the complete identity
+    # universe. A league can leave that queue while its verified roster and exact
+    # unexpired prices remain published. Keep those identities available without
+    # changing polling scope, membership eligibility or making provider requests.
+    registry_codes = {
+        str(league.get("leagueCode") or "").strip().upper()
+        for league in registry
+    } - {""}
+    roster_codes = {code for code, season in roster_by_key if code and season}
     indexes: Dict[str, CanonicalIdentityIndex] = {}
-    for league in registry:
-        code = str(league.get("leagueCode") or "").strip().upper()
-        if not code:
-            continue
+    for code in sorted(registry_codes | roster_codes):
         index = indexes.setdefault(code, CanonicalIdentityIndex(scope=code))
-
         league_aliases = raw_aliases.get(code, {}) if isinstance(raw_aliases, dict) else {}
         if isinstance(league_aliases, dict):
             for canonical, aliases in league_aliases.items():
@@ -253,6 +258,11 @@ def domestic_indexes(
                 for alias in aliases or []:
                     index.add_alias(alias, canonical, priority=CONFIGURED_ALIAS_PRIORITY)
 
+    for league in registry:
+        code = str(league.get("leagueCode") or "").strip().upper()
+        if not code:
+            continue
+        index = indexes[code]
         cache = pipeline_module.load_json(pipeline_module.stats_fetch.cache_path_for(league), {})
         for fixture in cache.get("fixtures", []) if isinstance(cache, dict) else []:
             if not isinstance(fixture, dict):
@@ -265,6 +275,14 @@ def domestic_indexes(
         ).strip()
         for canonical in roster_by_key.get((code, target_season), []):
             index.add_canonical(canonical)
+
+    # Registered leagues retain their existing target-season/cache behavior.
+    # For omitted leagues use only the checked-in, season-labelled roster. Never
+    # learn canonical names from the odds feed that is being validated.
+    for (code, season), names in roster_by_key.items():
+        if code and season and code not in registry_codes:
+            for canonical in names:
+                indexes[code].add_canonical(canonical)
 
     # Preserve already-verified provider aliases from the shared expansion. These are
     # intentionally stronger than the historical alias registry because they bridge
