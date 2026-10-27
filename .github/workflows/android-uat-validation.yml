@@ -57,6 +57,8 @@ jobs:
           java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
 
       - name: Compile UAT Android sources
         working-directory: statmaker-uat
@@ -78,6 +80,10 @@ jobs:
           find app/src/test -type f -name '*.kt' \
             ! -name 'DomesticCurrentMembershipTest.kt' \
             ! -name 'ModelPerformanceConfidenceTest.kt' \
+            ! -name 'StreakKickoffWindowTest.kt' \
+            ! -name 'StreakKickoffLocalizationTest.kt' \
+            ! -name 'StreakPatternScannerBttsTest.kt' \
+            ! -name 'StreakPatternScannerWdlTest.kt' \
             -delete
 
       - name: Run focused regression tests
@@ -88,6 +94,10 @@ jobs:
           ./gradlew :app:testDebugUnitTest \
             --tests "com.statmaker.app.DomesticCurrentMembershipTest" \
             --tests "com.statmaker.app.ModelPerformanceConfidenceTest" \
+            --tests "com.statmaker.app.StreakKickoffWindowTest" \
+            --tests "com.statmaker.app.StreakKickoffLocalizationTest" \
+            --tests "com.statmaker.app.StreakPatternScannerBttsTest" \
+            --tests "com.statmaker.app.StreakPatternScannerWdlTest" \
             --no-daemon --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
             -Dorg.gradle.workers.max=2 \
