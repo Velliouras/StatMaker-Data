@@ -1,9 +1,11 @@
 {
   "audit": {
-    "favouriteGuard": 20,
-    "oddsBounds": 1486,
-    "probabilityOrEv": 1040,
-    "supportedQuotes": 2546
+    "favouriteGuard": 21,
+    "missingApiFixtureId": 1,
+    "oddsBounds": 1445,
+    "probabilityOrEv": 1022,
+    "staleQuote": 27,
+    "supportedQuotes": 2516
   },
   "modelId": "SHOTS_SOT_CATBOOST_V1",
   "policyId": "SHOTS_SOT_P60_UAT_V4",
@@ -8218,6 +8220,118 @@
       "team": "Coritiba",
       "teamSide": "HOME",
       "winProbability": 0.6232191345214162
+    },
+    {
+      "apiFixtureId": 1603076,
+      "awayShots": 8.873778484986529,
+      "awaySot": 2.8341931086831056,
+      "awayTeam": "Al Kholood",
+      "bookmaker": "Unibet",
+      "bookmakerBinding": "EXACT_PROVIDER_QUOTE",
+      "category": "UAT_SHOTS_EXPERIMENT",
+      "certified": false,
+      "competitionId": "domestic",
+      "featureCutoff": "2026-10-27T06:22:27.429063Z",
+      "fixtureId": "73215828",
+      "fixtureKey": "api:1603076:1793296800",
+      "groupKey": "api:1603076:sot",
+      "historyAway": 47,
+      "historyHome": 49,
+      "homeShots": 17.065955817809396,
+      "homeSot": 6.07929841534868,
+      "homeTeam": "Al-Nassr",
+      "identityBinding": "cachedExactSchedule",
+      "indicativeEV": 0.16549051010219484,
+      "issuedAt": "2026-10-27T06:22:27.429063Z",
+      "kickoff": "2026-10-29T18:00:00Z",
+      "line": 10.5,
+      "market": "MATCH_SHOTS_ON_TARGET",
+      "match": {
+        "apiFootballFixtureId": "1603076",
+        "awayTeam": "Al Kholood",
+        "awayTeamLogo": "https://media.api-sports.io/football/teams/10509.png",
+        "canonicalAwayTeam": "Al Kholood",
+        "canonicalHomeTeam": "Al-Nassr",
+        "competition": "Pro League",
+        "country": "Saudi Arabia",
+        "date": "2026-10-29",
+        "homeTeam": "Al-Nassr",
+        "homeTeamLogo": "https://media.api-sports.io/football/teams/2939.png",
+        "id": "73215828",
+        "kickoff": "2026-10-29T18:00:00Z",
+        "leagueCode": "SAU",
+        "providerAwayTeam": "Al-Kholood",
+        "providerHomeTeam": "Al Nassr Club",
+        "scheduleOnly": false,
+        "scheduleSource": "odds-api-io-events",
+        "scheduleVerified": true,
+        "season": "2026-2027",
+        "squadContext": {
+          "apiFootballFixtureId": 1603076,
+          "away": {
+            "formation": null,
+            "formationSample": 0,
+            "injuriesCovered": true,
+            "lineupConfirmed": false,
+            "lineupContinuity": null,
+            "lineupCovered": false,
+            "recentArrivals": 8,
+            "recentDepartures": 7,
+            "squadContinuity": null,
+            "squadContinuitySample": 0,
+            "squadCovered": true,
+            "teamId": 10509,
+            "unavailablePlayers": [],
+            "usualFormation": null
+          },
+          "generatedAt": "2026-10-27T06:20:23Z",
+          "home": {
+            "formation": null,
+            "formationSample": 0,
+            "injuriesCovered": true,
+            "lineupConfirmed": false,
+            "lineupContinuity": null,
+            "lineupCovered": false,
+            "recentArrivals": 4,
+            "recentDepartures": 2,
+            "squadContinuity": null,
+            "squadContinuitySample": 0,
+            "squadCovered": true,
+            "teamId": 2939,
+            "unavailablePlayers": [],
+            "usualFormation": null
+          }
+        },
+        "teamMappingStatus": "matched",
+        "usableForStats": true
+      },
+      "metric": "sot",
+      "model": "SHOTS_SOT_CATBOOST_V1",
+      "modelBankSha256": "0007fa8b9c6ed09138c91c36d7e31891676496b180516bc385ec17650a97d985",
+      "odd": 1.81,
+      "outcome": "PENDING",
+      "policyId": "SHOTS_SOT_P60_UAT_V4",
+      "probabilityModel": "CATBOOST_NB_BINOMIAL",
+      "providerMarketUpdatedAt": "2026-10-26T20:46:17.261Z",
+      "publicationCommit": null,
+      "publishedAt": null,
+      "pushProbability": 0.0,
+      "quoteObservationCommit": null,
+      "quoteObservationEvidence": "CLIENT_RESPONSE_CAPTURE",
+      "quoteObservationSemantics": "OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
+      "quoteObservationSha256": "fd9518114aac55a6ece189f76ae9de64fd32992443521b7089cb08d8ec3ac521",
+      "quoteUpdatedAt": "2026-10-27T06:18:23.569730Z",
+      "scope": "TOTAL",
+      "selection": "Total Shots on Target Under 10.5",
+      "selectionId": "61901dc67441cc15cfbcd00ad6ee246c270f04a86567eb701ac8fa99c6c5f9a8",
+      "settledAt": null,
+      "settlementReturn": null,
+      "side": "UNDER",
+      "sourceOddsSha256": "c4ae097ee145006531f15c005836d75aea7e704c4dcc5c1452bbde2dbec123da",
+      "sourceProviderSha256": "a5926f78836da818a4d523a2d6378026954009d963ac326d74612969260e838e",
+      "team": null,
+      "teamSide": "",
+      "winProbability": 0.6439174088962403
     }
   ],
   "schemaVersion": 1,
@@ -8231,12 +8345,15 @@
           "fixtures": 54
         },
         "domestic": {
-          "fixtures": 671,
-          "forecastable": 106,
-          "mapped": 106,
-          "probabilityEvPassing": 20,
-          "quotes": 2546,
-          "withShotsOdds": 106
+          "eligibleOptions": 1,
+          "fixtures": 680,
+          "forecastable": 114,
+          "mapped": 114,
+          "missingApiFixtureId": 1,
+          "newSelections": 1,
+          "probabilityEvPassing": 22,
+          "quotes": 2516,
+          "withShotsOdds": 115
         },
         "europa_league": {
           "fixtures": 54
@@ -8245,56 +8362,68 @@
       "byDay": {
         "2026-10-27": {
           "fixtures": 36,
-          "forecastable": 3,
-          "mapped": 3,
+          "forecastable": 4,
+          "mapped": 4,
           "probabilityEvPassing": 1,
-          "quotes": 116,
-          "withShotsOdds": 3
+          "quotes": 132,
+          "withShotsOdds": 4
         },
         "2026-10-28": {
           "fixtures": 36,
           "forecastable": 13,
           "mapped": 13,
-          "probabilityEvPassing": 8,
-          "quotes": 416,
+          "probabilityEvPassing": 7,
+          "quotes": 306,
           "withShotsOdds": 13
         },
         "2026-10-29": {
+          "eligibleOptions": 1,
           "fixtures": 37,
-          "forecastable": 22,
-          "mapped": 22,
-          "quotes": 574,
-          "withShotsOdds": 22
+          "forecastable": 25,
+          "mapped": 25,
+          "newSelections": 1,
+          "probabilityEvPassing": 3,
+          "quotes": 592,
+          "withShotsOdds": 25
         },
         "2026-10-30": {
           "fixtures": 53,
           "forecastable": 8,
           "mapped": 8,
           "probabilityEvPassing": 3,
-          "quotes": 168,
+          "quotes": 164,
           "withShotsOdds": 8
         },
         "2026-10-31": {
           "fixtures": 221,
-          "forecastable": 41,
-          "mapped": 41,
+          "forecastable": 42,
+          "mapped": 42,
+          "missingApiFixtureId": 1,
           "probabilityEvPassing": 5,
-          "quotes": 892,
-          "withShotsOdds": 41
+          "quotes": 894,
+          "withShotsOdds": 43
         },
         "2026-11-01": {
           "fixtures": 151,
           "forecastable": 19,
           "mapped": 19,
           "probabilityEvPassing": 3,
-          "quotes": 380,
+          "quotes": 370,
           "withShotsOdds": 19
         },
         "2026-11-02": {
-          "fixtures": 16
+          "fixtures": 24,
+          "forecastable": 2,
+          "mapped": 2,
+          "quotes": 38,
+          "withShotsOdds": 2
         },
         "2026-11-03": {
-          "fixtures": 9
+          "fixtures": 10,
+          "forecastable": 1,
+          "mapped": 1,
+          "quotes": 20,
+          "withShotsOdds": 1
         },
         "2026-11-04": {
           "fixtures": 9
@@ -8370,30 +8499,30 @@
         }
       }
     },
-    "observedDomesticLeagues": 30,
-    "oddsGeneratedAt": "2026-10-26T23:26:32Z",
-    "oddsSha256": "40edb12a32359c5318aaee750cde1c044d7a855512f5cd731e55b18cd2c4b290",
-    "providerSha256": "9379f5b61a971d007a6263be7ab73bd5aee94b2a1a74900a0151bda28f243f64",
+    "observedDomesticLeagues": 8,
+    "oddsGeneratedAt": "2026-10-27T06:18:41Z",
+    "oddsSha256": "c4ae097ee145006531f15c005836d75aea7e704c4dcc5c1452bbde2dbec123da",
+    "providerSha256": "a5926f78836da818a4d523a2d6378026954009d963ac326d74612969260e838e",
     "uefa": [
       {
         "freshOddsEvents": 54,
-        "observedAt": "2026-10-26T21:55:44Z",
+        "observedAt": "2026-10-27T06:21:10Z",
         "path": "champions_league_odds.json",
-        "sha256": "f8ccd035175d3a58a31343950549e4a8031373419bbbe0c2f32f01b546840b3f",
+        "sha256": "c3180d35d3b4d2a042aaf5bcf5d896acc1f09414c76b949b171bf36f7e135475",
         "totalFixtures": 54
       },
       {
         "freshOddsEvents": 108,
-        "observedAt": "2026-10-26T21:55:45Z",
+        "observedAt": "2026-10-27T06:21:12Z",
         "path": "europa_league_odds.json",
-        "sha256": "64deae0df40356db6500fa19976ecf642aaf07d7cc5e85c1dd5488ac964e9a95",
+        "sha256": "4ac88240379278e375c86a66282de997009c47b49e4494b0e95c49b3de9d1c77",
         "totalFixtures": 54
       },
       {
         "freshOddsEvents": 162,
-        "observedAt": "2026-10-26T21:55:47Z",
+        "observedAt": "2026-10-27T06:21:14Z",
         "path": "conference_league_odds.json",
-        "sha256": "92ca87fda290ae4b213a9a2558baa728f84ae98a33930a69fd1c70fe43671c6f",
+        "sha256": "0328ff9874334c431f7c02d670da1d7e075bb68af4c8c8dfb8de6ab94b8c95bb",
         "totalFixtures": 54
       }
     ]
