@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "b09545d7701af0e870d70baf27b5021d21b4eb0faba185704599fc85514dd72d",
-  "generatedAt": "2026-10-27T15:22:23Z",
+  "contentVersion": "41f58871da47110dd02e3faee81a50ad01ff143e55a75e1bfc52430e32a45e1e",
+  "generatedAt": "2026-10-27T19:38:15.611320Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "d6fd76f6f689dc2f73a8943dfe0a2b9dc626ea3fc02e9cbea1d61577fc9d6742",
+      "sha256": "8ae3bb33549d1be96f2e3a8aaaf3866cad1e09fafad04fa5b8bdc59413f4a5de",
       "bytes": 82350,
-      "generatedAt": "2026-10-27T13:41:25Z"
+      "generatedAt": "2026-10-27T19:38:10Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "048e0434fb2ad5db9995fc73465297c56500013f12bef042dc2f4e1c280e8f0a",
-      "bytes": 15058726,
+      "sha256": "563d6fcbdcc346545c83f115abd823a37abe05d8eef5922e1de2c2d0f7f610a1",
+      "bytes": 15060053,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "ff72ca1eb00afbef7c27d666e13fceff0924ef0b4fbe7df9c2c19f12d3e4638f",
-      "bytes": 9013342,
-      "generatedAt": "2026-10-27T12:40:58.157899Z"
+      "sha256": "204249ec171d2abcd15007518b1e57a4f854a5e88778c9affe88e07011c6f253",
+      "bytes": 9013346,
+      "generatedAt": "2026-10-27T19:38:15.611320Z"
     },
     {
       "id": "uefa_team_logos",
@@ -765,6 +765,72 @@
           "2026-10-29",
           "2026-10-30",
           "2026-11-01"
+        ]
+      }
+    ]
+  },
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "563d6fcbdcc346545c83f115abd823a37abe05d8eef5922e1de2c2d0f7f610a1",
+    "transitions": [
+      {
+        "fromSha256": "048e0434fb2ad5db9995fc73465297c56500013f12bef042dc2f4e1c280e8f0a",
+        "toSha256": "563d6fcbdcc346545c83f115abd823a37abe05d8eef5922e1de2c2d0f7f610a1",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1558033,
+            "league_id": 373,
+            "league_code": "SVN",
+            "country": "Slovenia",
+            "league": "1. SNL",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-10-27",
+            "home_team": "Radomlje",
+            "away_team": "Mura",
+            "stats": {
+              "HS": null,
+              "AS": null,
+              "HST": null,
+              "AST": null,
+              "HC": null,
+              "AC": null,
+              "HF": null,
+              "AF": null,
+              "HY": null,
+              "AY": null,
+              "HR": null,
+              "AR": null,
+              "HPossession": null,
+              "APossession": null,
+              "HSaves": null,
+              "ASaves": null,
+              "HPasses": null,
+              "APasses": null,
+              "HPassesAccurate": null,
+              "APassesAccurate": null,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": null,
+              "AShotsOffGoal": null,
+              "HBlockedShots": null,
+              "ABlockedShots": null,
+              "HShotsInsideBox": null,
+              "AShotsInsideBox": null,
+              "HShotsOutsideBox": null,
+              "AShotsOutsideBox": null,
+              "HOffsides": null,
+              "AOffsides": null,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
         ]
       }
     ]
