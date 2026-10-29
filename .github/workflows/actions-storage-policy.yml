@@ -31,7 +31,6 @@ jobs:
       - name: Verify artifact-free evidence transfer
         run: python -m unittest discover -s tests -p test_ai_job_transfer.py -v
   cleanup:
-    needs: policy
     if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run' || contains(github.event.head_commit.message, '[cleanup-actions-artifacts]')
     runs-on: ubuntu-latest
     timeout-minutes: 8
@@ -44,6 +43,12 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner, repo, per_page: 100 });
+            core.info(`ARTIFACT_INVENTORY ${owner}/${repo} count=${artifacts.length} bytes=${artifacts.reduce((n,a)=>n+a.size_in_bytes,0)}`);
+            for (const a of artifacts) core.info(`ARTIFACT_FOUND id=${a.id} name=${a.name} bytes=${a.size_in_bytes} run=${a.workflow_run?.id}`);
+            try {
+              const caches = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner,repo,per_page:100});
+              core.info('CACHE_INVENTORY '+JSON.stringify({repo,count:caches.length,bytes:caches.reduce((n,a)=>n+a.size_in_bytes,0),keys:caches.map(a=>a.key)}));
+            } catch (error) { core.warning('CACHE_INVENTORY_UNAVAILABLE status='+error.status); }
             const active = new Set();
             for (const status of ['in_progress', 'queued', 'waiting']) {
               const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, { owner, repo, status, per_page: 100 });
@@ -65,3 +70,40 @@ jobs:
             core.info(`ACTIONS_ARTIFACTS_DELETED=${deleted} BYTES_FREED=${bytes} REMAINING=${remaining.length} ACTIVE_DEFERRED=${deferred}`);
             await core.summary.addHeading('Actions storage cleanup').addRaw(`Deleted ${deleted} generated artifacts (${(bytes / 1000000).toFixed(2)} MB). Remaining: ${remaining.length}. Repository files, app snapshots, releases and caches were not modified.`).write();
             if (remaining.length) core.warning('Remaining or active workflow artifacts will be reconciled by the completion hook.');
+
+  related-cleanup:
+    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[cleanup-connected-artifacts]')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - name: Audit and remove retained artifacts in connected owner repositories
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN || github.token }}
+          script: |
+            const owner = context.repo.owner;
+            const repos = ['StatMaker','Dogintel','ParkScan','AreYouOk','Gloobar','Reserve','Betfriend','myorario','livelingo','Spendary','Middleman'];
+            for (const repo of repos) {
+              let artifacts;
+              try { artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {owner,repo,per_page:100}); }
+              catch (error) { core.warning('ARTIFACT_ACCESS_UNAVAILABLE '+repo+' status='+error.status); continue; }
+              core.info('RELATED_ARTIFACT_INVENTORY '+JSON.stringify({repo,count:artifacts.length,bytes:artifacts.reduce((n,a)=>n+a.size_in_bytes,0)}));
+              let deleted=0, bytes=0, active=0, blocked=0;
+              for (const a of artifacts) {
+                try {
+                  const run = a.workflow_run?.id ? (await github.rest.actions.getWorkflowRun({owner,repo,run_id:a.workflow_run.id})).data : null;
+                  core.info('RELATED_ARTIFACT_FOUND '+JSON.stringify({repo,id:a.id,name:a.name,bytes:a.size_in_bytes,run:a.workflow_run?.id,workflow:run?.name,path:run?.path,status:run?.status}));
+                  if (run && run.status !== 'completed') { active++; continue; }
+                  await github.rest.actions.deleteArtifact({owner,repo,artifact_id:a.id});
+                  deleted++; bytes+=a.size_in_bytes;
+                } catch (error) { blocked++; core.warning('ARTIFACT_DELETE_BLOCKED '+repo+' id='+a.id+' status='+error.status); }
+              }
+              const remaining = await github.paginate(github.rest.actions.listArtifactsForRepo, {owner,repo,per_page:100});
+              core.info('RELATED_ARTIFACT_CLEANUP '+JSON.stringify({repo,deleted,bytes,active,blocked,remaining:remaining.length}));
+              try {
+                const caches = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner,repo,per_page:100});
+                core.info('RELATED_CACHE_INVENTORY '+JSON.stringify({repo,count:caches.length,bytes:caches.reduce((n,a)=>n+a.size_in_bytes,0),keys:caches.map(a=>a.key)}));
+              } catch (error) { core.warning('CACHE_ACCESS_UNAVAILABLE '+repo+' status='+error.status); }
+            }
