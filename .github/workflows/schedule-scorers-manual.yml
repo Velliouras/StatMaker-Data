@@ -76,6 +76,7 @@ jobs:
           filter: blob:none
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            /.github/scripts/publish_generated_paths.py
             /.github/workflows/
             /scripts/
             /tests/
@@ -133,14 +134,7 @@ jobs:
           git add data/statmaker/schedule_scorers/season_snapshot.json
           if ! git diff --cached --quiet; then
             git commit -m 'data: refresh bounded verified Schedule scorers [skip ci]'
-            for attempt in 1 2 3 4; do
-              git fetch --no-tags origin main
-              git rebase origin/main
-              if git push origin HEAD:main; then exit 0; fi
-              sleep $((attempt * 2))
-            done
-            echo 'Could not publish scorer snapshot after 4 retries' >&2
-            exit 1
+            python .github/scripts/publish_generated_paths.py --path-prefix data/api_football/schedule_scorers/ --path-prefix data/statmaker/schedule_scorers/season_snapshot.json
           fi
       - name: Audit leaderboard provider freshness (no API requests)
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.phase == 'leaders' || inputs.phase == 'both' }}

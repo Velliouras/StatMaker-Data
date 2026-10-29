@@ -57,6 +57,7 @@ jobs:
           ref: main
           sparse-checkout-cone-mode: false
           sparse-checkout: |
+            /.github/scripts/publish_generated_paths.py
             /scripts/api_budget_runtime/
             /config/api_football_refresh_policy.json
             /scripts/
@@ -125,6 +126,5 @@ jobs:
           if [ -d data/api_football/league_tables ]; then git add data/api_football/league_tables; fi
           if ! git diff --cached --quiet; then
             git commit -m 'Publish UEFA league tables and full season programmes [skip ci]'
-            git pull --rebase --autostash origin main
-            git push origin HEAD:main
+            python .github/scripts/publish_generated_paths.py --path-prefix data/statmaker/league_tables/ --path-prefix data/api_football/league_tables/
           fi
