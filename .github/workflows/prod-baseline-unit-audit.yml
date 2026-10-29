@@ -29,6 +29,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
       - name: Audit full PROD JVM test baseline without changing code
         working-directory: statmaker-prod
         shell: bash

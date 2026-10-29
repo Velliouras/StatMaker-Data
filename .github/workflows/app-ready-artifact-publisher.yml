@@ -192,6 +192,8 @@ jobs:
           "$SDKMANAGER" --version
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
 
       - name: Compile off-device builder

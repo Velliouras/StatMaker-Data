@@ -9,6 +9,8 @@ on:
       # Updating the keeper must bootstrap it immediately; no provider calls happen here.
       - '.github/workflows/live-settlement-watchdog.yml'
       - 'tests/test_live_settlement_watchdog.py'
+      - '.github/scripts/publish_generated_paths.py'
+      - 'tests/test_generated_publication.py'
       - 'scripts/api_football_usage.py'
       - 'tests/test_api_football_usage.py'
   workflow_run:
@@ -51,6 +53,8 @@ jobs:
             /config/api_football_refresh_policy.json
             .github/workflows/live-settlement-watchdog.yml
             tests/test_live_settlement_watchdog.py
+            tests/test_generated_publication.py
+            .github/scripts/publish_generated_paths.py
             scripts/api_football_usage.py
             tests/test_api_football_usage.py
             data/statmaker/monitoring/
@@ -62,6 +66,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -v
           python -m unittest discover -s tests -p 'test_api_football_usage.py' -v
+          python -m unittest discover -s tests -p 'test_generated_publication.py' -v
       - name: Maintain live settlement cadence
         env:
           GH_TOKEN: ${{ github.token }}
@@ -213,14 +218,8 @@ jobs:
           git add data/statmaker/monitoring/api_football_usage.json data/statmaker/monitoring/api_football_usage.csv
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "Record API-Football observed daily usage [skip ci]"
-          for attempt in 1 2 3 4; do
-            git fetch --no-tags origin +main:refs/remotes/origin/main
-            git rebase origin/main
-            if git push origin HEAD:main; then exit 0; fi
-            sleep $((attempt * 2))
-          done
-          echo "Could not publish API-Football usage snapshot" >&2
-          exit 1
+          python .github/scripts/publish_generated_paths.py --path-prefix data/statmaker/monitoring/
+
 
   refresh-priority-results-and-standings:
     uses: ./.github/workflows/priority-results-standings.yml

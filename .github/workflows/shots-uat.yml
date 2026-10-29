@@ -43,6 +43,8 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /scripts/
+            /.github/scripts/publish_generated_paths.py
+            /tests/test_generated_publication.py
             /tests/test_primary_snapshot_bindings.py
             /config/
             /mappings/
@@ -114,12 +116,7 @@ jobs:
           git add data/statmaker/uat/shots_v1 data/statmaker/betting_v1 data/statmaker/uat/market_watch docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: issue Shots/SOT selections with frozen CatBoost bank'
-            for attempt in 1 2 3 4; do
-              git fetch origin main
-              git rebase origin/main
-              if git push origin HEAD:main; then break; fi
-              if [ "$attempt" = 4 ]; then exit 1; fi
-            done
+            python .github/scripts/publish_generated_paths.py --path-prefix data/statmaker/uat/ --path-prefix data/statmaker/betting_v1/ --path-prefix docs/market-watch/ --path-prefix docs/.nojekyll
           fi
       - name: Verify public pre-kickoff commit and grade exact cached results
         run: python -m scripts.shots_uat.feed --publish
@@ -132,12 +129,7 @@ jobs:
           git add data/statmaker/uat/shots_v1 data/statmaker/betting_v1 data/statmaker/uat/market_watch docs/market-watch docs/.nojekyll
           if ! git diff --cached --quiet; then
             git commit -m 'UAT: refresh Shots/SOT feed and Performance Daily settlements'
-            for attempt in 1 2 3 4; do
-              git fetch origin main
-              git rebase origin/main
-              if git push origin HEAD:main; then break; fi
-              if [ "$attempt" = 4 ]; then exit 1; fi
-            done
+            python .github/scripts/publish_generated_paths.py --path-prefix data/statmaker/uat/ --path-prefix data/statmaker/betting_v1/ --path-prefix docs/market-watch/ --path-prefix docs/.nojekyll
           fi
 
 

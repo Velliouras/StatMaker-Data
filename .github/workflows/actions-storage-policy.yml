@@ -6,13 +6,15 @@ on:
     paths:
       - '.github/workflows/**'
       - '.github/scripts/check_no_artifacts.py'
+      - 'tests/test_actions_storage_policy.py'
       - '.github/triggers/actions-storage-cleanup'
   pull_request:
     paths:
       - '.github/workflows/**'
       - '.github/scripts/check_no_artifacts.py'
+      - 'tests/test_actions_storage_policy.py'
   workflow_run:
-    workflows: ["Betting V2 - offline QA (zero provider quota)", "Betting V2 All Market Revision", "Betting V2 Card Settlement Bounds", "Betting V2 Conditional SOT", "Betting V2 Contextual Market Model", "Betting V2 Contextual Model Scores", "Betting V2 Cross Market Corner Counts", "Betting V2 Direct Host Publish", "Betting V2 EV55 Research Shadow", "Betting V2 Expanded Count Calibration", "Betting V2 Expanded Historical Replay", "Betting V2 Expanded Market Research", "Betting V2 Expanding Prior Calibration", "Betting V2 Forward Candidate Research", "Betting V2 Forward Contextual Model", "Betting V2 Forward Market First Counts", "Betting V2 Forward Market Residual", "Betting V2 GAP Attacking Statistics", "Betting V2 Historical CSV Price Research", "Betting V2 Market First Counts", "Betting V2 Model Revision", "Betting V2 Phase 1 - API market coverage", "Betting V2 Phase 1 - targeted offline QA", "Betting V2 Phase 2 - chronological model QA", "Betting V2 Phase 2 - factual source blocker audit", "Betting V2 Prior Count-Price Calibration", "Betting V2 Probability Recalibration", "Betting V2 Raw Contract Recovery", "Betting V2 Recovered Market Residual", "Betting V2 favorite audit (cached data only)", "Betting offline research", "StatMaker Independent AI Analyst", "StatMaker PROD Unit Baseline Comparison", "UAT Betting Compile and Regression Tests", "UAT Value-First Market Funnel Audit", "UEFA Team Support Backfill", "Value-First Read-Only Historical Audit"]
+    workflows: ["Betting V2 - offline QA (zero provider quota)", "Betting V2 All Market Revision", "Betting V2 Card Settlement Bounds", "Betting V2 Conditional SOT", "Betting V2 Contextual Market Model", "Betting V2 Contextual Model Scores", "Betting V2 Cross Market Corner Counts", "Betting V2 Direct Host Publish", "Betting V2 EV55 Research Shadow", "Betting V2 Expanded Count Calibration", "Betting V2 Expanded Historical Replay", "Betting V2 Expanded Market Research", "Betting V2 Expanding Prior Calibration", "Betting V2 Forward Candidate Research", "Betting V2 Forward Contextual Model", "Betting V2 Forward Market First Counts", "Betting V2 Forward Market Residual", "Betting V2 GAP Attacking Statistics", "Betting V2 Historical CSV Price Research", "Betting V2 Market First Counts", "Betting V2 Model Revision", "Betting V2 Phase 1 - API market coverage", "Betting V2 Phase 1 - targeted offline QA", "Betting V2 Phase 2 - chronological model QA", "Betting V2 Phase 2 - factual source blocker audit", "Betting V2 Prior Count-Price Calibration", "Betting V2 Probability Recalibration", "Betting V2 Raw Contract Recovery", "Betting V2 Recovered Market Residual", "Betting V2 favorite audit (cached data only)", "Betting offline research", "StatMaker App-Ready Artifact Publisher", "StatMaker Independent AI Analyst", "StatMaker PROD Unit Baseline Comparison", "UAT Betting Compile and Regression Tests", "UAT Value-First Market Funnel Audit", "UEFA Team Support Backfill", "Value-First Read-Only Historical Audit"]
     types: [completed]
 permissions:
   contents: read
@@ -26,8 +28,18 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows/
+            .github/scripts/
+            tests/test_ai_job_transfer.py
+            tests/test_actions_storage_policy.py
+            scripts/ai_analyst/job_transfer.py
+          sparse-checkout-cone-mode: false
       - name: Reject persistent Actions artifact uploads
         run: python .github/scripts/check_no_artifacts.py
+      - name: Test storage policy guard
+        run: python -m unittest discover -s tests -p test_actions_storage_policy.py -v
       - name: Verify artifact-free evidence transfer
         run: python -m unittest discover -s tests -p test_ai_job_transfer.py -v
   cleanup:
@@ -43,12 +55,17 @@ jobs:
           script: |
             const { owner, repo } = context.repo;
             const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner, repo, per_page: 100 });
-            core.info(`ARTIFACT_INVENTORY ${owner}/${repo} count=${artifacts.length} bytes=${artifacts.reduce((n,a)=>n+a.size_in_bytes,0)}`);
-            for (const a of artifacts) core.info(`ARTIFACT_FOUND id=${a.id} name=${a.name} bytes=${a.size_in_bytes} run=${a.workflow_run?.id}`);
-            try {
-              const caches = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner,repo,per_page:100});
-              core.info('CACHE_INVENTORY '+JSON.stringify({repo,count:caches.length,bytes:caches.reduce((n,a)=>n+a.size_in_bytes,0),keys:caches.map(a=>a.key)}));
-            } catch (error) { core.warning('CACHE_INVENTORY_UNAVAILABLE status='+error.status); }
+            const caches = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner, repo, per_page:100});
+            core.info(`CACHE_INVENTORY count=${caches.length} bytes=${caches.reduce((n,c)=>n+c.size_in_bytes,0)}`);
+            let cacheDeleted=0, cacheBytes=0;
+            for (const cache of caches) {
+              if (!cache.key.startsWith('gradle-')) continue;
+              await github.request('DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}', {owner,repo,cache_id:cache.id});
+              cacheDeleted++; cacheBytes+=cache.size_in_bytes;
+            }
+            const cacheRemaining = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner,repo,per_page:100});
+            core.info(`GRADLE_CACHES_DELETED=${cacheDeleted} BYTES_FREED=${cacheBytes} CACHES_REMAINING=${cacheRemaining.length}`);
+            core.info(`ARTIFACT_INVENTORY count=${artifacts.length} bytes=${artifacts.reduce((n,a)=>n+a.size_in_bytes,0)}`);
             const active = new Set();
             for (const status of ['in_progress', 'queued', 'waiting']) {
               const runs = await github.paginate(github.rest.actions.listWorkflowRunsForRepo, { owner, repo, status, per_page: 100 });
@@ -68,42 +85,5 @@ jobs:
             }
             const remaining = await github.paginate(github.rest.actions.listArtifactsForRepo, { owner, repo, per_page: 100 });
             core.info(`ACTIONS_ARTIFACTS_DELETED=${deleted} BYTES_FREED=${bytes} REMAINING=${remaining.length} ACTIVE_DEFERRED=${deferred}`);
-            await core.summary.addHeading('Actions storage cleanup').addRaw(`Deleted ${deleted} generated artifacts (${(bytes / 1000000).toFixed(2)} MB). Remaining: ${remaining.length}. Repository files, app snapshots, releases and caches were not modified.`).write();
+            await core.summary.addHeading('Actions storage cleanup').addRaw(`Deleted ${deleted} generated artifacts (${(bytes / 1000000).toFixed(2)} MB). Remaining: ${remaining.length}. Deleted ${cacheDeleted} reproducible Gradle caches (${(cacheBytes / 1000000).toFixed(2)} MB). Repository files, app snapshots and releases were not modified.`).write();
             if (remaining.length) core.warning('Remaining or active workflow artifacts will be reconciled by the completion hook.');
-
-  related-cleanup:
-    if: github.event_name == 'push' && contains(github.event.head_commit.message, '[cleanup-connected-artifacts]')
-    runs-on: ubuntu-latest
-    timeout-minutes: 8
-    permissions:
-      contents: read
-    steps:
-      - name: Audit and remove retained artifacts in connected owner repositories
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN || github.token }}
-          script: |
-            const owner = context.repo.owner;
-            const repos = ['StatMaker','Dogintel','ParkScan','AreYouOk','Gloobar','Reserve','Betfriend','myorario','livelingo','Spendary','Middleman'];
-            for (const repo of repos) {
-              let artifacts;
-              try { artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo, {owner,repo,per_page:100}); }
-              catch (error) { core.warning('ARTIFACT_ACCESS_UNAVAILABLE '+repo+' status='+error.status); continue; }
-              core.info('RELATED_ARTIFACT_INVENTORY '+JSON.stringify({repo,count:artifacts.length,bytes:artifacts.reduce((n,a)=>n+a.size_in_bytes,0)}));
-              let deleted=0, bytes=0, active=0, blocked=0;
-              for (const a of artifacts) {
-                try {
-                  const run = a.workflow_run?.id ? (await github.rest.actions.getWorkflowRun({owner,repo,run_id:a.workflow_run.id})).data : null;
-                  core.info('RELATED_ARTIFACT_FOUND '+JSON.stringify({repo,id:a.id,name:a.name,bytes:a.size_in_bytes,run:a.workflow_run?.id,workflow:run?.name,path:run?.path,status:run?.status}));
-                  if (run && run.status !== 'completed') { active++; continue; }
-                  await github.rest.actions.deleteArtifact({owner,repo,artifact_id:a.id});
-                  deleted++; bytes+=a.size_in_bytes;
-                } catch (error) { blocked++; core.warning('ARTIFACT_DELETE_BLOCKED '+repo+' id='+a.id+' status='+error.status); }
-              }
-              const remaining = await github.paginate(github.rest.actions.listArtifactsForRepo, {owner,repo,per_page:100});
-              core.info('RELATED_ARTIFACT_CLEANUP '+JSON.stringify({repo,deleted,bytes,active,blocked,remaining:remaining.length}));
-              try {
-                const caches = await github.paginate('GET /repos/{owner}/{repo}/actions/caches', {owner,repo,per_page:100});
-                core.info('RELATED_CACHE_INVENTORY '+JSON.stringify({repo,count:caches.length,bytes:caches.reduce((n,a)=>n+a.size_in_bytes,0),keys:caches.map(a=>a.key)}));
-              } catch (error) { core.warning('CACHE_ACCESS_UNAVAILABLE '+repo+' status='+error.status); }
-            }

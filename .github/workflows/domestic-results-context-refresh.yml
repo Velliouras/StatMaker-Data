@@ -27,7 +27,8 @@ permissions:
   contents: write
 
 concurrency:
-  group: statmaker-domestic-results-context
+  group: statmaker-canonical-main-writer
+  queue: max
   cancel-in-progress: false
 
 env:
@@ -52,6 +53,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /.github/workflows/
+            /.github/scripts/publish_generated_paths.py
             /scripts/
             /tests/
             /config/
@@ -121,12 +123,5 @@ jobs:
           git add data/statmaker/schedule_scorers/domestic_match_context.json
           if ! git diff --cached --quiet; then
             git commit -m "Publish verified Domestic venues and scorer timelines [skip ci]"
-            for attempt in 1 2 3 4; do
-              if git push origin HEAD:main; then exit 0; fi
-              git fetch --depth=2 origin main
-              git rebase origin/main
-              sleep $((attempt * 2))
-            done
-            echo "Could not publish domestic results context" >&2
-            exit 1
+            python .github/scripts/publish_generated_paths.py --path-prefix data/api_football/schedule_scorers/ --path-prefix data/statmaker/schedule_scorers/domestic_match_context.json
           fi
