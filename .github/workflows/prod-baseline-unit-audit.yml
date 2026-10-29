@@ -1,10 +1,9 @@
 name: StatMaker PROD Unit Baseline Comparison
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/prod-baseline-unit-audit.yml'
+  # One-off historical diagnostic pinned to an old PROD snapshot below.
+  # Workflow maintenance must not rerun that known historical baseline.
+  # Current releases are checked by android-production-validation.yml.
   workflow_dispatch:
 
 permissions:
