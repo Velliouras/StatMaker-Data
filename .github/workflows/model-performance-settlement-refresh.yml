@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       max_requests:
-        description: "Safe API-Football request cap for this settlement run"
+        description: "Safe API-Football request cap; publication retries reuse fetched data"
         required: true
         default: "120"
         type: string
