@@ -202,25 +202,10 @@ jobs:
 
           git commit -m "Refresh live settlement and fixture validity"
 
-          for attempt in 1 2 3; do
-            git fetch origin main
-            # This commit contains only freshly regenerated settlement artifacts. If another
-            # canonical writer advanced main after checkout, replay this newer settlement commit
-            # on top and prefer the replayed artifact content for generated-file conflicts.
-            if ! git rebase -X theirs origin/main; then
-              echo "Live settlement ownership conflict could not be resolved during rebase."
-              git rebase --abort || true
-              exit 1
-            fi
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-            echo "Live settlement push attempt ${attempt} lost a remote race; retrying."
-            sleep $((attempt * 4))
-          done
-
-          echo "Could not publish live settlement feed after retries."
-          exit 1
+          python .github/scripts/publish_generated_paths.py \
+            --path-prefix data/statmaker/live_settlements.json \
+            --path-prefix data/api_football/live_settlement_cache.json \
+            --path-prefix data/statmaker/fixture_validity.json
 
   publish-daily:
     if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]') }}

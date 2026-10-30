@@ -101,23 +101,13 @@ jobs:
             echo "No Domestic match-context changes."
           else
             git commit -m "Refresh Domestic match context"
-            if ! git pull --rebase --autostash origin main; then
-              git rebase --abort || true
-              echo "Concurrent Domestic writer detected; deferring context artifact commit to the next run."
-              exit 0
-            fi
-            # The producer may have rebased over another canonical writer. Rebuild the
-            # deterministic manifest now so it describes the exact tree being pushed.
-            python scripts/build_statmaker_update_manifest.py \
-              --profile main \
-              --branch main \
-              --output data/statmaker/update_manifest.json
-            git add data/statmaker/update_manifest.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Rebuild main manifest after producer rebase"
-            fi
-            if ! git push origin HEAD:main; then
-              echo "Concurrent Domestic writer advanced main after rebase; deferring to the next run."
-              exit 0
-            fi
+            # Preserve unpublished runner scratch; hash only the committed canonical tree.
+            git stash push --include-untracked --message "Unpublished producer scratch"
+            python .github/scripts/publish_generated_paths.py --rebuild-main-manifest \
+              --path-prefix odds/odds_api_io/domestic_odds.json \
+              --path-prefix data/statmaker/domestic_match_context_cache.json \
+              --path-prefix data/statmaker/update_manifest.json \
+              --path-prefix reports/domestic_match_context_enrichment.json \
+              --path-prefix reports/domestic_lineup_watch.json \
+              --path-prefix reports/domestic_squad_context.json
           fi

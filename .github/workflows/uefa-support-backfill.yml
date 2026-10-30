@@ -160,16 +160,12 @@ jobs:
             echo "No UEFA support changes to commit."
           else
             git commit -m "Backfill missing UEFA participant support"
-            git pull --rebase --autostash origin main
-            # The producer may have rebased over another canonical writer. Rebuild the
-            # deterministic manifest now so it describes the exact tree being pushed.
-            python scripts/build_statmaker_update_manifest.py \
-              --profile main \
-              --branch main \
-              --output data/statmaker/update_manifest.json
-            git add data/statmaker/update_manifest.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Rebuild main manifest after producer rebase"
-            fi
-            git push origin HEAD:main
+            # Preserve unpublished runner scratch; hash only the committed canonical tree.
+            git stash push --include-untracked --message "Unpublished producer scratch"
+            python .github/scripts/publish_generated_paths.py --rebuild-main-manifest \
+              --path-prefix data/statmaker/uefa_support_history.json \
+              --path-prefix data/statmaker/uefa_team_support_history.json \
+              --path-prefix data/statmaker/uefa_team_logos.json \
+              --path-prefix data/statmaker/update_manifest.json \
+              --path-prefix reports/uefa_support_team_backfill.json
           fi

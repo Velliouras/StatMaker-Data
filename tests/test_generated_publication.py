@@ -1,5 +1,6 @@
 """Exercise real Git repositories, shallow fetches and concurrent main writers."""
 import importlib.util
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -90,6 +91,67 @@ class GeneratedPublicationTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "outside the publisher"):
             publisher.publish(prefixes=("other-output/",), pause=lambda _: None)
         self.assertNotEqual(self.command(self.remote, "cat-file", "-e", "main:owned.json", check=False).returncode, 0)
+
+    def prepare_manifest_race(self, fail_builder=False):
+        # Use a real offline builder in the worker; no provider work is repeated.
+        (self.worker / 'scripts').mkdir()
+        builder = self.worker / 'scripts/build_statmaker_update_manifest.py'
+        builder.write_text('raise RuntimeError("invalid source data")\n' if fail_builder else '''import json
+from pathlib import Path
+p=Path("data/statmaker/update_manifest.json")
+old=json.loads(p.read_text()) if p.exists() else {}
+p.write_text(json.dumps({"owned":Path("owned.json").read_text(),
+ "foreign":Path("foreign.json").read_text(),
+ "transitions":old.get("normalizedStatsDelta",{}).get("transitions",[])}))
+''')
+        manifest = self.worker / publisher.MANIFEST
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(json.dumps({'normalizedStatsDelta': {'transitions': [{'from':'own-before','to':'own-after'}]}}))
+        self.command(self.worker, 'add', 'scripts/', publisher.MANIFEST)
+        self.command(self.worker, 'commit', '--amend', '--no-edit', '-q')
+        self.advance_manifest('newer-result')
+
+    def advance_manifest(self, value):
+        self.commit(self.author, 'foreign.json', value, 'New canonical result')
+        manifest = self.author / publisher.MANIFEST
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(json.dumps({'normalizedStatsDelta': {'transitions': [{'from':'remote-before','to':'remote-after'}]}}))
+        self.command(self.author, 'add', publisher.MANIFEST)
+        self.command(self.author, 'commit', '--amend', '--no-edit', '-q')
+        self.command(self.author, 'push', '-q', 'origin', 'main')
+
+    def test_shared_manifest_is_rebuilt_from_both_canonical_sources_and_keeps_delta_receipts(self):
+        self.prepare_manifest_race()
+        publisher.publish(refresh_manifest=True, pause=lambda _: None)
+        result = json.loads(self.remote_file(publisher.MANIFEST))
+        self.assertEqual('new-scorers', result['owned'])
+        self.assertEqual('newer-result', result['foreign'])
+        self.assertEqual([{'from':'remote-before','to':'remote-after'}, {'from':'own-before','to':'own-after'}], result['transitions'])
+
+    def test_rejected_push_rebuilds_manifest_again_after_the_remote_advances(self):
+        self.prepare_manifest_race()
+        hook = self.remote / 'hooks/pre-receive'
+        hook.write_text('#!/bin/sh\nif [ ! -e "retry-marker" ]; then touch "retry-marker"; exit 1; fi\nexit 0\n')
+        hook.chmod(0o755)
+        publisher.publish(refresh_manifest=True, pause=lambda _: self.advance_manifest('latest-result'))
+        result = json.loads(self.remote_file(publisher.MANIFEST))
+        self.assertEqual('latest-result', result['foreign'])
+        self.assertEqual('new-scorers', result['owned'])
+        self.assertEqual('latest-result', self.remote_file('foreign.json'))
+
+    def test_manifest_mode_still_refuses_to_overwrite_conflicting_source_data(self):
+        self.prepare_manifest_race()
+        self.commit(self.author, 'owned.json', 'newer-canonical', 'Canonical source update')
+        self.command(self.author, 'push', '-q', 'origin', 'main')
+        with self.assertRaisesRegex(RuntimeError, 'conflicts with newer canonical'):
+            publisher.publish(refresh_manifest=True, pause=lambda _: None)
+        self.assertEqual('newer-canonical', self.remote_file('owned.json'))
+
+    def test_failed_manifest_builder_cannot_publish_source_data_with_stale_hashes(self):
+        self.prepare_manifest_race(fail_builder=True)
+        with self.assertRaises(subprocess.CalledProcessError):
+            publisher.publish(refresh_manifest=True, pause=lambda _: None)
+        self.assertNotEqual(self.command(self.remote, 'cat-file', '-e', 'main:owned.json', check=False).returncode, 0)
 
 
 if __name__ == "__main__":
