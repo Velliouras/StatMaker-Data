@@ -1,12 +1,12 @@
 {
   "audit": {
-    "favouriteGuard": 51,
+    "favouriteGuard": 55,
     "insufficientHistory": 2,
-    "missingApiFixtureId": 11,
-    "oddsBounds": 1993,
-    "probabilityOrEv": 1370,
-    "staleQuote": 64,
-    "supportedQuotes": 3478,
+    "missingApiFixtureId": 12,
+    "oddsBounds": 2064,
+    "probabilityOrEv": 1472,
+    "staleQuote": 8,
+    "supportedQuotes": 3602,
     "unknownTeam": 5
   },
   "modelId": "SHOTS_SOT_CATBOOST_V1",
@@ -9718,6 +9718,85 @@
       "team": null,
       "teamSide": "",
       "winProbability": 0.6004310969846705
+    },
+    {
+      "apiFixtureId": 1552805,
+      "awayShots": 12.826493005160618,
+      "awaySot": 4.449863964218787,
+      "awayTeam": "Toulouse",
+      "bookmaker": "Unibet",
+      "bookmakerBinding": "EXACT_PROVIDER_QUOTE",
+      "category": "UAT_SHOTS_EXPERIMENT",
+      "certified": false,
+      "competitionId": "domestic",
+      "featureCutoff": "2026-10-30T15:59:34.177843Z",
+      "fixtureId": "72036264",
+      "fixtureKey": "api:1552805:1793562300",
+      "groupKey": "api:1552805:shots",
+      "historyAway": 53,
+      "historyHome": 57,
+      "homeShots": 18.60959216345112,
+      "homeSot": 6.217067293820581,
+      "homeTeam": "Marseille",
+      "identityBinding": "cachedExactSchedule",
+      "indicativeEV": 0.34530218909253607,
+      "issuedAt": "2026-10-30T15:59:34.177843Z",
+      "kickoff": "2026-11-01T19:45:00Z",
+      "line": 15.5,
+      "market": "TEAM_SHOTS",
+      "match": {
+        "apiFootballFixtureId": "1552805",
+        "awayTeam": "Toulouse",
+        "awayTeamLogo": "https://media.api-sports.io/football/teams/96.png",
+        "canonicalAwayTeam": "Toulouse",
+        "canonicalHomeTeam": "Marseille",
+        "competition": "Ligue 1",
+        "country": "France",
+        "date": "2026-11-01",
+        "homeTeam": "Marseille",
+        "homeTeamLogo": "https://media.api-sports.io/football/teams/81.png",
+        "id": "72036264",
+        "kickoff": "2026-11-01T19:45:00Z",
+        "leagueCode": "F1",
+        "providerAwayTeam": "Toulouse FC",
+        "providerHomeTeam": "Olympique Marseille",
+        "scheduleOnly": false,
+        "scheduleSource": "odds-api-io-events",
+        "scheduleVerified": true,
+        "season": "2026-2027",
+        "squadContext": {
+          "apiFootballFixtureId": 1552805
+        },
+        "teamMappingStatus": "matched",
+        "usableForStats": true
+      },
+      "metric": "shots",
+      "model": "SHOTS_SOT_CATBOOST_V1",
+      "modelBankSha256": "0007fa8b9c6ed09138c91c36d7e31891676496b180516bc385ec17650a97d985",
+      "odd": 2.05,
+      "outcome": "PENDING",
+      "policyId": "SHOTS_SOT_P60_UAT_V4",
+      "probabilityModel": "CATBOOST_NB_BINOMIAL",
+      "providerMarketUpdatedAt": "2026-10-30T11:49:39.435Z",
+      "publicationCommit": null,
+      "publishedAt": null,
+      "pushProbability": 0.0,
+      "quoteObservationCommit": null,
+      "quoteObservationEvidence": "PROVIDER_LAST_CHANGE_LOWER_BOUND",
+      "quoteObservationSemantics": "OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
+      "quoteObservationSha256": null,
+      "quoteUpdatedAt": "2026-10-30T11:49:39.435000Z",
+      "scope": "TEAM",
+      "selection": "Marseille Over 15.5",
+      "selectionId": "c3ad03806d25a7aab528153cddbc3aade6ccd693e5414ddc43c5015e4e87910a",
+      "settledAt": null,
+      "settlementReturn": null,
+      "side": "OVER",
+      "sourceOddsSha256": "1b261b81f34c9be2b5cf61fbe4db4207f9984b1f2ee58a5484ebf03640414365",
+      "sourceProviderSha256": "695cef467d32944a55a5165c63306a6a7061460a4af6771acc226f205596e499",
+      "team": "Marseille",
+      "teamSide": "HOME",
+      "winProbability": 0.656244970289042
     }
   ],
   "schemaVersion": 1,
@@ -9737,13 +9816,15 @@
           "fixtures": 54
         },
         "domestic": {
-          "fixtures": 634,
-          "forecastable": 143,
-          "mapped": 143,
-          "missingApiFixtureId": 10,
-          "probabilityEvPassing": 36,
-          "quotes": 2856,
-          "withShotsOdds": 153
+          "eligibleOptions": 3,
+          "fixtures": 642,
+          "forecastable": 147,
+          "mapped": 147,
+          "missingApiFixtureId": 11,
+          "newSelections": 3,
+          "probabilityEvPassing": 44,
+          "quotes": 2980,
+          "withShotsOdds": 158
         },
         "europa_league": {
           "fixtures": 54,
@@ -9751,7 +9832,7 @@
           "insufficientHistory": 2,
           "mapped": 15,
           "missingApiFixtureId": 1,
-          "probabilityEvPassing": 7,
+          "probabilityEvPassing": 6,
           "quotes": 184,
           "unknownTeam": 2,
           "withShotsOdds": 18
@@ -9759,11 +9840,11 @@
       },
       "byDay": {
         "2026-10-30": {
-          "fixtures": 42,
+          "fixtures": 41,
           "forecastable": 8,
           "mapped": 8,
           "probabilityEvPassing": 4,
-          "quotes": 168,
+          "quotes": 188,
           "withShotsOdds": 8
         },
         "2026-10-31": {
@@ -9771,17 +9852,19 @@
           "forecastable": 65,
           "mapped": 65,
           "missingApiFixtureId": 2,
-          "probabilityEvPassing": 23,
-          "quotes": 1430,
+          "probabilityEvPassing": 25,
+          "quotes": 1460,
           "withShotsOdds": 67
         },
         "2026-11-01": {
+          "eligibleOptions": 2,
           "fixtures": 153,
           "forecastable": 39,
           "mapped": 39,
           "missingApiFixtureId": 5,
-          "probabilityEvPassing": 8,
-          "quotes": 698,
+          "newSelections": 2,
+          "probabilityEvPassing": 12,
+          "quotes": 702,
           "withShotsOdds": 44
         },
         "2026-11-02": {
@@ -9789,24 +9872,27 @@
           "forecastable": 10,
           "mapped": 10,
           "missingApiFixtureId": 3,
-          "quotes": 188,
+          "quotes": 168,
           "withShotsOdds": 13
         },
         "2026-11-03": {
+          "eligibleOptions": 1,
           "fixtures": 30,
-          "forecastable": 20,
-          "mapped": 20,
+          "forecastable": 22,
+          "mapped": 22,
+          "missingApiFixtureId": 1,
+          "newSelections": 1,
           "probabilityEvPassing": 3,
-          "quotes": 432,
+          "quotes": 484,
           "unknownTeam": 1,
-          "withShotsOdds": 21
+          "withShotsOdds": 24
         },
         "2026-11-04": {
           "fixtures": 26,
           "forecastable": 12,
           "mapped": 12,
           "missingApiFixtureId": 1,
-          "probabilityEvPassing": 6,
+          "probabilityEvPassing": 7,
           "quotes": 318,
           "unknownTeam": 2,
           "withShotsOdds": 15
@@ -9816,13 +9902,18 @@
           "forecastable": 17,
           "insufficientHistory": 2,
           "mapped": 19,
-          "probabilityEvPassing": 7,
+          "probabilityEvPassing": 6,
           "quotes": 244,
           "unknownTeam": 2,
           "withShotsOdds": 21
         },
         "2026-11-06": {
-          "fixtures": 3
+          "fixtures": 12,
+          "forecastable": 2,
+          "mapped": 2,
+          "probabilityEvPassing": 1,
+          "quotes": 38,
+          "withShotsOdds": 2
         },
         "2026-11-07": {
           "fixtures": 4
@@ -9890,29 +9981,29 @@
       }
     },
     "observedDomesticLeagues": 0,
-    "oddsGeneratedAt": "2026-10-30T15:02:19Z",
-    "oddsSha256": "bbcb27a0676cb02ebae876dae8035c563c7875d9d0f2fb75d69e41a71ef77de9",
-    "providerSha256": "14dc12cca263a42b89e3f139d48c92515b02f65b84611aabb0b17f629e92dda6",
+    "oddsGeneratedAt": "2026-10-30T15:55:45Z",
+    "oddsSha256": "1b261b81f34c9be2b5cf61fbe4db4207f9984b1f2ee58a5484ebf03640414365",
+    "providerSha256": "695cef467d32944a55a5165c63306a6a7061460a4af6771acc226f205596e499",
     "uefa": [
       {
         "freshOddsEvents": 54,
-        "observedAt": "2026-10-30T07:08:07Z",
+        "observedAt": "2026-10-30T15:58:05Z",
         "path": "champions_league_odds.json",
-        "sha256": "8605fbdad537beb9539a543464648245ff321585b2bc52deb9a26b8d981ed50b",
+        "sha256": "fdcb5d0a385ebd62159d4d576429f192e6860da1b3eb9bf5fd3812c171147553",
         "totalFixtures": 54
       },
       {
         "freshOddsEvents": 108,
-        "observedAt": "2026-10-30T07:08:10Z",
+        "observedAt": "2026-10-30T15:58:07Z",
         "path": "europa_league_odds.json",
-        "sha256": "b0c4303b06627cad2731a8ec3f85424ddcb356471aefe9e730dd063a99a81b82",
+        "sha256": "bfc26d36203b72af59df9000cf57193652ab79d7f46aa6b77b1fea85c5c875c8",
         "totalFixtures": 54
       },
       {
         "freshOddsEvents": 162,
-        "observedAt": "2026-10-30T07:08:12Z",
+        "observedAt": "2026-10-30T15:58:09Z",
         "path": "conference_league_odds.json",
-        "sha256": "70aacb6c60382eb645f0d76e5bf215c90ff4f92175ccfbaeb9441d0c55c2518b",
+        "sha256": "539677d6478591d9a0e79fd9ce503e7c8084bb0859326b5f636679773a36ae3d",
         "totalFixtures": 54
       }
     ]
