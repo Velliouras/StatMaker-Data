@@ -117,6 +117,14 @@ class LivePostmatchTest(unittest.TestCase):
         dump(self.root, CACHE, {"league_id": 39, "season": "2025", "fixtures": []})
         self.assertEqual(live.candidates(self.root, NOW), [])
 
+    def test_every_league_uses_shared_five_minute_final_detection(self):
+        policy = json.loads((ROOT / "config/api_football_refresh_policy.json").read_text())
+        self.assertEqual(
+            {key: item["resultsMinutes"] for key, item in policy["tiers"].items()},
+            {"primary": 5, "europe": 5, "background": 5},
+        )
+        self.assertEqual((policy["totalStop"], policy["reserve"]), (6000, 1500))
+
     def test_workflow_has_guard_and_refreshes_app_ready_only_after_stats(self):
         workflow = (ROOT / ".github/workflows/recent-postmatch-stats.yml").read_text()
         self.assertIn('STATMAKER_API_BUDGET_ENFORCE: "true"', workflow)
