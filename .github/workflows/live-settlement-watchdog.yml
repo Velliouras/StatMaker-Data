@@ -117,9 +117,16 @@ jobs:
     secrets: inherit
 
   refresh-postmatch-statistics:
-    # Independent, bounded worker. Called after each successful 5-minute results
-    # run; on the 15-minute watchdog cron it follows the results refresh.
-    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository) || github.event_name != 'workflow_run' }}
-    needs: []
+    # Run immediately when the independently scheduled five-minute results job
+    # completes successfully. Never restart results or scorers from this event.
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository }}
+    uses: ./.github/workflows/recent-postmatch-stats.yml
+    secrets: inherit
+
+  refresh-postmatch-fallback:
+    # The existing cron is the only fallback. Wait for the results refresh when
+    # the watchdog is scheduled or invoked manually.
+    if: ${{ github.event_name != 'workflow_run' }}
+    needs: refresh-priority-results-and-standings
     uses: ./.github/workflows/recent-postmatch-stats.yml
     secrets: inherit
