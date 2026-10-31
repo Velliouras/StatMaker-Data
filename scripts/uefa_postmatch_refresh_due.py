@@ -80,12 +80,13 @@ def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
         return watchdog_tables_due(root, docs, now)
 
     recent = []
+    delay = timedelta(minutes=100) if target == "stats" else FINALIZATION_DELAY
     for code, doc in docs.items():
         for row in doc.get("fixtures") or []:
             if not isinstance(row, dict):
                 continue
             date = parse_date(row.get("date_utc"))
-            if not date or not now - LOOKBACK <= date <= now - FINALIZATION_DELAY:
+            if not date or not now - LOOKBACK <= date <= now - delay:
                 continue
             if str(row.get("status") or "") in CANCELLED:
                 continue
@@ -94,8 +95,33 @@ def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
                 continue
             recent.append((code, int(fid), str(row.get("status") or ""), date))
 
+    if target == "stats":
+        # The fast results producer often knows the final score before UEFA
+        # League Tables has reconciled its older fixture snapshots.
+        # Only trust final, verified season/fixture identities.
+        for code, doc in docs.items():
+            fast = load(root / "data/statmaker/priority_refresh" / (code + ".json"))
+            if (fast.get("contract") != "statmaker-league-tables-v1"
+                    or fast.get("leagueCode") != code
+                    or fast.get("season") != doc.get("season")
+                    or fast.get("apiFootballLeagueId") != doc.get("apiFootballLeagueId")):
+                continue
+            for row in fast.get("fixtures", []):
+                if row.get("status") not in COMPLETED:
+                    continue
+                date = parse_date(row.get("date_utc"))
+                if date is None or not now - LOOKBACK <= date <= now - delay:
+                    continue
+                if any(type(row.get(key)) is not int for key in ("fixture_id", "home_goals", "away_goals")):
+                    continue
+                recent.append((code, row["fixture_id"], row["status"], date))
+
     if not recent:
         return False, "no-completed-kickoff-due"
+
+    # One final match can appear in both tables and priority snapshots.
+    recent = list({(code, fid): (code, fid, status, date)
+                   for code, fid, status, date in recent}.values())
 
     if target == "stats":
         source = load(root / "data/statmaker/uefa_current_stats.json")
@@ -105,7 +131,9 @@ def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
             ({"CONF": "UECL"}.get(str(c.get("leagueCode")), str(c.get("leagueCode"))), int(m.get("fixtureId")))
             for c in source.get("competitions") or [] if isinstance(c, dict)
             for m in c.get("fixtures") or [] if isinstance(m, dict) and m.get("fixtureId") is not None
-            and m.get("status") in COMPLETED
+            and m.get("status") in COMPLETED and m.get("statsFetched") is True
+            and isinstance(m.get("normalizedStats"), dict)
+            and any(value is not None for value in m["normalizedStats"].values())
         }
         missing = [(code, fid) for code, fid, _, _ in recent if (code, fid) not in completed]
         generated = parse_date(source.get("generatedAt"))
@@ -130,8 +158,9 @@ def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
     else:
         raise ValueError("target must be stats or tables")
 
-    if generated is not None and now - generated < COOLDOWN:
-        return False, "refresh-cooldown-2h"
+    cooldown = timedelta(minutes=15) if target == "stats" else COOLDOWN
+    if generated is not None and now - generated < cooldown:
+        return False, "refresh-cooldown"
     return True, "incomplete-uefa-fixtures:" + ",".join(str(x[0]) for x in missing[:8])
 
 
