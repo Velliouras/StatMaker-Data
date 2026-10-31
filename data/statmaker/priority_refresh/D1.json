@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-10-31T19:21:16+00:00",
+  "generatedAtUTC": "2026-10-31T19:30:37+00:00",
   "leagueCode": "D1",
   "country": "Germany",
   "competition": "Bundesliga",
@@ -1095,7 +1095,9 @@
       "away_goals": 1,
       "venue": "Ursapharm-Arena an der Kaiserlinde",
       "league_code": "D1",
-      "normalized_stats": {}
+      "normalized_stats": {},
+      "elapsed": 90,
+      "extra_time": null
     },
     {
       "fixture_id": 1575204,
@@ -1202,15 +1204,17 @@
       "away_team_id": 165,
       "home_logo": "https://media.api-sports.io/football/teams/157.png",
       "away_logo": "https://media.api-sports.io/football/teams/165.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 2,
-      "away_goals": 1,
+      "away_goals": 2,
       "venue": "Allianz Arena",
       "league_code": "D1",
       "normalized_stats": {},
-      "elapsed": 88,
+      "elapsed": 90,
       "extra_time": null,
       "live_goal_tracking": true,
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-10-31T19:30:37+00:00",
       "goal_events": [
         {
           "fixtureId": "1575203",
@@ -1238,14 +1242,21 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1575203",
+          "team": "Borussia Dortmund",
+          "player": "Fábio Silva",
+          "minute": 89,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
         }
       ],
       "goal_events_score": [
         2,
-        1
-      ],
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-10-31T19:21:16+00:00"
+        2
+      ]
     },
     {
       "fixture_id": 1575207,
@@ -5262,8 +5273,8 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/germany/bundesliga/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-10-31T00:00:49+00:00",
-  "resultsCheckedAtUTC": "2026-10-31T19:21:16+00:00",
-  "standingsCheckedAtUTC": "2026-10-31T19:00:47+00:00",
+  "resultsCheckedAtUTC": "2026-10-31T19:30:37+00:00",
+  "standingsCheckedAtUTC": "2026-10-31T19:30:37+00:00",
   "standings": [
     {
       "rank": 1,
@@ -5519,5 +5530,5 @@
     }
   ],
   "singleStandingsGroup": true,
-  "standingsObservedAtUTC": "2026-10-31T19:00:47+00:00"
+  "standingsObservedAtUTC": "2026-10-31T19:30:37+00:00"
 }
