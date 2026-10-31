@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-10-31T17:47:03Z",
+  "generated_at": "2026-10-31T18:02:59Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 225,
-    "fixtures_with_any_stats": 131,
-    "fixtures_with_bb_core_stats": 129,
-    "any_stats_coverage": 0.5822,
-    "bb_core_coverage": 0.5733,
+    "completed_fixtures": 226,
+    "fixtures_with_any_stats": 132,
+    "fixtures_with_bb_core_stats": 130,
+    "any_stats_coverage": 0.5841,
+    "bb_core_coverage": 0.5752,
     "group_counts": {
-      "shots_total": 101,
-      "shots_on_target": 129,
-      "corners": 129,
+      "shots_total": 102,
+      "shots_on_target": 130,
+      "corners": 130,
       "fouls": 27,
-      "yellow_cards": 131,
-      "red_cards": 131,
-      "possession": 129,
+      "yellow_cards": 132,
+      "red_cards": 132,
+      "possession": 130,
       "passes": 26,
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.4489,
-      "shots_on_target": 0.5733,
-      "corners": 0.5733,
-      "fouls": 0.12,
-      "yellow_cards": 0.5822,
-      "red_cards": 0.5822,
-      "possession": 0.5733,
-      "passes": 0.1156,
-      "xg": 0.1156
+      "shots_total": 0.4513,
+      "shots_on_target": 0.5752,
+      "corners": 0.5752,
+      "fouls": 0.1195,
+      "yellow_cards": 0.5841,
+      "red_cards": 0.5841,
+      "possession": 0.5752,
+      "passes": 0.115,
+      "xg": 0.115
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5822 < 0.65",
-      "low BB-core coverage: 0.5733 < 0.65",
+      "low any-stats coverage: 0.5841 < 0.65",
+      "low BB-core coverage: 0.5752 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -18966,6 +18966,90 @@
         "halftime": {
           "home": 1,
           "away": 0
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497737,
+      "date_utc": "2026-10-31T16:00:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "league_code": "SWE2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
+      "round": "Regular Season - 29",
+      "home_team": "Falkenbergs FF",
+      "away_team": "Sandviken",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 10,
+        "HST": 7,
+        "AST": 2,
+        "HC": 6,
+        "AC": 1,
+        "HF": null,
+        "AF": null,
+        "HY": 0,
+        "AY": 0,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 48,
+        "APossession": 52,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": null,
+      "htag": null,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": null,
+          "away": null
         },
         "fulltime": {
           "home": 2,
