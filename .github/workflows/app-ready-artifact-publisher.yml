@@ -589,4 +589,224 @@ jobs:
           names=lambda m:{Path(x['path']).name for x in m.get('artifacts',[])} if m else set()
           current, previous=names(incoming), names(old)
           for n in current: shutil.copy2(src/n,dst/n)
-          keep=current|previous|{'update_manifest.
+          keep=current|previous|{'update_manifest.json','publish_status.json'}
+          for f in dst.glob('app_ready_*_bundle-*.zip'):
+              if f.name not in keep: f.unlink()
+          shutil.copy2(src/'update_manifest.json',mp)
+
+          status={
+              'schemaVersion':1,
+              'status':'READY',
+              'contentVersion':incoming.get('contentVersion',''),
+              'generatedAt':incoming.get('generatedAt',''),
+              'verifiedAt':datetime.now(timezone.utc).isoformat().replace('+00:00','Z'),
+              'artifactCount':len(artifacts),
+              'mainContentVersion':incoming.get('metadata',{}).get('mainContentVersion',''),
+              'uefaContentVersion':incoming.get('metadata',{}).get('uefaContentVersion',''),
+              'statmakerCommit':incoming.get('metadata',{}).get('statmakerCommit',''),
+              'preparedBettingSchemaVersion':incoming.get('metadata',{}).get('preparedBettingSchemaVersion',0),
+              'preparedPatternRulesFingerprint':incoming.get('metadata',{}).get('preparedPatternRulesFingerprint',''),
+              'preparedPatternGenerationId':incoming.get('metadata',{}).get('preparedPatternGenerationId',''),
+              'preparedPatternCandidateCount':incoming.get('metadata',{}).get('preparedPatternCandidateCount',0),
+              'preparedPatternRecommendationEligibleCount':incoming.get('metadata',{}).get('preparedPatternRecommendationEligibleCount',0),
+              'preparedPerformanceRowCount':incoming.get('metadata',{}).get('preparedPerformanceRowCount',0),
+              'preparedOpponentAdjustedRequiredCount':incoming.get('metadata',{}).get('preparedOpponentAdjustedRequiredCount',0),
+              'preparedOpponentModelCount':incoming.get('metadata',{}).get('preparedOpponentModelCount',0),
+              'preparedFavoriteShadowCount':incoming.get('metadata',{}).get('preparedFavoriteShadowCount',0),
+              'recoveryPublish':__import__('os').environ.get('RECOVERY_PUBLISH','false').lower() == 'true',
+          }
+          (dst/'publish_status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+          if [ -z "$(git status --porcelain -- data/statmaker/app_ready)" ]; then exit 0; fi
+          git config user.name "StatMaker Artifact Bot"
+          git config user.email "actions@users.noreply.github.com"
+
+          if [[ "${RECOVERY_PUBLISH:-false}" == "true" ]]; then
+            # Recovery generation is already fully validated. Never rebase the workflow/code
+            # commit chain onto a moving main branch: that replays unrelated canonical producer
+            # commits and causes conflicts. Preserve only the generated app_ready directory,
+            # reset to the latest canonical main, then commit ONLY those immutable artifacts.
+            recovery_dir="$(mktemp -d)"
+            cp -a data/statmaker/app_ready "$recovery_dir/app_ready"
+
+            published=false
+            for attempt in 1 2 3 4 5; do
+              git fetch --no-tags origin +main:refs/remotes/origin/main
+              git reset --hard refs/remotes/origin/main
+              rm -rf data/statmaker/app_ready
+              mkdir -p data/statmaker
+              cp -a "$recovery_dir/app_ready" data/statmaker/app_ready
+              git add data/statmaker/app_ready
+
+              if git diff --cached --quiet; then
+                echo "APP_READY_RECOVERY_ALREADY_PUBLISHED"
+                published=true
+                break
+              fi
+
+              git commit -m "Publish verified app-ready StatMaker read models"
+              if git push origin HEAD:main; then
+                echo "APP_READY_RECOVERY_PUBLISH_OK attempt=$attempt"
+                published=true
+                break
+              fi
+              echo "APP_READY_RECOVERY_PUBLISH_RETRY attempt=$attempt"
+            done
+            [[ "$published" == "true" ]] || {
+              echo "Could not publish recovery app-ready artifacts after 5 retries" >&2
+              exit 1
+            }
+          else
+            # Normal generations are already validated. Preserve only the immutable app_ready
+            # tree, then replay that tree onto the latest main. Never rebase the long-lived
+            # workflow checkout: doing so can replay unrelated producer commits after main moves.
+            publish_dir="$(mktemp -d)"
+            cp -a data/statmaker/app_ready "$publish_dir/app_ready"
+
+            published=false
+            for attempt in 1 2 3 4 5; do
+              git fetch --no-tags origin +main:refs/remotes/origin/main
+              git fetch --no-tags origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
+
+              # Publish the fully validated generation even if canonical inputs advanced while it
+              # was building. A later queued publisher will catch up to the newer source version.
+              python - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          incoming=json.loads(Path('app-ready-export/out/update_manifest.json').read_text())
+          metadata=incoming.get('metadata',{})
+          expected_main=str(metadata.get('mainContentVersion') or '')
+          expected_uefa=str(metadata.get('uefaContentVersion') or '')
+          current_main=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/main:data/statmaker/update_manifest.json'],
+              text=True,
+          ))
+          current_uefa=json.loads(subprocess.check_output(
+              ['git','show','refs/remotes/origin/build/uefa-qualifier-feed-20260720:data/statmaker/uefa_update_manifest.json'],
+              text=True,
+          ))
+          actual_main=str(current_main.get('contentVersion') or '')
+          actual_uefa=str(current_uefa.get('contentVersion') or '')
+          if expected_main != actual_main or expected_uefa != actual_uefa:
+              print(
+                  'APP_READY_CONCURRENT_SOURCE_ADVANCE_ALLOWED',
+                  f'main={expected_main[:12]}->{actual_main[:12]}',
+                  f'uefa={expected_uefa[:12]}->{actual_uefa[:12]}',
+              )
+          PY
+
+              git reset --hard refs/remotes/origin/main
+              rm -rf data/statmaker/app_ready
+              mkdir -p data/statmaker
+              cp -a "$publish_dir/app_ready" data/statmaker/app_ready
+              git add data/statmaker/app_ready
+
+              if git diff --cached --quiet; then
+                echo "APP_READY_ALREADY_PUBLISHED"
+                published=true
+                break
+              fi
+
+              git commit -m "Publish verified app-ready StatMaker read models"
+              if git push origin HEAD:main; then
+                echo "APP_READY_PUBLISH_OK attempt=$attempt"
+                published=true
+                break
+              fi
+
+              echo "APP_READY push attempt ${attempt} lost a remote race; retrying immutable artifacts only."
+              sleep $((attempt * 2))
+            done
+
+            [[ "$published" == "true" ]] || {
+              echo "Could not publish app-ready artifacts after 5 retries" >&2
+              exit 1
+            }
+          fi
+
+      - name: Verify published generation
+        if: steps.preflight.outputs.generate == 'true' && steps.source_guard.outputs.current == 'true'
+        shell: bash
+        env:
+          EXPECTED_STATMAKER_COMMIT: ${{ steps.preflight.outputs.statmaker_commit }}
+        run: |
+          set -euo pipefail
+          local_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
+          test "$local_sha" = "$remote_sha"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          status=json.loads(Path('data/statmaker/app_ready/publish_status.json').read_text())
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          artifacts=manifest.get('artifacts',[])
+          assert status.get('status') == 'READY'
+          assert status.get('contentVersion') == manifest.get('contentVersion')
+          assert status.get('artifactCount') == len(artifacts) == 2
+          assert {item.get('id') for item in artifacts} == {'app_ready_stats_bundle','app_ready_betting_bundle'}
+          metadata=manifest.get('metadata',{})
+          assert metadata.get('domesticHistoryFingerprint') not in {'', '0|0|0'}
+          assert int(metadata.get('preparedBettingSchemaVersion') or 0) == 12
+          assert metadata.get('preparedPatternRulesFingerprint') == os.environ['APP_READY_PATTERN_RULES_FINGERPRINT']
+          assert metadata.get('statmakerCommit') == os.environ.get('EXPECTED_STATMAKER_COMMIT')
+          assert metadata.get('engineContract') == 'probability-first-prod-schema12-v6-retired-inputs-v1'
+          assert metadata.get('inputRetirementContract') == 'asian-and-handicap-market-types-only-before-engine-v2'
+          assert metadata.get('preparedSimulationContract') == 'monte-carlo-v1-prod-data-uat-engine'
+          assert int(metadata.get('preparedSimulationRowCount') or 0) > 0
+          assert int(metadata.get('preparedSimulationRuns') or 0) >= 10000
+          assert int(metadata.get('preparedMatchSimulationCount') or 0) > 0
+          assert metadata.get('preparedTeamEloContract') == 'team-elo-v1'
+          assert int(metadata.get('preparedTeamEloCount') or 0) > 0
+          assert int(metadata.get('preparedTeamEloLeagueCount') or 0) > 0
+          assert metadata.get('preparedLeagueSimulationContract') == 'league-season-monte-carlo-v3-all-domestic-elo'
+          assert int(metadata.get('preparedLeagueSimulationCount') or 0) > 0
+          assert int(metadata.get('preparedLeagueSimulationTeamCount') or 0) > 0
+          assert int(metadata.get('preparedLeagueSimulationRuns') or 0) >= 10000
+          assert str(metadata.get('preparedPatternGenerationId') or '').strip()
+          assert int(metadata.get('preparedPatternCandidateCount') or 0) > 0
+          eligible=int(metadata.get('preparedPatternRecommendationEligibleCount') or 0)
+          performance_rows=int(metadata.get('preparedPerformanceRowCount') or 0)
+          opponent_required=int(metadata.get('preparedOpponentAdjustedRequiredCount') or 0)
+          opponent_models=int(metadata.get('preparedOpponentModelCount') or 0)
+          favorite_shadow=int(metadata.get('preparedFavoriteShadowCount') or 0)
+          assert eligible > 0
+          assert performance_rows == eligible
+          assert opponent_required == 0 or opponent_models > 0
+          assert opponent_models == 0 or favorite_shadow > 0
+          assert status.get('preparedPatternGenerationId') == metadata.get('preparedPatternGenerationId')
+          assert int(status.get('preparedPatternRecommendationEligibleCount') or 0) == eligible
+          assert int(status.get('preparedPerformanceRowCount') or 0) == performance_rows
+          assert int(status.get('preparedOpponentModelCount') or 0) == opponent_models
+          assert int(status.get('preparedFavoriteShadowCount') or 0) == favorite_shadow
+          assert status.get('statmakerCommit') == metadata.get('statmakerCommit')
+          print(
+              'APP_READY_PUBLISH_OK',
+              status['contentVersion'],
+              status['generatedAt'],
+              'generation='+metadata['preparedPatternGenerationId'],
+              'candidates='+str(metadata['preparedPatternCandidateCount']),
+              'eligible='+str(metadata['preparedPatternRecommendationEligibleCount']),
+              'performance='+str(metadata['preparedPerformanceRowCount']),
+              'opponent_models='+str(metadata['preparedOpponentModelCount']),
+              'favorite_shadow='+str(metadata['preparedFavoriteShadowCount']),
+          )
+          PY
+
+      - name: Refresh UAT V2 candidates from cached production inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git pull --ff-only origin main
+          python -m scripts.betting_v2.publish_uat_feed
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/statmaker/uat/betting_v2
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Refresh real V2 UAT candidates [skip ci]"
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1

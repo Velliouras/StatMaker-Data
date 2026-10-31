@@ -1199,6 +1199,7 @@ def main() -> int:
                                  f"fixtures={len(fixtures)} teams={len(teams)} "
                                  f"missing_elo={missing} phases={phases}")
             meta, rows = result
+
             con.execute(
                 """
                 INSERT INTO prepared_league_simulation_meta(
