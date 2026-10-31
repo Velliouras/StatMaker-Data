@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   workflow_call:
   schedule:
-    # Wake every five minutes; the producer itself deduplicates UTC 15/30/60-minute buckets.
+    # Wake every five minutes; primary results use 5-minute buckets, other tiers remain throttled.
     - cron: '2-59/5 * * * *'
   workflow_run:
     # Independent lineup wakeups only. Do not subscribe to UEFA/Stats publishers:
