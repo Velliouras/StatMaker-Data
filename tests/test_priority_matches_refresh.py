@@ -70,9 +70,8 @@ class PriorityRefreshTest(unittest.TestCase):
         self.assertEqual(triggers['schedule'],[{'cron':'2-59/5 * * * *'}])
         fallback=triggers['workflow_run']
         self.assertEqual(fallback['types'],['completed']);self.assertEqual(fallback['branches'],['main'])
-        for name in ('Shots SOT UAT Feed','Live Settlement Publisher','Market Watch Dashboard',
-                     'Shared API Budget and Cadence Regression'):
-            self.assertIn(name,fallback['workflows'])
+        self.assertEqual(fallback['workflows'], ['Domestic Lineup Watch'])
+        self.assertNotIn('UEFA Current Stats Refresh', fallback['workflows'])
         self.assertNotIn(doc['name'],fallback['workflows'])
         self.assertNotIn('Live Settlement Watchdog',fallback['workflows'])
         self.assertIn('workflow_run.head_repository.full_name == github.repository',doc['jobs']['refresh']['if'])
