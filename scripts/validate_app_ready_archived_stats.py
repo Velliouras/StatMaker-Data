@@ -32,6 +32,63 @@ def historical_app_season(db_season: str) -> tuple[int, str]:
     return first, f"{first}-{second}"
 
 
+def archived_candidates(repo_root: Path, years: set[int]) -> dict:
+    archive_root = (Path(repo_root) / "data/statmaker/domestic_enriched").resolve()
+    if not archive_root.is_dir():
+        raise ValueError(f"Missing canonical Domestic archive directory {archive_root}")
+    candidates = {}
+    for year in sorted(years):
+        for path in sorted(archive_root.glob(f"*_{year}.json")):
+            if not path.resolve().is_relative_to(archive_root):
+                raise ValueError(f"Unsafe canonical archive path {path}")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            competition = payload.get("competition") or {}
+            scope = (str(competition.get("app_season") or ""), normalize_code(competition.get("league_code")))
+            if scope[0] == f"{year}-{year + 1}":
+                candidates.setdefault(scope, []).append((path, payload))
+    return candidates
+
+
+def canonical_archived_scope(repo_root: Path, season: str, code: str, *, app_season=None, _candidates=None) -> tuple[Path, dict, list[str]]:
+    """Resolve one retired scope with the same identity proof used at publication."""
+    if app_season is None:
+        year, app_season = historical_app_season(season)
+    else:
+        label = re.fullmatch(r"(20\d{2})\s*-\s*(20\d{2})", str(app_season))
+        if not label or int(label[2]) != int(label[1]) + 1:
+            raise ValueError(f"Invalid canonical archive season {app_season!r}")
+        year, app_season = int(label[1]), f"{label[1]}-{label[2]}"
+        if season not in (app_season, label[1][-2:] + label[2][-2:]):
+            raise ValueError(f"Archive/SQLite season mismatch {app_season!r}/{season!r}")
+    code = normalize_code(code)
+    catalog = _candidates if _candidates is not None else archived_candidates(repo_root, {year})
+    candidates = catalog.get((app_season, code), [])
+    if len(candidates) != 1:
+        raise ValueError(f"Unverified archived scope {code}@{season}: matching source artifacts={len(candidates)}")
+    path, payload = candidates[0]
+    competition = payload["competition"]
+    source = payload.get("source") or {}
+    if (str(source.get("provider") or "").strip().lower() != "api-football"
+            or str(competition.get("api_football_season") or "") != str(year)):
+        raise ValueError(f"Incorrect archived provider/season {path.name}")
+    matches = payload.get("matches")
+    completed = (payload.get("readiness") or {}).get("completed_fixtures")
+    if not isinstance(matches, list) or not matches or completed != len(matches):
+        raise ValueError(f"Incomplete archived fixture scope {path.name}")
+    source_keys, fixture_ids = [], []
+    for match in matches:
+        if (not isinstance(match, dict)
+                or str(match.get("app_season") or app_season) != app_season
+                or normalize_code(match.get("league_code") or code) != code):
+            raise ValueError(f"Wrong canonical archived fixture scope {path.name}")
+        source_keys.append(canonical_key(season, code, match))
+        fixture_ids.append(str(match.get("fixture_id") or ""))
+    if (len(set(source_keys)) != len(matches)
+            or not all(fixture_ids) or len(set(fixture_ids)) != len(matches)):
+        raise ValueError(f"Duplicate or unidentified canonical fixtures {path.name}")
+    return path, payload, source_keys
+
+
 def validated_archived_scope_counts(
     database: Path,
     canonical_index: dict,
@@ -50,53 +107,12 @@ def validated_archived_scope_counts(
         return {}
     if not isinstance(canonical_index.get("leagues"), list):
         raise ValueError("Invalid current canonical Domestic index")
-    archive_root = (Path(repo_root) / "data/statmaker/domestic_enriched").resolve()
-    if not archive_root.is_dir():
-        raise ValueError(f"Missing canonical Domestic archive directory {archive_root}")
-
-    candidates: dict[tuple[str, str], list[tuple[Path, dict]]] = {}
-    years = {historical_app_season(season)[0] for season, _ in extras}
-    for year in sorted(years):
-        for path in sorted(archive_root.glob(f"*_{year}.json")):
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            competition = payload.get("competition") or {}
-            scope = (str(competition.get("app_season") or ""), normalize_code(competition.get("league_code")))
-            if scope[0] == f"{year}-{year + 1}":
-                candidates.setdefault(scope, []).append((path, payload))
-
+    candidates = archived_candidates(repo_root, {historical_app_season(season)[0] for season, _ in extras})
     accepted: dict[tuple[str, str], int] = {}
     connection = sqlite3.connect(f"file:{Path(database).resolve()}?mode=ro", uri=True)
     try:
         for season, code in extras:
-            _, app_season = historical_app_season(season)
-            matches_archive = candidates.get((app_season, code), [])
-            if len(matches_archive) != 1:
-                raise ValueError(
-                    f"Unverified archived scope {code}@{season}: "
-                    f"matching source artifacts={len(matches_archive)}"
-                )
-            path, payload = matches_archive[0]
-            competition = payload["competition"]
-            source = payload.get("source") or {}
-            if (str(source.get("provider") or "").strip().lower() != "api-football"
-                    or str(competition.get("api_football_season") or "") != str(int(app_season[:4]))):
-                raise ValueError(f"Incorrect archived provider/season {path.name}")
-            matches = payload.get("matches")
-            completed = (payload.get("readiness") or {}).get("completed_fixtures")
-            if not isinstance(matches, list) or not matches or completed != len(matches):
-                raise ValueError(f"Incomplete archived fixture scope {path.name}")
-            source_keys = []
-            fixture_ids = []
-            for match in matches:
-                if (not isinstance(match, dict)
-                        or str(match.get("app_season") or app_season) != app_season
-                        or normalize_code(match.get("league_code") or code) != code):
-                    raise ValueError(f"Wrong canonical archived fixture scope {path.name}")
-                source_keys.append(canonical_key(season, code, match))
-                fixture_ids.append(str(match.get("fixture_id") or ""))
-            if (len(set(source_keys)) != len(matches)
-                    or not all(fixture_ids) or len(set(fixture_ids)) != len(matches)):
-                raise ValueError(f"Duplicate or unidentified canonical fixtures {path.name}")
+            path, payload, source_keys = canonical_archived_scope(repo_root, season, code, _candidates=candidates)
 
             db_rows = [
                 (str(match_key), str(date_text or "")[:10], str(home or ""), str(away or ""))

@@ -16,6 +16,11 @@ on:
       - 'tests/test_app_ready_exact_feeds.py'
       - 'tests/test_app_ready_retention.py'
       - 'tests/test_app_ready_workflow_routing.py'
+      - 'scripts/reconcile_app_ready_stats_scope.py'
+      - 'scripts/validate_app_ready_archived_stats.py'
+      - 'scripts/verify_app_ready_stats_reconciliation.py'
+      - 'tests/test_reconcile_app_ready_stats_scope.py'
+      - 'tests/test_validate_app_ready_archived_stats.py'
   push:
     branches:
       - main
@@ -43,6 +48,11 @@ on:
       - 'tests/test_simulation_recovery_cli.py'
       - 'tests/test_app_ready_published_verifier.py'
       - 'tests/test_prepared_league_simulation_phases.py'
+      - 'scripts/reconcile_app_ready_stats_scope.py'
+      - 'scripts/validate_app_ready_archived_stats.py'
+      - 'scripts/verify_app_ready_stats_reconciliation.py'
+      - 'tests/test_reconcile_app_ready_stats_scope.py'
+      - 'tests/test_validate_app_ready_archived_stats.py'
 
 permissions:
   contents: read
@@ -84,6 +94,7 @@ jobs:
             scripts/app_ready_input_retirement.py \
             scripts/audit_result_context_generation.py \
             scripts/validate_app_ready_retirement_contract.py
+          python -m py_compile scripts/reconcile_app_ready_stats_scope.py scripts/validate_app_ready_archived_stats.py scripts/verify_app_ready_stats_reconciliation.py
           bash -n scripts/stage_app_ready_producer.sh
           bash -n scripts/run_app_ready_emulator.sh
 
@@ -92,6 +103,12 @@ jobs:
 
       - name: Validate immutable bundle retention (offline)
         run: python -m unittest discover -s tests -p 'test_app_ready_retention.py' -v
+
+      - name: Validate season rollover and reconcile a temporary copy of the real published stats database
+        run: |
+          python -m unittest discover -s tests -p test_reconcile_app_ready_stats_scope.py -v
+          python -m unittest discover -s tests -p test_validate_app_ready_archived_stats.py -v
+          python scripts/verify_app_ready_stats_reconciliation.py --repo-root .
 
       - name: Validate league-table phases and cached simulation inputs without provider calls
         run: |

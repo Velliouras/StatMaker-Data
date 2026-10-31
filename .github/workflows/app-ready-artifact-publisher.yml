@@ -132,6 +132,16 @@ jobs:
         if: steps.preflight.outputs.generate == 'true'
         run: python scripts/preflight_league_simulations.py
 
+      - name: Validate active or archived historical source before costly Android build
+        if: steps.preflight.outputs.generate == 'true'
+        run: |
+          python -m unittest discover -s tests -p test_reconcile_app_ready_stats_scope.py -q
+          python -m unittest discover -s tests -p test_validate_app_ready_archived_stats.py -q
+          python scripts/reconcile_app_ready_stats_scope.py \
+            app-ready-export/raw/databases/statmaker.db \
+            data/statmaker/domestic_enriched/index.json \
+            --repo-root . --league-code F1 --app-season 2025-2026 --validate-source-only
+
       - name: Validate exact UEFA odds before costly Android build
         if: steps.preflight.outputs.generate == 'true'
         shell: bash
@@ -415,8 +425,8 @@ jobs:
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: |
           # Checkpoint imports upsert matches but cannot prune stale fixtures.
-          # Validate every Ligue 1 2025/26 fixture key before removing ONLY
-          # orphaned rows; the original full-scope publish guard stays enabled.
+          # Resolve active or retired canonical sources and validate every key
+          # before removing ONLY orphaned rows. Full-scope validation remains enabled.
           python scripts/reconcile_app_ready_stats_scope.py \
             app-ready-export/raw/databases/statmaker.db \
             app-ready-export/source/domestic_enriched_index.json \
