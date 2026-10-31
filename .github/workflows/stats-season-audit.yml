@@ -1,0 +1,35 @@
+name: Published Stats Season Audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/stats-season-audit.yml']
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: data/statmaker/app_ready
+      - name: Inspect real installed statistics seasons without provider calls
+        run: |
+          python - <<'PY'
+          import json,sqlite3,tempfile,zipfile
+          from pathlib import Path
+          manifest=json.loads(Path('data/statmaker/app_ready/update_manifest.json').read_text())
+          artifact=next(a for a in manifest['artifacts'] if a['id']=='app_ready_stats_bundle')
+          with tempfile.TemporaryDirectory() as tmp:
+              with zipfile.ZipFile(artifact['path']) as archive:
+                  files=[n for n in archive.namelist() if n.endswith('statmaker.db')]
+                  assert len(files)==1,files
+                  archive.extract(files[0],tmp)
+              con=sqlite3.connect(str(Path(tmp)/files[0]))
+              print('PUBLISHED_STATS_SEASONS',con.execute('SELECT season,COUNT(DISTINCT division),COUNT(*) FROM matches GROUP BY season ORDER BY season').fetchall())
+              print('MAJOR_LEAGUE_SEASONS',con.execute("SELECT division,season,COUNT(*) FROM matches WHERE division IN ('E0','I1','G1','D1') GROUP BY division,season ORDER BY division,season").fetchall())
+          PY
