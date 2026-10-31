@@ -103,16 +103,12 @@ jobs:
             -Dorg.gradle.workers.max=2 \
             -Pkotlin.compiler.execution.strategy=in-process
 
-      - name: Verify live refresh, clock, scorer placement and league selection
+      - name: Verify all retained UAT statistics and UI regressions
         working-directory: statmaker-uat
         shell: bash
         run: |
           set -euo pipefail
           ./gradlew :app:testDebugUnitTest \
-            --tests "com.statmaker.app.LiveMatchPresentationTest" \
-            --tests "com.statmaker.app.LeaguePickerLocalizationRegressionTest" \
-            --tests "com.statmaker.app.PriorityReadModelPolicyTest" \
-            --tests "com.statmaker.app.ScheduleResultsScorersPolicyTest" \
             --no-daemon --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
             -Dorg.gradle.workers.max=2 \
