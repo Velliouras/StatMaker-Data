@@ -1,14 +1,6 @@
 name: Market Watch Dashboard
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17 */4 * * *'
-  workflow_run:
-    workflows: ['Shots SOT UAT Feed', 'Betting V2 Forward Market First Counts']
-    types: [completed]
-  push:
-    branches: [main]
-    paths: ['.github/triggers/market-watch', '.github/workflows/market-watch.yml', 'scripts/market_watch/build.py', 'scripts/market_watch/test_refresh.py']
 permissions:
   contents: write
 concurrency:
