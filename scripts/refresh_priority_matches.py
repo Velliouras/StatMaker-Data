@@ -146,6 +146,10 @@ def refresh(root, provider, now):
     if primary_due:
         try:
             for offset in (0, -1, -2):
+                # Today's final status: every five minutes. Previous-day repair:
+                # every 15 minutes, keeping daily calls bounded despite faster FT checks.
+                if offset and now.minute % 15 >= 5:
+                    continue
                 global_rows.extend(provider.get('fixtures', {'date': (now+timedelta(days=offset)).date().isoformat(),
                                                             'timezone': 'UTC'}, 'primary'))
         except BudgetStop as exc:
