@@ -86,7 +86,10 @@ jobs:
           set -euo pipefail
           git config user.name 'statmaker-data-bot'
           git config user.email 'statmaker-data-bot@users.noreply.github.com'
-          git add data/api_football/fixture_stats/ data/statmaker/monitoring/recent_finished_match_stats.json
+          git add -A data/api_football/fixture_stats/
+          if [ -f data/statmaker/monitoring/recent_finished_match_stats.json ]; then
+            git add data/statmaker/monitoring/recent_finished_match_stats.json
+          fi
           if [ "${{ steps.postmatch.outputs.updated }}" = "true" ]; then
             git add data/api_football/domestic_normalized_fixture_stats.json
             git add data/statmaker/domestic_enriched/
