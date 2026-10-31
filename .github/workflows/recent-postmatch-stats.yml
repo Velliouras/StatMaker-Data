@@ -21,8 +21,10 @@ permissions:
   actions: write
 
 concurrency:
-  # Share the canonical writer lock; never race historical stats/manifest writes.
-  group: statmaker-canonical-main-writer
+  # Fast lane independent of slow squad/odds producers. Canonical publish still
+  # uses compare-and-rebase and refuses file conflicts rather than overwriting them.
+  # Retain one postmatch writer at a time to avoid duplicate provider consumption.
+  group: statmaker-postmatch-stats-fast
   queue: max
   cancel-in-progress: false
 
