@@ -1,10 +1,11 @@
 {
   "audit": {
-    "favouriteGuard": 50,
+    "favouriteGuard": 51,
     "insufficientHistory": 2,
     "missingApiFixtureId": 11,
     "oddsBounds": 1951,
-    "probabilityOrEv": 1395,
+    "probabilityOrEv": 1392,
+    "staleQuote": 1,
     "supportedQuotes": 3396,
     "unknownTeam": 5
   },
@@ -9911,6 +9912,81 @@
       "team": null,
       "teamSide": "",
       "winProbability": 0.6179254610253583
+    },
+    {
+      "apiFixtureId": 1635656,
+      "awayShots": 11.497472143835317,
+      "awaySot": 3.617117027421079,
+      "awayTeam": "SSC Napoli",
+      "bookmaker": "Unibet",
+      "bookmakerBinding": "EXACT_PROVIDER_QUOTE",
+      "category": "UAT_SHOTS_EXPERIMENT",
+      "certified": false,
+      "competitionId": "champions_league",
+      "featureCutoff": "2026-10-31T09:43:46.350845Z",
+      "fixtureId": "74166002",
+      "fixtureKey": "api:1635656:1793822400",
+      "groupKey": "api:1635656:sot",
+      "historyAway": 60,
+      "historyHome": 9,
+      "homeShots": 19.02871929594913,
+      "homeSot": 6.656754821700778,
+      "homeTeam": "FC Porto",
+      "identityBinding": "cachedExactSchedule",
+      "indicativeEV": 0.352324512778603,
+      "issuedAt": "2026-10-31T09:43:46.350845Z",
+      "kickoff": "2026-11-04T20:00:00Z",
+      "line": 5.5,
+      "market": "TEAM_SHOTS_ON_TARGET",
+      "match": {
+        "awayTeam": "SSC Napoli",
+        "awayTeamLogo": "https://media.api-sports.io/football/teams/492.png",
+        "canonicalAwayTeam": "SSC Napoli",
+        "canonicalHomeTeam": "FC Porto",
+        "competition": "Champions League",
+        "country": "International",
+        "date": "2026-11-04",
+        "homeTeam": "FC Porto",
+        "homeTeamLogo": "https://media.api-sports.io/football/teams/212.png",
+        "id": "74166002",
+        "kickoff": "2026-11-04T20:00:00Z",
+        "leagueCode": "CL",
+        "providerAwayTeam": "SSC Napoli",
+        "providerHomeTeam": "FC Porto",
+        "season": "2026-2027",
+        "squadContext": {
+          "apiFootballFixtureId": 1635656
+        },
+        "teamMappingStatus": "matched",
+        "usableForStats": true
+      },
+      "metric": "sot",
+      "model": "SHOTS_SOT_CATBOOST_V1",
+      "modelBankSha256": "0007fa8b9c6ed09138c91c36d7e31891676496b180516bc385ec17650a97d985",
+      "odd": 2.2,
+      "outcome": "PENDING",
+      "policyId": "SHOTS_SOT_P60_UAT_V4",
+      "probabilityModel": "CATBOOST_NB_BINOMIAL",
+      "providerMarketUpdatedAt": null,
+      "publicationCommit": null,
+      "publishedAt": null,
+      "pushProbability": 0.0,
+      "quoteObservationCommit": null,
+      "quoteObservationEvidence": "FRESH_NORMALIZED_PROVIDER_SNAPSHOT",
+      "quoteObservationSemantics": "OBSERVED_AT_OR_PROVIDER_LAST_CHANGE_LOWER_BOUND",
+      "quoteObservationSha256": "72e9522abe6784240df6818af8e15777d3ce7ca849f0f00ceebe8276ecf70109",
+      "quoteUpdatedAt": "2026-10-31T07:05:22Z",
+      "scope": "TEAM",
+      "selection": "FC Porto Over 5.5",
+      "selectionId": "66d5ed1604c80d7a3d34059e122beada867286b322e8129d0c0b28dc04d72541",
+      "settledAt": null,
+      "settlementReturn": null,
+      "side": "OVER",
+      "sourceOddsSha256": "72e9522abe6784240df6818af8e15777d3ce7ca849f0f00ceebe8276ecf70109",
+      "sourceProviderSha256": "4d0f939db3430f83c9bdaabfeadbb6295f0aa2fa00743b98d009497639c7cc6d",
+      "team": "FC Porto",
+      "teamSide": "HOME",
+      "winProbability": 0.6146929603539104
     }
   ],
   "schemaVersion": 1,
@@ -9918,10 +9994,12 @@
     "coverage": {
       "byCompetition": {
         "champions_league": {
+          "eligibleOptions": 1,
           "fixtures": 54,
           "forecastable": 15,
           "mapped": 15,
-          "probabilityEvPassing": 8,
+          "newSelections": 1,
+          "probabilityEvPassing": 9,
           "quotes": 438,
           "unknownTeam": 3,
           "withShotsOdds": 18
@@ -9930,13 +10008,13 @@
           "fixtures": 54
         },
         "domestic": {
-          "fixtures": 636,
-          "forecastable": 134,
-          "mapped": 134,
+          "fixtures": 643,
+          "forecastable": 133,
+          "mapped": 133,
           "missingApiFixtureId": 10,
-          "probabilityEvPassing": 35,
+          "probabilityEvPassing": 36,
           "quotes": 2772,
-          "withShotsOdds": 144
+          "withShotsOdds": 143
         },
         "europa_league": {
           "fixtures": 54,
@@ -9952,13 +10030,13 @@
       },
       "byDay": {
         "2026-10-31": {
-          "fixtures": 201,
-          "forecastable": 55,
-          "mapped": 55,
+          "fixtures": 200,
+          "forecastable": 54,
+          "mapped": 54,
           "missingApiFixtureId": 1,
           "probabilityEvPassing": 22,
           "quotes": 1274,
-          "withShotsOdds": 56
+          "withShotsOdds": 55
         },
         "2026-11-01": {
           "fixtures": 153,
@@ -9974,6 +10052,7 @@
           "forecastable": 10,
           "mapped": 10,
           "missingApiFixtureId": 3,
+          "probabilityEvPassing": 1,
           "quotes": 170,
           "withShotsOdds": 13
         },
@@ -9988,11 +10067,13 @@
           "withShotsOdds": 24
         },
         "2026-11-04": {
+          "eligibleOptions": 1,
           "fixtures": 26,
           "forecastable": 12,
           "mapped": 12,
           "missingApiFixtureId": 1,
-          "probabilityEvPassing": 7,
+          "newSelections": 1,
+          "probabilityEvPassing": 8,
           "quotes": 316,
           "unknownTeam": 2,
           "withShotsOdds": 15
@@ -10077,12 +10158,15 @@
         },
         "2027-02-21": {
           "fixtures": 8
+        },
+        "2027-02-28": {
+          "fixtures": 8
         }
       }
     },
     "observedDomesticLeagues": 40,
-    "oddsGeneratedAt": "2026-10-31T07:02:50Z",
-    "oddsSha256": "5da69eee43edbff8c3cc2fb9e6230840a20ab9de762ae06f9b76afd6fd2c3747",
+    "oddsGeneratedAt": "2026-10-31T07:34:48Z",
+    "oddsSha256": "5bbfc288d9cc5b4b9216a325a2f7b0f962e9a230c9a57cfd7f604ce42665839f",
     "providerSha256": "4d0f939db3430f83c9bdaabfeadbb6295f0aa2fa00743b98d009497639c7cc6d",
     "uefa": [
       {
