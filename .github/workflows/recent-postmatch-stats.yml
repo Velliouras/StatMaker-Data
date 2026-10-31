@@ -1,6 +1,12 @@
 name: Near Real-Time Postmatch Statistics
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recent-postmatch-stats.yml'
+      - 'scripts/refresh_recent_finished_match_stats.py'
+      - 'tests/test_recent_finished_match_stats.py'
   workflow_run:
     workflows: ["Priority Results and Official Standings"]
     types: [completed]
