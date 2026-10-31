@@ -83,9 +83,27 @@ class GeneratedPublicationTest(unittest.TestCase):
     def test_same_path_conflict_never_overwrites_newer_canonical_data(self):
         self.commit(self.author, "owned.json", "newer-canonical", "Another canonical owner")
         self.command(self.author, "push", "-q", "origin", "main")
-        with self.assertRaisesRegex(RuntimeError, "conflicts with newer canonical"):
+        with self.assertRaisesRegex(RuntimeError, "conflicts with newer canonical") as error:
             publisher.publish(prefixes=("owned.json",), pause=lambda _: None)
+        self.assertIn('owned.json', str(error.exception))
         self.assertEqual("newer-canonical", self.remote_file("owned.json"))
+
+    def test_queued_writer_uses_current_main_instead_of_the_old_trigger_commit(self):
+        event_sha = self.command(self.worker, 'rev-parse', 'HEAD^').stdout.strip()
+        self.command(self.worker, 'reset', '--hard', event_sha)
+        self.advance()  # Previous serialized producer finishes after this event was queued.
+        stale = (self.worker / 'foreign.json').read_text()
+        self.commit(self.worker, 'foreign.json', stale + '\nconfirmed-lineup', 'Stale event checkout')
+        with self.assertRaisesRegex(RuntimeError, 'conflicts with newer canonical'):
+            publisher.publish(prefixes=('foreign.json',), pause=lambda _: None)
+        self.assertEqual('newer-result-0', self.remote_file('foreign.json'))
+        # actions/checkout with ref: main resolves after the writer acquires its
+        # lock, so generation starts from the previous producer's current data.
+        self.command(self.worker, 'checkout', '-B', 'main', 'origin/main')
+        current = (self.worker / 'foreign.json').read_text()
+        self.commit(self.worker, 'foreign.json', current + '\nconfirmed-lineup', 'Fresh serialized checkout')
+        publisher.publish(prefixes=('foreign.json',), pause=lambda _: None)
+        self.assertEqual('newer-result-0\nconfirmed-lineup', self.remote_file('foreign.json'))
 
     def test_ownership_check_rejects_unrelated_files_before_publication(self):
         with self.assertRaisesRegex(RuntimeError, "outside the publisher"):

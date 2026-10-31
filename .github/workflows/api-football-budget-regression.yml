@@ -24,6 +24,7 @@ on:
       - 'tests/test_live_settlement_watchdog.py'
       - 'tests/test_generated_publication.py'
       - 'tests/test_manifest_publication_contract.py'
+      - 'tests/test_canonical_writer_checkout.py'
       - '.github/scripts/publish_generated_paths.py'
       - '.github/workflows/**'
   workflow_dispatch:
@@ -61,3 +62,4 @@ jobs:
           python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -q
           python -m unittest discover -s tests -p 'test_generated_publication.py' -q
           python -m unittest discover -s tests -p 'test_manifest_publication_contract.py' -q
+          python -m unittest discover -s tests -p 'test_canonical_writer_checkout.py' -q

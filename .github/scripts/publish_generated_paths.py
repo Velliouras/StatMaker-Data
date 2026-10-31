@@ -80,8 +80,10 @@ def publish(remote="origin", branch="main", attempts=4, prefixes=(), pause=time.
             git("commit", "--amend", "--no-edit", "--allow-empty")
         rebased = git("rebase", "--no-keep-empty", "--onto", upstream, parent, check=False)
         if rebased.returncode:
+            conflicts = git("diff", "--name-only", "--diff-filter=U", check=False).stdout.strip()
             git("rebase", "--abort", check=False)
-            raise RuntimeError("Generated output conflicts with newer canonical output; publication stopped: " + rebased.stderr.strip())
+            raise RuntimeError("Generated output conflicts with newer canonical output; publication stopped: "
+                               + f"paths={conflicts!r}\n" + rebased.stdout.strip() + "\n" + rebased.stderr.strip())
         ahead = int(git("rev-list", "--count", f"{upstream}..HEAD").stdout.strip())
         if ahead not in (0, 1):
             raise RuntimeError(f"Refusing to publish {ahead} commits instead of one generated commit")
