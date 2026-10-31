@@ -9,7 +9,7 @@ on:
       statmaker_ref:
         description: "Private StatMaker ref"
         required: true
-        default: "main"
+        default: "b4630638077b1c3dd83d94c66c03e2a70f45efd1"
         type: string
       force:
         description: "Force an approved full rebuild"
@@ -32,6 +32,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Preserve the compatible analysis producer independently of the statistics-only app release.
+  APP_READY_COMPAT_PRODUCER_REF: "b4630638077b1c3dd83d94c66c03e2a70f45efd1"
   STATMAKER_API_BUDGET_ENFORCE: "true"
   STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
   STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
@@ -64,7 +66,7 @@ jobs:
         env:
           FORCE: ${{ github.event_name == 'workflow_dispatch' && inputs.force || false }}
           STATMAKER_TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
-          STATMAKER_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
+          STATMAKER_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || env.APP_READY_COMPAT_PRODUCER_REF }}
         run: |
           set -euo pipefail
           git fetch --no-tags --depth=1 origin +build/uefa-qualifier-feed-20260720:refs/remotes/origin/build/uefa-qualifier-feed-20260720
@@ -73,7 +75,7 @@ jobs:
           from pathlib import Path
 
           token=str(os.environ.get('STATMAKER_TOKEN') or '').strip()
-          ref=str(os.environ.get('STATMAKER_REF') or 'main').strip() or 'main'
+          ref=str(os.environ.get('STATMAKER_REF') or 'b4630638077b1c3dd83d94c66c03e2a70f45efd1').strip() or 'b4630638077b1c3dd83d94c66c03e2a70f45efd1'
           if not token:
               raise SystemExit('Missing STATMAKER_PRIVATE_READ_TOKEN')
           request=urllib.request.Request(
@@ -161,7 +163,7 @@ jobs:
           repository: Velliouras/StatMaker
           # Production App-Ready artifacts must be generated from the production StatMaker branch.
           # workflow_dispatch may explicitly override the ref for controlled testing only.
-          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || 'main' }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || env.APP_READY_COMPAT_PRODUCER_REF }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
