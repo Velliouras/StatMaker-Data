@@ -1,4 +1,4 @@
-name: Live Settlement Watchdog
+name: Stats Freshness and API Quota Watchdog
 
 on:
   workflow_dispatch:
@@ -6,30 +6,23 @@ on:
     branches:
       - main
     paths:
-      # Updating the keeper must bootstrap it immediately; no provider calls happen here.
+      # Updating the stats watchdog must bootstrap quota monitoring and refresh fanout.
       - '.github/workflows/live-settlement-watchdog.yml'
-      - 'tests/test_live_settlement_watchdog.py'
       - '.github/scripts/publish_generated_paths.py'
       - 'tests/test_generated_publication.py'
       - 'scripts/api_football_usage.py'
       - 'tests/test_api_football_usage.py'
-  workflow_run:
-    # The guard must still run when GitHub delays both settlement cron schedules.
-    # These independent producers do not depend on settlement or its downstream feed.
-    workflows: ['Canonical PROD Value-First Publisher', 'Odds Integrity Production Refresh']
-    types: [completed]
-    branches: [main]
   schedule:
-    # One-shot health check every 15 minutes. Do not occupy a hosted runner for hours.
-    # Offset from the publisher schedule so this only fills genuine missed cadence gaps.
+    # Four independent bounded stats/standings/scorers refreshes and an API usage snapshot.
+    # Existing shared budget guard strictly protects the 7,500/day provider quota.
     - cron: "8,23,38,53 * * * *"
 
 permissions:
-  actions: write
+  actions: read
   contents: write
 
 concurrency:
-  group: statmaker-live-settlement-watchdog
+  group: statmaker-stats-freshness-watchdog
   cancel-in-progress: false
 
 env:
@@ -40,7 +33,7 @@ env:
   PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
-  ensure-fresh-live-settlement:
+  quota-usage-snapshot:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -52,7 +45,6 @@ jobs:
             /scripts/api_budget_runtime/
             /config/api_football_refresh_policy.json
             .github/workflows/live-settlement-watchdog.yml
-            tests/test_live_settlement_watchdog.py
             tests/test_generated_publication.py
             .github/scripts/publish_generated_paths.py
             scripts/api_football_usage.py
@@ -62,146 +54,10 @@ jobs:
       - name: Verify shared API budget guard before provider work
         run: |
           python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared provider budget guard is missing'"
-      - name: Verify settlement cadence recovery
+      - name: Verify quota monitoring and publication
         run: |
-          python -m unittest discover -s tests -p 'test_live_settlement_watchdog.py' -v
           python -m unittest discover -s tests -p 'test_api_football_usage.py' -v
           python -m unittest discover -s tests -p 'test_generated_publication.py' -v
-      - name: Maintain live settlement cadence
-        env:
-          GH_TOKEN: ${{ github.token }}
-          API_URL: ${{ github.api_url }}
-          REPOSITORY: ${{ github.repository }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - <<'PY'
-          import datetime as dt
-          import json
-          import os
-          import urllib.error
-          import urllib.request
-
-          api = os.environ["API_URL"].rstrip("/")
-          repo = os.environ["REPOSITORY"]
-          token = os.environ["GH_TOKEN"]
-          headers = {
-              "Authorization": f"Bearer {token}",
-              "Accept": "application/vnd.github+json",
-              "X-GitHub-Api-Version": "2022-11-28",
-              "User-Agent": "statmaker-live-settlement-watchdog",
-          }
-
-          # The provider workflow itself remains the single owner of API-Football calls.
-          # This keeper only reads GitHub Actions state and dispatches that workflow when stale.
-          runs_url = (
-              f"{api}/repos/{repo}/actions/workflows/"
-              "live-settlement-publisher.yml/runs?branch=main&per_page=3"
-          )
-          dispatch_url = (
-              f"{api}/repos/{repo}/actions/workflows/"
-              "live-settlement-publisher.yml/dispatches"
-          )
-
-          def parse_time(value):
-              text = str(value or "")
-              try:
-                  return dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
-              except ValueError:
-                  return None
-
-          def latest_publisher():
-              req = urllib.request.Request(runs_url, headers=headers)
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  payload = json.load(response)
-              runs = payload.get("workflow_runs") or []
-              return runs[0] if runs else None
-
-          def dispatch(reason):
-              body = json.dumps({
-                  "ref": "main",
-                  # Preserve the publisher's existing guarded request budget.
-                  "inputs": {"max_requests": "80"},
-              }).encode("utf-8")
-              req = urllib.request.Request(
-                  dispatch_url,
-                  data=body,
-                  headers={**headers, "Content-Type": "application/json"},
-                  method="POST",
-              )
-              with urllib.request.urlopen(req, timeout=30) as response:
-                  if response.status not in (200, 201, 204):
-                      raise RuntimeError(f"Unexpected dispatch status: {response.status}")
-              print("LIVE_SETTLEMENT_WATCHDOG_DISPATCHED", reason, flush=True)
-
-          # One-shot check: never hold a GitHub-hosted runner while idle.
-          for check in range(1):
-              now = dt.datetime.now(dt.timezone.utc)
-              try:
-                  latest = latest_publisher()
-                  should_dispatch = False
-                  reason = ""
-
-                  if latest is None:
-                      should_dispatch = True
-                      reason = "no_previous_run"
-                  else:
-                      status = str(latest.get("status") or "")
-                      conclusion = str(latest.get("conclusion") or "")
-                      created = parse_time(latest.get("created_at"))
-                      updated = parse_time(latest.get("updated_at")) or created
-
-                      created_age = (
-                          max(0.0, (now - created).total_seconds() / 60.0)
-                          if created is not None else 9999.0
-                      )
-                      fresh_age = (
-                          max(0.0, (now - updated).total_seconds() / 60.0)
-                          if updated is not None else 9999.0
-                      )
-
-                      print(
-                          "LIVE_SETTLEMENT_WATCHDOG",
-                          f"check={check + 1}",
-                          f"run_id={latest.get('id')}",
-                          f"status={status}",
-                          f"conclusion={conclusion}",
-                          f"created_age_minutes={created_age:.1f}",
-                          f"fresh_age_minutes={fresh_age:.1f}",
-                          flush=True,
-                      )
-
-                      if status in {"queued", "in_progress", "waiting", "requested", "pending"}:
-                          # Runner delays are infrastructure pressure, not a reason to
-                          # create duplicate settlement runs behind the same writer lock.
-                          reason = "publisher_already_active"
-                      elif conclusion != "success":
-                          should_dispatch = True
-                          reason = f"latest_{conclusion or 'unknown'}"
-                      elif fresh_age >= 14.0:
-                          # Target a real 15-minute settlement cadence based on completion
-                          # freshness, not merely on when a run was created.
-                          should_dispatch = True
-                          reason = f"stale_success_{fresh_age:.1f}m"
-                      else:
-                          reason = "fresh"
-
-                  if should_dispatch:
-                      dispatch(reason)
-                  else:
-                      print("LIVE_SETTLEMENT_WATCHDOG_OK", reason, flush=True)
-
-              except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, RuntimeError) as exc:
-                  # A transient GitHub API failure must not fail the one-shot guard.
-                  print(
-                      "LIVE_SETTLEMENT_WATCHDOG_TRANSIENT_ERROR",
-                      type(exc).__name__,
-                      str(exc),
-                      flush=True,
-                  )
-
-          PY
-
       - name: Record daily API-Football quota snapshot
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
