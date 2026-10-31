@@ -42,8 +42,10 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Validate stats hot-publish code
-        run: python -m py_compile scripts/hotpatch_app_ready_stats.py
+      - name: Validate stats hot-publish code and historical safeguards
+        run: |
+          python -m py_compile scripts/hotpatch_app_ready_stats.py scripts/statistics_archive_catalog.py scripts/restore_archived_stats.py
+          python -m unittest tests.test_statistics_archive_catalog tests.test_validate_app_ready_archived_stats tests.test_reconcile_app_ready_stats_scope -q
 
       - name: Publish current stats bundle without prepared betting rebuild
         shell: bash
@@ -81,7 +83,8 @@ jobs:
           bundle=root/artifact['path']
           assert bundle.is_file() and bundle.stat().st_size > 0
 
-          index=json.loads((root/'data/statmaker/domestic_enriched/index.json').read_text())
+          from scripts.statistics_archive_catalog import statistics_catalog
+          index=statistics_catalog(root,json.loads((root/'data/statmaker/domestic_enriched/index.json').read_text()))
           expected={
               (
                   {'2025-2026':'2526','2024-2025':'2425','2023-2024':'2324'}.get(str(row.get('app_season') or ''), str(row.get('app_season') or '2526')),

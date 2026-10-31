@@ -434,6 +434,13 @@ jobs:
             app-ready-export/source/domestic_enriched_index.json \
             --repo-root . --league-code F1 --app-season 2025-2026
 
+      - name: Restore verified historical statistics before immutable bundle creation
+        if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
+        run: |
+          python -m scripts.restore_archived_stats \
+            --database app-ready-export/raw/databases/statmaker.db \
+            --normalized app-ready-export/raw/files/domestic_normalized_stats_v2.bin
+
       - name: Build immutable bundles
         if: steps.preflight.outputs.generate == 'true' && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'Recover v10 candidates host-side from checkpoint 149'))
         run: python scripts/build_app_ready_from_device.py app-ready-export/raw app-ready-export/out app-ready-export/source

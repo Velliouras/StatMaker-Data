@@ -7,6 +7,7 @@ import re
 import shutil
 import sqlite3
 import struct
+import sys
 import tempfile
 import unicodedata
 import zipfile
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 APP_READY = ROOT / "data/statmaker/app_ready"
 APP_READY_MANIFEST = APP_READY / "update_manifest.json"
 MAIN_MANIFEST = ROOT / "data/statmaker/update_manifest.json"
@@ -113,8 +115,10 @@ def bool_text(value: Any) -> str:
     return str(value if value is not None else "")
 
 
-def create_stats_db(target: Path) -> tuple[int, dict[tuple[str, str], int]]:
-    index = load_json(DOMESTIC_INDEX)
+def create_stats_db(target: Path, repository_root: Path | None = None) -> tuple[int, dict[tuple[str, str], int]]:
+    from scripts.statistics_archive_catalog import statistics_catalog
+    source_root = ROOT if repository_root is None else repository_root
+    index = statistics_catalog(source_root, load_json(source_root / "data/statmaker/domestic_enriched/index.json"))
     target.parent.mkdir(parents=True, exist_ok=True)
     target.unlink(missing_ok=True)
     con = sqlite3.connect(target)
@@ -173,7 +177,7 @@ def create_stats_db(target: Path) -> tuple[int, dict[tuple[str, str], int]]:
             output_path = str(league.get("output_path") or "").strip()
             if completed <= 0 or not output_path:
                 continue
-            artifact_path = ROOT / output_path
+            artifact_path = source_root / output_path
             if not artifact_path.is_file():
                 raise SystemExit(f"Missing Domestic artifact: {output_path}")
             artifact = load_json(artifact_path)
@@ -355,6 +359,27 @@ def write_utf(handle, value: str) -> None:
     handle.write(data)
 
 
+def archived_normalized_values(repository_root: Path | None = None) -> dict[str, tuple[float | None, ...]]:
+    from scripts.statistics_archive_catalog import statistics_catalog
+    source_root = ROOT if repository_root is None else repository_root
+    catalogue = statistics_catalog(source_root, load_json(source_root / "data/statmaker/domestic_enriched/index.json"))
+    values = {}
+    for league in catalogue['leagues']:
+        if not league.get('statistics_archived'):
+            continue
+        for fixture in load_json(source_root / league['output_path']).get('matches', []):
+            stats = fixture.get('normalized_stats') or {}
+            row = tuple(parse_number(stats.get(field)) for field in NORMALIZED_FIELDS)
+            if not any(value is not None for value in row):
+                continue
+            canonical = dict(fixture,
+                league_id=fixture.get('api_football_league_id'),
+                date=str(fixture.get('date_utc') or '')[:10])
+            for key in stored_keys(canonical):
+                values[key] = row
+    return values
+
+
 def create_normalized_snapshot(target: Path) -> int:
     payload = load_json(NORMALIZED_STATS)
     values: dict[str, tuple[float | None, ...]] = {}
@@ -369,6 +394,10 @@ def create_normalized_snapshot(target: Path) -> int:
             continue
         for key in stored_keys(fixture):
             values[key] = row
+
+    # Historical normalized metrics disappear from the rolling input too.
+    # Rehydrate only canonical archive keys; keep every current normalized row.
+    values.update(archived_normalized_values())
 
     if not values:
         raise SystemExit("Normalized Domestic stats snapshot would be empty")

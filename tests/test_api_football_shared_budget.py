@@ -114,4 +114,44 @@ class SharedBudgetTest(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stderr.decode())
 
 
+    def test_midnight_provider_reset_removes_only_yesterday_seed_after_two_observations(self):
+        previous=dict(schemaVersion=1,dayUtc='2026-10-24',committed=4621,leases={},observedUsed=2649)
+        state, amount=budget.allocate(previous,'2026-10-25',2652,7500,'primary','one','worker',
+            observed_at='2026-10-25T00:00:50+00:00')
+        self.assertEqual(state['daySeedUsed'],2652)
+        state, amount=budget.allocate(state,'2026-10-25',97,7500,'primary','two','worker',
+            closing=('one',8),observed_at='2026-10-25T00:02:50+00:00')
+        self.assertEqual(state['committed'],2660)
+        state, amount=budget.allocate(state,'2026-10-25',100,7500,'primary','three','worker',
+            closing=('two',3),observed_at='2026-10-25T00:03:20+00:00')
+        self.assertEqual(state['committed'],11)
+        self.assertEqual(state['providerResetCorrection']['seedRemoved'],2652)
+        self.assertEqual(state['estimatedAllocated'],108)
+        self.assertEqual(set(state['leases']),{'three'})
+        state, amount=budget.allocate(state,'2026-10-25',102,7500,'primary','four','worker',
+            closing=('three',2),observed_at='2026-10-25T00:04:20+00:00')
+        self.assertEqual(state['committed'],13)
+
+    def test_midday_counter_decrease_never_reclaims_usage_or_other_worker_reservations(self):
+        previous=dict(schemaVersion=1,dayUtc='2026-10-24',committed=4621,leases={},observedUsed=2649)
+        state,_=budget.allocate(previous,'2026-10-25',2652,7500,'primary','other','other',
+            observed_at='2026-10-25T00:00:50+00:00')
+        for index in range(2):
+            state,_=budget.allocate(state,'2026-10-25',97+index,7500,'primary',str(index),'worker',
+                observed_at='2026-10-25T12:00:00+00:00')
+        self.assertEqual(state['committed'],2652)
+        self.assertEqual(state['leases']['other']['reserved'],8)
+        self.assertNotIn('providerResetCorrection',state)
+
+    def test_real_new_day_usage_without_previous_day_counter_match_is_not_erased(self):
+        previous=dict(schemaVersion=1,dayUtc='2026-10-24',committed=4621,leases={},observedUsed=2649)
+        state,_=budget.allocate(previous,'2026-10-25',100,7500,'primary','one','worker',
+            observed_at='2026-10-25T00:00:50+00:00')
+        for index in range(2):
+            state,_=budget.allocate(state,'2026-10-25',0,7500,'primary',str(index),'worker',
+                observed_at='2026-10-25T00:03:20+00:00')
+        self.assertEqual(state['committed'],100)
+        self.assertNotIn('providerResetCorrection',state)
+
+
 if __name__=='__main__':unittest.main()

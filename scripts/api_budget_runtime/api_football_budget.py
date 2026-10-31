@@ -4,7 +4,7 @@ import base64
 from contextlib import contextmanager
 from contextvars import ContextVar
 import copy
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
@@ -50,12 +50,54 @@ def utcnow():
     return datetime.now(timezone.utc)
 
 
-def allocate(state, day, used, limit, tier, lease_id, owner, closing=None, block=BLOCK):
+def rollover_seed(day, used, previous, observed_at):
+    """Identify a possible yesterday counter during the provider's UTC reset lag.
+
+    Keep charging the seed until TWO lower, nondecreasing status observations
+    confirm the reset. Only the seed can be removed; today's consumption and
+    every outstanding reservation remain fully charged.
+    """
+    if observed_at is None or not previous:
+        return {}
+    timestamp = datetime.fromisoformat(observed_at.replace('Z', '+00:00'))
+    midnight = datetime.fromisoformat(day).replace(tzinfo=timezone.utc)
+    prior_used = previous.get('observedUsed')
+    if (previous.get('dayUtc') != (midnight-timedelta(days=1)).date().isoformat()
+            or not 0 <= (timestamp-midnight).total_seconds() <= 300
+            or type(prior_used) is not int or prior_used < 128
+            or not 0 <= used-prior_used <= 128):
+        return {}
+    return dict(daySeedUsed=used, daySeedAtUtc=observed_at,
+                previousDayObservedUsed=prior_used, previousDay=previous['dayUtc'])
+
+
+def confirm_provider_reset(state, day, used, observed_at):
+    seed = state.get('daySeedUsed', 0)
+    if not seed or observed_at is None or state.get('providerResetCorrection'):
+        return
+    timestamp = datetime.fromisoformat(observed_at.replace('Z', '+00:00'))
+    midnight = datetime.fromisoformat(day).replace(tzinfo=timezone.utc)
+    if not 0 <= (timestamp-midnight).total_seconds() <= 1800 or used > seed//2:
+        return
+    candidate = state.get('providerResetCandidateUsed')
+    if candidate is None or used < candidate:
+        state['providerResetCandidateUsed'] = used
+        return
+    if type(seed) is not int or state['committed'] < seed:
+        raise ValueError('Invalid provider reset seed')
+    state['committed'] -= seed
+    state['providerResetCorrection'] = dict(dayUtc=day, seedRemoved=seed,
+        firstResetUsed=candidate, confirmedUsed=used, confirmedAtUtc=observed_at)
+    state['daySeedUsed'] = 0
+
+
+def allocate(state, day, used, limit, tier, lease_id, owner, closing=None, block=BLOCK, observed_at=None):
     """Pure compare-and-swap transition. Outstanding blocks always count in full."""
     if not isinstance(used, int) or isinstance(used, bool) or not 0 <= used <= limit:
         raise ValueError('Unknown provider quota')
     if not state or state.get('dayUtc') != day:
-        state = dict(schemaVersion=1, dayUtc=day, committed=used, leases={})
+        seed = rollover_seed(day, used, state, observed_at)
+        state = dict(schemaVersion=1, dayUtc=day, committed=used, leases={}, **seed)
     else:
         state = copy.deepcopy(state)
         if (state.get('schemaVersion') != 1 or not isinstance(state.get('leases'), dict)
@@ -63,6 +105,7 @@ def allocate(state, day, used, limit, tier, lease_id, owner, closing=None, block
                 or any(not isinstance(v, dict) or not isinstance(v.get('reserved'), int)
                        or not 1 <= v['reserved'] <= BLOCK for v in state['leases'].values())):
             raise ValueError('Invalid shared budget state')
+    confirm_provider_reset(state, day, used, observed_at)
     if closing:
         previous = state['leases'].pop(closing[0], None)
         if previous:
@@ -130,7 +173,8 @@ class Ledger:
     def claim(self, day, used, limit, tier, lease_id, owner, closing=None):
         for attempt in range(10):
             state, sha = self.store.read()
-            state, amount = allocate(state, day, used, limit, tier, lease_id, owner, closing)
+            state, amount = allocate(state, day, used, limit, tier, lease_id, owner, closing,
+                                     observed_at=utcnow().isoformat())
             state['updatedAtUtc'] = utcnow().isoformat()
             if self.store.write(state, sha):
                 return amount
