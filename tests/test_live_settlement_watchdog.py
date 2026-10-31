@@ -1,78 +1,93 @@
-"""Exercise the keeper's actual dispatch code without GitHub or provider requests."""
-import contextlib
-import datetime as dt
-import io
-import json
-import os
+"""Regression contracts for quota-safe statistics automation after betting retirement."""
 from pathlib import Path
-import textwrap
+import json
 import unittest
-from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW = ROOT / '.github/workflows/live-settlement-watchdog.yml'
+WORKFLOWS = ROOT / ".github" / "workflows"
 
 
-class SettlementWatchdogTest(unittest.TestCase):
-    def run_keeper(self, runs):
-        source = WORKFLOW.read_text()
-        code = textwrap.dedent(source.split("          python - <<'PY'\n", 1)[1]
-                               .split('\n          PY', 1)[0])
-        dispatches = []
-
-        def open_url(request, timeout):
-            if request.get_method() == 'POST':
-                dispatches.append(json.loads(request.data))
-                response = io.StringIO('')
-                response.status = 204
-            else:
-                response = io.StringIO(json.dumps({'workflow_runs': runs}))
-                response.status = 200
-            return response
-
-        env = {'GH_TOKEN': 'test-token', 'API_URL': 'https://api.github.com',
-               'REPOSITORY': 'example/StatMaker-Data'}
-        with mock.patch.dict(os.environ, env), \
-                mock.patch('urllib.request.urlopen', side_effect=open_url), \
-                contextlib.redirect_stdout(io.StringIO()):
-            exec(compile(code, str(WORKFLOW), 'exec'), {})
-        return dispatches
-
-    def publisher(self, age=3, status='completed', conclusion='success'):
-        timestamp = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=age)).isoformat()
-        return {'id': 123, 'status': status, 'conclusion': conclusion,
-                'created_at': timestamp, 'updated_at': timestamp}
-
-    def test_missed_schedules_dispatch_one_bounded_recovery(self):
-        self.assertEqual([{'ref': 'main', 'inputs': {'max_requests': '80'}}],
-                         self.run_keeper([self.publisher(age=180)]))
-
-    def test_fresh_publisher_never_consumes_another_provider_budget(self):
-        self.assertEqual([], self.run_keeper([self.publisher(age=3)]))
-        long_run = self.publisher(age=180)
-        long_run['updated_at'] = self.publisher(age=3)['updated_at']
-        self.assertEqual([], self.run_keeper([long_run]))
-
-    def test_queued_or_running_publisher_is_not_duplicated_even_when_old(self):
-        for status in ('queued', 'in_progress', 'waiting', 'requested', 'pending'):
-            with self.subTest(status=status):
-                self.assertEqual([], self.run_keeper([
-                    self.publisher(age=180, status=status, conclusion=None)]))
-
-    def test_failed_publisher_and_first_boot_are_recovered(self):
-        self.assertEqual(1, len(self.run_keeper([self.publisher(conclusion='failure')])))
-        self.assertEqual(1, len(self.run_keeper([])))
-
-    def test_fallback_comes_from_independent_producers_without_a_settlement_loop(self):
-        source = WORKFLOW.read_text()
-        triggers = source.split('\non:\n', 1)[1].split('\npermissions:', 1)[0]
-        self.assertIn('workflow_run:', triggers)
-        self.assertIn('Canonical PROD Value-First Publisher', triggers)
-        self.assertIn('Odds Integrity Production Refresh', triggers)
-        self.assertNotIn('Live Settlement Publisher', triggers)
-        self.assertNotIn('Shots SOT UAT Feed', triggers)
-        self.assertIn('cron: "8,23,38,53 * * * *"', triggers)
+def source(filename):
+    return (WORKFLOWS / filename).read_text(encoding="utf-8")
 
 
-if __name__ == '__main__':
+def event_section(filename):
+    text = source(filename)
+    return text.split("\non:\n", 1)[1].split("\npermissions:\n", 1)[0]
+
+
+class StatsWatchdogTest(unittest.TestCase):
+    def test_stats_watchdog_keeps_regular_refreshes_and_no_settlement_dispatch(self):
+        workflow = source("live-settlement-watchdog.yml")
+        events = event_section("live-settlement-watchdog.yml")
+        self.assertIn("Stats Freshness and API Quota Watchdog", workflow)
+        self.assertIn('cron: "8,23,38,53 * * * *"', events)
+        self.assertNotIn("workflow_run:", events)
+        self.assertNotIn("live-settlement-publisher.yml/dispatches", workflow)
+        self.assertNotIn("Maintain live settlement cadence", workflow)
+        self.assertIn("quota-usage-snapshot:", workflow)
+
+    def test_stats_fanout_preserves_scorers_results_and_uefa(self):
+        workflow = source("live-settlement-watchdog.yml")
+        for name in (
+            "priority-results-standings.yml",
+            "domestic-results-context-refresh.yml",
+            "schedule-scorers-manual.yml",
+            "league-tables-program-publish.yml",
+        ):
+            self.assertIn("uses: ./.github/workflows/" + name, workflow)
+        self.assertIn("max_requests: '6'", workflow)
+        self.assertIn("lookback: '14'", workflow)
+        self.assertIn("phase: leaders", workflow)
+
+    def test_provider_budget_is_fail_closed_with_1500_reserve(self):
+        watchdog = source("live-settlement-watchdog.yml")
+        self.assertIn('STATMAKER_API_BUDGET_ENFORCE: "true"', watchdog)
+        self.assertIn('STATMAKER_API_BUDGET_PROFILE: background', watchdog)
+        self.assertIn("scripts/api_football_usage.py --reserve 1500", watchdog)
+        policy = json.loads((ROOT / "config/api_football_refresh_policy.json").read_text())
+        self.assertEqual(policy["totalStop"], 6000)
+        self.assertEqual(policy["backgroundStop"], 4500)
+        self.assertEqual(policy["reserve"], 1500)
+        guard = (ROOT / "scripts/api_budget_runtime/api_football_budget.py").read_text()
+        self.assertIn("TOTAL_STOP = 6000", guard)
+        self.assertIn("BACKGROUND_STOP = 4500", guard)
+        self.assertIn("RESERVE = 1500", guard)
+
+    def test_old_betting_jobs_are_manual_only(self):
+        for filename in (
+            "live-settlement-publisher.yml",
+            "odds-integrity-production.yml",
+            "model-performance-settlement-refresh.yml",
+            "market-watch.yml",
+            "canonical-prod-value-first-publisher.yml",
+            "betting-v2-forward-candidate.yml",
+            "betting-v2-forward-context.yml",
+            "betting-v2-forward-market-first.yml",
+            "betting-v2-forward-market-residual.yml",
+        ):
+            events = event_section(filename)
+            with self.subTest(workflow=filename):
+                self.assertIn("workflow_dispatch:", events)
+                self.assertNotIn("schedule:", events)
+                self.assertNotIn("workflow_run:", events)
+                self.assertNotIn("push:", events)
+
+    def test_match_stats_have_two_small_guarded_refresh_windows(self):
+        workflow = source("domestic-targeted-stats-backfill.yml")
+        events = event_section("domestic-targeted-stats-backfill.yml")
+        self.assertIn("cron: '35 22 * * *'", events)
+        self.assertIn("cron: '30 7 * * *'", events)
+        self.assertIn('codes="G1,E0,SP1"; max_requests="48"', workflow)
+        self.assertIn('codes="I1,D1,F1"; max_requests="48"', workflow)
+        self.assertIn('STATMAKER_API_BUDGET_PROFILE: background', workflow)
+        self.assertIn('STATMAKER_BETTING_V2_CAPTURE_LINEAGE: "0"', workflow)
+
+    def test_app_ready_stats_publisher_does_not_rebuild_betting(self):
+        workflow = source("app-ready-stats-hot-publish.yml")
+        self.assertIn("python scripts/hotpatch_app_ready_stats.py", workflow)
+        self.assertNotIn("betting_v2.publish_uat_feed", workflow)
+
+
+if __name__ == "__main__":
     unittest.main()
