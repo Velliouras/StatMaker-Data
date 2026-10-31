@@ -72,35 +72,34 @@ jobs:
             -Dorg.gradle.workers.max=2 \
             -Pkotlin.compiler.execution.strategy=in-process
 
-      - name: Isolate focused regression sources
-        working-directory: statmaker-uat
-        shell: bash
-        run: |
-          set -euo pipefail
-          find app/src/test -type f -name '*.kt' \
-            ! -name 'DomesticCurrentMembershipTest.kt' \
-            ! -name 'ModelPerformanceConfidenceTest.kt' \
-            ! -name 'StreakKickoffWindowTest.kt' \
-            ! -name 'StreakKickoffLocalizationTest.kt' \
-            ! -name 'StreakPatternScannerBttsTest.kt' \
-            ! -name 'StreakPatternScannerWdlTest.kt' \
-            ! -name 'StreakPatternDiscoveryTest.kt' \
-            -delete
-
-      - name: Run focused regression tests
+      - name: Verify stats, patterns, simulations and retired feature removal
         working-directory: statmaker-uat
         shell: bash
         run: |
           set -euo pipefail
           ./gradlew :app:testDebugUnitTest \
-            --tests "com.statmaker.app.DomesticCurrentMembershipTest" \
-            --tests "com.statmaker.app.ModelPerformanceConfidenceTest" \
-            --tests "com.statmaker.app.StreakKickoffWindowTest" \
-            --tests "com.statmaker.app.StreakKickoffLocalizationTest" \
-            --tests "com.statmaker.app.StreakPatternScannerBttsTest" \
-            --tests "com.statmaker.app.StreakPatternScannerWdlTest" \
-            --tests "com.statmaker.app.StreakPatternDiscoveryTest" \
             --no-daemon --stacktrace \
             -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
             -Dorg.gradle.workers.max=2 \
             -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Report regression results
+        if: always()
+        working-directory: statmaker-uat
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          totals = dict(tests=0, failures=0, errors=0, skipped=0)
+          for path in Path('app/build/test-results/testDebugUnitTest').glob('TEST-*.xml'):
+              root = ET.parse(path).getroot()
+              for key in totals:
+                  totals[key] += int(root.get(key, '0'))
+              for case in root.iter('testcase'):
+                  for tag in ('failure', 'error'):
+                      node = case.find(tag)
+                      if node is not None:
+                          print(case.get('classname'), case.get('name'))
+                          print((node.text or '')[:12000])
+          print('UAT_REGRESSIONS', totals)
+          PY
