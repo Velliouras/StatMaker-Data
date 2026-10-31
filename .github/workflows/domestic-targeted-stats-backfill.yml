@@ -13,6 +13,11 @@ on:
         required: true
         default: "500"
         type: string
+  schedule:
+    # Quota-safe post-match stats: at most 48 refresh calls per slot, plus guarded registry lookup.
+    # Primary leagues are split to prevent the first leagues exhausting the request cap.
+    - cron: '35 22 * * *'
+    - cron: '30 7 * * *'
   push:
     branches:
       - main
@@ -62,11 +67,18 @@ jobs:
         env:
           DISPATCH_CODES: ${{ inputs.league_codes }}
           DISPATCH_MAX: ${{ inputs.stats_max_requests }}
+          SCHEDULE_EXPR: ${{ github.event.schedule }}
         run: |
           set -euo pipefail
           codes="${DISPATCH_CODES:-}"
           max_requests="${DISPATCH_MAX:-}"
-          if [[ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]]; then
+          if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]]; then
+            case "${SCHEDULE_EXPR}" in
+              '35 22 * * *') codes="G1,E0,SP1"; max_requests="48" ;;
+              '30 7 * * *') codes="I1,D1,F1"; max_requests="48" ;;
+              *) echo "Unsupported scheduled stats window" >&2; exit 1 ;;
+            esac
+          elif [[ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]]; then
             IFS='|' read -r codes max_requests < .github/triggers/domestic-targeted-stats-backfill
           fi
           codes="$(echo "${codes}" | tr -d ' ')"
@@ -105,6 +117,7 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
           INPUT_STATS_MAX_REQUESTS: ${{ steps.request.outputs.max_requests }}
+          STATMAKER_BETTING_V2_CAPTURE_LINEAGE: "0"
         run: |
           mkdir -p reports
           python scripts/run_domestic_stats_refresh.py \
