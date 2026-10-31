@@ -1,11 +1,6 @@
 name: Betting V2 Contextual Model Scores
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '25 */3 * * *'
-  push:
-    branches: [main]
-    paths: ['.github/triggers/betting-v2-context-score-20261018']
 permissions:
   contents: write
 concurrency:
