@@ -21,6 +21,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: .github
+          persist-credentials: false
 
       - name: Resolve requested StatMaker ref
         id: source
