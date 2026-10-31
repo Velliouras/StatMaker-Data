@@ -12,13 +12,19 @@ on:
       - 'tests/test_generated_publication.py'
       - 'scripts/api_football_usage.py'
       - 'tests/test_api_football_usage.py'
+  workflow_run:
+    # The existing five-minute final-score producer is the sole fast trigger.
+    # On completion only the postmatch job runs; slower scorer jobs stay on cron.
+    workflows: ["Priority Results and Official Standings"]
+    types: [completed]
+    branches: [main]
   schedule:
-    # Four independent bounded stats/standings/scorers refreshes and an API usage snapshot.
+    # Fifteen-minute safety fallback and slower scorer/standings refreshes.
     # Existing shared budget guard strictly protects the 7,500/day provider quota.
     - cron: "8,23,38,53 * * * *"
 
 permissions:
-  actions: read
+  actions: write
   contents: write
 
 concurrency:
@@ -34,6 +40,7 @@ env:
 
 jobs:
   quota-usage-snapshot:
+    if: ${{ github.event_name != 'workflow_run' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -78,10 +85,12 @@ jobs:
 
 
   refresh-priority-results-and-standings:
+    if: ${{ github.event_name != 'workflow_run' }}
     uses: ./.github/workflows/priority-results-standings.yml
     secrets: inherit
 
   refresh-domestic-scorer-events:
+    if: ${{ github.event_name != 'workflow_run' }}
     needs: refresh-priority-results-and-standings
     uses: ./.github/workflows/domestic-results-context-refresh.yml
     with:
@@ -89,6 +98,7 @@ jobs:
     secrets: inherit
 
   refresh-scorer-leaderboards:
+    if: ${{ github.event_name != 'workflow_run' }}
     needs: refresh-domestic-scorer-events
     uses: ./.github/workflows/schedule-scorers-manual.yml
     with:
@@ -99,8 +109,17 @@ jobs:
     secrets: inherit
 
   refresh-uefa-scorers:
+    if: ${{ github.event_name != 'workflow_run' }}
     needs: refresh-priority-results-and-standings
     uses: ./.github/workflows/league-tables-program-publish.yml
     with:
       watchdog: true
+    secrets: inherit
+
+  refresh-postmatch-statistics:
+    # Independent, bounded worker. Called after each successful 5-minute results
+    # run; on the 15-minute watchdog cron it follows the results refresh.
+    if: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository) || github.event_name != 'workflow_run' }}
+    needs: []
+    uses: ./.github/workflows/recent-postmatch-stats.yml
     secrets: inherit
