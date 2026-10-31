@@ -1,15 +1,7 @@
 name: Canonical PROD Value-First Publisher
 
 on:
-  schedule:
-    - cron: '12,42 * * * *'
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/canonical-prod-value-first-publisher.yml'
-      - 'scripts/materialize_canonical_recommendation_ledger.py'
-      - 'tests/test_value_first_prod_promotion.py'
-
+  workflow_dispatch:
 permissions:
   contents: write
 
