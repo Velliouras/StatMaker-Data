@@ -9,15 +9,6 @@ on:
         type: boolean
         required: false
         default: false
-  push:
-    branches: [main]
-    paths: ['.github/triggers/shots-uat', '.github/triggers/betting-production-release']
-  schedule:
-    - cron: '45 */4 * * *'
-  workflow_run:
-    workflows: ['Odds Integrity Production Refresh', 'Domestic Statistics Universe', 'Domestic Historical Closure', 'Betting V2 Forward Market First Counts', 'UEFA Current Stats Refresh', 'Model Performance Settlement Refresh']
-    types: [completed]
-
 permissions:
   contents: write
 
@@ -131,5 +122,4 @@ jobs:
             git commit -m 'UAT: refresh Shots/SOT feed and Performance Daily settlements'
             python .github/scripts/publish_generated_paths.py --path-prefix data/statmaker/uat/ --path-prefix data/statmaker/betting_v1/ --path-prefix docs/market-watch/ --path-prefix docs/.nojekyll
           fi
-
 
