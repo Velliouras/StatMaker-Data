@@ -16,7 +16,7 @@ class SimulationRecoveryCliTest(unittest.TestCase):
             self.assertTrue(run.call_args.kwargs["check"])
             command = run.call_args.args[0]
             self.assertEqual("50000", command[command.index("--runs") + 1])
-            self.assertEqual("10000", command[command.index("--match-runs") + 1])
+            self.assertEqual("50000", command[command.index("--match-runs") + 1])
             return command
 
     def test_full_publisher_recovery_uses_published_tables_without_an_api_key(self):

@@ -649,7 +649,7 @@ def simulate_competition(
 
 
 def materialize_match_simulations(
-    con: sqlite3.Connection, config: dict[str, Any], runs: int = 10_000,
+    con: sqlite3.Connection, config: dict[str, Any], runs: int = MATCH_SIMULATION_RUNS,
     now_ms: int | None = None,
 ) -> dict[str, int]:
     """Expose the existing UEFA ScoreModel per fixture; no new ratings/API calls.

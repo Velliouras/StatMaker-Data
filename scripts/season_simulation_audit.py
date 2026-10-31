@@ -11,11 +11,19 @@ SEASON_TABLES = {
 }
 
 
-def protected_digest(path: Path) -> str:
+MATCH_TABLES = {
+    "prepared_simulations", "prepared_match_simulations",
+    "prepared_match_explorer_simulations", "prepared_match_metric_simulations",
+    "prepared_score_edge_values",
+}
+
+
+def protected_digest(path: Path, allowed_tables: set[str] | None = None) -> str:
+    allowed_tables = SEASON_TABLES if allowed_tables is None else allowed_tables
     h = hashlib.sha256()
     with sqlite3.connect(f"file:{path.resolve()}?mode=ro", uri=True) as con:
         for name, schema in con.execute("SELECT name,sql FROM sqlite_master WHERE type='table' ORDER BY name"):
-            if name in SEASON_TABLES or name.startswith("sqlite_"):
+            if name in allowed_tables or name.startswith("sqlite_"):
                 continue
             quoted = '"' + name.replace('"', '""') + '"'
             pk = [r[1] for r in sorted(con.execute("PRAGMA table_info(" + quoted + ")"),
@@ -52,3 +60,48 @@ def validate_precision(path: Path, runs: int) -> dict:
         if len(stages) != 3 or any(r[1] != 36 or any(abs(a-b)>1e-7 for a,b in zip(r[2:], (8,16,16,8,4,2,1))) for r in stages):
             raise ValueError("Invalid UEFA stage probability mass")
         return {"domesticLeagues": domestic, "uefaCompetitions": len(stages), "seasonRuns": runs}
+
+
+def validate_match_precision(path: Path, runs: int) -> dict:
+    """Check the actual summary, metric and market distributions before publication."""
+    def probability_mass(values, label):
+        values = list(values)
+        if not values or any(not 0 <= p <= 1 for p in values) or abs(sum(values)-1) > 1e-7:
+            raise ValueError(f"Invalid match probability mass: {label}")
+
+    with sqlite3.connect(f"file:{path.resolve()}?mode=ro", uri=True) as con:
+        counts = {}
+        for table in sorted(MATCH_TABLES):
+            low, high, count = con.execute(
+                f"SELECT MIN(simulation_runs),MAX(simulation_runs),COUNT(*) FROM {table}"
+            ).fetchone()
+            if not count or low != runs or high != runs:
+                raise ValueError(f"Incomplete match precision: {table} min={low} max={high} count={count}")
+            counts[table] = count
+        for home, draw, away, raw in con.execute(
+            "SELECT home_win_probability,draw_probability,away_win_probability,score_distribution_json "
+            "FROM prepared_match_simulations"
+        ):
+            probability_mass((home, draw, away), "1X2")
+            scores = json.loads(raw)
+            probability_mass((s["probability"] for s in scores), "exact score")
+            expected = [sum(s["probability"] for s in scores if (s["homeGoals"] > s["awayGoals"])),
+                        sum(s["probability"] for s in scores if (s["homeGoals"] == s["awayGoals"])),
+                        sum(s["probability"] for s in scores if (s["homeGoals"] < s["awayGoals"]))]
+            if any(abs(a-b) > 1e-7 for a,b in zip((home,draw,away), expected)):
+                raise ValueError("Match 1X2 and exact-score distribution disagree")
+        for row in con.execute(
+            "SELECT home_histogram_json,away_histogram_json,total_histogram_json "
+            "FROM prepared_match_metric_simulations"
+        ):
+            for raw in row:
+                probability_mass((p[1] for p in json.loads(raw)), "metric histogram")
+        for table in ("prepared_simulations", "prepared_match_explorer_simulations"):
+            for win, push in con.execute(f"SELECT simulation_probability,simulation_push_probability FROM {table}"):
+                if not 0 <= win <= 1 or not 0 <= push <= 1 or win+push > 1+1e-7:
+                    raise ValueError(f"Invalid market probability: {table}")
+        uefa = con.execute("SELECT COUNT(*) FROM prepared_match_simulations WHERE simulation_model='uefa-match-monte-carlo-v1'").fetchone()[0]
+        if not uefa:
+            raise ValueError("UEFA match simulations are missing")
+        return {"matchRuns": runs, "matches": counts["prepared_match_simulations"],
+                "uefaMatches": uefa, "metricHistograms": counts["prepared_match_metric_simulations"]}

@@ -59,15 +59,15 @@ class UefaMatchSimulationTest(unittest.TestCase):
         with patch.object(uefa, "api_get", side_effect=AssertionError("No API calls")):
             return uefa.materialize_match_simulations(self.con, self.config, now_ms=2000, **kwargs)
 
-    def test_all_three_competitions_have_coherent_10000_draw_distributions(self):
-        counts = self.materialize(runs=1000)
+    def test_all_three_competitions_have_coherent_50000_draw_distributions(self):
+        counts = self.materialize()
         self.assertEqual(set(counts.values()), {1})
         rows = self.con.execute("SELECT simulation_runs,simulation_model,elo_model_version,"
                                 "home_win_probability,draw_probability,away_win_probability,"
                                 "score_distribution_json FROM prepared_match_simulations").fetchall()
         self.assertEqual(len(rows), 3)
         for runs, model, strength, home, draw, away, raw in rows:
-            self.assertEqual(runs, 10000)
+            self.assertEqual(runs, 50000)
             self.assertEqual(model, uefa.MATCH_MODEL_VERSION)
             self.assertEqual(strength, uefa.STRENGTH_MODEL)
             scores = json.loads(raw)
@@ -84,6 +84,11 @@ class UefaMatchSimulationTest(unittest.TestCase):
             "SELECT * FROM prepared_match_simulations ORDER BY competition_id").fetchall())
         self.assertEqual(self.con.execute("SELECT * FROM prepared_selections").fetchall(), [("unchanged",)])
         self.assertEqual(self.con.execute("SELECT * FROM prepared_simulations").fetchall(), [(0.63,)])
+
+    def test_explicit_smaller_runs_retain_the_10000_draw_floor(self):
+        self.materialize(runs=1000)
+        self.assertEqual([(10000,)], self.con.execute(
+            "SELECT DISTINCT simulation_runs FROM prepared_match_simulations").fetchall())
 
     def test_exact_aliases_only_and_same_season_and_pre_kickoff_snapshot(self):
         cid = "champions_league"

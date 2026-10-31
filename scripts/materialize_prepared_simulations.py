@@ -17,7 +17,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_PATH = ROOT / "data/statmaker/domestic_enriched/index.json"
-DEFAULT_RUNS = 10_000
+from simulation_precision import MATCH_SIMULATION_RUNS
+
+DEFAULT_RUNS = MATCH_SIMULATION_RUNS
 # Keep MODEL_VERSION stable: prepared_simulations is consumed by the existing Hybrid/Betting
 # evidence path and must remain unchanged while Match Explorer is validated independently.
 MODEL_VERSION = "monte-carlo-v1"

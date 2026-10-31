@@ -31,7 +31,7 @@ concurrency:
 
 jobs:
   refresh:
-    if: ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && !(github.event_name == 'push' && contains(github.event.head_commit.message, '[season-precision-only]')) }}
+    if: ${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && !(github.event_name == 'push' && (contains(github.event.head_commit.message, '[season-precision-only]') || contains(github.event.head_commit.message, '[match-precision-only]'))) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:

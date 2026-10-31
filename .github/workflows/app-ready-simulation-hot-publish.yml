@@ -50,6 +50,7 @@ jobs:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           CACHED_RECOVERY: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[cached-recovery]')) }}
           SEASON_PRECISION_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[season-precision-only]') }}
+          MATCH_PRECISION_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[match-precision-only]') }}
           UEFA_MATCH_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[uefa-match-only]') }}
         shell: bash
         run: |
@@ -72,6 +73,9 @@ jobs:
           if [[ "$SEASON_PRECISION_ONLY" == "true" ]]; then
             unset API_FOOTBALL_KEY
             python -u scripts/hotpatch_app_ready_simulation.py --season-only
+          elif [[ "$MATCH_PRECISION_ONLY" == "true" ]]; then
+            unset API_FOOTBALL_KEY
+            python -u scripts/hotpatch_app_ready_simulation.py --match-precision-only
           elif [[ "$UEFA_MATCH_ONLY" == "true" ]]; then
             python scripts/hotpatch_app_ready_simulation.py --uefa-match-only
           else

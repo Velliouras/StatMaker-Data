@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
-from season_simulation_audit import protected_digest, validate_precision
+from season_simulation_audit import MATCH_TABLES, protected_digest, validate_precision, validate_match_precision
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_READY = ROOT / "data/statmaker/app_ready"
@@ -70,8 +70,9 @@ def main() -> int:
     parser.add_argument("--uefa-only", action="store_true",
                         help="Refresh UEFA league/match simulation from published tables; no API calls")
     parser.add_argument("--season-only", action="store_true", help="Increase season precision without modifying matches or recommendation data")
+    parser.add_argument("--match-precision-only", action="store_true", help="Increase all match simulation distributions without rebuilding seasons, fixtures or ratings")
     args = parser.parse_args()
-    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only, args.season_only)) > 1:
+    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only, args.season_only, args.match_precision_only)) > 1:
         parser.error("Choose only one targeted simulation update")
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
@@ -98,7 +99,9 @@ def main() -> int:
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
         precision_before = protected_digest(db_path) if args.season_only else None
+        match_before = protected_digest(db_path, MATCH_TABLES) if args.match_precision_only else None
         precision_proof = None
+        match_proof = None
         if args.season_only:
             started = time.perf_counter()
             subprocess.run(["python", str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
@@ -111,6 +114,12 @@ def main() -> int:
                 raise ValueError("Season precision refresh modified protected match/history/recommendation tables")
             precision_proof = validate_precision(db_path, SEASON_SIMULATION_RUNS)
             print("SEASON_PRECISION_VERIFIED", precision_proof, flush=True)
+        elif args.match_precision_only:
+            started = time.perf_counter()
+            subprocess.run(["python", str(ROOT / "scripts/materialize_prepared_simulations.py"),
+                            str(db_path), "--runs", str(MATCH_SIMULATION_RUNS)], cwd=ROOT, check=True)
+            run_uefa_materializer(db_path, matches_only=True)
+            print(f"MATCH_PRECISION_TIMING runs={MATCH_SIMULATION_RUNS} seconds={time.perf_counter()-started:.3f}", flush=True)
         elif args.uefa_only:
             run_uefa_materializer(db_path, cached=True)
         elif args.uefa_match_only:
@@ -145,7 +154,7 @@ def main() -> int:
                     str(ROOT / "scripts/materialize_prepared_simulations.py"),
                     str(db_path),
                     "--runs",
-                    "10000",
+                    str(MATCH_SIMULATION_RUNS),
                 ],
                 cwd=ROOT,
                 check=True,
@@ -171,10 +180,17 @@ def main() -> int:
                  str(db_path)], cwd=ROOT, check=True,
             )
 
+        if args.match_precision_only:
+            if match_before != protected_digest(db_path, MATCH_TABLES):
+                raise ValueError("Match precision refresh modified protected seasons, statistics, ratings or recommendation tables")
+            match_proof = validate_match_precision(db_path, MATCH_SIMULATION_RUNS)
+            print("MATCH_PRECISION_VERIFIED", match_proof, flush=True)
+
         con = sqlite3.connect(db_path)
         try:
             rows = int(con.execute("SELECT COUNT(*) FROM prepared_simulations").fetchone()[0])
             match_rows = int(con.execute("SELECT COUNT(*) FROM prepared_match_simulations").fetchone()[0])
+            match_runs = int(con.execute("SELECT COALESCE(MIN(simulation_runs),0) FROM prepared_match_simulations").fetchone()[0])
             match_elo_rows = int(con.execute(
                 "SELECT COUNT(*) FROM prepared_match_simulations "
                 "WHERE simulation_model='match-monte-carlo-v2-elo' "
@@ -282,6 +298,7 @@ def main() -> int:
     metadata["preparedSimulationRowCount"] = rows
     metadata["preparedSimulationRuns"] = runs
     metadata["preparedMatchSimulationCount"] = match_rows
+    metadata["preparedMatchSimulationRuns"] = match_runs
     metadata["preparedMatchSimulationContract"] = "match-monte-carlo-v2-elo"
     metadata["preparedMatchSimulationExplorerRowCount"] = match_explorer_rows
     metadata["preparedMatchScoreDistributionCount"] = match_score_distribution_rows
@@ -305,8 +322,11 @@ def main() -> int:
     metadata["preparedScoreEdgeRowCount"] = score_edge_rows
     metadata["preparedScoreEdgeMatchCount"] = score_edge_matches
     metadata["simulationHotPublish"] = True
+    if match_proof is not None:
+        metadata["matchSimulationPrecision"] = match_proof
     if precision_proof is not None:
         metadata["seasonSimulationPrecision"] = precision_proof
+    if precision_proof is not None or match_proof is not None:
         from materialize_prepared_uefa_simulations import cached_source_fingerprint
         config = json.loads((ROOT / "config/uefa_simulation_2026_27.json").read_text())
         metadata["preparedUefaSimulationSourceFingerprint"] = cached_source_fingerprint(config)
