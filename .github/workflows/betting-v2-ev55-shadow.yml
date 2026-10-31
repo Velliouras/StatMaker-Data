@@ -1,13 +1,6 @@
 name: Betting V2 EV55 Research Shadow
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ['Betting V2 Forward Market Residual']
-    types: [completed]
-    branches: [main]
-  push:
-    branches: [main]
-    paths: ['.github/triggers/betting-v2-ev55-shadow-20261019']
 permissions:
   contents: write
 concurrency:
