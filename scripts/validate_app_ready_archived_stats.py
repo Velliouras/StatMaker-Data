@@ -23,6 +23,8 @@ def normalize_code(value: object) -> str:
 
 
 def historical_app_season(db_season: str) -> tuple[int, str]:
+    if re.fullmatch(r"20\d{2}", str(db_season)) and 2020 <= int(db_season) <= 2090:
+        return int(db_season), str(db_season)
     match = re.fullmatch(r"(\d{2})(\d{2})", str(db_season))
     if not match:
         raise ValueError(f"Unexpected non-archival stats scope season {db_season!r}")
@@ -44,7 +46,7 @@ def archived_candidates(repo_root: Path, years: set[int]) -> dict:
             payload = json.loads(path.read_text(encoding="utf-8"))
             competition = payload.get("competition") or {}
             scope = (str(competition.get("app_season") or ""), normalize_code(competition.get("league_code")))
-            if scope[0] == f"{year}-{year + 1}":
+            if scope[0] in (str(year), f"{year}-{year + 1}"):
                 candidates.setdefault(scope, []).append((path, payload))
     return candidates
 
@@ -55,11 +57,16 @@ def canonical_archived_scope(repo_root: Path, season: str, code: str, *, app_sea
         year, app_season = historical_app_season(season)
     else:
         label = re.fullmatch(r"(20\d{2})\s*-\s*(20\d{2})", str(app_season))
-        if not label or int(label[2]) != int(label[1]) + 1:
-            raise ValueError(f"Invalid canonical archive season {app_season!r}")
-        year, app_season = int(label[1]), f"{label[1]}-{label[2]}"
-        if season not in (app_season, label[1][-2:] + label[2][-2:]):
-            raise ValueError(f"Archive/SQLite season mismatch {app_season!r}/{season!r}")
+        if re.fullmatch(r"20\d{2}", str(app_season)):
+            year, app_season = int(app_season), str(app_season)
+            if season != app_season:
+                raise ValueError(f"Archive/SQLite season mismatch {app_season!r}/{season!r}")
+        else:
+            if not label or int(label[2]) != int(label[1]) + 1:
+                raise ValueError(f"Invalid canonical archive season {app_season!r}")
+            year, app_season = int(label[1]), f"{label[1]}-{label[2]}"
+            if season not in (app_season, label[1][-2:] + label[2][-2:]):
+                raise ValueError(f"Archive/SQLite season mismatch {app_season!r}/{season!r}")
     code = normalize_code(code)
     catalog = _candidates if _candidates is not None else archived_candidates(repo_root, {year})
     candidates = catalog.get((app_season, code), [])

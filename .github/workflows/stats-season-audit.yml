@@ -16,7 +16,10 @@ jobs:
           ref: main
           fetch-depth: 1
           filter: blob:none
-          sparse-checkout: data/statmaker/app_ready
+          sparse-checkout: |
+            data/statmaker/app_ready
+            data/statmaker/domestic_enriched
+            scripts
       - name: Inspect real installed statistics seasons without provider calls
         run: |
           python - <<'PY'
@@ -32,4 +35,20 @@ jobs:
               con=sqlite3.connect(str(Path(tmp)/files[0]))
               print('PUBLISHED_STATS_SEASONS',con.execute('SELECT season,COUNT(DISTINCT division),COUNT(*) FROM matches GROUP BY season ORDER BY season').fetchall())
               print('MAJOR_LEAGUE_SEASONS',con.execute("SELECT division,season,COUNT(*) FROM matches WHERE division IN ('E0','I1','G1','D1') GROUP BY division,season ORDER BY division,season").fetchall())
+          PY
+
+      - name: Verify complete repository statistics archives without provider calls
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from scripts.statistics_archive_catalog import statistics_catalog
+          index=json.loads(Path('data/statmaker/domestic_enriched/index.json').read_text())
+          catalogue=statistics_catalog(Path('.'),index)
+          history=[r for r in catalogue['leagues'] if r.get('statistics_archived')]
+          print('VERIFIED_HISTORICAL_STATS',len(history),'scopes',sum(r['completed_fixtures'] for r in history),'matches')
+          print('HISTORICAL_SCOPES',[(r['league_code'],r['app_season'],r['completed_fixtures']) for r in history])
+          assert history
+          assert any(r['league_code']=='E0' and r['app_season']=='2025-2026' for r in history)
+          assert any(r['league_code']=='G1' and r['app_season']=='2025-2026' for r in history)
           PY
