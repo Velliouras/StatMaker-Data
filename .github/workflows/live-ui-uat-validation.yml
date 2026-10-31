@@ -50,6 +50,23 @@ jobs:
           python -m pip install --quiet PyYAML
           python -m unittest tests.test_priority_matches_refresh -q
 
+      - name: Verify canonical manual Live HTTP transport
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json, os, uuid
+          from urllib.request import Request, urlopen
+          url = 'https://api.github.com/repos/Velliouras/StatMaker-Data/contents/data/statmaker/priority_refresh/I1.json?ref=main&statmaker_generation=priority-manual-' + uuid.uuid4().hex
+          request = Request(url, headers={'Accept':'application/vnd.github.raw+json', 'X-GitHub-Api-Version':'2022-11-28', 'Authorization':'Bearer ' + os.environ['GITHUB_TOKEN'], 'User-Agent':'StatMaker-Schedule'})
+          with urlopen(request, timeout=30) as response:
+              document = json.load(response)
+          assert document['contract'] == 'statmaker-league-tables-v1'
+          assert document['leagueCode'] == 'I1' and document['fixtures']
+          sample = next((f for f in document['fixtures'] if int(f['fixture_id']) == 1550177), {})
+          print('CANONICAL_LIVE_HTTP_OK', document.get('resultsCheckedAtUTC'), 'minute=' + str(sample.get('elapsed')), 'status=' + str(sample.get('status')))
+          PY
+
       - name: Require private read token
         env:
           TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
