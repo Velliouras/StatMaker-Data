@@ -18,6 +18,17 @@ class CompatibleProducerPinTest(unittest.TestCase):
         self.assertEqual(preflight['env']['STATMAKER_REF'], checkout['with']['ref'])
         self.assertNotIn("inputs.statmaker_ref || 'main'", source)
 
+    def test_pipeline_validator_uses_the_same_compatible_producer_as_the_publisher(self):
+        root = Path(__file__).resolve().parents[1] / '.github/workflows'
+        publisher = yaml.safe_load((root / 'app-ready-artifact-publisher.yml').read_text())
+        validation = yaml.safe_load((root / 'app-ready-pipeline-validation.yml').read_text())
+        job = validation['jobs']['validate']
+        self.assertEqual(publisher['env']['APP_READY_COMPAT_PRODUCER_REF'],
+                         job['env']['APP_READY_COMPAT_PRODUCER_REF'])
+        checkout = next(step for step in job['steps']
+                        if step.get('with', {}).get('repository') == 'Velliouras/StatMaker')
+        self.assertEqual('${{ env.APP_READY_COMPAT_PRODUCER_REF }}', checkout['with']['ref'])
+
 
 if __name__ == '__main__':
     unittest.main()

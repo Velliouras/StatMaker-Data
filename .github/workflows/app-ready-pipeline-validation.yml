@@ -67,6 +67,7 @@ jobs:
     timeout-minutes: 10
     env:
       APP_READY_UAT_SOURCE: "true"
+      APP_READY_COMPAT_PRODUCER_REF: "b4630638077b1c3dd83d94c66c03e2a70f45efd1"
       APP_READY_STATMAKER_COMMIT: "c9d9d90803b3409a655e7aee59b35f31ba49b70e"
       APP_READY_PATTERN_RULES_FINGERPRINT: "pattern-policy-v2-final-read-model-v6-probability-first-prod"
       APP_READY_PREPARED_SCHEMA_VERSION: "12"
@@ -126,16 +127,20 @@ jobs:
       - name: Enforce explicit heavy rebuild and serialized hot-publisher routing
         run: python -m unittest discover -s tests -p 'test_app_ready_workflow_routing.py' -v
 
+      - name: Verify historical restoration and compatible producer pin
+        run: |
+          python -m unittest tests.test_statistics_archive_catalog tests.test_app_ready_compat_producer_pin -q
+
       - name: Require private read token
         env:
           TOKEN: "${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}"
         run: test -n "$TOKEN" || (echo 'Missing STATMAKER_PRIVATE_READ_TOKEN' >&2; exit 1)
 
-      - name: Checkout current PROD StatMaker source
+      - name: Checkout compatible App-Ready producer source
         uses: actions/checkout@v4
         with:
           repository: Velliouras/StatMaker
-          ref: main
+          ref: ${{ env.APP_READY_COMPAT_PRODUCER_REF }}
           token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
           path: statmaker-private
           fetch-depth: 0
