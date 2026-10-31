@@ -1,19 +1,9 @@
 name: Near Real-Time Postmatch Statistics
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/recent-postmatch-stats.yml'
-      - 'scripts/refresh_recent_finished_match_stats.py'
-      - 'tests/test_recent_finished_match_stats.py'
-  workflow_run:
-    workflows: ["Priority Results and Official Standings"]
-    types: [completed]
-    branches: [main]
-  schedule:
-    # Recovery if a results producer completion event is missed. UTC.
-    - cron: '7,22,37,52 * * * *'
+  # Reusable worker, invoked ONLY by the existing Stats Watchdog.
+  # No independent cron, push or results-completion triggers.
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -38,7 +28,6 @@ env:
 
 jobs:
   postmatch:
-    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
