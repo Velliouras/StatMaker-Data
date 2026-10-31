@@ -24,7 +24,9 @@ from materialize_prepared_simulations import (
     simulate_counts,
 )
 
-DEFAULT_RUNS = 10_000
+from simulation_precision import SEASON_SIMULATION_RUNS
+
+DEFAULT_RUNS = SEASON_SIMULATION_RUNS
 MODEL_VERSION = "league-season-monte-carlo-v3-all-domestic-elo"
 ELO_MODEL_VERSION = "team-elo-v1"
 TIE_BREAK_MODEL = "POINTS_GD_GF"
@@ -1197,7 +1199,6 @@ def main() -> int:
                                  f"fixtures={len(fixtures)} teams={len(teams)} "
                                  f"missing_elo={missing} phases={phases}")
             meta, rows = result
-
             con.execute(
                 """
                 INSERT INTO prepared_league_simulation_meta(

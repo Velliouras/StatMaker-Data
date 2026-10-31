@@ -24,6 +24,11 @@ try:
 except ImportError:
     import uefa_club_strengths as club_strengths
 
+try:
+    from .simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
+except ImportError:
+    from simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
+
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_simulation_2026_27.json"
 
@@ -817,7 +822,7 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
 def cached_source_fingerprint(config: dict[str, Any], root: Path = ROOT) -> str:
     snapshot, mapped, _ = club_strengths.load_catalog(root)
     profiles = club_strengths.xg_profiles(config, root, goal_means)
-    inputs = {"algorithm": STRENGTH_ALGORITHM, "sourceAsOf": snapshot["sourceAsOf"],
+    inputs = {"seasonRuns": SEASON_SIMULATION_RUNS, "matchRuns": MATCH_SIMULATION_RUNS, "algorithm": STRENGTH_ALGORITHM, "sourceAsOf": snapshot["sourceAsOf"],
               "ratings": mapped, "xgProfiles": profiles}
     for comp in config["competitions"]:
         fixtures, _, ranks, league_id = cached_competition(comp, int(config["season"]), root)
@@ -858,13 +863,18 @@ def verify_cached_simulations(con: sqlite3.Connection, config: dict[str, Any], r
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
-    parser.add_argument("--runs", type=int, default=10_000)
+    parser.add_argument("--runs", type=int, default=SEASON_SIMULATION_RUNS)
+    parser.add_argument("--match-runs", type=int, default=MATCH_SIMULATION_RUNS)
+    parser.add_argument("--league-only", action="store_true", help="Refresh season tables without changing match simulations")
     parser.add_argument("--matches-only", action="store_true",
                         help="Reuse published UEFA ratings and fixtures without API calls")
     parser.add_argument("--cached-league-tables", action="store_true",
                         help="Refresh UEFA from published results/schedule; zero provider calls")
     args = parser.parse_args()
     runs = max(1_000, min(50_000, int(args.runs)))
+    match_runs = max(10_000, min(50_000, int(args.match_runs)))
+    if args.league_only and args.matches_only:
+        parser.error("--league-only and --matches-only are mutually exclusive")
 
     if args.matches_only:
         if not args.db.is_file():
@@ -872,7 +882,7 @@ def main() -> int:
         con = sqlite3.connect(args.db)
         try:
             counts = materialize_match_simulations(
-                con, json.loads(CONFIG_PATH.read_text(encoding="utf-8")), runs)
+                con, json.loads(CONFIG_PATH.read_text(encoding="utf-8")), match_runs)
             con.commit()
         finally:
             con.close()
@@ -1019,7 +1029,7 @@ def main() -> int:
                  profiles[r["team_name"]]["samples"]) for r in rows])
             team_rows += len(rows)
 
-        match_counts = materialize_match_simulations(con, config, runs)
+        match_counts = {} if args.league_only else materialize_match_simulations(con, config, match_runs)
         if args.cached_league_tables:
             print('UEFA_CACHED_STANDINGS_VERIFIED', verify_cached_simulations(con, config))
         con.commit()

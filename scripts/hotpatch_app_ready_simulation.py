@@ -9,9 +9,13 @@ import shutil
 import sqlite3
 import subprocess
 import tempfile
+import time
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
+
+from simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
+from season_simulation_audit import protected_digest, validate_precision
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_READY = ROOT / "data/statmaker/app_ready"
@@ -36,11 +40,16 @@ def deterministic_zip(source: Path, target: Path) -> None:
             zf.writestr(info, path.read_bytes(), compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
 
 
-def run_uefa_materializer(db_path: Path, *, cached: bool | None = None, matches_only: bool = False) -> None:
+def run_uefa_materializer(db_path: Path, *, cached: bool | None = None, matches_only: bool = False, league_only: bool = False) -> None:
     if cached is None:
         cached = os.environ.get("CACHED_RECOVERY", "").strip().lower() == "true"
     command = ["python", str(ROOT / "scripts/materialize_prepared_uefa_simulations.py"),
-               str(db_path), "--runs", "10000"]
+               str(db_path), "--runs", str(SEASON_SIMULATION_RUNS),
+               "--match-runs", str(MATCH_SIMULATION_RUNS)]
+    if matches_only and league_only:
+        raise ValueError("Choose match-only or league-only UEFA simulation")
+    if league_only:
+        command.append("--league-only")
     if matches_only:
         command.append("--matches-only")
     elif cached:
@@ -60,8 +69,9 @@ def main() -> int:
     )
     parser.add_argument("--uefa-only", action="store_true",
                         help="Refresh UEFA league/match simulation from published tables; no API calls")
+    parser.add_argument("--season-only", action="store_true", help="Increase season precision without modifying matches or recommendation data")
     args = parser.parse_args()
-    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only)) > 1:
+    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only, args.season_only)) > 1:
         parser.error("Choose only one targeted simulation update")
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
@@ -87,7 +97,21 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
-        if args.uefa_only:
+        precision_before = protected_digest(db_path) if args.season_only else None
+        precision_proof = None
+        if args.season_only:
+            started = time.perf_counter()
+            subprocess.run(["python", str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
+                            str(db_path), "--runs", str(SEASON_SIMULATION_RUNS)], cwd=ROOT, check=True)
+            print(f"SEASON_PRECISION_TIMING stage=domestic runs={SEASON_SIMULATION_RUNS} seconds={time.perf_counter()-started:.3f}", flush=True)
+            started = time.perf_counter()
+            run_uefa_materializer(db_path, cached=True, league_only=True)
+            print(f"SEASON_PRECISION_TIMING stage=uefa runs={SEASON_SIMULATION_RUNS} seconds={time.perf_counter()-started:.3f}", flush=True)
+            if precision_before != protected_digest(db_path):
+                raise ValueError("Season precision refresh modified protected match/history/recommendation tables")
+            precision_proof = validate_precision(db_path, SEASON_SIMULATION_RUNS)
+            print("SEASON_PRECISION_VERIFIED", precision_proof, flush=True)
+        elif args.uefa_only:
             run_uefa_materializer(db_path, cached=True)
         elif args.uefa_match_only:
             run_uefa_materializer(db_path, matches_only=True)
@@ -132,7 +156,7 @@ def main() -> int:
                     str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
                     str(db_path),
                     "--runs",
-                    "10000",
+                    str(SEASON_SIMULATION_RUNS),
                 ],
                 cwd=ROOT,
                 check=True,
@@ -141,7 +165,7 @@ def main() -> int:
 
 
         # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
-        if not args.uefa_match_only and not args.uefa_only:
+        if not args.uefa_match_only and not args.uefa_only and not args.season_only:
             subprocess.run(
                 ["python", str(ROOT / "scripts/materialize_prepared_score_edge.py"),
                  str(db_path)], cwd=ROOT, check=True,
@@ -281,6 +305,12 @@ def main() -> int:
     metadata["preparedScoreEdgeRowCount"] = score_edge_rows
     metadata["preparedScoreEdgeMatchCount"] = score_edge_matches
     metadata["simulationHotPublish"] = True
+    if precision_proof is not None:
+        metadata["seasonSimulationPrecision"] = precision_proof
+        from materialize_prepared_uefa_simulations import cached_source_fingerprint
+        config = json.loads((ROOT / "config/uefa_simulation_2026_27.json").read_text())
+        metadata["preparedUefaSimulationSourceFingerprint"] = cached_source_fingerprint(config)
+        metadata["preparedUefaSimulationValidatedBundleSha256"] = new_sha
 
     payload["generatedAt"] = now
     seed = "|".join(

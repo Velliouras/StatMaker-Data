@@ -49,6 +49,7 @@ jobs:
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           CACHED_RECOVERY: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[cached-recovery]')) }}
+          SEASON_PRECISION_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[season-precision-only]') }}
           UEFA_MATCH_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[uefa-match-only]') }}
         shell: bash
         run: |
@@ -57,6 +58,7 @@ jobs:
           # not from its original workflow_run source commit.
           git fetch --no-tags origin +main:refs/remotes/origin/main
           git reset --hard refs/remotes/origin/main
+          cp data/statmaker/app_ready/update_manifest.json "$RUNNER_TEMP/statmaker-simulation-source-manifest.json"
           # Finish a full rebuild with the latest cached scope rules. This also
           # covers source fixes made while the Android producer was still running.
           if [[ "$CACHED_RECOVERY" == "true" ]]; then unset API_FOOTBALL_KEY; fi
@@ -66,7 +68,11 @@ jobs:
             python -m unittest tests/test_prepared_league_simulation_phases.py
             python scripts/preflight_league_simulations.py
           fi
-          if [[ "$UEFA_MATCH_ONLY" == "true" ]]; then
+          python -m unittest tests.test_simulation_precision tests.test_simulation_recovery_cli
+          if [[ "$SEASON_PRECISION_ONLY" == "true" ]]; then
+            unset API_FOOTBALL_KEY
+            python -u scripts/hotpatch_app_ready_simulation.py --season-only
+          elif [[ "$UEFA_MATCH_ONLY" == "true" ]]; then
             python scripts/hotpatch_app_ready_simulation.py --uefa-match-only
           else
             python scripts/hotpatch_app_ready_simulation.py
@@ -190,6 +196,12 @@ jobs:
             git fetch --no-tags origin +main:refs/remotes/origin/main
             git reset --hard refs/remotes/origin/main
 
+            # A separate full producer can finish while the season simulation is running.
+            # A superseded snapshot must never replace newer stats, manifests or prepared data.
+            if ! cmp -s data/statmaker/app_ready/update_manifest.json "$RUNNER_TEMP/statmaker-simulation-source-manifest.json"; then
+              echo "APP_READY_SIMULATION_SUPERSEDED: newer App-Ready generation retained"
+              exit 0
+            fi
             cp data/statmaker/app_ready/update_manifest.json "$publish_dir/previous_manifest.json"
             cp "$publish_dir/update_manifest.json" data/statmaker/app_ready/update_manifest.json
             cp "$publish_dir/$bundle_name" "data/statmaker/app_ready/$bundle_name"
