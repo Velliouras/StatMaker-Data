@@ -124,6 +124,23 @@ class PriorityRefreshTest(unittest.TestCase):
             self.assertEqual(provider.requests[0][1]['date'], NOW.date().isoformat())
             self.assertEqual(provider.requests[0][2], 'primary')
 
+    def test_live_europe_results_reuse_the_same_global_date_query_at_five_minutes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);self.setup_root(root);self.run_refresh(root,FakeProvider())
+            path=root/FOLDER/'P1.json';doc=json.loads(path.read_text())
+            doc['fixtures'][0].update(status='1H',home_goals=0,away_goals=0)
+            path.write_text(json.dumps(doc))
+            class LiveProvider(FakeProvider):
+                def get(self, endpoint, params, tier):
+                    result=super().get(endpoint,params,tier)
+                    if endpoint=='fixtures' and 'date' in params:
+                        return result+[fixture(league=94,status='1H',goals=(0,0))]
+                    return result
+            provider=LiveProvider();now=NOW+timedelta(minutes=5)
+            self.run_refresh(root,provider,now)
+            self.assertEqual(1,provider.calls)
+            self.assertEqual(now.isoformat(),json.loads(path.read_text())['resultsCheckedAtUTC'])
+
     def test_completion_fallback_has_no_self_or_watchdog_loop(self):
         doc=yaml.safe_load((ROOT/'.github/workflows/priority-results-standings.yml').read_text())
         triggers=doc.get('on',doc.get(True))

@@ -16,10 +16,17 @@ from urllib.request import Request, urlopen
 
 from scripts.build_league_tables_program import CONTRACT, COMPLETED, current_leagues, instant, normalize_fixture, goal_events, read, write
 from api_football_budget import BudgetStop, priority
+from scripts.maintain_live_results_cadence import active as live_window
 
 FOLDER = 'data/statmaker/priority_refresh'
 TIERS = ('primary', 'europe', 'background')
 LIVE_STATUSES = {'1H', 'HT', '2H', 'ET', 'BT', 'P'}
+
+
+def results_minutes(document, cadence, now):
+    # The same global date response already contains every league. Reusing it
+    # for live matches adds no league/provider request or standings refresh.
+    return min(5, cadence['resultsMinutes']) if live_window(document, now) else cadence['resultsMinutes']
 
 
 def due(stamp, minutes, now):
@@ -181,7 +188,7 @@ def refresh(root, provider, now):
     errors, stopped = [], []
     # One batched date query serves every competition, including late final whistles.
     global_rows = []
-    primary_due = any(due(d.get('resultsCheckedAtUTC'), policy['tiers'][specs[str(d['apiFootballLeagueId'])]['tier']]['resultsMinutes'], now)
+    primary_due = any(due(d.get('resultsCheckedAtUTC'), results_minutes(d, policy['tiers'][specs[str(d['apiFootballLeagueId'])]['tier']], now), now)
                       for d in docs.values())
     if primary_due:
         try:
@@ -216,7 +223,7 @@ def refresh(root, provider, now):
                     if raw:
                         doc['fixtures'] = merge_matches(doc.get('fixtures', []), raw, league_id, season, code, aliases)
                         doc['seasonReconciledAtUTC'] = stamp
-                if global_rows is not None and primary_due and due(doc.get('resultsCheckedAtUTC'), cadence['resultsMinutes'], now):
+                if global_rows is not None and primary_due and due(doc.get('resultsCheckedAtUTC'), results_minutes(doc, cadence, now), now):
                     doc['fixtures'] = merge_matches(doc.get('fixtures', []), global_rows, league_id, season, code, aliases)
                     doc['resultsCheckedAtUTC'] = stamp
                 active = any(instant(f.get('date_utc')) and

@@ -1,0 +1,51 @@
+name: Live Results Five Minute Cadence
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/live-results-cadence.yml'
+      - 'scripts/maintain_live_results_cadence.py'
+      - 'tests/test_live_results_cadence.py'
+      - 'scripts/refresh_priority_matches.py'
+  workflow_run:
+    workflows: ['Stats Freshness and API Quota Watchdog']
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: statmaker-live-results-cadence
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.event != 'workflow_run' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /scripts/
+            /tests/test_live_results_cadence.py
+            /tests/test_priority_matches_refresh.py
+            /tests/__init__.py
+            /config/api_football_refresh_policy.json
+            /data/statmaker/priority_refresh/
+      - name: Verify bounded cadence and no dispatch loop
+        run: |
+          python -m pip install --quiet PyYAML
+          python -m unittest tests.test_live_results_cadence tests.test_priority_matches_refresh -q
+      - name: Fill the intermediate five-minute Live refresh slots
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python -u scripts/maintain_live_results_cadence.py
