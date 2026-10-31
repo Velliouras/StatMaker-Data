@@ -64,6 +64,21 @@ class PriorityRefreshTest(unittest.TestCase):
             # Only the 15-minute results bucket and 30-minute table bucket spend quota.
             self.assertEqual(calls,[0,0,0,3,0,0,0,4])
 
+    def test_primary_five_minute_final_detection_uses_only_one_date_query(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.setup_root(root)
+            path = root / 'config/api_football_refresh_policy.json'
+            policy = json.loads(path.read_text())
+            policy['tiers']['primary']['resultsMinutes'] = 5
+            path.write_text(json.dumps(policy))
+            self.run_refresh(root, FakeProvider(), NOW)
+            provider = FakeProvider()
+            self.run_refresh(root, provider, NOW + timedelta(minutes=5))
+            self.assertEqual(provider.calls, 1)
+            self.assertEqual(provider.requests[0][1]['date'], NOW.date().isoformat())
+            self.assertEqual(provider.requests[0][2], 'primary')
+
     def test_completion_fallback_has_no_self_or_watchdog_loop(self):
         doc=yaml.safe_load((ROOT/'.github/workflows/priority-results-standings.yml').read_text())
         triggers=doc.get('on',doc.get(True))
