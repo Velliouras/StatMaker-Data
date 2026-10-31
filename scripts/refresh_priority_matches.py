@@ -14,11 +14,12 @@ import time
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from scripts.build_league_tables_program import CONTRACT, COMPLETED, current_leagues, instant, normalize_fixture, read, write
+from scripts.build_league_tables_program import CONTRACT, COMPLETED, current_leagues, instant, normalize_fixture, goal_events, read, write
 from api_football_budget import BudgetStop, priority
 
 FOLDER = 'data/statmaker/priority_refresh'
 TIERS = ('primary', 'europe', 'background')
+LIVE_STATUSES = {'1H', 'HT', '2H', 'ET', 'BT', 'P'}
 
 
 def due(stamp, minutes, now):
@@ -64,6 +65,9 @@ def merge_matches(old, raw, league_id, season, code, aliases):
         if not match or not match.get('date_utc'):
             continue
         previous = result.get(match['fixture_id'], {})
+        clock = (row.get('fixture') or {}).get('status') or {}
+        match['elapsed'] = clock.get('elapsed') if type(clock.get('elapsed')) is int and 0 <= clock['elapsed'] <= 130 else None
+        match['extra_time'] = clock.get('extra') if type(clock.get('extra')) is int and 0 <= clock['extra'] <= 60 else None
         # Never replace a verified final score with a transient NS/null response.
         if previous.get('status') in COMPLETED and match['status'] not in COMPLETED:
             continue
@@ -73,6 +77,42 @@ def merge_matches(old, raw, league_id, season, code, aliases):
         result[match['fixture_id']] = {**previous, **match,
             'normalized_stats': previous.get('normalized_stats') or {}}
     return sorted(result.values(), key=lambda x: (x['date_utc'], x['fixture_id']))
+
+
+def refresh_live_goals(doc, provider, tier, now, allowance=12):
+    """Fetch only changed live goals; share the existing provider cap and budget guard."""
+    calls = 0
+    for match in doc.get('fixtures', []):
+        status = match.get('status')
+        if status not in LIVE_STATUSES and not (status in COMPLETED and match.get('live_goal_tracking')):
+            continue
+        score = [match.get('home_goals'), match.get('away_goals')]
+        if any(type(n) is not int or n < 0 for n in score):
+            continue
+        match['live_goal_tracking'] = True
+        prior_score = match.get('goal_events_score')
+        valid = prior_score == score and len(match.get('goal_events', [])) == sum(score)
+        if not valid:
+            # VAR corrections must remove stale names immediately, even if the event read fails.
+            match.pop('goal_events', None)
+            match.pop('goal_events_score', None)
+        if sum(score) == 0:
+            match.update(goal_events=[], goal_events_score=score, goal_events_status=status,
+                         goal_events_checked_at=now.isoformat())
+            continue
+        if valid and status in COMPLETED and match.get('goal_events_status') == status:
+            continue
+        if valid and match.get('goal_events_status') == status and not due(match.get('goal_events_checked_at'), 15, now):
+            continue
+        if calls >= allowance:
+            continue
+        calls += 1
+        raw = provider.get('fixtures/events', {'fixture': int(match['fixture_id'])}, tier)
+        verified = goal_events(raw, match)
+        if verified is not None:
+            match.update(goal_events=verified, goal_events_score=score, goal_events_status=status,
+                         goal_events_checked_at=now.isoformat())
+    return calls
 
 
 def standings(raw, league_id, season, aliases):
@@ -194,6 +234,21 @@ def refresh(root, provider, now):
                 break
             except (OSError, ValueError, RuntimeError) as exc:
                 errors.append(code+': '+type(exc).__name__)
+    event_allowance = 12
+    for tier in TIERS:
+        for row in specs.values():
+            doc = docs[row['code']]
+            if row['tier'] != tier or doc.get('resultsCheckedAtUTC') != stamp or event_allowance <= 0:
+                continue
+            before = provider.calls
+            try:
+                refresh_live_goals(doc, provider, tier, now, event_allowance)
+            except BudgetStop as exc:
+                stopped.append('live goals: '+exc.reason)
+                event_allowance = 0
+            except (OSError, ValueError, RuntimeError) as exc:
+                errors.append(row['code']+' live goals: '+type(exc).__name__)
+            event_allowance -= provider.calls - before
     if provider.calls == 0 and not stopped and not errors and (folder/'index.json').is_file():
         print('PRIORITY_REFRESH_ALREADY_FRESH apiCalls=0')
         return read(folder/'index.json')

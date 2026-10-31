@@ -10,7 +10,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts/api_budget_runtime'))
-from scripts.refresh_priority_matches import refresh, merge_matches, standings, due, current_policy, FOLDER
+from scripts.refresh_priority_matches import refresh, merge_matches, standings, due, current_policy, refresh_live_goals, FOLDER
 from api_football_budget import BudgetStop
 
 NOW = datetime(2026,10,25,19,0,tzinfo=timezone.utc)
@@ -32,6 +32,51 @@ class FakeProvider:
 
 
 class PriorityRefreshTest(unittest.TestCase):
+    def test_verified_clock_and_added_time_survive_the_priority_merge(self):
+        raw = fixture(status='2H')
+        raw['fixture']['status'].update(elapsed=90, extra=3)
+        match = merge_matches([], [raw], 39, 2026, 'E0', {})[0]
+        self.assertEqual((90,3), (match['elapsed'],match['extra_time']))
+
+    def test_live_scorers_are_fetched_once_and_finalized_without_repeated_history_calls(self):
+        match = merge_matches([], [fixture(status='2H',goals=(1,0))],39,2026,'E0',{})[0]
+        doc = {'fixtures':[match]}
+        class Events:
+            calls = 0
+            def get(self, endpoint, params, tier):
+                self.calls += 1
+                return [{'type':'Goal','detail':'Normal Goal','team':{'id':10},
+                         'player':{'name':'Verified Player'},'time':{'elapsed':38,'extra':0}}]
+        provider = Events()
+        refresh_live_goals(doc,provider,'primary',NOW)
+        self.assertEqual('Verified Player',match['goal_events'][0]['player'])
+        refresh_live_goals(doc,provider,'primary',NOW+timedelta(minutes=5))
+        self.assertEqual(1,provider.calls)
+        match['status']='FT'
+        refresh_live_goals(doc,provider,'primary',NOW+timedelta(minutes=10))
+        refresh_live_goals(doc,provider,'primary',NOW+timedelta(days=1))
+        self.assertEqual(2,provider.calls)
+
+    def test_var_correction_clears_scorers_without_spending_a_request(self):
+        match = merge_matches([], [fixture(status='2H',goals=(0,0))],39,2026,'E0',{})[0]
+        match.update(goal_events=[{'player':'Removed goal'}],goal_events_score=[1,0])
+        provider = FakeProvider()
+        refresh_live_goals({'fixtures':[match]},provider,'primary',NOW)
+        self.assertEqual([],match['goal_events'])
+        self.assertEqual(0,provider.calls)
+
+    def test_incomplete_goal_response_never_publishes_partial_player_names(self):
+        match = merge_matches([], [fixture(status='1H',goals=(1,0))],39,2026,'E0',{})[0]
+        provider = FakeProvider()
+        refresh_live_goals({'fixtures':[match]},provider,'primary',NOW)
+        self.assertNotIn('goal_events',match)
+
+    def test_event_allowance_preserves_the_existing_provider_budget(self):
+        matches = merge_matches([], [fixture(i,status='1H',goals=(1,0)) for i in (1,2)],39,2026,'E0',{})
+        provider = FakeProvider()
+        refresh_live_goals({'fixtures':matches},provider,'primary',NOW,allowance=1)
+        self.assertEqual(1,provider.calls)
+
     def setup_root(self, root):
         tiers={'primary':{'resultsMinutes':15,'standingsMinutes':30},'europe':{'resultsMinutes':30,'standingsMinutes':60},'background':{'resultsMinutes':60,'standingsMinutes':120}}
         rows={

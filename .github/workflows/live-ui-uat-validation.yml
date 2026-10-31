@@ -1,0 +1,123 @@
+name: StatMaker Live UAT Validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      statmaker_ref:
+        description: "StatMaker UAT ref"
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - ".github/live-ui-uat-validation-request"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout: |
+            .github
+            scripts
+            config
+            tests
+          persist-credentials: false
+
+      - name: Resolve requested StatMaker ref
+        id: source
+        shell: bash
+        env:
+          DISPATCH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.statmaker_ref || '' }}
+        run: |
+          set -euo pipefail
+          ref="${DISPATCH_REF}"
+          if [[ -z "$ref" ]]; then
+            ref="$(sed -n '1p' .github/live-ui-uat-validation-request | tr -d '\r\n')"
+          fi
+          [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "Invalid StatMaker ref: $ref" >&2; exit 1; }
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+      - name: Verify live provider contracts without API calls
+        run: |
+          python -m pip install --quiet PyYAML
+          python -m unittest tests.test_priority_matches_refresh -q
+
+      - name: Require private read token
+        env:
+          TOKEN: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+        run: test -n "$TOKEN" || (echo "Missing STATMAKER_PRIVATE_READ_TOKEN" >&2; exit 1)
+
+      - name: Checkout StatMaker UAT source
+        uses: actions/checkout@v4
+        with:
+          repository: Velliouras/StatMaker
+          ref: ${{ steps.source.outputs.ref }}
+          token: ${{ secrets.STATMAKER_PRIVATE_READ_TOKEN }}
+          path: statmaker-uat
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-disabled: true
+
+      - name: Compile UAT Android sources
+        working-directory: statmaker-uat
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew :app:compileDebugKotlin :app:compileDebugJavaWithJavac \
+            --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
+            -Dorg.gradle.workers.max=2 \
+            -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Verify live refresh, clock, scorer placement and league selection
+        working-directory: statmaker-uat
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./gradlew :app:testDebugUnitTest \
+            --tests "com.statmaker.app.LiveMatchPresentationTest" \
+            --tests "com.statmaker.app.LeaguePickerLocalizationRegressionTest" \
+            --tests "com.statmaker.app.PriorityReadModelPolicyTest" \
+            --tests "com.statmaker.app.ScheduleResultsScorersPolicyTest" \
+            --no-daemon --stacktrace \
+            -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8" \
+            -Dorg.gradle.workers.max=2 \
+            -Pkotlin.compiler.execution.strategy=in-process
+
+      - name: Report regression results
+        if: always()
+        working-directory: statmaker-uat
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          totals = dict(tests=0, failures=0, errors=0, skipped=0)
+          for path in Path('app/build/test-results/testDebugUnitTest').glob('TEST-*.xml'):
+              root = ET.parse(path).getroot()
+              for key in totals:
+                  totals[key] += int(root.get(key, '0'))
+              for case in root.iter('testcase'):
+                  for tag in ('failure', 'error'):
+                      node = case.find(tag)
+                      if node is not None:
+                          print(case.get('classname'), case.get('name'))
+                          print((node.text or '')[:12000])
+          print('UAT_REGRESSIONS', totals)
+          PY
