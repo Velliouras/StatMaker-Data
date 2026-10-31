@@ -1,0 +1,119 @@
+name: Near Real-Time Postmatch Statistics
+
+on:
+  workflow_run:
+    workflows: ["Priority Results and Official Standings"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    # Recovery if a results producer completion event is missed. UTC.
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  # Share the canonical writer lock; never race historical stats/manifest writes.
+  group: statmaker-canonical-main-writer
+  queue: max
+  cancel-in-progress: false
+
+env:
+  STATMAKER_API_BUDGET_ENFORCE: "true"
+  STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
+  STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
+  STATMAKER_API_BUDGET_PROFILE: rolling
+  PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
+
+jobs:
+  postmatch:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout latest canonical main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Fail closed without common API quota guard
+        run: |
+          python -c "import urllib.request; assert getattr(urllib.request.urlopen, '_statmaker_budget', False), 'Shared API quota guard is missing'"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check pure postmatch selection tests
+        run: |
+          python -m unittest discover -s tests -p 'test_recent_finished_match_stats.py' -q
+
+      - name: Fetch only recently finished fixtures with missing or partial statistics
+        id: postmatch
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          STATMAKER_BETTING_V2_CAPTURE_LINEAGE: "0"
+        run: |
+          python scripts/refresh_recent_finished_match_stats.py --max-requests 24
+
+      - name: Rebuild canonical app-facing stats from updated provider caches
+        if: steps.postmatch.outputs.updated == 'true'
+        run: |
+          set -euo pipefail
+          python scripts/expand_domestic_full_stats.py
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('scripts').resolve()))
+          import domestic_live_july_pipeline as pipeline
+          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
+          if not registry:
+              raise SystemExit('Domestic Stats registry is missing')
+          pipeline.build_app_statistics(registry)
+          PY
+          python scripts/finalize_domestic_live_july_artifacts.py
+          python scripts/build_domestic_live_july_normalized_stats.py
+          python scripts/build_uefa_support_history.py
+          python scripts/build_statmaker_update_manifest.py --profile main --branch main --output data/statmaker/update_manifest.json
+
+      - name: Publish only changed official stats and derived read model
+        id: publish
+        if: steps.postmatch.outputs.updated == 'true' || steps.postmatch.outputs.state_changed == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name 'statmaker-data-bot'
+          git config user.email 'statmaker-data-bot@users.noreply.github.com'
+          git add data/api_football/fixture_stats/ data/statmaker/monitoring/recent_finished_match_stats.json
+          if [ "${{ steps.postmatch.outputs.updated }}" = "true" ]; then
+            git add data/api_football/domestic_normalized_fixture_stats.json
+            git add data/statmaker/domestic_enriched/
+            git add data/statmaker/domestic_rosters.json data/statmaker/uefa_support_history.json data/statmaker/update_manifest.json
+            git add reports/domestic_live_july_full_stats_expansion.json
+          fi
+          if git diff --cached --quiet; then
+            echo 'No changed stats to publish'
+            exit 0
+          fi
+          git commit -m 'Publish prompt verified postmatch fixture statistics [skip ci]'
+          python .github/scripts/publish_generated_paths.py \
+            --path-prefix data/api_football/fixture_stats/ \
+            --path-prefix data/statmaker/monitoring/recent_finished_match_stats.json \
+            --path-prefix data/api_football/domestic_normalized_fixture_stats.json \
+            --path-prefix data/statmaker/domestic_enriched/ \
+            --path-prefix data/statmaker/domestic_rosters.json \
+            --path-prefix data/statmaker/uefa_support_history.json \
+            --path-prefix data/statmaker/update_manifest.json \
+            --path-prefix reports/domestic_live_july_full_stats_expansion.json
+          if [ "${{ steps.postmatch.outputs.updated }}" = "true" ]; then
+            echo 'updated=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Request immediate App-Ready stats-only publication
+        if: steps.publish.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X POST "repos/${{ github.repository }}/actions/workflows/app-ready-stats-hot-publish.yml/dispatches" -f ref=main
