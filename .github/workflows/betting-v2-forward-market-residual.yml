@@ -1,11 +1,6 @@
 name: Betting V2 Forward Market Residual
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '53 */3 * * *'
-  push:
-    branches: [main]
-    paths: ['.github/triggers/betting-v2-forward-market-residual-20261019']
 permissions:
   contents: write
 concurrency:
