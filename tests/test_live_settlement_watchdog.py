@@ -22,7 +22,9 @@ class StatsWatchdogTest(unittest.TestCase):
         events = event_section("live-settlement-watchdog.yml")
         self.assertIn("Stats Freshness and API Quota Watchdog", workflow)
         self.assertIn('cron: "8,23,38,53 * * * *"', events)
-        self.assertNotIn("workflow_run:", events)
+        self.assertIn("workflow_run:", events)
+        self.assertIn('workflows: ["Priority Results and Official Standings"]', events)
+        self.assertNotIn("Live Settlement Publisher", events)
         self.assertNotIn("live-settlement-publisher.yml/dispatches", workflow)
         self.assertNotIn("Maintain live settlement cadence", workflow)
         self.assertIn("quota-usage-snapshot:", workflow)
@@ -39,6 +41,10 @@ class StatsWatchdogTest(unittest.TestCase):
         self.assertIn("max_requests: '6'", workflow)
         self.assertIn("lookback: '14'", workflow)
         self.assertIn("phase: leaders", workflow)
+        self.assertIn("refresh-postmatch-statistics:", workflow)
+        self.assertIn("refresh-postmatch-fallback:", workflow)
+        self.assertIn("uses: ./.github/workflows/recent-postmatch-stats.yml", workflow)
+        self.assertIn("needs: refresh-priority-results-and-standings", workflow)
 
     def test_provider_budget_is_fail_closed_with_1500_reserve(self):
         watchdog = source("live-settlement-watchdog.yml")
