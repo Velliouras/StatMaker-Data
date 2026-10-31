@@ -101,7 +101,16 @@ jobs:
             exit 0
           fi
           git commit -m 'Publish prompt verified postmatch fixture statistics [skip ci]'
-          python .github/scripts/publish_generated_paths.py \
+          # The full stats rebuild may touch auxiliary tracked/untracked reports.
+          # All canonical outputs above are committed; publication must start clean.
+          git restore --worktree .
+          git clean -fd -- reports data
+          if [ -n "$(git status --porcelain)" ]; then
+            echo 'Unexpected uncommitted producer outputs; refusing to rebase' >&2
+            git status --short
+            exit 1
+          fi
+          python .github/scripts/publish_generated_paths.py --rebuild-main-manifest \
             --path-prefix data/api_football/fixture_stats/ \
             --path-prefix data/statmaker/monitoring/recent_finished_match_stats.json \
             --path-prefix data/api_football/domestic_normalized_fixture_stats.json \
