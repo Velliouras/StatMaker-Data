@@ -22,7 +22,7 @@ on:
   workflow_run:
     # Independent recovery trigger: this frequent existing workflow really ran
     # on 2026-10-16 even while both standalone UEFA schedules were skipped.
-    workflows: ["Domestic Lineup Watch"]
+    workflows: ["Domestic Lineup Watch", "Priority Results and Official Standings"]
     types: [completed]
     branches: [main]
 
@@ -42,9 +42,9 @@ env:
 
 jobs:
   refresh:
-    # GitHub may skip cron entirely: the existing independent watch provides
-    # evening/night/morning fallback. The offline due gate avoids quota spend.
-    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T21:') || contains(github.event.workflow_run.run_started_at, 'T22:') || contains(github.event.workflow_run.run_started_at, 'T23:') || contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:')))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
+    # The fresh 5-minute results producer wakes this workflow after final whistle.
+    # Offline missing-data gate avoids quota spend when no UEFA final is pending.
+    if: ${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository && (github.event.workflow_run.name == 'Priority Results and Official Standings' || (github.event.workflow_run.event == 'schedule' && (contains(github.event.workflow_run.run_started_at, 'T21:') || contains(github.event.workflow_run.run_started_at, 'T22:') || contains(github.event.workflow_run.run_started_at, 'T23:') || contains(github.event.workflow_run.run_started_at, 'T00:') || contains(github.event.workflow_run.run_started_at, 'T01:') || contains(github.event.workflow_run.run_started_at, 'T05:') || contains(github.event.workflow_run.run_started_at, 'T06:') || contains(github.event.workflow_run.run_started_at, 'T07:'))))) && (github.event_name != 'push' || !contains(github.event.head_commit.message, '[budget-policy-only]')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -62,6 +62,7 @@ jobs:
             /config/uefa_simulation_2026_27.json
             /data/statmaker/uefa_current_stats.json
             /data/statmaker/league_tables/
+            /data/statmaker/priority_refresh/
             /reports/*
 
       - name: Verify shared API budget guard before provider work
@@ -86,7 +87,7 @@ jobs:
         if: steps.freshness.outputs.refresh_needed == 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || '64' }}
+          INPUT_MAX_REQUESTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_requests || (github.event_name == 'workflow_run' && '48' || '64') }}
         run: |
           python scripts/refresh_uefa_current_stats.py             --max-requests "${INPUT_MAX_REQUESTS:-64}"
 
