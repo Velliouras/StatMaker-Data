@@ -108,7 +108,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p test_reconcile_app_ready_stats_scope.py -v
           python -m unittest discover -s tests -p test_validate_app_ready_archived_stats.py -v
-          python scripts/verify_app_ready_stats_reconciliation.py --repo-root .
+          python scripts/verify_app_ready_stats_reconciliation.py --repo-root . --full-scope
 
       - name: Validate league-table phases and cached simulation inputs without provider calls
         run: |

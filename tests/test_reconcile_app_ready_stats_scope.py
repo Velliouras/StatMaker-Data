@@ -210,6 +210,12 @@ class ReconcileAppReadyStatsScopeTest(unittest.TestCase):
         self.assertLess(source.index('--validate-source-only'), source.index('reactivecircus/android-emulator-runner'))
         self.assertIn('--repo-root . --league-code F1 --app-season 2025-2026', source)
 
+    def test_scope_regression_uses_a_verified_published_bundle_without_actions_artifacts(self) -> None:
+        source = (MODULE_PATH.parents[1] / '.github/workflows/app-ready-stats-scope-reconcile-tests.yml').read_text()
+        self.assertNotIn('actions/download-artifact', source)
+        self.assertIn('scripts/verify_app_ready_stats_reconciliation.py --repo-root . --full-scope', source)
+        self.assertIn('--validate-source-only', source)
+
 
 if __name__ == "__main__":
     unittest.main()
