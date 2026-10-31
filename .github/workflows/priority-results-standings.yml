@@ -7,18 +7,10 @@ on:
     # Wake every five minutes; the producer itself deduplicates UTC 15/30/60-minute buckets.
     - cron: '2-59/5 * * * *'
   workflow_run:
-    # Completion events provide wakeups independently of this workflow's cron.
-    # Never listen to ourselves or the watchdog: no refresh/settlement event loop.
+    # Independent lineup wakeups only. Do not subscribe to UEFA/Stats publishers:
+    # they depend on these results and would create a workflow_run loop.
     workflows:
-      - 'Shared API Budget and Cadence Regression'
-      - 'Live Settlement Publisher'
-      - 'Shots SOT UAT Feed'
-      - 'Market Watch Dashboard'
-      - 'Canonical PROD Value-First Publisher'
-      - 'Odds Integrity Production Refresh'
       - 'Domestic Lineup Watch'
-      - 'Model Performance Settlement Refresh'
-      - 'UEFA Current Stats Refresh'
     types: [completed]
     branches: [main]
   push:
