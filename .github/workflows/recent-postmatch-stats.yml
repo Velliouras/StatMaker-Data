@@ -33,6 +33,7 @@ env:
   STATMAKER_API_BUDGET_TOKEN: ${{ github.token }}
   STATMAKER_API_BUDGET_POLICY: ${{ github.workspace }}/config/api_football_refresh_policy.json
   STATMAKER_API_BUDGET_PROFILE: rolling
+  PYTHONDONTWRITEBYTECODE: "1"
   PYTHONPATH: ${{ github.workspace }}/scripts/api_budget_runtime:${{ github.workspace }}:${{ github.workspace }}/scripts
 
 jobs:
@@ -112,7 +113,7 @@ jobs:
           # The full stats rebuild may touch auxiliary tracked/untracked reports.
           # All canonical outputs above are committed; publication must start clean.
           git restore --worktree .
-          git clean -fd -- reports data
+          git clean -fd -- reports data scripts tests
           if [ -n "$(git status --porcelain)" ]; then
             echo 'Unexpected uncommitted producer outputs; refusing to rebase' >&2
             git status --short
