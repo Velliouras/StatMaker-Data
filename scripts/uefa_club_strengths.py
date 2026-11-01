@@ -15,11 +15,23 @@ from pathlib import Path
 import re
 import unicodedata
 import urllib.request
+import urllib.error
 
 ROOT = Path(__file__).resolve().parents[1]
 ALGORITHM = "uefa-clubelo-xg-sporting-bracket-v2"
 SNAPSHOT = "data/statmaker/uefa_clubelo_strengths.json"
 SOURCE_URL = "https://clubelo.com/"
+REFRESH_STATUS = "reports/uefa_club_strength_refresh.json"
+MAX_SOURCE_AGE = timedelta(days=7)
+
+
+class ClubStrengthSourceUnavailable(RuntimeError):
+    """A validated anchor exists, but a current public rating cannot be obtained."""
+    def __init__(self, reason, source_as_of, next_attempt):
+        self.source_as_of = source_as_of
+        self.next_attempt = next_attempt
+        super().__init__(reason)
+
 XG_PRIOR_MATCHES = 12.0
 XG_MAX_MATCHES = 24
 COUNTRIES = dict(zip(
@@ -78,41 +90,71 @@ def refresh_snapshot(root=ROOT, now=None):
     now = now or datetime.now(timezone.utc)
     path = root / SNAPSHOT
     old = json.loads(path.read_text()) if path.is_file() else None
-    # The public page is a daily rating snapshot. Avoid repeatedly fetching it on a matchday.
-    if old and str(old.get("fetchedAt", ""))[:10] == now.date().isoformat():
+    source_as_of = None
+    if old:
+        # A failed fetch may retain only a structurally validated, mapped anchor.
         load_catalog(root)
+        source_as_of = datetime.fromisoformat(old["sourceAsOf"])
+        if source_as_of.tzinfo is None or source_as_of > now + timedelta(hours=1):
+            raise ValueError("Invalid cached club-strength timestamp")
+    recent = old is not None and now - source_as_of <= MAX_SOURCE_AGE
+    if recent and str(old.get("fetchedAt", ""))[:10] == now.date().isoformat():
         return False
+
+    status_path = root / REFRESH_STATUS
+    if status_path.is_file():
+        status = json.loads(status_path.read_text())
+        if (status.get("schemaVersion") == 1 and status.get("sourceUrl") == SOURCE_URL
+                and old and status.get("sourceAsOf") == old["sourceAsOf"]):
+            attempted = datetime.fromisoformat(status["lastAttemptAt"])
+            retry = datetime.fromisoformat(status["nextAttemptAt"])
+            if attempted <= now < retry <= attempted + timedelta(hours=6):
+                if recent:
+                    return False
+                raise ClubStrengthSourceUnavailable(status["reason"], old["sourceAsOf"], retry.isoformat())
     try:
         request = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "StatMaker UEFA simulation"})
         with urllib.request.urlopen(request, timeout=20) as response:
-            raw = response.read(3 * 1024 * 1024)
-        rows, as_of = parse_catalog(raw.decode("utf-8"))
-        if as_of > now + timedelta(hours=1) or now - as_of > timedelta(days=7):
-            raise ValueError("Public club-strength snapshot is stale or in the future")
-        value = {"schemaVersion": 1, "source": "ClubElo", "sourceUrl": SOURCE_URL,
-                 "sourceAsOf": as_of.isoformat(),
-                 "throughDate": (as_of.date() - timedelta(days=1)).isoformat(),
-                 "fetchedAt": now.isoformat(), "sourceSha256": hashlib.sha256(raw).hexdigest(),
-                 "clubs": rows}
-        path.parent.mkdir(parents=True, exist_ok=True)
-        prior = path.read_bytes() if path.is_file() else None
-        path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
-        try:
-            load_catalog(root)
-        except Exception:
-            if prior is None:
-                path.unlink()
-            else:
-                path.write_bytes(prior)
+            raw = response.read(3 * 1024 * 1024 + 1)
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
+        if old is None:
             raise
-        return True
-    except Exception as error:
-        # Retain a recent verified snapshot instead of inventing ratings or damaging published data.
-        if old and now - datetime.fromisoformat(old["sourceAsOf"]) <= timedelta(days=7):
-            load_catalog(root)
-            print("CLUB_STRENGTH_LAST_VALID_RETAINED", type(error).__name__)
+        code = getattr(error, "code", None)
+        retry = now + timedelta(hours=6 if code in (403, 429) else 1)
+        reason = "ClubElo download unavailable: " + ("HTTP " + str(code) if code else type(error).__name__)
+        status = dict(schemaVersion=1, sourceUrl=SOURCE_URL, status="unavailable",
+                      sourceAsOf=old["sourceAsOf"], lastAttemptAt=now.isoformat(),
+                      nextAttemptAt=retry.isoformat(), reason=reason)
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.write_text(json.dumps(status, ensure_ascii=False, indent=2) + "\n")
+        if recent:
+            print("CLUB_STRENGTH_LAST_VALID_RETAINED " + reason)
             return False
+        raise ClubStrengthSourceUnavailable(reason, old["sourceAsOf"], retry.isoformat()) from error
+
+    if len(raw) > 3 * 1024 * 1024:
+        raise ValueError("Oversized public club-strength response")
+    rows, as_of = parse_catalog(raw.decode("utf-8"))
+    if as_of > now + timedelta(hours=1) or now - as_of > MAX_SOURCE_AGE:
+        raise ValueError("Public club-strength snapshot is stale or in the future")
+    value = {"schemaVersion": 1, "source": "ClubElo", "sourceUrl": SOURCE_URL,
+             "sourceAsOf": as_of.isoformat(),
+             "throughDate": (as_of.date() - timedelta(days=1)).isoformat(),
+             "fetchedAt": now.isoformat(), "sourceSha256": hashlib.sha256(raw).hexdigest(),
+             "clubs": rows}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    prior = path.read_bytes() if path.is_file() else None
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+    try:
+        load_catalog(root)
+    except Exception:
+        if prior is None:
+            path.unlink()
+        else:
+            path.write_bytes(prior)
         raise
+    status_path.unlink(missing_ok=True)
+    return True
 
 
 def xg_profiles(config, root, prior_means, now=None):

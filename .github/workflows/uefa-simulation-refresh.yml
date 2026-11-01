@@ -10,6 +10,7 @@ on:
       - 'scripts/materialize_prepared_uefa_simulations.py'
       - 'scripts/hotpatch_app_ready_simulation.py'
       - 'tests/test_cached_uefa_simulations.py'
+      - 'tests/test_uefa_strength_refresh_resilience.py'
       - 'tests/test_uefa_simulation_model_v2.py'
       - 'scripts/uefa_club_strengths.py'
       - 'config/uefa_clubelo_aliases.json'
@@ -51,6 +52,7 @@ jobs:
             /data/statmaker/uefa_current_stats.json
             /data/statmaker/app_ready/
             /reports/uefa_simulation_refresh.json
+            /reports/uefa_club_strength_refresh.json
 
       - uses: actions/setup-python@v5
         with:
@@ -58,7 +60,7 @@ jobs:
 
       - name: Validate cached inputs and stale-current-position regression without provider access
         run: |
-          python -m unittest tests/test_cached_uefa_simulations.py tests/test_prepared_uefa_match_simulations.py tests/test_uefa_simulation_model_v2.py
+          python -m unittest tests/test_cached_uefa_simulations.py tests/test_prepared_uefa_match_simulations.py tests/test_uefa_simulation_model_v2.py tests/test_uefa_strength_refresh_resilience.py
 
       - name: Refresh UEFA and verify every current table plus protected data
         run: python -m scripts.refresh_uefa_simulations
@@ -72,11 +74,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           for attempt in 1 2 3; do
             git add -A data/statmaker/app_ready data/statmaker/uefa_clubelo_strengths.json reports/uefa_simulation_refresh.json
+            if [[ -f reports/uefa_club_strength_refresh.json ]] || git ls-files --error-unmatch reports/uefa_club_strength_refresh.json >/dev/null 2>&1; then
+              git add -A -- reports/uefa_club_strength_refresh.json
+            fi
             if git diff --cached --quiet; then
               echo "UEFA simulations already current"
               exit 0
             fi
-            git commit -m "Refresh UEFA simulations from published matchday results"
+            git commit -m "Record verified UEFA simulation refresh outcome"
             if git push origin HEAD:main; then
               exit 0
             fi

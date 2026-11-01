@@ -204,22 +204,23 @@ jobs:
           # onto current main. Never commit stale copies that conflict with another
           # canonical producer between this workflow's checkout and publication.
           git restore -- data/statmaker/uefa_support_history.json data/statmaker/update_manifest.json
-          git add \
-            data/api_football/fixture_stats \
-            data/api_football/domestic_normalized_fixture_stats.json \
-            data/statmaker/domestic_live_july_registry.json \
-            data/statmaker/domestic_rosters.json \
-            data/statmaker/domestic_enriched \
-
-            reports/api_football_fixture_stats_fetch.json \
-            reports/api_football_fixture_stats_fetch.csv \
-            reports/api_football_fixture_stats_fetch.md \
-            reports/domestic_live_july_stats_refresh.json \
-            reports/domestic_live_july_full_stats_expansion.json \
-            reports/statmaker_domestic_enriched_build.json \
-            reports/statmaker_domestic_enriched_build.csv \
-            reports/statmaker_domestic_enriched_build.md \
+          generated_paths=(
+            data/api_football/fixture_stats
+            data/api_football/domestic_normalized_fixture_stats.json
+            data/statmaker/domestic_live_july_registry.json
+            data/statmaker/domestic_rosters.json
+            data/statmaker/domestic_enriched
+            reports/api_football_fixture_stats_fetch.json
+            reports/api_football_fixture_stats_fetch.csv
+            reports/api_football_fixture_stats_fetch.md
+            reports/domestic_live_july_stats_refresh.json
+            reports/domestic_live_july_full_stats_expansion.json
+            reports/statmaker_domestic_enriched_build.json
+            reports/statmaker_domestic_enriched_build.csv
+            reports/statmaker_domestic_enriched_build.md
             reports/domestic_targeted_stats_backfill.log
+          )
+          git add -- "${generated_paths[@]}"
           if [ -f data/statmaker/domestic_historical_stats_freeze.json ]; then
             git add data/statmaker/domestic_historical_stats_freeze.json
           fi
