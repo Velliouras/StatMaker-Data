@@ -48,4 +48,37 @@ sys.exit(0)
         push=next(i for i,c in enumerate(calls) if c[:2]==['git','push'])
         self.assertLess(pull,uefa);self.assertLess(uefa,manifest);self.assertLess(manifest,push)
 
+    def test_shallow_checkout_rebases_only_our_generated_commit_and_preserves_newer_main(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            def git(cwd,*args):
+                result=subprocess.run(['git',*args],cwd=cwd,text=True,capture_output=True)
+                self.assertEqual(0,result.returncode,result.stdout+'\n'+result.stderr)
+                return result.stdout.strip()
+            origin=root/'origin.git';git(root,'init','--bare','--initial-branch=main',str(origin))
+            writer=root/'writer';git(root,'clone',str(origin),str(writer))
+            for path in (writer,):
+                git(path,'config','user.name','Test');git(path,'config','user.email','test@example.test')
+            (writer/'canonical.json').write_text('initial')
+            git(writer,'add','.');git(writer,'commit','-m','initial');git(writer,'push','origin','main')
+            producer=root/'producer';git(root,'clone','--depth=1',origin.as_uri(),str(producer))
+            git(producer,'config','user.name','Test');git(producer,'config','user.email','test@example.test')
+            self.assertEqual('true',git(producer,'rev-parse','--is-shallow-repository'))
+            (producer/'stats.json').write_text('new verified stats')
+            git(producer,'add','stats.json');git(producer,'commit','-m','generated stats')
+            for index in range(5):
+                (writer/'concurrent.json').write_text(str(index))
+                git(writer,'add','concurrent.json');git(writer,'commit','-m','concurrent data '+str(index))
+            git(writer,'push','origin','main')
+            upstream=git(writer,'rev-parse','HEAD')
+            git(producer,'pull','--rebase','--autostash','origin','main')
+            self.assertEqual('1',git(producer,'rev-list','--count',upstream+'..HEAD'))
+            self.assertEqual('new verified stats',(producer/'stats.json').read_text())
+            self.assertEqual('4',(producer/'concurrent.json').read_text())
+            git(producer,'push','origin','HEAD:main')
+        doc=yaml.safe_load((ROOT/'.github/workflows/domestic-targeted-stats-backfill.yml').read_text())
+        checkout=next(s for s in doc['jobs']['targeted-backfill']['steps'] if str(s.get('uses','')).startswith('actions/checkout@'))
+        self.assertEqual(1,checkout['with']['fetch-depth'])
+        self.assertEqual('blob:none',checkout['with']['filter'])
+
 if __name__=='__main__':unittest.main()
