@@ -17,6 +17,7 @@ from urllib.request import Request, urlopen
 from scripts.build_league_tables_program import CONTRACT, COMPLETED, current_leagues, instant, normalize_fixture, goal_events, read, write
 from api_football_budget import BudgetStop, priority
 from scripts.maintain_live_results_cadence import active as live_window
+from scripts.reconcile_priority_standings import reconcile as reconcile_standings
 
 FOLDER = 'data/statmaker/priority_refresh'
 TIERS = ('primary', 'europe', 'background')
@@ -235,7 +236,8 @@ def refresh(root, provider, now):
                     table, single = standings(raw, league_id, season, aliases)
                     doc['standingsCheckedAtUTC'] = stamp
                     if table:
-                        doc.update(standings=table, singleStandingsGroup=single, standingsObservedAtUTC=stamp)
+                        doc.update(standings=table, singleStandingsGroup=single, standingsObservedAtUTC=stamp,
+                                   officialStandings=table, officialSingleStandingsGroup=single)
             except BudgetStop as exc:
                 stopped.append(tier+': '+exc.reason)
                 break
@@ -256,7 +258,10 @@ def refresh(root, provider, now):
             except (OSError, ValueError, RuntimeError) as exc:
                 errors.append(row['code']+' live goals: '+type(exc).__name__)
             event_allowance -= provider.calls - before
-    if provider.calls == 0 and not stopped and not errors and (folder/'index.json').is_file():
+    reconciled_changes = False
+    for doc in docs.values():
+        reconciled_changes = reconcile_standings(doc, now) or reconciled_changes
+    if provider.calls == 0 and not stopped and not errors and not reconciled_changes and (folder/'index.json').is_file():
         print('PRIORITY_REFRESH_ALREADY_FRESH apiCalls=0')
         return read(folder/'index.json')
     catalogue = []
