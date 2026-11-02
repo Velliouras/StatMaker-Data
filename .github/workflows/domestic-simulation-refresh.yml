@@ -1,0 +1,60 @@
+name: Domestic League Simulation Refresh
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/domestic-simulation-refresh.yml'
+      - 'scripts/refresh_domestic_simulations.py'
+      - 'scripts/simulation_priority_inputs.py'
+      - 'tests/test_domestic_simulation_refresh.py'
+  workflow_run:
+    workflows: ['Priority Results and Official Standings', 'App-Ready Stats Hot Publish', 'API-Football Standings Fetch']
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '11,41 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: statmaker-app-ready-targeted-writers
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      PYTHONPATH: .:scripts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /scripts/
+            /tests/test_domestic_simulation_refresh.py
+            /config/
+            /data/statmaker/app_ready/
+            /data/statmaker/domestic_enriched/index.json
+            /data/api_football/fixture_stats/
+            /data/api_football/standings/
+            /data/statmaker/priority_refresh/
+            /reports/domestic_simulation_refresh.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify incremental simulation and current-score regressions offline
+        run: python -m unittest discover -s tests -p test_domestic_simulation_refresh.py -v
+      - name: Refresh only changed domestic leagues and publish verified bundle
+        run: |
+          git config user.name 'statmaker-data-bot'
+          git config user.email 'statmaker-data-bot@users.noreply.github.com'
+          python -u -m scripts.refresh_domestic_simulations

@@ -25,6 +25,7 @@ from materialize_prepared_simulations import (
 )
 
 from simulation_precision import SEASON_SIMULATION_RUNS
+from simulation_priority_inputs import overlay as overlay_priority, verified_points
 
 DEFAULT_RUNS = SEASON_SIMULATION_RUNS
 MODEL_VERSION = "league-season-monte-carlo-v3-all-domestic-elo"
@@ -362,7 +363,7 @@ def load_fixture_payload(entry: dict[str, Any]) -> dict[str, Any] | None:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
-    return payload if isinstance(payload, dict) else None
+    return overlay_priority(ROOT, entry, payload) if isinstance(payload, dict) else None
 
 
 def current_season_fixtures(entry: dict[str, Any], payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -817,6 +818,10 @@ def simulate_league(
         )
 
     current_table = build_table(fixtures)
+    point_values = verified_points(ROOT, entry, fixtures)
+    for team in current_table.values():
+        if team.name in point_values:
+            team.points = point_values[team.name]
     add_extra_current_teams(current_table, league_code, elo_scope)
     if len(current_table) < 8 or len(fixtures) < 10:
         return None
@@ -828,6 +833,10 @@ def simulate_league(
     regular_finished = fixtures[: min(len(fixtures), regular_target)]
     post_regular_finished = fixtures[regular_target:] if len(fixtures) > regular_target else []
     regular_table = build_table(regular_finished)
+    if not post_regular_finished:
+        for team in regular_table.values():
+            if team.name in point_values:
+                team.points = point_values[team.name]
     add_extra_current_teams(regular_table, league_code, elo_scope)
     if set(regular_table) != set(team_keys):
         return None
@@ -1091,6 +1100,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("db", type=Path)
     parser.add_argument("--runs", type=int, default=DEFAULT_RUNS)
+    parser.add_argument("--league-code", action="append", default=[], help="Refresh only selected domestic league rows")
     args = parser.parse_args()
     runs = max(1_000, min(50_000, int(args.runs)))
 
@@ -1100,18 +1110,27 @@ def main() -> int:
     index = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
     generated_at_ms = int(time.time() * 1000)
     expected_entries = current_entries(index)
+    selected = set(args.league_code)
+    if selected:
+        available = {str(e.get('league_code')) for e in expected_entries}
+        if not selected.issubset(available):
+            raise SystemExit('Unsupported requested league simulation: '+','.join(sorted(selected-available)))
+        expected_entries = [e for e in expected_entries if e.get('league_code') in selected]
     expected_codes = {str(entry.get("league_code") or "") for entry in expected_entries}
     official_standings = load_official_standings_cache()
 
     con = sqlite3.connect(args.db)
     try:
-        con.executescript(
-            """
+        if not selected:
+            con.executescript("""
             DROP TABLE IF EXISTS prepared_league_standing_zones;
             DROP TABLE IF EXISTS prepared_league_team_simulations;
             DROP TABLE IF EXISTS prepared_league_simulation_meta;
 
-            CREATE TABLE prepared_league_simulation_meta (
+            """)
+        con.executescript(
+            """
+            CREATE TABLE IF NOT EXISTS prepared_league_simulation_meta (
                 league_code TEXT NOT NULL,
                 country TEXT NOT NULL,
                 league_name TEXT NOT NULL,
@@ -1134,7 +1153,7 @@ def main() -> int:
                 PRIMARY KEY (league_code, season)
             );
 
-            CREATE TABLE prepared_league_team_simulations (
+            CREATE TABLE IF NOT EXISTS prepared_league_team_simulations (
                 league_code TEXT NOT NULL,
                 season TEXT NOT NULL,
                 team_key TEXT NOT NULL,
@@ -1156,10 +1175,10 @@ def main() -> int:
                 generated_at_ms INTEGER NOT NULL,
                 PRIMARY KEY (league_code, season, team_key)
             );
-            CREATE INDEX idx_prepared_league_team_title
+            CREATE INDEX IF NOT EXISTS idx_prepared_league_team_title
               ON prepared_league_team_simulations(league_code, season, title_probability DESC);
 
-            CREATE TABLE prepared_league_standing_zones (
+            CREATE TABLE IF NOT EXISTS prepared_league_standing_zones (
                 league_code TEXT NOT NULL,
                 season TEXT NOT NULL,
                 rank INTEGER NOT NULL,
@@ -1169,10 +1188,15 @@ def main() -> int:
                 generated_at_ms INTEGER NOT NULL,
                 PRIMARY KEY (league_code, season, rank, group_name)
             );
-            CREATE INDEX idx_prepared_league_standing_zones
+            CREATE INDEX IF NOT EXISTS idx_prepared_league_standing_zones
               ON prepared_league_standing_zones(league_code, season, rank);
             """
         )
+
+        if selected:
+            for code in sorted(selected):
+                for table in ('prepared_league_standing_zones','prepared_league_team_simulations','prepared_league_simulation_meta'):
+                    con.execute('DELETE FROM '+table+' WHERE league_code=?',(code,))
 
         materialized_codes: set[str] = set()
         team_count = 0

@@ -71,9 +71,14 @@ def main() -> int:
                         help="Refresh UEFA league/match simulation from published tables; no API calls")
     parser.add_argument("--season-only", action="store_true", help="Increase season precision without modifying matches or recommendation data")
     parser.add_argument("--match-precision-only", action="store_true", help="Increase all match simulation distributions without rebuilding seasons, fixtures or ratings")
+    parser.add_argument("--domestic-season-only", action="store_true", help="Refresh domestic league simulations without UEFA/provider work")
+    parser.add_argument("--league-code", action="append", default=[])
     args = parser.parse_args()
-    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only, args.season_only, args.match_precision_only)) > 1:
+    if sum((args.uefa_match_only, args.score_edge_only, args.uefa_only, args.season_only, args.domestic_season_only, args.match_precision_only)) > 1:
         parser.error("Choose only one targeted simulation update")
+    season_update = args.season_only or args.domestic_season_only
+    if args.league_code and not args.domestic_season_only:
+        parser.error('--league-code requires --domestic-season-only')
     payload = json.loads(MANIFEST.read_text(encoding="utf-8"))
     artifacts = payload.get("artifacts") or []
     betting = next((x for x in artifacts if x.get("id") == "app_ready_betting_bundle"), None)
@@ -98,17 +103,19 @@ def main() -> int:
         if not db_path.is_file() or not bundle_manifest_path.is_file():
             raise SystemExit("Betting bundle is missing DB or bundle_manifest.json")
 
-        precision_before = protected_digest(db_path) if args.season_only else None
+        precision_before = protected_digest(db_path) if season_update else None
         match_before = protected_digest(db_path, MATCH_TABLES) if args.match_precision_only else None
         precision_proof = None
         match_proof = None
-        if args.season_only:
+        if season_update:
             started = time.perf_counter()
             subprocess.run(["python", str(ROOT / "scripts/materialize_prepared_league_simulations.py"),
-                            str(db_path), "--runs", str(SEASON_SIMULATION_RUNS)], cwd=ROOT, check=True)
+                            str(db_path), "--runs", str(SEASON_SIMULATION_RUNS)] +
+                           [v for code in args.league_code for v in ("--league-code",code)], cwd=ROOT, check=True)
             print(f"SEASON_PRECISION_TIMING stage=domestic runs={SEASON_SIMULATION_RUNS} seconds={time.perf_counter()-started:.3f}", flush=True)
             started = time.perf_counter()
-            run_uefa_materializer(db_path, cached=True, league_only=True)
+            if not args.domestic_season_only:
+                run_uefa_materializer(db_path, cached=True, league_only=True)
             print(f"SEASON_PRECISION_TIMING stage=uefa runs={SEASON_SIMULATION_RUNS} seconds={time.perf_counter()-started:.3f}", flush=True)
             if precision_before != protected_digest(db_path):
                 raise ValueError("Season precision refresh modified protected match/history/recommendation tables")
@@ -174,7 +181,7 @@ def main() -> int:
 
 
         # Strictly targeted: reuse the 10k draws already stored in this App-Ready DB.
-        if not args.uefa_match_only and not args.uefa_only and not args.season_only:
+        if not args.uefa_match_only and not args.uefa_only and not season_update:
             subprocess.run(
                 ["python", str(ROOT / "scripts/materialize_prepared_score_edge.py"),
                  str(db_path)], cwd=ROOT, check=True,
@@ -326,7 +333,7 @@ def main() -> int:
         metadata["matchSimulationPrecision"] = match_proof
     if precision_proof is not None:
         metadata["seasonSimulationPrecision"] = precision_proof
-    if precision_proof is not None or match_proof is not None:
+    if (precision_proof is not None or match_proof is not None) and not args.domestic_season_only:
         from materialize_prepared_uefa_simulations import cached_source_fingerprint
         config = json.loads((ROOT / "config/uefa_simulation_2026_27.json").read_text())
         metadata["preparedUefaSimulationSourceFingerprint"] = cached_source_fingerprint(config)
