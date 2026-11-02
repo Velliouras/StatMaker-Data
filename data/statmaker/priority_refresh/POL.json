@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-02T21:25:33+00:00",
+  "generatedAtUTC": "2026-11-02T21:30:41+00:00",
   "leagueCode": "POL",
   "country": "Poland",
   "competition": "Ekstraklasa",
@@ -2302,17 +2302,17 @@
       "away_team_id": 348,
       "home_logo": "https://media.api-sports.io/football/teams/3491.png",
       "away_logo": "https://media.api-sports.io/football/teams/348.png",
-      "status": "2H",
-      "home_goals": 2,
+      "status": "FT",
+      "home_goals": 3,
       "away_goals": 1,
       "venue": "Miejski Stadion Piłkarski Raków w Częstochowie",
       "league_code": "POL",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 4,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-02T21:15:32+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-02T21:30:41+00:00",
       "goal_events": [
         {
           "fixtureId": "1553214",
@@ -2340,10 +2340,19 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1553214",
+          "team": "Raków Częstochowa",
+          "player": "Tomasz Pienko",
+          "minute": 90,
+          "extraMinute": 7,
+          "ownGoal": false,
+          "penalty": false
         }
       ],
       "goal_events_score": [
-        2,
+        3,
         1
       ]
     },
@@ -5979,7 +5988,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/poland/ekstraklasa/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-02T00:00:49+00:00",
-  "resultsCheckedAtUTC": "2026-11-02T21:25:33+00:00",
+  "resultsCheckedAtUTC": "2026-11-02T21:30:41+00:00",
   "standingsCheckedAtUTC": "2026-11-02T21:00:49+00:00",
   "standings": [
     {
@@ -6494,8 +6503,9 @@
   "officialSingleStandingsGroup": true,
   "standingsSource": "official",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-02T21:25:33+00:00",
-    "appliedFixtureIds": []
+    "status": "awaiting_official",
+    "checkedAtUTC": "2026-11-02T21:30:41+00:00",
+    "appliedFixtureIds": [],
+    "reason": "new_tie_requires_official_sporting_order"
   }
 }
