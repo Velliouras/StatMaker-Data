@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-11-02T19:32:19Z",
+  "generated_at": "2026-11-02T19:52:26Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 230,
-    "fixtures_with_any_stats": 136,
-    "fixtures_with_bb_core_stats": 134,
-    "any_stats_coverage": 0.5913,
-    "bb_core_coverage": 0.5826,
+    "completed_fixtures": 231,
+    "fixtures_with_any_stats": 137,
+    "fixtures_with_bb_core_stats": 135,
+    "any_stats_coverage": 0.5931,
+    "bb_core_coverage": 0.5844,
     "group_counts": {
-      "shots_total": 106,
-      "shots_on_target": 134,
-      "corners": 134,
+      "shots_total": 107,
+      "shots_on_target": 135,
+      "corners": 135,
       "fouls": 27,
-      "yellow_cards": 136,
-      "red_cards": 136,
-      "possession": 134,
+      "yellow_cards": 137,
+      "red_cards": 137,
+      "possession": 135,
       "passes": 26,
       "xg": 26
     },
     "group_coverage": {
-      "shots_total": 0.4609,
-      "shots_on_target": 0.5826,
-      "corners": 0.5826,
-      "fouls": 0.1174,
-      "yellow_cards": 0.5913,
-      "red_cards": 0.5913,
-      "possession": 0.5826,
-      "passes": 0.113,
-      "xg": 0.113
+      "shots_total": 0.4632,
+      "shots_on_target": 0.5844,
+      "corners": 0.5844,
+      "fouls": 0.1169,
+      "yellow_cards": 0.5931,
+      "red_cards": 0.5931,
+      "possession": 0.5844,
+      "passes": 0.1126,
+      "xg": 0.1126
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.5913 < 0.65",
-      "low BB-core coverage: 0.5826 < 0.65",
+      "low any-stats coverage: 0.5931 < 0.65",
+      "low BB-core coverage: 0.5844 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -19390,6 +19390,90 @@
         "fulltime": {
           "home": 2,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1497743,
+      "date_utc": "2026-11-02T18:00:00+00:00",
+      "country": "Sweden",
+      "league": "Superettan",
+      "league_code": "SWE2",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 114,
+      "round": "Regular Season - 29",
+      "home_team": "Osters IF",
+      "away_team": "Helsingborg",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 8,
+        "AS": 19,
+        "HST": 7,
+        "AST": 9,
+        "HC": 6,
+        "AC": 10,
+        "HF": null,
+        "AF": null,
+        "HY": 2,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 45,
+        "APossession": 55,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 0,
+      "home_score": 3,
+      "away_score": 0,
+      "fthg": 3,
+      "ftag": 0,
+      "hthg": null,
+      "htag": null,
+      "goals": {
+        "home": 3,
+        "away": 0
+      },
+      "score": {
+        "halftime": {
+          "home": null,
+          "away": null
+        },
+        "fulltime": {
+          "home": 3,
+          "away": 0
         },
         "extratime": {
           "home": null,
