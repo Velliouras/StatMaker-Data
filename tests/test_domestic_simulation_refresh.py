@@ -72,6 +72,14 @@ class DomesticSimulationRefreshTest(unittest.TestCase):
             root=Path(folder);priority(root,[final(goals=(None,0))])
             with self.assertRaises(ValueError):overlay(root,entry(),{'fixtures':[]})
 
+    def test_future_final_is_excluded_and_unbound_pure_inputs_do_not_read_live_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder)
+            future=final();future['date_utc']=(datetime.now(timezone.utc)+timedelta(days=5)).isoformat()
+            priority(root,[future])
+            self.assertEqual([],overlay(root,entry(),{'fixtures':[]})['fixtures'])
+            self.assertEqual({},verified_points(root,{'league_code':'G1'},[]))
+
     def test_verified_points_preserve_deductions_and_reject_delayed_table(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder)

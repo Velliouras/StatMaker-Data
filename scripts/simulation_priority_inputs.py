@@ -5,15 +5,18 @@ import json
 
 
 def read_model(root, entry):
+    season = entry.get('api_football_season') or entry.get('target_api_football_season')
+    league_id = entry.get('api_football_league_id') or entry.get('target_api_football_league_id')
+    if not season or not league_id:
+        return None
     path = root/'data/statmaker/priority_refresh'/(str(entry.get('league_code'))+'.json')
     if not path.is_file():
         return None
     doc = json.loads(path.read_text())
-    season = entry.get('api_football_season') or entry.get('target_api_football_season')
     if (doc.get('contract') != 'statmaker-league-tables-v1'
             or doc.get('leagueCode') != entry.get('league_code')
             or str(doc.get('season')) != str(season)
-            or str(doc.get('apiFootballLeagueId')) != str(entry.get('api_football_league_id') or entry.get('target_api_football_league_id'))):
+            or str(doc.get('apiFootballLeagueId')) != str(league_id)):
         raise ValueError('Priority simulation input identity mismatch: '+str(entry.get('league_code')))
     return doc
 
@@ -39,8 +42,11 @@ def overlay(root, entry, payload):
                 or any(type(f.get(k)) is not int or f[k] < 0 for k in ('home_goals','away_goals'))):
             raise ValueError('Invalid verified final in priority simulation input')
         date = datetime.fromisoformat(str(f['date_utc']).replace('Z','+00:00'))
-        if date.utcoffset() is None or date > now+timedelta(minutes=1):
+        if date.utcoffset() is None:
             raise ValueError('Invalid final date in priority simulation input')
+        if date > now+timedelta(minutes=1):
+            print('SIMULATION_FUTURE_FINAL_IGNORED code='+str(doc['leagueCode'])+' fixture='+str(f['fixture_id']),flush=True)
+            continue
         old = rows.get(f['fixture_id'], {})
         hg, ag = f['home_goals'], f['away_goals']
         rows[f['fixture_id']] = {**old, 'fixture_id': f['fixture_id'], 'date': f['date_utc'],

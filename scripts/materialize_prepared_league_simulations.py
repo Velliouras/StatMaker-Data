@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone, timedelta
 import hashlib
 import json
 import math
@@ -384,6 +385,14 @@ def current_season_fixtures(entry: dict[str, Any], payload: dict[str, Any]) -> l
         if str(row.get("status") or "").upper() not in FINISHED_STATUSES:
             continue
         if fixture_goals(row) is None:
+            continue
+        try:
+            kickoff = datetime.fromisoformat(str(row.get('date') or row.get('date_utc') or '').replace('Z','+00:00'))
+            if kickoff.tzinfo is None:
+                kickoff = kickoff.replace(tzinfo=timezone.utc)
+            if kickoff > datetime.now(timezone.utc)+timedelta(minutes=1):
+                continue
+        except (ValueError, TypeError):
             continue
         date = fixture_date(row)
         if start_date and date and date < start_date:
