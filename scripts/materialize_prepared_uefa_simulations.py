@@ -751,6 +751,10 @@ CACHED_UEFA_TABLES = {"champions_league": ("CL", 2), "europa_league": ("EL", 3),
                       "conference_league": ("UECL", 848)}
 
 
+class UefaStandingsPending(ValueError):
+    """Official standings are consistent with an older set of verified results."""
+
+
 def cached_competition(competition: dict[str, Any], season: int, root: Path = ROOT):
     """One source for current table, completed results and remaining schedule; no API."""
     cid = competition["competitionId"]
@@ -791,10 +795,14 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
         raise ValueError(f"{cid}: incomplete league-phase schedule")
     table = {t: TableRow() for t in pots}
     finished = {}
+    histories = {t: [(0, 0, 0, 0)] for t in pots}
     for f in fixtures:
         if f.status in FINISHED:
             apply_result(table, f.home, f.away, f.home_goals, f.away_goals)
             finished[f.fixture_id] = (f.home_goals, f.away_goals)
+            for team in (f.home, f.away):
+                t = table[team]
+                histories[team].append((t.played, t.points, t.gf, t.ga))
     stats_path = root / "data/statmaker/uefa_current_stats.json"
     if stats_path.is_file():
         stats = json.loads(stats_path.read_text())
@@ -804,18 +812,30 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
                     for f in comp.get("fixtures") or []:
                         if f.get("status") in FINISHED and finished.get(int(f["fixtureId"])) != (f["homeGoals"], f["awayGoals"]):
                             raise ValueError(f"{cid}: tables are behind published UEFA results")
-    ranks = {}
+    ranks, official_played = {}, {}
+    behind = []
     for row in source.get("standings") or []:
         team = resolve_team(str(row.get("team") or ""), aliases, list(pots))
         if team is None or team in ranks:
             raise ValueError(f"{cid}: unknown/duplicate standing: {row.get('team')}")
-        t = table[team]
-        if (t.played, t.points, t.gf, t.ga) != tuple(int(row.get(k, -1))
-                    for k in ("played", "points", "goalsFor", "goalsAgainst")):
+        official = tuple(int(row.get(k, -1)) for k in ("played", "points", "goalsFor", "goalsAgainst"))
+        if official not in histories[team]:
             raise ValueError(f"{cid}/{team}: standings disagree with completed fixtures")
+        official_played[team] = official[0]
+        if official[0] < table[team].played:
+            behind.append(team)
         ranks[team] = int(row["rank"])
     if set(ranks) != set(pots) or set(ranks.values()) != set(range(1, 37)):
         raise ValueError(f"{cid}: incomplete standings")
+    if behind:
+        # An official table can only include a match for both participants.
+        seen = Counter()
+        for f in fixtures:
+            if f.fixture_id in finished:
+                seen.update((f.home, f.away))
+                if (seen[f.home] <= official_played[f.home]) != (seen[f.away] <= official_played[f.away]):
+                    raise ValueError(f"{cid}: standings disagree on inclusion of fixture {f.fixture_id}")
+        raise UefaStandingsPending(f"{cid}: official standings have not yet included results for {', '.join(behind)}")
     return fixtures, logos, ranks, league_id
 
 

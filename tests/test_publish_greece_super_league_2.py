@@ -19,6 +19,7 @@ FILES = (
 )
 MANIFEST = "data/statmaker/update_manifest.json"
 OTHER = "data/statmaker/uefa_current_stats.json"
+INDEX = FILES[2]
 
 
 class PublishG2Test(unittest.TestCase):
@@ -32,7 +33,13 @@ class PublishG2Test(unittest.TestCase):
     def write(self, repo, path, value):
         out = repo / path
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(json.dumps({"generatedAt": "2026-10-21T07:00:00Z", "value": value}))
+        doc = {"generatedAt": "2026-10-21T07:00:00Z", "value": value}
+        if path == INDEX:
+            doc = {"generated_at": "2026-10-21T07:00:00Z", "league_count": 2, "leagues": [
+                {"league_code": "G1", "league": "Super League 1", "value": "initial"},
+                {"league_code": "G2", "league": "Super League 2", "value": value},
+            ]}
+        out.write_text(json.dumps(doc))
 
     def manifest(self, repo):
         self.run_cmd(repo, sys.executable, "scripts/build_statmaker_update_manifest.py",
@@ -85,7 +92,35 @@ class PublishG2Test(unittest.TestCase):
         self.assertEqual(actual, (self.work / MANIFEST).read_text())
 
     def test_real_source_overlap_is_rejected_without_overwrite(self):
-        self.advance_other(FILES[2])
+        self.advance_other(INDEX)
+        remote_before = self.git(self.other, "rev-parse", "HEAD")
+        result = self.publish()
+        self.assertNotEqual(0, result.returncode, result.stdout)
+        self.assertIn("refusing to overwrite", result.stdout)
+        self.assertEqual(remote_before, self.git(self.work, "ls-remote", "origin", "refs/heads/main").split()[0])
+
+    def test_other_league_index_update_is_preserved_when_g2_is_published(self):
+        path = self.other / INDEX
+        doc = json.loads(path.read_text())
+        doc["leagues"][0]["value"] = "g1-new"
+        doc["leagues"].append({"league_code": "E0", "league": "Premier League", "value": "e0-new"})
+        doc["league_count"] = 3
+        doc["otherProducerMetadata"] = {"keep": True}
+        path.write_text(json.dumps(doc))
+        self.advance_other()
+        result = self.publish()
+        self.assertEqual(0, result.returncode, result.stdout)
+        actual = json.loads(self.git(self.work, "show", "origin/main:" + INDEX))
+        self.assertEqual({"G1": "g1-new", "G2": "g2-new", "E0": "e0-new"},
+                         {r["league_code"]: r["value"] for r in actual["leagues"]})
+        self.assertEqual(3, actual["league_count"])
+        self.assertEqual({"keep": True}, actual["otherProducerMetadata"])
+        actual_manifest = (self.work / MANIFEST).read_text()
+        self.manifest(self.work)
+        self.assertEqual(actual_manifest, (self.work / MANIFEST).read_text())
+
+    def test_owned_data_overlap_is_rejected_without_overwrite(self):
+        self.advance_other(FILES[1])
         remote_before = self.git(self.other, "rev-parse", "HEAD")
         result = self.publish()
         self.assertNotEqual(0, result.returncode, result.stdout)

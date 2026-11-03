@@ -23,6 +23,7 @@ class PostmatchRefreshTests(unittest.TestCase):
             "fixture_id": 555,
             "date_utc": "2026-10-20T19:00:00+00:00",
             "status": "NS",
+            "round": "League Stage - 3",
         }
         self.docs = {}
         for code in ["CL", "EL", "UECL"]:
@@ -75,6 +76,24 @@ class PostmatchRefreshTests(unittest.TestCase):
         self.docs["CL"]["scorers"]["verifiedFixtures"] = 0
         self.save()
         self.assertTrue(due(self.root, "tables", self.at)[0])
+
+    def test_watchdog_retries_lagging_standings_even_with_complete_scorers(self):
+        doc = self.docs["CL"]
+        doc["fixtures"][0].update(status="FT", home_goals=2, away_goals=1)
+        doc["scorers"]["verifiedFixtures"] = 1
+        self.save()
+        self.assertTrue(due(self.root, "tables", self.at, watchdog=True)[0])
+        for candidate in self.docs.values():
+            candidate["generatedAtUTC"] = self.at.isoformat()
+        self.save()
+        self.assertFalse(due(self.root, "tables", self.at, watchdog=True)[0])
+        after_cooldown = self.at + timedelta(minutes=30)
+        self.assertTrue(due(self.root, "tables", after_cooldown, watchdog=True)[0])
+        doc["standings"] = [{"played": 1}, {"played": 1}]
+        doc["fixtures"].append({**doc["fixtures"][0], "fixture_id": 556, "round": "Round of 16"})
+        doc["scorers"]["verifiedFixtures"] = 2
+        self.save()
+        self.assertFalse(due(self.root, "tables", after_cooldown, watchdog=True)[0])
 
     def test_fresh_priority_final_triggers_uefa_stats_before_tables_catch_up(self):
         at = datetime(2026, 10, 20, 21, 5, tzinfo=timezone.utc)

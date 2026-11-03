@@ -54,35 +54,45 @@ def unaffected_digest(con):
     return h.hexdigest(), counts
 
 
+def defer_refresh(reason, **details):
+    # Verify the retained published ZIP without claiming a new simulation run.
+    before_raw = MANIFEST.read_bytes()
+    published = json.loads(before_raw)
+    with tempfile.TemporaryDirectory() as directory:
+        bundle_db(published, Path(directory))
+    artifact = next(a for a in published["artifacts"] if a["id"] == "app_ready_betting_bundle")
+    previous = json.loads(REPORT.read_text()) if REPORT.is_file() else {}
+    retained = previous.get("lastSuccessfulRefresh")
+    if retained is None and previous.get("protectedTablesUnchanged"):
+        retained = previous
+    report = dict(status="deferred", reason=str(reason), apiRequestsUsed=0,
+                  publicRatingRefreshed=False, publishedBundleRetained=artifact["sha256"],
+                  publishedDataPreserved=True, **details)
+    if retained:
+        report["lastSuccessfulRefresh"] = retained
+    REPORT.parent.mkdir(parents=True, exist_ok=True)
+    REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+    assert MANIFEST.read_bytes() == before_raw, "Deferred refresh changed the published manifest"
+    print("::warning::UEFA simulation refresh deferred; retaining the published verified bundle. " + str(reason))
+    print("UEFA_SIMULATION_REFRESH_DEFERRED " + json.dumps(report))
+    return 0
+
+
 def main():
     config = json.loads(sim.CONFIG_PATH.read_text())
+    pending = []
+    for comp in config["competitions"]:
+        try:
+            sim.cached_competition(comp, int(config["season"]), ROOT)
+        except sim.UefaStandingsPending as error:
+            pending.append(str(error))
+    if pending:
+        return defer_refresh("; ".join(pending), deferredInput="official-standings")
     try:
         public_rating_refreshed = strengths.refresh_snapshot(ROOT)
     except strengths.ClubStrengthSourceUnavailable as error:
-        # A source outage is a deferred refresh, not a new successful model run.
-        # Verify the retained published ZIP before preserving its output unchanged.
-        before_raw = MANIFEST.read_bytes()
-        published = json.loads(before_raw)
-        with tempfile.TemporaryDirectory() as directory:
-            bundle_db(published, Path(directory))
-        artifact = next(a for a in published["artifacts"] if a["id"] == "app_ready_betting_bundle")
-        previous = json.loads(REPORT.read_text()) if REPORT.is_file() else {}
-        retained = previous.get("lastSuccessfulRefresh")
-        if retained is None and previous.get("protectedTablesUnchanged"):
-            retained = previous
-        report = dict(status="deferred", reason=str(error), apiRequestsUsed=0,
-                      publicRatingRefreshed=False, ratingSourceAsOf=error.source_as_of,
-                      nextRatingAttemptAt=error.next_attempt,
-                      publishedBundleRetained=artifact["sha256"],
-                      publishedDataPreserved=True)
-        if retained:
-            report["lastSuccessfulRefresh"] = retained
-        REPORT.parent.mkdir(parents=True, exist_ok=True)
-        REPORT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
-        assert MANIFEST.read_bytes() == before_raw, "Deferred refresh changed the published manifest"
-        print("::warning::UEFA simulation refresh deferred; retaining the published verified bundle. " + str(error))
-        print("UEFA_SIMULATION_REFRESH_DEFERRED " + json.dumps(report))
-        return 0
+        return defer_refresh(error, ratingSourceAsOf=error.source_as_of,
+                             nextRatingAttemptAt=error.next_attempt)
     fingerprint = sim.cached_source_fingerprint(config)
     before = json.loads(MANIFEST.read_text())
     current_bundle = next(a for a in before["artifacts"] if a["id"] == "app_ready_betting_bundle")

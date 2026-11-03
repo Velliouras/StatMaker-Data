@@ -112,4 +112,24 @@ class StrengthRefreshResilienceTest(unittest.TestCase):
              patch.object(refresh.strengths,'refresh_snapshot',side_effect=source.ClubStrengthSourceUnavailable('HTTP 403','2026-10-25','2026-11-01T14:00:00Z')):
             with self.assertRaisesRegex(ValueError,'SHA256'):refresh.main()
 
+    def test_lagging_standings_defer_before_ratings_or_generation(self):
+        config, manifest, bundle = self.published()
+        config.write_text('{"season":2026,"competitions":[{}]}')
+        report = self.root / 'report.json'
+        before = manifest.read_bytes(), bundle.read_bytes()
+        with patch.object(refresh, 'ROOT', self.root), patch.object(refresh, 'MANIFEST', manifest), \
+             patch.object(refresh, 'REPORT', report), patch.object(refresh.sim, 'CONFIG_PATH', config), \
+             patch.object(refresh.sim, 'cached_competition',
+                          side_effect=refresh.sim.UefaStandingsPending('waiting for official standings')), \
+             patch.object(refresh.strengths, 'refresh_snapshot') as ratings, \
+             patch.object(refresh.subprocess, 'run') as generate:
+            self.assertEqual(0, refresh.main())
+        ratings.assert_not_called()
+        generate.assert_not_called()
+        self.assertEqual(before, (manifest.read_bytes(), bundle.read_bytes()))
+        status = json.loads(report.read_text())
+        self.assertEqual('deferred', status['status'])
+        self.assertEqual('official-standings', status['deferredInput'])
+        self.assertTrue(status['publishedDataPreserved'])
+
 if __name__=='__main__':unittest.main()

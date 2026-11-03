@@ -98,7 +98,13 @@ class UefaSimulationModelV2Test(unittest.TestCase):
     def test_source_elo_results_already_in_snapshot_are_not_counted_twice(self):
         config = json.loads(sim.CONFIG_PATH.read_text())
         comp = next(c for c in config['competitions'] if c['competitionId']=='conference_league')
-        fixtures, logos, _, league_id = sim.cached_competition(comp, int(config['season']))
+        teams = list(sim.participant_maps(comp)[1])
+        fixtures = [sim.Fixture(i * 3 + offset, comp['phaseStart'], 'NS', '', team,
+                                teams[(i + offset) % len(teams)], None, None, None, None)
+                    for i, team in enumerate(teams) for offset in (1, 2, 3)]
+        played = next(f for f in fixtures if f.home == 'Panathinaikos')
+        played.status, played.home_goals, played.away_goals = 'FT', 3, 0
+        logos, league_id = {}, sim.CACHED_UEFA_TABLES[comp['competitionId']][1]
         snapshot, mapped, _ = strengths.load_catalog()
         snapshot = dict(snapshot, throughDate=max(f.date for f in fixtures if f.status in sim.FINISHED))
         profiles = {t: {'attack': 1., 'defense': 1., 'samples': 0} for t in mapped}

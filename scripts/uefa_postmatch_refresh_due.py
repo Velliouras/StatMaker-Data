@@ -35,8 +35,14 @@ def load(path):
         return {}
 
 
+def standings_behind(doc, completed):
+    league_stage_finals = sum(str(f.get("round", "")).lower().startswith("league stage")
+                              for f in completed)
+    return sum(int(row.get("played") or 0) for row in doc.get("standings") or []) < 2 * league_stage_finals
+
+
 def watchdog_tables_due(root, docs, now):
-    """Retry verified result/scorer gaps even when older than the cron lookback."""
+    """Retry result, standings and scorer gaps, including beyond the cron lookback."""
     current = load(root / "data/statmaker/uefa_current_stats.json")
     phases = {{"CONF": "UECL"}.get(c.get("leagueCode"), c.get("leagueCode")):
               str(c.get("phaseStart") or str(c.get("season")) + "-09-01")
@@ -60,14 +66,15 @@ def watchdog_tables_due(root, docs, now):
                 old = completed.get(f["fixture_id"])
                 if old is None or any(old.get(k) != f[k] for k in ("home_goals", "away_goals")):
                     missing.append(code)
-        if int((doc.get("scorers") or {}).get("verifiedFixtures") or 0) < len(completed):
+        if (standings_behind(doc, completed.values()) or
+                int((doc.get("scorers") or {}).get("verifiedFixtures") or 0) < len(completed)):
             missing.append(code)
     if not missing:
-        return False, "uefa-scorer-events-complete"
+        return False, "uefa-tables-and-scorers-complete"
     stamps = [parse_date(doc.get("generatedAtUTC")) for doc in docs.values()]
     if all(stamps) and all(int(stamp.timestamp()) // 1800 == int(now.timestamp()) // 1800 for stamp in stamps):
-        return False, "uefa-scorer-half-hour-cooldown"
-    return True, "incomplete-uefa-scorers:" + ",".join(sorted(set(missing)))
+        return False, "uefa-tables-half-hour-cooldown"
+    return True, "incomplete-uefa-tables-or-scorers:" + ",".join(sorted(set(missing)))
 
 
 def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
@@ -145,11 +152,9 @@ def due(root: Path, target: str, at: datetime | None = None, watchdog=False):
             if status not in COMPLETED:
                 missing.append((code, fid))
         for code, doc in docs.items():
-            completed = sum(f.get("status") in COMPLETED for f in doc.get("fixtures") or [])
-            played = sum(int(s.get("played") or 0) for s in doc.get("standings") or [])
+            completed = [f for f in doc.get("fixtures") or [] if f.get("status") in COMPLETED]
             sc = doc.get("scorers") or {}
-            if completed and (played < completed * 2 or
-                              int(sc.get("verifiedFixtures") or 0) < completed):
+            if standings_behind(doc, completed) or int(sc.get("verifiedFixtures") or 0) < len(completed):
                 missing.append((code, "standings-or-scorers"))
         stamps = [parse_date(doc.get("generatedAtUTC")) for doc in docs.values()]
         generated = min(stamps) if all(stamps) else None
