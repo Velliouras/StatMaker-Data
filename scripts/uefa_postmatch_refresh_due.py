@@ -38,7 +38,8 @@ def load(path):
 def standings_behind(doc, completed):
     league_stage_finals = sum(str(f.get("round", "")).lower().startswith("league stage")
                               for f in completed)
-    return sum(int(row.get("played") or 0) for row in doc.get("standings") or []) < 2 * league_stage_finals
+    official = doc.get("officialStandings") or doc.get("standings") or []
+    return sum(int(row.get("played") or 0) for row in official) < 2 * league_stage_finals
 
 
 def watchdog_tables_due(root, docs, now):

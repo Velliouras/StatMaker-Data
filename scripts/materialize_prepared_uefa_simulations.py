@@ -28,6 +28,10 @@ try:
     from .simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
 except ImportError:
     from simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
+try:
+    from .reconcile_priority_standings import champions_league_projection
+except ImportError:
+    from reconcile_priority_standings import champions_league_projection
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_simulation_2026_27.json"
@@ -812,6 +816,12 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
                     for f in comp.get("fixtures") or []:
                         if f.get("status") in FINISHED and finished.get(int(f["fixtureId"])) != (f["homeGoals"], f["awayGoals"]):
                             raise ValueError(f"{cid}: tables are behind published UEFA results")
+    projected = source.get("standingsSource") == "champions_league_verified_finals"
+    if projected:
+        projection = champions_league_projection(
+            source, datetime.fromisoformat(source["generatedAtUTC"].replace("Z", "+00:00")))
+        if projection is None or projection[0] != source.get("standings"):
+            raise ValueError(f"{cid}: invalid projected standings")
     ranks, official_played = {}, {}
     behind = []
     for row in source.get("standings") or []:
@@ -825,7 +835,7 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
         if official[0] < table[team].played:
             behind.append(team)
         ranks[team] = int(row["rank"])
-    if set(ranks) != set(pots) or set(ranks.values()) != set(range(1, 37)):
+    if set(ranks) != set(pots) or (not projected and set(ranks.values()) != set(range(1, 37))):
         raise ValueError(f"{cid}: incomplete standings")
     if behind:
         # An official table can only include a match for both participants.

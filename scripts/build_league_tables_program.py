@@ -20,6 +20,10 @@ try:
     from api_football_budget import BudgetStop, priority
 except ImportError:
     from api_budget_runtime.api_football_budget import BudgetStop, priority
+try:
+    from .reconcile_priority_standings import reconcile as reconcile_standings
+except ImportError:
+    from reconcile_priority_standings import reconcile as reconcile_standings
 
 COMPLETED = {"FT", "AET", "PEN"}
 CANCELLED = {"CANC", "ABD", "AWD", "WO"}
@@ -219,11 +223,13 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
     if standings_raw is None:
         standings_raw = provider.get(f"{code}_{season}_standings", "standings", {"league": league_id, "season": season})
     standings = []
+    standings_groups = 0
     for response in standings_raw:
         league = response.get("league") or {}
         if league.get("id") != league_id or league.get("season") != season:
             continue
         for group in league.get("standings") or []:
+            standings_groups += 1
             for item in group:
                 team = item.get("team") or {}
                 all_games = item.get("all") or {}
@@ -231,6 +237,7 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
                 if not team.get("name") or not isinstance(item.get("rank"), int):
                     continue
                 standings.append({"rank": item["rank"], "team": aliases.get(team.get("id")) or team["name"],
+                    **({"teamId": team.get("id")} if code == "CL" else {}),
                     "teamLogo": team.get("logo"), "played": all_games.get("played", 0),
                     "wins": all_games.get("win", 0), "draws": all_games.get("draw", 0),
                     "losses": all_games.get("lose", 0), "goalsFor": goals.get("for", 0),
@@ -258,7 +265,7 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
                 totals[(goal["player"], goal["team"])] += 1
     leaders = [{"player": player, "team": team, "goals": goals} for (player, team), goals in totals.items()]
     leaders.sort(key=lambda p: (-p["goals"], p["player"], p["team"]))
-    return {"contract": CONTRACT, "schemaVersion": 1, "generatedAtUTC": now(),
+    document = {"contract": CONTRACT, "schemaVersion": 1, "generatedAtUTC": now(),
         "leagueCode": code, "country": "UEFA", "competition": name, "season": season,
         "displaySeason": str(comp.get("displaySeason") or f"{season}-{season+1}"),
         "apiFootballLeagueId": league_id, "fixtures": list(fixtures.values()),
@@ -266,6 +273,9 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
         "hasCompletedFixtures": bool(completed), "goalEvents": events,
         "scorers": {"verified": bool(fixtures) and validated == len(completed), "season": season,
                     "completedFixtures": len(completed), "verifiedFixtures": validated, "players": leaders}}
+    if code == "CL" and standings_groups == 1:
+        document["singleStandingsGroup"] = True
+    return document
 
 
 def build(root, provider, uefa_only=False):
@@ -327,7 +337,11 @@ def build(root, provider, uefa_only=False):
                 incoming[f["fixture_id"]] = f
             doc["fixtures"] = list(incoming.values())
             if not doc["standings"]:
-                doc["standings"] = old.get("standings", [])
+                doc["standings"] = old.get("officialStandings") or old.get("standings", [])
+                if code == "CL":
+                    doc["singleStandingsGroup"] = old.get("officialSingleStandingsGroup", False)
+        if code == "CL" and doc.get("singleStandingsGroup"):
+            reconcile_standings(doc, datetime.fromisoformat(doc["generatedAtUTC"]))
         if not any(f["status"] not in COMPLETED | CANCELLED for f in doc["fixtures"]):
             warnings.append(code + ": no upcoming provider fixtures available")
         if not doc["scorers"]["verified"]:

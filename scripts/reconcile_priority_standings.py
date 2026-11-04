@@ -5,12 +5,14 @@ official W/D/L and goals match its chronological prefix of completed fixtures.
 This preserves point deductions and rejects incomplete or mixed-phase histories.
 Unresolved ties keep the official table until the provider resolves the sporting order.
 """
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 from datetime import datetime, timezone
 import re
 
 FIELDS = ('played', 'wins', 'draws', 'losses', 'goalsFor', 'goalsAgainst')
+FINAL = {'FT', 'AET', 'PEN'}
+CL_STAGE = re.compile(r'league stage\s*-\s*([1-8])', re.IGNORECASE)
 
 
 def totals(matches, team_id):
@@ -24,6 +26,88 @@ def totals(matches, team_id):
         result['goalsFor'] += scored
         result['goalsAgainst'] += conceded
     return result
+
+
+def champions_league_projection(doc, now):
+    """Return the provisional MD1–7 table, or None if the evidence is incomplete.
+
+    UEFA's live table uses Article 18(a–e) and shares ranks on exact ties.
+    The final matchday needs disciplinary and coefficient data; leave that
+    table to the provider. https://www.uefa.com/uefachampionsleague/news/0291-1bd88ae04870-e1e038c319e3-1000--champions-league-league-phase-standings-how-t/
+    """
+    official = doc.get('officialStandings') or []
+    if (doc.get('leagueCode'), doc.get('apiFootballLeagueId'), doc.get('country')) != ('CL', 2, 'UEFA'):
+        return None
+    if not doc.get('officialSingleStandingsGroup') or len(official) != 36:
+        return None
+    teams = {r.get('teamId') for r in official}
+    if (len(teams) != 36 or any(type(t) is not int or t <= 0 for t in teams)
+            or {r.get('rank') for r in official} != set(range(1, 37))
+            or any(not str(r.get('team') or '').strip()
+                   or any(type(r.get(k)) is not int or r[k] < 0 for k in FIELDS + ('points',))
+                   or r['points'] != 3 * r['wins'] + r['draws'] for r in official)):
+        return None
+
+    rounds, by_team = defaultdict(Counter), defaultdict(list)
+    fixture_ids, opponent_pairs = set(), set()
+    for match in doc.get('fixtures', []):
+        phase = CL_STAGE.fullmatch(str(match.get('round') or '').strip())
+        if not phase:
+            continue
+        md = int(phase[1])
+        fid, home, away = (match.get(k) for k in ('fixture_id', 'home_team_id', 'away_team_id'))
+        if (type(fid) is not int or fid <= 0 or fid in fixture_ids
+                or home not in teams or away not in teams or home == away):
+            return None
+        pair = frozenset((home, away))
+        if pair in opponent_pairs:
+            return None
+        opponent_pairs.add(pair)
+        fixture_ids.add(fid)
+        rounds[md].update((home, away))
+        if match.get('status') not in FINAL:
+            continue
+        if (md == 8 or match['status'] != 'FT'
+                or any(type(match.get(k)) is not int or match[k] < 0 for k in ('home_goals', 'away_goals'))):
+            return None
+        try:
+            kickoff = datetime.fromisoformat(str(match.get('date_utc')).replace('Z', '+00:00'))
+        except ValueError:
+            return None
+        if kickoff.utcoffset() is None or kickoff > now:
+            return None
+        for team in (home, away):
+            by_team[team].append((kickoff.astimezone(timezone.utc), fid, match))
+    if set(rounds) != set(range(1, 9)) or any(dict(members) != dict.fromkeys(teams, 1)
+                                               for members in rounds.values()):
+        return None
+
+    ranked, additions, included = [], Counter(), Counter()
+    for row in official:
+        team = row['teamId']
+        matches = [m for _, _, m in sorted(by_team[team], key=lambda x: x[:2])]
+        played = row['played']
+        if played > len(matches) or totals(matches[:played], team) != {k: row[k] for k in FIELDS}:
+            return None
+        included.update(m['fixture_id'] for m in matches[:played])
+        additions.update(m['fixture_id'] for m in matches[played:])
+        full = totals(matches, team)
+        pts = 3 * full['wins'] + full['draws']
+        away = [m for m in matches if m['away_team_id'] == team]
+        key = (pts, full['goalsFor'] - full['goalsAgainst'], full['goalsFor'],
+               sum(m['away_goals'] for m in away), full['wins'],
+               sum(m['away_goals'] > m['home_goals'] for m in away))
+        ranked.append((key, {**row, **full, 'points': pts}))
+    if not additions or any(n != 2 for n in (*included.values(), *additions.values())):
+        return None
+    ranked.sort(key=lambda pair: (tuple(-n for n in pair[0]), pair[1]['team'].casefold()))
+    rank, previous = 0, None
+    for index, (key, row) in enumerate(ranked, 1):
+        if key != previous:
+            rank = index
+        row['rank'] = rank
+        previous = key
+    return [row for _, row in ranked], sorted(additions)
 
 
 def reconcile(doc, now):
@@ -47,6 +131,20 @@ def reconcile(doc, now):
         report.update(status='awaiting_official', reason=reason)
         return was != doc['standings']
 
+    if (doc.get('leagueCode'), doc.get('apiFootballLeagueId'), doc.get('country')) == ('CL', 2, 'UEFA'):
+        projection = champions_league_projection(doc, now)
+        if projection is None:
+            if sum(r.get('played', 0) for r in official) < 2 * sum(
+                f.get('status') in FINAL and CL_STAGE.fullmatch(str(f.get('round') or '').strip()) is not None
+                for f in doc.get('fixtures', [])
+            ):
+                return defer('champions_league_projection_not_verified')
+            return was != doc['standings']
+        doc['standings'], additions = projection
+        doc['standingsSource'] = 'champions_league_verified_finals'
+        doc['standingsReconciledAtUTC'] = now.isoformat()
+        report.update(status='reconciled', appliedFixtureIds=additions)
+        return was != doc['standings']
     if not doc['singleStandingsGroup'] or doc.get('leagueCode') in {'CL', 'EL', 'UECL'}:
         return defer('phase_or_competition_rules')
     teams = {row.get('teamId') for row in official}

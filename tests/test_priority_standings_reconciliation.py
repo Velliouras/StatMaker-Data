@@ -37,7 +37,51 @@ def document(first=(2, 1), second=(2, 0)):
                 singleStandingsGroup=True, standingsObservedAtUTC=(NOW-timedelta(hours=1)).isoformat())
 
 
+def champions_league():
+    teams = list(range(1, 37))
+    fixtures = []
+    for md in range(1, 9):
+        for home, away in zip(teams[:18], reversed(teams[18:])):
+            fixtures.append(dict(fixture_id=len(fixtures)+1, home_team_id=home, away_team_id=away,
+                                 date_utc=(NOW + timedelta(days=md-7)).isoformat(),
+                                 round=f'League Stage - {md}', status='NS'))
+        teams = [teams[0], teams[-1], *teams[1:-1]]
+    standings = [dict(rank=t, teamId=t, team=f'Team {t:02}', points=0, **totals([], t))
+                 for t in range(1, 37)]
+    return dict(leagueCode='CL', country='UEFA', apiFootballLeagueId=2, fixtures=fixtures,
+                standings=standings, singleStandingsGroup=True)
+
+
 class StandingsReconciliationTest(unittest.TestCase):
+    def test_champions_league_shared_ranks_and_away_goal_tiebreak(self):
+        doc = champions_league()
+        doc['fixtures'][0].update(status='FT', home_goals=2, away_goals=0)
+        doc['fixtures'][1].update(status='FT', home_goals=2, away_goals=0)
+        doc['fixtures'][2].update(status='FT', home_goals=0, away_goals=2)
+        doc['fixtures'][3].update(status='2H', home_goals=5, away_goals=0)
+        doc['fixtures'].append(dict(doc['fixtures'][0], fixture_id=999, round='Qualifying Round'))
+        official = deepcopy(doc['standings'])
+        self.assertTrue(reconcile(doc, NOW))
+        self.assertEqual([(1, 34), (2, 1), (2, 2), (4, 4)],
+                         [(r['rank'], r['teamId']) for r in doc['standings'][:4]])
+        self.assertEqual([1, 2, 3], doc['standingsReconciliation']['appliedFixtureIds'])
+        self.assertEqual(official, doc['officialStandings'])
+        self.assertFalse(reconcile(doc, NOW+timedelta(minutes=5)))
+
+    def test_champions_league_defers_partial_official_inclusion_and_final_matchday(self):
+        for change in ('partial', 'matchday-8', 'incomplete-schedule'):
+            doc = champions_league()
+            doc['fixtures'][0].update(status='FT', home_goals=2, away_goals=0)
+            if change == 'partial':
+                doc['standings'][0].update(played=1, wins=1, goalsFor=2, points=3)
+            elif change == 'matchday-8':
+                doc['fixtures'][-1].update(status='FT', home_goals=1, away_goals=0)
+            else:
+                doc['fixtures'].pop()
+            official = deepcopy(doc['standings'])
+            self.assertFalse(reconcile(doc, NOW), change)
+            self.assertEqual(official, doc['standings'], change)
+
     def test_adds_only_missing_final_and_keeps_verified_source_timestamp(self):
         doc = document()
         before = deepcopy(doc['standings'])
