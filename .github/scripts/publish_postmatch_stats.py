@@ -35,7 +35,8 @@ pipeline.build_app_statistics(registry)
                    'build_domestic_live_july_normalized_stats.py', 'build_uefa_support_history.py']:
         subprocess.run([sys.executable, 'scripts/' + script], check=True)
     subprocess.run([sys.executable, 'scripts/build_statmaker_update_manifest.py',
-                    '--profile', 'main', '--branch', 'main', '--output', DERIVED[5]], check=True)
+                    '--profile', 'main', '--branch', 'main', '--output',
+                    'data/statmaker/update_manifest.json'], check=True)
 
 
 def publish(updated, builder=rebuild, pause=time.sleep):
