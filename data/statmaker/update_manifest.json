@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "a6245a9363a556ad81708c601d02b5b63610b856a7ad886523a1384b3ffae709",
-  "generatedAt": "2026-11-05T15:40:41.833561Z",
+  "contentVersion": "a5c70f7ef5f8646371b9ef3f54a12391b034e36d6201e043f77cb7e92919eeb0",
+  "generatedAt": "2026-11-05T20:02:35.399213Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "151c281bc7cf2427950ecc5eb765bbc9a750849f666844ec71613b2c0dc17ad4",
+      "sha256": "6d42f8714b8a75f36aa924511c3e6b22fef3323d4f8c235f8ea4073c854987be",
       "bytes": 75035,
-      "generatedAt": "2026-11-05T15:40:39Z"
+      "generatedAt": "2026-11-05T20:02:31Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "688561f822e353b53fafe91ecfb7dc7253e3e2fb487b1febafe6d3239b035263",
-      "bytes": 12651465,
+      "sha256": "6699ec94d1bbb951bc18cde07997971a007c40d9a5140d4cf7d9ce9979ef9be4",
+      "bytes": 12652734,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "266153d79ef079edf3b502da9c4ca45c9b9f92f28a987c1c54e65021256239e1",
-      "bytes": 9333430,
-      "generatedAt": "2026-11-05T15:40:41.833561Z"
+      "sha256": "0c4a9a4873f66878586b0540b3883d4d019af772da85e1ab3521d7a1443c16bd",
+      "bytes": 9333547,
+      "generatedAt": "2026-11-05T20:02:35.399213Z"
     },
     {
       "id": "uefa_team_logos",
@@ -786,6 +786,72 @@
         "dates": [
           "2026-11-01",
           "2026-11-07"
+        ]
+      }
+    ]
+  },
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "6699ec94d1bbb951bc18cde07997971a007c40d9a5140d4cf7d9ce9979ef9be4",
+    "transitions": [
+      {
+        "fromSha256": "688561f822e353b53fafe91ecfb7dc7253e3e2fb487b1febafe6d3239b035263",
+        "toSha256": "6699ec94d1bbb951bc18cde07997971a007c40d9a5140d4cf7d9ce9979ef9be4",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1493227,
+            "league_id": 128,
+            "league_code": "ARG",
+            "country": "Argentina",
+            "league": "Liga Profesional Argentina",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-11-05",
+            "home_team": "Aldosivi",
+            "away_team": "River Plate",
+            "stats": {
+              "HS": 2,
+              "AS": 23,
+              "HST": 0,
+              "AST": 9,
+              "HC": 1,
+              "AC": 8,
+              "HF": 18,
+              "AF": 4,
+              "HY": 5,
+              "AY": 1,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 32,
+              "APossession": 68,
+              "HSaves": 7,
+              "ASaves": 0,
+              "HPasses": 250,
+              "APasses": 520,
+              "HPassesAccurate": 166,
+              "APassesAccurate": 435,
+              "HxG": 0.11,
+              "AxG": 2.77,
+              "HShotsOffGoal": 2,
+              "AShotsOffGoal": 8,
+              "HBlockedShots": 0,
+              "ABlockedShots": 6,
+              "HShotsInsideBox": 1,
+              "AShotsInsideBox": 12,
+              "HShotsOutsideBox": 1,
+              "AShotsOutsideBox": 11,
+              "HOffsides": 2,
+              "AOffsides": 1,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 4,
+              "AFreeKicks": 15
+            }
+          }
         ]
       }
     ]
