@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 MODULE = Path(__file__).resolve().parents[1] / '.github/scripts/publish_postmatch_stats.py'
 spec = importlib.util.spec_from_file_location('publisher', MODULE)
@@ -91,6 +92,13 @@ class PublicationTests(unittest.TestCase):
     def test_retry_state_only_does_not_rebuild(self):
         publisher.publish(False, builder=lambda: self.fail('state-only must not rebuild'))
         self.assertEqual(Path('data/statmaker/domestic_enriched/a.json').read_text(), 'old\n')
+
+    def test_rebuild_targets_canonical_manifest(self):
+        with patch.object(publisher.subprocess, 'run') as invoke:
+            publisher.rebuild()
+        commands = [call.args[0] for call in invoke.call_args_list]
+        self.assertEqual(commands[-1][-2:], ['--output', 'data/statmaker/update_manifest.json'])
+        self.assertTrue(all('refresh_recent_finished_match_stats.py' not in ' '.join(c) for c in commands))
 
 
 if __name__ == '__main__':
