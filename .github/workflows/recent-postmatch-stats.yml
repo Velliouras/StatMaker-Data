@@ -11,8 +11,8 @@ permissions:
   actions: write
 
 concurrency:
-  # Fast lane independent of slow squad/odds producers. Canonical publish still
-  # uses compare-and-rebase and refuses file conflicts rather than overwriting them.
+  # Fast lane independent of slow squad/odds producers. Replay only source
+  # changes and rebuild derived outputs on current main after each branch race.
   # Retain one postmatch writer at a time to avoid duplicate provider consumption.
   group: statmaker-postmatch-stats-fast
   queue: max
@@ -48,6 +48,7 @@ jobs:
       - name: Check pure postmatch selection tests
         run: |
           python -m unittest discover -s tests -p 'test_recent_finished_match_stats.py' -q
+          python -m unittest discover -s tests -p 'test_postmatch_publication_race.py' -q
 
       - name: Fetch only recently finished fixtures with missing or partial statistics
         id: postmatch
@@ -57,29 +58,11 @@ jobs:
         run: |
           python scripts/refresh_recent_finished_match_stats.py --max-requests 24
 
-      - name: Rebuild canonical app-facing stats from updated provider caches
-        if: steps.postmatch.outputs.updated == 'true'
-        run: |
-          set -euo pipefail
-          python scripts/expand_domestic_full_stats.py
-          python - <<'PY'
-          import sys
-          from pathlib import Path
-          sys.path.insert(0, str(Path('scripts').resolve()))
-          import domestic_live_july_pipeline as pipeline
-          registry = pipeline.load_json(pipeline.REGISTRY_PATH, {}).get('leagues', [])
-          if not registry:
-              raise SystemExit('Domestic Stats registry is missing')
-          pipeline.build_app_statistics(registry)
-          PY
-          python scripts/finalize_domestic_live_july_artifacts.py
-          python scripts/build_domestic_live_july_normalized_stats.py
-          python scripts/build_uefa_support_history.py
-          python scripts/build_statmaker_update_manifest.py --profile main --branch main --output data/statmaker/update_manifest.json
-
-      - name: Publish only changed official stats and derived read model
+      - name: Publish verified provider caches and rebuild on latest main
         id: publish
         if: steps.postmatch.outputs.updated == 'true' || steps.postmatch.outputs.state_changed == 'true'
+        env:
+          POSTMATCH_UPDATED: ${{ steps.postmatch.outputs.updated }}
         run: |
           set -euo pipefail
           git config user.name 'statmaker-data-bot'
@@ -88,36 +71,15 @@ jobs:
           if [ -f data/statmaker/monitoring/recent_finished_match_stats.json ]; then
             git add data/statmaker/monitoring/recent_finished_match_stats.json
           fi
-          if [ "${{ steps.postmatch.outputs.updated }}" = "true" ]; then
-            git add data/api_football/domestic_normalized_fixture_stats.json
-            git add data/statmaker/domestic_enriched/
-            git add data/statmaker/domestic_rosters.json data/statmaker/uefa_support_history.json data/statmaker/update_manifest.json
-            git add reports/domestic_live_july_full_stats_expansion.json
-          fi
           if git diff --cached --quiet; then
             echo 'No changed stats to publish'
             exit 0
           fi
-          git commit -m 'Publish prompt verified postmatch fixture statistics [skip ci]'
-          # The full stats rebuild may touch auxiliary tracked/untracked reports.
-          # All canonical outputs above are committed; publication must start clean.
+          git commit -m 'Capture verified postmatch source changes [skip ci]'
           git restore --worktree .
-          git clean -fd -- reports data scripts tests
-          if [ -n "$(git status --porcelain)" ]; then
-            echo 'Unexpected uncommitted producer outputs; refusing to rebase' >&2
-            git status --short
-            exit 1
-          fi
-          python .github/scripts/publish_generated_paths.py --rebuild-main-manifest \
-            --path-prefix data/api_football/fixture_stats/ \
-            --path-prefix data/statmaker/monitoring/recent_finished_match_stats.json \
-            --path-prefix data/api_football/domestic_normalized_fixture_stats.json \
-            --path-prefix data/statmaker/domestic_enriched/ \
-            --path-prefix data/statmaker/domestic_rosters.json \
-            --path-prefix data/statmaker/uefa_support_history.json \
-            --path-prefix data/statmaker/update_manifest.json \
-            --path-prefix reports/domestic_live_july_full_stats_expansion.json
-          if [ "${{ steps.postmatch.outputs.updated }}" = "true" ]; then
+          git clean -fd -- reports data
+          python .github/scripts/publish_postmatch_stats.py
+          if [ "$POSTMATCH_UPDATED" = "true" ]; then
             echo 'updated=true' >> "$GITHUB_OUTPUT"
           fi
 
