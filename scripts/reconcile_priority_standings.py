@@ -12,7 +12,11 @@ import re
 
 FIELDS = ('played', 'wins', 'draws', 'losses', 'goalsFor', 'goalsAgainst')
 FINAL = {'FT', 'AET', 'PEN'}
-CL_STAGE = re.compile(r'league stage\s*-\s*([1-8])', re.IGNORECASE)
+UEFA_STAGE = re.compile(r'league stage\s*-\s*([1-8])', re.IGNORECASE)
+UEFA_PHASES = {'CL': (2, 8, 'champions_league_verified_finals'),
+               'EL': (3, 8, 'europa_league_verified_finals'),
+               'UECL': (848, 6, 'conference_league_verified_finals')}
+UEFA_PROJECTED_SOURCES = frozenset(spec[2] for spec in UEFA_PHASES.values())
 
 
 def totals(matches, team_id):
@@ -28,16 +32,18 @@ def totals(matches, team_id):
     return result
 
 
-def champions_league_projection(doc, now):
-    """Return the provisional MD1–7 table, or None if the evidence is incomplete.
+def uefa_league_phase_projection(doc, now):
+    """Return the provisional table, or None if the evidence is incomplete.
 
     UEFA's live table uses Article 18(a–e) and shares ranks on exact ties.
     The final matchday needs disciplinary and coefficient data; leave that
-    table to the provider. https://www.uefa.com/uefachampionsleague/news/0291-1bd88ae04870-e1e038c319e3-1000--champions-league-league-phase-standings-how-t/
+    table to the provider.
     """
     official = doc.get('officialStandings') or []
-    if (doc.get('leagueCode'), doc.get('apiFootballLeagueId'), doc.get('country')) != ('CL', 2, 'UEFA'):
+    spec = UEFA_PHASES.get(doc.get('leagueCode'))
+    if spec is None or (doc.get('apiFootballLeagueId'), doc.get('country')) != (spec[0], 'UEFA'):
         return None
+    _, last_matchday, _ = spec
     if not doc.get('officialSingleStandingsGroup') or len(official) != 36:
         return None
     teams = {r.get('teamId') for r in official}
@@ -51,7 +57,7 @@ def champions_league_projection(doc, now):
     rounds, by_team = defaultdict(Counter), defaultdict(list)
     fixture_ids, opponent_pairs = set(), set()
     for match in doc.get('fixtures', []):
-        phase = CL_STAGE.fullmatch(str(match.get('round') or '').strip())
+        phase = UEFA_STAGE.fullmatch(str(match.get('round') or '').strip())
         if not phase:
             continue
         md = int(phase[1])
@@ -67,7 +73,7 @@ def champions_league_projection(doc, now):
         rounds[md].update((home, away))
         if match.get('status') not in FINAL:
             continue
-        if (md == 8 or match['status'] != 'FT'
+        if (md >= last_matchday or match['status'] != 'FT'
                 or any(type(match.get(k)) is not int or match[k] < 0 for k in ('home_goals', 'away_goals'))):
             return None
         try:
@@ -78,7 +84,7 @@ def champions_league_projection(doc, now):
             return None
         for team in (home, away):
             by_team[team].append((kickoff.astimezone(timezone.utc), fid, match))
-    if set(rounds) != set(range(1, 9)) or any(dict(members) != dict.fromkeys(teams, 1)
+    if set(rounds) != set(range(1, last_matchday + 1)) or any(dict(members) != dict.fromkeys(teams, 1)
                                                for members in rounds.values()):
         return None
 
@@ -131,21 +137,22 @@ def reconcile(doc, now):
         report.update(status='awaiting_official', reason=reason)
         return was != doc['standings']
 
-    if (doc.get('leagueCode'), doc.get('apiFootballLeagueId'), doc.get('country')) == ('CL', 2, 'UEFA'):
-        projection = champions_league_projection(doc, now)
+    spec = UEFA_PHASES.get(doc.get('leagueCode'))
+    if spec is not None and (doc.get('apiFootballLeagueId'), doc.get('country')) == (spec[0], 'UEFA'):
+        projection = uefa_league_phase_projection(doc, now)
         if projection is None:
             if sum(r.get('played', 0) for r in official) < 2 * sum(
-                f.get('status') in FINAL and CL_STAGE.fullmatch(str(f.get('round') or '').strip()) is not None
+                f.get('status') in FINAL and UEFA_STAGE.fullmatch(str(f.get('round') or '').strip()) is not None
                 for f in doc.get('fixtures', [])
             ):
-                return defer('champions_league_projection_not_verified')
+                return defer('uefa_league_phase_projection_not_verified')
             return was != doc['standings']
         doc['standings'], additions = projection
-        doc['standingsSource'] = 'champions_league_verified_finals'
+        doc['standingsSource'] = spec[2]
         doc['standingsReconciledAtUTC'] = now.isoformat()
         report.update(status='reconciled', appliedFixtureIds=additions)
         return was != doc['standings']
-    if not doc['singleStandingsGroup'] or doc.get('leagueCode') in {'CL', 'EL', 'UECL'}:
+    if not doc['singleStandingsGroup'] or spec is not None:
         return defer('phase_or_competition_rules')
     teams = {row.get('teamId') for row in official}
     if (any(type(t) is not int or t <= 0 for t in teams) or len(teams) != len(official)

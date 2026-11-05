@@ -237,7 +237,7 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
                 if not team.get("name") or not isinstance(item.get("rank"), int):
                     continue
                 standings.append({"rank": item["rank"], "team": aliases.get(team.get("id")) or team["name"],
-                    **({"teamId": team.get("id")} if code == "CL" else {}),
+                    "teamId": team.get("id"),
                     "teamLogo": team.get("logo"), "played": all_games.get("played", 0),
                     "wins": all_games.get("win", 0), "draws": all_games.get("draw", 0),
                     "losses": all_games.get("lose", 0), "goalsFor": goals.get("for", 0),
@@ -273,7 +273,7 @@ def uefa_document(root, code, comp, provider, rows=None, standings_raw=None):
         "hasCompletedFixtures": bool(completed), "goalEvents": events,
         "scorers": {"verified": bool(fixtures) and validated == len(completed), "season": season,
                     "completedFixtures": len(completed), "verifiedFixtures": validated, "players": leaders}}
-    if code == "CL" and standings_groups == 1:
+    if standings_groups == 1:
         document["singleStandingsGroup"] = True
     return document
 
@@ -338,9 +338,8 @@ def build(root, provider, uefa_only=False):
             doc["fixtures"] = list(incoming.values())
             if not doc["standings"]:
                 doc["standings"] = old.get("officialStandings") or old.get("standings", [])
-                if code == "CL":
-                    doc["singleStandingsGroup"] = old.get("officialSingleStandingsGroup", False)
-        if code == "CL" and doc.get("singleStandingsGroup"):
+                doc["singleStandingsGroup"] = old.get("officialSingleStandingsGroup", False)
+        if doc.get("singleStandingsGroup"):
             reconcile_standings(doc, datetime.fromisoformat(doc["generatedAtUTC"]))
         if not any(f["status"] not in COMPLETED | CANCELLED for f in doc["fixtures"]):
             warnings.append(code + ": no upcoming provider fixtures available")

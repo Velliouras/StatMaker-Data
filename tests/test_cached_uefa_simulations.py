@@ -15,6 +15,12 @@ class CachedUefaSimulationTests(unittest.TestCase):
         cls.config = json.loads(sim.CONFIG_PATH.read_text())
         cls.comp = next(c for c in cls.config["competitions"] if c["competitionId"] == "conference_league")
         cls.source = json.loads((sim.ROOT / "data/statmaker/league_tables/UECL.json").read_text())
+        # The tests below construct a new provider table. Projection metadata
+        # describes the live fixture results and must not carry over.
+        cls.source["standings"] = cls.source.pop("officialStandings", cls.source["standings"])
+        cls.source.pop("standingsSource", None)
+        for rank, row in enumerate(cls.source["standings"], 1):
+            row["rank"] = rank
         # Keep the schedule and identities; use one known result for unit tests
         # that must run even while the live provider is catching up.
         first = min(cls.source["fixtures"], key=lambda f: (f["date_utc"], f["fixture_id"]))

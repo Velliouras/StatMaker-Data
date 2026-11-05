@@ -29,9 +29,9 @@ try:
 except ImportError:
     from simulation_precision import MATCH_SIMULATION_RUNS, SEASON_SIMULATION_RUNS
 try:
-    from .reconcile_priority_standings import champions_league_projection
+    from .reconcile_priority_standings import UEFA_PHASES, UEFA_PROJECTED_SOURCES, uefa_league_phase_projection
 except ImportError:
-    from reconcile_priority_standings import champions_league_projection
+    from reconcile_priority_standings import UEFA_PHASES, UEFA_PROJECTED_SOURCES, uefa_league_phase_projection
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "uefa_simulation_2026_27.json"
@@ -816,11 +816,12 @@ def cached_competition(competition: dict[str, Any], season: int, root: Path = RO
                     for f in comp.get("fixtures") or []:
                         if f.get("status") in FINISHED and finished.get(int(f["fixtureId"])) != (f["homeGoals"], f["awayGoals"]):
                             raise ValueError(f"{cid}: tables are behind published UEFA results")
-    projected = source.get("standingsSource") == "champions_league_verified_finals"
+    projected = source.get("standingsSource") in UEFA_PROJECTED_SOURCES
     if projected:
-        projection = champions_league_projection(
+        projection = uefa_league_phase_projection(
             source, datetime.fromisoformat(source["generatedAtUTC"].replace("Z", "+00:00")))
-        if projection is None or projection[0] != source.get("standings"):
+        if (source["standingsSource"] != UEFA_PHASES[code][2]
+                or projection is None or projection[0] != source.get("standings")):
             raise ValueError(f"{cid}: invalid projected standings")
     ranks, official_played = {}, {}
     behind = []
