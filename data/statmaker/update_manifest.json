@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "f0f16e72583b026a6eee3eb7f6236573f586b4fbb2b8da6308495a642462c597",
-  "generatedAt": "2026-11-06T00:16:54.180802Z",
+  "contentVersion": "77583e3fca05584929499ca866b9e921e2fa1806542ab4be06541ff38d70519f",
+  "generatedAt": "2026-11-06T00:32:07.959962Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "40a70b7e02e25e2718a43d3208b2fae9f9e544e3e162a53996d00d9a0a11705c",
+      "sha256": "f2ecc19ae3c102bc2e060b4421ee71f4ae4813b59db2fd50b4e9ae442e9d5445",
       "bytes": 75035,
-      "generatedAt": "2026-11-06T00:16:49Z"
+      "generatedAt": "2026-11-06T00:32:03Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "66c93b1d702dc5506cf3b9522fc6f128e71104e42d2460395a1022d5cb960a0b",
-      "bytes": 12654015,
+      "sha256": "3a20d90004cce9bfdbb2a268b5742e30b672af9b5b71428f599223e5500b7ba6",
+      "bytes": 12656512,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "3d828670e16f2a10d3463eed3df511193d2f09bd1a72bcf370dd22bba2a91eb3",
-      "bytes": 9333670,
-      "generatedAt": "2026-11-06T00:16:54.180802Z"
+      "sha256": "0d3103e4ff9aab151df81d7ceaa48b64abd0171b2d9ebf9f3dace18b82c9a276",
+      "bytes": 9333716,
+      "generatedAt": "2026-11-06T00:32:07.959962Z"
     },
     {
       "id": "uefa_team_logos",
@@ -793,7 +793,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "66c93b1d702dc5506cf3b9522fc6f128e71104e42d2460395a1022d5cb960a0b",
+    "targetSha256": "3a20d90004cce9bfdbb2a268b5742e30b672af9b5b71428f599223e5500b7ba6",
     "transitions": [
       {
         "fromSha256": "688561f822e353b53fafe91ecfb7dc7253e3e2fb487b1febafe6d3239b035263",
@@ -909,6 +909,117 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 17,
               "AFreeKicks": 10
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "66c93b1d702dc5506cf3b9522fc6f128e71104e42d2460395a1022d5cb960a0b",
+        "toSha256": "3a20d90004cce9bfdbb2a268b5742e30b672af9b5b71428f599223e5500b7ba6",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1492447,
+            "league_id": 71,
+            "league_code": "BRA",
+            "country": "Brazil",
+            "league": "Serie A",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-11-05",
+            "home_team": "Palmeiras",
+            "away_team": "Remo",
+            "stats": {
+              "HS": 17,
+              "AS": 10,
+              "HST": 9,
+              "AST": 5,
+              "HC": 4,
+              "AC": 3,
+              "HF": 11,
+              "AF": 12,
+              "HY": 0,
+              "AY": 3,
+              "HR": null,
+              "AR": null,
+              "HPossession": 56,
+              "APossession": 44,
+              "HSaves": 4,
+              "ASaves": 4,
+              "HPasses": 483,
+              "APasses": 374,
+              "HPassesAccurate": 418,
+              "APassesAccurate": 317,
+              "HxG": 4.65,
+              "AxG": 0.27,
+              "HShotsOffGoal": 7,
+              "AShotsOffGoal": 4,
+              "HBlockedShots": 1,
+              "ABlockedShots": 1,
+              "HShotsInsideBox": 14,
+              "AShotsInsideBox": 1,
+              "HShotsOutsideBox": 3,
+              "AShotsOutsideBox": 9,
+              "HOffsides": 1,
+              "AOffsides": 1,
+              "HPassAccuracy": 87,
+              "APassAccuracy": 85,
+              "HGoalsPrevented": -0.31,
+              "AGoalsPrevented": -0.31,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          },
+          {
+            "fixture_id": 1520962,
+            "league_id": 72,
+            "league_code": "BRA2",
+            "country": "Brazil",
+            "league": "Serie B",
+            "season": "2026",
+            "api_football_season": "2026",
+            "date": "2026-11-05",
+            "home_team": "Botafogo SP",
+            "away_team": "Londrina",
+            "stats": {
+              "HS": 16,
+              "AS": 8,
+              "HST": 7,
+              "AST": 0,
+              "HC": 3,
+              "AC": 2,
+              "HF": 17,
+              "AF": 14,
+              "HY": 2,
+              "AY": 3,
+              "HR": 0,
+              "AR": 0,
+              "HPossession": 51,
+              "APossession": 49,
+              "HSaves": 0,
+              "ASaves": 3,
+              "HPasses": 483,
+              "APasses": 464,
+              "HPassesAccurate": 412,
+              "APassesAccurate": 393,
+              "HxG": 3.08,
+              "AxG": 0.25,
+              "HShotsOffGoal": 7,
+              "AShotsOffGoal": 5,
+              "HBlockedShots": 2,
+              "ABlockedShots": 3,
+              "HShotsInsideBox": 7,
+              "AShotsInsideBox": 3,
+              "HShotsOutsideBox": 9,
+              "AShotsOutsideBox": 5,
+              "HOffsides": 2,
+              "AOffsides": 3,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 14,
+              "AFreeKicks": 17
             }
           }
         ]
