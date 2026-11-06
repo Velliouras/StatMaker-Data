@@ -1,6 +1,9 @@
 import datetime as dt
+import json
 import sys
+import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +21,29 @@ import update_domestic_odds_api_io as odds_fetch
 class DomesticLiveJulyPipelineTest(unittest.TestCase):
     def season(self, year, start, end):
         return {"year": year, "start": start, "end": end}
+
+    def test_refreshing_a_league_preserves_its_verified_older_season(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scope, freeze = root / "scope.json", root / "freeze.json"
+            scope.write_text(json.dumps({"statsUniverseLeagueCodes": ["D1"]}))
+            freeze.write_text(json.dumps({"snapshots": {"D1:2025": {
+                "frozen": True, "fixtureSetVerified": True,
+                "leagueCode": "D1", "historyApiSeason": "2025"}}}))
+            previous = []
+            for season in ("2024", "2025", "2026"):
+                row = dict(league_code="D1", api_football_season=season, lifecycle="active",
+                           stats_role="historical_support", output_path=f"{season}.json",
+                           cache_path=f"cache-{season}.json")
+                for key in ("output_path", "cache_path"):
+                    (root / row[key]).touch()
+                previous.append(row)
+            with patch.object(pipeline, "ROOT", root), patch.object(pipeline, "FINAL_SCOPE_CONFIG", scope), \
+                 patch.object(pipeline, "HISTORICAL_FREEZE_PATH", freeze):
+                current = [dict(league_code="D1", api_football_season="2026")]
+                self.assertEqual([previous[1]], pipeline._published_stats_continuity_rows(current, previous))
+                (root / previous[1]["cache_path"]).unlink()
+                self.assertEqual([], pipeline._published_stats_continuity_rows(current, previous))
 
     def test_active_season_is_selected(self):
         today = dt.date(2026, 7, 10)

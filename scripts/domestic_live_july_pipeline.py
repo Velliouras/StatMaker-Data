@@ -29,6 +29,7 @@ DOMESTIC_CONFIG = ROOT / "config" / "domestic_leagues.json"
 ENRICHMENT_CONFIG = ROOT / "config" / "api_football_enrichment_leagues.json"
 FINAL_SCOPE_CONFIG = ROOT / "config" / "statmaker_final_domestic_scope.json"
 REGISTRY_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_registry.json"
+HISTORICAL_FREEZE_PATH = ROOT / "data" / "statmaker" / "domestic_historical_stats_freeze.json"
 STATE_PATH = ROOT / "data" / "statmaker" / "domestic_live_july_state.json"
 REPORT_PATH = ROOT / "reports" / "domestic_live_july_pipeline.json"
 ROSTER_PATH = ROOT / "data" / "statmaker" / "domestic_rosters.json"
@@ -364,13 +365,7 @@ def _published_stats_continuity_rows(
     refreshed_rows: Sequence[Dict[str, Any]],
     previous_rows: Sequence[Dict[str, Any]],
 ) -> List[Dict[str, Any]]:
-    """Retain historical support for configured leagues outside the rolling refresh window.
-
-    The rolling registry deliberately contains only active/upcoming competitions so we do not
-    poll completed seasons forever. The app-facing enriched index has a different contract:
-    historical support for a configured Stats-universe league must not disappear on the day its
-    season ends. Keep its last published rows until a newer active/upcoming season replaces them.
-    """
+    """Keep configured out-of-window leagues and verified past seasons."""
     scope_payload = load_json(FINAL_SCOPE_CONFIG, {})
     allowed_codes = {
         str(code or "").strip().upper()
@@ -380,21 +375,35 @@ def _published_stats_continuity_rows(
         )
         if str(code or "").strip()
     }
-    refreshed_codes = {
-        str(row.get("league_code") or "").strip().upper()
-        for row in refreshed_rows
-        if str(row.get("league_code") or "").strip()
-    }
+
+    def identity(row: Dict[str, Any]) -> Tuple[str, str]:
+        return (str(row.get("league_code") or "").strip().upper(),
+                str(row.get("api_football_season") or "").strip())
+
+    refreshed_keys = {identity(row) for row in refreshed_rows}
+    refreshed_codes = {code for code, _ in refreshed_keys}
+    frozen = load_json(HISTORICAL_FREEZE_PATH, {}).get("snapshots") or {}
     retained: List[Dict[str, Any]] = []
     for previous in previous_rows:
         if not isinstance(previous, dict):
             continue
-        code = str(previous.get("league_code") or "").strip().upper()
-        if not code or code not in allowed_codes or code in refreshed_codes:
+        code, season = identity(previous)
+        if not code or code not in allowed_codes or (code, season) in refreshed_keys:
             continue
         output_path = str(previous.get("output_path") or "").strip()
         if output_path and not (ROOT / output_path).is_file():
             continue
+        if code in refreshed_codes:
+            snapshot = frozen.get(f"{code}:{season}") or {}
+            cache_path = str(previous.get("cache_path") or "").strip()
+            if (not season or previous.get("stats_role") != "historical_support"
+                    or previous.get("lifecycle") != "active" or not output_path
+                    or not cache_path or not (ROOT / cache_path).is_file()
+                    or snapshot.get("frozen") is not True
+                    or snapshot.get("fixtureSetVerified") is not True
+                    or snapshot.get("leagueCode") != code
+                    or str(snapshot.get("historyApiSeason") or "") != season):
+                continue
         retained.append(dict(previous))
     return retained
 

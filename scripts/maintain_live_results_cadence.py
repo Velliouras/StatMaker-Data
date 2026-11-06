@@ -5,10 +5,13 @@ import json
 import os
 from pathlib import Path
 import time
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 LIVE = {'1H', 'HT', '2H', 'ET', 'BT', 'P'}
 WORKFLOW = 'priority-results-standings.yml'
+RETRYABLE_HTTP = {500, 502, 503, 504}
+DISPATCH_RETRY_DELAYS = (2, 5)
 
 
 def instant(value):
@@ -55,13 +58,38 @@ class GitHub:
     def document(self, code):
         return self.request('contents/data/statmaker/priority_refresh/' + code + '.json?ref=main')
 
-    def busy(self):
+    def busy(self, started_since=None):
         runs = self.request('actions/workflows/' + WORKFLOW + '/runs?branch=main&per_page=5')
-        return any(r.get('status') in {'queued', 'in_progress', 'waiting', 'pending'}
-                   for r in runs.get('workflow_runs', []))
+        rows = runs['workflow_runs']
+        if not isinstance(rows, list):
+            raise ValueError('Invalid GitHub workflow runs response')
+        for run in rows:
+            if run.get('status') in {'queued', 'in_progress', 'waiting', 'pending', 'requested'}:
+                return True
+            created = instant(run.get('created_at'))
+            if started_since is not None and created is not None and created >= started_since:
+                return True
+        return False
 
     def dispatch(self):
-        self.request('actions/workflows/' + WORKFLOW + '/dispatches', {'ref': 'main'})
+        path = 'actions/workflows/' + WORKFLOW + '/dispatches'
+        started = datetime.now(timezone.utc).replace(microsecond=0)
+        # A 5xx on a POST can arrive after GitHub accepted it. Check for a
+        # queued or already completed run before each bounded retry.
+        retry = False
+        for delay in (0, *DISPATCH_RETRY_DELAYS):
+            if delay:
+                time.sleep(delay)
+            try:
+                if retry and self.busy(started_since=started):
+                    return 'already-running'
+                self.request(path, {'ref': 'main'})
+                return 'dispatched'
+            except HTTPError as exc:
+                if exc.code not in RETRYABLE_HTTP:
+                    raise
+                retry = True
+        return 'github-dispatch-unavailable'
 
 
 def probe(models, specs, github, now):
@@ -85,8 +113,8 @@ def probe(models, specs, github, now):
         return 'fresh' if live_count else 'inactive'
     if github.busy():
         return 'already-running'
-    github.dispatch()
-    return 'dispatched:' + ','.join(sorted(overdue))
+    result = github.dispatch()
+    return 'dispatched:' + ','.join(sorted(overdue)) if result == 'dispatched' else result
 
 
 def next_slot(now):
@@ -102,7 +130,15 @@ def main():
     github = GitHub()
     for slot in range(3):
         now = datetime.now(timezone.utc)
-        result = probe(models, specs, github, now)
+        try:
+            result = probe(models, specs, github, now)
+        except HTTPError as exc:
+            if exc.code not in RETRYABLE_HTTP:
+                raise
+            result = f'github-http-{exc.code}'
+        if result.startswith('github-'):
+            print(f'::warning::Live refresh slot deferred ({result}); next slot or Watchdog will retry.',
+                  flush=True)
         print('LIVE_CADENCE', now.isoformat(), result, flush=True)
         if result == 'inactive' or slot == 2:
             break

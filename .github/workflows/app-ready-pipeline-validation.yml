@@ -116,6 +116,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_prepared_league_simulation_phases.py' -v
           python -m unittest discover -s tests -p 'test_simulation_recovery_cli.py' -v
           python -m unittest discover -s tests -p 'test_app_ready_published_verifier.py' -v
+          python -m unittest tests.test_domestic_live_july_pipeline -q
           python scripts/preflight_league_simulations.py
 
       - name: Validate checkpoint compatibility contract

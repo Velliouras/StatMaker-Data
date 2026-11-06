@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
 import yaml
 
-from scripts.maintain_live_results_cadence import active, probe, next_slot
+from scripts.maintain_live_results_cadence import GitHub, active, probe, next_slot
 
 NOW = datetime(2026,10,31,20,12,tzinfo=timezone.utc)
 
@@ -19,7 +21,9 @@ class Client:
         self.doc, self.running, self.dispatched = doc, busy, 0
     def document(self, code): return self.doc
     def busy(self): return self.running
-    def dispatch(self): self.dispatched += 1
+    def dispatch(self):
+        self.dispatched += 1
+        return 'dispatched'
 
 
 class LiveResultsCadenceTest(unittest.TestCase):
@@ -29,6 +33,37 @@ class LiveResultsCadenceTest(unittest.TestCase):
         client = Client(document())
         self.assertEqual('dispatched:I1',probe({'I1':document()},self.specs,client,NOW))
         self.assertEqual(1,client.dispatched)
+
+    def test_dispatch_retries_transient_post_after_checking_for_a_run(self):
+        client = GitHub.__new__(GitHub)
+        unavailable = HTTPError('https://api.github.com', 500, 'temporary failure', None, None)
+        with patch.object(client, 'request', side_effect=[unavailable, {'workflow_runs': []}, {}]) as request, \
+             patch('scripts.maintain_live_results_cadence.time.sleep'):
+            self.assertEqual('dispatched', client.dispatch())
+        self.assertEqual([2, 1, 2], [len(call.args) for call in request.call_args_list])
+
+    def test_dispatch_does_not_repeat_an_accepted_post_or_hide_permission_failure(self):
+        client = GitHub.__new__(GitHub)
+        unavailable = HTTPError('https://api.github.com', 500, 'temporary failure', None, None)
+        run = {'status': 'completed', 'created_at': (datetime.now(timezone.utc) + timedelta(seconds=2)).isoformat()}
+        with patch.object(client, 'request', side_effect=[unavailable, {'workflow_runs': [run]}]) as request, \
+             patch('scripts.maintain_live_results_cadence.time.sleep'):
+            self.assertEqual('already-running', client.dispatch())
+        self.assertEqual(2, request.call_count)
+        forbidden = HTTPError('https://api.github.com', 403, 'forbidden', None, None)
+        with patch.object(client, 'request', side_effect=forbidden) as request:
+            with self.assertRaises(HTTPError):
+                client.dispatch()
+        request.assert_called_once()
+
+    def test_dispatch_defers_after_bounded_retries(self):
+        client = GitHub.__new__(GitHub)
+        unavailable = HTTPError('https://api.github.com', 503, 'unavailable', None, None)
+        with patch.object(client, 'request', side_effect=[
+                unavailable, {'workflow_runs': []}, unavailable, unavailable]) as request, \
+             patch('scripts.maintain_live_results_cadence.time.sleep'):
+            self.assertEqual('github-dispatch-unavailable', client.dispatch())
+        self.assertEqual([2, 1, 2, 1], [len(call.args) for call in request.call_args_list])
 
     def test_current_five_minute_bucket_does_not_spend_another_provider_refresh(self):
         client = Client(document(NOW-timedelta(seconds=30)))
