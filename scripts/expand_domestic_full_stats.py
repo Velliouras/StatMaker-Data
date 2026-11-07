@@ -112,6 +112,7 @@ def expand_fixture(item: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, int]
             normalized[field] = value
             observed[field] = observed.get(field, 0) + int(value is not None)
 
+    normalized.update(stats_fetch.first_half_corners(raw, home_id, away_id, home_name, away_name, normalized))
     result["normalized_stats"] = normalized
     return result, observed
 

@@ -19,6 +19,7 @@ REPORT_PATH = ROOT / "reports" / "domestic_live_july_normalized_stats.json"
 TRANSITION_PATH = ROOT / ".git" / "statmaker_normalized_stats_transition.json"
 
 FIELDS = (
+    "HC1H", "AC1H",
     "HS", "AS", "HST", "AST", "HC", "AC", "HF", "AF", "HY", "AY", "HR", "AR",
     "HPossession", "APossession", "HSaves", "ASaves", "HPasses", "APasses",
     "HPassesAccurate", "APassesAccurate", "HxG", "AxG",

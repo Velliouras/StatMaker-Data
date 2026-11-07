@@ -163,7 +163,7 @@ def refresh(root=ROOT, now=None, maximum=24, fetch=None):
         level = "primary" if code in PRIMARY or code in UEFA else "europe"
         try:
             with priority(level):
-                payload = fetch(api_key, "fixtures/statistics", {"fixture": fid}, counter, maximum)
+                payload = fetch(api_key, "fixtures/statistics", {"fixture": fid, "half": "true"}, counter, maximum)
         except BudgetStop:
             break
         except (OSError, ValueError, RuntimeError) as exc:
@@ -223,6 +223,13 @@ def main():
     ap.add_argument("--max-requests", type=int, default=24)
     args = ap.parse_args()
     outcome = refresh(maximum=args.max_requests)
+    remaining = args.max_requests - outcome["requests"]
+    if remaining > 0:
+        from refresh_first_half_corners import refresh as refresh_half_corners
+        half = refresh_half_corners(maximum=min(remaining, 12))
+        outcome["requests"] += half["requests"]
+        outcome["updated"] += half["updated"]
+        outcome["stateChanged"] = outcome["stateChanged"] or half["stateChanged"]
     output = os.getenv("GITHUB_OUTPUT")
     if output:
         with open(output, "a", encoding="utf-8") as f:

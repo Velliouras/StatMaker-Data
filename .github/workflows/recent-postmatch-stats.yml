@@ -48,6 +48,7 @@ jobs:
       - name: Check pure postmatch selection tests
         run: |
           python -m unittest discover -s tests -p 'test_recent_finished_match_stats.py' -q
+          python -m unittest discover -s tests -p 'test_first_half_corners.py' -q
           python -m unittest discover -s tests -p 'test_postmatch_publication_race.py' -q
 
       - name: Fetch only recently finished fixtures with missing or partial statistics

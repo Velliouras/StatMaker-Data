@@ -13,6 +13,11 @@ on:
         required: true
         default: "500"
         type: string
+      first_half_corners:
+        description: "Backfill verified first-half corners from cached fixture IDs"
+        required: false
+        default: false
+        type: boolean
   schedule:
     # Quota-safe post-match stats: at most 48 refresh calls per slot, plus guarded registry lookup.
     # Primary leagues are split to prevent the first leagues exhausting the request cap.
@@ -69,10 +74,12 @@ jobs:
           DISPATCH_CODES: ${{ inputs.league_codes }}
           DISPATCH_MAX: ${{ inputs.stats_max_requests }}
           SCHEDULE_EXPR: ${{ github.event.schedule }}
+          DISPATCH_HALF: ${{ inputs.first_half_corners }}
         run: |
           set -euo pipefail
           codes="${DISPATCH_CODES:-}"
           max_requests="${DISPATCH_MAX:-}"
+          half_corners="${DISPATCH_HALF:-false}"
           if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]]; then
             case "${SCHEDULE_EXPR}" in
               '35 22 * * *') codes="G1,E0,SP1"; max_requests="48" ;;
@@ -80,7 +87,7 @@ jobs:
               *) echo "Unsupported scheduled stats window" >&2; exit 1 ;;
             esac
           elif [[ "${GITHUB_EVENT_NAME}" != "workflow_dispatch" ]]; then
-            IFS='|' read -r codes max_requests < .github/triggers/domestic-targeted-stats-backfill
+            IFS='|' read -r codes max_requests half_corners < .github/triggers/domestic-targeted-stats-backfill
           fi
           codes="$(echo "${codes}" | tr -d ' ')"
           [[ -n "${codes}" ]] || { echo "Missing targeted league codes" >&2; exit 1; }
@@ -91,15 +98,18 @@ jobs:
           }
           echo "league_codes=${codes}" >> "${GITHUB_OUTPUT}"
           echo "max_requests=${max_requests}" >> "${GITHUB_OUTPUT}"
+          echo "first_half_corners=${half_corners}" >> "${GITHUB_OUTPUT}"
           echo "Targeted request resolved: leagues=${codes} cap=${max_requests}"
 
       - name: Validate targeted backfill scripts
         run: |
+          python -m unittest discover -s tests -p test_first_half_corners.py -q
           python -m py_compile \
             scripts/run_domestic_stats_refresh.py \
             scripts/run_scoped_domestic_registry.py \
             scripts/refresh_domestic_live_july_stats.py \
             scripts/api_football_fetch_fixture_stats.py \
+            scripts/refresh_first_half_corners.py \
             scripts/domestic_live_july_pipeline.py \
             scripts/expand_domestic_full_stats.py \
             scripts/finalize_domestic_live_july_artifacts.py \
@@ -109,6 +119,7 @@ jobs:
             scripts/validate_domestic_cache_provider_identity.py
 
       - name: Refresh rolling Domestic registry
+        if: steps.request.outputs.first_half_corners != 'true'
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
         run: python scripts/run_scoped_domestic_registry.py
@@ -119,12 +130,20 @@ jobs:
           INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
           INPUT_STATS_MAX_REQUESTS: ${{ steps.request.outputs.max_requests }}
           STATMAKER_BETTING_V2_CAPTURE_LINEAGE: "0"
+          FIRST_HALF_CORNERS: ${{ steps.request.outputs.first_half_corners }}
         run: |
           mkdir -p reports
-          python scripts/run_domestic_stats_refresh.py \
-            --league-codes "$INPUT_LEAGUE_CODES" \
-            --max-requests "$INPUT_STATS_MAX_REQUESTS" \
-            > reports/domestic_targeted_stats_backfill.log 2>&1
+          if [ "$FIRST_HALF_CORNERS" = "true" ]; then
+            python scripts/refresh_first_half_corners.py \
+              --league-codes "$INPUT_LEAGUE_CODES" \
+              --max-requests "$INPUT_STATS_MAX_REQUESTS" \
+              > reports/domestic_targeted_stats_backfill.log 2>&1
+          else
+            python scripts/run_domestic_stats_refresh.py \
+              --league-codes "$INPUT_LEAGUE_CODES" \
+              --max-requests "$INPUT_STATS_MAX_REQUESTS" \
+              > reports/domestic_targeted_stats_backfill.log 2>&1
+          fi
           cat reports/domestic_targeted_stats_backfill.log
 
       - name: Validate targeted provider identity
@@ -155,6 +174,7 @@ jobs:
             --output data/statmaker/update_manifest.json
 
       - name: Validate targeted result
+        if: steps.request.outputs.first_half_corners != 'true'
         env:
           INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
         run: |

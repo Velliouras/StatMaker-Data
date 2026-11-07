@@ -12,6 +12,7 @@ import argparse
 import csv
 import datetime as dt
 import json
+import math
 import os
 import re
 import sys
@@ -361,6 +362,30 @@ def empty_normalized_stats() -> Dict[str, Any]:
     return {field: None for field in NORMALIZED_FIELDS}
 
 
+def first_half_corners(raw_statistics, home_id, away_id, home_name, away_name, full_time):
+    """Read provider 1H corner counts by team identity, preserving unknowns."""
+    result = {}
+    for block in raw_statistics:
+        team = block.get("team") or {}
+        team_id = team.get("id")
+        name = str(team.get("name") or "").strip().casefold()
+        if (home_id is not None and team_id == home_id) or (name and name == str(home_name).strip().casefold()):
+            prefix = "H"
+        elif (away_id is not None and team_id == away_id) or (name and name == str(away_name).strip().casefold()):
+            prefix = "A"
+        else:
+            continue
+        for stat in block.get("statistics_1h") or []:
+            if normalize_key(stat.get("type")) not in {"corner kicks", "corners"}:
+                continue
+            value = parse_number(stat.get("value"))
+            total = full_time.get(prefix + "C")
+            if (value is not None and math.isfinite(value) and value >= 0
+                    and value == int(value) and (total is None or value <= total)):
+                result[prefix + "C1H"] = int(value)
+    return result
+
+
 def normalize_statistics(raw_statistics: List[Dict[str, Any]], fixture: Dict[str, Any]) -> Dict[str, Any]:
     stats = empty_normalized_stats()
     summary = fixture_summary(fixture)
@@ -390,6 +415,7 @@ def normalize_statistics(raw_statistics: List[Dict[str, Any]], fixture: Dict[str
             field = field_pair[0] if side == "home" else field_pair[1]
             stats[field] = parse_number(stat.get("value"))
 
+    stats.update(first_half_corners(raw_statistics, home_id, away_id, home_name, away_name, stats))
     return stats
 
 
@@ -825,7 +851,7 @@ def fetch_league(
             break
 
         try:
-            stats_payload = api_get(api_key, "fixtures/statistics", {"fixture": fixture_id}, request_state, max_requests)
+            stats_payload = api_get(api_key, "fixtures/statistics", {"fixture": fixture_id, "half": "true"}, request_state, max_requests)
         except RequestLimitReached:
             notes.append("request cap reached before statistics request")
             existing_by_id[fixture_id] = merged

@@ -53,7 +53,7 @@ class LivePostmatchTest(unittest.TestCase):
     def provider(self, *args):
         key, endpoint, params, counter, maximum = args
         self.assertEqual(endpoint, "fixtures/statistics")
-        self.assertEqual(params, {"fixture": 123456})
+        self.assertEqual(params, {"fixture": 123456, "half": "true"})
         self.assertLess(counter["count"], maximum)
         counter["count"] += 1
         return {"response": [
