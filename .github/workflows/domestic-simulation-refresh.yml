@@ -10,7 +10,7 @@ on:
       - 'scripts/simulation_priority_inputs.py'
       - 'tests/test_domestic_simulation_refresh.py'
   workflow_run:
-    workflows: ['Priority Results and Official Standings', 'App-Ready Stats Hot Publish', 'API-Football Standings Fetch']
+    workflows: ['Priority Results and Official Standings', 'App-Ready Stats Hot Publish', 'API-Football Standings Fetch', 'App-Ready Simulation Hot Publish']
     types: [completed]
     branches: [main]
   schedule:
@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: statmaker-app-ready-targeted-writers
@@ -55,7 +56,22 @@ jobs:
       - name: Verify incremental simulation and current-score regressions offline
         run: python -m unittest discover -s tests -p test_domestic_simulation_refresh.py -v
       - name: Refresh only changed domestic leagues and publish verified bundle
+        id: refresh
         run: |
           git config user.name 'statmaker-data-bot'
           git config user.email 'statmaker-data-bot@users.noreply.github.com'
           python -u -m scripts.refresh_domestic_simulations
+      - name: Recover missing Elo seasons from verified cached inputs
+        if: steps.refresh.outputs.elo_recovery_required == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          active=$(gh api "repos/${{ github.repository }}/actions/workflows/app-ready-simulation-hot-publish.yml/runs?branch=main&per_page=30" \
+            --jq '[.workflow_runs[] | select(.status != "completed")] | length')
+          if [ "$active" -gt 0 ]; then
+            echo 'Cached simulation recovery already queued or running'
+          else
+            gh api -X POST "repos/${{ github.repository }}/actions/workflows/app-ready-simulation-hot-publish.yml/dispatches" -f ref=main
+            echo 'Requested cached simulation rebuild for missing Elo seasons'
+          fi

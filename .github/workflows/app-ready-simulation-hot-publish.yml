@@ -1,6 +1,7 @@
 name: App-Ready Simulation Hot Publish
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -48,7 +49,7 @@ jobs:
       - name: Hot-patch latest App-Ready betting bundle
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          CACHED_RECOVERY: ${{ (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[cached-recovery]')) }}
+          CACHED_RECOVERY: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'StatMaker App-Ready Artifact Publisher') || (github.event_name == 'push' && contains(github.event.head_commit.message, '[cached-recovery]')) }}
           SEASON_PRECISION_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[season-precision-only]') }}
           MATCH_PRECISION_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[match-precision-only]') }}
           UEFA_MATCH_ONLY: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[uefa-match-only]') }}

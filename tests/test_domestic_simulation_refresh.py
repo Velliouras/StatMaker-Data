@@ -38,6 +38,25 @@ def final(fid=1, status='FT', goals=(2,0)):
 
 
 class DomesticSimulationRefreshTest(unittest.TestCase):
+    def test_missing_current_elo_requests_recovery_before_fingerprinting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'outputs'
+            entries = [entry('G1'), entry('UAE')]
+            with sqlite3.connect(':memory:') as con, patch.dict(
+                'os.environ', {'GITHUB_OUTPUT': str(output)}
+            ), patch.object(sim, 'load_elo_scope', side_effect=[object(), None]):
+                self.assertTrue(refresh.request_elo_recovery(entries, con))
+            self.assertEqual(output.read_text(), 'elo_recovery_required=true\n')
+
+    def test_complete_elo_coverage_keeps_incremental_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'outputs'
+            with sqlite3.connect(':memory:') as con, patch.dict(
+                'os.environ', {'GITHUB_OUTPUT': str(output)}
+            ), patch.object(sim, 'load_elo_scope', return_value=object()):
+                self.assertFalse(refresh.request_elo_recovery([entry()], con))
+            self.assertFalse(output.exists())
+
     def test_new_final_is_added_without_inventing_advanced_statistics(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder);priority(root,[final()])

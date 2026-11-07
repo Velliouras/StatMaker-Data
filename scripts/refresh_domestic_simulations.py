@@ -3,6 +3,7 @@ from dataclasses import asdict
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
 import sqlite3
@@ -27,6 +28,24 @@ TABLES = {'prepared_league_simulation_meta','prepared_league_team_simulations','
 
 def artifact(manifest):
     return next(a for a in manifest['artifacts'] if a['id'] == 'app_ready_betting_bundle')
+
+
+def request_elo_recovery(entries, con):
+    missing = []
+    for entry in entries:
+        season = str(entry.get('app_season') or entry.get('target_app_season'))
+        if sim.load_elo_scope(con, entry['league_code'], season) is None:
+            missing.append(entry['league_code'] + '@' + season)
+    if not missing:
+        return False
+    # A new season cannot use the previous season's Elo snapshot. Rebuild the
+    # coherent cached bundle before the incremental writer fingerprints it.
+    output = os.environ.get('GITHUB_OUTPUT')
+    if output:
+        with open(output, 'a', encoding='utf-8') as handle:
+            handle.write('elo_recovery_required=true\n')
+    print('::warning::DOMESTIC_SIMULATION_ELO_RECOVERY_REQUIRED scopes=' + ','.join(missing), flush=True)
+    return True
 
 
 def fingerprint(entry, con, results_only=False):
@@ -107,6 +126,8 @@ def main():
         db = temp/'databases/statmaker_prepared_betting.db'
         entries = sim.current_entries(json.loads(sim.INDEX_PATH.read_text()))
         with sqlite3.connect(db) as con:
+            if request_elo_recovery(entries, con):
+                return 0
             fingerprints = {e['league_code']:fingerprint(e,con) for e in entries}
             result_fingerprints = {e['league_code']:fingerprint(e,con,True) for e in entries}
             protected = protected_digest(con)
