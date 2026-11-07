@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "36c73c7cfbd243e645731aba21e14b9a5aaf60d1b7a2851b7c52fbc40dea5901",
-  "generatedAt": "2026-11-07T13:02:59.595003Z",
+  "contentVersion": "6e6a1fb902c7b56e40478c5b94bf9cb918b4eeaa17a0e53bd0ca33c7fba6eaad",
+  "generatedAt": "2026-11-07T13:16:52.262288Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "70b1a9d38d608f4e20a7c5eae4810d4a8dfbd329751016b17dfa836d176d8239",
+      "sha256": "e76953dafe64562fd9064296259866b0a36922f35bfbea2974f6579a96b26926",
       "bytes": 75060,
-      "generatedAt": "2026-11-07T13:02:56Z"
+      "generatedAt": "2026-11-07T13:16:48Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "2fee04089d611b5c65a185c7639fe2dcb052b3f1a536c8d57e31c01349382826",
-      "bytes": 12420881,
+      "sha256": "be0c9f810790b3284c581417ee57cbb0cd83f9d5322207e34c1d8b60b038636d",
+      "bytes": 12422152,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "928cdea978d25fef718d561481e65a2c17f7af8a5812e4af7d3162aa535fe0c4",
-      "bytes": 9364322,
-      "generatedAt": "2026-11-07T13:02:59.595003Z"
+      "sha256": "590b3c2fbd5e53f10591c85319b1546dcaf71b522b57a3c6c11bbeb6294b7190",
+      "bytes": 9364445,
+      "generatedAt": "2026-11-07T13:16:52.262288Z"
     },
     {
       "id": "uefa_team_logos",
@@ -796,7 +796,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "2fee04089d611b5c65a185c7639fe2dcb052b3f1a536c8d57e31c01349382826",
+    "targetSha256": "be0c9f810790b3284c581417ee57cbb0cd83f9d5322207e34c1d8b60b038636d",
     "transitions": [
       {
         "fromSha256": "b254fc933c100161e55d6b0b68ad66557ef860de01e8e56866fabbd04a49a77a",
@@ -1134,6 +1134,65 @@
               "AGoalsPrevented": null,
               "HFreeKicks": 0,
               "AFreeKicks": 0
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "2fee04089d611b5c65a185c7639fe2dcb052b3f1a536c8d57e31c01349382826",
+        "toSha256": "be0c9f810790b3284c581417ee57cbb0cd83f9d5322207e34c1d8b60b038636d",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1553220,
+            "league_id": 106,
+            "league_code": "POL",
+            "country": "Poland",
+            "league": "Ekstraklasa",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-11-07",
+            "home_team": "Korona Kielce",
+            "away_team": "Radomiak Radom",
+            "stats": {
+              "HS": 36,
+              "AS": 12,
+              "HST": 11,
+              "AST": 3,
+              "HC": 20,
+              "AC": 3,
+              "HF": 12,
+              "AF": 15,
+              "HY": 4,
+              "AY": 3,
+              "HR": 0,
+              "AR": 1,
+              "HPossession": 53,
+              "APossession": 47,
+              "HSaves": 1,
+              "ASaves": 11,
+              "HPasses": 374,
+              "APasses": 341,
+              "HPassesAccurate": 310,
+              "APassesAccurate": 284,
+              "HxG": 2.43,
+              "AxG": 1.12,
+              "HShotsOffGoal": 16,
+              "AShotsOffGoal": 5,
+              "HBlockedShots": 9,
+              "ABlockedShots": 4,
+              "HShotsInsideBox": 23,
+              "AShotsInsideBox": 8,
+              "HShotsOutsideBox": 13,
+              "AShotsOutsideBox": 4,
+              "HOffsides": 1,
+              "AOffsides": 1,
+              "HPassAccuracy": null,
+              "APassAccuracy": null,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": 15,
+              "AFreeKicks": 12
             }
           }
         ]
