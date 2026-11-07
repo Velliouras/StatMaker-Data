@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-07T20:20:35+00:00",
+  "generatedAtUTC": "2026-11-07T20:25:35+00:00",
   "leagueCode": "AUT",
   "country": "Austria",
   "competition": "Bundesliga",
@@ -1563,17 +1563,17 @@
       "away_team_id": 1026,
       "home_logo": "https://media.api-sports.io/football/teams/1028.png",
       "away_logo": "https://media.api-sports.io/football/teams/1026.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 2,
-      "away_goals": 3,
+      "away_goals": 4,
       "venue": "Josko Arena",
       "league_code": "AUT",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 2,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-07T20:20:35+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-07T20:25:35+00:00",
       "goal_events": [
         {
           "fixtureId": "1561962",
@@ -1619,11 +1619,20 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1561962",
+          "team": "Lask Linz",
+          "player": "Krystof Danek",
+          "minute": 90,
+          "extraMinute": 5,
+          "ownGoal": false,
+          "penalty": false
         }
       ],
       "goal_events_score": [
         2,
-        3
+        4
       ]
     },
     {
@@ -2826,7 +2835,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/austria/bundesliga/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-07T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-07T20:20:35+00:00",
+  "resultsCheckedAtUTC": "2026-11-07T20:25:35+00:00",
   "standingsCheckedAtUTC": "2026-11-07T20:00:49+00:00",
   "standings": [
     {
@@ -2859,13 +2868,13 @@
     },
     {
       "rank": 3,
-      "played": 11,
-      "wins": 7,
+      "played": 12,
+      "wins": 8,
       "draws": 1,
       "losses": 3,
-      "goalsFor": 26,
-      "goalsAgainst": 13,
-      "points": 22,
+      "goalsFor": 30,
+      "goalsAgainst": 15,
+      "points": 25,
       "team": "Lask Linz",
       "teamId": 1026,
       "teamLogo": "https://media.api-sports.io/football/teams/1026.png",
@@ -2901,12 +2910,12 @@
     },
     {
       "rank": 6,
-      "played": 11,
+      "played": 12,
       "wins": 4,
       "draws": 4,
-      "losses": 3,
-      "goalsFor": 19,
-      "goalsAgainst": 18,
+      "losses": 4,
+      "goalsFor": 21,
+      "goalsAgainst": 22,
       "points": 16,
       "team": "Ried",
       "teamId": 1028,
@@ -3171,10 +3180,13 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "official_plus_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-07T20:20:35+00:00",
-    "appliedFixtureIds": []
-  }
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-07T20:25:35+00:00",
+    "appliedFixtureIds": [
+      1561962
+    ]
+  },
+  "standingsReconciledAtUTC": "2026-11-07T20:25:35+00:00"
 }
