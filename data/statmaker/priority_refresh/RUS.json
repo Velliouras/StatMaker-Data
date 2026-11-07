@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-07T12:50:35+00:00",
+  "generatedAtUTC": "2026-11-07T12:55:36+00:00",
   "leagueCode": "RUS",
   "country": "Russia",
   "competition": "Premier League",
@@ -1910,7 +1910,7 @@
       "extra_time": null,
       "live_goal_tracking": true,
       "goal_events_status": "FT",
-      "goal_events_checked_at": "2026-11-07T12:50:35+00:00",
+      "goal_events_checked_at": "2026-11-07T12:55:36+00:00",
       "goal_events": [],
       "goal_events_score": [
         0,
@@ -2193,17 +2193,17 @@
       "away_team_id": 1088,
       "home_logo": "https://media.api-sports.io/football/teams/1993.png",
       "away_logo": "https://media.api-sports.io/football/teams/1088.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 1,
-      "away_goals": 1,
+      "away_goals": 2,
       "venue": "Fakel Stadium",
       "league_code": "RUS",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 1,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-07T12:45:31+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-07T12:55:36+00:00",
       "goal_events": [
         {
           "fixtureId": "1561437",
@@ -2222,11 +2222,20 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1561437",
+          "team": "Dynamo",
+          "player": "Konstantin Tyukavin",
+          "minute": 90,
+          "extraMinute": 1,
+          "ownGoal": false,
+          "penalty": false
         }
       ],
       "goal_events_score": [
         1,
-        1
+        2
       ]
     },
     {
@@ -4778,11 +4787,25 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/russia/premier-league/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-07T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-07T12:50:35+00:00",
+  "resultsCheckedAtUTC": "2026-11-07T12:55:36+00:00",
   "standingsCheckedAtUTC": "2026-11-07T12:00:36+00:00",
   "standings": [
     {
       "rank": 1,
+      "played": 14,
+      "wins": 10,
+      "draws": 1,
+      "losses": 3,
+      "goalsFor": 23,
+      "goalsAgainst": 13,
+      "points": 31,
+      "team": "Dynamo",
+      "teamId": 1088,
+      "teamLogo": "https://media.api-sports.io/football/teams/1088.png",
+      "group": "Premier League"
+    },
+    {
+      "rank": 2,
       "played": 13,
       "wins": 10,
       "draws": 0,
@@ -4793,20 +4816,6 @@
       "team": "Zenit",
       "teamId": 596,
       "teamLogo": "https://media.api-sports.io/football/teams/596.png",
-      "group": "Premier League"
-    },
-    {
-      "rank": 2,
-      "played": 13,
-      "wins": 9,
-      "draws": 1,
-      "losses": 3,
-      "goalsFor": 21,
-      "goalsAgainst": 12,
-      "points": 28,
-      "team": "Dynamo",
-      "teamId": 1088,
-      "teamLogo": "https://media.api-sports.io/football/teams/1088.png",
       "group": "Premier League"
     },
     {
@@ -4993,12 +5002,12 @@
     },
     {
       "rank": 16,
-      "played": 13,
+      "played": 14,
       "wins": 1,
       "draws": 3,
-      "losses": 9,
-      "goalsFor": 8,
-      "goalsAgainst": 21,
+      "losses": 10,
+      "goalsFor": 9,
+      "goalsAgainst": 23,
       "points": 6,
       "team": "Fakel",
       "teamId": 1993,
@@ -5235,10 +5244,13 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "official_plus_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-07T12:50:35+00:00",
-    "appliedFixtureIds": []
-  }
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-07T12:55:36+00:00",
+    "appliedFixtureIds": [
+      1561437
+    ]
+  },
+  "standingsReconciledAtUTC": "2026-11-07T12:55:36+00:00"
 }
