@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-07T18:50:38+00:00",
+  "generatedAtUTC": "2026-11-07T18:55:36+00:00",
   "leagueCode": "NOR",
   "country": "Norway",
   "competition": "Eliteserien",
@@ -4063,17 +4063,17 @@
       "away_team_id": 334,
       "home_logo": "https://media.api-sports.io/football/teams/331.png",
       "away_logo": "https://media.api-sports.io/football/teams/334.png",
-      "status": "2H",
-      "home_goals": 3,
-      "away_goals": 0,
+      "status": "FT",
+      "home_goals": 4,
+      "away_goals": 1,
       "venue": "Lerkendal Stadion",
       "league_code": "NOR",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 3,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-07T18:50:38+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-07T18:55:36+00:00",
       "goal_events": [
         {
           "fixtureId": "1494800",
@@ -4101,11 +4101,29 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": true
+        },
+        {
+          "fixtureId": "1494800",
+          "team": "Start",
+          "player": "Nikolaos Koutsakos",
+          "minute": 90,
+          "extraMinute": 3,
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "fixtureId": "1494800",
+          "team": "Rosenborg",
+          "player": "Deni Dashaev",
+          "minute": 90,
+          "extraMinute": 5,
+          "ownGoal": true,
+          "penalty": false
         }
       ],
       "goal_events_score": [
-        3,
-        0
+        4,
+        1
       ]
     },
     {
@@ -4833,7 +4851,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/norway/eliteserien/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-07T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-07T18:50:38+00:00",
+  "resultsCheckedAtUTC": "2026-11-07T18:55:36+00:00",
   "standingsCheckedAtUTC": "2026-11-07T18:05:36+00:00",
   "standings": [
     {
@@ -4866,6 +4884,20 @@
     },
     {
       "rank": 3,
+      "played": 26,
+      "wins": 14,
+      "draws": 4,
+      "losses": 8,
+      "goalsFor": 53,
+      "goalsAgainst": 32,
+      "points": 46,
+      "team": "Rosenborg",
+      "teamId": 331,
+      "teamLogo": "https://media.api-sports.io/football/teams/331.png",
+      "group": "Eliteserien"
+    },
+    {
+      "rank": 4,
       "played": 25,
       "wins": 13,
       "draws": 4,
@@ -4876,20 +4908,6 @@
       "team": "Molde",
       "teamId": 329,
       "teamLogo": "https://media.api-sports.io/football/teams/329.png",
-      "group": "Eliteserien"
-    },
-    {
-      "rank": 4,
-      "played": 25,
-      "wins": 13,
-      "draws": 4,
-      "losses": 8,
-      "goalsFor": 49,
-      "goalsAgainst": 31,
-      "points": 43,
-      "team": "Rosenborg",
-      "teamId": 331,
-      "teamLogo": "https://media.api-sports.io/football/teams/331.png",
       "group": "Eliteserien"
     },
     {
@@ -5048,12 +5066,12 @@
     },
     {
       "rank": 16,
-      "played": 25,
+      "played": 26,
       "wins": 5,
       "draws": 4,
-      "losses": 16,
-      "goalsFor": 26,
-      "goalsAgainst": 55,
+      "losses": 17,
+      "goalsFor": 27,
+      "goalsAgainst": 59,
       "points": 19,
       "team": "Start",
       "teamId": 334,
@@ -5290,10 +5308,13 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "official_plus_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-07T18:50:38+00:00",
-    "appliedFixtureIds": []
-  }
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-07T18:55:36+00:00",
+    "appliedFixtureIds": [
+      1494800
+    ]
+  },
+  "standingsReconciledAtUTC": "2026-11-07T18:55:36+00:00"
 }
