@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-11-07T09:31:56Z",
+  "generated_at": "2026-11-07T10:05:26Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -13,7 +13,7 @@
   "source": {
     "provider": "api-football",
     "cache_path": "data/api_football/fixture_stats/cyprus/1-division/2026/fixture_stats.json",
-    "cache_generated_at": "2026-11-05T10:54:30Z",
+    "cache_generated_at": "2026-11-07T10:04:12Z",
     "api_football_season": "2026",
     "season_window": [
       "2026-07-01",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 56,
-    "fixtures_with_any_stats": 21,
-    "fixtures_with_bb_core_stats": 21,
-    "any_stats_coverage": 0.375,
-    "bb_core_coverage": 0.375,
+    "completed_fixtures": 58,
+    "fixtures_with_any_stats": 22,
+    "fixtures_with_bb_core_stats": 22,
+    "any_stats_coverage": 0.3793,
+    "bb_core_coverage": 0.3793,
     "group_counts": {
-      "shots_total": 21,
-      "shots_on_target": 21,
-      "corners": 21,
-      "fouls": 12,
-      "yellow_cards": 21,
-      "red_cards": 21,
-      "possession": 21,
-      "passes": 12,
-      "xg": 12
+      "shots_total": 22,
+      "shots_on_target": 22,
+      "corners": 22,
+      "fouls": 13,
+      "yellow_cards": 22,
+      "red_cards": 22,
+      "possession": 22,
+      "passes": 13,
+      "xg": 13
     },
     "group_coverage": {
-      "shots_total": 0.375,
-      "shots_on_target": 0.375,
-      "corners": 0.375,
-      "fouls": 0.2143,
-      "yellow_cards": 0.375,
-      "red_cards": 0.375,
-      "possession": 0.375,
-      "passes": 0.2143,
-      "xg": 0.2143
+      "shots_total": 0.3793,
+      "shots_on_target": 0.3793,
+      "corners": 0.3793,
+      "fouls": 0.2241,
+      "yellow_cards": 0.3793,
+      "red_cards": 0.3793,
+      "possession": 0.3793,
+      "passes": 0.2241,
+      "xg": 0.2241
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.375 < 0.65",
-      "low BB-core coverage: 0.375 < 0.65",
+      "low any-stats coverage: 0.3793 < 0.65",
+      "low BB-core coverage: 0.3793 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -2952,42 +2952,42 @@
       "away_team": "Omonia Aradippou",
       "status": "FT",
       "normalized_stats": {
-        "HS": null,
-        "AS": null,
-        "HST": null,
-        "AST": null,
-        "HC": null,
-        "AC": null,
-        "HF": null,
-        "AF": null,
-        "HY": null,
-        "AY": null,
-        "HR": null,
-        "AR": null,
-        "HPossession": null,
-        "APossession": null,
-        "HSaves": null,
-        "ASaves": null,
-        "HPasses": null,
-        "APasses": null,
-        "HPassesAccurate": null,
-        "APassesAccurate": null,
-        "HxG": null,
-        "AxG": null
+        "HS": 17,
+        "AS": 9,
+        "HST": 5,
+        "AST": 7,
+        "HC": 7,
+        "AC": 2,
+        "HF": 8,
+        "AF": 11,
+        "HY": 1,
+        "AY": 2,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 68,
+        "APossession": 32,
+        "HSaves": 7,
+        "ASaves": 4,
+        "HPasses": 623,
+        "APasses": 270,
+        "HPassesAccurate": 524,
+        "APassesAccurate": 200,
+        "HxG": 2.71,
+        "AxG": 0.47
       },
       "quality": {
-        "has_any_stats": false,
-        "has_bb_core_stats": false,
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
         "groups": {
-          "shots_total": false,
-          "shots_on_target": false,
-          "corners": false,
-          "fouls": false,
-          "yellow_cards": false,
-          "red_cards": false,
-          "possession": false,
-          "passes": false,
-          "xg": false
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
         }
       },
       "home_goals": 1,
@@ -4773,6 +4773,174 @@
         },
         "fulltime": {
           "home": 1,
+          "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1603599,
+      "date_utc": "2026-11-06T17:00:00+00:00",
+      "country": "Cyprus",
+      "league": "1. Division",
+      "league_code": "CYP",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 318,
+      "round": "Regular Season - 9",
+      "home_team": "AEK Larnaca",
+      "away_team": "Karmiotissa",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 4,
+      "away_goals": 1,
+      "home_score": 4,
+      "away_score": 1,
+      "fthg": 4,
+      "ftag": 1,
+      "hthg": 2,
+      "htag": 0,
+      "goals": {
+        "home": 4,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": 2,
+          "away": 0
+        },
+        "fulltime": {
+          "home": 4,
+          "away": 1
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1603603,
+      "date_utc": "2026-11-06T17:00:00+00:00",
+      "country": "Cyprus",
+      "league": "1. Division",
+      "league_code": "CYP",
+      "season": "2026-2027",
+      "app_season": "2026-2027",
+      "api_football_season": "2026",
+      "api_football_league_id": 318,
+      "round": "Regular Season - 9",
+      "home_team": "Nea Salamis",
+      "away_team": "Omonia Aradippou",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": null,
+        "AS": null,
+        "HST": null,
+        "AST": null,
+        "HC": null,
+        "AC": null,
+        "HF": null,
+        "AF": null,
+        "HY": null,
+        "AY": null,
+        "HR": null,
+        "AR": null,
+        "HPossession": null,
+        "APossession": null,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": false,
+        "has_bb_core_stats": false,
+        "groups": {
+          "shots_total": false,
+          "shots_on_target": false,
+          "corners": false,
+          "fouls": false,
+          "yellow_cards": false,
+          "red_cards": false,
+          "possession": false,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 3,
+      "away_goals": 2,
+      "home_score": 3,
+      "away_score": 2,
+      "fthg": 3,
+      "ftag": 2,
+      "hthg": 0,
+      "htag": 2,
+      "goals": {
+        "home": 3,
+        "away": 2
+      },
+      "score": {
+        "halftime": {
+          "home": 0,
+          "away": 2
+        },
+        "fulltime": {
+          "home": 3,
           "away": 2
         },
         "extratime": {
