@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-07T19:35:38+00:00",
+  "generatedAtUTC": "2026-11-07T19:40:37+00:00",
   "leagueCode": "SC0",
   "country": "Scotland",
   "competition": "Premiership",
@@ -1494,17 +1494,59 @@
       "away_team_id": 249,
       "home_logo": "https://media.api-sports.io/football/teams/252.png",
       "away_logo": "https://media.api-sports.io/football/teams/249.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 0,
       "away_goals": 4,
       "venue": "Pittodrie Stadium",
       "league_code": "SC0",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 4,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-07T19:30:43+00:00"
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-07T19:40:37+00:00",
+      "goal_events": [
+        {
+          "fixtureId": "1556700",
+          "team": "Hibernian",
+          "player": "Jamie McGrath",
+          "minute": 57,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "fixtureId": "1556700",
+          "team": "Hibernian",
+          "player": "Callum·Wright",
+          "minute": 79,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "fixtureId": "1556700",
+          "team": "Hibernian",
+          "player": "Nicky Cadden",
+          "minute": 87,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "fixtureId": "1556700",
+          "team": "Hibernian",
+          "player": "Thibault Klidjé",
+          "minute": 90,
+          "extraMinute": 3,
+          "ownGoal": false,
+          "penalty": false
+        }
+      ],
+      "goal_events_score": [
+        0,
+        4
+      ]
     },
     {
       "fixture_id": 1556704,
@@ -3884,7 +3926,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/scotland/premiership/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-07T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-07T19:35:38+00:00",
+  "resultsCheckedAtUTC": "2026-11-07T19:40:37+00:00",
   "standingsCheckedAtUTC": "2026-11-07T19:00:50+00:00",
   "standings": [
     {
@@ -4231,8 +4273,9 @@
   "officialSingleStandingsGroup": true,
   "standingsSource": "official",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-07T19:35:38+00:00",
-    "appliedFixtureIds": []
+    "status": "awaiting_official",
+    "checkedAtUTC": "2026-11-07T19:40:37+00:00",
+    "appliedFixtureIds": [],
+    "reason": "new_tie_requires_official_sporting_order"
   }
 }
