@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "2c92c9f9b36944f5c0464515434f2893224ce4f507765665893f094d8a111058",
-  "generatedAt": "2026-11-07T12:32:23.013629Z",
+  "contentVersion": "c526768424ceafc395247bb1aba0b397358d96f76a54b4718322acafd40fb627",
+  "generatedAt": "2026-11-07T12:46:46.911555Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "31eff8b6ea94186cea30de58ebe444e018fcd594626503671f4ff7b34956370c",
-      "bytes": 75058,
-      "generatedAt": "2026-11-07T12:32:19Z"
+      "sha256": "65f816915c535917189898f5b0fc4daec2dfc2bbcbd80e9d9507eade58c53ce0",
+      "bytes": 75060,
+      "generatedAt": "2026-11-07T12:46:42Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
-      "bytes": 12415768,
+      "sha256": "2f41ae1c497c18561b8189d05f470883a4ca9c515b7e48d0d49f159537fd0fba",
+      "bytes": 12417037,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "c5eb1ecff7043dd73352c531b9c9da2821d9c32f7cd17f5df0da16a8549f06a2",
+      "sha256": "203fd90b4a70821a5249f2f66f784ab9c3a5976fc38155eb5de990c63900033c",
       "bytes": 9361739,
-      "generatedAt": "2026-11-07T12:32:23.013629Z"
+      "generatedAt": "2026-11-07T12:46:46.911555Z"
     },
     {
       "id": "uefa_team_logos",
@@ -796,7 +796,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
+    "targetSha256": "2f41ae1c497c18561b8189d05f470883a4ca9c515b7e48d0d49f159537fd0fba",
     "transitions": [
       {
         "fromSha256": "b254fc933c100161e55d6b0b68ad66557ef860de01e8e56866fabbd04a49a77a",
@@ -910,6 +910,65 @@
               "APassAccuracy": 86,
               "HGoalsPrevented": 0.16,
               "AGoalsPrevented": 0.16,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
+        "toSha256": "2f41ae1c497c18561b8189d05f470883a4ca9c515b7e48d0d49f159537fd0fba",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1593701,
+            "league_id": 188,
+            "league_code": "AUS",
+            "country": "Australia",
+            "league": "A-League",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-11-07",
+            "home_team": "Perth Glory",
+            "away_team": "Newcastle Jets",
+            "stats": {
+              "HS": 12,
+              "AS": 15,
+              "HST": 3,
+              "AST": 4,
+              "HC": 5,
+              "AC": 5,
+              "HF": 14,
+              "AF": 5,
+              "HY": 1,
+              "AY": 1,
+              "HR": null,
+              "AR": null,
+              "HPossession": 28,
+              "APossession": 72,
+              "HSaves": 4,
+              "ASaves": 1,
+              "HPasses": 241,
+              "APasses": 631,
+              "HPassesAccurate": 172,
+              "APassesAccurate": 545,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 5,
+              "AShotsOffGoal": 6,
+              "HBlockedShots": 4,
+              "ABlockedShots": 5,
+              "HShotsInsideBox": 5,
+              "AShotsInsideBox": 12,
+              "HShotsOutsideBox": 7,
+              "AShotsOutsideBox": 3,
+              "HOffsides": 2,
+              "AOffsides": 0,
+              "HPassAccuracy": 71,
+              "APassAccuracy": 86,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
               "HFreeKicks": null,
               "AFreeKicks": null
             }
