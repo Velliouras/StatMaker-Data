@@ -9,6 +9,7 @@ from pathlib import Path
 
 MAGIC = 0x534D4453  # SMDS
 FORMAT_VERSION = 2
+HALF_CORNERS_MAGIC = 0x534D4831  # SMH1, optional trailer after the legacy v2 rows
 STAT_KEYS = [
     "HxG", "AxG", "HSaves", "ASaves", "HPossession", "APossession",
     "HPasses", "APasses", "HPassesAccurate", "APassesAccurate",
@@ -96,6 +97,62 @@ def write_utf(out, value):
     out.write(raw)
 
 
+def half_corner_rows(fixtures):
+    rows = {}
+    for fixture in fixtures:
+        values = []
+        for field in ('HC1H', 'AC1H'):
+            number = opt_double((fixture.get('stats') or {}).get(field))
+            values.append(number if number is not None and 0 <= number <= 2147483647
+                          and number == int(number) else None)
+        if any(number is not None for number in values):
+            for key in fixture_keys(fixture):
+                rows[key] = tuple(values)
+    return rows
+
+
+def write_half_corner_tail(handle, rows):
+    if not rows:
+        return
+    handle.write(struct.pack('>ii', HALF_CORNERS_MAGIC, len(rows)))
+    for key, numbers in rows.items():
+        write_utf(handle, key)
+        for number in numbers:
+            handle.write(b'\1' if number is not None else b'\0')
+            if number is not None:
+                handle.write(struct.pack('>d', number))
+
+
+def read_half_corner_tail(handle):
+    header = handle.read(8)
+    if not header:
+        return {}
+    if len(header) != 8:
+        raise ValueError('Incomplete first-half corner trailer')
+    magic, count = struct.unpack('>ii', header)
+    if magic != HALF_CORNERS_MAGIC or count < 0:
+        raise ValueError('Invalid first-half corner trailer')
+    rows = {}
+    for _ in range(count):
+        length = struct.unpack('>H', handle.read(2))[0]
+        key = handle.read(length).decode('utf-8')
+        values = []
+        for _ in range(2):
+            flag = handle.read(1)
+            if flag not in (b'\0', b'\1'):
+                raise ValueError('Invalid first-half corner flag')
+            value = struct.unpack('>d', handle.read(8))[0] if flag == b'\1' else None
+            if value is not None and (not math.isfinite(value) or value < 0 or value != int(value)):
+                raise ValueError('Invalid first-half corner value')
+            values.append(value)
+        if key in rows:
+            raise ValueError('Duplicate first-half corner key')
+        rows[key] = tuple(values)
+    if handle.read(1):
+        raise ValueError('Trailing first-half corner bytes')
+    return rows
+
+
 def main():
     source = Path(sys.argv[1] if len(sys.argv) > 1 else "data/api_football/domestic_normalized_fixture_stats.json")
     target = Path(sys.argv[2] if len(sys.argv) > 2 else "domestic_normalized_stats_v2.bin")
@@ -130,6 +187,7 @@ def main():
                 out.write(b"\x01" if value is not None else b"\x00")
                 if value is not None:
                     out.write(struct.pack(">d", value))
+        write_half_corner_tail(out, half_corner_rows(fixtures))
     temp.replace(target)
     print(f"APP_READY_DOMESTIC_NORMALIZED_OK rows={len(rows)} bytes={target.stat().st_size}")
 

@@ -10,6 +10,7 @@ from pathlib import Path
 from scripts import hotpatch_app_ready_stats as stats
 from scripts.reconcile_app_ready_stats_scope import db_season
 from scripts.statistics_archive_catalog import statistics_catalog
+from scripts.build_domestic_normalized_snapshot import read_half_corner_tail, write_half_corner_tail
 
 
 def merge_archived_normalized(path: Path, values: dict) -> None:
@@ -32,8 +33,7 @@ def merge_archived_normalized(path: Path, values: dict) -> None:
             if key in existing:
                 raise ValueError('Duplicate normalized key')
             existing[key] = tuple(numbers)
-        if handle.read(1):
-            raise ValueError('Trailing normalized snapshot bytes')
+        half_corners = read_half_corner_tail(handle)
     existing.update(values)
     pending = path.with_suffix('.restoring')
     with pending.open('wb') as handle:
@@ -44,6 +44,7 @@ def merge_archived_normalized(path: Path, values: dict) -> None:
                 handle.write(b'\1' if number is not None else b'\0')
                 if number is not None:
                     handle.write(struct.pack('>d', number))
+        write_half_corner_tail(handle, half_corners)
     pending.replace(path)
 
 

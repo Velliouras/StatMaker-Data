@@ -17,6 +17,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+from scripts.build_domestic_normalized_snapshot import half_corner_rows, write_half_corner_tail
 APP_READY = ROOT / "data/statmaker/app_ready"
 APP_READY_MANIFEST = APP_READY / "update_manifest.json"
 MAIN_MANIFEST = ROOT / "data/statmaker/update_manifest.json"
@@ -413,6 +414,7 @@ def create_normalized_snapshot(target: Path) -> int:
                 handle.write(b"\x01" if number is not None else b"\x00")
                 if number is not None:
                     handle.write(struct.pack(">d", number))
+        write_half_corner_tail(handle, half_corner_rows(payload.get('fixtures', [])))
     return len(values)
 
 
