@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-11-07T17:46:02Z",
+  "generated_at": "2026-11-07T18:03:46Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 49,
-    "fixtures_with_any_stats": 31,
-    "fixtures_with_bb_core_stats": 28,
-    "any_stats_coverage": 0.6327,
-    "bb_core_coverage": 0.5714,
+    "completed_fixtures": 50,
+    "fixtures_with_any_stats": 32,
+    "fixtures_with_bb_core_stats": 29,
+    "any_stats_coverage": 0.64,
+    "bb_core_coverage": 0.58,
     "group_counts": {
-      "shots_total": 28,
-      "shots_on_target": 28,
-      "corners": 28,
+      "shots_total": 29,
+      "shots_on_target": 29,
+      "corners": 29,
       "fouls": 0,
-      "yellow_cards": 31,
-      "red_cards": 31,
-      "possession": 28,
+      "yellow_cards": 32,
+      "red_cards": 32,
+      "possession": 29,
       "passes": 0,
       "xg": 0
     },
     "group_coverage": {
-      "shots_total": 0.5714,
-      "shots_on_target": 0.5714,
-      "corners": 0.5714,
+      "shots_total": 0.58,
+      "shots_on_target": 0.58,
+      "corners": 0.58,
       "fouls": 0.0,
-      "yellow_cards": 0.6327,
-      "red_cards": 0.6327,
-      "possession": 0.5714,
+      "yellow_cards": 0.64,
+      "red_cards": 0.64,
+      "possession": 0.58,
       "passes": 0.0,
       "xg": 0.0
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.6327 < 0.65",
-      "low BB-core coverage: 0.5714 < 0.65",
+      "low any-stats coverage: 0.64 < 0.65",
+      "low BB-core coverage: 0.58 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -4186,6 +4186,90 @@
         "fulltime": {
           "home": 0,
           "away": 2
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1646870,
+      "date_utc": "2026-11-07T16:00:00+00:00",
+      "country": "Morocco",
+      "league": "Botola Pro",
+      "league_code": "MAR",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 200,
+      "round": "Regular Season - 7",
+      "home_team": "Kawkab Marrakech",
+      "away_team": "Wydad AC",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 15,
+        "AS": 10,
+        "HST": 5,
+        "AST": 6,
+        "HC": 1,
+        "AC": 3,
+        "HF": null,
+        "AF": null,
+        "HY": 4,
+        "AY": 2,
+        "HR": 0,
+        "AR": 1,
+        "HPossession": 53,
+        "APossession": 47,
+        "HSaves": null,
+        "ASaves": null,
+        "HPasses": null,
+        "APasses": null,
+        "HPassesAccurate": null,
+        "APassesAccurate": null,
+        "HxG": null,
+        "AxG": null
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": false,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": false,
+          "xg": false
+        }
+      },
+      "home_goals": 2,
+      "away_goals": 1,
+      "home_score": 2,
+      "away_score": 1,
+      "fthg": 2,
+      "ftag": 1,
+      "hthg": null,
+      "htag": null,
+      "goals": {
+        "home": 2,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": null,
+          "away": null
+        },
+        "fulltime": {
+          "home": 2,
+          "away": 1
         },
         "extratime": {
           "home": null,
