@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "8a1f6d7f2027f55a6d09340638144c5720c72ec7dba3b8fd65af5f95183cf8d2",
-  "generatedAt": "2026-11-07T10:05:29.380858Z",
+  "contentVersion": "702f5772da3a46ab8986e0340076983f7135556978a894f0176a6eb43a1f859a",
+  "generatedAt": "2026-11-07T10:47:08.444122Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "7816ddaebc50932d432cba8efbafbaf005bcaa4aa0563fca9f2914cb707c9b0a",
-      "bytes": 75059,
-      "generatedAt": "2026-11-07T10:05:26Z"
+      "sha256": "7aa2667f5417a327ffc87f7d4e8dba94bb53973584db09d892ad58d9349643a7",
+      "bytes": 75057,
+      "generatedAt": "2026-11-07T10:47:05Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "b254fc933c100161e55d6b0b68ad66557ef860de01e8e56866fabbd04a49a77a",
-      "bytes": 12413231,
+      "sha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
+      "bytes": 12414510,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "ccac3dcaa9422455061b45dd73f5725af89945f5c5d0ebf19cfe11ac0e2aa8c0",
+      "sha256": "a8241a7e2dd79ecd9ac3db210210a6993b0463b98f95fda4e4743a7e85659f49",
       "bytes": 9361681,
-      "generatedAt": "2026-11-07T10:05:29.380858Z"
+      "generatedAt": "2026-11-07T10:47:08.444122Z"
     },
     {
       "id": "uefa_team_logos",
@@ -787,6 +787,72 @@
         "dates": [
           "2026-11-01",
           "2026-11-07"
+        ]
+      }
+    ]
+  },
+  "normalizedStatsDelta": {
+    "schemaVersion": 1,
+    "targetArtifactId": "domestic_normalized_fixture_stats",
+    "targetSha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
+    "transitions": [
+      {
+        "fromSha256": "b254fc933c100161e55d6b0b68ad66557ef860de01e8e56866fabbd04a49a77a",
+        "toSha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1593700,
+            "league_id": 188,
+            "league_code": "AUS",
+            "country": "Australia",
+            "league": "A-League",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-11-07",
+            "home_team": "Melbourne City",
+            "away_team": "Western Sydney Wanderers",
+            "stats": {
+              "HS": 9,
+              "AS": 27,
+              "HST": 4,
+              "AST": 10,
+              "HC": 3,
+              "AC": 12,
+              "HF": 17,
+              "AF": 5,
+              "HY": 2,
+              "AY": 1,
+              "HR": 1,
+              "AR": 0,
+              "HPossession": 32,
+              "APossession": 68,
+              "HSaves": 8,
+              "ASaves": 2,
+              "HPasses": 274,
+              "APasses": 589,
+              "HPassesAccurate": 188,
+              "APassesAccurate": 506,
+              "HxG": null,
+              "AxG": null,
+              "HShotsOffGoal": 5,
+              "AShotsOffGoal": 5,
+              "HBlockedShots": 0,
+              "ABlockedShots": 12,
+              "HShotsInsideBox": 5,
+              "AShotsInsideBox": 12,
+              "HShotsOutsideBox": 4,
+              "AShotsOutsideBox": 15,
+              "HOffsides": 0,
+              "AOffsides": 1,
+              "HPassAccuracy": 69,
+              "APassAccuracy": 86,
+              "HGoalsPrevented": null,
+              "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
         ]
       }
     ]
