@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-07T14:30:42+00:00",
+  "generatedAtUTC": "2026-11-07T14:35:42+00:00",
   "leagueCode": "SVK",
   "country": "Slovakia",
   "competition": "Super Liga",
@@ -1546,14 +1546,22 @@
       "away_team_id": 1120,
       "home_logo": "https://media.api-sports.io/football/teams/10533.png",
       "away_logo": "https://media.api-sports.io/football/teams/1120.png",
-      "status": "NS",
-      "home_goals": null,
-      "away_goals": null,
+      "status": "1H",
+      "home_goals": 0,
+      "away_goals": 0,
       "venue": null,
       "league_code": "SVK",
       "normalized_stats": {},
-      "elapsed": null,
-      "extra_time": null
+      "elapsed": 5,
+      "extra_time": null,
+      "live_goal_tracking": true,
+      "goal_events": [],
+      "goal_events_score": [
+        0,
+        0
+      ],
+      "goal_events_status": "1H",
+      "goal_events_checked_at": "2026-11-07T14:35:42+00:00"
     },
     {
       "fixture_id": 1551597,
@@ -1565,14 +1573,32 @@
       "away_team_id": 3554,
       "home_logo": "https://media.api-sports.io/football/teams/10542.png",
       "away_logo": "https://media.api-sports.io/football/teams/3554.png",
-      "status": "NS",
-      "home_goals": null,
-      "away_goals": null,
+      "status": "1H",
+      "home_goals": 1,
+      "away_goals": 0,
       "venue": null,
       "league_code": "SVK",
       "normalized_stats": {},
-      "elapsed": null,
-      "extra_time": null
+      "elapsed": 5,
+      "extra_time": null,
+      "live_goal_tracking": true,
+      "goal_events": [
+        {
+          "fixtureId": "1551597",
+          "team": "Skalica",
+          "player": "A. Abdullahi",
+          "minute": 2,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        }
+      ],
+      "goal_events_score": [
+        1,
+        0
+      ],
+      "goal_events_status": "1H",
+      "goal_events_checked_at": "2026-11-07T14:35:42+00:00"
     },
     {
       "fixture_id": 1551598,
@@ -1586,20 +1612,30 @@
       "away_logo": "https://media.api-sports.io/football/teams/655.png",
       "status": "1H",
       "home_goals": 0,
-      "away_goals": 0,
+      "away_goals": 1,
       "venue": null,
       "league_code": "SVK",
       "normalized_stats": {},
-      "elapsed": 1,
+      "elapsed": 6,
       "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events": [],
+      "goal_events_status": "1H",
+      "goal_events_checked_at": "2026-11-07T14:35:42+00:00",
+      "goal_events": [
+        {
+          "fixtureId": "1551598",
+          "team": "AS Trencin",
+          "player": "C. Ansah",
+          "minute": 3,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        }
+      ],
       "goal_events_score": [
         0,
-        0
-      ],
-      "goal_events_status": "1H",
-      "goal_events_checked_at": "2026-11-07T14:30:42+00:00"
+        1
+      ]
     },
     {
       "fixture_id": 1551594,
@@ -2573,7 +2609,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/slovakia/super-liga/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-07T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-07T14:30:42+00:00",
+  "resultsCheckedAtUTC": "2026-11-07T14:35:42+00:00",
   "standingsCheckedAtUTC": "2026-11-07T14:00:51+00:00",
   "standings": [
     {
@@ -2921,7 +2957,7 @@
   "standingsSource": "official",
   "standingsReconciliation": {
     "status": "official",
-    "checkedAtUTC": "2026-11-07T14:30:42+00:00",
+    "checkedAtUTC": "2026-11-07T14:35:42+00:00",
     "appliedFixtureIds": []
   }
 }
