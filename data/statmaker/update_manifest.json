@@ -3,8 +3,8 @@
   "profile": "main",
   "repository": "Velliouras/StatMaker-Data",
   "branch": "main",
-  "contentVersion": "f3683f0afc3f8addb595373a3a0f7942d978cf89168976bd4ecd3dcf2d3cce90",
-  "generatedAt": "2026-11-07T11:49:48Z",
+  "contentVersion": "2c92c9f9b36944f5c0464515434f2893224ce4f507765665893f094d8a111058",
+  "generatedAt": "2026-11-07T12:32:23.013629Z",
   "artifactCount": 9,
   "artifacts": [
     {
@@ -12,17 +12,17 @@
       "group": "history",
       "path": "data/statmaker/domestic_enriched/index.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/domestic_enriched/index.json",
-      "sha256": "7aa2667f5417a327ffc87f7d4e8dba94bb53973584db09d892ad58d9349643a7",
-      "bytes": 75057,
-      "generatedAt": "2026-11-07T10:47:05Z"
+      "sha256": "31eff8b6ea94186cea30de58ebe444e018fcd594626503671f4ff7b34956370c",
+      "bytes": 75058,
+      "generatedAt": "2026-11-07T12:32:19Z"
     },
     {
       "id": "domestic_normalized_fixture_stats",
       "group": "history",
       "path": "data/api_football/domestic_normalized_fixture_stats.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/api_football/domestic_normalized_fixture_stats.json",
-      "sha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
-      "bytes": 12414510,
+      "sha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
+      "bytes": 12415768,
       "generatedAt": ""
     },
     {
@@ -66,9 +66,9 @@
       "group": "support",
       "path": "data/statmaker/uefa_support_history.json",
       "url": "https://raw.githubusercontent.com/Velliouras/StatMaker-Data/main/data/statmaker/uefa_support_history.json",
-      "sha256": "a8241a7e2dd79ecd9ac3db210210a6993b0463b98f95fda4e4743a7e85659f49",
-      "bytes": 9361681,
-      "generatedAt": "2026-11-07T10:47:08.444122Z"
+      "sha256": "c5eb1ecff7043dd73352c531b9c9da2821d9c32f7cd17f5df0da16a8549f06a2",
+      "bytes": 9361739,
+      "generatedAt": "2026-11-07T12:32:23.013629Z"
     },
     {
       "id": "uefa_team_logos",
@@ -796,7 +796,7 @@
   "normalizedStatsDelta": {
     "schemaVersion": 1,
     "targetArtifactId": "domestic_normalized_fixture_stats",
-    "targetSha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
+    "targetSha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
     "transitions": [
       {
         "fromSha256": "b254fc933c100161e55d6b0b68ad66557ef860de01e8e56866fabbd04a49a77a",
@@ -851,6 +851,65 @@
               "APassAccuracy": 86,
               "HGoalsPrevented": null,
               "AGoalsPrevented": null,
+              "HFreeKicks": null,
+              "AFreeKicks": null
+            }
+          }
+        ]
+      },
+      {
+        "fromSha256": "8acc7ce7a6af6b6812da1337d48306d6b677dc3aad82478df7931560e5a8d8bc",
+        "toSha256": "48072c874c57c284cc4c8220c0ed3194e72a3dd7eea6d8256d9409595d089b63",
+        "removedFixtures": [],
+        "upserts": [
+          {
+            "fixture_id": 1584460,
+            "league_id": 203,
+            "league_code": "T1",
+            "country": "Turkey",
+            "league": "Süper Lig",
+            "season": "2026-2027",
+            "api_football_season": "2026",
+            "date": "2026-11-07",
+            "home_team": "Eyüpspor",
+            "away_team": "Kocaelispor",
+            "stats": {
+              "HS": 5,
+              "AS": 12,
+              "HST": 3,
+              "AST": 7,
+              "HC": 3,
+              "AC": 1,
+              "HF": 11,
+              "AF": 15,
+              "HY": 1,
+              "AY": 2,
+              "HR": null,
+              "AR": null,
+              "HPossession": 49,
+              "APossession": 51,
+              "HSaves": 5,
+              "ASaves": 3,
+              "HPasses": 402,
+              "APasses": 424,
+              "HPassesAccurate": 350,
+              "APassesAccurate": 363,
+              "HxG": 0.26,
+              "AxG": 1,
+              "HShotsOffGoal": 1,
+              "AShotsOffGoal": 3,
+              "HBlockedShots": 1,
+              "ABlockedShots": 2,
+              "HShotsInsideBox": 5,
+              "AShotsInsideBox": 3,
+              "HShotsOutsideBox": 0,
+              "AShotsOutsideBox": 9,
+              "HOffsides": 1,
+              "AOffsides": 1,
+              "HPassAccuracy": 87,
+              "APassAccuracy": 86,
+              "HGoalsPrevented": 0.16,
+              "AGoalsPrevented": 0.16,
               "HFreeKicks": null,
               "AFreeKicks": null
             }
