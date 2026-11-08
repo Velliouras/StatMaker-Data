@@ -154,4 +154,19 @@ class SharedBudgetTest(unittest.TestCase):
         self.assertNotIn('providerResetCorrection',state)
 
 
+    def test_blocked_claim_persists_reset_evidence_and_recovers(self):
+        state=dict(schemaVersion=1, dayUtc='2026-10-25', committed=6000,
+                   leases={}, observedUsed=5897, daySeedUsed=5897)
+        store=Store()
+        store.state=state
+        ledger=budget.Ledger(store, pause=lambda _:None)
+        with mock.patch.object(budget, 'utcnow', return_value=budget.datetime.fromisoformat('2026-10-25T00:03:00+00:00')):
+            with self.assertRaises(budget.BudgetStop):
+                ledger.claim('2026-10-25',103,7500,'primary','first','worker')
+            self.assertEqual(store.state['providerResetCandidateUsed'],103)
+            amount=ledger.claim('2026-10-25',103,7500,'primary','second','worker')
+        self.assertEqual(amount,8)
+        self.assertEqual(store.state['committed'],103)
+        self.assertEqual(store.state['daySeedUsed'],0)
+
 if __name__=='__main__':unittest.main()

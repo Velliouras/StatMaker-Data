@@ -29,7 +29,8 @@ _lock = threading.RLock()
 
 
 class BudgetStop(SystemExit):
-    def __init__(self, reason):
+    def __init__(self, reason, state=None):
+        self.state = state
         self.reason = reason
         print('API_FOOTBALL_BUDGET_STOP '+reason, flush=True)
         super().__init__(0)
@@ -118,7 +119,9 @@ def allocate(state, day, used, limit, tier, lease_id, owner, closing=None, block
     estimated = max(state['committed'], used) + sum(x['reserved'] for x in state['leases'].values())
     amount = min(block, max(0, threshold-estimated))
     if amount == 0:
-        raise BudgetStop('priority='+tier+' estimated='+str(estimated)+' stop='+str(threshold))
+        state.update(observedUsed=used, limit=limit, estimatedAllocated=estimated,
+                     totalStop=TOTAL_STOP, backgroundStop=BACKGROUND_STOP, reserve=RESERVE)
+        raise BudgetStop('priority='+tier+' estimated='+str(estimated)+' stop='+str(threshold), state)
     state['leases'][lease_id] = dict(reserved=amount, owner=owner, priority=tier)
     state.update(observedUsed=used, limit=limit, estimatedAllocated=estimated+amount,
                  totalStop=TOTAL_STOP, backgroundStop=BACKGROUND_STOP, reserve=RESERVE)
@@ -173,10 +176,19 @@ class Ledger:
     def claim(self, day, used, limit, tier, lease_id, owner, closing=None):
         for attempt in range(10):
             state, sha = self.store.read()
-            state, amount = allocate(state, day, used, limit, tier, lease_id, owner, closing,
-                                     observed_at=utcnow().isoformat())
+            original_state = state
+            stopped = None
+            try:
+                state, amount = allocate(state, day, used, limit, tier, lease_id, owner, closing,
+                                         observed_at=utcnow().isoformat())
+            except BudgetStop as exc:
+                stopped, state = exc, exc.state
+                if state == original_state:
+                    raise
             state['updatedAtUtc'] = utcnow().isoformat()
             if self.store.write(state, sha):
+                if stopped is not None:
+                    raise stopped
                 return amount
             self.pause(min(.15*(attempt+1), 1.5))
         raise ValueError('Shared budget is busy')
