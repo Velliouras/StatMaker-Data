@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-08T18:25:35+00:00",
+  "generatedAtUTC": "2026-11-08T18:30:35+00:00",
   "leagueCode": "E0",
   "country": "England",
   "competition": "Premier League",
@@ -2269,17 +2269,17 @@
       "away_team_id": 66,
       "home_logo": "https://media.api-sports.io/football/teams/33.png",
       "away_logo": "https://media.api-sports.io/football/teams/66.png",
-      "status": "2H",
-      "home_goals": 3,
+      "status": "FT",
+      "home_goals": 4,
       "away_goals": 4,
       "venue": "Old Trafford",
       "league_code": "E0",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 4,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-08T18:25:35+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-08T18:30:35+00:00",
       "goal_events": [
         {
           "fixtureId": "1557464",
@@ -2343,10 +2343,19 @@
           "extraMinute": 2,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1557464",
+          "team": "Manchester United",
+          "player": "Patrick Dorgu",
+          "minute": 90,
+          "extraMinute": 6,
+          "ownGoal": false,
+          "penalty": false
         }
       ],
       "goal_events_score": [
-        3,
+        4,
         4
       ]
     },
@@ -7673,8 +7682,8 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/england/premier-league/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-08T00:00:31+00:00",
-  "resultsCheckedAtUTC": "2026-11-08T18:25:35+00:00",
-  "standingsCheckedAtUTC": "2026-11-08T18:00:40+00:00",
+  "resultsCheckedAtUTC": "2026-11-08T18:30:35+00:00",
+  "standingsCheckedAtUTC": "2026-11-08T18:30:35+00:00",
   "standings": [
     {
       "rank": 1,
@@ -7958,7 +7967,7 @@
     }
   ],
   "singleStandingsGroup": true,
-  "standingsObservedAtUTC": "2026-11-08T18:00:40+00:00",
+  "standingsObservedAtUTC": "2026-11-08T18:30:35+00:00",
   "officialStandings": [
     {
       "rank": 1,
@@ -8244,8 +8253,9 @@
   "officialSingleStandingsGroup": true,
   "standingsSource": "official",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-08T18:25:35+00:00",
-    "appliedFixtureIds": []
+    "status": "awaiting_official",
+    "checkedAtUTC": "2026-11-08T18:30:35+00:00",
+    "appliedFixtureIds": [],
+    "reason": "new_tie_requires_official_sporting_order"
   }
 }
