@@ -125,6 +125,7 @@ jobs:
         run: python scripts/run_scoped_domestic_registry.py
 
       - name: Refresh requested Domestic leagues
+        id: refresh
         env:
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
@@ -144,15 +145,23 @@ jobs:
               --max-requests "$INPUT_STATS_MAX_REQUESTS" \
               > reports/domestic_targeted_stats_backfill.log 2>&1
           fi
+          if python -c "from pathlib import Path; import sys; sys.exit(0 if 'API_FOOTBALL_BUDGET_STOP' in Path('reports/domestic_targeted_stats_backfill.log').read_text() else 1)"; then
+            echo '::warning::Targeted refresh deferred by shared API budget; published data retained'
+            echo 'quota_deferred=true' >> "$GITHUB_OUTPUT"
+            cat reports/domestic_targeted_stats_backfill.log
+            exit 0
+          fi
           if [ "$FIRST_HALF_CORNERS" != "true" ]; then
             cp reports/domestic_live_july_stats_refresh.json "$RUNNER_TEMP/domestic_targeted_fetch_report.json"
           fi
           cat reports/domestic_targeted_stats_backfill.log
 
       - name: Validate targeted provider identity
+        if: steps.refresh.outputs.quota_deferred != 'true'
         run: python scripts/validate_domestic_cache_provider_identity.py
 
       - name: Rebuild app-facing statistics
+        if: steps.refresh.outputs.quota_deferred != 'true'
         run: |
           python scripts/expand_domestic_full_stats.py
           python - <<'PY'
@@ -170,6 +179,7 @@ jobs:
           python scripts/build_uefa_support_history.py
 
       - name: Rebuild main update manifest
+        if: steps.refresh.outputs.quota_deferred != 'true'
         run: |
           python scripts/build_statmaker_update_manifest.py \
             --profile main \
@@ -177,7 +187,7 @@ jobs:
             --output data/statmaker/update_manifest.json
 
       - name: Validate targeted result
-        if: steps.request.outputs.first_half_corners != 'true'
+        if: steps.request.outputs.first_half_corners != 'true' && steps.refresh.outputs.quota_deferred != 'true'
         env:
           INPUT_LEAGUE_CODES: ${{ steps.request.outputs.league_codes }}
         run: |
@@ -221,6 +231,7 @@ jobs:
           PY
 
       - name: Commit targeted stats artifacts
+        if: steps.refresh.outputs.quota_deferred != 'true'
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
