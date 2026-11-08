@@ -144,6 +144,9 @@ jobs:
               --max-requests "$INPUT_STATS_MAX_REQUESTS" \
               > reports/domestic_targeted_stats_backfill.log 2>&1
           fi
+          if [ "$FIRST_HALF_CORNERS" != "true" ]; then
+            cp reports/domestic_live_july_stats_refresh.json "$RUNNER_TEMP/domestic_targeted_fetch_report.json"
+          fi
           cat reports/domestic_targeted_stats_backfill.log
 
       - name: Validate targeted provider identity
@@ -183,7 +186,7 @@ jobs:
           from collections import Counter
           from pathlib import Path
 
-          report = json.loads(Path('reports/domestic_live_july_stats_refresh.json').read_text(encoding='utf-8'))
+          report = json.loads((Path(os.environ['RUNNER_TEMP']) / 'domestic_targeted_fetch_report.json').read_text(encoding='utf-8'))
           requested = {x.strip().upper() for x in os.environ['INPUT_LEAGUE_CODES'].replace(';', ',').split(',') if x.strip()}
           selected = {str(x).upper() for x in report.get('selectedLeagueCodes', [])}
           if requested != selected:
