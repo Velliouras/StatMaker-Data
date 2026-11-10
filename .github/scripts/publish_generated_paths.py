@@ -10,6 +10,7 @@ import sys
 import time
 
 MANIFEST = "data/statmaker/update_manifest.json"
+UEFA_SUPPORT = "data/statmaker/uefa_support_history.json"
 
 
 def manifest_transitions(payload):
@@ -37,7 +38,7 @@ def git(*args, check=True):
 
 
 def publish(remote="origin", branch="main", attempts=4, prefixes=(), pause=time.sleep,
-            refresh_manifest=False):
+            refresh_manifest=False, refresh_uefa_support=False):
     """Retry publication only; provider work must never be repeated by this helper."""
     head = git("rev-parse", "HEAD").stdout.strip()
     parents = git("show", "-s", "--format=%P", head).stdout.split()
@@ -48,16 +49,19 @@ def publish(remote="origin", branch="main", attempts=4, prefixes=(), pause=time.
         raise RuntimeError("Generated commit contains no changed files")
     if prefixes and any(not any(path.startswith(prefix) for prefix in prefixes) for path in changed):
         raise RuntimeError("Generated commit contains files outside the publisher's owned paths")
-    allowed = changed | ({MANIFEST} if refresh_manifest else set())
+    derived = ([UEFA_SUPPORT] if refresh_uefa_support else []) + ([MANIFEST] if refresh_manifest else [])
+    if prefixes and any(not any(path.startswith(prefix) for prefix in prefixes) for path in derived):
+        raise RuntimeError("Derived output is outside the publisher's owned paths")
+    allowed = changed | set(derived)
     message = git("show", "-s", "--format=%B", "HEAD").stdout
     transitions = []
-    if refresh_manifest:
-        if prefixes and not any(MANIFEST.startswith(prefix) for prefix in prefixes):
+    if derived:
+        if refresh_manifest and prefixes and not any(MANIFEST.startswith(prefix) for prefix in prefixes):
             raise RuntimeError("The main manifest is outside the publisher's owned paths")
         if git("diff", "--quiet", check=False).returncode or git("diff", "--cached", "--quiet", check=False).returncode:
             raise RuntimeError("Stash unpublished producer scratch before rebuilding the canonical manifest")
-        original = git("show", f"HEAD:{MANIFEST}", check=False)
-        if original.returncode == 0:
+        original = git("show", f"HEAD:{MANIFEST}", check=False) if refresh_manifest else None
+        if original is not None and original.returncode == 0:
             transitions = manifest_transitions(json.loads(original.stdout))
 
     for attempt in range(1, attempts + 1):
@@ -70,14 +74,15 @@ def publish(remote="origin", branch="main", attempts=4, prefixes=(), pause=time.
         if git("merge-base", "--is-ancestor", "HEAD", upstream, check=False).returncode == 0:
             print("GENERATED_PUBLISH_ALREADY_VISIBLE", flush=True)
             return
-        if refresh_manifest and git("diff", "--quiet", parent, "HEAD", "--", MANIFEST, check=False).returncode:
-            # A manifest describes other files; replaying its old JSON alongside
-            # source data causes false conflicts and can restore obsolete hashes.
-            if git("cat-file", "-e", f"{parent}:{MANIFEST}", check=False).returncode == 0:
-                git("restore", f"--source={parent}", "--staged", "--worktree", "--", MANIFEST)
-            else:
-                git("rm", "--ignore-unmatch", "--", MANIFEST)
-            git("commit", "--amend", "--no-edit", "--allow-empty")
+        for path in derived:
+            # Rebuild shared derived JSON from current sources after replaying
+            # this producer's source changes, without any provider requests.
+            if git("diff", "--quiet", parent, "HEAD", "--", path, check=False).returncode:
+                if git("cat-file", "-e", f"{parent}:{path}", check=False).returncode == 0:
+                    git("restore", f"--source={parent}", "--staged", "--worktree", "--", path)
+                else:
+                    git("rm", "--ignore-unmatch", "--", path)
+                git("commit", "--amend", "--no-edit", "--allow-empty")
         rebased = git("rebase", "--no-keep-empty", "--onto", upstream, parent, check=False)
         if rebased.returncode:
             conflicts = git("diff", "--name-only", "--diff-filter=U", check=False).stdout.strip()
@@ -87,9 +92,12 @@ def publish(remote="origin", branch="main", attempts=4, prefixes=(), pause=time.
         ahead = int(git("rev-list", "--count", f"{upstream}..HEAD").stdout.strip())
         if ahead not in (0, 1):
             raise RuntimeError(f"Refusing to publish {ahead} commits instead of one generated commit")
-        if refresh_manifest:
-            rebuild_main_manifest(transitions)
-            git("add", "--", MANIFEST)
+        if derived:
+            if refresh_uefa_support:
+                subprocess.run([sys.executable, "scripts/build_uefa_support_history.py"], check=True)
+            if refresh_manifest:
+                rebuild_main_manifest(transitions)
+            git("add", "--", *derived)
             if git("diff", "--cached", "--quiet", check=False).returncode:
                 if ahead:
                     git("commit", "--amend", "--no-edit")
@@ -122,8 +130,11 @@ if __name__ == "__main__":
     parser.add_argument("--path-prefix", action="append", default=[])
     parser.add_argument("--rebuild-main-manifest", action="store_true",
                         help="Derive the main manifest from the final tree on every push attempt")
+    parser.add_argument("--rebuild-uefa-support-history", action="store_true",
+                        help="Rebuild shared Domestic support from the current merged cache")
     args = parser.parse_args()
     if not 1 <= args.attempts <= 8:
         parser.error("attempts must be between 1 and 8")
     publish(args.remote, args.branch, args.attempts, args.path_prefix,
-            refresh_manifest=args.rebuild_main_manifest)
+            refresh_manifest=args.rebuild_main_manifest,
+            refresh_uefa_support=args.rebuild_uefa_support_history)

@@ -78,7 +78,10 @@ def publish(updated, builder=rebuild, pause=time.sleep):
                 print(f'POSTMATCH_PUBLISH_OK attempt={attempt}', flush=True)
                 return
             # Retry only a branch race, not authentication/network failures.
-            if 'fetch first' not in pushed.stderr and 'non-fast-forward' not in pushed.stderr:
+            branch_race = ('fetch first' in pushed.stderr or 'non-fast-forward' in pushed.stderr
+                           or ("cannot lock ref 'refs/heads/main'" in pushed.stderr
+                               and 'but expected' in pushed.stderr))
+            if not branch_race:
                 raise RuntimeError(pushed.stderr)
             pause(min(attempt * 2, 8))
     raise RuntimeError('Postmatch publication remained busy after six rebuilds')

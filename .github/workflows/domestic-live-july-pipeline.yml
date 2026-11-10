@@ -252,45 +252,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add \
-            data/api_football/fixture_stats \
-            data/api_football/domestic_normalized_fixture_stats.json \
-            data/statmaker/domestic_enriched \
-            data/statmaker/domestic_live_july_registry.json \
-            data/statmaker/domestic_live_july_state.json \
-            data/statmaker/domestic_rosters.json \
-            data/statmaker/uefa_support_history.json \
-            reports/api_football_fixture_stats_fetch.json \
-            reports/api_football_fixture_stats_fetch.csv \
-            reports/api_football_fixture_stats_fetch.md \
-            reports/statmaker_domestic_enriched_build.json \
-            reports/statmaker_domestic_enriched_build.csv \
-            reports/statmaker_domestic_enriched_build.md \
-            reports/domestic_live_july_pipeline.json \
-            reports/domestic_live_july_stats_refresh.json \
-            reports/domestic_live_july_full_stats_expansion.json \
-            reports/domestic_live_july_artifact_contract.json \
-            reports/domestic_live_july_normalized_stats.json \
-            reports/domestic_live_july_stats.log
-          if [ -f data/statmaker/domestic_historical_stats_freeze.json ]; then
-            git add data/statmaker/domestic_historical_stats_freeze.json
-          fi
-          if git diff --cached --quiet; then
-            echo "No Domestic statistics-universe changes to commit."
-          else
-            git commit -m "Record Domestic statistics universe run"
-            # The manifest is shared by several producers. Do not carry a stale,
-            # pre-rebase manifest through rebase because it can conflict with a
-            # newer manifest written by another workflow.
-            git restore -- data/statmaker/update_manifest.json
-            git pull --rebase --autostash origin main
-            python scripts/build_statmaker_update_manifest.py \
-              --profile main \
-              --branch main \
-              --output data/statmaker/update_manifest.json
-            git add data/statmaker/update_manifest.json
-            if ! git diff --cached --quiet; then
-              git commit -m "Rebuild main update manifest after Domestic stats refresh"
-            fi
-            git push origin HEAD:main
-          fi
+          # Merge fetched source deltas onto current main, then rebuild derived
+          # statistics offline. Never rebase stale generated league JSON.
+          python scripts/publish_targeted_backfill.py

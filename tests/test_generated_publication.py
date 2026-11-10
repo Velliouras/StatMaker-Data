@@ -165,6 +165,25 @@ p.write_text(json.dumps({"owned":Path("owned.json").read_text(),
             publisher.publish(refresh_manifest=True, pause=lambda _: None)
         self.assertEqual('newer-canonical', self.remote_file('owned.json'))
 
+    def test_shared_uefa_support_is_rebuilt_after_source_replay(self):
+        (self.worker / 'scripts').mkdir(exist_ok=True)
+        builder = self.worker / 'scripts/build_uefa_support_history.py'
+        builder.write_text('from pathlib import Path\np=Path("data/statmaker/uefa_support_history.json")\np.parent.mkdir(parents=True,exist_ok=True)\np.write_text(Path("owned.json").read_text()+":"+Path("foreign.json").read_text())\n')
+        support = self.worker / publisher.UEFA_SUPPORT
+        support.parent.mkdir(parents=True, exist_ok=True)
+        support.write_text('stale derived support')
+        self.command(self.worker, 'add', 'scripts/', publisher.UEFA_SUPPORT)
+        self.command(self.worker, 'commit', '--amend', '--no-edit', '-q')
+        current = self.author / publisher.UEFA_SUPPORT
+        current.parent.mkdir(parents=True, exist_ok=True)
+        current.write_text('newer derived support')
+        self.command(self.author, 'add', publisher.UEFA_SUPPORT)
+        self.command(self.author, 'commit', '-m', 'New support from current Domestic data', '-q')
+        self.command(self.author, 'push', '-q', 'origin', 'main')
+        self.advance()
+        publisher.publish(refresh_uefa_support=True, pause=lambda _: None)
+        self.assertEqual('new-scorers:newer-result-0', self.remote_file(publisher.UEFA_SUPPORT))
+
     def test_failed_manifest_builder_cannot_publish_source_data_with_stale_hashes(self):
         self.prepare_manifest_race(fail_builder=True)
         with self.assertRaises(subprocess.CalledProcessError):

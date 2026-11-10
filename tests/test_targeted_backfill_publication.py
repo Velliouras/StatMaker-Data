@@ -48,6 +48,14 @@ class TargetedBackfillPublicationTest(unittest.TestCase):
         self.assertNotIn('scripts.betting_v2.publish_uat_feed', full)
         self.assertIn('b4630638077b1c3dd83d94c66c03e2a70f45efd1', full)
 
+    def test_daily_universe_uses_offline_source_merge_and_keeps_refresh_state(self):
+        doc = yaml.safe_load((ROOT/'.github/workflows/domestic-live-july-pipeline.yml').read_text())
+        script = next(s['run'] for s in doc['jobs']['refresh']['steps']
+                      if s.get('name') == 'Commit artifacts and diagnostics')
+        self.assertIn('python scripts/publish_targeted_backfill.py', script)
+        self.assertNotIn('git pull --rebase', script)
+        self.assertIn('data/statmaker/domestic_live_july_state.json', publisher.SOURCES)
+
     def test_three_way_merge_retains_both_fixtures_and_newer_conflicting_value(self):
         base = {'fixtures':[{'fixture_id':1,'normalized_stats':{'HS':2}},
                             {'fixture_id':2,'normalized_stats':{'HS':3}}]}
@@ -76,11 +84,13 @@ class TargetedBackfillPublicationTest(unittest.TestCase):
             self.git(root,'clone',str(origin),str(writer))
             self.git(writer,'config','user.name','Test'); self.git(writer,'config','user.email','test@example.test')
             base = {'fixtures':[{'fixture_id':1,'value':2},{'fixture_id':2,'value':3}]}
+            self.write(writer,'data/statmaker/domestic_live_july_state.json',{'completed':1})
             self.write(writer,CACHE,base); self.write(writer,DERIVED,{'total':5})
             self.git(writer,'add','.'); self.git(writer,'commit','-m','initial'); self.git(writer,'push','origin','main')
             self.git(root,'clone','--depth=1',origin.as_uri(),str(producer))
             self.git(producer,'config','user.name','Test'); self.git(producer,'config','user.email','test@example.test')
             self.assertEqual('true',self.git(producer,'rev-parse','--is-shallow-repository'))
+            self.write(producer,'data/statmaker/domestic_live_july_state.json',{'completed':2})
             incoming = deepcopy(base); incoming['fixtures'][0]['value'] = 9
             self.write(producer,CACHE,incoming); self.write(producer,DERIVED,{'total':12})
             newer = deepcopy(base); newer['fixtures'][1]['value'] = 12
@@ -92,6 +102,7 @@ class TargetedBackfillPublicationTest(unittest.TestCase):
                 self.write(producer,DERIVED,{'total':sum(r['value'] for r in doc['fixtures'])})
             with cwd(producer): publisher.publish(rebuild_outputs=rebuild, pause=lambda _:None)
             self.assertEqual([9,12],[r['value'] for r in json.loads((producer/CACHE).read_text())['fixtures']])
+            self.assertEqual({'completed':2},json.loads((producer/'data/statmaker/domestic_live_july_state.json').read_text()))
             self.assertEqual({'total':21},json.loads((producer/DERIVED).read_text()))
             self.assertEqual('1',self.git(producer,'rev-list','--count',upstream+'..HEAD'))
             self.assertEqual(self.git(producer,'rev-parse','HEAD'),self.git(origin,'rev-parse','main'))

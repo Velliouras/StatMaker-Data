@@ -13,9 +13,10 @@ import sys
 import time
 
 SOURCES = ('data/api_football/fixture_stats/', 'data/statmaker/domestic_live_july_registry.json',
-           'data/statmaker/domestic_rosters.json', 'data/statmaker/domestic_historical_stats_freeze.json')
+           'data/statmaker/domestic_rosters.json', 'data/statmaker/domestic_historical_stats_freeze.json',
+           'data/statmaker/domestic_live_july_state.json')
 REPORTS = ('reports/api_football_fixture_stats_fetch.', 'reports/domestic_live_july_stats_refresh.json',
-           'reports/domestic_targeted_stats_backfill.log')
+           'reports/domestic_targeted_stats_backfill.log', 'reports/domestic_live_july_stats.log')
 OUTPUTS = ('data/api_football/fixture_stats', 'data/api_football/domestic_normalized_fixture_stats.json',
            'data/statmaker/domestic_live_july_registry.json', 'data/statmaker/domestic_rosters.json',
            'data/statmaker/domestic_enriched', 'data/statmaker/uefa_support_history.json',

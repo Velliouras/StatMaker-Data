@@ -74,6 +74,26 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(Path('data/api_football/fixture_stats/a.json').read_text(), 'verified\n')
         self.assertEqual(run(self.work, 'rev-parse', 'HEAD'), run(self.work, 'rev-parse', 'origin/main'))
 
+    def test_server_ref_lock_race_rebuilds_and_retries(self):
+        original = publisher.git
+        pushes = []
+        builders = []
+        def git(*args, **kwargs):
+            if args[0] == 'push' and not pushes:
+                pushes.append(1)
+                self.competing_commit('unrelated.txt', 'latest\n')
+                return subprocess.CompletedProcess(args, 1, '',
+                    "remote rejected cannot lock ref 'refs/heads/main': is at newer but expected older")
+            return original(*args, **kwargs)
+        def builder():
+            builders.append(1)
+            self.write(self.work, 'data/statmaker/domestic_enriched/a.json',
+                       'derived:' + Path('unrelated.txt').read_text())
+        with patch.object(publisher, 'git', side_effect=git):
+            publisher.publish(True, builder=builder, pause=lambda _: None)
+        self.assertEqual(len(builders), 2)
+        self.assertEqual(Path('data/statmaker/domestic_enriched/a.json').read_text(), 'derived:latest\n')
+
     def test_existing_derived_change_is_rebuilt(self):
         self.competing_commit('data/statmaker/domestic_enriched/a.json', 'newer derived\n')
         def builder():

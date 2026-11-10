@@ -163,7 +163,7 @@ jobs:
             git commit -m "Backfill missing UEFA participant support"
             # Preserve unpublished runner scratch; hash only the committed canonical tree.
             git stash push --include-untracked --message "Unpublished producer scratch"
-            python .github/scripts/publish_generated_paths.py --rebuild-main-manifest \
+            python .github/scripts/publish_generated_paths.py --rebuild-main-manifest --rebuild-uefa-support-history \
               --path-prefix data/statmaker/uefa_support_history.json \
               --path-prefix data/statmaker/uefa_team_support_history.json \
               --path-prefix data/statmaker/uefa_team_logos.json \
