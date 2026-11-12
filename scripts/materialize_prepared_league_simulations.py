@@ -213,8 +213,9 @@ RULES: dict[str, LeagueRule] = {
 }
 
 TABLE_PHASE_PREFIXES = {
-    "IRL": ("regular season",),
     # Cross-division promotion/relegation ties do not contribute league-table points.
+    "IRL": ("regular season",),
+    "LVA": ("regular season",),
     "NOR2": ("regular season",),
     "FIN": ("regular season", "championship group", "relegation group"),
     "FIN2": ("regular season", "group stage"),
