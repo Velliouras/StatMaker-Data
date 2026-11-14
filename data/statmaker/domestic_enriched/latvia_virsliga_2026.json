@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "generated_at": "2026-11-14T12:46:59Z",
+  "generated_at": "2026-11-14T13:02:32Z",
   "data_contract": {
     "consumer": "StatMaker Android app",
     "active_source": "API-Football domestic history and fixture statistics. Football-Data CSV is inactive archive only.",
@@ -45,37 +45,37 @@
   "readiness": {
     "min_fixtures": 15,
     "min_coverage": 0.65,
-    "completed_fixtures": 180,
-    "fixtures_with_any_stats": 85,
-    "fixtures_with_bb_core_stats": 85,
-    "any_stats_coverage": 0.4722,
-    "bb_core_coverage": 0.4722,
+    "completed_fixtures": 181,
+    "fixtures_with_any_stats": 86,
+    "fixtures_with_bb_core_stats": 86,
+    "any_stats_coverage": 0.4751,
+    "bb_core_coverage": 0.4751,
     "group_counts": {
-      "shots_total": 85,
-      "shots_on_target": 85,
-      "corners": 85,
-      "fouls": 85,
-      "yellow_cards": 85,
-      "red_cards": 84,
-      "possession": 85,
-      "passes": 85,
-      "xg": 22
+      "shots_total": 86,
+      "shots_on_target": 86,
+      "corners": 86,
+      "fouls": 86,
+      "yellow_cards": 86,
+      "red_cards": 85,
+      "possession": 86,
+      "passes": 86,
+      "xg": 23
     },
     "group_coverage": {
-      "shots_total": 0.4722,
-      "shots_on_target": 0.4722,
-      "corners": 0.4722,
-      "fouls": 0.4722,
-      "yellow_cards": 0.4722,
-      "red_cards": 0.4667,
-      "possession": 0.4722,
-      "passes": 0.4722,
-      "xg": 0.1222
+      "shots_total": 0.4751,
+      "shots_on_target": 0.4751,
+      "corners": 0.4751,
+      "fouls": 0.4751,
+      "yellow_cards": 0.4751,
+      "red_cards": 0.4696,
+      "possession": 0.4751,
+      "passes": 0.4751,
+      "xg": 0.1271
     },
     "bb_ready_candidate": false,
     "notes": [
-      "low any-stats coverage: 0.4722 < 0.65",
-      "low BB-core coverage: 0.4722 < 0.65",
+      "low any-stats coverage: 0.4751 < 0.65",
+      "low BB-core coverage: 0.4751 < 0.65",
       "required BB groups below threshold",
       "no shot group reaches threshold"
     ]
@@ -15190,6 +15190,90 @@
         "fulltime": {
           "home": 1,
           "away": 0
+        },
+        "extratime": {
+          "home": null,
+          "away": null
+        },
+        "penalty": {
+          "home": null,
+          "away": null
+        }
+      }
+    },
+    {
+      "fixture_id": 1649703,
+      "date_utc": "2026-11-14T11:00:00+00:00",
+      "country": "Latvia",
+      "league": "Virsliga",
+      "league_code": "LVA",
+      "season": "2026",
+      "app_season": "2026",
+      "api_football_season": "2026",
+      "api_football_league_id": 365,
+      "round": "Final",
+      "home_team": "Valmiera / BSS",
+      "away_team": "Tukums",
+      "status": "FT",
+      "normalized_stats": {
+        "HS": 10,
+        "AS": 15,
+        "HST": 4,
+        "AST": 6,
+        "HC": 4,
+        "AC": 7,
+        "HF": 10,
+        "AF": 11,
+        "HY": 1,
+        "AY": 1,
+        "HR": 0,
+        "AR": 0,
+        "HPossession": 47,
+        "APossession": 53,
+        "HSaves": 5,
+        "ASaves": 4,
+        "HPasses": 413,
+        "APasses": 403,
+        "HPassesAccurate": 326,
+        "APassesAccurate": 320,
+        "HxG": 0.98,
+        "AxG": 1.81
+      },
+      "quality": {
+        "has_any_stats": true,
+        "has_bb_core_stats": true,
+        "groups": {
+          "shots_total": true,
+          "shots_on_target": true,
+          "corners": true,
+          "fouls": true,
+          "yellow_cards": true,
+          "red_cards": true,
+          "possession": true,
+          "passes": true,
+          "xg": true
+        }
+      },
+      "home_goals": 0,
+      "away_goals": 1,
+      "home_score": 0,
+      "away_score": 1,
+      "fthg": 0,
+      "ftag": 1,
+      "hthg": null,
+      "htag": null,
+      "goals": {
+        "home": 0,
+        "away": 1
+      },
+      "score": {
+        "halftime": {
+          "home": null,
+          "away": null
+        },
+        "fulltime": {
+          "home": 0,
+          "away": 1
         },
         "extratime": {
           "home": null,
