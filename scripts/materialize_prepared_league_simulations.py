@@ -216,6 +216,7 @@ TABLE_PHASE_PREFIXES = {
     # Cross-division promotion/relegation ties do not contribute league-table points.
     "IRL": ("regular season",),
     "LVA": ("regular season",),
+    "LTU": ("regular season",),
     "NOR2": ("regular season",),
     "FIN": ("regular season", "championship group", "relegation group"),
     "FIN2": ("regular season", "group stage"),
