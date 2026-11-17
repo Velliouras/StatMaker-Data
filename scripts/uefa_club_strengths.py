@@ -32,6 +32,10 @@ class ClubStrengthSourceUnavailable(RuntimeError):
         self.next_attempt = next_attempt
         super().__init__(reason)
 
+class ClubStrengthCoverageError(ValueError):
+    """A participant does not have exactly one verified Elo rating."""
+
+
 XG_PRIOR_MATCHES = 12.0
 XG_MAX_MATCHES = 24
 COUNTRIES = dict(zip(
@@ -78,7 +82,7 @@ def load_catalog(root=ROOT):
         rows = indexed[(source["country"], norm(source["name"]))]
         unique = {(r["country"], r["name"], float(r["elo"])) for r in rows}
         if len(unique) != 1:
-            raise ValueError(f"Missing/ambiguous club strength: {canonical}")
+            raise ClubStrengthCoverageError(f"Missing/ambiguous club strength: {canonical}")
         country, name, elo = next(iter(unique))
         if not 500 <= elo <= 2600:
             raise ValueError(f"Invalid participant strength: {canonical}/{elo}")
@@ -112,16 +116,8 @@ def refresh_snapshot(root=ROOT, now=None):
                 if recent:
                     return False
                 raise ClubStrengthSourceUnavailable(status["reason"], old["sourceAsOf"], retry.isoformat())
-    try:
-        request = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "StatMaker UEFA simulation"})
-        with urllib.request.urlopen(request, timeout=20) as response:
-            raw = response.read(3 * 1024 * 1024 + 1)
-    except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
-        if old is None:
-            raise
-        code = getattr(error, "code", None)
-        retry = now + timedelta(hours=6 if code in (403, 429) else 1)
-        reason = "ClubElo download unavailable: " + ("HTTP " + str(code) if code else type(error).__name__)
+    def retain_snapshot(reason, delay):
+        retry = now + delay
         status = dict(schemaVersion=1, sourceUrl=SOURCE_URL, status="unavailable",
                       sourceAsOf=old["sourceAsOf"], lastAttemptAt=now.isoformat(),
                       nextAttemptAt=retry.isoformat(), reason=reason)
@@ -130,7 +126,18 @@ def refresh_snapshot(root=ROOT, now=None):
         if recent:
             print("CLUB_STRENGTH_LAST_VALID_RETAINED " + reason)
             return False
-        raise ClubStrengthSourceUnavailable(reason, old["sourceAsOf"], retry.isoformat()) from error
+        raise ClubStrengthSourceUnavailable(reason, old["sourceAsOf"], retry.isoformat())
+
+    try:
+        request = urllib.request.Request(SOURCE_URL, headers={"User-Agent": "StatMaker UEFA simulation"})
+        with urllib.request.urlopen(request, timeout=20) as response:
+            raw = response.read(3 * 1024 * 1024 + 1)
+    except (urllib.error.URLError, TimeoutError, ConnectionError) as error:
+        if old is None:
+            raise
+        code = getattr(error, "code", None)
+        reason = "ClubElo download unavailable: " + ("HTTP " + str(code) if code else type(error).__name__)
+        return retain_snapshot(reason, timedelta(hours=6 if code in (403, 429) else 1))
 
     if len(raw) > 3 * 1024 * 1024:
         raise ValueError("Oversized public club-strength response")
@@ -147,11 +154,13 @@ def refresh_snapshot(root=ROOT, now=None):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
     try:
         load_catalog(root)
-    except Exception:
+    except Exception as error:
         if prior is None:
             path.unlink()
         else:
             path.write_bytes(prior)
+        if old is not None and isinstance(error, ClubStrengthCoverageError):
+            return retain_snapshot("ClubElo catalog incomplete: " + str(error), timedelta(hours=6))
         raise
     status_path.unlink(missing_ok=True)
     return True
