@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-20T21:40:33+00:00",
+  "generatedAtUTC": "2026-11-20T21:45:31+00:00",
   "leagueCode": "F1",
   "country": "France",
   "competition": "Ligue 1",
@@ -2206,17 +2206,17 @@
       "away_team_id": 111,
       "home_logo": "https://media.api-sports.io/football/teams/110.png",
       "away_logo": "https://media.api-sports.io/football/teams/111.png",
-      "status": "2H",
-      "home_goals": 2,
+      "status": "FT",
+      "home_goals": 3,
       "away_goals": 1,
       "venue": "Stade de l'Aube",
       "league_code": "F1",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 7,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-20T21:30:41+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-20T21:45:31+00:00",
       "goal_events": [
         {
           "fixtureId": "1552827",
@@ -2244,10 +2244,19 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1552827",
+          "team": "Estac Troyes",
+          "player": "Renaud Ripart",
+          "minute": 90,
+          "extraMinute": 8,
+          "ownGoal": false,
+          "penalty": true
         }
       ],
       "goal_events_score": [
-        2,
+        3,
         1
       ]
     },
@@ -6339,7 +6348,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/france/ligue-1/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-20T00:00:51+00:00",
-  "resultsCheckedAtUTC": "2026-11-20T21:40:33+00:00",
+  "resultsCheckedAtUTC": "2026-11-20T21:45:31+00:00",
   "standingsCheckedAtUTC": "2026-11-20T21:30:41+00:00",
   "standings": [
     {
@@ -6512,6 +6521,20 @@
     },
     {
       "rank": 13,
+      "played": 11,
+      "wins": 3,
+      "draws": 2,
+      "losses": 6,
+      "goalsFor": 10,
+      "goalsAgainst": 18,
+      "points": 11,
+      "team": "Estac Troyes",
+      "teamId": 110,
+      "teamLogo": "https://media.api-sports.io/football/teams/110.png",
+      "group": "Ligue 1"
+    },
+    {
+      "rank": 14,
       "played": 10,
       "wins": 3,
       "draws": 1,
@@ -6525,7 +6548,7 @@
       "group": "Ligue 1"
     },
     {
-      "rank": 14,
+      "rank": 15,
       "played": 10,
       "wins": 3,
       "draws": 1,
@@ -6539,7 +6562,7 @@
       "group": "Ligue 1"
     },
     {
-      "rank": 15,
+      "rank": 16,
       "played": 10,
       "wins": 1,
       "draws": 5,
@@ -6553,7 +6576,7 @@
       "group": "Ligue 1"
     },
     {
-      "rank": 16,
+      "rank": 17,
       "played": 10,
       "wins": 2,
       "draws": 2,
@@ -6567,27 +6590,13 @@
       "group": "Ligue 1"
     },
     {
-      "rank": 17,
-      "played": 10,
-      "wins": 2,
-      "draws": 2,
-      "losses": 6,
-      "goalsFor": 7,
-      "goalsAgainst": 17,
-      "points": 8,
-      "team": "Estac Troyes",
-      "teamId": 110,
-      "teamLogo": "https://media.api-sports.io/football/teams/110.png",
-      "group": "Ligue 1"
-    },
-    {
       "rank": 18,
-      "played": 10,
+      "played": 11,
       "wins": 0,
       "draws": 2,
-      "losses": 8,
-      "goalsFor": 9,
-      "goalsAgainst": 22,
+      "losses": 9,
+      "goalsFor": 10,
+      "goalsAgainst": 25,
       "points": 2,
       "team": "Le Havre",
       "teamId": 111,
@@ -6852,10 +6861,13 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "official_plus_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-20T21:40:33+00:00",
-    "appliedFixtureIds": []
-  }
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-20T21:45:31+00:00",
+    "appliedFixtureIds": [
+      1552827
+    ]
+  },
+  "standingsReconciledAtUTC": "2026-11-20T21:45:31+00:00"
 }
