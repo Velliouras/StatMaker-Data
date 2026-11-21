@@ -38,6 +38,19 @@ def final(fid=1, status='FT', goals=(2,0)):
 
 
 class DomesticSimulationRefreshTest(unittest.TestCase):
+    def test_swedish_playoffs_do_not_define_league_table_roster(self):
+        for code in ('SWE', 'SWE2'):
+            with self.subTest(league=code):
+                regular = final()
+                regular['source_league'] = {'round': 'Regular Season - 30'}
+                playoff = final(2)
+                playoff['home_team'] = 'Other division'
+                playoff['source_league'] = {'round': 'Semi-finals' if code == 'SWE' else 'Final'}
+                league = entry(code)
+                league['target_season_start'] = '2026-01-01'
+                rows = sim.current_season_fixtures(league, {'fixtures': [regular, playoff]})
+                self.assertEqual([regular], rows)
+
     def test_missing_current_elo_requests_recovery_before_fingerprinting(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / 'outputs'

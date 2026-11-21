@@ -218,6 +218,8 @@ TABLE_PHASE_PREFIXES = {
     "LVA": ("regular season",),
     "LTU": ("regular season",),
     "NOR2": ("regular season",),
+    "SWE": ("regular season",),
+    "SWE2": ("regular season",),
     "FIN": ("regular season", "championship group", "relegation group"),
     "FIN2": ("regular season", "group stage"),
 }
