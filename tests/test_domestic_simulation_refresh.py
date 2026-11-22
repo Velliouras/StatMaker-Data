@@ -38,8 +38,8 @@ def final(fid=1, status='FT', goals=(2,0)):
 
 
 class DomesticSimulationRefreshTest(unittest.TestCase):
-    def test_swedish_playoffs_do_not_define_league_table_roster(self):
-        for code in ('SWE', 'SWE2'):
+    def test_cross_division_playoffs_do_not_define_league_table_roster(self):
+        for code in ('EST', 'IRL', 'LVA', 'LTU', 'NOR2', 'SWE', 'SWE2'):
             with self.subTest(league=code):
                 regular = final()
                 regular['source_league'] = {'round': 'Regular Season - 30'}
