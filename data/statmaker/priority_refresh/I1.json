@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-22T21:35:33+00:00",
+  "generatedAtUTC": "2026-11-22T21:40:31+00:00",
   "leagueCode": "I1",
   "country": "Italy",
   "competition": "Serie A",
@@ -3134,17 +3134,17 @@
       "away_team_id": 505,
       "home_logo": "https://media.api-sports.io/football/teams/499.png",
       "away_logo": "https://media.api-sports.io/football/teams/505.png",
-      "status": "2H",
-      "home_goals": 3,
+      "status": "FT",
+      "home_goals": 4,
       "away_goals": 4,
       "venue": "New Balance Arena",
       "league_code": "I1",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 2,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-22T21:30:40+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-22T21:40:31+00:00",
       "goal_events": [
         {
           "fixtureId": "1550198",
@@ -3208,10 +3208,19 @@
           "extraMinute": 0,
           "ownGoal": false,
           "penalty": false
+        },
+        {
+          "fixtureId": "1550198",
+          "team": "Atalanta",
+          "player": "Franck Kessié",
+          "minute": 90,
+          "extraMinute": 1,
+          "ownGoal": false,
+          "penalty": true
         }
       ],
       "goal_events_score": [
-        3,
+        4,
         4
       ]
     },
@@ -8177,7 +8186,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/italy/serie-a/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-22T00:00:56+00:00",
-  "resultsCheckedAtUTC": "2026-11-22T21:35:33+00:00",
+  "resultsCheckedAtUTC": "2026-11-22T21:40:31+00:00",
   "standingsCheckedAtUTC": "2026-11-22T21:30:40+00:00",
   "standings": [
     {
@@ -8210,13 +8219,13 @@
     },
     {
       "rank": 3,
-      "played": 11,
+      "played": 12,
       "wins": 9,
-      "draws": 1,
+      "draws": 2,
       "losses": 1,
-      "goalsFor": 28,
-      "goalsAgainst": 13,
-      "points": 28,
+      "goalsFor": 32,
+      "goalsAgainst": 17,
+      "points": 29,
       "team": "Inter",
       "teamId": 505,
       "teamLogo": "https://media.api-sports.io/football/teams/505.png",
@@ -8336,13 +8345,13 @@
     },
     {
       "rank": 12,
-      "played": 11,
+      "played": 12,
       "wins": 4,
-      "draws": 2,
+      "draws": 3,
       "losses": 5,
-      "goalsFor": 17,
-      "goalsAgainst": 20,
-      "points": 14,
+      "goalsFor": 21,
+      "goalsAgainst": 24,
+      "points": 15,
       "team": "Atalanta",
       "teamId": 499,
       "teamLogo": "https://media.api-sports.io/football/teams/499.png",
@@ -8746,10 +8755,13 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "official_plus_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-22T21:35:33+00:00",
-    "appliedFixtureIds": []
-  }
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-22T21:40:31+00:00",
+    "appliedFixtureIds": [
+      1550198
+    ]
+  },
+  "standingsReconciledAtUTC": "2026-11-22T21:40:31+00:00"
 }
