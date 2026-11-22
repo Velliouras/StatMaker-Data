@@ -1,12 +1,12 @@
 # API-Football domestic fixture history/statistics fetch
 
-Generated at: `2026-11-21T15:28:59Z`
+Generated at: `2026-11-22T02:38:35Z`
 Requests used: `3` / `48`
 
 API-Football is the active domestic historical/stat source. Football-Data CSV is inactive archive/fallback.
 
 | Country | League | Season | API league ID | Completed fixtures found | Already cached | Newly fetched | Metadata refreshed | Missing scores | Missing stats responses | Requests used | Fixture query used | Fixtures returned | Cache path | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| France | Ligue 1 | 2026 | 61 | 91 | 91 | 0 | 91 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/france/ligue-1/2026/fixture_stats.json | league+season:2026 returned=306 completed=91 |
-| Italy | Serie A | 2026 | 135 | 110 | 110 | 0 | 110 | 0 | 0 | 1 | league+season:2026 | 380 | data/api_football/fixture_stats/italy/serie-a/2026/fixture_stats.json | league+season:2026 returned=380 completed=110 |
-| Germany | Bundesliga | 2026 | 78 | 82 | 82 | 0 | 82 | 0 | 0 | 1 | league+season:2026 | 306 | data/api_football/fixture_stats/germany/bundesliga/2026/fixture_stats.json | league+season:2026 returned=306 completed=82 |
+| Spain | La Liga | 2026 | 140 | 124 | 124 | 0 | 124 | 0 | 0 | 1 | league+season:2026 | 380 | data/api_football/fixture_stats/spain/la-liga/2026/fixture_stats.json | league+season:2026 returned=380 completed=124 |
+| England | Premier League | 2026 | 39 | 107 | 107 | 0 | 107 | 0 | 0 | 1 | league+season:2026 | 380 | data/api_football/fixture_stats/england/premier-league/2026/fixture_stats.json | league+season:2026 returned=380 completed=107 |
+| Greece | Super League | 2026 | 197 | 70 | 70 | 0 | 70 | 0 | 0 | 1 | league+season:2026 | 182 | data/api_football/fixture_stats/greece/super-league/2026/fixture_stats.json | league+season:2026 returned=182 completed=70 |
