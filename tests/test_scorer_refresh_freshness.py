@@ -8,8 +8,11 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+import subprocess
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+import scorer_refresh_sources as archive_sources
 from fetch_schedule_scorers_capped import plan, recent_leader_cache
 from refresh_domestic_match_context import fixture_priority, refresh_window, already_refreshed
 
@@ -113,6 +116,51 @@ class ScorerRefreshRegressionTests(unittest.TestCase):
         other = {"leagueCode": "JPN", "date": "2026-10-19T01:00:00+00:00", "fixtureId": 2}
         self.assertLess(fixture_priority(greek, today),
                         fixture_priority(other, today))
+
+
+class ScorerArchiveCheckoutTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        index = self.root / "data/statmaker/domestic_enriched/index.json"
+        index.parent.mkdir(parents=True)
+        index.write_text(json.dumps({"leagues": [{
+            "league_code": "E0", "stats_role": "current_target",
+            "app_season": "2026-2027",
+            "output_path": "data/statmaker/domestic_enriched/england_2026.json",
+        }]}))
+
+    def test_transient_checkout_retries_with_http11_and_same_selected_paths(self):
+        failed = subprocess.CompletedProcess([], 128, "", "Error in the HTTP2 framing layer")
+        success = subprocess.CompletedProcess([], 0, "", "")
+        with patch.object(archive_sources.subprocess, "run", side_effect=[failed, success]) as run, \
+             patch.object(archive_sources.time, "sleep") as pause:
+            archive_sources.include_current_archives(self.root)
+        self.assertEqual(2, run.call_count)
+        self.assertEqual(run.call_args_list[0], run.call_args_list[1])
+        self.assertIn("http.version=HTTP/1.1", run.call_args.args[0])
+        self.assertEqual("/data/statmaker/domestic_enriched/england_2026.json\n",
+                         run.call_args.kwargs["input"])
+        pause.assert_called_once_with(2)
+
+    def test_exhausted_network_retries_still_fail(self):
+        failed = subprocess.CompletedProcess([], 128, "", "Connection reset by peer")
+        with patch.object(archive_sources.subprocess, "run", return_value=failed) as run, \
+             patch.object(archive_sources.time, "sleep") as pause:
+            with self.assertRaises(subprocess.CalledProcessError):
+                archive_sources.include_current_archives(self.root)
+        self.assertEqual(3, run.call_count)
+        self.assertEqual(2, pause.call_count)
+
+    def test_non_network_checkout_error_fails_immediately(self):
+        failed = subprocess.CompletedProcess([], 128, "", "Invalid sparse-checkout pattern")
+        with patch.object(archive_sources.subprocess, "run", return_value=failed) as run, \
+             patch.object(archive_sources.time, "sleep") as pause:
+            with self.assertRaises(subprocess.CalledProcessError):
+                archive_sources.include_current_archives(self.root)
+        run.assert_called_once()
+        pause.assert_not_called()
 
 
 if __name__ == "__main__":

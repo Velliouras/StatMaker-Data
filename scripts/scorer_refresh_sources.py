@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import json
 from pathlib import Path
 import subprocess
+import time
 
 
 def load(path):
@@ -65,8 +66,24 @@ def include_current_archives(root):
                     if str(row.get("output_path", "")).startswith("data/statmaker/domestic_enriched/")
                     and ".." not in Path(row["output_path"]).parts})
     if paths:
-        subprocess.run(["git", "sparse-checkout", "add", "--stdin"], cwd=root,
-                       input="\n".join(paths) + "\n", text=True, check=True)
+        command = ["git", "-c", "http.version=HTTP/1.1", "sparse-checkout", "add", "--stdin"]
+        transient_errors = (
+            "http2 framing layer", "early eof", "remote end hung up",
+            "connection reset", "connection timed out", "operation timed out",
+            "failed to connect", "could not resolve host", "tls connection",
+            "http 502", "http 503", "http 504",
+        )
+        for attempt in range(3):
+            result = subprocess.run(command, cwd=root, input="\n".join(paths) + "\n",
+                                    text=True, capture_output=True)
+            if result.returncode == 0:
+                break
+            retryable = any(message in result.stderr.lower() for message in transient_errors)
+            if not retryable or attempt == 2:
+                print(result.stderr, flush=True)
+                result.check_returncode()
+            print("SCORER_ARCHIVE_CHECKOUT_RETRY", attempt + 1, flush=True)
+            time.sleep(2 * (attempt + 1))
     print("SCORER_CURRENT_ARCHIVES", len(paths))
 
 
