@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-24T17:05:34+00:00",
+  "generatedAtUTC": "2026-11-24T17:10:34+00:00",
   "leagueCode": "EGY",
   "country": "Egypt",
   "competition": "Premier League",
@@ -1686,17 +1686,41 @@
       "away_team_id": 15570,
       "home_logo": "https://media.api-sports.io/football/teams/1044.png",
       "away_logo": "https://media.api-sports.io/football/teams/15570.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 1,
       "away_goals": 1,
       "venue": "Alexandria Stadium",
       "league_code": "EGY",
       "normalized_stats": {},
       "elapsed": 90,
-      "extra_time": 8,
+      "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-24T17:00:56+00:00"
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-24T17:10:34+00:00",
+      "goal_events": [
+        {
+          "fixtureId": "1612281",
+          "team": "National Bank of Egypt",
+          "player": "Karim Hamed",
+          "minute": 61,
+          "extraMinute": 0,
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "fixtureId": "1612281",
+          "team": "Smouha SC",
+          "player": "Fady Farid",
+          "minute": 90,
+          "extraMinute": 7,
+          "ownGoal": false,
+          "penalty": true
+        }
+      ],
+      "goal_events_score": [
+        1,
+        1
+      ]
     },
     {
       "fixture_id": 1612282,
@@ -1723,7 +1747,7 @@
         0
       ],
       "goal_events_status": "FT",
-      "goal_events_checked_at": "2026-11-24T17:05:34+00:00"
+      "goal_events_checked_at": "2026-11-24T17:10:34+00:00"
     },
     {
       "fixture_id": 1612283,
@@ -3723,7 +3747,7 @@
   ],
   "sourceCache": "data/api_football/fixture_stats/egypt/premier-league/2026/fixture_stats.json",
   "seasonReconciledAtUTC": "2026-11-24T00:00:52+00:00",
-  "resultsCheckedAtUTC": "2026-11-24T17:05:34+00:00",
+  "resultsCheckedAtUTC": "2026-11-24T17:10:34+00:00",
   "standingsCheckedAtUTC": "2026-11-24T16:00:54+00:00",
   "standings": [
     {
@@ -3812,20 +3836,6 @@
     },
     {
       "rank": 7,
-      "played": 9,
-      "wins": 3,
-      "draws": 3,
-      "losses": 3,
-      "goalsFor": 9,
-      "goalsAgainst": 10,
-      "points": 12,
-      "team": "Masr",
-      "teamId": 7520,
-      "teamLogo": "https://media.api-sports.io/football/teams/7520.png",
-      "group": "Premier League"
-    },
-    {
-      "rank": 8,
       "played": 8,
       "wins": 3,
       "draws": 2,
@@ -3839,7 +3849,7 @@
       "group": "Premier League"
     },
     {
-      "rank": 9,
+      "rank": 8,
       "played": 8,
       "wins": 3,
       "draws": 2,
@@ -3853,7 +3863,7 @@
       "group": "Premier League"
     },
     {
-      "rank": 10,
+      "rank": 9,
       "played": 8,
       "wins": 3,
       "draws": 2,
@@ -3864,6 +3874,20 @@
       "team": "Smouha SC",
       "teamId": 1044,
       "teamLogo": "https://media.api-sports.io/football/teams/1044.png",
+      "group": "Premier League"
+    },
+    {
+      "rank": 10,
+      "played": 8,
+      "wins": 3,
+      "draws": 2,
+      "losses": 3,
+      "goalsFor": 9,
+      "goalsAgainst": 10,
+      "points": 11,
+      "team": "Masr",
+      "teamId": 7520,
+      "teamLogo": "https://media.api-sports.io/football/teams/7520.png",
       "group": "Premier League"
     },
     {
@@ -3980,13 +4004,13 @@
     },
     {
       "rank": 19,
-      "played": 9,
+      "played": 8,
       "wins": 1,
-      "draws": 2,
+      "draws": 1,
       "losses": 6,
       "goalsFor": 3,
       "goalsAgainst": 12,
-      "points": 5,
+      "points": 4,
       "team": "Abu Qair Semad",
       "teamId": 15731,
       "teamLogo": "https://media.api-sports.io/football/teams/15731.png",
@@ -4292,13 +4316,11 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official_plus_verified_finals",
+  "standingsSource": "official",
   "standingsReconciliation": {
-    "status": "reconciled",
-    "checkedAtUTC": "2026-11-24T17:05:34+00:00",
-    "appliedFixtureIds": [
-      1612282
-    ]
-  },
-  "standingsReconciledAtUTC": "2026-11-24T17:05:34+00:00"
+    "status": "awaiting_official",
+    "checkedAtUTC": "2026-11-24T17:10:34+00:00",
+    "appliedFixtureIds": [],
+    "reason": "new_tie_requires_official_sporting_order"
+  }
 }
