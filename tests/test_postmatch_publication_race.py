@@ -94,6 +94,54 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(len(builders), 2)
         self.assertEqual(Path('data/statmaker/domestic_enriched/a.json').read_text(), 'derived:latest\n')
 
+    def test_github_server_error_retries_and_preserves_newer_data(self):
+        original = publisher.git
+        pushes = []
+        builders = []
+        def git(*args, **kwargs):
+            if args[0] == 'push' and not pushes:
+                pushes.append(1)
+                self.competing_commit('unrelated.txt', 'latest\n')
+                return subprocess.CompletedProcess(args, 1, '', 'remote: Internal Server Error')
+            return original(*args, **kwargs)
+        def builder():
+            builders.append(1)
+            self.write(self.work, 'data/statmaker/domestic_enriched/a.json',
+                       'derived:' + Path('unrelated.txt').read_text())
+        with patch.object(publisher, 'git', side_effect=git):
+            publisher.publish(True, builder=builder, pause=lambda _: None)
+        self.assertEqual(2, len(builders))
+        self.assertEqual('derived:latest\n',
+                         Path('data/statmaker/domestic_enriched/a.json').read_text())
+        self.assertEqual('verified\n', Path('data/api_football/fixture_stats/a.json').read_text())
+
+    def test_persistent_server_error_stops_after_six_attempts(self):
+        original = publisher.git
+        pushes = []
+        def git(*args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(1)
+                return subprocess.CompletedProcess(args, 1, '', 'remote: Internal Server Error')
+            return original(*args, **kwargs)
+        with patch.object(publisher, 'git', side_effect=git):
+            with self.assertRaisesRegex(RuntimeError, 'after six rebuilds'):
+                publisher.publish(False, pause=lambda _: None)
+        self.assertEqual(6, len(pushes))
+        self.assertEqual('old\n', run(self.remote, 'show', 'main:data/api_football/fixture_stats/a.json'))
+
+    def test_authentication_error_fails_without_retries(self):
+        original = publisher.git
+        pushes = []
+        def git(*args, **kwargs):
+            if args[0] == 'push':
+                pushes.append(1)
+                return subprocess.CompletedProcess(args, 1, '', 'Authentication failed')
+            return original(*args, **kwargs)
+        with patch.object(publisher, 'git', side_effect=git):
+            with self.assertRaisesRegex(RuntimeError, 'Authentication failed'):
+                publisher.publish(False, pause=lambda _: self.fail('must not retry authentication'))
+        self.assertEqual(1, len(pushes))
+
     def test_existing_derived_change_is_rebuilt(self):
         self.competing_commit('data/statmaker/domestic_enriched/a.json', 'newer derived\n')
         def builder():

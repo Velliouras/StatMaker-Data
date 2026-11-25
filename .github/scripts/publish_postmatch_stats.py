@@ -77,11 +77,16 @@ def publish(updated, builder=rebuild, pause=time.sleep):
             if pushed.returncode == 0:
                 print(f'POSTMATCH_PUBLISH_OK attempt={attempt}', flush=True)
                 return
-            # Retry only a branch race, not authentication/network failures.
+            # Retry branch races and temporary GitHub server failures within the existing bound.
             branch_race = ('fetch first' in pushed.stderr or 'non-fast-forward' in pushed.stderr
                            or ("cannot lock ref 'refs/heads/main'" in pushed.stderr
                                and 'but expected' in pushed.stderr))
-            if not branch_race:
+            server_failure = any(message in pushed.stderr.lower() for message in (
+                'internal server error', 'bad gateway', 'service unavailable', 'gateway timeout',
+                'the requested url returned error: 500', 'the requested url returned error: 502',
+                'the requested url returned error: 503', 'the requested url returned error: 504',
+            ))
+            if not (branch_race or server_failure):
                 raise RuntimeError(pushed.stderr)
             pause(min(attempt * 2, 8))
     raise RuntimeError('Postmatch publication remained busy after six rebuilds')
