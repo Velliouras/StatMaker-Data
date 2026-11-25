@@ -1,7 +1,7 @@
 {
   "contract": "statmaker-league-tables-v1",
   "schemaVersion": 1,
-  "generatedAtUTC": "2026-11-25T19:30:42+00:00",
+  "generatedAtUTC": "2026-11-25T19:35:32+00:00",
   "leagueCode": "CL",
   "country": "UEFA",
   "competition": "Champions League",
@@ -2752,7 +2752,7 @@
         0
       ],
       "goal_events_status": "FT",
-      "goal_events_checked_at": "2026-11-25T19:30:42+00:00"
+      "goal_events_checked_at": "2026-11-25T19:35:32+00:00"
     },
     {
       "fixture_id": 1635662,
@@ -4136,17 +4136,17 @@
       "away_team_id": 529,
       "home_logo": "https://media.api-sports.io/football/teams/13976.png",
       "away_logo": "https://media.api-sports.io/football/teams/529.png",
-      "status": "2H",
+      "status": "FT",
       "home_goals": 1,
       "away_goals": 4,
       "venue": "Baku Olympic Stadium",
       "league_code": "CL",
       "normalized_stats": {},
-      "elapsed": 88,
+      "elapsed": 90,
       "extra_time": null,
       "live_goal_tracking": true,
-      "goal_events_status": "2H",
-      "goal_events_checked_at": "2026-11-25T19:30:42+00:00",
+      "goal_events_status": "FT",
+      "goal_events_checked_at": "2026-11-25T19:35:32+00:00",
       "goal_events": [
         {
           "fixtureId": "1635718",
@@ -4215,8 +4215,8 @@
       "venue": "Sinobo Stadium",
       "league_code": "CL",
       "normalized_stats": {},
-      "elapsed": 87,
-      "extra_time": null,
+      "elapsed": 90,
+      "extra_time": 2,
       "live_goal_tracking": true,
       "goal_events_status": "2H",
       "goal_events_checked_at": "2026-11-25T19:30:42+00:00",
@@ -5445,6 +5445,20 @@
       "wins": 4,
       "draws": 0,
       "losses": 1,
+      "goalsFor": 18,
+      "goalsAgainst": 7,
+      "points": 12,
+      "team": "Barcelona",
+      "teamId": 529,
+      "teamLogo": "https://media.api-sports.io/football/teams/529.png",
+      "group": "UEFA Champions League"
+    },
+    {
+      "rank": 5,
+      "played": 5,
+      "wins": 4,
+      "draws": 0,
+      "losses": 1,
       "goalsFor": 10,
       "goalsAgainst": 6,
       "points": 12,
@@ -5454,7 +5468,7 @@
       "group": "UEFA Champions League"
     },
     {
-      "rank": 5,
+      "rank": 6,
       "played": 5,
       "wins": 3,
       "draws": 2,
@@ -5468,7 +5482,7 @@
       "group": "UEFA Champions League"
     },
     {
-      "rank": 6,
+      "rank": 7,
       "played": 5,
       "wins": 3,
       "draws": 1,
@@ -5482,7 +5496,7 @@
       "group": "UEFA Champions League"
     },
     {
-      "rank": 7,
+      "rank": 8,
       "played": 5,
       "wins": 3,
       "draws": 1,
@@ -5493,20 +5507,6 @@
       "team": "Borussia Dortmund",
       "teamId": 165,
       "teamLogo": "https://media.api-sports.io/football/teams/165.png",
-      "group": "UEFA Champions League"
-    },
-    {
-      "rank": 8,
-      "played": 4,
-      "wins": 3,
-      "draws": 0,
-      "losses": 1,
-      "goalsFor": 14,
-      "goalsAgainst": 6,
-      "points": 9,
-      "team": "Barcelona",
-      "teamId": 529,
-      "teamLogo": "https://media.api-sports.io/football/teams/529.png",
       "group": "UEFA Champions League"
     },
     {
@@ -5805,20 +5805,6 @@
     },
     {
       "rank": 30,
-      "played": 4,
-      "wins": 1,
-      "draws": 0,
-      "losses": 3,
-      "goalsFor": 4,
-      "goalsAgainst": 10,
-      "points": 3,
-      "team": "Sabah",
-      "teamId": 13976,
-      "teamLogo": "https://media.api-sports.io/football/teams/13976.png",
-      "group": "UEFA Champions League"
-    },
-    {
-      "rank": 31,
       "played": 5,
       "wins": 1,
       "draws": 0,
@@ -5832,7 +5818,7 @@
       "group": "UEFA Champions League"
     },
     {
-      "rank": 32,
+      "rank": 31,
       "played": 5,
       "wins": 1,
       "draws": 0,
@@ -5843,6 +5829,20 @@
       "team": "Feyenoord",
       "teamId": 209,
       "teamLogo": "https://media.api-sports.io/football/teams/209.png",
+      "group": "UEFA Champions League"
+    },
+    {
+      "rank": 32,
+      "played": 5,
+      "wins": 1,
+      "draws": 0,
+      "losses": 4,
+      "goalsFor": 5,
+      "goalsAgainst": 14,
+      "points": 3,
+      "team": "Sabah",
+      "teamId": 13976,
+      "teamLogo": "https://media.api-sports.io/football/teams/13976.png",
       "group": "UEFA Champions League"
     },
     {
@@ -9250,14 +9250,17 @@
     }
   ],
   "officialSingleStandingsGroup": true,
-  "standingsSource": "official",
+  "standingsSource": "champions_league_verified_finals",
   "standingsReconciliation": {
-    "status": "official",
-    "checkedAtUTC": "2026-11-25T19:30:42+00:00",
-    "appliedFixtureIds": []
+    "status": "reconciled",
+    "checkedAtUTC": "2026-11-25T19:35:32+00:00",
+    "appliedFixtureIds": [
+      1635718
+    ]
   },
   "seasonReconciledAtUTC": "2026-11-25T00:00:50+00:00",
-  "resultsCheckedAtUTC": "2026-11-25T19:30:42+00:00",
+  "resultsCheckedAtUTC": "2026-11-25T19:35:32+00:00",
   "standingsCheckedAtUTC": "2026-11-25T19:30:42+00:00",
-  "standingsObservedAtUTC": "2026-11-25T19:30:42+00:00"
+  "standingsObservedAtUTC": "2026-11-25T19:30:42+00:00",
+  "standingsReconciledAtUTC": "2026-11-25T19:35:32+00:00"
 }
